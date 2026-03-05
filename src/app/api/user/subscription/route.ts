@@ -10,7 +10,7 @@ export async function DELETE() {
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    return NextResponse.json({ error: 'Non authentifie' }, { status: 401 });
+    return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
   }
 
   const service = createServiceClient();
@@ -42,7 +42,7 @@ export async function DELETE() {
 
   return NextResponse.json({
     success: true,
-    message: 'Votre abonnement sera annule a la fin de la periode en cours.',
+    message: 'Votre abonnement sera annulé à la fin de la période en cours.',
     period_end: sub.current_period_end,
   });
 }
@@ -56,7 +56,7 @@ export async function PATCH() {
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    return NextResponse.json({ error: 'Non authentifie' }, { status: 401 });
+    return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
   }
 
   const service = createServiceClient();
@@ -71,7 +71,7 @@ export async function PATCH() {
     .single();
 
   if (!sub) {
-    return NextResponse.json({ error: 'Aucun abonnement trouve' }, { status: 400 });
+    return NextResponse.json({ error: 'Aucun abonnement trouvé' }, { status: 400 });
   }
 
   // Reactivate: undo cancellation
@@ -84,7 +84,7 @@ export async function PATCH() {
       })
       .eq('user_id', user.id);
 
-    return NextResponse.json({ success: true, message: 'Abonnement reactive.' });
+    return NextResponse.json({ success: true, message: 'Abonnement réactivé.' });
   }
 
   return NextResponse.json({ error: 'Action non disponible' }, { status: 400 });

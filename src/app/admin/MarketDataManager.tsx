@@ -189,7 +189,7 @@ export function MarketDataManager() {
                 <th className="text-right text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Valeur</th>
                 <th className="text-right text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Variation</th>
                 <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Source</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Mis a jour</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Mis à jour</th>
                 <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Actions</th>
               </tr>
             </thead>
@@ -375,7 +375,7 @@ function MarketForm({ form, setForm, onSave, onCancel, saving }: {
           />
         </div>
         <div>
-          <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Unite</label>
+          <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Unité</label>
           <input
             type="text"
             value={form.unit}

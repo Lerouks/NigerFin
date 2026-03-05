@@ -1,16 +1,14 @@
 import type { Metadata } from 'next';
 import { ArticleCard } from '@/components/ArticleCard';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
-import { getAllArticles } from '@/lib/sanity';
-import { mockArticles, marketData } from '@/data/mock-data';
+import { getArticlesByCategory } from '@/lib/sanity';
+import { marketData } from '@/data/mock-data';
 
 export const revalidate = 60;
 export const metadata: Metadata = { title: 'Entreprises' };
 
 export default async function EntreprisesPage() {
-  const sanityArticles = await getAllArticles();
-  const allArticles = sanityArticles.length > 0 ? sanityArticles : mockArticles;
-  const articles = allArticles.filter((a) => a.category === 'entreprises' || a.category === 'Entreprises' || a.category === 'Outils');
+  const articles = await getArticlesByCategory('entreprises');
   return (
     <div className="min-h-screen bg-[#fafaf9]">
       <section className="bg-[#111] text-white py-16 md:py-20">

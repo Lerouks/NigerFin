@@ -28,8 +28,8 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
     : `${siteUrl}/og-default.jpg`;
 
   return {
-    title: article.title,
-    description: article.excerpt,
+    title: article.seo?.metaTitle || article.title,
+    description: article.seo?.metaDescription || article.excerpt,
     alternates: {
       canonical: articleUrl,
     },

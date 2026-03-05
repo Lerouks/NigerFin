@@ -5,12 +5,12 @@ import { navigationSections } from '@/data/mock-data';
 export const revalidate = 300; // 5 minutes
 
 const defaultSocialLinks = {
-  facebook: '',
+  facebook: 'https://www.facebook.com/share/1APpbXcsAV/?mibextid=wwXIfr',
   twitter: '',
   linkedin: '',
-  instagram: '',
-  youtube: '',
-  tiktok: '',
+  instagram: 'https://www.instagram.com/nfireport?igsh=Y3FmYTYyZXBrd3ph&utm_source=qr',
+  youtube: 'https://youtube.com/@nfireport?si=bnYKo7AVK9F9pklE',
+  tiktok: 'https://www.tiktok.com/@nfireport?_r=1&_t=ZN-94QaNLIYjkE',
 };
 
 export async function GET() {
@@ -36,7 +36,7 @@ export async function GET() {
   return NextResponse.json({
     siteName: settings?.siteName || 'NFI Report',
     siteDescription: settings?.siteDescription || 'Niger Financial Insights',
-    contactEmail: settings?.contactEmail || 'contact@nfireport.ne',
+    contactEmail: settings?.contactEmail || 'contact@nfireport.com',
     socialLinks: settings?.socialLinks || defaultSocialLinks,
     navigation: settings?.navigation?.length ? settings.navigation : fallbackNavigation,
     breakingNews: breakingNews.length > 0 ? breakingNews : fallbackBreakingNews,

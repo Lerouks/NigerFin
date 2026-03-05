@@ -24,11 +24,15 @@ export function BreakingNews() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    fetch('/api/site-settings')
+    fetch('/api/admin/flash-banner')
       .then((res) => res.json())
       .then((data) => {
-        if (data.breakingNews?.length) {
-          setItems(data.breakingNews.map((n: any) => ({ tag: n.tag, text: n.text })));
+        if (data.enabled === false) {
+          setDismissed(true);
+          return;
+        }
+        if (data.items?.length) {
+          setItems(data.items.map((n: any) => ({ tag: n.tag, text: n.text })));
         }
       })
       .catch(() => {});

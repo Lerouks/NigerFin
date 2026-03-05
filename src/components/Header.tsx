@@ -28,7 +28,6 @@ export function Header() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [navigation, setNavigation] = useState<NavItem[]>(defaultNavigation);
   const { isSignedIn, user, userRole, signOut } = useAuth();
-  const isSubscribed = userRole === 'standard' || userRole === 'pro' || userRole === 'admin';
   const router = useRouter();
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -54,7 +53,6 @@ export function Header() {
   }, []);
 
   const handleNewsletterClick = () => {
-    // If already on home page, smooth-scroll to newsletter
     if (window.location.pathname === '/') {
       const el = document.getElementById('newsletter');
       if (el) {
@@ -62,7 +60,6 @@ export function Header() {
         return;
       }
     }
-    // Otherwise navigate to home page with hash
     router.push('/#newsletter');
   };
 
@@ -75,10 +72,10 @@ export function Header() {
   return (
     <>
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-black/[0.06]">
-        {/* Top bar */}
+        {/* Top bar — date only */}
         <div className="border-b border-black/[0.04]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-9">
+            <div className="flex justify-center items-center h-9">
               <div className="text-[11px] text-gray-400 tracking-wide">
                 {new Date().toLocaleDateString('fr-FR', {
                   weekday: 'long',
@@ -86,60 +83,6 @@ export function Header() {
                   month: 'long',
                   day: 'numeric',
                 })}
-              </div>
-              <div className="flex items-center gap-4">
-                {isSignedIn ? (
-                  <div className="relative" ref={userMenuRef}>
-                    <button
-                      onClick={() => setUserMenuOpen(!userMenuOpen)}
-                      className="flex items-center gap-2 text-[11px] text-gray-500 hover:text-black transition-colors"
-                    >
-                      <div className="w-6 h-6 bg-[#111] text-white rounded-full flex items-center justify-center text-[10px]">
-                        {(user?.user_metadata?.full_name || user?.email || 'U').charAt(0).toUpperCase()}
-                      </div>
-                      <span className="hidden sm:inline">
-                        {user?.user_metadata?.full_name || user?.email?.split('@')[0]}
-                      </span>
-                    </button>
-                    {userMenuOpen && (
-                      <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-black/[0.06] py-1 z-50">
-                        <div className="px-4 py-2 border-b border-black/[0.04]">
-                          <p className="text-xs text-gray-500 truncate">{user?.email}</p>
-                        </div>
-                        <Link
-                          href="/compte"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                          onClick={() => setUserMenuOpen(false)}
-                        >
-                          Mon compte
-                        </Link>
-                        {userRole === 'admin' && (
-                          <Link
-                            href="/admin"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                            onClick={() => setUserMenuOpen(false)}
-                          >
-                            Administration
-                          </Link>
-                        )}
-                        <button
-                          onClick={handleSignOut}
-                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-                        >
-                          <LogOut className="w-3.5 h-3.5" />
-                          Se déconnecter
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <Link
-                    href="/connexion"
-                    className="text-[11px] text-gray-400 hover:text-black transition-colors tracking-wide"
-                  >
-                    Se connecter
-                  </Link>
-                )}
               </div>
             </div>
           </div>
@@ -170,23 +113,56 @@ export function Header() {
               >
                 <Search className="w-[18px] h-[18px]" />
               </button>
-              {isSignedIn ? (
-                <button
-                  onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="p-2 hover:bg-black/5 rounded-full transition-colors"
-                  aria-label="Mon compte"
-                >
-                  <User className="w-[18px] h-[18px]" />
-                </button>
-              ) : (
-                <Link
-                  href="/connexion"
-                  className="p-2 hover:bg-black/5 rounded-full transition-colors"
-                  aria-label="Se connecter"
-                >
-                  <User className="w-[18px] h-[18px]" />
-                </Link>
-              )}
+              <div className="relative" ref={userMenuRef}>
+                {isSignedIn ? (
+                  <button
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    className="p-2 hover:bg-black/5 rounded-full transition-colors"
+                    aria-label="Mon compte"
+                  >
+                    <User className="w-[18px] h-[18px]" />
+                  </button>
+                ) : (
+                  <Link
+                    href="/connexion"
+                    className="p-2 hover:bg-black/5 rounded-full transition-colors"
+                    aria-label="Se connecter"
+                  >
+                    <User className="w-[18px] h-[18px]" />
+                  </Link>
+                )}
+                {userMenuOpen && isSignedIn && (
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-black/[0.06] py-1 z-50">
+                    <div className="px-4 py-2 border-b border-black/[0.04]">
+                      <p className="text-[12px] font-medium truncate">{user?.user_metadata?.full_name || user?.email?.split('@')[0]}</p>
+                      <p className="text-[11px] text-gray-400 truncate">{user?.email}</p>
+                    </div>
+                    <Link
+                      href="/compte"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      onClick={() => setUserMenuOpen(false)}
+                    >
+                      Mon compte
+                    </Link>
+                    {userRole === 'admin' && (
+                      <Link
+                        href="/admin"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        Administration
+                      </Link>
+                    )}
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      Se déconnecter
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -213,15 +189,6 @@ export function Header() {
                 >
                   Newsletter
                 </button>
-                {isSignedIn && (
-                  <Link
-                    href="/compte"
-                    className="flex items-center gap-1.5 text-[13px] text-white/60 hover:text-white transition-colors"
-                  >
-                    <User className="w-3.5 h-3.5" />
-                    <span>Mon compte</span>
-                  </Link>
-                )}
               </div>
             </div>
           </div>

@@ -1,76 +1,96 @@
-const BREVO_API_KEY = process.env.BREVO_API_KEY || '';
-const BREVO_API_URL = 'https://api.brevo.com/v3';
+// Mailchimp newsletter segmentation
+// Uses existing Mailchimp config (MAILCHIMP_API_KEY, MAILCHIMP_LIST_ID, MAILCHIMP_SERVER_PREFIX)
 
-interface BrevoContactData {
+import { createHash } from 'crypto';
+
+const API_KEY = process.env.MAILCHIMP_API_KEY || '';
+const LIST_ID = process.env.MAILCHIMP_LIST_ID || '';
+const SERVER = process.env.MAILCHIMP_SERVER_PREFIX || 'us8';
+
+function getMailchimpUrl(path: string) {
+  return `https://${SERVER}.api.mailchimp.com/3.0${path}`;
+}
+
+function getHeaders() {
+  return {
+    Authorization: `apikey ${API_KEY}`,
+    'Content-Type': 'application/json',
+  };
+}
+
+function subscriberHash(email: string): string {
+  return createHash('md5').update(email.toLowerCase()).digest('hex');
+}
+
+function getTagsForRole(role: string): string[] {
+  const tags = ['nfi-report', role, 'newsletter_mensuelle'];
+
+  if (role === 'standard' || role === 'pro') {
+    tags.push('newsletter_hebdomadaire');
+    tags.push('alertes_news');
+  }
+
+  if (role === 'pro') {
+    tags.push('rapports_pdf');
+  }
+
+  return tags;
+}
+
+const ALL_ROLE_TAGS = ['reader', 'standard', 'pro', 'newsletter_hebdomadaire', 'alertes_news', 'rapports_pdf'];
+
+interface ContactData {
   email: string;
   firstName?: string;
   role: string;
 }
 
-export async function syncContactToBrevo(data: BrevoContactData): Promise<boolean> {
-  if (!BREVO_API_KEY) return false;
+export async function syncContactToBrevo(data: ContactData): Promise<boolean> {
+  if (!API_KEY || !LIST_ID) return false;
 
   try {
-    await fetch(`${BREVO_API_URL}/contacts`, {
-      method: 'POST',
-      headers: {
-        'api-key': BREVO_API_KEY,
-        'Content-Type': 'application/json',
-      },
+    const hash = subscriberHash(data.email);
+
+    // Create or update the member
+    await fetch(getMailchimpUrl(`/lists/${LIST_ID}/members/${hash}`), {
+      method: 'PUT',
+      headers: getHeaders(),
       body: JSON.stringify({
-        email: data.email,
-        attributes: {
-          FIRSTNAME: data.firstName || '',
+        email_address: data.email,
+        status_if_new: 'subscribed',
+        merge_fields: {
+          FNAME: data.firstName || '',
           ROLE: data.role,
         },
-        listIds: getListIdsForRole(data.role),
-        updateEnabled: true,
       }),
     });
+
+    // Remove old role tags, then add new ones
+    const tagsToRemove = ALL_ROLE_TAGS.map((tag) => ({
+      name: tag,
+      status: 'inactive' as const,
+    }));
+    const tagsToAdd = getTagsForRole(data.role).map((tag) => ({
+      name: tag,
+      status: 'active' as const,
+    }));
+
+    await fetch(getMailchimpUrl(`/lists/${LIST_ID}/members/${hash}/tags`), {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ tags: [...tagsToRemove, ...tagsToAdd] }),
+    });
+
     return true;
   } catch {
     return false;
   }
 }
 
-export async function removeContactFromLists(email: string, listIds: number[]): Promise<void> {
-  if (!BREVO_API_KEY || listIds.length === 0) return;
-
-  for (const listId of listIds) {
-    try {
-      await fetch(`${BREVO_API_URL}/contacts/lists/${listId}/contacts/remove`, {
-        method: 'POST',
-        headers: {
-          'api-key': BREVO_API_KEY,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ emails: [email] }),
-      });
-    } catch {}
-  }
+export async function removeContactFromLists(_email: string, _listIds: number[]): Promise<void> {
+  // Tags are managed via syncContactToBrevo — no separate list removal needed
 }
 
-function getListIdsForRole(role: string): number[] {
-  const ids: number[] = [];
-  const monthly = parseInt(process.env.BREVO_LIST_MONTHLY || '0');
-  const weekly = parseInt(process.env.BREVO_LIST_WEEKLY || '0');
-  const alerts = parseInt(process.env.BREVO_LIST_ALERTS || '0');
-  const pro = parseInt(process.env.BREVO_LIST_PRO || '0');
-
-  if (monthly) ids.push(monthly); // All users get monthly
-
-  if (role === 'standard' || role === 'pro') {
-    if (weekly) ids.push(weekly);
-    if (alerts) ids.push(alerts);
-  }
-
-  if (role === 'pro' && pro) {
-    ids.push(pro);
-  }
-
-  return ids;
-}
-
-export function getListIdsForRoleExport(role: string): number[] {
-  return getListIdsForRole(role);
+export function getListIdsForRoleExport(_role: string): number[] {
+  return [];
 }

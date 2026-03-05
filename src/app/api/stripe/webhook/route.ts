@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
+import { syncContactToBrevo } from '@/lib/brevo';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
           })
           .eq('id', userId);
 
-        await syncBrevoContact(userId, role, supabase);
+        await syncMailchimpContact(userId, role, supabase);
       }
       break;
     }
@@ -132,7 +133,7 @@ export async function POST(request: NextRequest) {
           })
           .eq('id', userId);
 
-        await syncBrevoContact(userId, 'reader', supabase);
+        await syncMailchimpContact(userId, 'reader', supabase);
       }
       break;
     }
@@ -160,10 +161,7 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ received: true });
 }
 
-async function syncBrevoContact(userId: string, role: string, supabase: any) {
-  const brevoApiKey = process.env.BREVO_API_KEY;
-  if (!brevoApiKey) return;
-
+async function syncMailchimpContact(userId: string, role: string, supabase: any) {
   const { data: profile } = await supabase
     .from('user_profiles')
     .select('email, full_name')
@@ -172,43 +170,9 @@ async function syncBrevoContact(userId: string, role: string, supabase: any) {
 
   if (!profile?.email) return;
 
-  try {
-    await fetch('https://api.brevo.com/v3/contacts', {
-      method: 'POST',
-      headers: {
-        'api-key': brevoApiKey,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: profile.email,
-        attributes: {
-          FIRSTNAME: profile.full_name || '',
-          ROLE: role,
-        },
-        listIds: getBrevoListIds(role),
-        updateEnabled: true,
-      }),
-    });
-  } catch {}
-}
-
-function getBrevoListIds(role: string): number[] {
-  const listIds: number[] = [];
-  const monthlyListId = parseInt(process.env.BREVO_LIST_MONTHLY || '0');
-  const weeklyListId = parseInt(process.env.BREVO_LIST_WEEKLY || '0');
-  const alertsListId = parseInt(process.env.BREVO_LIST_ALERTS || '0');
-  const proListId = parseInt(process.env.BREVO_LIST_PRO || '0');
-
-  if (monthlyListId) listIds.push(monthlyListId);
-
-  if (role === 'standard' || role === 'pro') {
-    if (weeklyListId) listIds.push(weeklyListId);
-    if (alertsListId) listIds.push(alertsListId);
-  }
-
-  if (role === 'pro' && proListId) {
-    listIds.push(proListId);
-  }
-
-  return listIds;
+  await syncContactToBrevo({
+    email: profile.email,
+    firstName: profile.full_name || '',
+    role,
+  });
 }

@@ -3,7 +3,7 @@ import imageUrlBuilder from '@sanity/image-url';
 import type { Article } from '@/types';
 
 // Check if Sanity is configured with a valid project ID (a-z, 0-9, dashes only)
-const sanityProjectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || '';
+const sanityProjectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'x0yrcr9r';
 export const isSanityConfigured = /^[a-z0-9-]+$/.test(sanityProjectId) && sanityProjectId.length > 0;
 
 // Lazy-initialize clients to avoid validation errors when env vars are missing

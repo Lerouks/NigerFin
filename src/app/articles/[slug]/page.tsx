@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { draftMode } from 'next/headers';
 import { getArticleBySlug, getRelatedArticles, getAllArticleSlugs, urlFor } from '@/lib/sanity';
-import { mockArticles, marketData } from '@/data/mock-data';
+import { marketData } from '@/data/mock-data';
 import { ArticleContent } from './ArticleContent';
 
 export const revalidate = 60;
@@ -12,9 +12,7 @@ interface ArticlePageProps {
 }
 
 async function getArticle(slug: string, preview = false) {
-  const sanityArticle = await getArticleBySlug(slug, preview);
-  if (sanityArticle) return sanityArticle;
-  return mockArticles.find((a) => a.slug.current === slug) || null;
+  return await getArticleBySlug(slug, preview);
 }
 
 export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
@@ -55,13 +53,10 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
 
 export async function generateStaticParams() {
   try {
-    const sanitySlugs = await getAllArticleSlugs();
-    const mockSlugs = mockArticles.map((a) => a.slug.current);
-    const allSlugs = Array.from(new Set([...sanitySlugs, ...mockSlugs]));
-    return allSlugs.map((slug) => ({ slug }));
+    const slugs = await getAllArticleSlugs();
+    return slugs.map((slug) => ({ slug }));
   } catch {
-    // Fallback to mock slugs if Sanity is unavailable during build
-    return mockArticles.map((a) => ({ slug: a.slug.current }));
+    return [];
   }
 }
 

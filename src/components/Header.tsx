@@ -2,20 +2,38 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Menu, Search, User, X, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
-import { useUser, SignInButton, UserButton } from '@clerk/nextjs';
+import { Menu, Search, User, X, ChevronRight, LogOut } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { useAuth } from '@/lib/auth-context';
 import { navigationSections } from '@/data/mock-data';
 import { SearchOverlay } from './SearchOverlay';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const { isSignedIn } = useUser();
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const { isSignedIn, user, signOut } = useAuth();
   const router = useRouter();
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleNewsletterClick = () => {
     router.push('/#newsletter');
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    setUserMenuOpen(false);
+    router.refresh();
   };
 
   return (
@@ -35,13 +53,47 @@ export function Header() {
               </div>
               <div className="flex items-center gap-4">
                 {isSignedIn ? (
-                  <UserButton afterSignOutUrl="/" />
-                ) : (
-                  <SignInButton mode="modal">
-                    <button className="text-[11px] text-gray-400 hover:text-black transition-colors tracking-wide">
-                      Se connecter
+                  <div className="relative" ref={userMenuRef}>
+                    <button
+                      onClick={() => setUserMenuOpen(!userMenuOpen)}
+                      className="flex items-center gap-2 text-[11px] text-gray-500 hover:text-black transition-colors"
+                    >
+                      <div className="w-6 h-6 bg-[#111] text-white rounded-full flex items-center justify-center text-[10px]">
+                        {(user?.user_metadata?.full_name || user?.email || 'U').charAt(0).toUpperCase()}
+                      </div>
+                      <span className="hidden sm:inline">
+                        {user?.user_metadata?.full_name || user?.email?.split('@')[0]}
+                      </span>
                     </button>
-                  </SignInButton>
+                    {userMenuOpen && (
+                      <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-black/[0.06] py-1 z-50">
+                        <div className="px-4 py-2 border-b border-black/[0.04]">
+                          <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                        </div>
+                        <Link
+                          href="/pricing"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          Mon abonnement
+                        </Link>
+                        <button
+                          onClick={handleSignOut}
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                        >
+                          <LogOut className="w-3.5 h-3.5" />
+                          Se déconnecter
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    href="/connexion"
+                    className="text-[11px] text-gray-400 hover:text-black transition-colors tracking-wide"
+                  >
+                    Se connecter
+                  </Link>
                 )}
               </div>
             </div>

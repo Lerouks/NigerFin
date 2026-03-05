@@ -1,6 +1,4 @@
 import type { Metadata } from 'next';
-import { ClerkProvider } from '@clerk/nextjs';
-import { frFR } from '@clerk/localizations';
 import { Inter, Playfair_Display } from 'next/font/google';
 import { Providers } from './providers';
 import { Header } from '@/components/Header';
@@ -55,17 +53,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider localization={frFR}>
-      <html lang="fr" className={`${inter.variable} ${playfair.variable}`}>
-        <body className="min-h-screen flex flex-col">
-          <Providers>
-            <BreakingNews />
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </Providers>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="fr" className={`${inter.variable} ${playfair.variable}`}>
+      <body className="min-h-screen flex flex-col">
+        <Providers>
+          <BreakingNews />
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </Providers>
+      </body>
+    </html>
   );
 }

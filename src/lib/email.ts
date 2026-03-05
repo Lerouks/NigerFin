@@ -19,18 +19,26 @@ export async function sendTransactionalEmail({
   });
 }
 
-export async function subscribeToBrevoNewsletter(email: string) {
-  const response = await fetch('https://api.brevo.com/v3/contacts', {
-    method: 'POST',
-    headers: {
-      'api-key': process.env.BREVO_API_KEY || '',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      email,
-      listIds: [2],
-      updateEnabled: true,
-    }),
-  });
+export async function subscribeToMailchimpNewsletter(email: string) {
+  const apiKey = process.env.MAILCHIMP_API_KEY || '';
+  const listId = process.env.MAILCHIMP_LIST_ID || '';
+  const serverPrefix = process.env.MAILCHIMP_SERVER_PREFIX || 'us1';
+
+  const response = await fetch(
+    `https://${serverPrefix}.api.mailchimp.com/3.0/lists/${listId}/members`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `apikey ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email_address: email,
+        status: 'subscribed',
+        tags: ['newsletter', 'nfi-report'],
+      }),
+    }
+  );
+
   return response.ok;
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase';
+import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase';
 
 export async function GET() {
   const supabase = await createServerSupabaseClient();
@@ -24,8 +24,13 @@ export async function GET() {
     .single();
 
   if (!profile) {
-    // Auto-create profile if missing (for existing users before migration)
-    const { data: newProfile } = await supabase
+    // Auto-create profile if missing — use service client to bypass RLS
+    const serviceClient = createServiceClient();
+    if (!serviceClient) {
+      return NextResponse.json({ error: 'Service indisponible' }, { status: 503 });
+    }
+
+    const { data: newProfile } = await serviceClient
       .from('user_profiles')
       .insert({
         id: user.id,

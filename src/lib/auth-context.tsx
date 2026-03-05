@@ -115,7 +115,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     // Supabase returns a fake user with empty identities when email already exists
-    const existingUser = !error && data?.user && (!data.user.identities || data.user.identities.length === 0);
+    const existingUser = !!(
+      !error && data?.user && (!data.user.identities || data.user.identities.length === 0)
+    );
 
     if (existingUser) {
       // Log the duplicate signup attempt

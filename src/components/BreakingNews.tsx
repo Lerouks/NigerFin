@@ -3,7 +3,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { Zap, ChevronLeft, ChevronRight, X } from 'lucide-react';
 
-const breakingNewsItems = [
+interface NewsItem {
+  tag: string;
+  text: string;
+}
+
+const fallbackItems: NewsItem[] = [
   { tag: 'MARCHÉS', text: "EUR/XOF stable à 655,957 — Le franc CFA maintient sa parité fixe avec l'euro" },
   { tag: 'BRVM', text: "L'indice composite gagne 1,01% en clôture — Hausse portée par les valeurs bancaires" },
   { tag: 'NIGER', text: 'Le secteur minier enregistre une croissance de 18% au T1 2026' },
@@ -12,16 +17,28 @@ const breakingNewsItems = [
 ];
 
 export function BreakingNews() {
+  const [items, setItems] = useState<NewsItem[]>(fallbackItems);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [dismissed, setDismissed] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  useEffect(() => {
+    fetch('/api/site-settings')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.breakingNews?.length) {
+          setItems(data.breakingNews.map((n: any) => ({ tag: n.tag, text: n.text })));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const startTimer = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     intervalRef.current = setInterval(() => {
       if (!isPaused) {
-        setCurrentIndex((prev) => (prev + 1) % breakingNewsItems.length);
+        setCurrentIndex((prev) => (prev + 1) % items.length);
       }
     }, 5000);
   };
@@ -32,21 +49,21 @@ export function BreakingNews() {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPaused]);
+  }, [isPaused, items.length]);
 
   const goNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % breakingNewsItems.length);
+    setCurrentIndex((prev) => (prev + 1) % items.length);
     startTimer();
   };
 
   const goPrev = () => {
-    setCurrentIndex((prev) => (prev - 1 + breakingNewsItems.length) % breakingNewsItems.length);
+    setCurrentIndex((prev) => (prev - 1 + items.length) % items.length);
     startTimer();
   };
 
-  if (dismissed) return null;
+  if (dismissed || items.length === 0) return null;
 
-  const item = breakingNewsItems[currentIndex];
+  const item = items[currentIndex];
 
   return (
     <div
@@ -90,7 +107,7 @@ export function BreakingNews() {
               <ChevronLeft className="w-3.5 h-3.5 text-gray-400" />
             </button>
             <div className="flex items-center gap-1 mx-1">
-              {breakingNewsItems.map((_, i) => (
+              {items.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => {

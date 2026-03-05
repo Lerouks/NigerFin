@@ -5,16 +5,42 @@ import { useRouter } from 'next/navigation';
 import { Menu, Search, User, X, ChevronRight, LogOut } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
-import { navigationSections } from '@/data/mock-data';
 import { SearchOverlay } from './SearchOverlay';
+
+interface NavItem {
+  label: string;
+  path: string;
+  order: number;
+}
+
+const defaultNavigation: NavItem[] = [
+  { label: 'Économie', path: '/economie', order: 1 },
+  { label: 'Finance', path: '/finance', order: 2 },
+  { label: 'Marchés', path: '/marches', order: 3 },
+  { label: 'Entreprises', path: '/entreprises', order: 4 },
+  { label: 'Éducation', path: '/education', order: 5 },
+  { label: 'Outils', path: '/outils', order: 6 },
+];
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [navigation, setNavigation] = useState<NavItem[]>(defaultNavigation);
   const { isSignedIn, user, signOut } = useAuth();
   const router = useRouter();
   const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetch('/api/site-settings')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.navigation?.length) {
+          setNavigation(data.navigation.sort((a: NavItem, b: NavItem) => a.order - b.order));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -130,9 +156,9 @@ export function Header() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="hidden lg:flex items-center justify-between h-11">
               <div className="flex items-center gap-1">
-                {navigationSections.map((section) => (
+                {navigation.map((section) => (
                   <Link
-                    key={section.id}
+                    key={section.path}
                     href={section.path}
                     className="text-[13px] px-3 py-1 rounded-md hover:bg-white/10 text-white/80 hover:text-white transition-all"
                   >
@@ -165,9 +191,9 @@ export function Header() {
         {mobileMenuOpen && (
           <div className="lg:hidden bg-white border-t border-black/5">
             <div className="px-4 py-3 space-y-1">
-              {navigationSections.map((section) => (
+              {navigation.map((section) => (
                 <Link
-                  key={section.id}
+                  key={section.path}
                   href={section.path}
                   className="flex items-center justify-between py-2.5 px-3 text-[15px] text-gray-700 hover:bg-black/[0.03] rounded-lg transition-colors"
                   onClick={() => setMobileMenuOpen(false)}

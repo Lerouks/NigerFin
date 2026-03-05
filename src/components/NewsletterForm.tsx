@@ -32,7 +32,7 @@ export function NewsletterForm() {
   };
 
   return (
-    <div id="newsletter" className="relative overflow-hidden rounded-xl bg-[#111] p-8 md:p-10">
+    <div id="newsletter" className="relative overflow-hidden rounded-xl bg-[#111] p-8 md:p-10 scroll-mt-[180px]">
       <div className="absolute top-0 right-0 w-64 h-64 bg-white/[0.02] rounded-full -translate-y-1/2 translate-x-1/2" />
       <h3 className="text-[22px] md:text-[26px] text-white mb-2 leading-tight font-semibold">
         Restez informé

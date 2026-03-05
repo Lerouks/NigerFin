@@ -54,6 +54,15 @@ export function Header() {
   }, []);
 
   const handleNewsletterClick = () => {
+    // If already on home page, smooth-scroll to newsletter
+    if (window.location.pathname === '/') {
+      const el = document.getElementById('newsletter');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+    }
+    // Otherwise navigate to home page with hash
     router.push('/#newsletter');
   };
 
@@ -105,22 +114,13 @@ export function Header() {
                           Mon compte
                         </Link>
                         {userRole === 'admin' && (
-                          <>
-                            <Link
-                              href="/admin"
-                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                              onClick={() => setUserMenuOpen(false)}
-                            >
-                              Administration
-                            </Link>
-                            <Link
-                              href="/studio"
-                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                              onClick={() => setUserMenuOpen(false)}
-                            >
-                              Studio CMS
-                            </Link>
-                          </>
+                          <Link
+                            href="/admin"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                            onClick={() => setUserMenuOpen(false)}
+                          >
+                            Administration
+                          </Link>
                         )}
                         <button
                           onClick={handleSignOut}

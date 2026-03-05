@@ -143,7 +143,7 @@ export function PracticalTools() {
   }, []);
 
   return (
-    <section id="outils" className="py-20 md:py-28">
+    <section id="outils" className="py-20 md:py-28 scroll-mt-[180px]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-xl mb-14">
           <span className="text-[11px] tracking-[0.15em] uppercase text-gray-400 block mb-3">

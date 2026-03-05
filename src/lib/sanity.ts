@@ -32,7 +32,7 @@ export function urlFor(source: any) {
 // Check if Sanity is configured
 export const isSanityConfigured = !!(process.env.NEXT_PUBLIC_SANITY_PROJECT_ID);
 
-// ─── GROQ Queries ───────────────────────────────────────────────────────────
+// ─── Article GROQ Queries ───────────────────────────────────────────────────
 
 const articleFields = `
   _id,
@@ -80,7 +80,61 @@ export const pageBySlugQuery = `*[_type == "page" && slug.current == $slug][0] {
   seo
 }`;
 
-// ─── Data Fetching Functions ────────────────────────────────────────────────
+// ─── Site Settings Queries ──────────────────────────────────────────────────
+
+export const siteSettingsQuery = `*[_type == "siteSettings"][0] {
+  siteName,
+  siteDescription,
+  contactEmail,
+  socialLinks {
+    facebook,
+    twitter,
+    linkedin,
+    instagram,
+    youtube,
+    tiktok
+  },
+  navigation[] {
+    label,
+    path,
+    order
+  },
+  footerSections[] {
+    title,
+    links[] {
+      label,
+      path
+    }
+  }
+}`;
+
+export const breakingNewsQuery = `*[_type == "breakingNews" && active == true] | order(_createdAt desc) [0...10] {
+  _id,
+  tag,
+  text
+}`;
+
+export const toolsQuery = `*[_type == "tool"] | order(order asc) {
+  _id,
+  name,
+  slug,
+  icon,
+  isPremium,
+  description
+}`;
+
+export const legalPageQuery = `*[_type == "legalPage" && slug.current == $slug][0] {
+  _id,
+  title,
+  slug,
+  sections[] {
+    heading,
+    text
+  },
+  lastUpdated
+}`;
+
+// ─── Article Data Fetching ──────────────────────────────────────────────────
 
 export async function getAllArticles(preview = false): Promise<Article[]> {
   if (!isSanityConfigured) return [];
@@ -110,4 +164,68 @@ export async function getRelatedArticles(currentSlug: string, category: string, 
 export async function getAllArticleSlugs(): Promise<string[]> {
   if (!isSanityConfigured) return [];
   return sanityClient.fetch(articleSlugsQuery);
+}
+
+// ─── Site Content Data Fetching ─────────────────────────────────────────────
+
+export interface SiteSettings {
+  siteName?: string;
+  siteDescription?: string;
+  contactEmail?: string;
+  socialLinks?: {
+    facebook?: string;
+    twitter?: string;
+    linkedin?: string;
+    instagram?: string;
+    youtube?: string;
+    tiktok?: string;
+  };
+  navigation?: Array<{ label: string; path: string; order: number }>;
+  footerSections?: Array<{
+    title: string;
+    links: Array<{ label: string; path: string }>;
+  }>;
+}
+
+export interface BreakingNewsItem {
+  _id: string;
+  tag: string;
+  text: string;
+}
+
+export interface ToolItem {
+  _id: string;
+  name: string;
+  slug: { current: string } | string;
+  icon?: string;
+  isPremium?: boolean;
+  description?: string;
+}
+
+export interface LegalPage {
+  _id: string;
+  title: string;
+  slug: { current: string };
+  sections: Array<{ heading: string; text: string }>;
+  lastUpdated?: string;
+}
+
+export async function getSiteSettings(): Promise<SiteSettings | null> {
+  if (!isSanityConfigured) return null;
+  return sanityClient.fetch(siteSettingsQuery);
+}
+
+export async function getBreakingNews(): Promise<BreakingNewsItem[]> {
+  if (!isSanityConfigured) return [];
+  return sanityClient.fetch(breakingNewsQuery);
+}
+
+export async function getTools(): Promise<ToolItem[]> {
+  if (!isSanityConfigured) return [];
+  return sanityClient.fetch(toolsQuery);
+}
+
+export async function getLegalPage(slug: string): Promise<LegalPage | null> {
+  if (!isSanityConfigured) return null;
+  return sanityClient.fetch(legalPageQuery, { slug });
 }

@@ -8,13 +8,22 @@ import { useAuth } from '@/lib/auth-context';
 import { PortableTextRenderer } from '@/components/PortableTextRenderer';
 import { CommentsSection } from '@/components/CommentsSection';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
-import { LoginGate } from '@/components/LoginGate';
+import { Paywall } from '@/components/Paywall';
 import { ArticleCard } from '@/components/ArticleCard';
 import { ArticleLikes } from '@/components/ArticleLikes';
 import type { Article, MarketData } from '@/types';
 import { articleImages, fallbackImageUrl } from '@/data/mock-data';
 import { formatDate } from '@/lib/utils';
 import { urlFor } from '@/lib/sanity';
+import {
+  checkArticleAccess,
+  getContentTypeFromArticle,
+  trackVisitorArticle,
+  getReaderPremiumLimit,
+  getVisitorLimit,
+  type AccessResult,
+} from '@/lib/access-control';
+import { trackPremiumArticleRead } from '@/lib/user-profile';
 
 interface ArticleContentProps {
   article: Article;
@@ -47,21 +56,42 @@ function WhatsAppIcon({ className }: { className?: string }) {
 }
 
 export function ArticleContent({ article, marketData, relatedArticles = [] }: ArticleContentProps) {
-  const { isSignedIn } = useAuth();
-  const [showLoginGate, setShowLoginGate] = useState(false);
+  const { isSignedIn, userRole, premiumArticlesUsed, refreshProfile } = useAuth();
+  const [accessResult, setAccessResult] = useState<AccessResult>({ allowed: true });
   const [linkCopied, setLinkCopied] = useState(false);
+  const [hasTracked, setHasTracked] = useState(false);
   const imageUrl = getArticleImageUrl(article);
+  const contentType = getContentTypeFromArticle(article);
 
   const articleUrl = typeof window !== 'undefined'
     ? window.location.href
     : `https://nfireport.com/articles/${article.slug.current}`;
 
   useEffect(() => {
-    if (article.isPremium && !isSignedIn) {
-      const timer = setTimeout(() => setShowLoginGate(true), 3000);
-      return () => clearTimeout(timer);
+    const result = checkArticleAccess(
+      contentType,
+      userRole,
+      premiumArticlesUsed,
+      article.slug.current
+    );
+    setAccessResult(result);
+
+    // Track reading
+    if (result.allowed && !hasTracked) {
+      if (!isSignedIn) {
+        // Track visitor read
+        if (contentType === 'free') {
+          trackVisitorArticle(article.slug.current);
+        }
+      } else if (contentType === 'premium' && userRole === 'reader') {
+        // Track premium article read for reader
+        trackPremiumArticleRead(article._id, article.slug.current).then(() => {
+          refreshProfile();
+        });
+        setHasTracked(true);
+      }
     }
-  }, [article.isPremium, isSignedIn]);
+  }, [contentType, userRole, premiumArticlesUsed, article, isSignedIn, hasTracked, refreshProfile]);
 
   const handleCopyLink = async () => {
     await navigator.clipboard.writeText(articleUrl);
@@ -76,15 +106,46 @@ export function ArticleContent({ article, marketData, relatedArticles = [] }: Ar
     whatsapp: `https://wa.me/?text=${encodeURIComponent(article.title + ' ' + articleUrl)}`,
   };
 
+  // Show paywall if access denied
+  if (!accessResult.allowed) {
+    return (
+      <div className="min-h-screen bg-[#fafaf9]">
+        <div className="relative h-[450px] md:h-[500px] bg-[#111]">
+          <Image src={imageUrl} alt={article.title} fill className="object-cover opacity-60" priority />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-32 relative z-10 pb-20">
+          <div className="max-w-3xl mx-auto">
+            <article className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] overflow-hidden">
+              <div className="p-8 md:p-12">
+                <span className="inline-block text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">{article.category}</span>
+                <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">{article.title}</h1>
+                {article.excerpt && <p className="text-lg text-gray-600 mb-6">{article.excerpt}</p>}
+
+                <div className="relative">
+                  <div className="text-gray-600 leading-relaxed line-clamp-6 opacity-50 select-none">
+                    {article.excerpt} {article.excerpt}
+                  </div>
+                  <Paywall
+                    reason={accessResult.reason}
+                    inline
+                    premiumArticlesUsed={premiumArticlesUsed}
+                    premiumArticlesLimit={
+                      accessResult.reason === 'visitor_limit' ? getVisitorLimit() : getReaderPremiumLimit()
+                    }
+                  />
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#fafaf9]">
-      <LoginGate
-        isOpen={showLoginGate}
-        onClose={() => setShowLoginGate(false)}
-        title="Contenu Premium"
-        message={`Connectez-vous pour lire "${article.title}" en entier`}
-      />
-
       <div className="relative h-[450px] md:h-[500px] bg-[#111]">
         <Image src={imageUrl} alt={article.title} fill className="object-cover opacity-60" priority />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
@@ -95,7 +156,16 @@ export function ArticleContent({ article, marketData, relatedArticles = [] }: Ar
           <div className="lg:col-span-8">
             <article className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] overflow-hidden">
               <div className="p-8 md:p-12">
-                <span className="inline-block text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">{article.category}</span>
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="inline-block text-[11px] tracking-[0.15em] uppercase text-gray-400">{article.category}</span>
+                  {contentType !== 'free' && (
+                    <span className={`text-[10px] tracking-[0.12em] uppercase px-2 py-0.5 rounded ${
+                      contentType === 'pro' ? 'bg-purple-100 text-purple-700' : 'bg-amber-100 text-amber-700'
+                    }`}>
+                      {contentType === 'pro' ? 'PRO' : 'PREMIUM'}
+                    </span>
+                  )}
+                </div>
                 <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">{article.title}</h1>
                 {article.subtitle && <p className="text-xl text-gray-600 mb-6">{article.subtitle}</p>}
 
@@ -114,16 +184,7 @@ export function ArticleContent({ article, marketData, relatedArticles = [] }: Ar
                   </div>
                 </div>
 
-                <div className={article.isPremium && !isSignedIn ? 'relative' : ''}>
-                  <PortableTextRenderer content={article.body} />
-                  {article.isPremium && !isSignedIn && (
-                    <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent flex items-end justify-center pb-8">
-                      <button onClick={() => setShowLoginGate(true)} className="bg-[#111] text-white px-8 py-3 rounded-full hover:bg-[#333] transition-colors text-[14px]">
-                        Connectez-vous pour lire la suite
-                      </button>
-                    </div>
-                  )}
-                </div>
+                <PortableTextRenderer content={article.body} />
 
                 {/* Tags */}
                 <div className="mt-10 pt-6 border-t border-black/[0.06]">
@@ -141,46 +202,19 @@ export function ArticleContent({ article, marketData, relatedArticles = [] }: Ar
                     <ArticleLikes articleId={article._id} />
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <a
-                      href={shareLinks.facebook}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-2 bg-[#1877F2] text-white rounded-lg text-[13px] hover:opacity-90 transition-opacity"
-                    >
-                      <Facebook className="w-4 h-4" />
-                      Facebook
+                    <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 bg-[#1877F2] text-white rounded-lg text-[13px] hover:opacity-90 transition-opacity">
+                      <Facebook className="w-4 h-4" />Facebook
                     </a>
-                    <a
-                      href={shareLinks.twitter}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg text-[13px] hover:opacity-90 transition-opacity"
-                    >
-                      <XIcon className="w-4 h-4" />
-                      X
+                    <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg text-[13px] hover:opacity-90 transition-opacity">
+                      <XIcon className="w-4 h-4" />X
                     </a>
-                    <a
-                      href={shareLinks.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-2 bg-[#0A66C2] text-white rounded-lg text-[13px] hover:opacity-90 transition-opacity"
-                    >
-                      <Linkedin className="w-4 h-4" />
-                      LinkedIn
+                    <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 bg-[#0A66C2] text-white rounded-lg text-[13px] hover:opacity-90 transition-opacity">
+                      <Linkedin className="w-4 h-4" />LinkedIn
                     </a>
-                    <a
-                      href={shareLinks.whatsapp}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-2 bg-[#25D366] text-white rounded-lg text-[13px] hover:opacity-90 transition-opacity"
-                    >
-                      <WhatsAppIcon className="w-4 h-4" />
-                      WhatsApp
+                    <a href={shareLinks.whatsapp} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 bg-[#25D366] text-white rounded-lg text-[13px] hover:opacity-90 transition-opacity">
+                      <WhatsAppIcon className="w-4 h-4" />WhatsApp
                     </a>
-                    <button
-                      onClick={handleCopyLink}
-                      className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-[13px] hover:bg-gray-200 transition-colors"
-                    >
+                    <button onClick={handleCopyLink} className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-[13px] hover:bg-gray-200 transition-colors">
                       {linkCopied ? <Check className="w-4 h-4 text-green-600" /> : <Link2 className="w-4 h-4" />}
                       {linkCopied ? 'Copié !' : 'Copier le lien'}
                     </button>
@@ -189,12 +223,10 @@ export function ArticleContent({ article, marketData, relatedArticles = [] }: Ar
               </div>
             </article>
 
-            {/* Comments Section */}
             <div className="mt-8">
               <CommentsSection articleId={article._id} />
             </div>
 
-            {/* Related Articles */}
             {relatedArticles.length > 0 && (
               <div className="mt-10">
                 <div className="flex items-center gap-4 mb-6">

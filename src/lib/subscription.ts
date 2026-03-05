@@ -1,4 +1,4 @@
-import { createBrowserSupabaseClient } from './supabase-browser';
+import type { UserRole } from '@/types';
 
 export type SubscriptionTier = 'lecteur' | 'standard' | 'premium';
 
@@ -99,47 +99,18 @@ export const subscriptionPlans: SubscriptionPlan[] = [
   },
 ];
 
-export async function getUserSubscription(userId: string): Promise<SubscriptionTier> {
-  const supabase = createBrowserSupabaseClient();
-  const { data } = await supabase
-    .from('subscriptions')
-    .select('tier, status')
-    .eq('user_id', userId)
-    .eq('status', 'active')
-    .single();
-
-  if (!data) return 'lecteur';
-  return data.tier as SubscriptionTier;
-}
-
-export async function getPremiumArticlesUsed(userId: string): Promise<number> {
-  const startOfMonth = new Date();
-  startOfMonth.setDate(1);
-  startOfMonth.setHours(0, 0, 0, 0);
-
-  const supabase = createBrowserSupabaseClient();
-  const { count } = await supabase
-    .from('article_access_log')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId)
-    .eq('is_premium', true)
-    .gte('accessed_at', startOfMonth.toISOString());
-
-  return count || 0;
-}
-
 export function canAccessPremiumContent(
-  tier: SubscriptionTier,
+  role: UserRole | null,
   premiumArticlesUsed: number
 ): boolean {
-  const plan = subscriptionPlans.find((p) => p.id === tier);
-  if (!plan) return false;
-  if (plan.limits.hasUnlimitedArticles) return true;
-  return premiumArticlesUsed < plan.limits.premiumArticlesPerMonth;
+  if (!role || role === 'reader') {
+    return premiumArticlesUsed < 3;
+  }
+  return true;
 }
 
-export function canAccessTool(tier: SubscriptionTier, isPremiumTool: boolean): boolean {
+export function canAccessTool(role: UserRole | null, isPremiumTool: boolean): boolean {
   if (!isPremiumTool) return true;
-  const plan = subscriptionPlans.find((p) => p.id === tier);
-  return plan?.limits.hasPremiumTools || false;
+  if (!role) return false;
+  return role === 'standard' || role === 'pro' || role === 'admin';
 }

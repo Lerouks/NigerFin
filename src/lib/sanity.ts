@@ -75,8 +75,10 @@ const articleFields = `
   mainImage,
   body,
   isPremium,
+  contentType,
   readTime,
   tags,
+  seo,
   "shareImage": mainImage
 `;
 

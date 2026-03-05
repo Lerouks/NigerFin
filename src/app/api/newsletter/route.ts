@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { subscribeToBrevoNewsletter } from '@/lib/email';
+import { subscribeToMailchimpNewsletter } from '@/lib/email';
 import { sendTransactionalEmail } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
@@ -10,8 +10,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email invalide' }, { status: 400 });
     }
 
-    // Subscribe to Brevo newsletter
-    await subscribeToBrevoNewsletter(email);
+    // Subscribe to Mailchimp newsletter
+    await subscribeToMailchimpNewsletter(email);
 
     // Send welcome email via Resend
     await sendTransactionalEmail({

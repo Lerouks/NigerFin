@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { Heart, Send } from 'lucide-react';
-import { useUser, SignInButton } from '@clerk/nextjs';
+import Link from 'next/link';
+import { useAuth } from '@/lib/auth-context';
 import type { Comment } from '@/types';
 
 interface CommentsSectionProps {
@@ -11,7 +12,7 @@ interface CommentsSectionProps {
 }
 
 export function CommentsSection({ articleId, initialComments }: CommentsSectionProps) {
-  const { isSignedIn, user } = useUser();
+  const { isSignedIn, user } = useAuth();
   const [commentText, setCommentText] = useState('');
   const [localComments, setLocalComments] = useState(initialComments);
 
@@ -23,7 +24,7 @@ export function CommentsSection({ articleId, initialComments }: CommentsSectionP
       id: Date.now().toString(),
       article_id: articleId,
       user_id: user.id,
-      user_name: user.fullName || 'Utilisateur',
+      user_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Utilisateur',
       content: commentText,
       created_at: new Date().toISOString(),
       likes: 0,
@@ -80,11 +81,12 @@ export function CommentsSection({ articleId, initialComments }: CommentsSectionP
             <p className="text-gray-500 text-[14px] mb-4">
               Connectez-vous pour participer à la discussion
             </p>
-            <SignInButton mode="modal">
-              <button className="bg-[#111] text-white px-6 py-2.5 rounded-lg hover:bg-[#333] transition-colors text-[13px]">
-                Se connecter
-              </button>
-            </SignInButton>
+            <Link
+              href="/connexion"
+              className="inline-block bg-[#111] text-white px-6 py-2.5 rounded-lg hover:bg-[#333] transition-colors text-[13px]"
+            >
+              Se connecter
+            </Link>
           </div>
         )}
 

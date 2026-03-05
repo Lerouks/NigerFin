@@ -48,7 +48,7 @@ export function ContactForm() {
                   </div>
                   <div>
                     <h3 className="font-semibold mb-1">Adresse</h3>
-                    <p className="text-gray-600 text-sm">Boulevard de la République<br />Quartier Plateau, Niamey<br />Niger</p>
+                    <p className="text-gray-600 text-sm">Niamey, Niger<br />Plateau &ndash; BP 800</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -57,8 +57,7 @@ export function ContactForm() {
                   </div>
                   <div>
                     <h3 className="font-semibold mb-1">Email</h3>
-                    <a href="mailto:contact@nfireport.ne" className="text-gray-600 text-sm hover:text-black transition-colors block">contact@nfireport.ne</a>
-                    <a href="mailto:redaction@nfireport.ne" className="text-gray-600 text-sm hover:text-black transition-colors block">redaction@nfireport.ne</a>
+                    <a href="mailto:contact@nfireport.com" className="text-gray-600 text-sm hover:text-black transition-colors block">contact@nfireport.com</a>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -67,8 +66,7 @@ export function ContactForm() {
                   </div>
                   <div>
                     <h3 className="font-semibold mb-1">Téléphone</h3>
-                    <p className="text-gray-600 text-sm">+227 20 73 XX XX</p>
-                    <p className="text-gray-600 text-sm">+227 90 XX XX XX</p>
+                    <a href="tel:+22798543837" className="text-gray-600 text-sm hover:text-black transition-colors block">+227 98 54 38 37</a>
                   </div>
                 </div>
               </div>

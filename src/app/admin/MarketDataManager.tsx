@@ -30,8 +30,6 @@ const emptyForm = {
   symbol: '',
   type: 'currency' as 'currency' | 'commodity' | 'index',
   value: 0,
-  change: 0,
-  change_percent: 0,
   unit: '',
   source: '',
 };
@@ -98,8 +96,6 @@ export function MarketDataManager() {
       symbol: entry.symbol,
       type: entry.type,
       value: entry.value,
-      change: entry.change,
-      change_percent: entry.change_percent,
       unit: entry.unit || '',
       source: entry.source || '',
     });
@@ -343,7 +339,7 @@ function MarketForm({ form, setForm, onSave, onCancel, saving }: {
           </select>
         </div>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div>
           <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Valeur</label>
           <input
@@ -353,26 +349,7 @@ function MarketForm({ form, setForm, onSave, onCancel, saving }: {
             onChange={(e) => update('value', parseFloat(e.target.value) || 0)}
             className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
           />
-        </div>
-        <div>
-          <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Variation</label>
-          <input
-            type="number"
-            step="0.01"
-            value={form.change}
-            onChange={(e) => update('change', parseFloat(e.target.value) || 0)}
-            className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
-          />
-        </div>
-        <div>
-          <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Variation %</label>
-          <input
-            type="number"
-            step="0.01"
-            value={form.change_percent}
-            onChange={(e) => update('change_percent', parseFloat(e.target.value) || 0)}
-            className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
-          />
+          <p className="text-[10px] text-gray-400 mt-1">La variation sera calculée automatiquement</p>
         </div>
         <div>
           <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Unité</label>

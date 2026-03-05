@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
   const { serviceClient } = auth;
 
   const body = await request.json();
-  const { name, symbol, type, value, change, change_percent, unit, source } = body;
+  const { name, symbol, type, value, unit, source } = body;
 
   if (!name || !symbol || !type) {
     return NextResponse.json({ error: 'Nom, symbole et type requis' }, { status: 400 });
@@ -46,8 +46,8 @@ export async function POST(request: NextRequest) {
       symbol,
       type,
       value: value ?? 0,
-      change: change ?? 0,
-      change_percent: change_percent ?? 0,
+      change: 0,
+      change_percent: 0,
       unit: unit || '',
       source: source || '',
     })
@@ -76,6 +76,24 @@ export async function PUT(request: NextRequest) {
 
   if (updates.type && !['currency', 'commodity', 'index'].includes(updates.type)) {
     return NextResponse.json({ error: 'Type invalide' }, { status: 400 });
+  }
+
+  // Auto-calculate variation when value is provided
+  if (updates.value !== undefined) {
+    const { data: current } = await serviceClient
+      .from('market_data')
+      .select('value')
+      .eq('id', id)
+      .single();
+
+    if (current) {
+      const oldValue = Number(current.value);
+      const newValue = Number(updates.value);
+      updates.change = newValue - oldValue;
+      updates.change_percent = oldValue !== 0
+        ? ((newValue - oldValue) / oldValue) * 100
+        : 0;
+    }
   }
 
   const { data, error } = await serviceClient

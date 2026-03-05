@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Calculator, TrendingUp, Percent, DollarSign, BarChart3, ArrowRight, Lock, Wrench } from 'lucide-react';
+import { useAuth } from '@/lib/auth-context';
 
 interface ToolData {
   _id: string;
@@ -34,9 +35,10 @@ interface PlanCardProps {
   badge: string;
   tools: ToolData[];
   isPremium?: boolean;
+  isSubscribed?: boolean;
 }
 
-function PlanCard({ title, badge, tools, isPremium = false }: PlanCardProps) {
+function PlanCard({ title, badge, tools, isPremium = false, isSubscribed = false }: PlanCardProps) {
   return (
     <div
       className={`rounded-xl overflow-hidden border transition-all duration-300 ${
@@ -94,15 +96,17 @@ function PlanCard({ title, badge, tools, isPremium = false }: PlanCardProps) {
 
       <div className="px-6 pb-6 pt-2">
         <Link
-          href={isPremium ? '/pricing' : `/outil/${tools[0] ? getSlug(tools[0].slug) : ''}`}
+          href={isPremium && !isSubscribed ? '/pricing' : `/outil/${tools[0] ? getSlug(tools[0].slug) : ''}`}
           className={`flex items-center justify-center gap-2 w-full py-3 rounded-lg text-[13px] transition-all duration-300 ${
             isPremium
-              ? 'bg-white text-black hover:bg-white/90'
+              ? isSubscribed
+                ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                : 'bg-white text-black hover:bg-white/90'
               : 'bg-[#111] text-white hover:bg-[#333]'
           }`}
         >
-          {isPremium && <Lock className="w-3.5 h-3.5" />}
-          {isPremium ? 'Débloquer Premium' : 'Accéder gratuitement'}
+          {isPremium && !isSubscribed && <Lock className="w-3.5 h-3.5" />}
+          {isPremium ? (isSubscribed ? 'Accéder aux outils' : 'Débloquer Premium') : 'Accéder gratuitement'}
         </Link>
       </div>
     </div>
@@ -121,6 +125,8 @@ const defaultPremiumTools: ToolData[] = [
 ];
 
 export function PracticalTools() {
+  const { userRole } = useAuth();
+  const isSubscribed = userRole === 'standard' || userRole === 'pro' || userRole === 'admin';
   const [freeTools, setFreeTools] = useState<ToolData[]>(defaultFreeTools);
   const [premiumTools, setPremiumTools] = useState<ToolData[]>(defaultPremiumTools);
 
@@ -152,7 +158,7 @@ export function PracticalTools() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
           <PlanCard title="Plan Gratuit" badge="GRATUIT" tools={freeTools} />
-          <PlanCard title="Plan Premium" badge="PREMIUM" tools={premiumTools} isPremium />
+          <PlanCard title={isSubscribed ? 'Vos outils Premium' : 'Plan Premium'} badge={isSubscribed ? 'DÉBLOQUÉ' : 'PREMIUM'} tools={premiumTools} isPremium isSubscribed={isSubscribed} />
         </div>
 
         <div className="text-center mt-10">

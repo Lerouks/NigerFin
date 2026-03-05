@@ -40,6 +40,7 @@ const plans = [
 
 export function PricingContent() {
   const { isSignedIn, userRole } = useAuth();
+  const isSubscribed = userRole === 'standard' || userRole === 'pro' || userRole === 'admin';
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [dynamicPrices, setDynamicPrices] = useState<Record<string, number>>({});
@@ -98,12 +99,30 @@ export function PricingContent() {
 
   return (
     <div className="min-h-screen bg-[#fafaf9]">
+      {/* Banner for subscribers */}
+      {isSubscribed && (
+        <div className="bg-emerald-600 text-white">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+            <p className="text-sm">
+              Vous êtes abonné <strong>{userRole === 'pro' ? 'Pro' : 'Standard'}</strong> — votre accès est actif.
+            </p>
+            <Link href="/compte" className="text-sm underline hover:no-underline">
+              Mon compte &rarr;
+            </Link>
+          </div>
+        </div>
+      )}
+
       <section className="bg-[#111] text-white py-20 md:py-28">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <span className="text-[11px] tracking-[0.2em] uppercase text-white/40 block mb-4">Abonnements</span>
-          <h1 className="text-4xl md:text-5xl mb-5 leading-[1.1]">Choisissez votre plan</h1>
+          <h1 className="text-4xl md:text-5xl mb-5 leading-[1.1]">
+            {isSubscribed ? 'Votre abonnement' : 'Choisissez votre plan'}
+          </h1>
           <p className="text-[17px] text-white/50 max-w-2xl mx-auto leading-relaxed">
-            Accédez à l&apos;information économique et financière premium du Niger et de l&apos;Afrique de l&apos;Ouest.
+            {isSubscribed
+              ? 'Gérez votre abonnement ou découvrez nos autres plans.'
+              : 'Accédez à l\'information économique et financière premium du Niger et de l\'Afrique de l\'Ouest.'}
           </p>
 
           {/* Billing cycle toggle */}
@@ -209,15 +228,16 @@ export function PricingContent() {
                     </ul>
 
                     {isCurrentPlan ? (
-                      <div
-                        className={`w-full py-3 rounded-lg text-[14px] text-center ${
+                      <Link
+                        href="/compte"
+                        className={`block w-full py-3 rounded-lg text-[14px] text-center ${
                           isPopular
-                            ? 'bg-white/10 text-white/60'
-                            : 'bg-gray-100 text-gray-500'
-                        }`}
+                            ? 'bg-white/10 text-white/60 hover:bg-white/20'
+                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                        } transition-colors`}
                       >
-                        Plan actuel
-                      </div>
+                        Plan actuel &mdash; Gérer
+                      </Link>
                     ) : isSignedIn && plan.tier ? (
                       <button
                         onClick={() => handleSubscribe(plan.tier!)}
@@ -232,11 +252,13 @@ export function PricingContent() {
                       >
                         {loadingPlan === plan.tier ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : isSubscribed ? (
+                          'Changer de plan'
                         ) : (
                           'Choisir ce plan'
                         )}
                       </button>
-                    ) : (
+                    ) : !isSignedIn ? (
                       <Link
                         href={plan.tier ? '/connexion' : '/inscription'}
                         className={`block w-full py-3 rounded-lg text-[14px] transition-colors text-center ${
@@ -249,6 +271,14 @@ export function PricingContent() {
                       >
                         {plan.tier ? 'Choisir ce plan' : 'Commencer gratuitement'}
                       </Link>
+                    ) : (
+                      <div
+                        className={`w-full py-3 rounded-lg text-[14px] text-center ${
+                          isPopular ? 'bg-white/10 text-white/40' : 'bg-gray-50 text-gray-400'
+                        }`}
+                      >
+                        Inclus dans votre plan
+                      </div>
                     )}
                   </div>
                 </div>

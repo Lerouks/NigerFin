@@ -1,4 +1,5 @@
 import type { UserRole } from '@/types';
+import { TIERS } from '@/config/pricing';
 
 export type SubscriptionTier = 'lecteur' | 'standard' | 'premium';
 
@@ -50,15 +51,9 @@ export const subscriptionPlans: SubscriptionPlan[] = [
   {
     id: 'standard',
     name: 'Populaire',
-    price: 4900,
-    priceLabel: '4 900 FCFA/mois',
-    features: [
-      'Accès illimité aux articles',
-      'Analyses et rapports complets',
-      'Newsletter hebdomadaire',
-      'Alertes actualités majeures',
-      'Accès aux outils premium',
-    ],
+    price: TIERS.standard.plans.monthly.amount,
+    priceLabel: TIERS.standard.plans.monthly.label,
+    features: TIERS.standard.features,
     limits: {
       premiumArticlesPerMonth: -1,
       hasUnlimitedArticles: true,
@@ -75,15 +70,9 @@ export const subscriptionPlans: SubscriptionPlan[] = [
   {
     id: 'premium',
     name: 'Pro',
-    price: 9900,
-    priceLabel: '9 900 FCFA/mois',
-    features: [
-      'Tout le plan Standard',
-      'Rapports exclusifs PDF',
-      'Alertes personnalisées',
-      'Archives complètes',
-      'Support prioritaire 24h/7j',
-    ],
+    price: TIERS.pro.plans.monthly.amount,
+    priceLabel: TIERS.pro.plans.monthly.label,
+    features: TIERS.pro.features,
     limits: {
       premiumArticlesPerMonth: -1,
       hasUnlimitedArticles: true,

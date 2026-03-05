@@ -1,30 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase';
+import { requireAdmin } from '@/lib/admin-auth';
+import { logAuditEvent } from '@/lib/audit';
 import { cycleMonths } from '@/config/pricing';
 import type { BillingCycle } from '@/config/pricing';
 
 export async function POST(request: NextRequest) {
-  // Verify admin
-  const supabase = await createServerSupabaseClient();
-  if (!supabase) {
-    return NextResponse.json({ error: 'Service indisponible' }, { status: 503 });
-  }
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
-  }
-
-  // Check admin role
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (profile?.role !== 'admin') {
-    return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
-  }
+  const { user, serviceClient } = auth;
 
   const { paymentRequestId, action, rejectionReason } = await request.json() as {
     paymentRequestId: string;
@@ -34,12 +18,6 @@ export async function POST(request: NextRequest) {
 
   if (!paymentRequestId || !action) {
     return NextResponse.json({ error: 'Paramètres manquants' }, { status: 400 });
-  }
-
-  // Use service client for admin operations
-  const serviceClient = createServiceClient();
-  if (!serviceClient) {
-    return NextResponse.json({ error: 'Service indisponible' }, { status: 503 });
   }
 
   // Get payment request
@@ -68,6 +46,12 @@ export async function POST(request: NextRequest) {
         updated_at: new Date().toISOString(),
       })
       .eq('id', paymentRequestId);
+
+    await logAuditEvent(user.id, 'reject_payment', 'payment', paymentRequestId, {
+      tier: paymentRequest.tier,
+      amount: paymentRequest.amount,
+      reason: rejectionReason,
+    });
 
     return NextResponse.json({ success: true, status: 'rejected' });
   }
@@ -120,6 +104,12 @@ export async function POST(request: NextRequest) {
       updated_at: now,
     })
     .eq('id', paymentRequest.user_id);
+
+  await logAuditEvent(user.id, 'verify_payment', 'payment', paymentRequestId, {
+    tier: paymentRequest.tier,
+    amount: paymentRequest.amount,
+    expiresAt: expiresAt.toISOString(),
+  });
 
   return NextResponse.json({
     success: true,

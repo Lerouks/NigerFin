@@ -27,7 +27,8 @@ export function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [navigation, setNavigation] = useState<NavItem[]>(defaultNavigation);
-  const { isSignedIn, user, signOut } = useAuth();
+  const { isSignedIn, user, userRole, signOut } = useAuth();
+  const isSubscribed = userRole === 'standard' || userRole === 'pro' || userRole === 'admin';
   const router = useRouter();
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -97,11 +98,11 @@ export function Header() {
                           <p className="text-xs text-gray-500 truncate">{user?.email}</p>
                         </div>
                         <Link
-                          href="/pricing"
+                          href="/compte"
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                           onClick={() => setUserMenuOpen(false)}
                         >
-                          Mon abonnement
+                          Mon compte
                         </Link>
                         <button
                           onClick={handleSignOut}
@@ -175,11 +176,11 @@ export function Header() {
                 </button>
                 {isSignedIn && (
                   <Link
-                    href="/pricing"
+                    href="/compte"
                     className="flex items-center gap-1.5 text-[13px] text-white/60 hover:text-white transition-colors"
                   >
                     <User className="w-3.5 h-3.5" />
-                    <span>Compte</span>
+                    <span>Mon compte</span>
                   </Link>
                 )}
               </div>
@@ -213,6 +214,16 @@ export function Header() {
                   Newsletter
                   <ChevronRight className="w-4 h-4 text-gray-300" />
                 </button>
+                {isSignedIn && (
+                  <Link
+                    href="/compte"
+                    className="flex items-center justify-between py-2.5 px-3 text-[15px] text-gray-700 hover:bg-black/[0.03] rounded-lg transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Mon compte
+                    <ChevronRight className="w-4 h-4 text-gray-300" />
+                  </Link>
+                )}
               </div>
             </div>
           </div>

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
   Users, BarChart3, Shield, Loader2, Search, CreditCard, CheckCircle, XCircle,
   Clock, Download, TrendingUp, TrendingDown, DollarSign, Activity, Ban,
-  Unlock, Settings, FileText, AlertTriangle, ChevronDown, ChevronUp, Newspaper, LineChart, Zap,
+  Unlock, Settings, FileText, AlertTriangle, ChevronDown, ChevronUp, Newspaper, LineChart, Zap, BookOpen,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { formatPrice, cycleLabel, TIERS, CURRENCY, type BillingCycle, type TierId } from '@/config/pricing';
@@ -13,6 +13,7 @@ import { ArticlesManager } from './ArticlesManager';
 import { CategoriesManager } from './CategoriesManager';
 import { MarketDataManager } from './MarketDataManager';
 import { FlashBannerManager } from './FlashBannerManager';
+import { EducationManager } from './EducationManager';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -83,7 +84,7 @@ interface DynamicPrice {
   updated_at: string;
 }
 
-type TabId = 'overview' | 'articles' | 'categories' | 'market' | 'flash' | 'users' | 'payments' | 'pricing' | 'audit';
+type TabId = 'overview' | 'articles' | 'categories' | 'market' | 'flash' | 'education' | 'users' | 'payments' | 'pricing' | 'audit';
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -275,6 +276,7 @@ export function AdminDashboard() {
     { id: 'categories', label: 'Catégories', icon: FileText },
     { id: 'market', label: 'Marchés', icon: LineChart },
     { id: 'flash', label: 'Flash Info', icon: Zap },
+    { id: 'education', label: 'Éducation', icon: BookOpen },
     { id: 'users', label: 'Utilisateurs', icon: Users },
     { id: 'payments', label: 'Paiements', icon: CreditCard, badge: stats.pendingPayments },
     { id: 'pricing', label: 'Tarifs', icon: DollarSign },
@@ -452,6 +454,9 @@ export function AdminDashboard() {
 
         {/* ─── FLASH BANNER TAB ──────────────────────────────────── */}
         {activeTab === 'flash' && <FlashBannerManager />}
+
+        {/* ─── EDUCATION TAB ─────────────────────────────────────── */}
+        {activeTab === 'education' && <EducationManager />}
 
         {/* ─── USERS TAB ──────────────────────────────────────────── */}
         {activeTab === 'users' && (

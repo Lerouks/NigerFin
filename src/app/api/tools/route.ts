@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
-import { getTools } from '@/lib/sanity';
 
 export const revalidate = 300;
 
-const fallbackTools = [
+const tools = [
   { _id: 'f1', name: "Simulateur d'Emprunt", slug: 'simulateur-emprunt', icon: 'Calculator', isPremium: false },
   { _id: 'f2', name: 'Intérêt Simple', slug: 'interet-simple', icon: 'Percent', isPremium: false },
   { _id: 'f3', name: 'Simulateur Salaire', slug: 'simulateur-salaire', icon: 'DollarSign', isPremium: true },
@@ -12,7 +11,5 @@ const fallbackTools = [
 ];
 
 export async function GET() {
-  const sanityTools = await getTools();
-  const tools = sanityTools.length > 0 ? sanityTools : fallbackTools;
   return NextResponse.json(tools);
 }

@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { draftMode } from 'next/headers';
-import { getArticleBySlug, getRelatedArticles, getAllArticleSlugs, urlFor } from '@/lib/sanity';
+import { getArticleBySlug, getRelatedArticles, getAllArticleSlugs } from '@/lib/articles';
 import { marketData } from '@/data/mock-data';
 import { ArticleContent } from './ArticleContent';
 
@@ -11,19 +10,14 @@ interface ArticlePageProps {
   params: { slug: string };
 }
 
-async function getArticle(slug: string, preview = false) {
-  return await getArticleBySlug(slug, preview);
-}
-
 export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
-  const article = await getArticle(params.slug);
-  if (!article) return { title: 'Article introuvable' };
+  const result = await getArticleBySlug(params.slug);
+  if (!result) return { title: 'Article introuvable' };
 
+  const { article } = result;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://nfireport.com';
   const articleUrl = `${siteUrl}/articles/${article.slug.current}`;
-  const imageUrl = article.mainImage
-    ? urlFor(article.mainImage)?.width(1200).height(630).url()
-    : `${siteUrl}/og-default.jpg`;
+  const imageUrl = article.mainImage?.url || `${siteUrl}/og-default.jpg`;
 
   return {
     title: article.seo?.metaTitle || article.title,
@@ -61,28 +55,21 @@ export async function generateStaticParams() {
 }
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
-  const { isEnabled: preview } = await draftMode();
-  const article = await getArticle(params.slug, preview);
+  const result = await getArticleBySlug(params.slug);
 
-  if (!article) {
+  if (!result) {
     notFound();
   }
+
+  const { article, htmlBody } = result;
 
   const related = await getRelatedArticles(
     article.slug.current,
     article.category,
     article.tags || [],
-    preview
   );
 
   return (
-    <>
-      {preview && (
-        <div className="bg-yellow-400 text-black text-center py-2 text-sm">
-          Mode preview actif — <a href="/api/exit-preview" className="underline font-semibold">Quitter le preview</a>
-        </div>
-      )}
-      <ArticleContent article={article} marketData={marketData} relatedArticles={related} />
-    </>
+    <ArticleContent article={article} htmlBody={htmlBody} marketData={marketData} relatedArticles={related} />
   );
 }

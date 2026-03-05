@@ -5,16 +5,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Clock, Calendar, User, Facebook, Linkedin, Link2, Check } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
-import { PortableTextRenderer } from '@/components/PortableTextRenderer';
 import { CommentsSection } from '@/components/CommentsSection';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
 import { Paywall } from '@/components/Paywall';
 import { ArticleCard } from '@/components/ArticleCard';
 import { ArticleLikes } from '@/components/ArticleLikes';
 import type { Article, MarketData } from '@/types';
-import { articleImages, fallbackImageUrl } from '@/data/mock-data';
+import { fallbackImageUrl } from '@/data/mock-data';
 import { formatDate } from '@/lib/utils';
-import { urlFor } from '@/lib/sanity';
 import {
   checkArticleAccess,
   getContentTypeFromArticle,
@@ -27,16 +25,14 @@ import { trackPremiumArticleRead } from '@/lib/user-profile';
 
 interface ArticleContentProps {
   article: Article;
+  htmlBody: string;
   marketData: MarketData[];
   relatedArticles?: Article[];
 }
 
 function getArticleImageUrl(article: Article): string {
-  if (article.mainImage) {
-    const url = urlFor(article.mainImage)?.width(1200).height(600).url();
-    if (url) return url;
-  }
-  return articleImages[article.slug.current] || fallbackImageUrl;
+  if (article.mainImage?.url) return article.mainImage.url;
+  return fallbackImageUrl;
 }
 
 function XIcon({ className }: { className?: string }) {
@@ -55,7 +51,7 @@ function WhatsAppIcon({ className }: { className?: string }) {
   );
 }
 
-export function ArticleContent({ article, marketData, relatedArticles = [] }: ArticleContentProps) {
+export function ArticleContent({ article, htmlBody, marketData, relatedArticles = [] }: ArticleContentProps) {
   const { isSignedIn, userRole, premiumArticlesUsed, refreshProfile } = useAuth();
   const [accessResult, setAccessResult] = useState<AccessResult>({ allowed: true });
   const [linkCopied, setLinkCopied] = useState(false);
@@ -76,15 +72,12 @@ export function ArticleContent({ article, marketData, relatedArticles = [] }: Ar
     );
     setAccessResult(result);
 
-    // Track reading
     if (result.allowed && !hasTracked) {
       if (!isSignedIn) {
-        // Track visitor read
         if (contentType === 'free') {
           trackVisitorArticle(article.slug.current);
         }
       } else if (contentType === 'premium' && userRole === 'reader') {
-        // Track premium article read for reader
         trackPremiumArticleRead(article._id, article.slug.current).then(() => {
           refreshProfile();
         });
@@ -106,7 +99,6 @@ export function ArticleContent({ article, marketData, relatedArticles = [] }: Ar
     whatsapp: `https://wa.me/?text=${encodeURIComponent(article.title + ' ' + articleUrl)}`,
   };
 
-  // Show paywall if access denied
   if (!accessResult.allowed) {
     return (
       <div className="min-h-screen bg-[#fafaf9]">
@@ -184,16 +176,22 @@ export function ArticleContent({ article, marketData, relatedArticles = [] }: Ar
                   </div>
                 </div>
 
-                <PortableTextRenderer content={article.body} />
+                {/* Render HTML body */}
+                <div
+                  className="prose prose-lg max-w-none prose-headings:font-bold prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3 prose-p:mb-4 prose-p:leading-relaxed prose-blockquote:border-l-4 prose-blockquote:border-black prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:my-6 prose-a:text-black prose-a:underline hover:prose-a:no-underline prose-img:rounded-lg prose-img:my-6"
+                  dangerouslySetInnerHTML={{ __html: htmlBody }}
+                />
 
                 {/* Tags */}
-                <div className="mt-10 pt-6 border-t border-black/[0.06]">
-                  <div className="flex flex-wrap gap-2">
-                    {article.tags.map((tag) => (
-                      <span key={tag} className="px-3 py-1.5 bg-[#f5f5f0] text-[12px] rounded-full hover:bg-[#eee] transition-colors cursor-pointer text-gray-600">#{tag}</span>
-                    ))}
+                {article.tags.length > 0 && (
+                  <div className="mt-10 pt-6 border-t border-black/[0.06]">
+                    <div className="flex flex-wrap gap-2">
+                      {article.tags.map((tag) => (
+                        <span key={tag} className="px-3 py-1.5 bg-[#f5f5f0] text-[12px] rounded-full hover:bg-[#eee] transition-colors cursor-pointer text-gray-600">#{tag}</span>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Share Buttons */}
                 <div className="mt-6 pt-6 border-t border-black/[0.06]">

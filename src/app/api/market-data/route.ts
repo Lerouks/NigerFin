@@ -32,6 +32,8 @@ export async function GET() {
     unit: item.unit || '',
     source: item.source || '',
     updatedAt: item.updated_at || null,
+    description: item.description || '',
+    educationLink: item.education_link || '',
   }));
 
   return NextResponse.json(mapped);

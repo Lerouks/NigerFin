@@ -15,6 +15,8 @@ interface MarketEntry {
   change_percent: number;
   unit: string;
   source: string;
+  description: string;
+  education_link: string;
   updated_at: string;
   created_at: string;
 }
@@ -32,6 +34,8 @@ const emptyForm = {
   value: 0,
   unit: '',
   source: '',
+  description: '',
+  education_link: '',
 };
 
 export function MarketDataManager() {
@@ -98,6 +102,8 @@ export function MarketDataManager() {
       value: entry.value,
       unit: entry.unit || '',
       source: entry.source || '',
+      description: entry.description || '',
+      education_link: entry.education_link || '',
     });
   };
 
@@ -370,6 +376,29 @@ function MarketForm({ form, setForm, onSave, onCancel, saving }: {
             placeholder="Ex: BCEAO"
             className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
           />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Description pédagogique</label>
+          <input
+            type="text"
+            value={form.description}
+            onChange={(e) => update('description', e.target.value)}
+            placeholder="Ex: Indice des 40 plus grandes entreprises françaises"
+            className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
+          />
+        </div>
+        <div>
+          <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Lien éducation</label>
+          <input
+            type="text"
+            value={form.education_link}
+            onChange={(e) => update('education_link', e.target.value)}
+            placeholder="Ex: /education/bourse-marches"
+            className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
+          />
+          <p className="text-[10px] text-gray-400 mt-1">Lien vers la page éducation correspondante</p>
         </div>
       </div>
       <div className="flex gap-2 pt-2">

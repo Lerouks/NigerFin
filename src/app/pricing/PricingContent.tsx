@@ -46,8 +46,20 @@ export function PricingContent() {
   const isSubscribed = userRole === 'standard' || userRole === 'pro' || userRole === 'admin';
   const isMaxPlan = userRole === 'pro' || userRole === 'admin';
 
-  // Filter: standard users see only pro upgrade, others see all
-  const visiblePlans = userRole === 'standard'
+  // Map userRole to matching plan id
+  const currentPlanId = userRole === 'pro' || userRole === 'admin'
+    ? 'pro'
+    : userRole === 'standard'
+    ? 'standard'
+    : 'lecteur';
+
+  // Filter plans based on current role:
+  // - pro/admin: only show pro (already at max)
+  // - standard: show standard (current) + pro (upgrade)
+  // - reader/free: show all 3
+  const visiblePlans = isMaxPlan
+    ? plans.filter((p) => p.id === 'pro')
+    : userRole === 'standard'
     ? plans.filter((p) => p.id === 'standard' || p.id === 'pro')
     : plans;
 
@@ -165,7 +177,7 @@ export function PricingContent() {
             {visiblePlans.map((plan) => {
               const isPopular = plan.id === 'standard';
               const isPro = plan.id === 'pro';
-              const isCurrentPlan = userRole === plan.id || (!userRole && plan.id === 'lecteur');
+              const isCurrentPlan = plan.id === currentPlanId;
               const monthlyPrice = plan.tier
                 ? getMonthly(plan.tier, billingCycle)
                 : 0;
@@ -239,59 +251,79 @@ export function PricingContent() {
                       ))}
                     </ul>
 
-                    {isCurrentPlan ? (
-                      <Link
-                        href="/compte"
-                        className={`block w-full py-3 rounded-lg text-[14px] text-center ${
-                          isPopular
-                            ? 'bg-white/10 text-white/60 hover:bg-white/20'
-                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                        } transition-colors`}
-                      >
-                        Plan actuel &mdash; Gérer
-                      </Link>
-                    ) : isSignedIn && plan.tier ? (
-                      <button
-                        onClick={() => handleSubscribe(plan.tier!)}
-                        disabled={loadingPlan !== null}
-                        className={`w-full py-3 rounded-lg text-[14px] transition-colors flex items-center justify-center gap-2 ${
-                          isPopular
-                            ? 'bg-white text-black hover:bg-white/90'
-                            : isPro
-                            ? 'bg-[#111] text-white hover:bg-[#333]'
-                            : 'border border-black/[0.1] hover:bg-black/5'
-                        }`}
-                      >
-                        {loadingPlan === plan.tier ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : isSubscribed ? (
-                          'Changer de plan'
-                        ) : (
-                          'Choisir ce plan'
-                        )}
-                      </button>
-                    ) : !isSignedIn ? (
-                      <Link
-                        href={plan.tier ? '/connexion' : '/inscription'}
-                        className={`block w-full py-3 rounded-lg text-[14px] transition-colors text-center ${
-                          isPopular
-                            ? 'bg-white text-black hover:bg-white/90'
-                            : isPro
-                            ? 'bg-[#111] text-white hover:bg-[#333]'
-                            : 'border border-black/[0.1] hover:bg-black/5'
-                        }`}
-                      >
-                        {plan.tier ? 'Choisir ce plan' : 'Commencer gratuitement'}
-                      </Link>
-                    ) : (
-                      <div
-                        className={`w-full py-3 rounded-lg text-[14px] text-center ${
-                          isPopular ? 'bg-white/10 text-white/40' : 'bg-gray-50 text-gray-400'
-                        }`}
-                      >
-                        Inclus dans votre plan
-                      </div>
-                    )}
+                    {(() => {
+                      // Current plan → link to account
+                      if (isCurrentPlan) {
+                        return (
+                          <Link
+                            href="/compte"
+                            className={`block w-full py-3 rounded-lg text-[14px] text-center ${
+                              isPopular
+                                ? 'bg-white/10 text-white/60 hover:bg-white/20'
+                                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                            } transition-colors`}
+                          >
+                            Plan actuel &mdash; Gérer
+                          </Link>
+                        );
+                      }
+
+                      // Lower plan than current → "Inclus dans votre plan"
+                      const planRank = { lecteur: 0, standard: 1, pro: 2 };
+                      const currentRank = planRank[currentPlanId as keyof typeof planRank] ?? 0;
+                      const thisPlanRank = planRank[plan.id as keyof typeof planRank] ?? 0;
+                      if (isSignedIn && thisPlanRank < currentRank) {
+                        return (
+                          <div
+                            className={`w-full py-3 rounded-lg text-[14px] text-center ${
+                              isPopular ? 'bg-white/10 text-white/40' : 'bg-gray-50 text-gray-400'
+                            }`}
+                          >
+                            Inclus dans votre plan
+                          </div>
+                        );
+                      }
+
+                      // Higher plan → upgrade button
+                      if (isSignedIn && plan.tier) {
+                        const upgradeLabel = plan.id === 'pro' ? 'Passer au Pro' : 'Choisir Standard';
+                        return (
+                          <button
+                            onClick={() => handleSubscribe(plan.tier!)}
+                            disabled={loadingPlan !== null}
+                            className={`w-full py-3 rounded-lg text-[14px] transition-colors flex items-center justify-center gap-2 ${
+                              isPopular
+                                ? 'bg-white text-black hover:bg-white/90'
+                                : isPro
+                                ? 'bg-[#111] text-white hover:bg-[#333]'
+                                : 'border border-black/[0.1] hover:bg-black/5'
+                            }`}
+                          >
+                            {loadingPlan === plan.tier ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              upgradeLabel
+                            )}
+                          </button>
+                        );
+                      }
+
+                      // Not signed in
+                      return (
+                        <Link
+                          href={plan.tier ? '/connexion' : '/inscription'}
+                          className={`block w-full py-3 rounded-lg text-[14px] transition-colors text-center ${
+                            isPopular
+                              ? 'bg-white text-black hover:bg-white/90'
+                              : isPro
+                              ? 'bg-[#111] text-white hover:bg-[#333]'
+                              : 'border border-black/[0.1] hover:bg-black/5'
+                          }`}
+                        >
+                          {plan.tier ? 'Choisir ce plan' : 'Commencer gratuitement'}
+                        </Link>
+                      );
+                    })()}
                   </div>
                 </div>
               );

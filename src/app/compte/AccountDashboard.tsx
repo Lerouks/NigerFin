@@ -539,29 +539,7 @@ export function AccountDashboard() {
             <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
               <h3 className="text-lg font-semibold mb-5">Actions</h3>
               <div className="space-y-4">
-                {/* Change plan */}
-                {isSubscribed && (
-                  <div className="flex items-center justify-between p-4 rounded-xl border border-black/[0.04]">
-                    <div>
-                      <p className="text-sm font-medium">Modifier mon abonnement</p>
-                      <p className="text-[12px] text-gray-500 mt-0.5">
-                        {userRole === 'standard'
-                          ? 'Passez au plan Pro pour plus d\'avantages'
-                          : userRole === 'pro'
-                          ? 'Changez de cycle ou passez au plan Standard'
-                          : 'Voir les plans disponibles'}
-                      </p>
-                    </div>
-                    <Link
-                      href="/pricing"
-                      className="inline-flex items-center gap-2 bg-[#111] text-white px-5 py-2.5 rounded-xl text-[13px] hover:bg-[#333] transition-colors flex-shrink-0"
-                    >
-                      Changer de plan <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                )}
-
-                {/* Subscribe (for free users) */}
+                {/* Free user → subscribe */}
                 {!isSubscribed && (
                   <div className="flex items-center justify-between p-4 rounded-xl border border-black/[0.04]">
                     <div>
@@ -576,6 +554,39 @@ export function AccountDashboard() {
                     >
                       Voir les plans <ArrowRight className="w-4 h-4" />
                     </Link>
+                  </div>
+                )}
+
+                {/* Standard user → upgrade to Pro */}
+                {userRole === 'standard' && (
+                  <div className="flex items-center justify-between p-4 rounded-xl border border-black/[0.04]">
+                    <div>
+                      <p className="text-sm font-medium">Passer au Pro</p>
+                      <p className="text-[12px] text-gray-500 mt-0.5">
+                        Débloquez les rapports PDF, alertes personnalisées et archives complètes
+                      </p>
+                    </div>
+                    <Link
+                      href="/pricing"
+                      className="inline-flex items-center gap-2 bg-[#111] text-white px-5 py-2.5 rounded-xl text-[13px] hover:bg-[#333] transition-colors flex-shrink-0"
+                    >
+                      Passer au Pro <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                )}
+
+                {/* Pro user → already at max */}
+                {userRole === 'pro' && (
+                  <div className="flex items-center justify-between p-4 rounded-xl border border-emerald-100 bg-emerald-50/50">
+                    <div>
+                      <p className="text-sm font-medium text-emerald-800">Plan Pro actif</p>
+                      <p className="text-[12px] text-emerald-600/70 mt-0.5">
+                        Vous bénéficiez de l&apos;accès complet à tous les contenus et fonctionnalités
+                      </p>
+                    </div>
+                    <span className="text-[12px] text-emerald-600 bg-emerald-100 px-3 py-1.5 rounded-lg font-medium flex-shrink-0">
+                      Plan maximum
+                    </span>
                   </div>
                 )}
 

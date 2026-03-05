@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
   const { data, error, count } = await serviceClient
     .from('audit_log')
-    .select('*, user_profiles!audit_log_admin_id_fkey(email, full_name)', { count: 'exact' })
+    .select('*, user_profiles!audit_log_admin_profile_fkey(email, full_name)', { count: 'exact' })
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1);
 

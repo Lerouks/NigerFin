@@ -39,6 +39,8 @@ export interface MarketData {
   unit?: string;
   source?: string;
   updatedAt?: string;
+  description?: string;
+  educationLink?: string;
 }
 
 export interface NavigationSection {

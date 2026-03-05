@@ -25,6 +25,9 @@ import {
   ChevronRight,
   Settings,
   LogOut,
+  AlertTriangle,
+  RefreshCw,
+  XCircle,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { getRoleLabel } from '@/lib/user-profile';
@@ -68,7 +71,10 @@ export function AccountDashboard() {
     reports_pdf: false,
   });
   const [savingPrefs, setSavingPrefs] = useState(false);
-  const [portalLoading, setPortalLoading] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [reactivateLoading, setReactivateLoading] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [subActionMsg, setSubActionMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
     if (!isLoading && !isSignedIn) {
@@ -96,14 +102,42 @@ export function AccountDashboard() {
     if (isSignedIn) fetchSummary();
   }, [isSignedIn, fetchSummary]);
 
-  const handleManageSubscription = async () => {
-    setPortalLoading(true);
+  const handleCancelSubscription = async () => {
+    setCancelLoading(true);
+    setSubActionMsg(null);
     try {
-      const res = await fetch('/api/stripe/portal', { method: 'POST' });
+      const res = await fetch('/api/user/subscription', { method: 'DELETE' });
       const data = await res.json();
-      if (data.url) window.location.href = data.url;
-    } catch {} finally {
-      setPortalLoading(false);
+      if (res.ok) {
+        setSubActionMsg({ type: 'success', text: data.message || 'Abonnement annule.' });
+        setShowCancelConfirm(false);
+        fetchSummary();
+      } else {
+        setSubActionMsg({ type: 'error', text: data.error || 'Erreur lors de l\'annulation.' });
+      }
+    } catch {
+      setSubActionMsg({ type: 'error', text: 'Erreur reseau. Veuillez reessayer.' });
+    } finally {
+      setCancelLoading(false);
+    }
+  };
+
+  const handleReactivateSubscription = async () => {
+    setReactivateLoading(true);
+    setSubActionMsg(null);
+    try {
+      const res = await fetch('/api/user/subscription', { method: 'PATCH' });
+      const data = await res.json();
+      if (res.ok) {
+        setSubActionMsg({ type: 'success', text: data.message || 'Abonnement reactive.' });
+        fetchSummary();
+      } else {
+        setSubActionMsg({ type: 'error', text: data.error || 'Erreur lors de la reactivation.' });
+      }
+    } catch {
+      setSubActionMsg({ type: 'error', text: 'Erreur reseau. Veuillez reessayer.' });
+    } finally {
+      setReactivateLoading(false);
     }
   };
 
@@ -389,65 +423,268 @@ export function AccountDashboard() {
         {/* ─── SUBSCRIPTION TAB ─── */}
         {activeTab === 'subscription' && (
           <div className="space-y-6">
+            {/* Action feedback message */}
+            {subActionMsg && (
+              <div className={`rounded-xl px-5 py-4 text-sm flex items-start gap-3 ${
+                subActionMsg.type === 'success'
+                  ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
+                  : 'bg-red-50 border border-red-200 text-red-800'
+              }`}>
+                {subActionMsg.type === 'success' ? <Check className="w-4 h-4 mt-0.5 flex-shrink-0" /> : <XCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />}
+                <span>{subActionMsg.text}</span>
+              </div>
+            )}
+
+            {/* ── Subscription details ── */}
             <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
-              <h3 className="text-lg font-semibold mb-5">Détails de l&apos;abonnement</h3>
-              <div className="space-y-3">
-                <InfoRow label="Plan" value={getRoleLabel(userRole || 'reader')} />
-                <InfoRow
-                  label="Statut"
-                  value={profile?.subscription_status === 'active' ? 'Actif' : 'Inactif'}
-                  valueColor={profile?.subscription_status === 'active' ? 'text-emerald-600' : 'text-gray-400'}
-                />
-                {profile?.billing_cycle && (
-                  <InfoRow label="Cycle" value={cycleLabel(profile.billing_cycle as 'monthly' | 'quarterly' | 'yearly')} />
-                )}
-                {sub?.price_amount && (
-                  <InfoRow label="Montant" value={`${sub.price_amount.toLocaleString('fr-FR')} FCFA`} />
-                )}
-                {periodEnd && (
-                  <InfoRow label="Prochain renouvellement" value={periodEnd} />
-                )}
-                <InfoRow label="Membre depuis" value={memberSince} />
+              <h3 className="text-lg font-semibold mb-5">Details de l&apos;abonnement</h3>
+
+              {/* Infos utilisateur */}
+              <div className="mb-6 p-4 bg-[#fafaf9] rounded-xl">
+                <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-3">Informations du compte</p>
+                <div className="space-y-2">
+                  <InfoRow label="Email" value={user?.email || '—'} />
+                  {profile?.full_name && <InfoRow label="Nom" value={profile.full_name} />}
+                  <InfoRow label="Membre depuis" value={memberSince} />
+                  <InfoRow
+                    label="Statut du compte"
+                    value={isSignedIn ? 'Actif' : 'Inactif'}
+                    valueColor={isSignedIn ? 'text-emerald-600' : 'text-gray-400'}
+                  />
+                </div>
               </div>
 
-              <div className="mt-6 flex flex-wrap gap-3">
-                {isSubscribed && (
-                  <button
-                    onClick={handleManageSubscription}
-                    disabled={portalLoading}
-                    className="flex items-center gap-2 bg-[#111] text-white px-6 py-2.5 rounded-xl text-[13px] hover:bg-[#333] transition-colors"
-                  >
-                    {portalLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ExternalLink className="w-4 h-4" />}
-                    Gérer mon abonnement
-                  </button>
+              {/* Infos abonnement */}
+              <div className="space-y-3">
+                <InfoRow label="Plan actuel" value={
+                  userRole === 'pro' ? 'Pro' :
+                  userRole === 'standard' ? 'Populaire (Standard)' :
+                  userRole === 'admin' ? 'Administrateur' : 'Lecteur (gratuit)'
+                } />
+                <InfoRow
+                  label="Statut abonnement"
+                  value={
+                    sub?.cancel_at_period_end ? 'Annulation programmee'
+                    : sub?.status === 'active' ? 'Actif'
+                    : profile?.subscription_status === 'active' ? 'Actif'
+                    : 'Inactif'
+                  }
+                  valueColor={
+                    sub?.cancel_at_period_end ? 'text-amber-600'
+                    : (sub?.status === 'active' || profile?.subscription_status === 'active') ? 'text-emerald-600'
+                    : 'text-gray-400'
+                  }
+                />
+                {profile?.billing_cycle && (
+                  <InfoRow label="Cycle de facturation" value={cycleLabel(profile.billing_cycle as 'monthly' | 'quarterly' | 'yearly')} />
                 )}
+                {sub?.price_amount != null && sub.price_amount > 0 && (
+                  <InfoRow label="Montant" value={`${sub.price_amount.toLocaleString('fr-FR')} FCFA`} />
+                )}
+                {sub?.current_period_start && (
+                  <InfoRow label="Debut de la periode" value={
+                    new Date(sub.current_period_start).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+                  } />
+                )}
+                {periodEnd && (
+                  <InfoRow label={sub?.cancel_at_period_end ? 'Fin d\'acces' : 'Prochain renouvellement'} value={periodEnd} />
+                )}
+              </div>
+
+              {/* Cancellation warning */}
+              {sub?.cancel_at_period_end && (
+                <div className="mt-5 bg-amber-50 border border-amber-200 rounded-xl px-5 py-4 flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-amber-800">Annulation programmee</p>
+                    <p className="text-[13px] text-amber-700 mt-1">
+                      Votre abonnement ne sera pas renouvele. Vous conservez l&apos;acces jusqu&apos;au {periodEnd}.
+                    </p>
+                    <button
+                      onClick={handleReactivateSubscription}
+                      disabled={reactivateLoading}
+                      className="mt-3 inline-flex items-center gap-2 bg-amber-600 text-white px-4 py-2 rounded-lg text-[13px] hover:bg-amber-700 transition-colors"
+                    >
+                      {reactivateLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                      Reactiver mon abonnement
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Expired subscription */}
+              {!isSubscribed && summary?.recentPayments && summary.recentPayments.length > 0 && (
+                <div className="mt-5 bg-gray-50 border border-gray-200 rounded-xl px-5 py-4 flex items-start gap-3">
+                  <Clock className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">Abonnement expire</p>
+                    <p className="text-[13px] text-gray-500 mt-1">
+                      Votre abonnement precedent a expire. Renouvelez-le pour retrouver l&apos;acces a tous les contenus.
+                    </p>
+                    <Link
+                      href="/pricing"
+                      className="mt-3 inline-flex items-center gap-2 bg-[#111] text-white px-4 py-2 rounded-lg text-[13px] hover:bg-[#333] transition-colors"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                      Renouveler mon abonnement
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* ── Actions: Modify / Cancel ── */}
+            <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
+              <h3 className="text-lg font-semibold mb-5">Actions</h3>
+              <div className="space-y-4">
+                {/* Change plan */}
+                {isSubscribed && (
+                  <div className="flex items-center justify-between p-4 rounded-xl border border-black/[0.04]">
+                    <div>
+                      <p className="text-sm font-medium">Modifier mon abonnement</p>
+                      <p className="text-[12px] text-gray-500 mt-0.5">
+                        {userRole === 'standard'
+                          ? 'Passez au plan Pro pour plus d\'avantages'
+                          : userRole === 'pro'
+                          ? 'Changez de cycle ou passez au plan Standard'
+                          : 'Voir les plans disponibles'}
+                      </p>
+                    </div>
+                    <Link
+                      href="/pricing"
+                      className="inline-flex items-center gap-2 bg-[#111] text-white px-5 py-2.5 rounded-xl text-[13px] hover:bg-[#333] transition-colors flex-shrink-0"
+                    >
+                      Changer de plan <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                )}
+
+                {/* Subscribe (for free users) */}
                 {!isSubscribed && (
-                  <Link
-                    href="/pricing"
-                    className="inline-flex items-center gap-2 bg-[#111] text-white px-6 py-2.5 rounded-xl text-[13px] hover:bg-[#333] transition-colors"
-                  >
-                    S&apos;abonner <ArrowRight className="w-4 h-4" />
-                  </Link>
+                  <div className="flex items-center justify-between p-4 rounded-xl border border-black/[0.04]">
+                    <div>
+                      <p className="text-sm font-medium">S&apos;abonner</p>
+                      <p className="text-[12px] text-gray-500 mt-0.5">
+                        Accedez a tous les articles et outils premium
+                      </p>
+                    </div>
+                    <Link
+                      href="/pricing"
+                      className="inline-flex items-center gap-2 bg-[#111] text-white px-5 py-2.5 rounded-xl text-[13px] hover:bg-[#333] transition-colors flex-shrink-0"
+                    >
+                      Voir les plans <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                )}
+
+                {/* Cancel */}
+                {isSubscribed && !sub?.cancel_at_period_end && userRole !== 'admin' && (
+                  <div className="flex items-center justify-between p-4 rounded-xl border border-red-100 bg-red-50/50">
+                    <div>
+                      <p className="text-sm font-medium text-red-800">Resilier mon abonnement</p>
+                      <p className="text-[12px] text-red-600/70 mt-0.5">
+                        Vous conserverez l&apos;acces jusqu&apos;a la fin de la periode en cours
+                      </p>
+                    </div>
+                    {!showCancelConfirm ? (
+                      <button
+                        onClick={() => setShowCancelConfirm(true)}
+                        className="inline-flex items-center gap-2 border border-red-300 text-red-700 px-5 py-2.5 rounded-xl text-[13px] hover:bg-red-100 transition-colors flex-shrink-0"
+                      >
+                        Resilier
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <button
+                          onClick={() => setShowCancelConfirm(false)}
+                          className="px-4 py-2.5 rounded-xl text-[13px] text-gray-500 hover:bg-gray-100 transition-colors"
+                        >
+                          Annuler
+                        </button>
+                        <button
+                          onClick={handleCancelSubscription}
+                          disabled={cancelLoading}
+                          className="inline-flex items-center gap-2 bg-red-600 text-white px-5 py-2.5 rounded-xl text-[13px] hover:bg-red-700 transition-colors"
+                        >
+                          {cancelLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+                          Confirmer la resiliation
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
 
-            {/* Upgrade section for standard users */}
+            {/* ── Upgrade section for standard users ── */}
             {userRole === 'standard' && (
               <div className="bg-gradient-to-r from-purple-50 to-purple-100/50 rounded-2xl border border-purple-200/50 p-6">
                 <div className="flex items-center gap-2 mb-2">
                   <Crown className="w-5 h-5 text-purple-500" />
-                  <h3 className="font-semibold text-[15px]">Passez à Pro</h3>
+                  <h3 className="font-semibold text-[15px]">Passez a Pro</h3>
                 </div>
                 <p className="text-sm text-gray-600 mb-4">
-                  Accédez aux rapports PDF, alertes personnalisées, archives complètes et support prioritaire.
+                  Accedez aux rapports PDF, alertes personnalisees, archives completes et support prioritaire.
                 </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mb-5">
+                  {TIERS.pro.features.map((f) => (
+                    <div key={f} className="flex items-start gap-2 p-2">
+                      <Check className="w-4 h-4 text-purple-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-[12px] text-gray-600">{f}</span>
+                    </div>
+                  ))}
+                </div>
                 <Link
                   href="/pricing"
                   className="inline-flex items-center gap-2 bg-purple-600 text-white px-5 py-2.5 rounded-xl text-[13px] hover:bg-purple-700 transition-colors"
                 >
-                  Découvrir Pro <ArrowRight className="w-4 h-4" />
+                  Decouvrir Pro <ArrowRight className="w-4 h-4" />
                 </Link>
+              </div>
+            )}
+
+            {/* ── Payment history ── */}
+            {summary?.recentPayments && summary.recentPayments.length > 0 && (
+              <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Clock className="w-4 h-4 text-gray-400" />
+                  <h3 className="font-semibold text-[15px]">Historique des paiements</h3>
+                </div>
+                <ul className="space-y-2">
+                  {summary.recentPayments.map((payment) => (
+                    <li key={payment.id} className="flex items-center justify-between py-3 px-4 border border-black/[0.03] rounded-lg">
+                      <div>
+                        <p className="text-sm font-medium capitalize">{payment.tier} — {cycleLabel(payment.billing_cycle as 'monthly' | 'quarterly' | 'yearly')}</p>
+                        <p className="text-[11px] text-gray-400">
+                          {new Date(payment.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium">{payment.amount.toLocaleString('fr-FR')} FCFA</p>
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full ${
+                          payment.status === 'verified' ? 'bg-emerald-50 text-emerald-600' :
+                          payment.status === 'pending' ? 'bg-amber-50 text-amber-600' :
+                          'bg-red-50 text-red-600'
+                        }`}>
+                          {payment.status === 'verified' ? 'Verifie' : payment.status === 'pending' ? 'En attente' : 'Rejete'}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Pending payment notice */}
+            {summary?.recentPayments?.some(p => p.status === 'pending') && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl px-5 py-4 flex items-start gap-3">
+                <Clock className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-amber-800">Paiement en attente de verification</p>
+                  <p className="text-[13px] text-amber-700 mt-1">
+                    Votre paiement sera verifie sous 24h. Votre abonnement sera active des la verification.
+                  </p>
+                </div>
               </div>
             )}
           </div>

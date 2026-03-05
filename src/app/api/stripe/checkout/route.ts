@@ -2,9 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
+function getStripe() {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) throw new Error('STRIPE_SECRET_KEY not configured');
+  return new Stripe(key);
+}
 
 export async function POST(request: NextRequest) {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return NextResponse.json({ error: 'Stripe not configured' }, { status: 503 });
+  }
+
   const supabase = await createServerSupabaseClient();
   if (!supabase) {
     return NextResponse.json({ error: 'Supabase not configured' }, { status: 503 });
@@ -28,6 +36,8 @@ export async function POST(request: NextRequest) {
     .single();
 
   let customerId = profile?.stripe_customer_id;
+
+  const stripe = getStripe();
 
   if (!customerId) {
     const customer = await stripe.customers.create({

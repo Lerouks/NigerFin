@@ -2,9 +2,17 @@ import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
+function getStripe() {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) throw new Error('STRIPE_SECRET_KEY not configured');
+  return new Stripe(key);
+}
 
 export async function POST() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return NextResponse.json({ error: 'Stripe not configured' }, { status: 503 });
+  }
+
   const supabase = await createServerSupabaseClient();
   if (!supabase) {
     return NextResponse.json({ error: 'Supabase not configured' }, { status: 503 });
@@ -27,6 +35,7 @@ export async function POST() {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://nfireport.com';
 
+  const stripe = getStripe();
   const session = await stripe.billingPortal.sessions.create({
     customer: profile.stripe_customer_id,
     return_url: `${siteUrl}/compte`,

@@ -1,36 +1,60 @@
-import { createClient } from '@sanity/client';
+import { createClient, type SanityClient } from '@sanity/client';
 import imageUrlBuilder from '@sanity/image-url';
 import type { Article } from '@/types';
 
-export const sanityClient = createClient({
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || '',
-  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
-  apiVersion: '2024-01-01',
-  useCdn: true,
-});
+// Check if Sanity is configured
+export const isSanityConfigured = !!(process.env.NEXT_PUBLIC_SANITY_PROJECT_ID);
 
-// Preview client (no CDN, with token for draft content)
-export const previewClient = createClient({
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || '',
-  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
-  apiVersion: '2024-01-01',
-  useCdn: false,
-  token: process.env.SANITY_API_TOKEN,
+// Lazy-initialize clients to avoid validation errors when env vars are missing
+let _sanityClient: SanityClient | null = null;
+let _previewClient: SanityClient | null = null;
+
+function getSanityClient(): SanityClient | null {
+  if (!isSanityConfigured) return null;
+  if (!_sanityClient) {
+    _sanityClient = createClient({
+      projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
+      dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
+      apiVersion: '2024-01-01',
+      useCdn: true,
+    });
+  }
+  return _sanityClient;
+}
+
+function getPreviewClient(): SanityClient | null {
+  if (!isSanityConfigured) return null;
+  if (!_previewClient) {
+    _previewClient = createClient({
+      projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
+      dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
+      apiVersion: '2024-01-01',
+      useCdn: false,
+      token: process.env.SANITY_API_TOKEN,
+    });
+  }
+  return _previewClient;
+}
+
+// Backwards-compatible export
+export const sanityClient = new Proxy({} as SanityClient, {
+  get(_target, prop) {
+    const client = getSanityClient();
+    if (!client) throw new Error('Sanity is not configured');
+    return (client as any)[prop];
+  },
 });
 
 export function getClient(preview = false) {
-  return preview ? previewClient : sanityClient;
+  return preview ? (getPreviewClient() || sanityClient) : sanityClient;
 }
-
-const builder = imageUrlBuilder(sanityClient);
 
 export function urlFor(source: any) {
   if (!source) return null;
-  return builder.image(source);
+  const client = getSanityClient();
+  if (!client) return null;
+  return imageUrlBuilder(client).image(source);
 }
-
-// Check if Sanity is configured
-export const isSanityConfigured = !!(process.env.NEXT_PUBLIC_SANITY_PROJECT_ID);
 
 // ─── Article GROQ Queries ───────────────────────────────────────────────────
 

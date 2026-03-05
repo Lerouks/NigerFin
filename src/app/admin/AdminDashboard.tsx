@@ -10,6 +10,7 @@ import {
 import { useAuth } from '@/lib/auth-context';
 import { formatPrice, cycleLabel, TIERS, CURRENCY, type BillingCycle, type TierId } from '@/config/pricing';
 import { ArticlesManager } from './ArticlesManager';
+import { CategoriesManager } from './CategoriesManager';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -80,7 +81,7 @@ interface DynamicPrice {
   updated_at: string;
 }
 
-type TabId = 'overview' | 'articles' | 'users' | 'payments' | 'pricing' | 'audit';
+type TabId = 'overview' | 'articles' | 'categories' | 'users' | 'payments' | 'pricing' | 'audit';
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -269,6 +270,7 @@ export function AdminDashboard() {
   const tabs: { id: TabId; label: string; icon: typeof BarChart3; badge?: number }[] = [
     { id: 'overview', label: 'Vue d\'ensemble', icon: BarChart3 },
     { id: 'articles', label: 'Articles', icon: Newspaper },
+    { id: 'categories', label: 'Catégories', icon: FileText },
     { id: 'users', label: 'Utilisateurs', icon: Users },
     { id: 'payments', label: 'Paiements', icon: CreditCard, badge: stats.pendingPayments },
     { id: 'pricing', label: 'Tarifs', icon: DollarSign },
@@ -437,6 +439,9 @@ export function AdminDashboard() {
 
         {/* ─── ARTICLES TAB ──────────────────────────────────────── */}
         {activeTab === 'articles' && <ArticlesManager />}
+
+        {/* ─── CATEGORIES TAB ──────────────────────────────────── */}
+        {activeTab === 'categories' && <CategoriesManager />}
 
         {/* ─── USERS TAB ──────────────────────────────────────────── */}
         {activeTab === 'users' && (

@@ -54,10 +54,15 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
 }
 
 export async function generateStaticParams() {
-  const sanitySlugs = await getAllArticleSlugs();
-  const mockSlugs = mockArticles.map((a) => a.slug.current);
-  const allSlugs = Array.from(new Set([...sanitySlugs, ...mockSlugs]));
-  return allSlugs.map((slug) => ({ slug }));
+  try {
+    const sanitySlugs = await getAllArticleSlugs();
+    const mockSlugs = mockArticles.map((a) => a.slug.current);
+    const allSlugs = Array.from(new Set([...sanitySlugs, ...mockSlugs]));
+    return allSlugs.map((slug) => ({ slug }));
+  } catch {
+    // Fallback to mock slugs if Sanity is unavailable during build
+    return mockArticles.map((a) => ({ slug: a.slug.current }));
+  }
 }
 
 export default async function ArticlePage({ params }: ArticlePageProps) {

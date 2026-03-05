@@ -57,7 +57,7 @@ interface AccountSummary {
 }
 
 export function AccountDashboard() {
-  const { isSignedIn, isLoading, user, profile, userRole, premiumArticlesUsed, signOut } = useAuth();
+  const { isSignedIn, isLoading, user, profile, userRole, premiumArticlesUsed, signOut, refreshProfile } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'overview' | 'subscription' | 'newsletter' | 'alerts'>('overview');
   const [summary, setSummary] = useState<AccountSummary | null>(null);
@@ -85,6 +85,8 @@ export function AccountDashboard() {
   const fetchSummary = useCallback(async () => {
     setSummaryLoading(true);
     try {
+      // Refresh profile from server to get the latest role (e.g. after admin upgrade)
+      await refreshProfile();
       const [summaryRes, likesRes, prefsRes] = await Promise.all([
         fetch('/api/user/account-summary'),
         fetch('/api/user/liked-articles'),
@@ -96,7 +98,7 @@ export function AccountDashboard() {
     } catch {} finally {
       setSummaryLoading(false);
     }
-  }, []);
+  }, [refreshProfile]);
 
   useEffect(() => {
     if (isSignedIn) fetchSummary();

@@ -39,7 +39,10 @@ const plans = [
 ];
 
 export function PricingContent() {
-  const { isSignedIn, userRole } = useAuth();
+  const { isSignedIn, userRole, refreshProfile } = useAuth();
+
+  // Refresh profile on mount to ensure the latest role is shown
+  useEffect(() => { refreshProfile(); }, [refreshProfile]);
   const isSubscribed = userRole === 'standard' || userRole === 'pro' || userRole === 'admin';
   const isMaxPlan = userRole === 'pro' || userRole === 'admin';
 

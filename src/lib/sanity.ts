@@ -14,7 +14,7 @@ function getSanityClient(): SanityClient | null {
   if (!isSanityConfigured) return null;
   if (!_sanityClient) {
     _sanityClient = createClient({
-      projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
+      projectId: sanityProjectId,
       dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
       apiVersion: '2024-01-01',
       useCdn: true,
@@ -27,7 +27,7 @@ function getPreviewClient(): SanityClient | null {
   if (!isSanityConfigured) return null;
   if (!_previewClient) {
     _previewClient = createClient({
-      projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
+      projectId: sanityProjectId,
       dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
       apiVersion: '2024-01-01',
       useCdn: false,

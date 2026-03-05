@@ -41,6 +41,13 @@ const plans = [
 export function PricingContent() {
   const { isSignedIn, userRole } = useAuth();
   const isSubscribed = userRole === 'standard' || userRole === 'pro' || userRole === 'admin';
+  const isMaxPlan = userRole === 'pro' || userRole === 'admin';
+
+  // Filter: standard users see only pro upgrade, others see all
+  const visiblePlans = userRole === 'standard'
+    ? plans.filter((p) => p.id === 'standard' || p.id === 'pro')
+    : plans;
+
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [dynamicPrices, setDynamicPrices] = useState<Record<string, number>>({});
@@ -120,7 +127,9 @@ export function PricingContent() {
             {isSubscribed ? 'Votre abonnement' : 'Choisissez votre plan'}
           </h1>
           <p className="text-[17px] text-white/50 max-w-2xl mx-auto leading-relaxed">
-            {isSubscribed
+            {isMaxPlan
+              ? 'Vous bénéficiez déjà de l\'accès complet. Gérez votre abonnement depuis votre compte.'
+              : isSubscribed
               ? 'Gérez votre abonnement ou découvrez nos autres plans.'
               : 'Accédez à l\'information économique et financière premium du Niger et de l\'Afrique de l\'Ouest.'}
           </p>
@@ -149,8 +158,8 @@ export function PricingContent() {
 
       <section className="py-20 md:py-28">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {plans.map((plan) => {
+          <div className={`grid grid-cols-1 gap-8 ${visiblePlans.length === 2 ? "md:grid-cols-2 max-w-4xl mx-auto" : "md:grid-cols-3"}`}>
+            {visiblePlans.map((plan) => {
               const isPopular = plan.id === 'standard';
               const isPro = plan.id === 'pro';
               const isCurrentPlan = userRole === plan.id || (!userRole && plan.id === 'lecteur');

@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
   const { serviceClient } = auth;
 
   const body = await request.json();
-  const { name, symbol, type, value, unit, source } = body;
+  const { name, symbol, type, value, unit, source, description, education_link } = body;
 
   if (!name || !symbol || !type) {
     return NextResponse.json({ error: 'Nom, symbole et type requis' }, { status: 400 });
@@ -50,6 +50,8 @@ export async function POST(request: NextRequest) {
       change_percent: 0,
       unit: unit || '',
       source: source || '',
+      description: description || '',
+      education_link: education_link || '',
     })
     .select()
     .single();

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, BookOpen, Clock, Lock, Crown, Loader2 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { useAuth } from '@/lib/auth-context';
 
 interface Category {
@@ -150,8 +151,8 @@ export function EducationCategoryContent({ slug }: { slug: string }) {
                 {/* Expanded content */}
                 {isOpen && accessible && lesson.content && (
                   <div className="mx-5 px-5 py-4 bg-[#fafaf9] border-x border-b border-black/[0.06] rounded-b-xl -mt-1">
-                    <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-line">
-                      {lesson.content}
+                    <div className="prose prose-sm max-w-none text-gray-700 prose-headings:text-gray-900 prose-h2:text-lg prose-h2:mt-0 prose-h3:text-base prose-strong:text-gray-800 prose-table:text-sm">
+                      <ReactMarkdown>{lesson.content}</ReactMarkdown>
                     </div>
                   </div>
                 )}

@@ -89,17 +89,16 @@ export function MarketDataWidget({ data: fallbackData }: MarketDataWidgetProps) 
           </div>
         ))}
       </div>
-      <div className="border-t border-black/[0.04] px-5 py-3 bg-[#fafaf9] rounded-b-xl">
-        {lastUpdated ? (
+      <div className="border-t border-black/[0.04] px-5 py-3 bg-[#fafaf9] rounded-b-xl space-y-0.5">
+        <p className="text-[10px] text-gray-400 text-center">
+          Variations par rapport à la dernière mise à jour
+        </p>
+        {lastUpdated && (
           <p className="text-[10px] text-gray-400 text-center">
             Dernière mise à jour : {new Date(lastUpdated).toLocaleString('fr-FR', {
               day: '2-digit', month: '2-digit', year: 'numeric',
               hour: '2-digit', minute: '2-digit',
             })}
-          </p>
-        ) : (
-          <p className="text-[11px] text-gray-400 text-center">
-            Données indicatives
           </p>
         )}
       </div>

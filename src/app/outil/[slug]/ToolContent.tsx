@@ -141,10 +141,11 @@ const toolIcons: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export function ToolContent({ slug, title, description, isPremium }: ToolContentProps) {
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, userRole } = useAuth();
   const ToolComponent = toolComponents[slug];
   const Icon = toolIcons[slug] || Calculator;
-  const needsGate = isPremium && !isSignedIn;
+  const canAccess = !isPremium || (isSignedIn && (userRole === 'standard' || userRole === 'pro' || userRole === 'admin'));
+  const needsGate = !canAccess;
 
   return (
     <div className="min-h-screen bg-[#fafaf9]">
@@ -170,10 +171,16 @@ export function ToolContent({ slug, title, description, isPremium }: ToolContent
             <div className="text-center py-20 bg-white border border-black/[0.06] rounded-xl">
               <Lock className="w-12 h-12 text-gray-300 mx-auto mb-4" />
               <h2 className="text-2xl font-bold mb-3">Outil Premium</h2>
-              <p className="text-gray-600 mb-8 max-w-md mx-auto">Connectez-vous et abonnez-vous pour accéder à cet outil professionnel.</p>
+              <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                {isSignedIn
+                  ? 'Débloquez les outils premium avec l\'abonnement Standard ou Pro.'
+                  : 'Connectez-vous et abonnez-vous pour accéder à cet outil professionnel.'}
+              </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Link href="/connexion" className="bg-[#111] text-white px-8 py-3 rounded-lg hover:bg-[#333] transition-colors text-[14px]">Se connecter</Link>
-                <Link href="/pricing" className="border border-black/[0.1] px-8 py-3 rounded-lg hover:bg-black/5 transition-colors text-[14px]">Voir les abonnements</Link>
+                {!isSignedIn && (
+                  <Link href="/connexion" className="bg-[#111] text-white px-8 py-3 rounded-lg hover:bg-[#333] transition-colors text-[14px]">Se connecter</Link>
+                )}
+                <Link href="/pricing" className="bg-[#111] text-white px-8 py-3 rounded-lg hover:bg-[#333] transition-colors text-[14px]">Voir les abonnements</Link>
               </div>
             </div>
           ) : ToolComponent ? <ToolComponent /> : null}

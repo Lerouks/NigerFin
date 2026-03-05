@@ -66,11 +66,11 @@ const EMPTY_FORM: ArticleForm = {
 };
 
 const CATEGORIES = [
-  { value: 'economie', label: 'Economie' },
+  { value: 'economie', label: 'Économie' },
   { value: 'finance', label: 'Finance' },
-  { value: 'marches', label: 'Marches' },
+  { value: 'marches', label: 'Marchés' },
   { value: 'entreprises', label: 'Entreprises' },
-  { value: 'education', label: 'Education' },
+  { value: 'education', label: 'Éducation' },
 ];
 
 const CONTENT_TYPES = [
@@ -181,7 +181,7 @@ export function ArticlesManager() {
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'Erreur'); setSaving(false); return; }
 
-      setSuccess(publishNow ? 'Article publie !' : 'Article sauvegarde !');
+      setSuccess(publishNow ? 'Article publié !' : 'Article sauvegardé !');
       setForm({ ...form, id: data.id, slug: data.slug, status: data.status, published_at: data.published_at || '' });
       fetchArticles();
     } catch (e: any) {
@@ -294,7 +294,7 @@ export function ArticlesManager() {
                 onChange={(e) => setForm((f) => ({ ...f, excerpt: e.target.value }))}
                 rows={2}
                 className="w-full px-4 py-2.5 border border-black/[0.08] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black bg-white resize-none"
-                placeholder="Court resume de l'article..."
+                placeholder="Court résumé de l'article..."
               />
             </div>
 
@@ -388,7 +388,7 @@ export function ArticlesManager() {
                   form.status === 'archived' ? 'bg-gray-400' :
                   'bg-amber-500'
                 }`} />
-                {form.status === 'published' ? 'Publie' : form.status === 'archived' ? 'Archive' : 'Brouillon'}
+                {form.status === 'published' ? 'Publié' : form.status === 'archived' ? 'Archivé' : 'Brouillon'}
               </div>
               {form.id && form.status === 'published' && (
                 <a href={`/articles/${form.slug}`} target="_blank" rel="noopener noreferrer"
@@ -410,7 +410,7 @@ export function ArticlesManager() {
 
             {/* Category */}
             <div className="bg-white border border-black/[0.06] rounded-xl p-4">
-              <label className="text-[11px] uppercase tracking-wider text-gray-400 block mb-1.5">Categorie</label>
+              <label className="text-[11px] uppercase tracking-wider text-gray-400 block mb-1.5">Catégorie</label>
               <select value={form.category}
                 onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
                 className="w-full px-3 py-2 border border-black/[0.08] rounded-lg text-sm focus:outline-none bg-white">
@@ -420,7 +420,7 @@ export function ArticlesManager() {
 
             {/* Content type */}
             <div className="bg-white border border-black/[0.06] rounded-xl p-4">
-              <label className="text-[11px] uppercase tracking-wider text-gray-400 block mb-2">Niveau d&apos;acces</label>
+              <label className="text-[11px] uppercase tracking-wider text-gray-400 block mb-2">Niveau d&apos;accès</label>
               <div className="space-y-1.5">
                 {CONTENT_TYPES.map((ct) => (
                   <label key={ct.value} className={`flex items-center gap-2.5 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
@@ -557,7 +557,7 @@ export function ArticlesManager() {
           <p className="text-gray-400 mb-4">Aucun article</p>
           <button onClick={handleNew}
             className="px-4 py-2 bg-[#111] text-white rounded-lg text-sm hover:bg-[#333]">
-            Creer le premier article
+            Créer le premier article
           </button>
         </div>
       ) : (
@@ -566,9 +566,9 @@ export function ArticlesManager() {
             <thead>
               <tr className="border-b border-black/[0.04]">
                 <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Article</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Categorie</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Catégorie</th>
                 <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Statut</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Acces</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Accès</th>
                 <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Date</th>
                 <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Actions</th>
               </tr>
@@ -602,7 +602,7 @@ export function ArticlesManager() {
                       a.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
                     }`}>
                       <div className={`w-1.5 h-1.5 rounded-full ${a.status === 'published' ? 'bg-green-500' : 'bg-amber-500'}`} />
-                      {a.status === 'published' ? 'Publie' : 'Brouillon'}
+                      {a.status === 'published' ? 'Publié' : 'Brouillon'}
                     </span>
                   </td>
                   <td className="px-4 py-3">

@@ -21,7 +21,7 @@ interface MarketEntry {
 
 const TYPES = [
   { value: 'currency', label: 'Devise' },
-  { value: 'commodity', label: 'Matiere premiere' },
+  { value: 'commodity', label: 'Matière première' },
   { value: 'index', label: 'Indice' },
 ];
 
@@ -163,7 +163,7 @@ export function MarketDataManager() {
       {/* Create form */}
       {showCreate && (
         <div className="bg-white rounded-xl border border-black/[0.06] p-6">
-          <h3 className="text-sm font-semibold mb-4">Nouvelle donnee de marche</h3>
+          <h3 className="text-sm font-semibold mb-4">Nouvelle donnée de marché</h3>
           <MarketForm
             form={form}
             setForm={setForm}
@@ -189,7 +189,7 @@ export function MarketDataManager() {
                 <th className="text-right text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Valeur</th>
                 <th className="text-right text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Variation</th>
                 <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Source</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Mis a jour</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Mis à jour</th>
                 <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Actions</th>
               </tr>
             </thead>
@@ -288,7 +288,7 @@ export function MarketDataManager() {
             </tbody>
           </table>
           {filtered.length === 0 && (
-            <p className="text-center py-8 text-sm text-gray-400">Aucune donnee de marche</p>
+            <p className="text-center py-8 text-sm text-gray-400">Aucune donnée de marché</p>
           )}
         </div>
       )}
@@ -375,7 +375,7 @@ function MarketForm({ form, setForm, onSave, onCancel, saving }: {
           />
         </div>
         <div>
-          <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Unite</label>
+          <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Unité</label>
           <input
             type="text"
             value={form.unit}

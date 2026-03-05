@@ -14,18 +14,19 @@ export function NewsletterForm() {
 
     setLoading(true);
     try {
-      await fetch('/api/newsletter', {
+      const res = await fetch('/api/newsletter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
+      if (!res.ok) throw new Error();
       setSubscribed(true);
       setTimeout(() => {
         setEmail('');
         setSubscribed(false);
       }, 3000);
     } catch {
-      // Silently handle error
+      setEmail('');
     } finally {
       setLoading(false);
     }

@@ -34,6 +34,13 @@ export function MarketDataWidget({ data: fallbackData }: MarketDataWidgetProps) 
     return acc;
   }, {} as Record<string, MarketData[]>);
 
+  // Find the most recent updatedAt across all items
+  const lastUpdated = data.reduce((latest, item) => {
+    if (!item.updatedAt) return latest;
+    if (!latest) return item.updatedAt;
+    return item.updatedAt > latest ? item.updatedAt : latest;
+  }, null as string | null);
+
   return (
     <div className="bg-white rounded-xl border border-black/[0.06] sticky top-36 overflow-hidden">
       <div className="border-b border-black/[0.05] px-5 py-4">
@@ -58,6 +65,9 @@ export function MarketDataWidget({ data: fallbackData }: MarketDataWidgetProps) 
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
                       })}
+                      {item.unit && (
+                        <span className="text-[10px] text-gray-400 ml-0.5">{item.unit}</span>
+                      )}
                     </div>
                     <div
                       className={`text-[11px] flex items-center justify-end gap-0.5 ${
@@ -80,9 +90,18 @@ export function MarketDataWidget({ data: fallbackData }: MarketDataWidgetProps) 
         ))}
       </div>
       <div className="border-t border-black/[0.04] px-5 py-3 bg-[#fafaf9] rounded-b-xl">
-        <p className="text-[11px] text-gray-400 text-center">
-          Données indicatives
-        </p>
+        {lastUpdated ? (
+          <p className="text-[10px] text-gray-400 text-center">
+            Dernière mise à jour : {new Date(lastUpdated).toLocaleString('fr-FR', {
+              day: '2-digit', month: '2-digit', year: 'numeric',
+              hour: '2-digit', minute: '2-digit',
+            })}
+          </p>
+        ) : (
+          <p className="text-[11px] text-gray-400 text-center">
+            Données indicatives
+          </p>
+        )}
       </div>
     </div>
   );

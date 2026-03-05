@@ -36,6 +36,9 @@ export interface MarketData {
   changePercent: number;
   type: 'currency' | 'commodity' | 'index';
   symbol: string;
+  unit?: string;
+  source?: string;
+  updatedAt?: string;
 }
 
 export interface NavigationSection {

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Facebook, Twitter, Linkedin, Instagram, Mail, Youtube } from 'lucide-react';
+import { Facebook, Twitter, Linkedin, Instagram, Mail, Youtube, Phone, MapPin } from 'lucide-react';
 
 interface SocialLinks {
   facebook?: string;
@@ -23,7 +23,7 @@ function TikTokIcon({ className }: { className?: string }) {
 
 export function Footer() {
   const [socialLinks, setSocialLinks] = useState<SocialLinks>({});
-  const [contactEmail, setContactEmail] = useState('contact@nfireport.ne');
+  const [contactEmail, setContactEmail] = useState('contact@nfireport.com');
 
   useEffect(() => {
     fetch('/api/site-settings')
@@ -142,13 +142,26 @@ export function Footer() {
                 ))
               )}
             </div>
-            <a
-              href={`mailto:${contactEmail}`}
-              className="text-white/40 hover:text-white/70 transition-colors text-[13px] flex items-center gap-2"
-            >
-              <Mail className="w-4 h-4" />
-              {contactEmail}
-            </a>
+            <div className="space-y-2.5">
+              <a
+                href={`mailto:${contactEmail}`}
+                className="text-white/40 hover:text-white/70 transition-colors text-[13px] flex items-center gap-2"
+              >
+                <Mail className="w-4 h-4" />
+                {contactEmail}
+              </a>
+              <a
+                href="tel:+22798543837"
+                className="text-white/40 hover:text-white/70 transition-colors text-[13px] flex items-center gap-2"
+              >
+                <Phone className="w-4 h-4" />
+                +227 98 54 38 37
+              </a>
+              <p className="text-white/40 text-[13px] flex items-start gap-2">
+                <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <span>Niamey, Niger<br />Plateau &ndash; BP 800</span>
+              </p>
+            </div>
           </div>
         </div>
 

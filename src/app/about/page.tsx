@@ -52,10 +52,26 @@ export default function AboutPage() {
           </div>
 
           <div className="mb-20">
-            <h2 className="text-3xl mb-6">Notre Équipe</h2>
-            <p className="text-gray-600 text-lg leading-relaxed mb-8">
-              Notre équipe est composée de journalistes économiques expérimentés, d&apos;analystes financiers et de développeurs passionnés par le développement de l&apos;Afrique.
-            </p>
+            <span className="text-[11px] tracking-[0.15em] uppercase text-gray-400 block mb-4">Fondateurs</span>
+            <h2 className="text-3xl mb-8">Les visionnaires derrière NFI Report</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="bg-white rounded-xl border border-black/[0.06] p-7">
+                <div className="w-16 h-16 bg-[#111] text-white rounded-full flex items-center justify-center text-xl font-semibold mb-4">RB</div>
+                <h3 className="text-xl font-semibold mb-1">Raouf B.</h3>
+                <p className="text-[13px] text-gray-400 mb-3">Co-fondateur</p>
+                <p className="text-gray-600 text-[15px] leading-relaxed">
+                  Entrepreneur engagé et fin observateur des dynamiques économiques régionales, Raouf est à l&apos;origine de la vision fondatrice de NFI REPORT. Convaincu que l&apos;Afrique mérite une presse économique d&apos;excellence, il oeuvre à construire une plateforme indépendante capable d&apos;éclairer investisseurs, dirigeants et institutions.
+                </p>
+              </div>
+              <div className="bg-white rounded-xl border border-black/[0.06] p-7">
+                <div className="w-16 h-16 bg-[#111] text-white rounded-full flex items-center justify-center text-xl font-semibold mb-4">IS</div>
+                <h3 className="text-xl font-semibold mb-1">Ibrahim S.</h3>
+                <p className="text-[13px] text-gray-400 mb-3">Co-fondateur</p>
+                <p className="text-gray-600 text-[15px] leading-relaxed">
+                  Ingénieur et entrepreneur engagé dans le développement économique africain, Ibrahim structure la vision stratégique de NFI REPORT. Son approche analytique, inspirée des standards internationaux, vise à élever le débat économique au Niger et en Afrique en proposant une information indépendante, rigoureuse et orientée vers l&apos;action.
+                </p>
+              </div>
+            </div>
             <div className="bg-white rounded-xl border border-black/[0.06] p-8">
               <p className="text-gray-600 text-[18px] italic leading-relaxed">
                 &ldquo;Nous croyons fermement au potentiel économique de l&apos;Afrique et nous nous engageons à être les catalyseurs de cette transformation en fournissant l&apos;information qui compte.&rdquo;

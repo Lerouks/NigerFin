@@ -2,15 +2,18 @@ import { ArticleCard } from '@/components/ArticleCard';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
 import { NewsletterForm } from '@/components/NewsletterForm';
 import { PracticalTools } from '@/components/PracticalTools';
-import { getAllArticles } from '@/lib/sanity';
+import { getAllArticles, getFeaturedArticles } from '@/lib/articles';
 import { marketData } from '@/data/mock-data';
 
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const articles = await getAllArticles();
-  const featuredArticle = articles[0] ?? null;
-  const otherArticles = articles.slice(1);
+  const [featured, articles] = await Promise.all([
+    getFeaturedArticles(),
+    getAllArticles(),
+  ]);
+  const featuredArticle = featured[0] ?? articles[0] ?? null;
+  const otherArticles = articles.filter((a) => a._id !== featuredArticle?._id);
 
   return (
     <div className="min-h-screen bg-[#fafaf9]">
@@ -32,7 +35,7 @@ export default async function HomePage() {
                 <div className="flex-1 h-px bg-black/[0.06]" />
               </div>
               {articles.length === 0 && (
-                <p className="text-gray-500 text-center py-20">Aucun article pour le moment. Publiez votre premier article dans Sanity Studio.</p>
+                <p className="text-gray-500 text-center py-20">Aucun article pour le moment. Publiez votre premier article depuis l&apos;espace admin.</p>
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {otherArticles.map((article) => (

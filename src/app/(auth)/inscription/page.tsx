@@ -12,6 +12,7 @@ export default function InscriptionPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [accountExists, setAccountExists] = useState(false);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
@@ -28,9 +29,12 @@ export default function InscriptionPage() {
       return;
     }
 
-    const { error } = await signUp(email, password, fullName);
+    const { error, existingUser } = await signUp(email, password, fullName);
 
-    if (error) {
+    if (existingUser) {
+      setAccountExists(true);
+      setLoading(false);
+    } else if (error) {
       setError(error.message || 'Une erreur est survenue.');
       setLoading(false);
     } else {
@@ -38,6 +42,34 @@ export default function InscriptionPage() {
       setLoading(false);
     }
   };
+
+  if (accountExists) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center bg-[#fafaf9] px-4">
+        <div className="w-full max-w-md">
+          <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] p-8 text-center">
+            <div className="w-14 h-14 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-5">
+              <User className="w-7 h-7 text-amber-500" />
+            </div>
+            <h1 className="text-2xl font-bold mb-3">Compte existant</h1>
+            <p className="text-gray-600 text-sm mb-6">
+              Un compte est déjà associé à cette adresse email.
+              Veuillez vous connecter pour accéder à votre espace.
+            </p>
+            <Link
+              href="/connexion"
+              className="inline-block bg-[#111] text-white px-6 py-3 rounded-lg hover:bg-[#333] transition-colors text-[14px]"
+            >
+              Se connecter
+            </Link>
+            <p className="text-gray-400 text-[12px] mt-4">
+              Mot de passe oublié ? Contactez le support.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (success) {
     return (

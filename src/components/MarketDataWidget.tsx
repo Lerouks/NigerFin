@@ -1,3 +1,6 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import type { MarketData } from '@/types';
 
@@ -5,7 +8,18 @@ interface MarketDataWidgetProps {
   data: MarketData[];
 }
 
-export function MarketDataWidget({ data }: MarketDataWidgetProps) {
+export function MarketDataWidget({ data: fallbackData }: MarketDataWidgetProps) {
+  const [data, setData] = useState<MarketData[]>(fallbackData);
+
+  useEffect(() => {
+    fetch('/api/market-data')
+      .then((res) => res.json())
+      .then((fetched) => {
+        if (Array.isArray(fetched) && fetched.length > 0) setData(fetched);
+      })
+      .catch(() => {});
+  }, []);
+
   const getTypeLabel = (type: MarketData['type']) => {
     switch (type) {
       case 'currency': return 'Devises';

@@ -1,12 +1,15 @@
 import type { Metadata } from 'next';
 import { ArticleCard } from '@/components/ArticleCard';
-import { mockArticles, marketData } from '@/data/mock-data';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
+import { getArticlesByCategory } from '@/lib/sanity';
+import { mockArticles, marketData } from '@/data/mock-data';
 
+export const revalidate = 60;
 export const metadata: Metadata = { title: 'Éducation' };
 
-export default function EducationPage() {
-  const articles = mockArticles.filter((a) => a.category === 'Éducation');
+export default async function EducationPage() {
+  const sanityArticles = await getArticlesByCategory('Éducation');
+  const articles = sanityArticles.length > 0 ? sanityArticles : mockArticles.filter((a) => a.category === 'Éducation');
   return (
     <div className="min-h-screen bg-[#fafaf9]">
       <section className="bg-[#111] text-white py-16 md:py-20">
@@ -21,6 +24,7 @@ export default function EducationPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {articles.map((article) => (<ArticleCard key={article._id} article={article} />))}
             </div>
+            {articles.length === 0 && <p className="text-gray-500 text-center py-20">Aucun article dans cette rubrique pour le moment.</p>}
           </div>
           <aside className="lg:col-span-4"><MarketDataWidget data={marketData} /></aside>
         </div>

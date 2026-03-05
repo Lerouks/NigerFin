@@ -301,6 +301,14 @@ export function AdminDashboard() {
                 <Download className="w-3.5 h-3.5" />
                 Export Paiements
               </button>
+              <a
+                href="/studio"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 transition-colors"
+              >
+                Studio CMS
+              </a>
             </div>
           </div>
         </div>

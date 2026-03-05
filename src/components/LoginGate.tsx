@@ -1,7 +1,6 @@
 'use client';
 
 import { X } from 'lucide-react';
-import { SignInButton } from '@clerk/nextjs';
 import Link from 'next/link';
 
 interface LoginGateProps {
@@ -34,18 +33,20 @@ export function LoginGate({
           <p className="text-gray-600 text-sm">{message}</p>
         </div>
 
-        <SignInButton mode="modal">
-          <button className="w-full bg-[#111] text-white py-3 rounded-lg hover:bg-[#333] transition-colors">
-            Se connecter
-          </button>
-        </SignInButton>
+        <Link
+          href="/connexion"
+          className="block w-full bg-[#111] text-white py-3 rounded-lg hover:bg-[#333] transition-colors text-center"
+        >
+          Se connecter
+        </Link>
 
         <div className="mt-4">
-          <SignInButton mode="modal">
-            <button className="w-full border border-black/[0.08] py-3 rounded-lg hover:bg-gray-50 transition-colors text-sm">
-              Créer un compte gratuitement
-            </button>
-          </SignInButton>
+          <Link
+            href="/inscription"
+            className="block w-full border border-black/[0.08] py-3 rounded-lg hover:bg-gray-50 transition-colors text-sm text-center"
+          >
+            Créer un compte gratuitement
+          </Link>
         </div>
 
         <div className="mt-6 pt-6 border-t border-black/[0.05]">

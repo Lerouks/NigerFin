@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -16,15 +16,50 @@ import {
   Calendar,
   BookOpen,
   ExternalLink,
+  Heart,
+  Clock,
+  TrendingUp,
+  Zap,
+  Crown,
+  FileText,
+  ChevronRight,
+  Settings,
+  LogOut,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { getRoleLabel } from '@/lib/user-profile';
+import { formatPrice, TIERS, cycleLabel } from '@/config/pricing';
 import type { NewsletterPreferences, UserRole } from '@/types';
+
+interface AccountSummary {
+  subscription: {
+    tier: string;
+    status: string;
+    billing_cycle: string;
+    current_period_start: string | null;
+    current_period_end: string | null;
+    cancel_at_period_end: boolean;
+    price_amount: number;
+    created_at: string;
+  } | null;
+  likedArticlesCount: number;
+  recentPayments: {
+    id: string;
+    amount: number;
+    tier: string;
+    billing_cycle: string;
+    status: string;
+    created_at: string;
+  }[];
+}
 
 export function AccountDashboard() {
   const { isSignedIn, isLoading, user, profile, userRole, premiumArticlesUsed, signOut } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'overview' | 'subscription' | 'newsletter' | 'alerts'>('overview');
+  const [summary, setSummary] = useState<AccountSummary | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(true);
+  const [likedArticles, setLikedArticles] = useState<{ article_id: string; created_at: string }[]>([]);
   const [newsletterPrefs, setNewsletterPrefs] = useState<NewsletterPreferences>({
     newsletter_monthly: true,
     newsletter_weekly: false,
@@ -41,25 +76,32 @@ export function AccountDashboard() {
     }
   }, [isLoading, isSignedIn, router]);
 
-  useEffect(() => {
-    if (isSignedIn) {
-      fetch('/api/user/newsletter-prefs')
-        .then((r) => r.ok ? r.json() : null)
-        .then((data) => {
-          if (data) setNewsletterPrefs(data);
-        })
-        .catch(() => {});
+  const fetchSummary = useCallback(async () => {
+    setSummaryLoading(true);
+    try {
+      const [summaryRes, likesRes, prefsRes] = await Promise.all([
+        fetch('/api/user/account-summary'),
+        fetch('/api/user/liked-articles'),
+        fetch('/api/user/newsletter-prefs'),
+      ]);
+      if (summaryRes.ok) setSummary(await summaryRes.json());
+      if (likesRes.ok) setLikedArticles(await likesRes.json());
+      if (prefsRes.ok) setNewsletterPrefs(await prefsRes.json());
+    } catch {} finally {
+      setSummaryLoading(false);
     }
-  }, [isSignedIn]);
+  }, []);
+
+  useEffect(() => {
+    if (isSignedIn) fetchSummary();
+  }, [isSignedIn, fetchSummary]);
 
   const handleManageSubscription = async () => {
     setPortalLoading(true);
     try {
       const res = await fetch('/api/stripe/portal', { method: 'POST' });
       const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      }
+      if (data.url) window.location.href = data.url;
     } catch {} finally {
       setPortalLoading(false);
     }
@@ -86,8 +128,17 @@ export function AccountDashboard() {
     );
   }
 
+  const isSubscribed = userRole === 'standard' || userRole === 'pro' || userRole === 'admin';
+  const sub = summary?.subscription;
+  const memberSince = profile?.created_at
+    ? new Date(profile.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+    : '—';
+  const periodEnd = sub?.current_period_end
+    ? new Date(sub.current_period_end).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+    : null;
+
   const tabs = [
-    { id: 'overview' as const, label: 'Aperçu', icon: BarChart3 },
+    { id: 'overview' as const, label: 'Vue d\'ensemble', icon: BarChart3 },
     { id: 'subscription' as const, label: 'Abonnement', icon: CreditCard },
     { id: 'newsletter' as const, label: 'Newsletter', icon: Mail },
     { id: 'alerts' as const, label: 'Alertes', icon: Bell },
@@ -95,40 +146,79 @@ export function AccountDashboard() {
 
   return (
     <div className="min-h-screen bg-[#fafaf9]">
-      <section className="bg-[#111] text-white py-12 md:py-16">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center text-xl font-bold">
+      {/* Hero header */}
+      <section className="bg-[#111] text-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
+          <div className="flex flex-col md:flex-row md:items-center gap-6">
+            <div className="w-16 h-16 bg-gradient-to-br from-white/20 to-white/5 rounded-2xl flex items-center justify-center text-2xl font-bold border border-white/10">
               {(profile?.full_name || user?.email || 'U').charAt(0).toUpperCase()}
             </div>
-            <div>
-              <h1 className="text-2xl font-bold">{profile?.full_name || user?.email?.split('@')[0]}</h1>
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-1">
+                <h1 className="text-2xl md:text-3xl font-bold">
+                  {profile?.full_name || user?.email?.split('@')[0]}
+                </h1>
+                <span className={`text-[10px] tracking-[0.15em] uppercase px-3 py-1 rounded-full font-medium ${
+                  userRole === 'pro' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' :
+                  userRole === 'standard' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' :
+                  userRole === 'admin' ? 'bg-red-500/20 text-red-300 border border-red-500/30' :
+                  'bg-white/10 text-white/50 border border-white/10'
+                }`}>
+                  {getRoleLabel(userRole || 'reader')}
+                </span>
+              </div>
               <p className="text-white/40 text-sm">{user?.email}</p>
             </div>
-            <div className="ml-auto">
-              <span className={`text-[11px] tracking-[0.12em] uppercase px-3 py-1.5 rounded-full ${
-                userRole === 'pro' ? 'bg-purple-500/20 text-purple-300' :
-                userRole === 'standard' ? 'bg-amber-500/20 text-amber-300' :
-                'bg-white/10 text-white/60'
-              }`}>
-                {getRoleLabel(userRole || 'reader')}
-              </span>
+            <div className="flex gap-2">
+              <button
+                onClick={async () => { await signOut(); router.push('/'); }}
+                className="flex items-center gap-2 px-4 py-2 text-[13px] text-white/40 hover:text-white/80 hover:bg-white/5 rounded-lg transition-all"
+              >
+                <LogOut className="w-4 h-4" />
+                Déconnexion
+              </button>
             </div>
+          </div>
+
+          {/* Quick stats bar */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8">
+            <QuickStat
+              icon={Shield}
+              label="Plan"
+              value={getRoleLabel(userRole || 'reader')}
+              accent={isSubscribed}
+            />
+            <QuickStat
+              icon={BookOpen}
+              label="Articles lus"
+              value={userRole === 'reader' ? `${premiumArticlesUsed}/3` : 'Illimité'}
+              accent={isSubscribed}
+            />
+            <QuickStat
+              icon={Heart}
+              label="Articles sauvegardés"
+              value={summaryLoading ? '...' : String(summary?.likedArticlesCount || 0)}
+            />
+            <QuickStat
+              icon={Calendar}
+              label="Membre depuis"
+              value={memberSince}
+            />
           </div>
         </div>
       </section>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Tab navigation */}
-        <div className="flex gap-1 mb-8 bg-white rounded-lg p-1 border border-black/[0.06]">
+        <div className="flex gap-1 mb-8 bg-white rounded-xl p-1.5 border border-black/[0.06] shadow-sm">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-md text-[13px] transition-all flex-1 justify-center ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-[13px] transition-all flex-1 justify-center font-medium ${
                 activeTab === tab.id
-                  ? 'bg-[#111] text-white'
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                  ? 'bg-[#111] text-white shadow-sm'
+                  : 'text-gray-400 hover:text-gray-700 hover:bg-gray-50'
               }`}
             >
               <tab.icon className="w-4 h-4" />
@@ -137,91 +227,240 @@ export function AccountDashboard() {
           ))}
         </div>
 
-        {/* Overview Tab */}
+        {/* ─── OVERVIEW TAB ─── */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <StatCard
-                icon={Shield}
-                label="Plan actuel"
-                value={getRoleLabel(userRole || 'reader')}
-              />
-              <StatCard
-                icon={BookOpen}
-                label="Articles premium lus ce mois"
-                value={userRole === 'reader' ? `${premiumArticlesUsed}/3` : 'Illimité'}
-              />
-              <StatCard
-                icon={Calendar}
-                label="Membre depuis"
-                value={profile?.created_at ? new Date(profile.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) : '—'}
-              />
+            {/* Subscription status card (for subscribers) */}
+            {isSubscribed && sub && (
+              <div className="bg-gradient-to-br from-[#111] to-[#1a1a1a] text-white rounded-2xl p-8 border border-white/5">
+                <div className="flex items-start justify-between mb-6">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Crown className="w-5 h-5 text-amber-400" />
+                      <span className="text-[11px] tracking-[0.15em] uppercase text-white/40">Abonnement actif</span>
+                    </div>
+                    <h2 className="text-2xl font-bold">
+                      {sub.tier === 'pro' ? 'Pro' : 'Standard'} — {cycleLabel(sub.billing_cycle as 'monthly' | 'quarterly' | 'yearly')}
+                    </h2>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">{(sub.price_amount || 0).toLocaleString('fr-FR')}</p>
+                    <p className="text-white/40 text-sm">FCFA/{sub.billing_cycle === 'monthly' ? 'mois' : sub.billing_cycle === 'quarterly' ? 'trim.' : 'an'}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-white/5 rounded-xl p-4 border border-white/5">
+                    <p className="text-[11px] text-white/40 uppercase tracking-wider mb-1">Statut</p>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="text-sm font-medium">Actif</span>
+                    </div>
+                  </div>
+                  {periodEnd && (
+                    <div className="bg-white/5 rounded-xl p-4 border border-white/5">
+                      <p className="text-[11px] text-white/40 uppercase tracking-wider mb-1">Prochain renouvellement</p>
+                      <p className="text-sm font-medium">{periodEnd}</p>
+                    </div>
+                  )}
+                  <div className="bg-white/5 rounded-xl p-4 border border-white/5">
+                    <p className="text-[11px] text-white/40 uppercase tracking-wider mb-1">Accès</p>
+                    <p className="text-sm font-medium">
+                      {userRole === 'pro' ? 'Complet (PDF + Archives)' : 'Articles illimités'}
+                    </p>
+                  </div>
+                </div>
+
+                {sub.cancel_at_period_end && (
+                  <div className="mt-4 bg-amber-500/10 border border-amber-500/20 rounded-lg px-4 py-3 text-amber-300 text-sm">
+                    Votre abonnement sera annulé le {periodEnd}. Vous conservez l&apos;accès jusque-là.
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Upgrade CTA (for free users only) */}
+            {!isSubscribed && (
+              <div className="bg-gradient-to-br from-[#111] to-[#222] text-white rounded-2xl p-8 border border-white/5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Zap className="w-5 h-5 text-amber-400" />
+                  <span className="text-[11px] tracking-[0.15em] uppercase text-white/40">Passez Premium</span>
+                </div>
+                <h2 className="text-2xl font-bold mb-2">Débloquez un accès illimité</h2>
+                <p className="text-white/50 text-sm mb-6 max-w-lg">
+                  Accédez à tous les articles, analyses, outils premium et newsletters exclusives.
+                  Rejoingnez les professionnels qui font confiance à NFI Report.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Link
+                    href="/pricing"
+                    className="inline-flex items-center justify-center gap-2 bg-white text-black px-6 py-3 rounded-xl text-[14px] font-medium hover:bg-white/90 transition-colors"
+                  >
+                    Voir les plans <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {/* Features grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Articles sauvegardés */}
+              <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Heart className="w-4 h-4 text-red-400" />
+                    <h3 className="font-semibold text-[15px]">Articles sauvegardés</h3>
+                  </div>
+                  <span className="text-[12px] text-gray-400">{summary?.likedArticlesCount || 0} articles</span>
+                </div>
+                {likedArticles.length > 0 ? (
+                  <ul className="space-y-2">
+                    {likedArticles.slice(0, 5).map((like) => (
+                      <li key={like.article_id} className="flex items-center justify-between py-2 border-b border-black/[0.03] last:border-0">
+                        <span className="text-sm text-gray-600 truncate flex-1">{like.article_id}</span>
+                        <span className="text-[11px] text-gray-400 ml-2 flex-shrink-0">
+                          {new Date(like.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-gray-400 py-4 text-center">
+                    Aucun article sauvegardé. Cliquez sur le coeur d&apos;un article pour le sauvegarder.
+                  </p>
+                )}
+              </div>
+
+              {/* Activité récente / Paiements */}
+              <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Clock className="w-4 h-4 text-gray-400" />
+                  <h3 className="font-semibold text-[15px]">Historique des paiements</h3>
+                </div>
+                {summary?.recentPayments && summary.recentPayments.length > 0 ? (
+                  <ul className="space-y-2">
+                    {summary.recentPayments.map((payment) => (
+                      <li key={payment.id} className="flex items-center justify-between py-2 border-b border-black/[0.03] last:border-0">
+                        <div>
+                          <p className="text-sm font-medium capitalize">{payment.tier} — {cycleLabel(payment.billing_cycle as 'monthly' | 'quarterly' | 'yearly')}</p>
+                          <p className="text-[11px] text-gray-400">
+                            {new Date(payment.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-medium">{payment.amount.toLocaleString('fr-FR')} F</p>
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full ${
+                            payment.status === 'verified' ? 'bg-emerald-50 text-emerald-600' :
+                            payment.status === 'pending' ? 'bg-amber-50 text-amber-600' :
+                            'bg-red-50 text-red-600'
+                          }`}>
+                            {payment.status === 'verified' ? 'Vérifié' : payment.status === 'pending' ? 'En attente' : 'Rejeté'}
+                          </span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-gray-400 py-4 text-center">Aucun paiement enregistré.</p>
+                )}
+              </div>
             </div>
 
-            {userRole === 'reader' && (
-              <div className="bg-gradient-to-r from-[#111] to-[#333] text-white rounded-xl p-8">
-                <h3 className="text-xl font-bold mb-2">Passez à Standard</h3>
-                <p className="text-white/60 text-sm mb-4">
-                  Accédez à tous les articles, analyses et outils premium sans aucune limite.
+            {/* Avantages du plan */}
+            {isSubscribed && (
+              <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
+                <div className="flex items-center gap-2 mb-5">
+                  <TrendingUp className="w-4 h-4 text-emerald-500" />
+                  <h3 className="font-semibold text-[15px]">Vos avantages {userRole === 'pro' ? 'Pro' : 'Standard'}</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                  {(userRole === 'pro' ? TIERS.pro.features : TIERS.standard.features).map((feature) => (
+                    <div key={feature} className="flex items-start gap-2 p-3 bg-[#fafaf9] rounded-lg">
+                      <Check className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-[13px] text-gray-600">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ─── SUBSCRIPTION TAB ─── */}
+        {activeTab === 'subscription' && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
+              <h3 className="text-lg font-semibold mb-5">Détails de l&apos;abonnement</h3>
+              <div className="space-y-3">
+                <InfoRow label="Plan" value={getRoleLabel(userRole || 'reader')} />
+                <InfoRow
+                  label="Statut"
+                  value={profile?.subscription_status === 'active' ? 'Actif' : 'Inactif'}
+                  valueColor={profile?.subscription_status === 'active' ? 'text-emerald-600' : 'text-gray-400'}
+                />
+                {profile?.billing_cycle && (
+                  <InfoRow label="Cycle" value={cycleLabel(profile.billing_cycle as 'monthly' | 'quarterly' | 'yearly')} />
+                )}
+                {sub?.price_amount && (
+                  <InfoRow label="Montant" value={`${sub.price_amount.toLocaleString('fr-FR')} FCFA`} />
+                )}
+                {periodEnd && (
+                  <InfoRow label="Prochain renouvellement" value={periodEnd} />
+                )}
+                <InfoRow label="Membre depuis" value={memberSince} />
+              </div>
+
+              <div className="mt-6 flex flex-wrap gap-3">
+                {isSubscribed && (
+                  <button
+                    onClick={handleManageSubscription}
+                    disabled={portalLoading}
+                    className="flex items-center gap-2 bg-[#111] text-white px-6 py-2.5 rounded-xl text-[13px] hover:bg-[#333] transition-colors"
+                  >
+                    {portalLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ExternalLink className="w-4 h-4" />}
+                    Gérer mon abonnement
+                  </button>
+                )}
+                {!isSubscribed && (
+                  <Link
+                    href="/pricing"
+                    className="inline-flex items-center gap-2 bg-[#111] text-white px-6 py-2.5 rounded-xl text-[13px] hover:bg-[#333] transition-colors"
+                  >
+                    S&apos;abonner <ArrowRight className="w-4 h-4" />
+                  </Link>
+                )}
+              </div>
+            </div>
+
+            {/* Upgrade section for standard users */}
+            {userRole === 'standard' && (
+              <div className="bg-gradient-to-r from-purple-50 to-purple-100/50 rounded-2xl border border-purple-200/50 p-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <Crown className="w-5 h-5 text-purple-500" />
+                  <h3 className="font-semibold text-[15px]">Passez à Pro</h3>
+                </div>
+                <p className="text-sm text-gray-600 mb-4">
+                  Accédez aux rapports PDF, alertes personnalisées, archives complètes et support prioritaire.
                 </p>
                 <Link
                   href="/pricing"
-                  className="inline-flex items-center gap-2 bg-white text-black px-6 py-2.5 rounded-lg text-[13px] hover:bg-white/90 transition-colors"
+                  className="inline-flex items-center gap-2 bg-purple-600 text-white px-5 py-2.5 rounded-xl text-[13px] hover:bg-purple-700 transition-colors"
                 >
-                  Voir les abonnements <ArrowRight className="w-4 h-4" />
+                  Découvrir Pro <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             )}
           </div>
         )}
 
-        {/* Subscription Tab */}
-        {activeTab === 'subscription' && (
-          <div className="space-y-6">
-            <div className="bg-white rounded-xl border border-black/[0.06] p-6">
-              <h3 className="text-lg font-semibold mb-4">Mon abonnement</h3>
-              <div className="space-y-3">
-                <InfoRow label="Plan" value={getRoleLabel(userRole || 'reader')} />
-                <InfoRow label="Statut" value={profile?.subscription_status === 'active' ? 'Actif' : 'Inactif'} />
-                {profile?.billing_cycle && (
-                  <InfoRow label="Cycle de facturation" value={
-                    profile.billing_cycle === 'monthly' ? 'Mensuel' :
-                    profile.billing_cycle === 'quarterly' ? 'Trimestriel' : 'Annuel'
-                  } />
-                )}
-              </div>
-
-              {(userRole === 'standard' || userRole === 'pro') && (
-                <button
-                  onClick={handleManageSubscription}
-                  disabled={portalLoading}
-                  className="mt-6 flex items-center gap-2 bg-[#111] text-white px-6 py-2.5 rounded-lg text-[13px] hover:bg-[#333] transition-colors"
-                >
-                  {portalLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ExternalLink className="w-4 h-4" />}
-                  Gérer mon abonnement
-                </button>
-              )}
-
-              {userRole === 'reader' && (
-                <Link
-                  href="/pricing"
-                  className="mt-6 inline-flex items-center gap-2 bg-[#111] text-white px-6 py-2.5 rounded-lg text-[13px] hover:bg-[#333] transition-colors"
-                >
-                  S&apos;abonner <ArrowRight className="w-4 h-4" />
-                </Link>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Newsletter Tab */}
+        {/* ─── NEWSLETTER TAB ─── */}
         {activeTab === 'newsletter' && (
-          <div className="bg-white rounded-xl border border-black/[0.06] p-6">
+          <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
             <h3 className="text-lg font-semibold mb-6">Préférences newsletter</h3>
             <div className="space-y-4">
               <ToggleRow
                 label="Newsletter mensuelle"
-                description="Recevez un résumé mensuel des actualités économiques"
+                description="Résumé mensuel des actualités économiques"
                 checked={newsletterPrefs.newsletter_monthly}
                 onChange={(v) => setNewsletterPrefs((p) => ({ ...p, newsletter_monthly: v }))}
               />
@@ -230,22 +469,22 @@ export function AccountDashboard() {
                 description="Analyses et actualités chaque semaine"
                 checked={newsletterPrefs.newsletter_weekly}
                 onChange={(v) => setNewsletterPrefs((p) => ({ ...p, newsletter_weekly: v }))}
-                disabled={userRole === 'reader'}
-                disabledMessage="Disponible avec Standard"
+                disabled={!isSubscribed}
+                disabledMessage="Standard ou Pro requis"
               />
               <ToggleRow
                 label="Rapports PDF"
                 description="Recevez les rapports exclusifs en PDF"
                 checked={newsletterPrefs.reports_pdf}
                 onChange={(v) => setNewsletterPrefs((p) => ({ ...p, reports_pdf: v }))}
-                disabled={userRole !== 'pro'}
-                disabledMessage="Disponible avec Pro"
+                disabled={userRole !== 'pro' && userRole !== 'admin'}
+                disabledMessage="Pro requis"
               />
             </div>
             <button
               onClick={handleSaveNewsletterPrefs}
               disabled={savingPrefs}
-              className="mt-6 flex items-center gap-2 bg-[#111] text-white px-6 py-2.5 rounded-lg text-[13px] hover:bg-[#333] transition-colors"
+              className="mt-6 flex items-center gap-2 bg-[#111] text-white px-6 py-2.5 rounded-xl text-[13px] hover:bg-[#333] transition-colors"
             >
               {savingPrefs ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
               Enregistrer
@@ -253,9 +492,9 @@ export function AccountDashboard() {
           </div>
         )}
 
-        {/* Alerts Tab */}
+        {/* ─── ALERTS TAB ─── */}
         {activeTab === 'alerts' && (
-          <div className="bg-white rounded-xl border border-black/[0.06] p-6">
+          <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
             <h3 className="text-lg font-semibold mb-6">Alertes</h3>
             <div className="space-y-4">
               <ToggleRow
@@ -263,60 +502,50 @@ export function AccountDashboard() {
                 description="Soyez alerté des événements économiques importants"
                 checked={newsletterPrefs.alerts_news}
                 onChange={(v) => setNewsletterPrefs((p) => ({ ...p, alerts_news: v }))}
-                disabled={userRole === 'reader'}
-                disabledMessage="Disponible avec Standard"
+                disabled={!isSubscribed}
+                disabledMessage="Standard ou Pro requis"
               />
               <ToggleRow
                 label="Alertes personnalisées"
                 description="Créez des alertes sur des sujets spécifiques"
                 checked={newsletterPrefs.alerts_custom}
                 onChange={(v) => setNewsletterPrefs((p) => ({ ...p, alerts_custom: v }))}
-                disabled={userRole !== 'pro'}
-                disabledMessage="Disponible avec Pro"
+                disabled={userRole !== 'pro' && userRole !== 'admin'}
+                disabledMessage="Pro requis"
               />
             </div>
             <button
               onClick={handleSaveNewsletterPrefs}
               disabled={savingPrefs}
-              className="mt-6 flex items-center gap-2 bg-[#111] text-white px-6 py-2.5 rounded-lg text-[13px] hover:bg-[#333] transition-colors"
+              className="mt-6 flex items-center gap-2 bg-[#111] text-white px-6 py-2.5 rounded-xl text-[13px] hover:bg-[#333] transition-colors"
             >
               {savingPrefs ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
               Enregistrer
             </button>
           </div>
         )}
-
-        {/* Sign out */}
-        <div className="mt-8 text-center">
-          <button
-            onClick={async () => { await signOut(); router.push('/'); }}
-            className="text-sm text-gray-400 hover:text-red-600 transition-colors"
-          >
-            Se déconnecter
-          </button>
-        </div>
       </div>
     </div>
   );
 }
 
-function StatCard({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
+function QuickStat({ icon: Icon, label, value, accent }: { icon: any; label: string; value: string; accent?: boolean }) {
   return (
-    <div className="bg-white rounded-xl border border-black/[0.06] p-5">
-      <div className="flex items-center gap-2 mb-2">
-        <Icon className="w-4 h-4 text-gray-400" />
-        <span className="text-[12px] text-gray-400 uppercase tracking-wider">{label}</span>
+    <div className="bg-white/[0.06] backdrop-blur-sm rounded-xl p-4 border border-white/[0.06]">
+      <div className="flex items-center gap-2 mb-1.5">
+        <Icon className={`w-3.5 h-3.5 ${accent ? 'text-amber-400' : 'text-white/30'}`} />
+        <span className="text-[10px] text-white/30 uppercase tracking-wider">{label}</span>
       </div>
-      <p className="text-xl font-semibold">{value}</p>
+      <p className="text-[15px] font-semibold text-white truncate">{value}</p>
     </div>
   );
 }
 
-function InfoRow({ label, value }: { label: string; value: string }) {
+function InfoRow({ label, value, valueColor }: { label: string; value: string; valueColor?: string }) {
   return (
-    <div className="flex items-center justify-between py-2 border-b border-black/[0.04] last:border-0">
+    <div className="flex items-center justify-between py-3 border-b border-black/[0.04] last:border-0">
       <span className="text-sm text-gray-500">{label}</span>
-      <span className="text-sm font-medium">{value}</span>
+      <span className={`text-sm font-medium ${valueColor || ''}`}>{value}</span>
     </div>
   );
 }
@@ -337,14 +566,14 @@ function ToggleRow({
   disabledMessage?: string;
 }) {
   return (
-    <div className={`flex items-start justify-between p-4 rounded-lg border border-black/[0.04] ${disabled ? 'opacity-60' : ''}`}>
+    <div className={`flex items-start justify-between p-4 rounded-xl border border-black/[0.04] ${disabled ? 'opacity-50' : ''}`}>
       <div>
         <p className="text-sm font-medium">{label}</p>
         <p className="text-[12px] text-gray-500 mt-0.5">{description}</p>
         {disabled && disabledMessage && (
-          <Link href="/pricing" className="text-[11px] text-blue-600 hover:underline mt-1 inline-block">
-            {disabledMessage} &rarr;
-          </Link>
+          <span className="text-[11px] text-amber-600 mt-1 inline-block">
+            {disabledMessage}
+          </span>
         )}
       </div>
       <button

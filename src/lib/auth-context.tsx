@@ -14,7 +14,7 @@ interface AuthContextType {
   userRole: UserRole | null;
   premiumArticlesUsed: number;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName: string) => Promise<{ error: any; existingUser: boolean }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -28,7 +28,7 @@ const AuthContext = createContext<AuthContextType>({
   userRole: null,
   premiumArticlesUsed: 0,
   signIn: async () => ({ error: null }),
-  signUp: async () => ({ error: null }),
+  signUp: async () => ({ error: null, existingUser: false }),
   signOut: async () => {},
   refreshProfile: async () => {},
 });
@@ -105,15 +105,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    if (!supabase) return { error: { message: 'Supabase not configured' } };
-    const { error } = await supabase.auth.signUp({
+    if (!supabase) return { error: { message: 'Supabase not configured' }, existingUser: false };
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { full_name: fullName },
       },
     });
-    return { error };
+
+    // Supabase returns a fake user with empty identities when email already exists
+    const existingUser = !error && data?.user && (!data.user.identities || data.user.identities.length === 0);
+
+    if (existingUser) {
+      // Log the duplicate signup attempt
+      try {
+        await fetch('/api/auth/log-attempt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'duplicate_signup', email }),
+        });
+      } catch {}
+    }
+
+    return {
+      error: existingUser
+        ? { message: 'ACCOUNT_EXISTS' }
+        : error,
+      existingUser,
+    };
   };
 
   const signOut = async () => {

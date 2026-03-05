@@ -8,7 +8,7 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({
-  message = 'Veuillez saisir les informations ci-dessus pour afficher les resultats.',
+  message = 'Veuillez saisir les informations ci-dessus pour afficher les résultats.',
   icon: Icon = Calculator,
 }: EmptyStateProps) {
   return (

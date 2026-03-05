@@ -109,14 +109,14 @@ export function AccountDashboard() {
       const res = await fetch('/api/user/subscription', { method: 'DELETE' });
       const data = await res.json();
       if (res.ok) {
-        setSubActionMsg({ type: 'success', text: data.message || 'Abonnement annule.' });
+        setSubActionMsg({ type: 'success', text: data.message || 'Abonnement annulé.' });
         setShowCancelConfirm(false);
         fetchSummary();
       } else {
         setSubActionMsg({ type: 'error', text: data.error || 'Erreur lors de l\'annulation.' });
       }
     } catch {
-      setSubActionMsg({ type: 'error', text: 'Erreur reseau. Veuillez reessayer.' });
+      setSubActionMsg({ type: 'error', text: 'Erreur réseau. Veuillez réessayer.' });
     } finally {
       setCancelLoading(false);
     }
@@ -129,13 +129,13 @@ export function AccountDashboard() {
       const res = await fetch('/api/user/subscription', { method: 'PATCH' });
       const data = await res.json();
       if (res.ok) {
-        setSubActionMsg({ type: 'success', text: data.message || 'Abonnement reactive.' });
+        setSubActionMsg({ type: 'success', text: data.message || 'Abonnement réactivé.' });
         fetchSummary();
       } else {
-        setSubActionMsg({ type: 'error', text: data.error || 'Erreur lors de la reactivation.' });
+        setSubActionMsg({ type: 'error', text: data.error || 'Erreur lors de la réactivation.' });
       }
     } catch {
-      setSubActionMsg({ type: 'error', text: 'Erreur reseau. Veuillez reessayer.' });
+      setSubActionMsg({ type: 'error', text: 'Erreur réseau. Veuillez réessayer.' });
     } finally {
       setReactivateLoading(false);
     }
@@ -323,7 +323,7 @@ export function AccountDashboard() {
                 <h2 className="text-2xl font-bold mb-2">Débloquez un accès illimité</h2>
                 <p className="text-white/50 text-sm mb-6 max-w-lg">
                   Accédez à tous les articles, analyses, outils premium et newsletters exclusives.
-                  Rejoingnez les professionnels qui font confiance à NFI Report.
+                  Rejoignez les professionnels qui font confiance à NFI Report.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Link
@@ -437,7 +437,7 @@ export function AccountDashboard() {
 
             {/* ── Subscription details ── */}
             <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
-              <h3 className="text-lg font-semibold mb-5">Details de l&apos;abonnement</h3>
+              <h3 className="text-lg font-semibold mb-5">Détails de l&apos;abonnement</h3>
 
               {/* Infos utilisateur */}
               <div className="mb-6 p-4 bg-[#fafaf9] rounded-xl">
@@ -464,7 +464,7 @@ export function AccountDashboard() {
                 <InfoRow
                   label="Statut abonnement"
                   value={
-                    sub?.cancel_at_period_end ? 'Annulation programmee'
+                    sub?.cancel_at_period_end ? 'Annulation programmée'
                     : sub?.status === 'active' ? 'Actif'
                     : profile?.subscription_status === 'active' ? 'Actif'
                     : 'Inactif'
@@ -482,12 +482,12 @@ export function AccountDashboard() {
                   <InfoRow label="Montant" value={`${sub.price_amount.toLocaleString('fr-FR')} FCFA`} />
                 )}
                 {sub?.current_period_start && (
-                  <InfoRow label="Debut de la periode" value={
+                  <InfoRow label="Début de la période" value={
                     new Date(sub.current_period_start).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
                   } />
                 )}
                 {periodEnd && (
-                  <InfoRow label={sub?.cancel_at_period_end ? 'Fin d\'acces' : 'Prochain renouvellement'} value={periodEnd} />
+                  <InfoRow label={sub?.cancel_at_period_end ? 'Fin d\'accès' : 'Prochain renouvellement'} value={periodEnd} />
                 )}
               </div>
 
@@ -496,9 +496,9 @@ export function AccountDashboard() {
                 <div className="mt-5 bg-amber-50 border border-amber-200 rounded-xl px-5 py-4 flex items-start gap-3">
                   <AlertTriangle className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-medium text-amber-800">Annulation programmee</p>
+                    <p className="text-sm font-medium text-amber-800">Annulation programmée</p>
                     <p className="text-[13px] text-amber-700 mt-1">
-                      Votre abonnement ne sera pas renouvele. Vous conservez l&apos;acces jusqu&apos;au {periodEnd}.
+                      Votre abonnement ne sera pas renouvelé. Vous conservez l&apos;accès jusqu&apos;au {periodEnd}.
                     </p>
                     <button
                       onClick={handleReactivateSubscription}
@@ -506,7 +506,7 @@ export function AccountDashboard() {
                       className="mt-3 inline-flex items-center gap-2 bg-amber-600 text-white px-4 py-2 rounded-lg text-[13px] hover:bg-amber-700 transition-colors"
                     >
                       {reactivateLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-                      Reactiver mon abonnement
+                      Réactiver mon abonnement
                     </button>
                   </div>
                 </div>
@@ -517,9 +517,9 @@ export function AccountDashboard() {
                 <div className="mt-5 bg-gray-50 border border-gray-200 rounded-xl px-5 py-4 flex items-start gap-3">
                   <Clock className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-medium text-gray-700">Abonnement expire</p>
+                    <p className="text-sm font-medium text-gray-700">Abonnement expiré</p>
                     <p className="text-[13px] text-gray-500 mt-1">
-                      Votre abonnement precedent a expire. Renouvelez-le pour retrouver l&apos;acces a tous les contenus.
+                      Votre abonnement précédent a expiré. Renouvelez-le pour retrouver l&apos;accès à tous les contenus.
                     </p>
                     <Link
                       href="/pricing"
@@ -565,7 +565,7 @@ export function AccountDashboard() {
                     <div>
                       <p className="text-sm font-medium">S&apos;abonner</p>
                       <p className="text-[12px] text-gray-500 mt-0.5">
-                        Accedez a tous les articles et outils premium
+                        Accédez à tous les articles et outils premium
                       </p>
                     </div>
                     <Link
@@ -581,9 +581,9 @@ export function AccountDashboard() {
                 {isSubscribed && !sub?.cancel_at_period_end && userRole !== 'admin' && (
                   <div className="flex items-center justify-between p-4 rounded-xl border border-red-100 bg-red-50/50">
                     <div>
-                      <p className="text-sm font-medium text-red-800">Resilier mon abonnement</p>
+                      <p className="text-sm font-medium text-red-800">Résilier mon abonnement</p>
                       <p className="text-[12px] text-red-600/70 mt-0.5">
-                        Vous conserverez l&apos;acces jusqu&apos;a la fin de la periode en cours
+                        Vous conserverez l&apos;accès jusqu&apos;à la fin de la période en cours
                       </p>
                     </div>
                     {!showCancelConfirm ? (
@@ -591,7 +591,7 @@ export function AccountDashboard() {
                         onClick={() => setShowCancelConfirm(true)}
                         className="inline-flex items-center gap-2 border border-red-300 text-red-700 px-5 py-2.5 rounded-xl text-[13px] hover:bg-red-100 transition-colors flex-shrink-0"
                       >
-                        Resilier
+                        Résilier
                       </button>
                     ) : (
                       <div className="flex items-center gap-2 flex-shrink-0">
@@ -607,7 +607,7 @@ export function AccountDashboard() {
                           className="inline-flex items-center gap-2 bg-red-600 text-white px-5 py-2.5 rounded-xl text-[13px] hover:bg-red-700 transition-colors"
                         >
                           {cancelLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
-                          Confirmer la resiliation
+                          Confirmer la résiliation
                         </button>
                       </div>
                     )}
@@ -621,10 +621,10 @@ export function AccountDashboard() {
               <div className="bg-gradient-to-r from-purple-50 to-purple-100/50 rounded-2xl border border-purple-200/50 p-6">
                 <div className="flex items-center gap-2 mb-2">
                   <Crown className="w-5 h-5 text-purple-500" />
-                  <h3 className="font-semibold text-[15px]">Passez a Pro</h3>
+                  <h3 className="font-semibold text-[15px]">Passez à Pro</h3>
                 </div>
                 <p className="text-sm text-gray-600 mb-4">
-                  Accedez aux rapports PDF, alertes personnalisees, archives completes et support prioritaire.
+                  Accédez aux rapports PDF, alertes personnalisées, archives complètes et support prioritaire.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mb-5">
                   {TIERS.pro.features.map((f) => (
@@ -638,7 +638,7 @@ export function AccountDashboard() {
                   href="/pricing"
                   className="inline-flex items-center gap-2 bg-purple-600 text-white px-5 py-2.5 rounded-xl text-[13px] hover:bg-purple-700 transition-colors"
                 >
-                  Decouvrir Pro <ArrowRight className="w-4 h-4" />
+                  Découvrir Pro <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             )}
@@ -666,7 +666,7 @@ export function AccountDashboard() {
                           payment.status === 'pending' ? 'bg-amber-50 text-amber-600' :
                           'bg-red-50 text-red-600'
                         }`}>
-                          {payment.status === 'verified' ? 'Verifie' : payment.status === 'pending' ? 'En attente' : 'Rejete'}
+                          {payment.status === 'verified' ? 'Vérifié' : payment.status === 'pending' ? 'En attente' : 'Rejeté'}
                         </span>
                       </div>
                     </li>
@@ -680,9 +680,9 @@ export function AccountDashboard() {
               <div className="bg-amber-50 border border-amber-200 rounded-xl px-5 py-4 flex items-start gap-3">
                 <Clock className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-medium text-amber-800">Paiement en attente de verification</p>
+                  <p className="text-sm font-medium text-amber-800">Paiement en attente de vérification</p>
                   <p className="text-[13px] text-amber-700 mt-1">
-                    Votre paiement sera verifie sous 24h. Votre abonnement sera active des la verification.
+                    Votre paiement sera vérifié sous 24h. Votre abonnement sera activé dès la vérification.
                   </p>
                 </div>
               </div>

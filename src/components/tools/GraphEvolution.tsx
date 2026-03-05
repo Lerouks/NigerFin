@@ -18,7 +18,7 @@ export function GraphEvolution({ data }: GraphEvolutionProps) {
   return (
     <div className="bg-white border border-black/[0.06] rounded-xl p-6">
       <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
-        Evolution du remboursement
+        Évolution du remboursement
       </h3>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
@@ -57,7 +57,7 @@ export function GraphEvolution({ data }: GraphEvolutionProps) {
               }}
               formatter={((value: number, name: string) => [
                 `${value.toLocaleString('fr-FR')} FCFA`,
-                name === 'capitalRestant' ? 'Capital restant' : 'Interets cumules',
+                name === 'capitalRestant' ? 'Capital restant' : 'Intérêts cumulés',
               ]) as never}
             />
             <Area
@@ -86,7 +86,7 @@ export function GraphEvolution({ data }: GraphEvolutionProps) {
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-0.5 bg-red-500" />
-          <span className="text-[12px] text-gray-500">Interets cumules</span>
+          <span className="text-[12px] text-gray-500">Intérêts cumulés</span>
         </div>
       </div>
     </div>

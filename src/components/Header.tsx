@@ -162,13 +162,32 @@ export function Header() {
               </h1>
             </Link>
 
-            <button
-              onClick={() => setSearchOpen(true)}
-              className="p-2 hover:bg-black/5 rounded-full transition-colors"
-              aria-label="Rechercher"
-            >
-              <Search className="w-[18px] h-[18px]" />
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setSearchOpen(true)}
+                className="p-2 hover:bg-black/5 rounded-full transition-colors"
+                aria-label="Rechercher"
+              >
+                <Search className="w-[18px] h-[18px]" />
+              </button>
+              {isSignedIn ? (
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="p-2 hover:bg-black/5 rounded-full transition-colors"
+                  aria-label="Mon compte"
+                >
+                  <User className="w-[18px] h-[18px]" />
+                </button>
+              ) : (
+                <Link
+                  href="/connexion"
+                  className="p-2 hover:bg-black/5 rounded-full transition-colors"
+                  aria-label="Se connecter"
+                >
+                  <User className="w-[18px] h-[18px]" />
+                </Link>
+              )}
+            </div>
           </div>
         </div>
 

@@ -11,7 +11,7 @@ interface ResultSummaryProps {
   items: ResultItem[];
 }
 
-export function ResultSummary({ title = 'Resume', items }: ResultSummaryProps) {
+export function ResultSummary({ title = 'Résumé', items }: ResultSummaryProps) {
   if (items.length === 0) return null;
 
   return (

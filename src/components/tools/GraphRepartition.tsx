@@ -15,7 +15,7 @@ export function GraphRepartition({ capital, interest }: GraphRepartitionProps) {
 
   const data = [
     { name: 'Capital', value: capital, color: '#111111' },
-    { name: 'Interets', value: interest, color: '#d4d4d4' },
+    { name: 'Intérêts', value: interest, color: '#d4d4d4' },
   ];
 
   const capitalPercent = ((capital / total) * 100).toFixed(1);
@@ -24,7 +24,7 @@ export function GraphRepartition({ capital, interest }: GraphRepartitionProps) {
   return (
     <div className="bg-white border border-black/[0.06] rounded-xl p-6">
       <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
-        Repartition du cout
+        Répartition du coût
       </h3>
       <div className="flex items-center gap-6">
         <div className="w-40 h-40 flex-shrink-0">
@@ -69,7 +69,7 @@ export function GraphRepartition({ capital, interest }: GraphRepartitionProps) {
           <div className="flex items-center gap-3">
             <div className="w-3 h-3 rounded-full bg-[#d4d4d4]" />
             <div>
-              <p className="text-[13px] text-gray-500">Interets</p>
+              <p className="text-[13px] text-gray-500">Intérêts</p>
               <p className="text-[15px] font-semibold">{interestPercent}%</p>
             </div>
           </div>

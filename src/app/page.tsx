@@ -2,12 +2,14 @@ import { ArticleCard } from '@/components/ArticleCard';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
 import { NewsletterForm } from '@/components/NewsletterForm';
 import { PracticalTools } from '@/components/PracticalTools';
+import { getAllArticles } from '@/lib/sanity';
 import { mockArticles, marketData } from '@/data/mock-data';
 
 export const revalidate = 60;
 
-export default function HomePage() {
-  const articles = mockArticles;
+export default async function HomePage() {
+  const sanityArticles = await getAllArticles();
+  const articles = sanityArticles.length > 0 ? sanityArticles : mockArticles;
   const featuredArticle = articles[0];
   const otherArticles = articles.slice(1);
 

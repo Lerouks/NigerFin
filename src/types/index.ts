@@ -15,6 +15,7 @@ export interface Article {
   isPremium: boolean;
   readTime: number;
   tags: string[];
+  shareImage?: any;
 }
 
 export interface MarketData {
@@ -38,9 +39,10 @@ export interface Comment {
   id: string;
   article_id: string;
   user_id: string;
-  user_name: string;
+  username: string;
   content: string;
-  likes: number;
   created_at: string;
+  parent_comment_id: string | null;
+  likes: number;
   isLiked?: boolean;
 }

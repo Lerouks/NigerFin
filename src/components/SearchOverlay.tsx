@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Search, X, Clock } from 'lucide-react';
 import Link from 'next/link';
-import { mockArticles } from '@/data/mock-data';
+import type { Article } from '@/types';
 
 interface SearchOverlayProps {
   isOpen: boolean;
@@ -12,7 +12,15 @@ interface SearchOverlayProps {
 
 export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   const [query, setQuery] = useState('');
+  const [articles, setArticles] = useState<Article[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetch('/api/articles')
+      .then((res) => res.json())
+      .then(setArticles)
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -40,11 +48,11 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
 
   const filteredArticles =
     query.trim().length > 1
-      ? mockArticles.filter(
+      ? articles.filter(
           (a) =>
             a.title.toLowerCase().includes(query.toLowerCase()) ||
             a.excerpt.toLowerCase().includes(query.toLowerCase()) ||
-            a.tags.some((t) => t.toLowerCase().includes(query.toLowerCase())) ||
+            a.tags?.some((t) => t.toLowerCase().includes(query.toLowerCase())) ||
             a.category.toLowerCase().includes(query.toLowerCase())
         )
       : [];

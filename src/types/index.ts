@@ -22,6 +22,10 @@ export interface Article {
   readTime: number;
   tags: string[];
   shareImage?: any;
+  seo?: {
+    metaTitle?: string;
+    metaDescription?: string;
+  };
 }
 
 export interface MarketData {

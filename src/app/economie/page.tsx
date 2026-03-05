@@ -8,8 +8,8 @@ export const revalidate = 60;
 export const metadata: Metadata = { title: 'Économie', description: 'Actualités économiques du Niger et de l\'Afrique de l\'Ouest.' };
 
 export default async function EconomiePage() {
-  const sanityArticles = await getArticlesByCategory('Économie');
-  const articles = sanityArticles.length > 0 ? sanityArticles : mockArticles.filter((a) => a.category === 'Économie');
+  const sanityArticles = await getArticlesByCategory('economie');
+  const articles = sanityArticles.length > 0 ? sanityArticles : mockArticles.filter((a) => a.category === 'economie' || a.category === 'Économie');
   return (
     <div className="min-h-screen bg-[#fafaf9]">
       <section className="bg-[#111] text-white py-16 md:py-20">

@@ -7,8 +7,8 @@ const indices = [
   { name: 'Inflation (IPC)', value: '3,8%', change: '+0,4 pts', positive: false, numValue: 3.8 },
   { name: 'Taux directeur BCEAO', value: '3,50%', change: '0,00', positive: true, numValue: 3.5 },
   { name: 'Dette publique / PIB', value: '42,3%', change: '-1,2 pts', positive: true, numValue: 42.3 },
-  { name: 'Reserves de change', value: '4,8 mois', change: '+0,3', positive: true, numValue: 4.8 },
-  { name: 'Taux de chomage', value: '15,2%', change: '-0,8 pts', positive: true, numValue: 15.2 },
+  { name: 'Réserves de change', value: '4,8 mois', change: '+0,3', positive: true, numValue: 4.8 },
+  { name: 'Taux de chômage', value: '15,2%', change: '-0,8 pts', positive: true, numValue: 15.2 },
   { name: 'Balance commerciale', value: '-380 Mrd FCFA', change: '+45 Mrd', positive: true, numValue: -380 },
   { name: 'IDE entrants', value: '620 Mrd FCFA', change: '+12%', positive: true, numValue: 620 },
 ];
@@ -25,7 +25,7 @@ export function IndicesEconomiques() {
       {/* Chart */}
       <div className="bg-white border border-black/[0.06] rounded-xl p-6">
         <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
-          Indicateurs cles (Mrd FCFA)
+          Indicateurs clés (Mrd FCFA)
         </h3>
         <div className="h-52">
           <ResponsiveContainer width="100%" height="100%">
@@ -60,7 +60,7 @@ export function IndicesEconomiques() {
         ))}
       </div>
 
-      <p className="text-[12px] text-gray-400">* Donnees indicatives. Sources : BCEAO, INS Niger, FMI.</p>
+      <p className="text-[12px] text-gray-400">* Données indicatives. Sources : BCEAO, INS Niger, FMI.</p>
     </div>
   );
 }

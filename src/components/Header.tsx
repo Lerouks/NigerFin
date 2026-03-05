@@ -151,6 +151,7 @@ export function Header() {
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="lg:hidden p-1.5 -ml-1.5 hover:bg-black/5 rounded-lg transition-colors"
+              aria-label={mobileMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -164,6 +165,7 @@ export function Header() {
             <button
               onClick={() => setSearchOpen(true)}
               className="p-2 hover:bg-black/5 rounded-full transition-colors"
+              aria-label="Rechercher"
             >
               <Search className="w-[18px] h-[18px]" />
             </button>

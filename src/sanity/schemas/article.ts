@@ -55,6 +55,14 @@ export const article = defineType({
       title: 'Image principale',
       type: 'image',
       options: { hotspot: true },
+      fields: [
+        {
+          name: 'alt',
+          title: 'Texte alternatif',
+          type: 'string',
+          description: 'Important pour le SEO et l\'accessibilité',
+        },
+      ],
     }),
     defineField({
       name: 'publishedAt',
@@ -112,6 +120,15 @@ export const article = defineType({
       of: [{ type: 'string' }],
       options: { layout: 'tags' },
     }),
+    defineField({
+      name: 'seo',
+      title: 'SEO',
+      type: 'object',
+      fields: [
+        { name: 'metaTitle', title: 'Titre SEO', type: 'string' },
+        { name: 'metaDescription', title: 'Description SEO', type: 'text', rows: 2 },
+      ],
+    }),
   ],
   preview: {
     select: {
@@ -119,11 +136,12 @@ export const article = defineType({
       author: 'author.name',
       media: 'mainImage',
       category: 'category',
-      isPremium: 'isPremium',
+      contentType: 'contentType',
     },
-    prepare({ title, author, media, category, isPremium }) {
+    prepare({ title, author, media, category, contentType }) {
+      const badge = contentType === 'pro' ? '🔒 PRO — ' : contentType === 'premium' ? '🔒 ' : '';
       return {
-        title: `${isPremium ? '🔒 ' : ''}${title}`,
+        title: `${badge}${title}`,
         subtitle: `${category || ''} ${author ? `— ${author}` : ''}`,
         media,
       };

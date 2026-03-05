@@ -4,8 +4,7 @@ import { useState } from 'react';
 import { Check, Star, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
-import { STRIPE_PLANS, getMonthlyEquivalent } from '@/lib/stripe';
-import type { BillingCycle } from '@/types';
+import { TIERS, getMonthlyEquivalent, type TierId, type BillingCycle } from '@/config/pricing';
 
 const billingCycles: { id: BillingCycle; label: string }[] = [
   { id: 'monthly', label: 'Mensuel' },
@@ -17,7 +16,7 @@ const plans = [
   {
     id: 'lecteur' as const,
     name: 'Lecteur',
-    tier: null as null,
+    tier: null as TierId | null,
     features: [
       'Accès aux articles gratuits',
       '3 articles premium / mois',
@@ -28,26 +27,14 @@ const plans = [
   {
     id: 'standard' as const,
     name: 'Standard',
-    tier: 'standard' as const,
-    features: [
-      'Accès illimité aux articles',
-      'Analyses et rapports complets',
-      'Newsletter hebdomadaire',
-      'Alertes actualités majeures',
-      'Accès aux outils premium',
-    ],
+    tier: 'standard' as TierId | null,
+    features: TIERS.standard.features,
   },
   {
     id: 'pro' as const,
     name: 'Pro',
-    tier: 'pro' as const,
-    features: [
-      'Tout le plan Standard',
-      'Rapports exclusifs PDF',
-      'Alertes personnalisées',
-      'Archives complètes',
-      'Support prioritaire 24h/7j',
-    ],
+    tier: 'pro' as TierId | null,
+    features: TIERS.pro.features,
   },
 ];
 
@@ -56,26 +43,36 @@ export function PricingContent() {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
-  const handleSubscribe = async (tier: 'standard' | 'pro') => {
+  const handleSubscribe = async (tier: TierId) => {
     if (!isSignedIn) return;
     setLoadingPlan(tier);
 
     try {
-      const plan = STRIPE_PLANS[tier][billingCycle];
-      const res = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          priceId: plan.priceId,
-          tier,
-          billingCycle,
-        }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
+      const plan = TIERS[tier].plans[billingCycle];
+
+      // If Stripe is configured, try Stripe checkout
+      if (plan.priceId) {
+        const res = await fetch('/api/stripe/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            priceId: plan.priceId,
+            tier,
+            billingCycle,
+          }),
+        });
+        const data = await res.json();
+        if (data.url) {
+          window.location.href = data.url;
+          return;
+        }
       }
+
+      // Fallback: redirect to local payment page (Nita/Amana)
+      window.location.href = `/paiement?tier=${tier}&cycle=${billingCycle}`;
     } catch {
+      window.location.href = `/paiement?tier=${tier}&cycle=${billingCycle}`;
+    } finally {
       setLoadingPlan(null);
     }
   };
@@ -123,10 +120,10 @@ export function PricingContent() {
                 ? getMonthlyEquivalent(plan.tier, billingCycle)
                 : 0;
               const fullPrice = plan.tier
-                ? STRIPE_PLANS[plan.tier][billingCycle].amount
+                ? TIERS[plan.tier].plans[billingCycle].amount
                 : 0;
               const savings = plan.tier && billingCycle !== 'monthly'
-                ? (STRIPE_PLANS[plan.tier][billingCycle] as any).savings
+                ? TIERS[plan.tier].plans[billingCycle].savings
                 : null;
 
               return (
@@ -257,7 +254,7 @@ export function PricingContent() {
               },
               {
                 q: 'Quels moyens de paiement acceptez-vous ?',
-                a: 'Nous acceptons les paiements par carte bancaire via Stripe. Le paiement est sécurisé et chiffré.',
+                a: 'Nous acceptons les paiements via Nita Transfert d\'Argent et Amana Transfert d\'Argent. Envoyez le montant exact au numéro indiqué, puis soumettez votre numéro de transaction pour activer votre abonnement.',
               },
               {
                 q: 'Puis-je annuler mon abonnement ?',

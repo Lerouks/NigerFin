@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { Clock, ArrowUpRight } from 'lucide-react';
 import type { Article } from '@/types';
 import { formatDate } from '@/lib/utils';
+import { urlFor } from '@/lib/sanity';
 import { articleImages, fallbackImageUrl } from '@/data/mock-data';
 
 interface ArticleCardProps {
@@ -11,6 +12,10 @@ interface ArticleCardProps {
 }
 
 function getImageUrl(article: Article): string {
+  if (article.mainImage) {
+    const url = urlFor(article.mainImage)?.width(1200).height(600).url();
+    if (url) return url;
+  }
   return articleImages[article.slug.current] || fallbackImageUrl;
 }
 

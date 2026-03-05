@@ -1,7 +1,15 @@
+const path = require('path');
 const { withSentryConfig } = require('@sentry/nextjs');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  webpack: (config) => {
+    config.resolve.alias['react/compiler-runtime'] = path.resolve(
+      __dirname,
+      'src/lib/react-compiler-runtime-shim.js'
+    );
+    return config;
+  },
   images: {
     remotePatterns: [
       {

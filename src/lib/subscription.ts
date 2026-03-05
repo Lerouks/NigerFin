@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { createBrowserSupabaseClient } from './supabase-browser';
 
 export type SubscriptionTier = 'lecteur' | 'standard' | 'premium';
 
@@ -100,6 +100,7 @@ export const subscriptionPlans: SubscriptionPlan[] = [
 ];
 
 export async function getUserSubscription(userId: string): Promise<SubscriptionTier> {
+  const supabase = createBrowserSupabaseClient();
   const { data } = await supabase
     .from('subscriptions')
     .select('tier, status')
@@ -116,6 +117,7 @@ export async function getPremiumArticlesUsed(userId: string): Promise<number> {
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
 
+  const supabase = createBrowserSupabaseClient();
   const { count } = await supabase
     .from('article_access_log')
     .select('*', { count: 'exact', head: true })

@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase';
 import { marketData as fallbackData } from '@/data/mock-data';
 
-export const revalidate = 60;
+// No static cache — data must propagate instantly after admin updates
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const supabase = await createServerSupabaseClient();
@@ -13,6 +14,7 @@ export async function GET() {
   const { data, error } = await supabase
     .from('market_data')
     .select('*')
+    .order('type')
     .order('name');
 
   if (error || !data || data.length === 0) {
@@ -27,6 +29,9 @@ export async function GET() {
     changePercent: Number(item.change_percent),
     type: item.type as 'currency' | 'commodity' | 'index',
     symbol: item.symbol,
+    unit: item.unit || '',
+    source: item.source || '',
+    updatedAt: item.updated_at || null,
   }));
 
   return NextResponse.json(mapped);

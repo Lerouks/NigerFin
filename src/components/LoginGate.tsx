@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import Link from 'next/link';
 
@@ -13,59 +14,78 @@ interface LoginGateProps {
 export function LoginGate({
   isOpen,
   onClose,
-  title = 'Contenu Premium',
-  message = "Connectez-vous pour accéder à ce contenu",
+  title = 'Rejoignez NFI Report',
+  message = 'Connectez-vous pour accéder à cette analyse exclusive.',
 }: LoginGateProps) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKey);
+    dialogRef.current?.focus();
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-md w-full p-8 relative shadow-2xl">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+    >
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={onClose} />
+
+      <div
+        ref={dialogRef}
+        tabIndex={-1}
+        className="relative bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl"
+      >
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors"
+          aria-label="Fermer"
         >
-          <X className="w-6 h-6" />
+          <X className="w-5 h-5" />
         </button>
 
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold mb-2">{title}</h2>
-          <p className="text-gray-600 text-sm">{message}</p>
+        <div className="text-center mb-6">
+          <span className="text-[22px] font-bold tracking-[-0.03em]">NFI Report</span>
+        </div>
+
+        <div className="text-center mb-6">
+          <h2 className="text-xl font-bold mb-2">{title}</h2>
+          <p className="text-gray-500 text-[14px]">{message}</p>
         </div>
 
         <Link
           href="/connexion"
-          className="block w-full bg-[#111] text-white py-3 rounded-lg hover:bg-[#333] transition-colors text-center"
+          className="block w-full bg-[#111] text-white py-3 rounded-lg hover:bg-[#333] active:bg-[#000] transition-colors text-center text-[14px] font-medium"
         >
           Se connecter
         </Link>
 
-        <div className="mt-4">
-          <Link
-            href="/inscription"
-            className="block w-full border border-black/[0.08] py-3 rounded-lg hover:bg-gray-50 transition-colors text-sm text-center"
-          >
-            Créer un compte gratuitement
-          </Link>
-        </div>
+        <Link
+          href="/inscription"
+          className="block w-full mt-3 border border-black/[0.08] py-3 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors text-[14px] text-center"
+        >
+          Créer un compte — c&apos;est gratuit
+        </Link>
 
         <div className="mt-6 pt-6 border-t border-black/[0.05]">
-          <Link
-            href="/pricing"
-            className="block text-center text-sm text-gray-500 hover:text-black transition-colors"
-          >
-            Voir nos abonnements Premium &rarr;
-          </Link>
-        </div>
-
-        <div className="mt-6 bg-[#fafaf9] p-4 rounded-lg">
-          <h4 className="font-semibold text-sm mb-2">Avec un compte NFI REPORT :</h4>
-          <ul className="space-y-1.5 text-xs text-gray-600">
-            <li>&#10003; Accès illimité aux articles premium</li>
-            <li>&#10003; Commentez et interagissez avec la communauté</li>
-            <li>&#10003; Recevez notre newsletter quotidienne</li>
-            <li>&#10003; Suivez les sujets qui vous intéressent</li>
-          </ul>
+          <div className="bg-[#fafaf9] p-4 rounded-lg">
+            <h4 className="font-semibold text-[13px] mb-2">Avec un compte NFI Report :</h4>
+            <ul className="space-y-1.5 text-[12px] text-gray-600">
+              <li className="flex items-center gap-2"><span className="text-emerald-500">&#10003;</span>Accédez aux analyses premium</li>
+              <li className="flex items-center gap-2"><span className="text-emerald-500">&#10003;</span>Commentez et interagissez avec la communauté</li>
+              <li className="flex items-center gap-2"><span className="text-emerald-500">&#10003;</span>Recevez notre newsletter quotidienne</li>
+              <li className="flex items-center gap-2"><span className="text-emerald-500">&#10003;</span>Suivez les sujets qui vous intéressent</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>

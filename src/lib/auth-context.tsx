@@ -1,8 +1,8 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
-import type { User, Session } from '@supabase/supabase-js';
+import { createBrowserSupabaseClient, isSupabaseConfigured } from '@/lib/supabase-browser';
+import type { User, Session, SupabaseClient } from '@supabase/supabase-js';
 
 interface AuthContextType {
   user: User | null;
@@ -27,10 +27,14 @@ const AuthContext = createContext<AuthContextType>({
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [supabase] = useState(() => createBrowserSupabaseClient());
+  const [isLoading, setIsLoading] = useState(!isSupabaseConfigured ? false : true);
+  const [supabase] = useState<SupabaseClient | null>(() =>
+    isSupabaseConfigured ? createBrowserSupabaseClient() : null
+  );
 
   useEffect(() => {
+    if (!supabase) return;
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -51,11 +55,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase]);
 
   const signIn = async (email: string, password: string) => {
+    if (!supabase) return { error: { message: 'Supabase not configured' } };
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     return { error };
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
+    if (!supabase) return { error: { message: 'Supabase not configured' } };
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -67,6 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
+    if (!supabase) return;
     await supabase.auth.signOut();
   };
 

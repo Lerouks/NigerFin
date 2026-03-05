@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Check, Star, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
-import { TIERS, getMonthlyEquivalent, type TierId, type BillingCycle } from '@/config/pricing';
+import { TIERS, getMonthlyEquivalent, formatPrice, cycleMonths, type TierId, type BillingCycle } from '@/config/pricing';
 
 const billingCycles: { id: BillingCycle; label: string }[] = [
   { id: 'monthly', label: 'Mensuel' },
@@ -42,6 +42,25 @@ export function PricingContent() {
   const { isSignedIn, userRole } = useAuth();
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [dynamicPrices, setDynamicPrices] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    fetch('/api/prices')
+      .then((r) => r.json())
+      .then((data) => setDynamicPrices(data))
+      .catch(() => {});
+  }, []);
+
+  // Helper to get the actual price (dynamic override or default)
+  const getPrice = (tier: TierId, cycle: BillingCycle): number => {
+    const key = `${tier}_${cycle}`;
+    return dynamicPrices[key] ?? TIERS[tier].plans[cycle].amount;
+  };
+
+  const getMonthly = (tier: TierId, cycle: BillingCycle): number => {
+    const price = getPrice(tier, cycle);
+    return Math.round(price / cycleMonths(cycle));
+  };
 
   const handleSubscribe = async (tier: TierId) => {
     if (!isSignedIn) return;
@@ -117,10 +136,10 @@ export function PricingContent() {
               const isPro = plan.id === 'pro';
               const isCurrentPlan = userRole === plan.id || (!userRole && plan.id === 'lecteur');
               const monthlyPrice = plan.tier
-                ? getMonthlyEquivalent(plan.tier, billingCycle)
+                ? getMonthly(plan.tier, billingCycle)
                 : 0;
               const fullPrice = plan.tier
-                ? TIERS[plan.tier].plans[billingCycle].amount
+                ? getPrice(plan.tier, billingCycle)
                 : 0;
               const savings = plan.tier && billingCycle !== 'monthly'
                 ? TIERS[plan.tier].plans[billingCycle].savings

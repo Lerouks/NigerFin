@@ -2,8 +2,9 @@ import { createClient, type SanityClient } from '@sanity/client';
 import imageUrlBuilder from '@sanity/image-url';
 import type { Article } from '@/types';
 
-// Check if Sanity is configured
-export const isSanityConfigured = !!(process.env.NEXT_PUBLIC_SANITY_PROJECT_ID);
+// Check if Sanity is configured with a valid project ID (a-z, 0-9, dashes only)
+const sanityProjectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || '';
+export const isSanityConfigured = /^[a-z0-9-]+$/.test(sanityProjectId) && sanityProjectId.length > 0;
 
 // Lazy-initialize clients to avoid validation errors when env vars are missing
 let _sanityClient: SanityClient | null = null;
@@ -36,11 +37,15 @@ function getPreviewClient(): SanityClient | null {
   return _previewClient;
 }
 
-// Backwards-compatible export
+// Backwards-compatible export (safe: returns no-op if Sanity not configured)
 export const sanityClient = new Proxy({} as SanityClient, {
   get(_target, prop) {
     const client = getSanityClient();
-    if (!client) throw new Error('Sanity is not configured');
+    if (!client) {
+      // Return a no-op function for .fetch() etc. to prevent build crashes
+      if (typeof prop === 'string') return () => Promise.resolve(null);
+      return undefined;
+    }
     return (client as any)[prop];
   },
 });
@@ -187,7 +192,13 @@ export async function getRelatedArticles(currentSlug: string, category: string, 
 
 export async function getAllArticleSlugs(): Promise<string[]> {
   if (!isSanityConfigured) return [];
-  return sanityClient.fetch(articleSlugsQuery);
+  try {
+    const client = getSanityClient();
+    if (!client) return [];
+    return await client.fetch(articleSlugsQuery);
+  } catch {
+    return [];
+  }
 }
 
 // ─── Site Content Data Fetching ─────────────────────────────────────────────

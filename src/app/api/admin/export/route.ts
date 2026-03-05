@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   if (type === 'payments') {
     const { data } = await serviceClient
       .from('payment_requests')
-      .select('*, user_profiles!payment_requests_user_id_fkey(email, full_name)')
+      .select('*, user_profiles!payment_requests_user_profile_fkey(email, full_name)')
       .order('created_at', { ascending: false });
 
     if (!data) return NextResponse.json({ error: 'No data' }, { status: 404 });

@@ -5,12 +5,13 @@ import { useRouter } from 'next/navigation';
 import {
   Users, BarChart3, Shield, Loader2, Search, CreditCard, CheckCircle, XCircle,
   Clock, Download, TrendingUp, TrendingDown, DollarSign, Activity, Ban,
-  Unlock, Settings, FileText, AlertTriangle, ChevronDown, ChevronUp, Newspaper,
+  Unlock, Settings, FileText, AlertTriangle, ChevronDown, ChevronUp, Newspaper, LineChart,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { formatPrice, cycleLabel, TIERS, CURRENCY, type BillingCycle, type TierId } from '@/config/pricing';
 import { ArticlesManager } from './ArticlesManager';
 import { CategoriesManager } from './CategoriesManager';
+import { MarketDataManager } from './MarketDataManager';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -81,7 +82,7 @@ interface DynamicPrice {
   updated_at: string;
 }
 
-type TabId = 'overview' | 'articles' | 'categories' | 'users' | 'payments' | 'pricing' | 'audit';
+type TabId = 'overview' | 'articles' | 'categories' | 'market' | 'users' | 'payments' | 'pricing' | 'audit';
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -271,6 +272,7 @@ export function AdminDashboard() {
     { id: 'overview', label: 'Vue d\'ensemble', icon: BarChart3 },
     { id: 'articles', label: 'Articles', icon: Newspaper },
     { id: 'categories', label: 'Catégories', icon: FileText },
+    { id: 'market', label: 'Marchés', icon: LineChart },
     { id: 'users', label: 'Utilisateurs', icon: Users },
     { id: 'payments', label: 'Paiements', icon: CreditCard, badge: stats.pendingPayments },
     { id: 'pricing', label: 'Tarifs', icon: DollarSign },
@@ -442,6 +444,9 @@ export function AdminDashboard() {
 
         {/* ─── CATEGORIES TAB ──────────────────────────────────── */}
         {activeTab === 'categories' && <CategoriesManager />}
+
+        {/* ─── MARKET DATA TAB ──────────────────────────────────── */}
+        {activeTab === 'market' && <MarketDataManager />}
 
         {/* ─── USERS TAB ──────────────────────────────────────────── */}
         {activeTab === 'users' && (

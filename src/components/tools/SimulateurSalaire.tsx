@@ -168,13 +168,13 @@ function salaryPhrase(c: ReturnType<typeof compute>) {
   const totalRet = fmt(c.cnssSal + c.inamSal + c.its);
 
   if (c.tauxEffectif < 10) {
-    return `Avec un salaire brut de ${b} F CFA, vos prelevements restent faibles. Vous percevez ${n} F CFA nets par mois, soit seulement ${tx}% de retenues au total.`;
+    return `Avec un salaire brut de ${b} F CFA, vos prélèvements restent faibles. Vous percevez ${n} F CFA nets par mois, soit seulement ${tx}% de retenues au total.`;
   } else if (c.tauxEffectif < 20) {
-    return `Pour un brut de ${b} F CFA, l'Etat et les organismes sociaux retiennent ${totalRet} F CFA au total, dont ${i} F CFA d'ITS. Vous touchez ${n} F CFA nets chaque mois.`;
+    return `Pour un brut de ${b} F CFA, l'État et les organismes sociaux retiennent ${totalRet} F CFA au total, dont ${i} F CFA d'ITS. Vous touchez ${n} F CFA nets chaque mois.`;
   } else if (c.tauxEffectif < 30) {
-    return `Sur ${b} F CFA bruts, plus d'un quart est preleve entre l'ITS (${i} F CFA), la CNSS (${cn} F CFA) et l'INAM (${inam} F CFA). Votre salaire net est de ${n} F CFA.`;
+    return `Sur ${b} F CFA bruts, plus d'un quart est prélevé entre l'ITS (${i} F CFA), la CNSS (${cn} F CFA) et l'INAM (${inam} F CFA). Votre salaire net est de ${n} F CFA.`;
   }
-  return `A ce niveau de salaire, les prelevements representent plus de 30% du brut. Sur ${b} F CFA, vous percevez ${n} F CFA nets apres ${i} F CFA d'ITS, ${cn} F CFA de CNSS et ${inam} F CFA d'INAM.`;
+  return `À ce niveau de salaire, les prélèvements représentent plus de 30% du brut. Sur ${b} F CFA, vous percevez ${n} F CFA nets après ${i} F CFA d'ITS, ${cn} F CFA de CNSS et ${inam} F CFA d'INAM.`;
 }
 
 function employerPhrase(c: ReturnType<typeof compute>) {
@@ -187,11 +187,11 @@ function employerPhrase(c: ReturnType<typeof compute>) {
   const its = fmt(c.its);
 
   if (c.surcout < 20) {
-    return `Pour un salarie a ${b} F CFA bruts, votre cout reel mensuel est de ${ct} F CFA, soit ${sc}% au-dessus du salaire negocie.`;
+    return `Pour un salarié à ${b} F CFA bruts, votre coût réel mensuel est de ${ct} F CFA, soit ${sc}% au-dessus du salaire négocié.`;
   } else if (c.surcout <= 25) {
-    return `Embaucher a ${b} F CFA bruts vous revient a ${ct} F CFA par mois une fois les charges patronales incluses. Vous versez ${cnss} F CFA a la CNSS, ${inam} F CFA a l'INAM et ${its} F CFA d'ITS a la DGI.`;
+    return `Embaucher à ${b} F CFA bruts vous revient à ${ct} F CFA par mois une fois les charges patronales incluses. Vous versez ${cnss} F CFA à la CNSS, ${inam} F CFA à l'INAM et ${its} F CFA d'ITS à la DGI.`;
   }
-  return `Les charges patronales representent plus du quart du salaire brut. Un brut de ${b} F CFA engendre un cout total de ${ct} F CFA, soit ${ch} F CFA de charges sociales en dehors du salaire negocie.`;
+  return `Les charges patronales représentent plus du quart du salaire brut. Un brut de ${b} F CFA engendre un coût total de ${ct} F CFA, soit ${ch} F CFA de charges sociales en dehors du salaire négocié.`;
 }
 
 /* ─── Main component ─── */
@@ -253,7 +253,7 @@ export default function SimulateurSalaireNiger() {
       {/* ─── Toggle ─── */}
       <div style={{ ...S.card, padding: '6px', display: 'flex', gap: 4 }}>
         <button onClick={() => setMode('salarie')} style={S.toggle(mode === 'salarie')}>
-          Je suis salarie
+          Je suis salarié
         </button>
         <button onClick={() => setMode('employeur')} style={S.toggle(mode === 'employeur')}>
           Je suis employeur
@@ -282,7 +282,7 @@ export default function SimulateurSalaireNiger() {
           {/* Main results */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
             <div style={S.cardDark}>
-              <div style={{ ...S.label, color: 'rgba(255,255,255,0.4)' }}>Salaire NET percu</div>
+              <div style={{ ...S.label, color: 'rgba(255,255,255,0.4)' }}>Salaire NET perçu</div>
               <div style={S.bigVal}><AnimVal value={c.salaireNet} /></div>
             </div>
             <div style={{ ...S.cardDark, background: '#1a1a1a' }}>
@@ -293,7 +293,7 @@ export default function SimulateurSalaireNiger() {
 
           {/* Distribution bar */}
           <div style={S.card}>
-            <div style={S.sectionTitle}>Repartition du brut</div>
+            <div style={S.sectionTitle}>Répartition du brut</div>
             <div style={{ display: 'flex', gap: 2, borderRadius: 7, overflow: 'hidden', marginBottom: 16 }}>
               <div style={S.barSegment('#111', (c.salaireNet / c.brut) * 100)} />
               <div style={S.barSegment('#ef4444', (c.its / c.brut) * 100)} />
@@ -321,31 +321,31 @@ export default function SimulateurSalaireNiger() {
 
           {/* Warning */}
           <div style={S.warning}>
-            <span role="img" aria-label="attention">&#9888;&#65039;</span> Simulation indicative basee sur le bareme fiscal 2026. Les montants peuvent varier selon votre situation personnelle (primes, avantages en nature, regimes speciaux, conventions collectives, etc.).
+            <span role="img" aria-label="attention">&#9888;&#65039;</span> Simulation indicative basée sur le barème fiscal 2026. Les montants peuvent varier selon votre situation personnelle (primes, avantages en nature, régimes spéciaux, conventions collectives, etc.).
           </div>
 
           {/* Calculation table */}
           <div style={S.card}>
-            <div style={S.sectionTitle}>Detail du calcul</div>
+            <div style={S.sectionTitle}>Détail du calcul</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <div style={{ ...S.row, ...S.rowBg }}>
                 <span style={S.rowLabel}>Salaire brut</span>
                 <span style={S.rowVal}><AnimVal value={c.brut} /></span>
               </div>
               <div style={{ ...S.row, ...S.rowBg }}>
-                <span style={S.rowLabel}>- CNSS salarie (3,6% · plafonne a 500 000 F CFA)</span>
+                <span style={S.rowLabel}>- CNSS salarié (3,6% · plafonné à 500 000 F CFA)</span>
                 <span style={S.rowVal}><AnimVal value={c.cnssSal} /></span>
               </div>
               <div style={{ ...S.row, ...S.rowBg }}>
-                <span style={S.rowLabel}>- INAM salarie (2,5%)</span>
+                <span style={S.rowLabel}>- INAM salarié (2,5%)</span>
                 <span style={S.rowVal}><AnimVal value={c.inamSal} /></span>
               </div>
               <div style={{ ...S.row, background: '#f3f4f6' }}>
-                <span style={{ ...S.rowLabel, fontWeight: 600, color: '#374151' }}>= Net apres cotisations</span>
+                <span style={{ ...S.rowLabel, fontWeight: 600, color: '#374151' }}>= Net après cotisations</span>
                 <span style={S.rowVal}><AnimVal value={c.netRetenues} /></span>
               </div>
               <div style={{ ...S.row, ...S.rowBg }}>
-                <span style={S.rowLabel}>- Abattement forfaitaire 20% (frais professionnels presumes)</span>
+                <span style={S.rowLabel}>- Abattement forfaitaire 20% (frais professionnels présumés)</span>
                 <span style={S.rowVal}><AnimVal value={c.abattement} /></span>
               </div>
               <div style={{ ...S.row, background: '#f3f4f6' }}>
@@ -357,11 +357,11 @@ export default function SimulateurSalaireNiger() {
                 <span style={S.rowVal}><AnimVal value={c.its} /></span>
               </div>
               <div style={{ ...S.row, ...S.rowDark }}>
-                <span style={{ fontSize: 14, fontWeight: 700 }}>= SALAIRE NET PERCU</span>
+                <span style={{ fontSize: 14, fontWeight: 700 }}>= SALAIRE NET PERÇU</span>
                 <span style={{ fontSize: 18, fontWeight: 700 }}><AnimVal value={c.salaireNet} /></span>
               </div>
               <div style={{ ...S.row, ...S.rowBg, marginTop: 4 }}>
-                <span style={S.rowLabel}>Taux effectif de prelevement</span>
+                <span style={S.rowLabel}>Taux effectif de prélèvement</span>
                 <span style={{ ...S.rowVal, color: '#ef4444' }}>{c.tauxEffectif.toFixed(2)}%</span>
               </div>
             </div>
@@ -370,7 +370,7 @@ export default function SimulateurSalaireNiger() {
           {/* ITS accordion */}
           <div style={S.accordion}>
             <button onClick={() => setItsOpen(!itsOpen)} style={S.accordionHead}>
-              <span>Detail ITS par tranche</span>
+              <span>Détail ITS par tranche</span>
               <span style={{ fontSize: 18, transition: 'transform 0.2s', transform: itsOpen ? 'rotate(180deg)' : 'rotate(0)' }}>&#9660;</span>
             </button>
             {itsOpen && (
@@ -383,7 +383,7 @@ export default function SimulateurSalaireNiger() {
                     }}>
                       <span style={{ fontSize: 13, color: '#6b7280' }}>
                         {tr.max === Infinity
-                          ? `Au-dela de ${fmt(tr.min)} F CFA`
+                          ? `Au-delà de ${fmt(tr.min)} F CFA`
                           : `${fmt(tr.min)} - ${fmt(tr.max)} F CFA`}
                         {' '}({(tr.rate * 100).toFixed(0)}%)
                       </span>
@@ -428,7 +428,7 @@ export default function SimulateurSalaireNiger() {
           {/* Main results */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
             <div style={S.cardDark}>
-              <div style={{ ...S.label, color: 'rgba(255,255,255,0.4)' }}>Cout total employeur</div>
+              <div style={{ ...S.label, color: 'rgba(255,255,255,0.4)' }}>Coût total employeur</div>
               <div style={S.bigVal}><AnimVal value={c.coutTotal} /></div>
             </div>
             <div style={{ ...S.cardDark, background: '#1a1a1a' }}>
@@ -439,7 +439,7 @@ export default function SimulateurSalaireNiger() {
 
           {/* Distribution bar */}
           <div style={S.card}>
-            <div style={S.sectionTitle}>Repartition du cout total</div>
+            <div style={S.sectionTitle}>Répartition du coût total</div>
             <div style={{ display: 'flex', gap: 2, borderRadius: 7, overflow: 'hidden', marginBottom: 16 }}>
               <div style={S.barSegment('#111', (c.brut / c.coutTotal) * 100)} />
               <div style={S.barSegment('#3b82f6', (c.cnssPat / c.coutTotal) * 100)} />
@@ -465,19 +465,19 @@ export default function SimulateurSalaireNiger() {
 
           {/* Warning */}
           <div style={S.warning}>
-            <span role="img" aria-label="attention">&#9888;&#65039;</span> Simulation indicative basee sur le bareme fiscal 2026. Les montants peuvent varier selon votre situation personnelle (primes, avantages en nature, regimes speciaux, conventions collectives, etc.).
+            <span role="img" aria-label="attention">&#9888;&#65039;</span> Simulation indicative basée sur le barème fiscal 2026. Les montants peuvent varier selon votre situation personnelle (primes, avantages en nature, régimes spéciaux, conventions collectives, etc.).
           </div>
 
           {/* Calculation table */}
           <div style={S.card}>
-            <div style={S.sectionTitle}>Detail du cout employeur</div>
+            <div style={S.sectionTitle}>Détail du coût employeur</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <div style={{ ...S.row, ...S.rowBg }}>
-                <span style={S.rowLabel}>Salaire brut negocie</span>
+                <span style={S.rowLabel}>Salaire brut négocié</span>
                 <span style={S.rowVal}><AnimVal value={c.brut} /></span>
               </div>
               <div style={{ ...S.row, ...S.rowBg }}>
-                <span style={S.rowLabel}>+ CNSS patronal (16,4% · plafonne a 500 000 F CFA)</span>
+                <span style={S.rowLabel}>+ CNSS patronal (16,4% · plafonné à 500 000 F CFA)</span>
                 <span style={S.rowVal}><AnimVal value={c.cnssPat} /></span>
               </div>
               <div style={{ ...S.row, ...S.rowBg }}>
@@ -485,11 +485,11 @@ export default function SimulateurSalaireNiger() {
                 <span style={S.rowVal}><AnimVal value={c.inamPat} /></span>
               </div>
               <div style={{ ...S.row, ...S.rowDark }}>
-                <span style={{ fontSize: 14, fontWeight: 700 }}>= COUT TOTAL EMPLOYEUR</span>
+                <span style={{ fontSize: 14, fontWeight: 700 }}>= COÛT TOTAL EMPLOYEUR</span>
                 <span style={{ fontSize: 18, fontWeight: 700 }}><AnimVal value={c.coutTotal} /></span>
               </div>
               <div style={{ ...S.row, ...S.rowBg, marginTop: 4 }}>
-                <span style={S.rowLabel}>Surcout par rapport au brut</span>
+                <span style={S.rowLabel}>Surcoût par rapport au brut</span>
                 <span style={{ ...S.rowVal, color: '#ef4444' }}>{c.surcout.toFixed(2)}%</span>
               </div>
             </div>
@@ -497,10 +497,10 @@ export default function SimulateurSalaireNiger() {
 
           {/* Ventilation */}
           <div style={S.card}>
-            <div style={S.sectionTitle}>Ventilation du cout total</div>
+            <div style={S.sectionTitle}>Ventilation du coût total</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <div style={{ ...S.row, ...S.rowBg }}>
-                <span style={S.rowLabel}>Net en main du salarie</span>
+                <span style={S.rowLabel}>Net en main du salarié</span>
                 <span style={S.rowVal}><AnimVal value={c.salaireNet} /></span>
               </div>
               <div style={{ ...S.row, ...S.rowBg }}>
@@ -508,7 +508,7 @@ export default function SimulateurSalaireNiger() {
                 <span style={S.rowVal}><AnimVal value={c.cnssSal + c.inamSal} /></span>
               </div>
               <div style={{ ...S.row, ...S.rowBg }}>
-                <span style={S.rowLabel}>ITS verse a l'Etat</span>
+                <span style={S.rowLabel}>ITS versé à l'État</span>
                 <span style={S.rowVal}><AnimVal value={c.its} /></span>
               </div>
               <div style={{ ...S.row, ...S.rowBg }}>
@@ -531,11 +531,11 @@ export default function SimulateurSalaireNiger() {
                 <span style={S.rowVal}><AnimVal value={c.inamVerser} /></span>
               </div>
               <div style={{ ...S.row, ...S.rowBg }}>
-                <span style={S.rowLabel}>DGI (ITS precompte)</span>
+                <span style={S.rowLabel}>DGI (ITS précompté)</span>
                 <span style={S.rowVal}><AnimVal value={c.its} /></span>
               </div>
               <div style={{ ...S.row, ...S.rowDark, marginTop: 4 }}>
-                <span style={{ fontSize: 14, fontWeight: 700 }}>Total decaisse</span>
+                <span style={{ fontSize: 14, fontWeight: 700 }}>Total décaissé</span>
                 <span style={{ fontSize: 18, fontWeight: 700 }}><AnimVal value={c.coutTotal} /></span>
               </div>
             </div>
@@ -546,7 +546,7 @@ export default function SimulateurSalaireNiger() {
             <div style={S.sectionTitle}>Projection annuelle (x 12)</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <div style={{ ...S.row, ...S.rowBg }}>
-                <span style={S.rowLabel}>Cout total / an</span>
+                <span style={S.rowLabel}>Coût total / an</span>
                 <span style={S.rowVal}><AnimVal value={c.coutTotal * 12} /></span>
               </div>
               <div style={{ ...S.row, ...S.rowBg }}>
@@ -561,7 +561,7 @@ export default function SimulateurSalaireNiger() {
       {/* ─── Legal footer ─── */}
       {c && (
         <div style={S.footer}>
-          Ces resultats sont fournis a titre purement indicatif sur la base de l'Ordonnance N°2025-44 du 31 decembre 2025 portant loi de finances pour l'annee budgetaire 2026 (Art. 150 ITS nouveau). Ils ne constituent pas un avis fiscal, comptable ou juridique et ne sauraient engager la responsabilite de NFI REPORT. Consultez un expert-comptable agree ou l'administration fiscale nigerienne (DGI) pour toute situation specifique. CNSS salarie 3,6% / patronal 16,4% · base plafonnee a 500 000 F CFA/mois · INAM salarie 2,5% / patronal 7,5% · sans plafond · Abattement forfaitaire 20% · nfireport.com
+          Ces résultats sont fournis à titre purement indicatif sur la base de l'Ordonnance N°2025-44 du 31 décembre 2025 portant loi de finances pour l'année budgétaire 2026 (Art. 150 ITS nouveau). Ils ne constituent pas un avis fiscal, comptable ou juridique et ne sauraient engager la responsabilité de NFI REPORT. Consultez un expert-comptable agréé ou l'administration fiscale nigérienne (DGI) pour toute situation spécifique. CNSS salarié 3,6% / patronal 16,4% · base plafonnée à 500 000 F CFA/mois · INAM salarié 2,5% / patronal 7,5% · sans plafond · Abattement forfaitaire 20% · nfireport.com
         </div>
       )}
     </div>

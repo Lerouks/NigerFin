@@ -17,9 +17,10 @@ const fallbackItems: NewsItem[] = [
 ];
 
 export function BreakingNews() {
-  const [items, setItems] = useState<NewsItem[]>(fallbackItems);
+  const [items, setItems] = useState<NewsItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [dismissed, setDismissed] = useState(false);
+  const [ready, setReady] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -27,13 +28,12 @@ export function BreakingNews() {
     fetch('/api/admin/flash-banner')
       .then((res) => res.json())
       .then((data) => {
-        if (data.enabled === false) {
-          setDismissed(true);
+        if (data.enabled === false || !data.items?.length) {
+          setReady(false);
           return;
         }
-        if (data.items?.length) {
-          setItems(data.items.map((n: any) => ({ tag: n.tag, text: n.text })));
-        }
+        setItems(data.items.map((n: any) => ({ tag: n.tag, text: n.text })));
+        setReady(true);
       })
       .catch(() => {});
   }, []);
@@ -65,7 +65,7 @@ export function BreakingNews() {
     startTimer();
   };
 
-  if (dismissed || items.length === 0) return null;
+  if (!ready || dismissed || items.length === 0) return null;
 
   const item = items[currentIndex];
 

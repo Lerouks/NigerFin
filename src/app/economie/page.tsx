@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { ArticleCard } from '@/components/ArticleCard';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
-import { getArticlesByCategory } from '@/lib/sanity';
+import { getArticlesByCategory } from '@/lib/articles';
 import { marketData } from '@/data/mock-data';
 
 export const revalidate = 60;

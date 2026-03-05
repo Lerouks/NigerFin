@@ -1,24 +1,8 @@
-import { revalidatePath, revalidateTag } from 'next/cache';
+import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 
-// Sanity webhook → Next.js on-demand revalidation
-//
-// HOW TO CONFIGURE IN SANITY DASHBOARD:
-// 1. Go to https://www.sanity.io/manage → your project → API → Webhooks
-// 2. Create a new webhook:
-//    - Name: "Next.js Revalidation"
-//    - URL: https://YOUR_DOMAIN/api/revalidate
-//    - Trigger on: Create, Update, Delete
-//    - Filter: _type == "article" || _type == "breakingNews" || _type == "siteSettings" || _type == "tool" || _type == "page" || _type == "legalPage"
-//    - Projection: {_type, slug}
-//    - Secret: same value as SANITY_REVALIDATE_SECRET env var
-// 3. Save and test
-
-interface SanityWebhookBody {
-  _type?: string;
-  slug?: { current?: string };
-}
-
+// On-demand cache revalidation endpoint
+// Called after article creation/update/deletion from admin
 export async function POST(request: NextRequest) {
   const secret = request.nextUrl.searchParams.get('secret');
 
@@ -26,65 +10,27 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: 'Invalid secret' }, { status: 401 });
   }
 
-  let body: SanityWebhookBody = {};
+  let body: { type?: string; slug?: string } = {};
   try {
     body = await request.json();
-  } catch {
-    // Empty body is OK for delete events
-  }
+  } catch {}
 
-  const type = body._type;
-  const slug = body.slug?.current;
-
-  // Revalidate based on content type
   const revalidated: string[] = [];
 
-  // Always revalidate homepage (it shows latest articles)
+  // Always revalidate homepage
   revalidatePath('/');
   revalidated.push('/');
 
-  if (type === 'article') {
-    // Revalidate the specific article page
-    if (slug) {
-      revalidatePath(`/articles/${slug}`);
-      revalidated.push(`/articles/${slug}`);
+  if (body.type === 'article') {
+    if (body.slug) {
+      revalidatePath(`/articles/${body.slug}`);
+      revalidated.push(`/articles/${body.slug}`);
     }
-    // Revalidate all category pages (article could change category)
     for (const cat of ['/economie', '/finance', '/entreprises', '/education', '/marches']) {
       revalidatePath(cat);
       revalidated.push(cat);
     }
   }
 
-  if (type === 'breakingNews') {
-    // Breaking news appears on layout — revalidate all
-    revalidatePath('/', 'layout');
-    revalidated.push('layout:/');
-  }
-
-  if (type === 'siteSettings') {
-    revalidatePath('/', 'layout');
-    revalidated.push('layout:/');
-  }
-
-  if (type === 'tool') {
-    revalidatePath('/outils');
-    revalidated.push('/outils');
-  }
-
-  if (type === 'page' && slug) {
-    revalidatePath(`/${slug}`);
-    revalidated.push(`/${slug}`);
-  }
-
-  if (type === 'legalPage' && slug) {
-    revalidatePath(`/legal/${slug}`);
-    revalidated.push(`/legal/${slug}`);
-  }
-
-  return NextResponse.json({
-    revalidated: true,
-    paths: revalidated,
-    now: Date.now(),
-  });
+  return NextResponse.json({ revalidated: true, paths: revalidated, now: Date.now() });
 }

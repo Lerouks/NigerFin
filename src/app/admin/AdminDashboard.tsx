@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation';
 import {
   Users, BarChart3, Shield, Loader2, Search, CreditCard, CheckCircle, XCircle,
   Clock, Download, TrendingUp, TrendingDown, DollarSign, Activity, Ban,
-  Unlock, Settings, FileText, AlertTriangle, ChevronDown, ChevronUp,
+  Unlock, Settings, FileText, AlertTriangle, ChevronDown, ChevronUp, Newspaper,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { formatPrice, cycleLabel, TIERS, CURRENCY, type BillingCycle, type TierId } from '@/config/pricing';
+import { ArticlesManager } from './ArticlesManager';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -79,7 +80,7 @@ interface DynamicPrice {
   updated_at: string;
 }
 
-type TabId = 'overview' | 'users' | 'payments' | 'pricing' | 'audit';
+type TabId = 'overview' | 'articles' | 'users' | 'payments' | 'pricing' | 'audit';
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -267,6 +268,7 @@ export function AdminDashboard() {
 
   const tabs: { id: TabId; label: string; icon: typeof BarChart3; badge?: number }[] = [
     { id: 'overview', label: 'Vue d\'ensemble', icon: BarChart3 },
+    { id: 'articles', label: 'Articles', icon: Newspaper },
     { id: 'users', label: 'Utilisateurs', icon: Users },
     { id: 'payments', label: 'Paiements', icon: CreditCard, badge: stats.pendingPayments },
     { id: 'pricing', label: 'Tarifs', icon: DollarSign },
@@ -301,14 +303,13 @@ export function AdminDashboard() {
                 <Download className="w-3.5 h-3.5" />
                 Export Paiements
               </button>
-              <a
-                href="/studio"
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={() => setActiveTab('articles')}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 transition-colors"
               >
-                Studio CMS
-              </a>
+                <Newspaper className="w-3.5 h-3.5" />
+                Gestion Articles
+              </button>
             </div>
           </div>
         </div>
@@ -433,6 +434,9 @@ export function AdminDashboard() {
             )}
           </div>
         )}
+
+        {/* ─── ARTICLES TAB ──────────────────────────────────────── */}
+        {activeTab === 'articles' && <ArticlesManager />}
 
         {/* ─── USERS TAB ──────────────────────────────────────────── */}
         {activeTab === 'users' && (

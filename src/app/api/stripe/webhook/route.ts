@@ -3,8 +3,11 @@ import { createServiceClient } from '@/lib/supabase';
 import { syncContactToBrevo } from '@/lib/brevo';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
+function getStripe() {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) throw new Error('STRIPE_SECRET_KEY not configured');
+  return new Stripe(key);
+}
 
 function mapTierToRole(tier: string): string {
   switch (tier) {
@@ -15,6 +18,12 @@ function mapTierToRole(tier: string): string {
 }
 
 export async function POST(request: NextRequest) {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return NextResponse.json({ error: 'Stripe not configured' }, { status: 503 });
+  }
+
+  const stripe = getStripe();
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
   const body = await request.text();
   const signature = request.headers.get('stripe-signature') || '';
 

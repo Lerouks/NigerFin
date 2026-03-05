@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Lock, Check, Star, ArrowRight, X } from 'lucide-react';
+import { TIERS } from '@/config/pricing';
 
 type PaywallReason = 'login_required' | 'paywall_reader' | 'paywall_pro' | 'visitor_limit';
 
@@ -62,28 +63,16 @@ function InnerContent({ content, reason }: { content: PaywallContentData; reason
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-left">
           <PlanCard
             name="Standard"
-            price="4 900"
+            price={TIERS.standard.plans.monthly.amount.toLocaleString('fr-FR')}
             badge="POPULAIRE"
-            features={[
-              'Articles illimités',
-              'Analyses complètes',
-              'Newsletter hebdomadaire',
-              'Alertes actualités',
-              'Outils premium',
-            ]}
+            features={TIERS.standard.features.slice(0, 5)}
             isPopular
           />
           <PlanCard
             name="Pro"
-            price="9 900"
+            price={TIERS.pro.plans.monthly.amount.toLocaleString('fr-FR')}
             badge="PREMIUM"
-            features={[
-              'Tout Standard +',
-              'Rapports PDF exclusifs',
-              'Alertes personnalisées',
-              'Archives complètes',
-              'Support prioritaire',
-            ]}
+            features={TIERS.pro.features.slice(0, 5)}
           />
         </div>
       )}

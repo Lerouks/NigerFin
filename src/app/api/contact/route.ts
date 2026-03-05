@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
 
     // Send notification to the team
     await sendTransactionalEmail({
-      to: 'contact@nfireport.ne',
+      to: 'contact@nfireport.com',
       subject: `[Contact] ${subject} - ${name}`,
       html: `
         <h2>Nouveau message de contact</h2>

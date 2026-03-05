@@ -14,7 +14,7 @@ export async function sendTransactionalEmail({
   html: string;
 }) {
   return getResend().emails.send({
-    from: 'NFI Report <noreply@nfireport.ne>',
+    from: 'NFI Report <noreply@nfireport.com>',
     to,
     subject,
     html,

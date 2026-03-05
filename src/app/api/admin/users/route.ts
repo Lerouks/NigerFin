@@ -88,11 +88,18 @@ export async function PUT(request: NextRequest) {
       const expiresAt = new Date();
       expiresAt.setMonth(expiresAt.getMonth() + months);
 
-      const role = tier === 'pro' ? 'pro' : 'standard';
+      // Preserve admin role — only change role for non-admin users
+      const { data: targetProfile } = await serviceClient
+        .from('user_profiles')
+        .select('role')
+        .eq('id', userId)
+        .single();
+
+      const newRole = targetProfile?.role === 'admin' ? 'admin' : (tier === 'pro' ? 'pro' : 'standard');
 
       await serviceClient
         .from('user_profiles')
-        .update({ role, subscription_status: 'active', billing_cycle: billingCycle, updated_at: now })
+        .update({ role: newRole, subscription_status: 'active', billing_cycle: billingCycle, updated_at: now })
         .eq('id', userId);
 
       await serviceClient
@@ -114,9 +121,18 @@ export async function PUT(request: NextRequest) {
     }
 
     case 'deactivateSubscription': {
+      // Preserve admin role on deactivation
+      const { data: deactProfile } = await serviceClient
+        .from('user_profiles')
+        .select('role')
+        .eq('id', userId)
+        .single();
+
+      const deactRole = deactProfile?.role === 'admin' ? 'admin' : 'reader';
+
       await serviceClient
         .from('user_profiles')
-        .update({ role: 'reader', subscription_status: 'inactive', updated_at: now })
+        .update({ role: deactRole, subscription_status: 'inactive', updated_at: now })
         .eq('id', userId);
 
       await serviceClient

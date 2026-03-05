@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
 
     let query = serviceClient
       .from('payment_requests')
-      .select('*, user_profiles!payment_requests_user_id_fkey(email, full_name)')
+      .select('*, user_profiles!payment_requests_user_profile_fkey(email, full_name)')
       .order('created_at', { ascending: false });
 
     if (statusFilter) {

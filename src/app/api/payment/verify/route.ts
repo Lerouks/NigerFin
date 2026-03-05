@@ -75,8 +75,16 @@ export async function POST(request: NextRequest) {
     })
     .eq('id', paymentRequestId);
 
-  // Map tier to role
-  const role = paymentRequest.tier === 'pro' ? 'pro' : 'standard';
+  // Preserve admin role
+  const { data: targetProfile } = await serviceClient
+    .from('user_profiles')
+    .select('role')
+    .eq('id', paymentRequest.user_id)
+    .single();
+
+  const role = targetProfile?.role === 'admin'
+    ? 'admin'
+    : (paymentRequest.tier === 'pro' ? 'pro' : 'standard');
 
   // Upsert subscription
   await serviceClient
@@ -94,7 +102,7 @@ export async function POST(request: NextRequest) {
       { onConflict: 'user_id' }
     );
 
-  // Update user profile role
+  // Update user profile
   await serviceClient
     .from('user_profiles')
     .update({

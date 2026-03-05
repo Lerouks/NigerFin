@@ -119,10 +119,14 @@ export function AdminDashboard() {
         fetch('/api/admin/stats'),
         fetch('/api/admin/revenue'),
       ]);
-      const statsData = await statsRes.json();
-      const revenueData = await revenueRes.json();
-      setStats(statsData);
-      setRevenue(revenueData);
+      if (statsRes.ok) {
+        const statsData = await statsRes.json();
+        setStats(statsData);
+      }
+      if (revenueRes.ok) {
+        const revenueData = await revenueRes.json();
+        setRevenue(revenueData);
+      }
     } catch { /* ignore */ }
   }, []);
 

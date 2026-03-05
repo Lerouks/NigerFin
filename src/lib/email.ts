@@ -1,6 +1,8 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY!);
+}
 
 export async function sendTransactionalEmail({
   to,
@@ -11,7 +13,7 @@ export async function sendTransactionalEmail({
   subject: string;
   html: string;
 }) {
-  return resend.emails.send({
+  return getResend().emails.send({
     from: 'NFI Report <noreply@nfireport.ne>',
     to,
     subject,

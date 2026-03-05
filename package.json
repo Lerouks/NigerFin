@@ -25,6 +25,7 @@
     "posthog-js": "^1.190.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "recharts": "^3.7.0",
     "resend": "^4.0.0",
     "sanity": "^3.99.0",
     "stripe": "^20.4.0",

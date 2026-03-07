@@ -8,8 +8,8 @@ import { useAuth } from '@/lib/auth-context';
 import { CommentsSection } from '@/components/CommentsSection';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
 import { Paywall } from '@/components/Paywall';
-import { PaywallOverlay } from '@/components/PaywallOverlay';
 import { LoginGate } from '@/components/LoginGate';
+import { PremiumOverlay } from '@/components/PremiumOverlay';
 import { ArticleCard } from '@/components/ArticleCard';
 import { ArticleLikes } from '@/components/ArticleLikes';
 import type { Article, MarketData } from '@/types';
@@ -205,21 +205,15 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
           </div>
         </div>
 
-        {/* LoginGate modal — auto-triggered or on button click */}
+        {/* Unified premium overlay - handles all blocked states */}
+        <PremiumOverlay articleId={article._id} isPremium={contentType === 'premium'} />
+
+        {/* Fallback LoginGate modal for manual trigger */}
         <LoginGate
           isOpen={showLoginGate}
           onClose={() => setShowLoginGate(false)}
           articleTitle={article.title}
         />
-
-        {/* Paywall modal for users who ARE signed in but hit their limit */}
-        {accessResult.reason === 'paywall_reader' && (
-          <Paywall
-            reason={accessResult.reason}
-            premiumArticlesUsed={premiumArticlesUsed}
-            premiumArticlesLimit={getReaderPremiumLimit()}
-          />
-        )}
       </div>
     );
   }
@@ -338,8 +332,8 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
         </div>
       </div>
 
-      {/* Soft paywall overlay for non-subscribers (nudge, not block) */}
-      <PaywallOverlay articleId={article._id} />
+      {/* Unified premium overlay - adapts to user status */}
+      <PremiumOverlay articleId={article._id} isPremium={contentType === 'premium'} />
     </div>
   );
 }

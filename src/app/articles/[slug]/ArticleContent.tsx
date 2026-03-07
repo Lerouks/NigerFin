@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Clock, Calendar, User, Facebook, Linkedin, Link2, Check } from 'lucide-react';
+import { Clock, Calendar, User, Facebook, Linkedin, Link2, Check, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { CommentsSection } from '@/components/CommentsSection';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
@@ -53,8 +53,8 @@ function WhatsAppIcon({ className }: { className?: string }) {
 }
 
 export function ArticleContent({ article, htmlBody, marketData, relatedArticles = [] }: ArticleContentProps) {
-  const { isSignedIn, userRole, premiumArticlesUsed, refreshProfile } = useAuth();
-  const [accessResult, setAccessResult] = useState<AccessResult>({ allowed: true });
+  const { isSignedIn, isLoading, userRole, premiumArticlesUsed, refreshProfile } = useAuth();
+  const [accessResult, setAccessResult] = useState<AccessResult | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
   const [hasTracked, setHasTracked] = useState(false);
   const imageUrl = getArticleImageUrl(article);
@@ -65,6 +65,9 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
     : `https://nfireport.com/articles/${article.slug.current}`;
 
   useEffect(() => {
+    // Wait for auth to finish loading before checking access
+    if (isLoading) return;
+
     const result = checkArticleAccess(
       contentType,
       userRole,
@@ -85,7 +88,7 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
         setHasTracked(true);
       }
     }
-  }, [contentType, userRole, premiumArticlesUsed, article, isSignedIn, hasTracked, refreshProfile]);
+  }, [contentType, userRole, premiumArticlesUsed, article, isSignedIn, isLoading, hasTracked, refreshProfile]);
 
   const handleCopyLink = async () => {
     await navigator.clipboard.writeText(articleUrl);
@@ -99,6 +102,32 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
     linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(articleUrl)}`,
     whatsapp: `https://wa.me/?text=${encodeURIComponent(article.title + ' ' + articleUrl)}`,
   };
+
+  // Show loading skeleton while auth state is being resolved
+  if (accessResult === null) {
+    return (
+      <div className="min-h-screen bg-[#fafaf9]">
+        <div className="relative h-[450px] md:h-[500px] bg-[#111]">
+          <Image src={imageUrl} alt={article.title} fill className="object-cover opacity-60" priority />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-32 relative z-10 pb-20">
+          <div className="max-w-3xl mx-auto">
+            <article className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] overflow-hidden">
+              <div className="p-8 md:p-12">
+                <span className="inline-block text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">{article.category}</span>
+                <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">{article.title}</h1>
+                {article.excerpt && <p className="text-lg text-gray-600 mb-6">{article.excerpt}</p>}
+                <div className="flex items-center justify-center py-16">
+                  <Loader2 className="w-8 h-8 animate-spin text-gray-300" />
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!accessResult.allowed) {
     return (

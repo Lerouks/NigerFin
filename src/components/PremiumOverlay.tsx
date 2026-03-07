@@ -405,18 +405,13 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
         aria-labelledby="premium-overlay-title"
         aria-describedby="premium-overlay-desc"
         tabIndex={-1}
-        className={`fixed inset-x-0 bottom-0 z-[101] outline-none motion-safe:transition-all motion-safe:duration-500 ease-out ${
-          animateIn ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
+        className={`fixed inset-0 z-[101] flex items-center justify-center p-4 outline-none motion-safe:transition-all motion-safe:duration-400 ease-out ${
+          animateIn ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
         }`}
       >
-        <div className="bg-white rounded-t-3xl shadow-[0_-20px_60px_-15px_rgba(0,0,0,0.2)] max-w-xl mx-auto relative overflow-hidden pb-[env(safe-area-inset-bottom,0px)]">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-auto relative overflow-hidden">
           {/* Decorative top bar */}
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-500" />
-
-          {/* Drag indicator */}
-          <div className="flex justify-center pt-4 pb-2">
-            <div className="w-10 h-1 rounded-full bg-gray-200" />
-          </div>
 
           {/* Close button (non-blocking only) */}
           {config.showCloseButton && (
@@ -429,7 +424,7 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
             </button>
           )}
 
-          <div className="px-6 pb-8 pt-2 sm:px-8">
+          <div className="px-6 pb-8 pt-6 sm:px-8">
             {/* Icon */}
             <div className="flex justify-center mb-5">
               <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${

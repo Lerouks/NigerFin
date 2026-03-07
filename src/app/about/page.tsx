@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
@@ -12,6 +13,14 @@ export default function AboutPage() {
     <div className="min-h-screen bg-[#fafaf9]">
       <section className="bg-[#111] text-white py-20 md:py-28">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Image
+            src="/logo-white.png"
+            alt="NFI Report"
+            width={160}
+            height={48}
+            className="mb-8"
+            priority
+          />
           <span className="text-[11px] tracking-[0.2em] uppercase text-white/40 block mb-4">À propos</span>
           <h1 className="text-4xl md:text-5xl mb-5 leading-[1.1]">
             L&apos;information économique qui fait avancer l&apos;Afrique

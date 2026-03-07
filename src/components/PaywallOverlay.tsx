@@ -75,7 +75,7 @@ export function PaywallOverlay({ articleId }: PaywallOverlayProps) {
   const mountedRef = useRef(true);
 
   // Don't show to subscribers or admins
-  const shouldSkip = isSignedIn && (userRole === 'standard' || userRole === 'pro' || userRole === 'admin');
+  const shouldSkip = isSignedIn && (userRole === 'premium' || userRole === 'admin');
 
   // Cleanup on unmount
   useEffect(() => {

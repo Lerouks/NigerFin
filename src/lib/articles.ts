@@ -9,7 +9,7 @@ export interface SupabaseArticle {
   slug: string;
   excerpt: string | null;
   category: string;
-  content_type: 'free' | 'premium' | 'pro';
+  content_type: 'free' | 'premium';
   is_featured: boolean;
   featured_order: number;
   author_name: string;

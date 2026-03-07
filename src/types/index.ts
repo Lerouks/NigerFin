@@ -1,7 +1,6 @@
-export type ContentType = 'free' | 'premium' | 'pro';
-export type UserRole = 'reader' | 'standard' | 'pro' | 'admin';
+export type ContentType = 'free' | 'premium';
+export type UserRole = 'reader' | 'premium' | 'admin';
 export type SubscriptionStatus = 'active' | 'inactive' | 'cancelled' | 'past_due';
-export type BillingCycle = 'monthly' | 'quarterly' | 'yearly';
 
 export interface Article {
   _id: string;
@@ -68,10 +67,8 @@ export interface UserProfile {
   full_name: string;
   role: UserRole;
   subscription_status: SubscriptionStatus;
-  billing_cycle: BillingCycle | null;
   premium_articles_read_this_month: number;
   premium_articles_reset_at: string;
-  stripe_customer_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -79,11 +76,8 @@ export interface UserProfile {
 export interface Subscription {
   id: string;
   user_id: string;
-  tier: string;
+  tier: 'premium';
   status: string;
-  stripe_subscription_id: string | null;
-  stripe_customer_id: string | null;
-  billing_cycle: BillingCycle;
   current_period_start: string | null;
   current_period_end: string | null;
   cancel_at_period_end: boolean;

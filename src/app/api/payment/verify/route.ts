@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { logAuditEvent } from '@/lib/audit';
-import { cycleMonths } from '@/config/pricing';
-import type { BillingCycle } from '@/config/pricing';
 
 export async function POST(request: NextRequest) {
   const auth = await requireAdmin();
@@ -56,10 +54,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, status: 'rejected' });
   }
 
-  // action === 'verify'
-  const months = cycleMonths(paymentRequest.billing_cycle as BillingCycle);
+  // action === 'verify' — always 1 month
   const expiresAt = new Date();
-  expiresAt.setMonth(expiresAt.getMonth() + months);
+  expiresAt.setMonth(expiresAt.getMonth() + 1);
 
   const now = new Date().toISOString();
 
@@ -82,9 +79,7 @@ export async function POST(request: NextRequest) {
     .eq('id', paymentRequest.user_id)
     .single();
 
-  const role = targetProfile?.role === 'admin'
-    ? 'admin'
-    : (paymentRequest.tier === 'pro' ? 'pro' : 'standard');
+  const role = targetProfile?.role === 'admin' ? 'admin' : 'premium';
 
   // Upsert subscription
   await serviceClient
@@ -92,9 +87,9 @@ export async function POST(request: NextRequest) {
     .upsert(
       {
         user_id: paymentRequest.user_id,
-        tier: paymentRequest.tier,
+        tier: 'premium',
         status: 'active',
-        billing_cycle: paymentRequest.billing_cycle,
+        billing_cycle: 'monthly',
         current_period_start: now,
         current_period_end: expiresAt.toISOString(),
         price_amount: paymentRequest.amount,
@@ -108,13 +103,12 @@ export async function POST(request: NextRequest) {
     .update({
       role,
       subscription_status: 'active',
-      billing_cycle: paymentRequest.billing_cycle,
       updated_at: now,
     })
     .eq('id', paymentRequest.user_id);
 
   await logAuditEvent(user.id, 'verify_payment', 'payment', paymentRequestId, {
-    tier: paymentRequest.tier,
+    tier: 'premium',
     amount: paymentRequest.amount,
     expiresAt: expiresAt.toISOString(),
   });

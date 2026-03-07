@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { logAuditEvent } from '@/lib/audit';
-import { cycleMonths } from '@/config/pricing';
-import type { BillingCycle } from '@/config/pricing';
 
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin();
@@ -16,7 +14,7 @@ export async function GET(request: NextRequest) {
 
   let query = serviceClient
     .from('user_profiles')
-    .select('id, email, full_name, role, subscription_status, billing_cycle, blocked, created_at')
+    .select('id, email, full_name, role, subscription_status, blocked, created_at')
     .order('created_at', { ascending: false })
     .limit(500);
 
@@ -45,7 +43,7 @@ export async function PUT(request: NextRequest) {
   switch (action) {
     case 'changeRole': {
       const { role } = body;
-      const validRoles = ['reader', 'standard', 'pro', 'admin'];
+      const validRoles = ['reader', 'premium', 'admin'];
       if (!role || !validRoles.includes(role)) {
         return NextResponse.json({ error: 'Invalid role' }, { status: 400 });
       }
@@ -79,14 +77,8 @@ export async function PUT(request: NextRequest) {
     }
 
     case 'activateSubscription': {
-      const { tier, billingCycle } = body;
-      if (!tier || !billingCycle) {
-        return NextResponse.json({ error: 'tier and billingCycle required' }, { status: 400 });
-      }
-
-      const months = cycleMonths(billingCycle as BillingCycle);
       const expiresAt = new Date();
-      expiresAt.setMonth(expiresAt.getMonth() + months);
+      expiresAt.setMonth(expiresAt.getMonth() + 1);
 
       // Preserve admin role — only change role for non-admin users
       const { data: targetProfile } = await serviceClient
@@ -95,11 +87,11 @@ export async function PUT(request: NextRequest) {
         .eq('id', userId)
         .single();
 
-      const newRole = targetProfile?.role === 'admin' ? 'admin' : (tier === 'pro' ? 'pro' : 'standard');
+      const newRole = targetProfile?.role === 'admin' ? 'admin' : 'premium';
 
       await serviceClient
         .from('user_profiles')
-        .update({ role: newRole, subscription_status: 'active', billing_cycle: billingCycle, updated_at: now })
+        .update({ role: newRole, subscription_status: 'active', updated_at: now })
         .eq('id', userId);
 
       await serviceClient
@@ -107,16 +99,16 @@ export async function PUT(request: NextRequest) {
         .upsert(
           {
             user_id: userId,
-            tier,
+            tier: 'premium',
             status: 'active',
-            billing_cycle: billingCycle,
+            billing_cycle: 'monthly',
             current_period_start: now,
             current_period_end: expiresAt.toISOString(),
           },
           { onConflict: 'user_id' }
         );
 
-      await logAuditEvent(user.id, 'activate_subscription', 'user', userId, { tier, billingCycle, expiresAt: expiresAt.toISOString() });
+      await logAuditEvent(user.id, 'activate_subscription', 'user', userId, { tier: 'premium', expiresAt: expiresAt.toISOString() });
       return NextResponse.json({ success: true });
     }
 

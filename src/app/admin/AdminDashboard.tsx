@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
   Users, BarChart3, Shield, Loader2, Search, CreditCard, CheckCircle, XCircle,
   Clock, Download, TrendingUp, TrendingDown, DollarSign, Activity, Ban,
-  Unlock, Settings, FileText, AlertTriangle, ChevronDown, ChevronUp, Newspaper, LineChart, Zap, BookOpen, SlidersHorizontal, Map,
+  Unlock, Settings, FileText, AlertTriangle, ChevronDown, ChevronUp, Newspaper, LineChart, Zap, BookOpen, SlidersHorizontal,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { formatPrice, PREMIUM_TIER, CURRENCY, BILLING_OPTIONS, getBillingCycleLabel } from '@/config/pricing';
@@ -15,7 +15,6 @@ import { MarketDataManager } from './MarketDataManager';
 import { FlashBannerManager } from './FlashBannerManager';
 import { EducationManager } from './EducationManager';
 import { PaywallManager } from './PaywallManager';
-import { NigerManager } from './NigerManager';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -85,7 +84,7 @@ interface DynamicPrice {
   updated_at: string;
 }
 
-type TabId = 'overview' | 'articles' | 'categories' | 'market' | 'flash' | 'education' | 'paywall' | 'niger' | 'users' | 'payments' | 'pricing' | 'audit';
+type TabId = 'overview' | 'articles' | 'categories' | 'market' | 'flash' | 'education' | 'paywall' | 'users' | 'payments' | 'pricing' | 'audit';
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -279,7 +278,6 @@ export function AdminDashboard() {
     { id: 'flash', label: 'Flash Info', icon: Zap },
     { id: 'education', label: 'Éducation', icon: BookOpen },
     { id: 'paywall', label: 'Paywall', icon: SlidersHorizontal },
-    { id: 'niger', label: 'Niger', icon: Map },
     { id: 'users', label: 'Utilisateurs', icon: Users },
     { id: 'payments', label: 'Paiements', icon: CreditCard, badge: stats.pendingPayments },
     { id: 'pricing', label: 'Tarifs', icon: DollarSign },
@@ -461,9 +459,6 @@ export function AdminDashboard() {
 
         {/* ─── PAYWALL TAB ────────────────────────────────────────── */}
         {activeTab === 'paywall' && <PaywallManager />}
-
-        {/* ─── NIGER TAB ────────────────────────────────────────── */}
-        {activeTab === 'niger' && <NigerManager />}
 
         {/* ─── USERS TAB ──────────────────────────────────────────── */}
         {activeTab === 'users' && (

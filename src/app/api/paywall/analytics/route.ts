@@ -5,8 +5,6 @@ const VALID_EVENTS = [
   'view',
   'click_primary',
   'click_secondary',
-  'click_subscribe',
-  'click_login',
   'continue_reading',
   'dismiss',
 ];
@@ -40,8 +38,8 @@ export async function POST(request: NextRequest) {
       article_id: article_id || null,
       user_id: user_id || null,
       session_id: session_id || null,
-      scroll_depth: typeof scroll_depth === 'number' ? scroll_depth : null,
-      read_time_seconds: typeof read_time_seconds === 'number' ? read_time_seconds : null,
+      scroll_depth: typeof scroll_depth === 'number' && scroll_depth >= 0 && scroll_depth <= 100 ? Math.round(scroll_depth) : null,
+      read_time_seconds: typeof read_time_seconds === 'number' && read_time_seconds >= 0 && read_time_seconds < 86400 ? Math.round(read_time_seconds) : null,
       overlay_case: overlay_case || null,
     });
 

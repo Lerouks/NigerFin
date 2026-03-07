@@ -121,7 +121,7 @@ export function EconomicDashboard({ indicators, indicatorHistory }: EconomicDash
       {selectedIndicator && historyForIndicator.length > 0 && (
         <div className="mt-6 bg-white rounded-xl border border-black/[0.06] p-5">
           <h4 className="font-semibold text-[15px] mb-4">
-            Évolution — {selectedIndicator.label}
+            Évolution : {selectedIndicator.label}
           </h4>
           <div className="h-[250px]">
             <ResponsiveContainer width="100%" height="100%">

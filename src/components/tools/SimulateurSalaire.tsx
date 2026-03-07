@@ -388,7 +388,7 @@ export default function SimulateurSalaireNiger() {
                         {' '}({(tr.rate * 100).toFixed(0)}%)
                       </span>
                       <span style={{ fontSize: 14, fontWeight: 600 }}>
-                        {tr.active ? `${fmt(tr.tax)} F CFA` : '—'}
+                        {tr.active ? `${fmt(tr.tax)} F CFA` : '-'}
                       </span>
                     </div>
                   ))}

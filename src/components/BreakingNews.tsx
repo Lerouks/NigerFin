@@ -9,8 +9,8 @@ interface NewsItem {
 }
 
 const fallbackItems: NewsItem[] = [
-  { tag: 'MARCHÉS', text: "EUR/XOF stable à 655,957 — Le franc CFA maintient sa parité fixe avec l'euro" },
-  { tag: 'BRVM', text: "L'indice composite gagne 1,01% en clôture — Hausse portée par les valeurs bancaires" },
+  { tag: 'MARCHÉS', text: "EUR/XOF stable à 655,957 : le franc CFA maintient sa parité fixe avec l'euro" },
+  { tag: 'BRVM', text: "L'indice composite gagne 1,01% en clôture, hausse portée par les valeurs bancaires" },
   { tag: 'NIGER', text: 'Le secteur minier enregistre une croissance de 18% au T1 2026' },
   { tag: 'MATIÈRES', text: 'Uranium : les cours mondiaux atteignent 89,50 USD/lb, +1,42% cette semaine' },
   { tag: 'UEMOA', text: "Les échanges commerciaux intra-régionaux en hausse de 23% sur l'année" },

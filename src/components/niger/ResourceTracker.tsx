@@ -145,7 +145,7 @@ export function ResourceTracker({ resources, resourceHistory }: ResourceTrackerP
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="w-4 h-4 text-gray-500" />
             <h4 className="font-semibold text-[15px]">
-              Évolution de la production — {selectedResource.name}
+              Évolution de la production : {selectedResource.name}
             </h4>
           </div>
           <div className="h-[250px]">

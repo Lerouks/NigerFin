@@ -88,7 +88,8 @@ function getOverlayCase(
   isSignedIn: boolean,
   userRole: UserRole | null,
   premiumArticlesUsed: number,
-  isPremiumArticle: boolean
+  isPremiumArticle: boolean,
+  configuredLimit?: number
 ): OverlayCase {
   // Free articles never show an overlay (same as having premium access)
   if (!isPremiumArticle) return 'premium';
@@ -96,7 +97,7 @@ function getOverlayCase(
   if (userRole === 'admin') return 'admin';
   if (userRole === 'premium') return 'premium';
 
-  const limit = getReaderPremiumLimit();
+  const limit = getReaderPremiumLimit(configuredLimit);
 
   if (userRole === 'reader') {
     return premiumArticlesUsed < limit ? 'reader_has_articles' : 'reader_no_articles';
@@ -202,14 +203,26 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
   const { isSignedIn, userRole, premiumArticlesUsed, user, isLoading } = useAuth();
   const [visible, setVisible] = useState(false);
   const [animateIn, setAnimateIn] = useState(false);
+  const [configuredLimit, setConfiguredLimit] = useState<number | undefined>(undefined);
   const hasTriggered = useRef(false);
   const mountedRef = useRef(true);
   const pageLoadTime = useRef(Date.now());
   const dialogRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<Element | null>(null);
 
-  const overlayCase = getOverlayCase(isSignedIn, userRole, premiumArticlesUsed, isPremium);
-  const limit = getReaderPremiumLimit();
+  // Fetch configurable limit from paywall config
+  useEffect(() => {
+    if (!isPremium) return;
+    fetch('/api/paywall-config')
+      .then((r) => r.ok ? r.json() : null)
+      .then((cfg) => {
+        if (cfg?.free_articles_count) setConfiguredLimit(cfg.free_articles_count);
+      })
+      .catch(() => {});
+  }, [isPremium]);
+
+  const overlayCase = getOverlayCase(isSignedIn, userRole, premiumArticlesUsed, isPremium, configuredLimit);
+  const limit = getReaderPremiumLimit(configuredLimit);
   const remaining = Math.max(0, limit - premiumArticlesUsed);
   const config = getOverlayConfig(overlayCase, remaining);
 

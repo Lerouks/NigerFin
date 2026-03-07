@@ -1,7 +1,7 @@
 import type { ContentType, UserRole } from '@/types';
 
 const VISITOR_ARTICLE_LIMIT = 3;
-const READER_PREMIUM_LIMIT = 3;
+const DEFAULT_READER_PREMIUM_LIMIT = 3;
 
 // ─── Visitor (not logged in) article tracking ────────────────────────────────
 
@@ -70,7 +70,8 @@ export function checkArticleAccess(
   contentType: ContentType,
   userRole: UserRole | null,
   premiumArticlesReadThisMonth: number,
-  articleSlug: string
+  articleSlug: string,
+  readerPremiumLimit: number = DEFAULT_READER_PREMIUM_LIMIT
 ): AccessResult {
   // Not logged in
   if (!userRole) {
@@ -93,7 +94,7 @@ export function checkArticleAccess(
   if (contentType === 'premium') {
     if (userRole === 'premium') return { allowed: true };
     // Reader: check monthly limit
-    if (premiumArticlesReadThisMonth < READER_PREMIUM_LIMIT) {
+    if (premiumArticlesReadThisMonth < readerPremiumLimit) {
       return { allowed: true };
     }
     return { allowed: false, reason: 'paywall_reader' };
@@ -113,6 +114,6 @@ export function canAccessTool(userRole: UserRole | null, isPremiumTool: boolean)
   return userRole === 'premium' || userRole === 'admin';
 }
 
-export function getReaderPremiumLimit(): number {
-  return READER_PREMIUM_LIMIT;
+export function getReaderPremiumLimit(configuredLimit?: number): number {
+  return configuredLimit ?? DEFAULT_READER_PREMIUM_LIMIT;
 }

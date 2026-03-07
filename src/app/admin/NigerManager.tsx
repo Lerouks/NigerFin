@@ -113,7 +113,7 @@ function RegionsEditor({ regions, onSave, saving }: { regions: any[]; onSave: an
           >
             <div>
               <span className="font-semibold">{r.name}</span>
-              <span className="text-gray-400 text-[13px] ml-2">— {r.capital}</span>
+              <span className="text-gray-400 text-[13px] ml-2">({r.capital})</span>
             </div>
             {expanded === r.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
@@ -192,7 +192,7 @@ function ResourcesEditor({ resources, regions, onSave, saving }: { resources: an
           >
             <div>
               <span className="font-semibold">{r.name}</span>
-              <span className="text-gray-400 text-[13px] ml-2">— {r.type}</span>
+              <span className="text-gray-400 text-[13px] ml-2">({r.type})</span>
             </div>
             {expanded === r.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
@@ -237,7 +237,7 @@ function ResourceForm({ resource, regions, onSave, saving }: { resource: any; re
         <div>
           <label className="block text-[12px] text-gray-400 mb-1">Région</label>
           <select value={form.region_id || ''} onChange={(e) => setForm({ ...form, region_id: e.target.value || null })} className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-[13px] bg-[#fafaf9]">
-            <option value="">— Aucune —</option>
+            <option value="">Aucune</option>
             {regions.map((r: any) => <option key={r.id} value={r.id}>{r.name}</option>)}
           </select>
         </div>

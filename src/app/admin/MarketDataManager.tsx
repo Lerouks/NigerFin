@@ -240,12 +240,12 @@ export function MarketDataManager() {
                         {Number(entry.change_percent) > 0 ? '+' : ''}{Number(entry.change_percent).toFixed(2)}%
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-[12px] text-gray-500">{entry.source || '—'}</td>
+                    <td className="px-4 py-3 text-[12px] text-gray-500">{entry.source || '-'}</td>
                     <td className="px-4 py-3 text-[11px] text-gray-400 whitespace-nowrap">
                       {entry.updated_at ? new Date(entry.updated_at).toLocaleString('fr-FR', {
                         day: '2-digit', month: '2-digit', year: 'numeric',
                         hour: '2-digit', minute: '2-digit',
-                      }) : '—'}
+                      }) : '-'}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-1.5">

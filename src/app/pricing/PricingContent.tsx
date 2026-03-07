@@ -8,6 +8,7 @@ import {
   PREMIUM_TIER,
   FREE_TIER_FEATURES,
   BILLING_OPTIONS,
+  CURRENCY,
   formatPrice,
   getBillingCycleLabel,
   type BillingCycle,
@@ -152,7 +153,7 @@ export function PricingContent() {
                     {price.toLocaleString('fr-FR')}
                   </span>
                   <span className="text-sm ml-1 text-white/50">
-                    FCFA/{selectedOption.durationLabel}
+                    {CURRENCY}/{selectedOption.durationLabel}
                   </span>
                 </div>
                 {selectedOption.savings && (
@@ -232,7 +233,7 @@ export function PricingContent() {
             {[
               {
                 q: 'Quelles sont les durées d\'abonnement disponibles ?',
-                a: 'Nous proposons trois formules : mensuel à 5 000 FCFA, trimestriel à 10 000 FCFA (3 mois) et annuel à 50 000 FCFA. Plus la durée est longue, plus vous économisez.',
+                a: `Nous proposons trois formules : mensuel à ${formatPrice(BILLING_OPTIONS[0].price)}, trimestriel à ${formatPrice(BILLING_OPTIONS[1].price)} (3 mois) et annuel à ${formatPrice(BILLING_OPTIONS[2].price)}. Plus la durée est longue, plus vous économisez.`,
               },
               {
                 q: 'Puis-je changer de plan à tout moment ?',

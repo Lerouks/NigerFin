@@ -203,7 +203,7 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
         </div>
 
         {/* Unified premium overlay - handles all blocked states */}
-        <PremiumOverlay articleId={article._id} isPremium={contentType === 'premium'} />
+        <PremiumOverlay articleId={article._id} articleTitle={article.title} isPremium={contentType === 'premium'} />
       </div>
     );
   }
@@ -323,7 +323,7 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
       </div>
 
       {/* Unified premium overlay - adapts to user status */}
-      <PremiumOverlay articleId={article._id} isPremium={contentType === 'premium'} />
+      <PremiumOverlay articleId={article._id} articleTitle={article.title} isPremium={contentType === 'premium'} />
     </div>
   );
 }

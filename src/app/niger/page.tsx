@@ -1,11 +1,15 @@
 import type { Metadata } from 'next';
 import { ArticleCard } from '@/components/ArticleCard';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
+import { NigerPresentation } from '@/components/NigerPresentation';
 import { getArticlesByCategory } from '@/lib/articles';
 import { marketData } from '@/data/mock-data';
 
 export const revalidate = 60;
-export const metadata: Metadata = { title: 'Niger', description: 'Actualites et analyses sur le Niger : economie, politique, ressources naturelles et developpement.' };
+export const metadata: Metadata = {
+  title: 'Niger : economie, entreprises et analyses',
+  description: 'Analyses economiques, entreprises, marches et actualites du Niger.',
+};
 
 export default async function NigerPage() {
   const articles = await getArticlesByCategory('niger');
@@ -15,6 +19,9 @@ export default async function NigerPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <span className="text-[11px] tracking-[0.2em] uppercase text-white/40 block mb-4">Rubrique</span>
           <h1 className="text-4xl md:text-5xl">Niger</h1>
+          <p className="text-white/50 mt-3 text-[15px] max-w-xl">
+            Analyses economiques, entreprises, marches et actualites du Niger.
+          </p>
         </div>
       </section>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
@@ -27,6 +34,9 @@ export default async function NigerPage() {
           </div>
           <aside className="lg:col-span-4"><MarketDataWidget data={marketData} /></aside>
         </div>
+
+        {/* Country presentation */}
+        <NigerPresentation />
       </div>
     </div>
   );

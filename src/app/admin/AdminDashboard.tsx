@@ -15,6 +15,7 @@ import { MarketDataManager } from './MarketDataManager';
 import { FlashBannerManager } from './FlashBannerManager';
 import { EducationManager } from './EducationManager';
 import { PaywallManager } from './PaywallManager';
+import { NigerPresentationManager } from './NigerPresentationManager';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -84,7 +85,7 @@ interface DynamicPrice {
   updated_at: string;
 }
 
-type TabId = 'overview' | 'articles' | 'categories' | 'market' | 'flash' | 'education' | 'paywall' | 'users' | 'payments' | 'pricing' | 'audit';
+type TabId = 'overview' | 'articles' | 'categories' | 'market' | 'flash' | 'education' | 'niger' | 'paywall' | 'users' | 'payments' | 'pricing' | 'audit';
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -277,6 +278,7 @@ export function AdminDashboard() {
     { id: 'market', label: 'Marchés', icon: LineChart },
     { id: 'flash', label: 'Flash Info', icon: Zap },
     { id: 'education', label: 'Éducation', icon: BookOpen },
+    { id: 'niger', label: 'Niger', icon: Activity },
     { id: 'paywall', label: 'Paywall', icon: SlidersHorizontal },
     { id: 'users', label: 'Utilisateurs', icon: Users },
     { id: 'payments', label: 'Paiements', icon: CreditCard, badge: stats.pendingPayments },
@@ -456,6 +458,9 @@ export function AdminDashboard() {
 
         {/* ─── EDUCATION TAB ─────────────────────────────────────── */}
         {activeTab === 'education' && <EducationManager />}
+
+        {/* ─── NIGER TAB ──────────────────────────────────────────── */}
+        {activeTab === 'niger' && <NigerPresentationManager />}
 
         {/* ─── PAYWALL TAB ────────────────────────────────────────── */}
         {activeTab === 'paywall' && <PaywallManager />}

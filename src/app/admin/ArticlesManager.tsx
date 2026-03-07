@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Plus, Edit3, Trash2, Eye, Loader2, ArrowLeft, Save, Upload, Star, StarOff,
-  Image as ImageIcon, X, Globe, Lock, Crown,
+  Image as ImageIcon, X, Globe, Lock,
 } from 'lucide-react';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -14,7 +14,7 @@ interface ArticleRow {
   slug: string;
   category: string;
   status: 'draft' | 'published' | 'archived';
-  content_type: 'free' | 'premium' | 'pro';
+  content_type: 'free' | 'premium';
   is_featured: boolean;
   published_at: string | null;
   created_at: string;
@@ -76,7 +76,6 @@ const CATEGORIES = [
 const CONTENT_TYPES = [
   { value: 'free', label: 'Gratuit', icon: Globe, color: 'text-green-600' },
   { value: 'premium', label: 'Premium', icon: Lock, color: 'text-amber-600' },
-  { value: 'pro', label: 'Pro', icon: Crown, color: 'text-purple-600' },
 ];
 
 // ─── Main Component ─────────────────────────────────────────────────────────
@@ -607,7 +606,6 @@ export function ArticlesManager() {
                   </td>
                   <td className="px-4 py-3">
                     <span className={`text-[11px] uppercase tracking-wider px-2 py-0.5 rounded ${
-                      a.content_type === 'pro' ? 'bg-purple-100 text-purple-700' :
                       a.content_type === 'premium' ? 'bg-amber-100 text-amber-700' :
                       'bg-gray-100 text-gray-600'
                     }`}>

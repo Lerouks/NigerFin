@@ -31,8 +31,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { getRoleLabel } from '@/lib/user-profile';
-import { formatPrice, TIERS, cycleLabel } from '@/config/pricing';
-import type { NewsletterPreferences, UserRole } from '@/types';
+import { formatPrice, PREMIUM_TIER } from '@/config/pricing';
+import type { NewsletterPreferences } from '@/types';
 
 interface AccountSummary {
   subscription: {
@@ -164,7 +164,7 @@ export function AccountDashboard() {
     );
   }
 
-  const isSubscribed = userRole === 'standard' || userRole === 'pro' || userRole === 'admin';
+  const isSubscribed = userRole === 'premium' || userRole === 'admin';
   const sub = summary?.subscription;
   const memberSince = profile?.created_at
     ? new Date(profile.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -195,8 +195,7 @@ export function AccountDashboard() {
                   {profile?.full_name || user?.email?.split('@')[0]}
                 </h1>
                 <span className={`text-[10px] tracking-[0.15em] uppercase px-3 py-1 rounded-full font-medium ${
-                  userRole === 'pro' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' :
-                  userRole === 'standard' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' :
+                  userRole === 'premium' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' :
                   userRole === 'admin' ? 'bg-red-500/20 text-red-300 border border-red-500/30' :
                   'bg-white/10 text-white/50 border border-white/10'
                 }`}>
@@ -227,7 +226,7 @@ export function AccountDashboard() {
             <QuickStat
               icon={BookOpen}
               label="Articles lus"
-              value={userRole === 'reader' ? `${premiumArticlesUsed}/3` : 'Illimité'}
+              value={userRole === 'reader' ? `${premiumArticlesUsed}/3 premium` : 'Illimité'}
               accent={isSubscribed}
             />
             <QuickStat
@@ -276,12 +275,12 @@ export function AccountDashboard() {
                       <span className="text-[11px] tracking-[0.15em] uppercase text-white/40">Abonnement actif</span>
                     </div>
                     <h2 className="text-2xl font-bold">
-                      {sub.tier === 'pro' ? 'Pro' : 'Standard'} — {cycleLabel(sub.billing_cycle as 'monthly' | 'quarterly' | 'yearly')}
+                      Premium — Mensuel
                     </h2>
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold">{(sub.price_amount || 0).toLocaleString('fr-FR')}</p>
-                    <p className="text-white/40 text-sm">FCFA/{sub.billing_cycle === 'monthly' ? 'mois' : sub.billing_cycle === 'quarterly' ? 'trim.' : 'an'}</p>
+                    <p className="text-white/40 text-sm">FCFA/mois</p>
                   </div>
                 </div>
 
@@ -301,9 +300,7 @@ export function AccountDashboard() {
                   )}
                   <div className="bg-white/5 rounded-xl p-4 border border-white/5">
                     <p className="text-[11px] text-white/40 uppercase tracking-wider mb-1">Accès</p>
-                    <p className="text-sm font-medium">
-                      {userRole === 'pro' ? 'Complet (PDF + Archives)' : 'Articles illimités'}
-                    </p>
+                    <p className="text-sm font-medium">Articles illimités</p>
                   </div>
                 </div>
 
@@ -378,7 +375,7 @@ export function AccountDashboard() {
                     {summary.recentPayments.map((payment) => (
                       <li key={payment.id} className="flex items-center justify-between py-2 border-b border-black/[0.03] last:border-0">
                         <div>
-                          <p className="text-sm font-medium capitalize">{payment.tier} — {cycleLabel(payment.billing_cycle as 'monthly' | 'quarterly' | 'yearly')}</p>
+                          <p className="text-sm font-medium capitalize">{payment.tier} — Mensuel</p>
                           <p className="text-[11px] text-gray-400">
                             {new Date(payment.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
                           </p>
@@ -407,10 +404,10 @@ export function AccountDashboard() {
               <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
                 <div className="flex items-center gap-2 mb-5">
                   <TrendingUp className="w-4 h-4 text-emerald-500" />
-                  <h3 className="font-semibold text-[15px]">Vos avantages {userRole === 'pro' ? 'Pro' : 'Standard'}</h3>
+                  <h3 className="font-semibold text-[15px]">Vos avantages Premium</h3>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                  {(userRole === 'pro' ? TIERS.pro.features : TIERS.standard.features).map((feature) => (
+                  {PREMIUM_TIER.features.map((feature) => (
                     <div key={feature} className="flex items-start gap-2 p-3 bg-[#fafaf9] rounded-lg">
                       <Check className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
                       <span className="text-[13px] text-gray-600">{feature}</span>
@@ -459,8 +456,7 @@ export function AccountDashboard() {
               {/* Infos abonnement */}
               <div className="space-y-3">
                 <InfoRow label="Plan actuel" value={
-                  userRole === 'pro' ? 'Pro' :
-                  userRole === 'standard' ? 'Populaire (Standard)' :
+                  userRole === 'premium' ? 'Premium' :
                   userRole === 'admin' ? 'Administrateur' : 'Lecteur (gratuit)'
                 } />
                 <InfoRow
@@ -477,9 +473,6 @@ export function AccountDashboard() {
                     : 'text-gray-400'
                   }
                 />
-                {profile?.billing_cycle && (
-                  <InfoRow label="Cycle de facturation" value={cycleLabel(profile.billing_cycle as 'monthly' | 'quarterly' | 'yearly')} />
-                )}
                 {sub?.price_amount != null && sub.price_amount > 0 && (
                   <InfoRow label="Montant" value={`${sub.price_amount.toLocaleString('fr-FR')} FCFA`} />
                 )}
@@ -557,35 +550,17 @@ export function AccountDashboard() {
                   </div>
                 )}
 
-                {/* Standard user → upgrade to Pro */}
-                {userRole === 'standard' && (
-                  <div className="flex items-center justify-between p-4 rounded-xl border border-black/[0.04]">
-                    <div>
-                      <p className="text-sm font-medium">Passer au Pro</p>
-                      <p className="text-[12px] text-gray-500 mt-0.5">
-                        Débloquez les rapports PDF, alertes personnalisées et archives complètes
-                      </p>
-                    </div>
-                    <Link
-                      href="/pricing"
-                      className="inline-flex items-center gap-2 bg-[#111] text-white px-5 py-2.5 rounded-xl text-[13px] hover:bg-[#333] transition-colors flex-shrink-0"
-                    >
-                      Passer au Pro <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                )}
-
-                {/* Pro user → already at max */}
-                {userRole === 'pro' && (
+                {/* Premium user → at max */}
+                {userRole === 'premium' && (
                   <div className="flex items-center justify-between p-4 rounded-xl border border-emerald-100 bg-emerald-50/50">
                     <div>
-                      <p className="text-sm font-medium text-emerald-800">Plan Pro actif</p>
+                      <p className="text-sm font-medium text-emerald-800">Plan Premium actif</p>
                       <p className="text-[12px] text-emerald-600/70 mt-0.5">
                         Vous bénéficiez de l&apos;accès complet à tous les contenus et fonctionnalités
                       </p>
                     </div>
                     <span className="text-[12px] text-emerald-600 bg-emerald-100 px-3 py-1.5 rounded-lg font-medium flex-shrink-0">
-                      Plan maximum
+                      Plan actif
                     </span>
                   </div>
                 )}
@@ -629,33 +604,6 @@ export function AccountDashboard() {
               </div>
             </div>
 
-            {/* ── Upgrade section for standard users ── */}
-            {userRole === 'standard' && (
-              <div className="bg-gradient-to-r from-purple-50 to-purple-100/50 rounded-2xl border border-purple-200/50 p-6">
-                <div className="flex items-center gap-2 mb-2">
-                  <Crown className="w-5 h-5 text-purple-500" />
-                  <h3 className="font-semibold text-[15px]">Passez à Pro</h3>
-                </div>
-                <p className="text-sm text-gray-600 mb-4">
-                  Accédez aux rapports PDF, alertes personnalisées, archives complètes et support prioritaire.
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mb-5">
-                  {TIERS.pro.features.map((f) => (
-                    <div key={f} className="flex items-start gap-2 p-2">
-                      <Check className="w-4 h-4 text-purple-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-[12px] text-gray-600">{f}</span>
-                    </div>
-                  ))}
-                </div>
-                <Link
-                  href="/pricing"
-                  className="inline-flex items-center gap-2 bg-purple-600 text-white px-5 py-2.5 rounded-xl text-[13px] hover:bg-purple-700 transition-colors"
-                >
-                  Découvrir Pro <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-            )}
-
             {/* ── Payment history ── */}
             {summary?.recentPayments && summary.recentPayments.length > 0 && (
               <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
@@ -667,7 +615,7 @@ export function AccountDashboard() {
                   {summary.recentPayments.map((payment) => (
                     <li key={payment.id} className="flex items-center justify-between py-3 px-4 border border-black/[0.03] rounded-lg">
                       <div>
-                        <p className="text-sm font-medium capitalize">{payment.tier} — {cycleLabel(payment.billing_cycle as 'monthly' | 'quarterly' | 'yearly')}</p>
+                        <p className="text-sm font-medium capitalize">{payment.tier} — Mensuel</p>
                         <p className="text-[11px] text-gray-400">
                           {new Date(payment.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                         </p>
@@ -720,15 +668,15 @@ export function AccountDashboard() {
                 checked={newsletterPrefs.newsletter_weekly}
                 onChange={(v) => setNewsletterPrefs((p) => ({ ...p, newsletter_weekly: v }))}
                 disabled={!isSubscribed}
-                disabledMessage="Standard ou Pro requis"
+                disabledMessage="Premium requis"
               />
               <ToggleRow
                 label="Rapports PDF"
                 description="Recevez les rapports exclusifs en PDF"
                 checked={newsletterPrefs.reports_pdf}
                 onChange={(v) => setNewsletterPrefs((p) => ({ ...p, reports_pdf: v }))}
-                disabled={userRole !== 'pro' && userRole !== 'admin'}
-                disabledMessage="Pro requis"
+                disabled={!isSubscribed}
+                disabledMessage="Premium requis"
               />
             </div>
             <button
@@ -753,15 +701,15 @@ export function AccountDashboard() {
                 checked={newsletterPrefs.alerts_news}
                 onChange={(v) => setNewsletterPrefs((p) => ({ ...p, alerts_news: v }))}
                 disabled={!isSubscribed}
-                disabledMessage="Standard ou Pro requis"
+                disabledMessage="Premium requis"
               />
               <ToggleRow
                 label="Alertes personnalisées"
                 description="Créez des alertes sur des sujets spécifiques"
                 checked={newsletterPrefs.alerts_custom}
                 onChange={(v) => setNewsletterPrefs((p) => ({ ...p, alerts_custom: v }))}
-                disabled={userRole !== 'pro' && userRole !== 'admin'}
-                disabledMessage="Pro requis"
+                disabled={!isSubscribed}
+                disabledMessage="Premium requis"
               />
             </div>
             <button

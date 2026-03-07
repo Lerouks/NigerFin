@@ -58,7 +58,7 @@ export function LoginGate({
       <div
         ref={dialogRef}
         tabIndex={-1}
-        className={`relative bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl transition-all duration-300 ease-out ${
+        className={`relative bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl outline-none transition-all duration-300 ease-out ${
           mounted ? 'translate-y-0 scale-100' : 'translate-y-6 scale-95'
         }`}
       >
@@ -99,7 +99,7 @@ export function LoginGate({
           href="/inscription"
           className="block w-full mt-3 border border-black/[0.08] py-3 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors text-[14px] text-center"
         >
-          Créer un compte — c&apos;est gratuit
+          Créer un compte gratuitement
         </Link>
 
         {/* Avantages */}

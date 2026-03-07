@@ -56,12 +56,24 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
   const [linkCopied, setLinkCopied] = useState(false);
   const [hasTracked, setHasTracked] = useState(false);
   const [resolvedBody, setResolvedBody] = useState<string | null>(null);
+  const [premiumLimit, setPremiumLimit] = useState(3);
   const imageUrl = getArticleImageUrl(article);
   const contentType = getContentTypeFromArticle(article);
 
   const articleUrl = typeof window !== 'undefined'
     ? window.location.href
     : `https://nfireport.com/articles/${article.slug.current}`;
+
+  // Fetch paywall config once for configurable limit
+  useEffect(() => {
+    if (contentType !== 'premium') return;
+    fetch('/api/paywall-config')
+      .then((r) => r.ok ? r.json() : null)
+      .then((config) => {
+        if (config?.free_articles_count) setPremiumLimit(config.free_articles_count);
+      })
+      .catch(() => {});
+  }, [contentType]);
 
   useEffect(() => {
     // Wait for auth to finish loading before checking access
@@ -71,7 +83,8 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
       contentType,
       userRole,
       premiumArticlesUsed,
-      article.slug.current
+      article.slug.current,
+      premiumLimit
     );
     setAccessResult(result);
 
@@ -87,7 +100,7 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
         setHasTracked(true);
       }
     }
-  }, [contentType, userRole, premiumArticlesUsed, article, isSignedIn, isLoading, hasTracked, refreshProfile]);
+  }, [contentType, userRole, premiumArticlesUsed, article, isSignedIn, isLoading, hasTracked, refreshProfile, premiumLimit]);
 
   // Fetch body: use prop for free articles, fetch securely for premium
   useEffect(() => {

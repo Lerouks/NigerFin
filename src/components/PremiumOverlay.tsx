@@ -250,8 +250,8 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
     });
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Escape key for non-blocking overlays
-      if (e.key === 'Escape' && !config?.isBlocking) {
+      // Escape key to close overlay
+      if (e.key === 'Escape') {
         e.preventDefault();
         handleDismiss();
         return;
@@ -348,17 +348,16 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
   // ─── Dismiss / Continue handlers ───────────────────────────────────────────
 
   const handleDismiss = useCallback(() => {
-    if (config?.isBlocking) return;
-
     setAnimateIn(false);
     markDismissed();
+    document.body.style.overflow = '';
 
     trackOverlayEvent('dismiss', { articleId, userId: user?.id, overlayCase });
 
     setTimeout(() => {
       if (mountedRef.current) setVisible(false);
     }, 300);
-  }, [config?.isBlocking, articleId, user?.id, overlayCase]);
+  }, [articleId, user?.id, overlayCase]);
 
   const handleContinueReading = useCallback(() => {
     setAnimateIn(false);
@@ -388,12 +387,10 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
       <div
         className={`fixed inset-0 z-[100] motion-safe:transition-all motion-safe:duration-500 ${
           animateIn
-            ? isBlocking
-              ? 'bg-black/60 backdrop-blur-sm'
-              : 'bg-black/40 backdrop-blur-[2px]'
-            : 'bg-black/0 backdrop-blur-0'
+            ? 'bg-black/80'
+            : 'bg-black/0'
         }`}
-        onClick={!isBlocking ? handleDismiss : undefined}
+        onClick={handleDismiss}
         aria-hidden="true"
       />
 
@@ -413,16 +410,14 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
           {/* Decorative top bar */}
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-500" />
 
-          {/* Close button (non-blocking only) */}
-          {config.showCloseButton && (
-            <button
-              onClick={handleDismiss}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all z-10"
-              aria-label="Fermer"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
+          {/* Close button */}
+          <button
+            onClick={handleDismiss}
+            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all z-10"
+            aria-label="Fermer"
+          >
+            <X className="w-4 h-4" />
+          </button>
 
           <div className="px-6 pb-8 pt-6 sm:px-8">
             {/* Icon */}

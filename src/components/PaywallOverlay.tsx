@@ -38,17 +38,14 @@ function getSessionId(): string {
   return sid;
 }
 
-function isDismissed(hours: number): boolean {
+function isDismissed(): boolean {
   if (typeof document === 'undefined') return false;
-  const match = document.cookie.match(new RegExp(`(?:^|; )${DISMISS_COOKIE}=([^;]*)`));
-  if (!match) return false;
-  const dismissedAt = parseInt(match[1], 10);
-  return Date.now() - dismissedAt < hours * 3600 * 1000;
+  return document.cookie.includes(DISMISS_COOKIE + '=');
 }
 
 function setDismissCookie(hours: number): void {
   const expires = new Date(Date.now() + hours * 3600 * 1000).toUTCString();
-  document.cookie = `${DISMISS_COOKIE}=${Date.now()};expires=${expires};path=/;SameSite=Lax`;
+  document.cookie = `${DISMISS_COOKIE}=1;expires=${expires};path=/;SameSite=Lax`;
 }
 
 function trackEvent(eventType: string, articleId?: string, userId?: string) {
@@ -66,55 +63,63 @@ function trackEvent(eventType: string, articleId?: string, userId?: string) {
 
 interface PaywallOverlayProps {
   articleId?: string;
-  contentType?: 'free' | 'premium' | 'pro';
 }
 
-export function PaywallOverlay({ articleId, contentType }: PaywallOverlayProps) {
+export function PaywallOverlay({ articleId }: PaywallOverlayProps) {
   const { isSignedIn, userRole, user } = useAuth();
   const [config, setConfig] = useState<PaywallConfig | null>(null);
   const [visible, setVisible] = useState(false);
   const [animateIn, setAnimateIn] = useState(false);
   const hasTriggered = useRef(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const mountedRef = useRef(true);
 
   // Don't show to subscribers or admins
   const shouldSkip = isSignedIn && (userRole === 'standard' || userRole === 'pro' || userRole === 'admin');
+
+  // Cleanup on unmount
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
 
   // Fetch config
   useEffect(() => {
     if (shouldSkip) return;
     fetch('/api/paywall')
       .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data) setConfig(data); })
+      .then(data => { if (data && mountedRef.current) setConfig(data); })
       .catch(() => {});
   }, [shouldSkip]);
 
   const showOverlay = useCallback(() => {
-    if (hasTriggered.current || !config?.enabled) return;
-    if (isDismissed(config.dismiss_cookie_hours)) return;
+    if (hasTriggered.current || !config?.enabled || !mountedRef.current) return;
+    if (isDismissed()) return;
     hasTriggered.current = true;
     setVisible(true);
-    // Trigger animation after mount
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => setAnimateIn(true));
+      requestAnimationFrame(() => {
+        if (mountedRef.current) setAnimateIn(true);
+      });
     });
     trackEvent('view', articleId, user?.id);
-  }, [config, articleId, user?.id]);
+  }, [config?.enabled, config?.dismiss_cookie_hours, articleId, user?.id]);
 
   // Time-based trigger
   useEffect(() => {
-    if (!config?.enabled || shouldSkip) return;
-    if (config.trigger_type === 'scroll') return; // scroll-only mode
+    if (!config?.enabled || shouldSkip || hasTriggered.current) return;
+    if (config.trigger_type === 'scroll') return;
     timerRef.current = setTimeout(showOverlay, config.delay_seconds * 1000);
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
-  }, [config, shouldSkip, showOverlay]);
+  }, [config?.enabled, config?.trigger_type, config?.delay_seconds, shouldSkip, showOverlay]);
 
   // Scroll-based trigger
   useEffect(() => {
     if (!config?.enabled || shouldSkip) return;
-    if (config.trigger_type === 'time') return; // time-only mode
+    if (config.trigger_type === 'time') return;
 
     const handleScroll = () => {
+      if (hasTriggered.current) return;
       const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
       if (scrollHeight <= 0) return;
       const percent = (window.scrollY / scrollHeight) * 100;
@@ -125,12 +130,12 @@ export function PaywallOverlay({ articleId, contentType }: PaywallOverlayProps) 
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [config, shouldSkip, showOverlay]);
+  }, [config?.enabled, config?.trigger_type, config?.scroll_percent, shouldSkip, showOverlay]);
 
   const handleDismiss = () => {
     setAnimateIn(false);
     trackEvent('dismiss', articleId, user?.id);
-    setTimeout(() => setVisible(false), 300);
+    setTimeout(() => { if (mountedRef.current) setVisible(false); }, 300);
     if (config) setDismissCookie(config.dismiss_cookie_hours);
   };
 

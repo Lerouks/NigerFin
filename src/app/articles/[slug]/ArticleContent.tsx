@@ -248,7 +248,7 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
       </div>
 
       {/* Soft paywall overlay for non-subscribers (nudge, not block) */}
-      <PaywallOverlay articleId={article._id} contentType={contentType} />
+      <PaywallOverlay articleId={article._id} />
     </div>
   );
 }

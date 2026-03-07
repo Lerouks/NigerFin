@@ -54,9 +54,12 @@ export function PaywallManager() {
 
   useEffect(() => { fetchConfig(); }, [fetchConfig]);
 
+  const [error, setError] = useState('');
+
   const handleSave = async () => {
     if (!config) return;
     setSaving(true);
+    setError('');
     try {
       const res = await fetch('/api/admin/paywall', {
         method: 'PUT',
@@ -64,10 +67,17 @@ export function PaywallManager() {
         body: JSON.stringify(config),
       });
       if (res.ok) {
+        const updated = await res.json();
+        setConfig(updated);
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
+      } else {
+        const err = await res.json().catch(() => ({ error: 'Erreur serveur' }));
+        setError(err.error || 'Erreur lors de la sauvegarde');
       }
-    } catch { /* ignore */ }
+    } catch {
+      setError('Erreur réseau');
+    }
     setSaving(false);
   };
 
@@ -302,7 +312,7 @@ export function PaywallManager() {
         </div>
 
         {/* Save */}
-        <div className="flex gap-3 pt-2">
+        <div className="flex items-center gap-3 pt-2">
           <button
             onClick={handleSave}
             disabled={saving}
@@ -311,6 +321,7 @@ export function PaywallManager() {
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
             {saved ? 'Enregistré !' : 'Enregistrer'}
           </button>
+          {error && <p className="text-red-500 text-[13px]">{error}</p>}
         </div>
       </div>
     </div>

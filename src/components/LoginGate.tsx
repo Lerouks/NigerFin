@@ -99,7 +99,7 @@ export function LoginGate({
           href="/inscription"
           className="block w-full mt-3 border border-black/[0.08] py-3 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors text-[14px] text-center"
         >
-          Créer un compte — c&apos;est gratuit
+          Créer un compte gratuitement
         </Link>
 
         {/* Avantages */}

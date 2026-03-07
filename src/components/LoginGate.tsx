@@ -58,7 +58,7 @@ export function LoginGate({
       <div
         ref={dialogRef}
         tabIndex={-1}
-        className={`relative bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl transition-all duration-300 ease-out ${
+        className={`relative bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl outline-none transition-all duration-300 ease-out ${
           mounted ? 'translate-y-0 scale-100' : 'translate-y-6 scale-95'
         }`}
       >

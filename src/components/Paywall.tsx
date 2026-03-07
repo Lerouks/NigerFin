@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { Lock, Check, Star, ArrowRight, X } from 'lucide-react';
-import { TIERS } from '@/config/pricing';
+import { PREMIUM_TIER, BILLING_OPTIONS } from '@/config/pricing';
 
-type PaywallReason = 'login_required' | 'paywall_reader' | 'paywall_pro' | 'visitor_limit';
+type PaywallReason = 'login_required' | 'paywall_reader' | 'visitor_limit';
 
 interface PaywallProps {
   reason: PaywallReason;
@@ -59,21 +59,31 @@ function InnerContent({ content, reason }: { content: PaywallContentData; reason
       <h2 className="text-2xl font-bold mb-2">{content.title}</h2>
       <p className="text-gray-600 mb-6">{content.message}</p>
 
-      {content.showComparison && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-left">
-          <PlanCard
-            name="Standard"
-            price={TIERS.standard.plans.monthly.amount.toLocaleString('fr-FR')}
-            badge="POPULAIRE"
-            features={TIERS.standard.features.slice(0, 5)}
-            isPopular
-          />
-          <PlanCard
-            name="Pro"
-            price={TIERS.pro.plans.monthly.amount.toLocaleString('fr-FR')}
-            badge="PREMIUM"
-            features={TIERS.pro.features.slice(0, 5)}
-          />
+      {content.showPremiumCard && (
+        <div className="mb-6 text-left max-w-sm mx-auto">
+          <div className="rounded-lg p-5 border bg-[#111] text-white border-white/10">
+            <div className="flex items-center gap-2 mb-2">
+              <Star className="w-4 h-4" style={{ color: '#d4a843', fill: '#d4a843' }} />
+              <span className="text-[10px] tracking-[0.15em] uppercase text-white/40">PREMIUM</span>
+            </div>
+            <h3 className="text-lg font-bold mb-1">Premium</h3>
+            <div className="space-y-0.5 mb-3">
+              {BILLING_OPTIONS.map((opt) => (
+                <p key={opt.cycle} className="text-xs text-white/60">
+                  {opt.label}
+                  {opt.savings && <span className="ml-1.5 text-emerald-400 text-[10px]">({opt.savings})</span>}
+                </p>
+              ))}
+            </div>
+            <ul className="space-y-1.5">
+              {PREMIUM_TIER.features.slice(0, 4).map((f) => (
+                <li key={f} className="flex items-center gap-2 text-xs text-white/70">
+                  <Check className="w-3.5 h-3.5 flex-shrink-0 text-emerald-400" />
+                  {f}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       )}
 
@@ -107,45 +117,10 @@ function InnerContent({ content, reason }: { content: PaywallContentData; reason
   );
 }
 
-function PlanCard({
-  name,
-  price,
-  badge,
-  features,
-  isPopular,
-}: {
-  name: string;
-  price: string;
-  badge: string;
-  features: string[];
-  isPopular?: boolean;
-}) {
-  return (
-    <div className={`rounded-lg p-5 border ${isPopular ? 'bg-[#111] text-white border-white/10' : 'bg-white border-black/[0.06]'}`}>
-      <div className="flex items-center gap-2 mb-2">
-        {isPopular && <Star className="w-4 h-4" style={{ color: '#d4a843', fill: '#d4a843' }} />}
-        <span className={`text-[10px] tracking-[0.15em] uppercase ${isPopular ? 'text-white/40' : 'text-gray-400'}`}>
-          {badge}
-        </span>
-      </div>
-      <h3 className="text-lg font-bold mb-1">{name}</h3>
-      <p className={`text-sm mb-3 ${isPopular ? 'text-white/60' : 'text-gray-500'}`}>{price} FCFA/mois</p>
-      <ul className="space-y-1.5">
-        {features.map((f) => (
-          <li key={f} className={`flex items-center gap-2 text-xs ${isPopular ? 'text-white/70' : 'text-gray-600'}`}>
-            <Check className={`w-3.5 h-3.5 flex-shrink-0 ${isPopular ? 'text-emerald-400' : 'text-emerald-600'}`} />
-            {f}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 interface PaywallContentData {
   title: string;
   message: string;
-  showComparison: boolean;
+  showPremiumCard: boolean;
 }
 
 function getPaywallContent(
@@ -158,25 +133,19 @@ function getPaywallContent(
       return {
         title: 'Créez un compte pour continuer',
         message: `Vous avez lu vos ${limit} articles gratuits. Créez un compte gratuit pour continuer à lire.`,
-        showComparison: false,
+        showPremiumCard: false,
       };
     case 'login_required':
       return {
         title: 'Contenu réservé aux abonnés',
         message: 'Connectez-vous ou créez un compte pour accéder à ce contenu premium.',
-        showComparison: false,
+        showPremiumCard: false,
       };
     case 'paywall_reader':
       return {
         title: 'Limite atteinte',
-        message: `Vous avez lu ${used}/${limit} articles premium ce mois-ci. Passez à Standard pour un accès illimité.`,
-        showComparison: true,
-      };
-    case 'paywall_pro':
-      return {
-        title: 'Contenu exclusif Pro',
-        message: 'Ce contenu est réservé aux abonnés Pro. Passez au plan Pro pour un accès complet.',
-        showComparison: true,
+        message: `Vous avez lu ${used}/${limit} articles premium ce mois-ci. Passez au Premium pour un accès illimité.`,
+        showPremiumCard: true,
       };
   }
 }

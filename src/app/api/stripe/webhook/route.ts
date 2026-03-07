@@ -10,11 +10,7 @@ function getStripe() {
 }
 
 function mapTierToRole(tier: string): string {
-  switch (tier) {
-    case 'standard': return 'standard';
-    case 'pro': return 'pro';
-    default: return 'reader';
-  }
+  return tier === 'premium' ? 'premium' : 'reader';
 }
 
 export async function POST(request: NextRequest) {
@@ -43,7 +39,7 @@ export async function POST(request: NextRequest) {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session;
       const userId = session.metadata?.supabase_user_id;
-      const tier = session.metadata?.tier || 'standard';
+      const tier = session.metadata?.tier || 'premium';
       const billingCycle = session.metadata?.billing_cycle || 'monthly';
 
       if (userId && session.subscription) {
@@ -74,7 +70,6 @@ export async function POST(request: NextRequest) {
           .update({
             role,
             subscription_status: 'active',
-            billing_cycle: billingCycle,
             updated_at: new Date().toISOString(),
           })
           .eq('id', userId);
@@ -87,7 +82,7 @@ export async function POST(request: NextRequest) {
     case 'customer.subscription.updated': {
       const subscription = event.data.object as Stripe.Subscription;
       const userId = subscription.metadata?.supabase_user_id;
-      const tier = subscription.metadata?.tier || 'standard';
+      const tier = subscription.metadata?.tier || 'premium';
 
       if (userId) {
         const status = subscription.status === 'active' ? 'active' :
@@ -137,7 +132,6 @@ export async function POST(request: NextRequest) {
           .update({
             role: 'reader',
             subscription_status: 'inactive',
-            billing_cycle: null,
             updated_at: new Date().toISOString(),
           })
           .eq('id', userId);

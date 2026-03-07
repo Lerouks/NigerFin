@@ -21,15 +21,14 @@ interface Lesson {
   category_id: string;
   title: string;
   duration: string;
-  access_level: 'free' | 'standard' | 'pro';
+  access_level: 'free' | 'premium';
   sort_order: number;
   content: string;
 }
 
 const ACCESS_LEVELS = [
   { value: 'free', label: 'Gratuit', color: 'bg-emerald-100 text-emerald-700' },
-  { value: 'standard', label: 'Standard', color: 'bg-blue-100 text-blue-700' },
-  { value: 'pro', label: 'Pro', color: 'bg-purple-100 text-purple-700' },
+  { value: 'premium', label: 'Premium', color: 'bg-blue-100 text-blue-700' },
 ];
 
 const ICONS = [

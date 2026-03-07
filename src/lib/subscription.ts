@@ -1,10 +1,8 @@
 import type { UserRole } from '@/types';
-import { TIERS } from '@/config/pricing';
-
-export type SubscriptionTier = 'lecteur' | 'standard' | 'premium';
+import { PREMIUM_TIER, BILLING_OPTIONS, type BillingCycle } from '@/config/pricing';
 
 export interface SubscriptionPlan {
-  id: SubscriptionTier;
+  id: 'lecteur' | 'premium';
   name: string;
   price: number;
   priceLabel: string;
@@ -30,7 +28,7 @@ export const subscriptionPlans: SubscriptionPlan[] = [
     price: 0,
     priceLabel: 'Gratuit',
     features: [
-      'Accès aux articles gratuits',
+      'Articles gratuits illimités',
       '3 articles premium / mois',
       'Newsletter mensuelle',
       'Outils de base',
@@ -49,30 +47,11 @@ export const subscriptionPlans: SubscriptionPlan[] = [
     },
   },
   {
-    id: 'standard',
-    name: 'Populaire',
-    price: TIERS.standard.plans.monthly.amount,
-    priceLabel: TIERS.standard.plans.monthly.label,
-    features: TIERS.standard.features,
-    limits: {
-      premiumArticlesPerMonth: -1,
-      hasUnlimitedArticles: true,
-      hasReports: true,
-      hasPdfReports: false,
-      hasAlerts: true,
-      hasCustomAlerts: false,
-      hasPremiumTools: true,
-      hasArchives: false,
-      hasPrioritySupport: false,
-      newsletterFrequency: 'hebdomadaire',
-    },
-  },
-  {
     id: 'premium',
-    name: 'Pro',
-    price: TIERS.pro.plans.monthly.amount,
-    priceLabel: TIERS.pro.plans.monthly.label,
-    features: TIERS.pro.features,
+    name: 'Premium',
+    price: PREMIUM_TIER.price,
+    priceLabel: PREMIUM_TIER.label,
+    features: PREMIUM_TIER.features,
     limits: {
       premiumArticlesPerMonth: -1,
       hasUnlimitedArticles: true,
@@ -83,10 +62,15 @@ export const subscriptionPlans: SubscriptionPlan[] = [
       hasPremiumTools: true,
       hasArchives: true,
       hasPrioritySupport: true,
-      newsletterFrequency: 'quotidienne',
+      newsletterFrequency: 'hebdomadaire',
     },
   },
 ];
+
+export function getPriceForCycle(cycle: BillingCycle): number {
+  const option = BILLING_OPTIONS.find((b) => b.cycle === cycle);
+  return option?.price ?? BILLING_OPTIONS[0].price;
+}
 
 export function canAccessPremiumContent(
   role: UserRole | null,
@@ -101,5 +85,5 @@ export function canAccessPremiumContent(
 export function canAccessTool(role: UserRole | null, isPremiumTool: boolean): boolean {
   if (!isPremiumTool) return true;
   if (!role) return false;
-  return role === 'standard' || role === 'pro' || role === 'admin';
+  return role === 'premium' || role === 'admin';
 }

@@ -82,7 +82,7 @@ export function LoginGate({
             <ul className="space-y-1.5 text-[12px] text-gray-600">
               <li className="flex items-center gap-2"><span className="text-emerald-500">&#10003;</span>Accédez aux analyses premium</li>
               <li className="flex items-center gap-2"><span className="text-emerald-500">&#10003;</span>Commentez et interagissez avec la communauté</li>
-              <li className="flex items-center gap-2"><span className="text-emerald-500">&#10003;</span>Recevez notre newsletter quotidienne</li>
+              <li className="flex items-center gap-2"><span className="text-emerald-500">&#10003;</span>Recevez notre newsletter mensuelle</li>
               <li className="flex items-center gap-2"><span className="text-emerald-500">&#10003;</span>Suivez les sujets qui vous intéressent</li>
             </ul>
           </div>

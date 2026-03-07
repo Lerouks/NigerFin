@@ -64,7 +64,7 @@ export function getVisitorLimit(): number {
 
 export type AccessResult =
   | { allowed: true }
-  | { allowed: false; reason: 'login_required' | 'paywall_reader' | 'paywall_pro' | 'visitor_limit' };
+  | { allowed: false; reason: 'login_required' | 'paywall_reader' | 'visitor_limit' };
 
 export function checkArticleAccess(
   contentType: ContentType,
@@ -89,15 +89,9 @@ export function checkArticleAccess(
   // Free content: accessible to all logged-in users
   if (contentType === 'free') return { allowed: true };
 
-  // Pro content: only pro and admin
-  if (contentType === 'pro') {
-    if (userRole === 'pro') return { allowed: true };
-    return { allowed: false, reason: 'paywall_pro' };
-  }
-
   // Premium content
   if (contentType === 'premium') {
-    if (userRole === 'standard' || userRole === 'pro') return { allowed: true };
+    if (userRole === 'premium') return { allowed: true };
     // Reader: check monthly limit
     if (premiumArticlesReadThisMonth < READER_PREMIUM_LIMIT) {
       return { allowed: true };
@@ -116,7 +110,7 @@ export function getContentTypeFromArticle(article: { isPremium?: boolean; conten
 export function canAccessTool(userRole: UserRole | null, isPremiumTool: boolean): boolean {
   if (!isPremiumTool) return true;
   if (!userRole) return false;
-  return userRole === 'standard' || userRole === 'pro' || userRole === 'admin';
+  return userRole === 'premium' || userRole === 'admin';
 }
 
 export function getReaderPremiumLimit(): number {

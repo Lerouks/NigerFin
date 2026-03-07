@@ -7,11 +7,10 @@ export async function GET() {
 
   const { serviceClient } = auth;
 
-  const [totalRes, readersRes, standardRes, proRes, activeRes, blockedRes, pendingPayRes] = await Promise.all([
+  const [totalRes, readersRes, premiumRes, activeRes, blockedRes, pendingPayRes] = await Promise.all([
     serviceClient.from('user_profiles').select('*', { count: 'exact', head: true }),
     serviceClient.from('user_profiles').select('*', { count: 'exact', head: true }).eq('role', 'reader'),
-    serviceClient.from('user_profiles').select('*', { count: 'exact', head: true }).eq('role', 'standard'),
-    serviceClient.from('user_profiles').select('*', { count: 'exact', head: true }).eq('role', 'pro'),
+    serviceClient.from('user_profiles').select('*', { count: 'exact', head: true }).eq('role', 'premium'),
     serviceClient.from('user_profiles').select('*', { count: 'exact', head: true }).eq('subscription_status', 'active'),
     serviceClient.from('user_profiles').select('*', { count: 'exact', head: true }).eq('blocked', true),
     serviceClient.from('payment_requests').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
@@ -20,8 +19,7 @@ export async function GET() {
   return NextResponse.json({
     total: totalRes.count || 0,
     readers: readersRes.count || 0,
-    standard: standardRes.count || 0,
-    pro: proRes.count || 0,
+    premium: premiumRes.count || 0,
     activeSubscriptions: activeRes.count || 0,
     blockedUsers: blockedRes.count || 0,
     pendingPayments: pendingPayRes.count || 0,

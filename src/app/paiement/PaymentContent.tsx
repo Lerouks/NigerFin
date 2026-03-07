@@ -14,14 +14,15 @@ import {
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import {
-  TIERS,
+  PREMIUM_TIER,
   PAYMENT_METHODS,
+  BILLING_OPTIONS,
   formatPrice,
-  cycleLabel,
-  getMonthlyEquivalent,
-  type TierId,
-  type BillingCycle,
+  getBillingOption,
+  getBillingCycleLabel,
+  isValidBillingCycle,
   type PaymentMethodId,
+  type BillingCycle,
 } from '@/config/pricing';
 
 type Step = 'choose-method' | 'instructions' | 'confirm' | 'submitted';
@@ -31,9 +32,12 @@ export function PaymentContent() {
   const router = useRouter();
   const { isSignedIn, isLoading } = useAuth();
 
-  const tierParam = searchParams.get('tier') as TierId | null;
-  const cycleParam = searchParams.get('cycle') as BillingCycle | null;
+  const tierParam = searchParams.get('tier');
+  const cycleParam = searchParams.get('cycle') || 'monthly';
 
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>(
+    isValidBillingCycle(cycleParam) ? cycleParam : 'monthly'
+  );
   const [step, setStep] = useState<Step>('choose-method');
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethodId | null>(null);
   const [transactionNumber, setTransactionNumber] = useState('');
@@ -49,7 +53,7 @@ export function PaymentContent() {
   }, [isLoading, isSignedIn, router]);
 
   // Validate params
-  if (!tierParam || !(tierParam in TIERS) || !cycleParam || !['monthly', 'quarterly', 'yearly'].includes(cycleParam)) {
+  if (tierParam !== 'premium') {
     return (
       <div className="min-h-screen bg-[#fafaf9] flex items-center justify-center">
         <div className="text-center">
@@ -64,8 +68,8 @@ export function PaymentContent() {
     );
   }
 
-  const tier = TIERS[tierParam];
-  const plan = tier.plans[cycleParam];
+  const billingOption = getBillingOption(billingCycle);
+  const price = billingOption.price;
   const method = selectedMethod ? PAYMENT_METHODS[selectedMethod] : null;
 
   const handleCopyNumber = async () => {
@@ -90,8 +94,8 @@ export function PaymentContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          tier: tierParam,
-          billingCycle: cycleParam,
+          tier: 'premium',
+          billingCycle,
           paymentMethod: selectedMethod,
           transactionNumber: transactionNumber.trim(),
         }),
@@ -132,36 +136,50 @@ export function PaymentContent() {
           </Link>
           <h1 className="text-3xl md:text-4xl font-bold mb-3">Finaliser le paiement</h1>
           <p className="text-white/50 text-[15px]">
-            Plan {tier.name} &mdash; {cycleLabel(cycleParam)}
+            Plan Premium &mdash; {getBillingCycleLabel(billingCycle)}
           </p>
         </div>
       </section>
 
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        {/* Billing cycle selector */}
+        <div className="bg-white rounded-xl border border-black/[0.06] p-6 mb-6">
+          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Choisissez la durée</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {BILLING_OPTIONS.map((opt) => (
+              <button
+                key={opt.cycle}
+                onClick={() => setBillingCycle(opt.cycle)}
+                className={`p-4 rounded-xl border-2 text-left transition-all ${
+                  billingCycle === opt.cycle
+                    ? 'border-[#111] bg-[#111]/5'
+                    : 'border-black/[0.06] hover:border-black/20'
+                }`}
+              >
+                <p className="font-bold text-lg">{formatPrice(opt.price)}</p>
+                <p className="text-sm text-gray-500">{opt.durationLabel}</p>
+                {opt.savings && (
+                  <p className="text-emerald-600 text-[12px] font-medium mt-1">{opt.savings}</p>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Order summary */}
         <div className="bg-white rounded-xl border border-black/[0.06] p-6 mb-8">
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Récapitulatif</h2>
           <div className="flex items-center justify-between py-2 border-b border-black/[0.04]">
             <span className="text-gray-600">Plan</span>
-            <span className="font-semibold">{tier.name}</span>
+            <span className="font-semibold">Premium</span>
           </div>
           <div className="flex items-center justify-between py-2 border-b border-black/[0.04]">
             <span className="text-gray-600">Durée</span>
-            <span className="font-semibold">{cycleLabel(cycleParam)}</span>
+            <span className="font-semibold">{billingOption.durationLabel}</span>
           </div>
-          <div className="flex items-center justify-between py-2 border-b border-black/[0.04]">
-            <span className="text-gray-600">Équivalent mensuel</span>
-            <span className="text-gray-500">{formatPrice(getMonthlyEquivalent(tierParam, cycleParam))}/mois</span>
-          </div>
-          {plan.savings && (
-            <div className="flex items-center justify-between py-2 border-b border-black/[0.04]">
-              <span className="text-gray-600">Économie</span>
-              <span className="text-emerald-600 font-medium">{plan.savings}</span>
-            </div>
-          )}
           <div className="flex items-center justify-between py-3 mt-1">
             <span className="text-lg font-bold">Total à payer</span>
-            <span className="text-2xl font-bold">{formatPrice(plan.amount)}</span>
+            <span className="text-2xl font-bold">{formatPrice(price)}</span>
           </div>
         </div>
 
@@ -199,7 +217,7 @@ export function PaymentContent() {
             <div className="bg-white rounded-xl border border-black/[0.06] p-6 mb-6 space-y-4">
               <div>
                 <span className="text-[12px] text-gray-400 uppercase tracking-wider">Montant exact à envoyer</span>
-                <p className="text-2xl font-bold mt-1">{formatPrice(plan.amount)}</p>
+                <p className="text-2xl font-bold mt-1">{formatPrice(price)}</p>
               </div>
               <div>
                 <span className="text-[12px] text-gray-400 uppercase tracking-wider">Numéro du destinataire</span>
@@ -244,7 +262,8 @@ export function PaymentContent() {
             <div className="bg-white rounded-xl border border-black/[0.06] p-6 mb-6">
               <div className="mb-4">
                 <p className="text-[13px] text-gray-500 mb-1">Méthode : <span className="font-semibold text-black">{method.name}</span></p>
-                <p className="text-[13px] text-gray-500">Montant : <span className="font-semibold text-black">{formatPrice(plan.amount)}</span></p>
+                <p className="text-[13px] text-gray-500 mb-1">Durée : <span className="font-semibold text-black">{billingOption.durationLabel}</span></p>
+                <p className="text-[13px] text-gray-500">Montant : <span className="font-semibold text-black">{formatPrice(price)}</span></p>
               </div>
 
               <label htmlFor="txn" className="block text-sm font-medium mb-2">

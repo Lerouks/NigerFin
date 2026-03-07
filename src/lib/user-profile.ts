@@ -40,8 +40,7 @@ export async function getPremiumArticlesCount(): Promise<number> {
 export function getRoleLabel(role: UserRole): string {
   switch (role) {
     case 'reader': return 'Lecteur';
-    case 'standard': return 'Standard';
-    case 'pro': return 'Pro';
+    case 'premium': return 'Premium';
     case 'admin': return 'Administrateur';
     default: return 'Lecteur';
   }

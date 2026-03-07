@@ -7,8 +7,6 @@ import { Clock, Calendar, User, Facebook, Linkedin, Link2, Check, Loader2 } from
 import { useAuth } from '@/lib/auth-context';
 import { CommentsSection } from '@/components/CommentsSection';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
-import { Paywall } from '@/components/Paywall';
-import { LoginGate } from '@/components/LoginGate';
 import { PremiumOverlay } from '@/components/PremiumOverlay';
 import { ArticleCard } from '@/components/ArticleCard';
 import { ArticleLikes } from '@/components/ArticleLikes';
@@ -19,8 +17,6 @@ import {
   checkArticleAccess,
   getContentTypeFromArticle,
   trackVisitorArticle,
-  getReaderPremiumLimit,
-  getVisitorLimit,
   type AccessResult,
 } from '@/lib/access-control';
 import { trackPremiumArticleRead } from '@/lib/user-profile';
@@ -59,7 +55,6 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
   const [linkCopied, setLinkCopied] = useState(false);
   const [hasTracked, setHasTracked] = useState(false);
   const [resolvedBody, setResolvedBody] = useState<string | null>(null);
-  const [showLoginGate, setShowLoginGate] = useState(false);
   const imageUrl = getArticleImageUrl(article);
   const contentType = getContentTypeFromArticle(article);
 
@@ -107,18 +102,6 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
       .catch(() => {});
     return () => { cancelled = true; };
   }, [accessResult, htmlBody, article.slug]);
-
-  // Auto-trigger LoginGate after 3s for premium articles when not authenticated
-  useEffect(() => {
-    if (isLoading) return;
-    const isPremium = contentType === 'premium';
-    if (isPremium && !isSignedIn) {
-      const timer = setTimeout(() => {
-        setShowLoginGate(true);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [contentType, isSignedIn, isLoading]);
 
   const handleCopyLink = async () => {
     await navigator.clipboard.writeText(articleUrl);
@@ -190,14 +173,14 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
                   {/* White gradient overlay — progressive blur effect */}
                   <div className="absolute inset-0 bg-gradient-to-t from-white via-white/90 to-transparent" />
 
-                  {/* "Connectez-vous pour lire la suite" button overlaid */}
+                  {/* CTA button overlaid */}
                   <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-4">
-                    <button
-                      onClick={() => setShowLoginGate(true)}
+                    <Link
+                      href={isSignedIn ? '/pricing' : '/inscription'}
                       className="bg-[#111] text-white px-8 py-3 rounded-lg text-[14px] font-medium hover:bg-[#333] transition-colors shadow-lg"
                     >
-                      Connectez-vous pour lire la suite
-                    </button>
+                      {isSignedIn ? 'Passer en Premium' : 'S\'inscrire pour lire la suite'}
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -207,13 +190,6 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
 
         {/* Unified premium overlay - handles all blocked states */}
         <PremiumOverlay articleId={article._id} isPremium={contentType === 'premium'} />
-
-        {/* Fallback LoginGate modal for manual trigger */}
-        <LoginGate
-          isOpen={showLoginGate}
-          onClose={() => setShowLoginGate(false)}
-          articleTitle={article.title}
-        />
       </div>
     );
   }

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { X, Lock, ArrowRight, Crown, BookOpen, BarChart3, Globe, Zap, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { getReaderPremiumLimit } from '@/lib/access-control';
+import type { UserRole } from '@/types';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -85,10 +86,11 @@ function trackOverlayEvent(
 
 function getOverlayCase(
   isSignedIn: boolean,
-  userRole: string | null,
+  userRole: UserRole | null,
   premiumArticlesUsed: number,
   isPremiumArticle: boolean
 ): OverlayCase {
+  // Free articles never show an overlay (same as having premium access)
   if (!isPremiumArticle) return 'premium';
   if (!isSignedIn) return 'not_connected';
   if (userRole === 'admin') return 'admin';

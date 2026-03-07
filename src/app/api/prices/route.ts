@@ -12,7 +12,7 @@ export async function GET() {
     .from('dynamic_pricing')
     .select('tier, billing_cycle, amount');
 
-  // Return as a map: { "standard_monthly": 4900, "pro_yearly": 95000, ... }
+  // Return as a map: { "premium_monthly": 2500, ... }
   const priceMap: Record<string, number> = {};
   if (data) {
     for (const row of data) {

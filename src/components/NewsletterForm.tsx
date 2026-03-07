@@ -39,7 +39,7 @@ export function NewsletterForm() {
         Restez informé
       </h3>
       <p className="text-[14px] text-white/45 mb-7 max-w-md">
-        Recevez chaque matin les analyses économiques et financières du Niger et de l&apos;Afrique.
+        Recevez les analyses économiques et financières du Niger et de l&apos;Afrique de l&apos;Ouest.
       </p>
 
       {subscribed ? (

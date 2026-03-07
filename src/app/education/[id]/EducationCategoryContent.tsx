@@ -16,15 +16,14 @@ interface Lesson {
   id: string;
   title: string;
   duration: string;
-  access_level: 'free' | 'standard' | 'pro';
+  access_level: 'free' | 'premium';
   sort_order: number;
   content: string;
 }
 
 const ACCESS_CONFIG: Record<string, { label: string; color: string; requiredRoles: string[] }> = {
-  free: { label: 'Gratuit', color: 'bg-emerald-100 text-emerald-700', requiredRoles: ['reader', 'standard', 'pro', 'admin'] },
-  standard: { label: 'Standard', color: 'bg-blue-100 text-blue-700', requiredRoles: ['standard', 'pro', 'admin'] },
-  pro: { label: 'Pro', color: 'bg-purple-100 text-purple-700', requiredRoles: ['pro', 'admin'] },
+  free: { label: 'Gratuit', color: 'bg-emerald-100 text-emerald-700', requiredRoles: ['reader', 'premium', 'admin'] },
+  premium: { label: 'Premium', color: 'bg-blue-100 text-blue-700', requiredRoles: ['premium', 'admin'] },
 };
 
 export function EducationCategoryContent({ slug }: { slug: string }) {
@@ -143,7 +142,7 @@ export function EducationCategoryContent({ slug }: { slug: string }) {
                   </div>
                   {!accessible && (
                     <span className={`flex items-center gap-1.5 text-[11px] px-3 py-1 rounded-full ${config.color}`}>
-                      {lesson.access_level === 'pro' ? <Crown className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
+                      {lesson.access_level === 'premium' ? <Crown className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
                       {config.label}
                     </span>
                   )}

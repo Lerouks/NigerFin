@@ -9,6 +9,7 @@ import { CommentsSection } from '@/components/CommentsSection';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
 import { Paywall } from '@/components/Paywall';
 import { PaywallOverlay } from '@/components/PaywallOverlay';
+import { LoginGate } from '@/components/LoginGate';
 import { ArticleCard } from '@/components/ArticleCard';
 import { ArticleLikes } from '@/components/ArticleLikes';
 import type { Article, MarketData } from '@/types';
@@ -58,6 +59,7 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
   const [linkCopied, setLinkCopied] = useState(false);
   const [hasTracked, setHasTracked] = useState(false);
   const [resolvedBody, setResolvedBody] = useState<string | null>(null);
+  const [showLoginGate, setShowLoginGate] = useState(false);
   const imageUrl = getArticleImageUrl(article);
   const contentType = getContentTypeFromArticle(article);
 
@@ -106,6 +108,18 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
     return () => { cancelled = true; };
   }, [accessResult, htmlBody, article.slug]);
 
+  // Auto-trigger LoginGate after 3s for premium articles when not authenticated
+  useEffect(() => {
+    if (isLoading) return;
+    const isPremium = contentType === 'premium';
+    if (isPremium && !isSignedIn) {
+      const timer = setTimeout(() => {
+        setShowLoginGate(true);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [contentType, isSignedIn, isLoading]);
+
   const handleCopyLink = async () => {
     await navigator.clipboard.writeText(articleUrl);
     setLinkCopied(true);
@@ -148,29 +162,42 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
   if (!accessResult.allowed) {
     return (
       <div className="min-h-screen bg-[#fafaf9]">
-        {/* Article page visible behind, blurred — like RFI */}
-        <div className="select-none" style={{ filter: 'blur(3px)' }} aria-hidden="true">
-          <div className="relative h-[450px] md:h-[500px] bg-[#111]">
-            <Image src={imageUrl} alt={article.title} fill className="object-cover opacity-60" priority />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-          </div>
+        {/* Article header — visible normally */}
+        <div className="relative h-[450px] md:h-[500px] bg-[#111]">
+          <Image src={imageUrl} alt={article.title} fill className="object-cover opacity-60" priority />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        </div>
 
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-32 relative z-10 pb-20">
-            <div className="max-w-3xl mx-auto">
-              <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] overflow-hidden">
-                <div className="p-8 md:p-12">
-                  <span className="inline-block text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">{article.category}</span>
-                  <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">{article.title}</h1>
-                  {article.excerpt && <p className="text-lg text-gray-600 mb-6">{article.excerpt}</p>}
-                  {/* Fake content lines — never the real body */}
-                  <div className="space-y-4">
-                    {Array.from({ length: 8 }).map((_, i) => (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-32 relative z-10 pb-20">
+          <div className="max-w-3xl mx-auto">
+            <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] overflow-hidden">
+              <div className="p-8 md:p-12">
+                <span className="inline-block text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">{article.category}</span>
+                <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">{article.title}</h1>
+                {article.excerpt && <p className="text-lg text-gray-600 mb-6">{article.excerpt}</p>}
+
+                {/* Fake content with progressive gradient blur */}
+                <div className="relative select-none" aria-hidden="true">
+                  <div className="space-y-4 opacity-40">
+                    {Array.from({ length: 6 }).map((_, i) => (
                       <div key={i} className="space-y-2.5">
-                        <div className="h-3.5 bg-gray-100 rounded w-full" />
-                        <div className="h-3.5 bg-gray-100 rounded w-11/12" />
-                        <div className="h-3.5 bg-gray-100 rounded w-9/12" />
+                        <div className="h-3.5 bg-gray-200 rounded w-full" />
+                        <div className="h-3.5 bg-gray-200 rounded w-11/12" />
+                        <div className="h-3.5 bg-gray-200 rounded w-9/12" />
                       </div>
                     ))}
+                  </div>
+                  {/* White gradient overlay — progressive blur effect */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-white via-white/90 to-transparent" />
+
+                  {/* "Connectez-vous pour lire la suite" button overlaid */}
+                  <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-4">
+                    <button
+                      onClick={() => setShowLoginGate(true)}
+                      className="bg-[#111] text-white px-8 py-3 rounded-lg text-[14px] font-medium hover:bg-[#333] transition-colors shadow-lg"
+                    >
+                      Connectez-vous pour lire la suite
+                    </button>
                   </div>
                 </div>
               </div>
@@ -178,14 +205,21 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
           </div>
         </div>
 
-        {/* Modal overlay on top */}
-        <Paywall
-          reason={accessResult.reason}
-          premiumArticlesUsed={premiumArticlesUsed}
-          premiumArticlesLimit={
-            accessResult.reason === 'visitor_limit' ? getVisitorLimit() : getReaderPremiumLimit()
-          }
+        {/* LoginGate modal — auto-triggered or on button click */}
+        <LoginGate
+          isOpen={showLoginGate}
+          onClose={() => setShowLoginGate(false)}
+          articleTitle={article.title}
         />
+
+        {/* Paywall modal for users who ARE signed in but hit their limit */}
+        {accessResult.reason === 'paywall_reader' && (
+          <Paywall
+            reason={accessResult.reason}
+            premiumArticlesUsed={premiumArticlesUsed}
+            premiumArticlesLimit={getReaderPremiumLimit()}
+          />
+        )}
       </div>
     );
   }

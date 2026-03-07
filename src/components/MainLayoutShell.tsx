@@ -9,7 +9,7 @@ export function MainLayoutShell({ children }: { children: React.ReactNode }) {
     <>
       <BreakingNews />
       <Header />
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 bg-[#fafaf9]">{children}</main>
       <Footer />
     </>
   );

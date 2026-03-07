@@ -72,22 +72,6 @@ export function Header() {
   return (
     <>
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-black/[0.06]">
-        {/* Top bar — date only */}
-        <div className="border-b border-black/[0.04]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-center items-center h-9">
-              <div className="text-[11px] text-gray-400 tracking-wide">
-                {new Date().toLocaleDateString('fr-FR', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Main header */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">

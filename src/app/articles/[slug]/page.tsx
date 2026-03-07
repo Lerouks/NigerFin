@@ -63,6 +63,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   const { article, htmlBody } = result;
 
+  // Security: never include premium body in static payload
+  const isPremium = article.contentType === 'premium' || article.isPremium;
+  const safeHtmlBody = isPremium ? '' : htmlBody;
+
   const related = await getRelatedArticles(
     article.slug.current,
     article.category,
@@ -70,6 +74,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   );
 
   return (
-    <ArticleContent article={article} htmlBody={htmlBody} marketData={marketData} relatedArticles={related} />
+    <ArticleContent article={article} htmlBody={safeHtmlBody} marketData={marketData} relatedArticles={related} />
   );
 }

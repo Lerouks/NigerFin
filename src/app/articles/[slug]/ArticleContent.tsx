@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import DOMPurify from 'isomorphic-dompurify';
 import { Clock, Calendar, User, Facebook, Linkedin, Link2, Check, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { CommentsSection } from '@/components/CommentsSection';
@@ -232,11 +233,11 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
                   </div>
                 </div>
 
-                {/* Render HTML body (fetched securely for premium) */}
+                {/* Render HTML body (fetched securely for premium, sanitized) */}
                 {resolvedBody ? (
                   <div
                     className="prose prose-lg max-w-none prose-headings:font-bold prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3 prose-p:mb-4 prose-p:leading-relaxed prose-blockquote:border-l-4 prose-blockquote:border-black prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:my-6 prose-a:text-black prose-a:underline hover:prose-a:no-underline prose-img:rounded-lg prose-img:my-6"
-                    dangerouslySetInnerHTML={{ __html: resolvedBody }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(resolvedBody) }}
                   />
                 ) : (
                   <div className="flex items-center justify-center py-16">

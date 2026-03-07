@@ -9,13 +9,13 @@ import { getReaderPremiumLimit } from '@/lib/access-control';
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 type OverlayCase =
-  | 'not_connected'           // Case 1: not logged in
-  | 'connected_has_articles'  // Case 2a: logged in, free articles remaining
-  | 'connected_no_articles'   // Case 2b: logged in, no free articles left
-  | 'reader_has_articles'     // Case 3a: reader plan, articles remaining
-  | 'reader_no_articles'      // Case 3b: reader plan, no articles left
-  | 'premium'                 // Case 4: premium user
-  | 'admin';                  // Admin - skip
+  | 'not_connected'
+  | 'connected_has_articles'
+  | 'connected_no_articles'
+  | 'reader_has_articles'
+  | 'reader_no_articles'
+  | 'premium'
+  | 'admin';
 
 interface OverlayConfig {
   isBlocking: boolean;
@@ -34,7 +34,7 @@ interface PremiumOverlayProps {
   isPremium: boolean;
 }
 
-// ─── Session & Analytics helpers ─────────────────────────────────────────────
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const SESSION_ID_KEY = 'nfi_overlay_session';
 const DISMISS_KEY = 'nfi_overlay_dismissed';
@@ -53,7 +53,6 @@ function wasDismissedRecently(): boolean {
   if (typeof window === 'undefined') return false;
   const ts = localStorage.getItem(DISMISS_KEY);
   if (!ts) return false;
-  // Don't show again for 4 hours after dismiss
   return Date.now() - parseInt(ts, 10) < 4 * 3600 * 1000;
 }
 
@@ -82,7 +81,7 @@ function trackOverlayEvent(
   }).catch(() => {});
 }
 
-// ─── Determine overlay case ─────────────────────────────────────────────────
+// ─── Overlay case detection ──────────────────────────────────────────────────
 
 function getOverlayCase(
   isSignedIn: boolean,
@@ -90,10 +89,8 @@ function getOverlayCase(
   premiumArticlesUsed: number,
   isPremiumArticle: boolean
 ): OverlayCase {
-  if (!isPremiumArticle) return 'premium'; // No overlay for free articles
-
+  if (!isPremiumArticle) return 'premium';
   if (!isSignedIn) return 'not_connected';
-
   if (userRole === 'admin') return 'admin';
   if (userRole === 'premium') return 'premium';
 
@@ -103,17 +100,16 @@ function getOverlayCase(
     return premiumArticlesUsed < limit ? 'reader_has_articles' : 'reader_no_articles';
   }
 
-  // Connected but no subscription (treated as free user)
   return premiumArticlesUsed < limit ? 'connected_has_articles' : 'connected_no_articles';
 }
 
-// ─── Get overlay config for each case ────────────────────────────────────────
+// ─── Config per case ─────────────────────────────────────────────────────────
 
 function getOverlayConfig(overlayCase: OverlayCase, remaining: number): OverlayConfig | null {
   switch (overlayCase) {
     case 'premium':
     case 'admin':
-      return null; // No overlay
+      return null;
 
     case 'not_connected':
       return {
@@ -139,7 +135,7 @@ function getOverlayConfig(overlayCase: OverlayCase, remaining: number): OverlayC
         title: 'Articles premium gratuits',
         message: `B\u00e9n\u00e9ficiez de 3 articles premium gratuits chaque mois.`,
         counterText: `Il vous reste ${remaining} article${remaining !== 1 ? 's' : ''}.`,
-        ctaPrimary: { text: 'Continuer la lecture', href: '' }, // Empty = dismiss
+        ctaPrimary: { text: 'Continuer la lecture', href: '' },
         ctaSecondary: { text: 'Passer en Premium', href: '/pricing' },
         showCloseButton: true,
       };
@@ -190,7 +186,7 @@ function getOverlayConfig(overlayCase: OverlayCase, remaining: number): OverlayC
   }
 }
 
-// ─── Argument icon mapping ───────────────────────────────────────────────────
+// ─── Icon helper ─────────────────────────────────────────────────────────────
 
 function ArgumentIcon({ index }: { index: number }) {
   const icons = [BookOpen, Globe, BarChart3, Zap, TrendingUp, Crown];
@@ -207,8 +203,9 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
   const hasTriggered = useRef(false);
   const mountedRef = useRef(true);
   const pageLoadTime = useRef(Date.now());
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<Element | null>(null);
 
-  // Determine user case
   const overlayCase = getOverlayCase(isSignedIn, userRole, premiumArticlesUsed, isPremium);
   const limit = getReaderPremiumLimit();
   const remaining = Math.max(0, limit - premiumArticlesUsed);
@@ -220,13 +217,65 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
     return () => { mountedRef.current = false; };
   }, []);
 
+  // ─── Focus trap & keyboard handling ────────────────────────────────────────
+
+  useEffect(() => {
+    if (!visible) return;
+
+    // Save current focus to restore later
+    previousFocusRef.current = document.activeElement;
+
+    // Focus the dialog
+    requestAnimationFrame(() => {
+      dialogRef.current?.focus();
+    });
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Escape key for non-blocking overlays
+      if (e.key === 'Escape' && !config?.isBlocking) {
+        e.preventDefault();
+        handleDismiss();
+        return;
+      }
+
+      // Focus trap: Tab key cycles within the dialog
+      if (e.key === 'Tab' && dialogRef.current) {
+        const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      // Restore focus when overlay closes
+      if (previousFocusRef.current instanceof HTMLElement) {
+        previousFocusRef.current.focus();
+      }
+    };
+  }, [visible, config?.isBlocking]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ─── Show overlay logic ────────────────────────────────────────────────────
+
   const showOverlay = useCallback(() => {
     if (hasTriggered.current || !mountedRef.current) return;
     if (wasDismissedRecently() && !config?.isBlocking) return;
     hasTriggered.current = true;
     setVisible(true);
 
-    // Lock scroll for blocking overlays
     if (config?.isBlocking) {
       document.body.style.overflow = 'hidden';
     }
@@ -237,10 +286,9 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
       });
     });
 
+    const scrollMax = document.documentElement.scrollHeight - window.innerHeight;
     const readTimeSeconds = Math.round((Date.now() - pageLoadTime.current) / 1000);
-    const scrollDepth = Math.round(
-      (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100
-    );
+    const scrollDepth = scrollMax > 0 ? Math.round((window.scrollY / scrollMax) * 100) : 0;
 
     trackOverlayEvent('view', {
       articleId,
@@ -251,35 +299,42 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
     });
   }, [config?.isBlocking, articleId, user?.id, overlayCase]);
 
-  // Scroll-based trigger
+  // ─── Throttled scroll trigger ──────────────────────────────────────────────
+
   useEffect(() => {
     if (isLoading || !config || !isPremium) return;
 
+    let ticking = false;
+
     const handleScroll = () => {
-      if (hasTriggered.current) return;
-      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (scrollHeight <= 0) return;
-      const percent = (window.scrollY / scrollHeight) * 100;
-      if (percent >= config.scrollTriggerPercent) {
-        showOverlay();
-      }
+      if (hasTriggered.current || ticking) return;
+      ticking = true;
+
+      requestAnimationFrame(() => {
+        ticking = false;
+        if (hasTriggered.current) return;
+        const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+        if (scrollHeight <= 0) return;
+        const percent = (window.scrollY / scrollHeight) * 100;
+        if (percent >= config.scrollTriggerPercent) {
+          showOverlay();
+        }
+      });
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isLoading, config, isPremium, showOverlay]);
 
+  // ─── Dismiss / Continue handlers ───────────────────────────────────────────
+
   const handleDismiss = useCallback(() => {
-    if (config?.isBlocking) return; // Can't dismiss blocking overlays
+    if (config?.isBlocking) return;
 
     setAnimateIn(false);
     markDismissed();
 
-    trackOverlayEvent('dismiss', {
-      articleId,
-      userId: user?.id,
-      overlayCase,
-    });
+    trackOverlayEvent('dismiss', { articleId, userId: user?.id, overlayCase });
 
     setTimeout(() => {
       if (mountedRef.current) setVisible(false);
@@ -290,11 +345,7 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
     setAnimateIn(false);
     markDismissed();
 
-    trackOverlayEvent('continue_reading', {
-      articleId,
-      userId: user?.id,
-      overlayCase,
-    });
+    trackOverlayEvent('continue_reading', { articleId, userId: user?.id, overlayCase });
 
     setTimeout(() => {
       if (mountedRef.current) setVisible(false);
@@ -302,14 +353,11 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
   }, [articleId, user?.id, overlayCase]);
 
   const handleCtaClick = useCallback((ctaType: string) => {
-    trackOverlayEvent(`click_${ctaType}`, {
-      articleId,
-      userId: user?.id,
-      overlayCase,
-    });
+    trackOverlayEvent(`click_${ctaType}`, { articleId, userId: user?.id, overlayCase });
   }, [articleId, user?.id, overlayCase]);
 
-  // No overlay needed
+  // ─── Render ────────────────────────────────────────────────────────────────
+
   if (!config || !isPremium || isLoading) return null;
   if (!visible) return null;
 
@@ -319,7 +367,7 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-[100] transition-all duration-500 ${
+        className={`fixed inset-0 z-[100] motion-safe:transition-all motion-safe:duration-500 ${
           animateIn
             ? isBlocking
               ? 'bg-black/60 backdrop-blur-sm'
@@ -327,19 +375,26 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
             : 'bg-black/0 backdrop-blur-0'
         }`}
         onClick={!isBlocking ? handleDismiss : undefined}
+        aria-hidden="true"
       />
 
-      {/* Overlay panel */}
+      {/* Dialog */}
       <div
-        className={`fixed inset-x-0 bottom-0 z-[101] transition-all duration-500 ease-out ${
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="premium-overlay-title"
+        aria-describedby="premium-overlay-desc"
+        tabIndex={-1}
+        className={`fixed inset-x-0 bottom-0 z-[101] outline-none motion-safe:transition-all motion-safe:duration-500 ease-out ${
           animateIn ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
         }`}
       >
-        <div className="bg-white rounded-t-3xl shadow-[0_-20px_60px_-15px_rgba(0,0,0,0.2)] max-w-xl mx-auto relative overflow-hidden">
+        <div className="bg-white rounded-t-3xl shadow-[0_-20px_60px_-15px_rgba(0,0,0,0.2)] max-w-xl mx-auto relative overflow-hidden pb-[env(safe-area-inset-bottom,0px)]">
           {/* Decorative top bar */}
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-500" />
 
-          {/* Drag indicator (mobile feel) */}
+          {/* Drag indicator */}
           <div className="flex justify-center pt-4 pb-2">
             <div className="w-10 h-1 rounded-full bg-gray-200" />
           </div>
@@ -372,12 +427,18 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
             </div>
 
             {/* Title */}
-            <h2 className="text-center text-[22px] sm:text-[26px] font-extrabold leading-tight text-gray-900 mb-2">
+            <h2
+              id="premium-overlay-title"
+              className="text-center text-[22px] sm:text-[26px] font-extrabold leading-tight text-gray-900 mb-2"
+            >
               {config.title}
             </h2>
 
             {/* Message */}
-            <p className="text-center text-[14px] sm:text-[15px] text-gray-500 leading-relaxed mb-5 max-w-md mx-auto">
+            <p
+              id="premium-overlay-desc"
+              className="text-center text-[14px] sm:text-[15px] text-gray-500 leading-relaxed mb-5 max-w-md mx-auto"
+            >
               {config.message}
             </p>
 
@@ -385,7 +446,7 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
             {config.counterText && (
               <div className="flex justify-center mb-5">
                 <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 text-emerald-700 text-[13px] font-medium">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 motion-safe:animate-pulse" />
                   {config.counterText}
                 </span>
               </div>
@@ -406,7 +467,6 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
             {/* CTA buttons */}
             <div className="flex flex-col gap-3 max-w-sm mx-auto">
               {config.ctaPrimary.href === '' ? (
-                // "Continue reading" button (dismisses overlay)
                 <button
                   onClick={handleContinueReading}
                   className="w-full py-3.5 bg-[#111] text-white rounded-xl text-[14px] sm:text-[15px] font-semibold hover:bg-[#222] active:bg-[#000] transition-colors flex items-center justify-center gap-2"
@@ -436,7 +496,6 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
               )}
             </div>
 
-            {/* Note for non-connected users */}
             {overlayCase === 'not_connected' && (
               <p className="text-center text-[11px] text-gray-400 mt-4">
                 Inscription gratuite, sans engagement.

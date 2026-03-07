@@ -214,7 +214,11 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
   useEffect(() => {
     mountedRef.current = true;
     pageLoadTime.current = Date.now();
-    return () => { mountedRef.current = false; };
+    return () => {
+      mountedRef.current = false;
+      // Always restore body scroll on unmount (e.g. client-side navigation)
+      document.body.style.overflow = '';
+    };
   }, []);
 
   // ─── Focus trap & keyboard handling ────────────────────────────────────────

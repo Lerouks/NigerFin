@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   const { serviceClient } = auth;
 
   const { searchParams } = new URL(request.url);
-  const days = parseInt(searchParams.get('days') || '30', 10);
+  const days = Math.min(Math.max(parseInt(searchParams.get('days') || '30', 10) || 30, 1), 365);
 
   const since = new Date();
   since.setDate(since.getDate() - days);
@@ -42,8 +42,6 @@ function buildResponse(data: Array<Record<string, unknown>>, days: number) {
     views: 0,
     click_primary: 0,
     click_secondary: 0,
-    click_subscribe: 0,
-    click_login: 0,
     continue_reading: 0,
     dismiss: 0,
     total: data.length,
@@ -82,7 +80,7 @@ function buildResponse(data: Array<Record<string, unknown>>, days: number) {
     }
   }
 
-  const conversions = summary.click_primary + summary.click_secondary + summary.click_subscribe + summary.click_login;
+  const conversions = summary.click_primary + summary.click_secondary;
 
   return NextResponse.json({
     period_days: days,

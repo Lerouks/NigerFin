@@ -103,7 +103,7 @@ export function PaywallOverlay({ articleId }: PaywallOverlayProps) {
       });
     });
     trackEvent('view', articleId, user?.id);
-  }, [config?.enabled, config?.dismiss_cookie_hours, articleId, user?.id]);
+  }, [config?.enabled, articleId, user?.id]);
 
   // Time-based trigger
   useEffect(() => {

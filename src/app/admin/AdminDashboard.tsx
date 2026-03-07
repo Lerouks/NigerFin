@@ -587,6 +587,9 @@ export function AdminDashboard() {
                           <span className="text-[11px] uppercase tracking-wider px-2 py-1 rounded bg-amber-100 text-amber-700">
                             {p.tier}
                           </span>
+                          <span className="text-[10px] text-gray-400 ml-1">
+                            {getBillingCycleLabel(p.billing_cycle)}
+                          </span>
                         </td>
                         <td className="px-4 py-3 text-sm font-medium">{formatPrice(p.amount)}</td>
                         <td className="px-4 py-3 text-[12px] text-gray-600 capitalize">{p.payment_method}</td>

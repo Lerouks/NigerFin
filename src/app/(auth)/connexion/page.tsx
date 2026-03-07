@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import { Eye, EyeOff, Mail, Lock, ArrowLeft, CheckCircle } from 'lucide-react';
 
 export default function ConnexionPage() {
-  const [email, setEmail] = useState('');
+  const searchParams = useSearchParams();
+  const [email, setEmail] = useState(searchParams.get('email') || '');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -32,7 +33,8 @@ export default function ConnexionPage() {
         : 'Une erreur est survenue. Veuillez réessayer.');
       setLoading(false);
     } else {
-      router.push('/');
+      const redirect = searchParams.get('redirect');
+      router.push(redirect || '/');
       router.refresh();
     }
   };

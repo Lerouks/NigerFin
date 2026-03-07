@@ -119,16 +119,16 @@ function getOverlayConfig(overlayCase: OverlayCase, remaining: number): OverlayC
       return {
         isBlocking: true,
         scrollTriggerPercent: 30,
-        title: 'Cet article est reserve aux membres',
-        message: 'Accedez a l\'analyse complete et a l\'ensemble des contenus premium.',
+        title: 'Cet article est r\u00e9serv\u00e9 aux membres',
+        message: 'Acc\u00e9dez \u00e0 l\'analyse compl\u00e8te et \u00e0 l\'ensemble des contenus premium.',
         arguments: [
-          'Analyses economiques exclusives',
-          'Decryptages geopolitiques',
-          'Acces aux outils et donnees avancees',
+          'Analyses \u00e9conomiques exclusives',
+          'D\u00e9cryptages g\u00e9opolitiques',
+          'Acc\u00e8s aux outils et donn\u00e9es avanc\u00e9es',
           '3 articles premium gratuits chaque mois',
         ],
         ctaPrimary: { text: 'S\'inscrire gratuitement', href: '/inscription' },
-        ctaSecondary: { text: 'Deja membre ? Se connecter', href: '/connexion' },
+        ctaSecondary: { text: 'D\u00e9j\u00e0 membre ? Se connecter', href: '/connexion' },
         showCloseButton: false,
       };
 
@@ -137,7 +137,7 @@ function getOverlayConfig(overlayCase: OverlayCase, remaining: number): OverlayC
         isBlocking: false,
         scrollTriggerPercent: 40,
         title: 'Articles premium gratuits',
-        message: `Beneficiez de 3 articles premium gratuits chaque mois.`,
+        message: `B\u00e9n\u00e9ficiez de 3 articles premium gratuits chaque mois.`,
         counterText: `Il vous reste ${remaining} article${remaining !== 1 ? 's' : ''}.`,
         ctaPrimary: { text: 'Continuer la lecture', href: '' }, // Empty = dismiss
         ctaSecondary: { text: 'Passer en Premium', href: '/pricing' },
@@ -148,13 +148,13 @@ function getOverlayConfig(overlayCase: OverlayCase, remaining: number): OverlayC
       return {
         isBlocking: true,
         scrollTriggerPercent: 30,
-        title: 'Vous avez utilise vos 3 articles premium gratuits',
-        message: 'Passez en Premium pour un acces illimite aux analyses et aux outils.',
+        title: 'Vous avez utilis\u00e9 vos 3 articles premium gratuits',
+        message: 'Passez en Premium pour un acc\u00e8s illimit\u00e9 aux analyses et aux outils.',
         arguments: [
-          'Acces illimite aux articles',
-          'Analyses economiques approfondies',
+          'Acc\u00e8s illimit\u00e9 aux articles',
+          'Analyses \u00e9conomiques approfondies',
           'Outils d\'analyse automatique',
-          'Donnees marches en temps reel',
+          'Donn\u00e9es march\u00e9s en temps r\u00e9el',
         ],
         ctaPrimary: { text: 'Passer en Premium', href: '/pricing' },
         ctaSecondary: { text: 'Voir les offres', href: '/pricing' },
@@ -169,7 +169,7 @@ function getOverlayConfig(overlayCase: OverlayCase, remaining: number): OverlayC
         message: 'Votre formule inclut 3 analyses premium par mois.',
         counterText: `Il vous reste ${remaining} article${remaining !== 1 ? 's' : ''}.`,
         ctaPrimary: { text: 'Continuer la lecture', href: '' },
-        ctaSecondary: { text: 'Passer en Premium illimite', href: '/pricing' },
+        ctaSecondary: { text: 'Passer en Premium illimit\u00e9', href: '/pricing' },
         showCloseButton: true,
       };
 
@@ -178,11 +178,11 @@ function getOverlayConfig(overlayCase: OverlayCase, remaining: number): OverlayC
         isBlocking: true,
         scrollTriggerPercent: 30,
         title: 'Limite mensuelle atteinte',
-        message: 'La formule Lecteur inclut 3 analyses premium par mois. Passez en Premium pour un acces illimite.',
+        message: 'La formule Lecteur inclut 3 analyses premium par mois. Passez en Premium pour un acc\u00e8s illimit\u00e9.',
         arguments: [
-          'Acces total aux analyses',
-          'Acces complet aux outils',
-          'Contenu exclusif reserve aux membres Premium',
+          'Acc\u00e8s total aux analyses',
+          'Acc\u00e8s complet aux outils',
+          'Contenu exclusif r\u00e9serv\u00e9 aux membres Premium',
         ],
         ctaPrimary: { text: 'Passer en Premium', href: '/pricing' },
         showCloseButton: false,
@@ -273,7 +273,6 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
     if (config?.isBlocking) return; // Can't dismiss blocking overlays
 
     setAnimateIn(false);
-    document.body.style.overflow = '';
     markDismissed();
 
     trackOverlayEvent('dismiss', {
@@ -289,7 +288,6 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
 
   const handleContinueReading = useCallback(() => {
     setAnimateIn(false);
-    document.body.style.overflow = '';
     markDismissed();
 
     trackOverlayEvent('continue_reading', {

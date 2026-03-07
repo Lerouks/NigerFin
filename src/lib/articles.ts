@@ -57,6 +57,27 @@ export function toArticle(row: SupabaseArticle): Article {
   };
 }
 
+// ─── Body processing ────────────────────────────────────────────────────────
+
+/**
+ * Convert raw body text to HTML paragraphs.
+ * If the body already contains block-level HTML tags, return as-is.
+ * Otherwise, split on blank lines into <p> and convert single newlines to <br>.
+ */
+function bodyToHtml(raw: string): string {
+  if (!raw.trim()) return '';
+  // If body already contains block-level HTML, assume it's already formatted
+  if (/<(?:p|div|h[1-6]|ul|ol|blockquote|figure|table|section|article)\b/i.test(raw)) {
+    return raw;
+  }
+  // Split on double newlines (paragraph breaks), then convert single newlines to <br>
+  return raw
+    .split(/\n{2,}/)
+    .filter(block => block.trim())
+    .map(block => `<p>${block.trim().replace(/\n/g, '<br>')}</p>`)
+    .join('\n');
+}
+
 // ─── Data fetching functions ────────────────────────────────────────────────
 
 export async function getAllArticles(): Promise<Article[]> {
@@ -80,7 +101,7 @@ export async function getArticleBySlug(slug: string): Promise<{ article: Article
     .eq('status', 'published')
     .single();
   if (!data) return null;
-  return { article: toArticle(data), htmlBody: data.body || '' };
+  return { article: toArticle(data), htmlBody: bodyToHtml(data.body || '') };
 }
 
 export async function getArticlesByCategory(category: string): Promise<Article[]> {

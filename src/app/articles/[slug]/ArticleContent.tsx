@@ -57,6 +57,7 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
   const [accessResult, setAccessResult] = useState<AccessResult | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
   const [hasTracked, setHasTracked] = useState(false);
+  const [resolvedBody, setResolvedBody] = useState<string | null>(null);
   const imageUrl = getArticleImageUrl(article);
   const contentType = getContentTypeFromArticle(article);
 
@@ -89,6 +90,21 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
       }
     }
   }, [contentType, userRole, premiumArticlesUsed, article, isSignedIn, isLoading, hasTracked, refreshProfile]);
+
+  // Fetch body: use prop for free articles, fetch securely for premium
+  useEffect(() => {
+    if (!accessResult?.allowed) return;
+    if (htmlBody) {
+      setResolvedBody(htmlBody);
+      return;
+    }
+    let cancelled = false;
+    fetch(`/api/articles/${article.slug.current}/content`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (!cancelled && data?.body) setResolvedBody(data.body); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [accessResult, htmlBody, article.slug]);
 
   const handleCopyLink = async () => {
     await navigator.clipboard.writeText(articleUrl);
@@ -132,36 +148,44 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
   if (!accessResult.allowed) {
     return (
       <div className="min-h-screen bg-[#fafaf9]">
-        <div className="relative h-[450px] md:h-[500px] bg-[#111]">
-          <Image src={imageUrl} alt={article.title} fill className="object-cover opacity-60" priority />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-        </div>
+        {/* Article page visible behind, blurred — like RFI */}
+        <div className="select-none" style={{ filter: 'blur(3px)' }} aria-hidden="true">
+          <div className="relative h-[450px] md:h-[500px] bg-[#111]">
+            <Image src={imageUrl} alt={article.title} fill className="object-cover opacity-60" priority />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+          </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-32 relative z-10 pb-20">
-          <div className="max-w-3xl mx-auto">
-            <article className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] overflow-hidden">
-              <div className="p-8 md:p-12">
-                <span className="inline-block text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">{article.category}</span>
-                <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">{article.title}</h1>
-                {article.excerpt && <p className="text-lg text-gray-600 mb-6">{article.excerpt}</p>}
-
-                <div className="relative">
-                  <div className="text-gray-600 leading-relaxed line-clamp-6 opacity-50 select-none">
-                    {article.excerpt} {article.excerpt}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-32 relative z-10 pb-20">
+            <div className="max-w-3xl mx-auto">
+              <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] overflow-hidden">
+                <div className="p-8 md:p-12">
+                  <span className="inline-block text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">{article.category}</span>
+                  <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">{article.title}</h1>
+                  {article.excerpt && <p className="text-lg text-gray-600 mb-6">{article.excerpt}</p>}
+                  {/* Fake content lines — never the real body */}
+                  <div className="space-y-4">
+                    {Array.from({ length: 8 }).map((_, i) => (
+                      <div key={i} className="space-y-2.5">
+                        <div className="h-3.5 bg-gray-100 rounded w-full" />
+                        <div className="h-3.5 bg-gray-100 rounded w-11/12" />
+                        <div className="h-3.5 bg-gray-100 rounded w-9/12" />
+                      </div>
+                    ))}
                   </div>
-                  <Paywall
-                    reason={accessResult.reason}
-                    inline
-                    premiumArticlesUsed={premiumArticlesUsed}
-                    premiumArticlesLimit={
-                      accessResult.reason === 'visitor_limit' ? getVisitorLimit() : getReaderPremiumLimit()
-                    }
-                  />
                 </div>
               </div>
-            </article>
+            </div>
           </div>
         </div>
+
+        {/* Modal overlay on top */}
+        <Paywall
+          reason={accessResult.reason}
+          premiumArticlesUsed={premiumArticlesUsed}
+          premiumArticlesLimit={
+            accessResult.reason === 'visitor_limit' ? getVisitorLimit() : getReaderPremiumLimit()
+          }
+        />
       </div>
     );
   }
@@ -204,11 +228,17 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
                   </div>
                 </div>
 
-                {/* Render HTML body */}
-                <div
-                  className="prose prose-lg max-w-none prose-headings:font-bold prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3 prose-p:mb-4 prose-p:leading-relaxed prose-blockquote:border-l-4 prose-blockquote:border-black prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:my-6 prose-a:text-black prose-a:underline hover:prose-a:no-underline prose-img:rounded-lg prose-img:my-6"
-                  dangerouslySetInnerHTML={{ __html: htmlBody }}
-                />
+                {/* Render HTML body (fetched securely for premium) */}
+                {resolvedBody ? (
+                  <div
+                    className="prose prose-lg max-w-none prose-headings:font-bold prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3 prose-p:mb-4 prose-p:leading-relaxed prose-blockquote:border-l-4 prose-blockquote:border-black prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:my-6 prose-a:text-black prose-a:underline hover:prose-a:no-underline prose-img:rounded-lg prose-img:my-6"
+                    dangerouslySetInnerHTML={{ __html: resolvedBody }}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center py-16">
+                    <Loader2 className="w-8 h-8 animate-spin text-gray-300" />
+                  </div>
+                )}
 
                 {/* Tags */}
                 {article.tags.length > 0 && (

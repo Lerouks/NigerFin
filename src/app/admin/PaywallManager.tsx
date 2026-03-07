@@ -89,7 +89,7 @@ export function PaywallManager() {
         setError(err.error || 'Erreur lors de la sauvegarde');
       }
     } catch {
-      setError('Erreur reseau');
+      setError('Erreur r\u00e9seau');
     }
     setSaving(false);
   };

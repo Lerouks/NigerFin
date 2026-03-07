@@ -409,7 +409,7 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
           {config.showCloseButton && (
             <button
               onClick={handleDismiss}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-200 transition-all z-10"
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all z-10"
               aria-label="Fermer"
             >
               <X className="w-4 h-4" />
@@ -475,7 +475,7 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
               {config.ctaPrimary.href === '' ? (
                 <button
                   onClick={handleContinueReading}
-                  className="w-full py-3.5 bg-[#111] text-white rounded-xl text-[14px] sm:text-[15px] font-semibold hover:bg-[#222] active:bg-[#000] transition-colors flex items-center justify-center gap-2"
+                  className="w-full py-3.5 bg-[#111] text-white rounded-xl text-[14px] sm:text-[15px] font-semibold hover:bg-[#222] active:bg-[#000] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors flex items-center justify-center gap-2"
                 >
                   {config.ctaPrimary.text}
                   <ArrowRight className="w-4 h-4" />
@@ -484,7 +484,7 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
                 <Link
                   href={config.ctaPrimary.href}
                   onClick={() => handleCtaClick('primary')}
-                  className="w-full py-3.5 bg-[#111] text-white rounded-xl text-[14px] sm:text-[15px] font-semibold hover:bg-[#222] active:bg-[#000] transition-colors flex items-center justify-center gap-2 text-center"
+                  className="w-full py-3.5 bg-[#111] text-white rounded-xl text-[14px] sm:text-[15px] font-semibold hover:bg-[#222] active:bg-[#000] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors flex items-center justify-center gap-2 text-center"
                 >
                   {config.ctaPrimary.text}
                   <ArrowRight className="w-4 h-4" />
@@ -495,7 +495,7 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
                 <Link
                   href={config.ctaSecondary.href}
                   onClick={() => handleCtaClick('secondary')}
-                  className="w-full py-3 border border-gray-200 text-gray-700 rounded-xl text-[13px] sm:text-[14px] font-medium hover:bg-gray-50 active:bg-gray-100 transition-colors text-center"
+                  className="w-full py-3 border border-gray-200 text-gray-700 rounded-xl text-[13px] sm:text-[14px] font-medium hover:bg-gray-50 active:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors text-center"
                 >
                   {config.ctaSecondary.text}
                 </Link>

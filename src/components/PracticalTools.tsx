@@ -126,7 +126,7 @@ const defaultPremiumTools: ToolData[] = [
 
 export function PracticalTools() {
   const { userRole } = useAuth();
-  const isSubscribed = userRole === 'standard' || userRole === 'pro' || userRole === 'admin';
+  const isSubscribed = userRole === 'premium' || userRole === 'admin';
   const [freeTools, setFreeTools] = useState<ToolData[]>(defaultFreeTools);
   const [premiumTools, setPremiumTools] = useState<ToolData[]>(defaultPremiumTools);
 

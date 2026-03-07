@@ -8,6 +8,7 @@ import { useAuth } from '@/lib/auth-context';
 import { CommentsSection } from '@/components/CommentsSection';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
 import { Paywall } from '@/components/Paywall';
+import { PaywallOverlay } from '@/components/PaywallOverlay';
 import { ArticleCard } from '@/components/ArticleCard';
 import { ArticleLikes } from '@/components/ArticleLikes';
 import type { Article, MarketData } from '@/types';
@@ -151,10 +152,8 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
                 <div className="flex items-center gap-2 mb-4">
                   <span className="inline-block text-[11px] tracking-[0.15em] uppercase text-gray-400">{article.category}</span>
                   {contentType !== 'free' && (
-                    <span className={`text-[10px] tracking-[0.12em] uppercase px-2 py-0.5 rounded ${
-                      contentType === 'pro' ? 'bg-purple-100 text-purple-700' : 'bg-amber-100 text-amber-700'
-                    }`}>
-                      {contentType === 'pro' ? 'PRO' : 'PREMIUM'}
+                    <span className="text-[10px] tracking-[0.12em] uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-700">
+                      PREMIUM
                     </span>
                   )}
                 </div>
@@ -245,6 +244,9 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
           </aside>
         </div>
       </div>
+
+      {/* Soft paywall overlay for non-subscribers (nudge, not block) */}
+      <PaywallOverlay articleId={article._id} />
     </div>
   );
 }

@@ -29,7 +29,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'Paramètres invalides' }, { status: 400 });
   }
 
-  const validTiers = ['standard', 'pro'];
+  const validTiers = ['premium'];
   const validCycles = ['monthly', 'quarterly', 'yearly'];
   if (!validTiers.includes(tier) || !validCycles.includes(billingCycle)) {
     return NextResponse.json({ error: 'Tier ou cycle invalide' }, { status: 400 });

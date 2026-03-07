@@ -36,7 +36,7 @@ export function ToolContent({ slug, title, description, isPremium }: ToolContent
   const { isSignedIn, userRole } = useAuth();
   const ToolComponent = toolComponents[slug];
   const Icon = toolIcons[slug] || Calculator;
-  const canAccess = !isPremium || (isSignedIn && (userRole === 'standard' || userRole === 'pro' || userRole === 'admin'));
+  const canAccess = !isPremium || (isSignedIn && (userRole === 'premium' || userRole === 'admin'));
   const needsGate = !canAccess;
 
   return (
@@ -65,7 +65,7 @@ export function ToolContent({ slug, title, description, isPremium }: ToolContent
               <h2 className="text-2xl font-bold mb-3">Outil Premium</h2>
               <p className="text-gray-600 mb-8 max-w-md mx-auto">
                 {isSignedIn
-                  ? 'Débloquez les outils premium avec l\'abonnement Standard ou Pro.'
+                  ? 'Débloquez les outils premium avec l\'abonnement Premium.'
                   : 'Connectez-vous et abonnez-vous pour accéder à cet outil professionnel.'}
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">

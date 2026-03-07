@@ -20,7 +20,7 @@ export async function GET() {
       thisMonth: 0,
       lastMonth: 0,
       growthPercent: 0,
-      byTier: { standard: 0, pro: 0 },
+      byTier: { premium: 0 },
       byMethod: { nita: 0, amana: 0 },
       monthly: [],
       totalPayments: 0,
@@ -36,7 +36,7 @@ export async function GET() {
   let totalRevenue = 0;
   let thisMonth = 0;
   let lastMonth = 0;
-  const byTier: Record<string, number> = { standard: 0, pro: 0 };
+  const byTier: Record<string, number> = { premium: 0 };
   const byMethod: Record<string, number> = { nita: 0, amana: 0 };
   const monthlyMap: Record<string, number> = {};
 

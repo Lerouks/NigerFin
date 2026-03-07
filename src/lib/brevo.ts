@@ -25,19 +25,16 @@ function subscriberHash(email: string): string {
 function getTagsForRole(role: string): string[] {
   const tags = ['nfi-report', role, 'newsletter_mensuelle'];
 
-  if (role === 'standard' || role === 'pro') {
+  if (role === 'premium') {
     tags.push('newsletter_hebdomadaire');
     tags.push('alertes_news');
-  }
-
-  if (role === 'pro') {
     tags.push('rapports_pdf');
   }
 
   return tags;
 }
 
-const ALL_ROLE_TAGS = ['reader', 'standard', 'pro', 'newsletter_hebdomadaire', 'alertes_news', 'rapports_pdf'];
+const ALL_ROLE_TAGS = ['reader', 'premium', 'newsletter_hebdomadaire', 'alertes_news', 'rapports_pdf'];
 
 interface ContactData {
   email: string;

@@ -5,23 +5,23 @@ import { useRouter } from 'next/navigation';
 import {
   Users, BarChart3, Shield, Loader2, Search, CreditCard, CheckCircle, XCircle,
   Clock, Download, TrendingUp, TrendingDown, DollarSign, Activity, Ban,
-  Unlock, Settings, FileText, AlertTriangle, ChevronDown, ChevronUp, Newspaper, LineChart, Zap, BookOpen,
+  Unlock, Settings, FileText, AlertTriangle, ChevronDown, ChevronUp, Newspaper, LineChart, Zap, BookOpen, SlidersHorizontal,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
-import { formatPrice, cycleLabel, TIERS, CURRENCY, type BillingCycle, type TierId } from '@/config/pricing';
+import { formatPrice, PREMIUM_TIER, CURRENCY, BILLING_OPTIONS, getBillingCycleLabel } from '@/config/pricing';
 import { ArticlesManager } from './ArticlesManager';
 import { CategoriesManager } from './CategoriesManager';
 import { MarketDataManager } from './MarketDataManager';
 import { FlashBannerManager } from './FlashBannerManager';
 import { EducationManager } from './EducationManager';
+import { PaywallManager } from './PaywallManager';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface UserStats {
   total: number;
   readers: number;
-  standard: number;
-  pro: number;
+  premium: number;
   activeSubscriptions: number;
   blockedUsers: number;
   pendingPayments: number;
@@ -84,7 +84,7 @@ interface DynamicPrice {
   updated_at: string;
 }
 
-type TabId = 'overview' | 'articles' | 'categories' | 'market' | 'flash' | 'education' | 'users' | 'payments' | 'pricing' | 'audit';
+type TabId = 'overview' | 'articles' | 'categories' | 'market' | 'flash' | 'education' | 'paywall' | 'users' | 'payments' | 'pricing' | 'audit';
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -94,7 +94,7 @@ export function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<TabId>('overview');
 
   // Data states
-  const [stats, setStats] = useState<UserStats>({ total: 0, readers: 0, standard: 0, pro: 0, activeSubscriptions: 0, blockedUsers: 0, pendingPayments: 0 });
+  const [stats, setStats] = useState<UserStats>({ total: 0, readers: 0, premium: 0, activeSubscriptions: 0, blockedUsers: 0, pendingPayments: 0 });
   const [revenue, setRevenue] = useState<RevenueData | null>(null);
   const [users, setUsers] = useState<UserEntry[]>([]);
   const [payments, setPayments] = useState<PaymentRequest[]>([]);
@@ -265,7 +265,7 @@ export function AdminDashboard() {
   }
 
   const conversionRate = stats.total > 0
-    ? (((stats.standard + stats.pro) / stats.total) * 100).toFixed(1)
+    ? ((stats.premium / stats.total) * 100).toFixed(1)
     : '0';
 
   // ─── Tabs config ────────────────────────────────────────────────────────
@@ -277,6 +277,7 @@ export function AdminDashboard() {
     { id: 'market', label: 'Marchés', icon: LineChart },
     { id: 'flash', label: 'Flash Info', icon: Zap },
     { id: 'education', label: 'Éducation', icon: BookOpen },
+    { id: 'paywall', label: 'Paywall', icon: SlidersHorizontal },
     { id: 'users', label: 'Utilisateurs', icon: Users },
     { id: 'payments', label: 'Paiements', icon: CreditCard, badge: stats.pendingPayments },
     { id: 'pricing', label: 'Tarifs', icon: DollarSign },
@@ -383,7 +384,7 @@ export function AdminDashboard() {
                   <div className="bg-white rounded-xl border border-black/[0.06] p-5">
                     <p className="text-[12px] text-gray-400 uppercase tracking-wider mb-1">Taux de conversion</p>
                     <p className="text-3xl font-bold">{conversionRate}%</p>
-                    <p className="text-[12px] text-gray-400 mt-1">{stats.standard} Standard + {stats.pro} Pro</p>
+                    <p className="text-[12px] text-gray-400 mt-1">{stats.premium} Premium</p>
                   </div>
                 </div>
 
@@ -419,9 +420,7 @@ export function AdminDashboard() {
                     <h3 className="text-sm font-semibold mb-3">Par plan</h3>
                     {Object.entries(revenue.byTier).map(([tier, amount]) => (
                       <div key={tier} className="flex items-center justify-between py-2 border-b border-black/[0.03] last:border-0">
-                        <span className={`text-[12px] uppercase tracking-wider px-2 py-0.5 rounded ${
-                          tier === 'pro' ? 'bg-purple-100 text-purple-700' : 'bg-amber-100 text-amber-700'
-                        }`}>
+                        <span className="text-[12px] uppercase tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-700">
                           {tier}
                         </span>
                         <span className="font-semibold">{formatPrice(amount)}</span>
@@ -458,6 +457,9 @@ export function AdminDashboard() {
         {/* ─── EDUCATION TAB ─────────────────────────────────────── */}
         {activeTab === 'education' && <EducationManager />}
 
+        {/* ─── PAYWALL TAB ────────────────────────────────────────── */}
+        {activeTab === 'paywall' && <PaywallManager />}
+
         {/* ─── USERS TAB ──────────────────────────────────────────── */}
         {activeTab === 'users' && (
           <div className="space-y-4">
@@ -478,9 +480,8 @@ export function AdminDashboard() {
                 className="px-4 py-3 bg-white border border-black/[0.06] rounded-lg text-sm focus:outline-none"
               >
                 <option value="">Tous les rôles</option>
-                <option value="reader">Reader</option>
-                <option value="standard">Standard</option>
-                <option value="pro">Pro</option>
+                <option value="reader">Lecteur</option>
+                <option value="premium">Premium</option>
                 <option value="admin">Admin</option>
               </select>
             </div>
@@ -583,12 +584,9 @@ export function AdminDashboard() {
                           <p className="text-[12px] text-gray-400">{p.user_profiles?.email || p.user_id}</p>
                         </td>
                         <td className="px-4 py-3">
-                          <span className={`text-[11px] uppercase tracking-wider px-2 py-1 rounded ${
-                            p.tier === 'pro' ? 'bg-purple-100 text-purple-700' : 'bg-amber-100 text-amber-700'
-                          }`}>
+                          <span className="text-[11px] uppercase tracking-wider px-2 py-1 rounded bg-amber-100 text-amber-700">
                             {p.tier}
                           </span>
-                          <span className="text-[11px] text-gray-400 ml-2">{cycleLabel(p.billing_cycle as BillingCycle)}</span>
                         </td>
                         <td className="px-4 py-3 text-sm font-medium">{formatPrice(p.amount)}</td>
                         <td className="px-4 py-3 text-[12px] text-gray-600 capitalize">{p.payment_method}</td>
@@ -648,38 +646,32 @@ export function AdminDashboard() {
               </div>
             </div>
 
-            {(['standard', 'pro'] as TierId[]).map((tierId) => {
-              const tier = TIERS[tierId];
-              return (
-                <div key={tierId} className="bg-white rounded-xl border border-black/[0.06] p-6">
-                  <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                    <Settings className="w-4 h-4 text-gray-400" />
-                    Plan {tier.name}
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {(['monthly', 'quarterly', 'yearly'] as BillingCycle[]).map((cycle) => {
-                      const defaultAmount = tier.plans[cycle].amount;
-                      const dynamic = dynamicPrices.find(
-                        (dp) => dp.tier === tierId && dp.billing_cycle === cycle
-                      );
-                      const currentAmount = dynamic?.amount ?? defaultAmount;
-                      const key = `${tierId}_${cycle}`;
+            <div className="bg-white rounded-xl border border-black/[0.06] p-6">
+              <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                <Settings className="w-4 h-4 text-gray-400" />
+                Plan Premium
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {BILLING_OPTIONS.map((opt) => {
+                  const dynamic = dynamicPrices.find(
+                    (dp) => dp.tier === 'premium' && dp.billing_cycle === opt.cycle
+                  );
+                  const currentAmount = dynamic?.amount ?? opt.price;
+                  const key = `premium_${opt.cycle}`;
 
-                      return (
-                        <PriceEditor
-                          key={key}
-                          label={cycleLabel(cycle)}
-                          defaultAmount={defaultAmount}
-                          currentAmount={currentAmount}
-                          saving={savingPrice === key}
-                          onSave={(amount) => handlePriceUpdate(tierId, cycle, amount)}
-                        />
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
+                  return (
+                    <PriceEditor
+                      key={key}
+                      label={getBillingCycleLabel(opt.cycle)}
+                      defaultAmount={opt.price}
+                      currentAmount={currentAmount}
+                      saving={savingPrice === key}
+                      onSave={(amount) => handlePriceUpdate('premium', opt.cycle, amount)}
+                    />
+                  );
+                })}
+              </div>
+            </div>
           </div>
         )}
 
@@ -753,8 +745,8 @@ function UserRow({ user, expanded, processing, onToggle, onAction }: {
   onToggle: () => void;
   onAction: (action: string, extra?: Record<string, string>) => void;
 }) {
-  const [subTier, setSubTier] = useState<TierId>('standard');
-  const [subCycle, setSubCycle] = useState<BillingCycle>('monthly');
+  const [subTier] = useState('premium');
+  const [subCycle, setSubCycle] = useState('monthly');
 
   return (
     <>
@@ -772,8 +764,7 @@ function UserRow({ user, expanded, processing, onToggle, onAction }: {
         </td>
         <td className="px-4 py-3">
           <span className={`text-[11px] uppercase tracking-wider px-2 py-1 rounded ${
-            user.role === 'pro' ? 'bg-purple-100 text-purple-700' :
-            user.role === 'standard' ? 'bg-amber-100 text-amber-700' :
+            user.role === 'premium' ? 'bg-amber-100 text-amber-700' :
             user.role === 'admin' ? 'bg-red-100 text-red-700' :
             'bg-gray-100 text-gray-600'
           }`}>
@@ -784,9 +775,6 @@ function UserRow({ user, expanded, processing, onToggle, onAction }: {
           <span className={`text-[12px] ${user.subscription_status === 'active' ? 'text-green-600' : 'text-gray-400'}`}>
             {user.subscription_status === 'active' ? 'Actif' : 'Inactif'}
           </span>
-          {user.billing_cycle && (
-            <span className="text-[11px] text-gray-400 ml-1">({cycleLabel(user.billing_cycle as BillingCycle)})</span>
-          )}
         </td>
         <td className="px-4 py-3 text-[12px] text-gray-500">
           {new Date(user.created_at).toLocaleDateString('fr-FR')}
@@ -810,9 +798,8 @@ function UserRow({ user, expanded, processing, onToggle, onAction }: {
                   disabled={processing}
                   className="text-[12px] border border-gray-200 rounded px-2 py-1.5 bg-white"
                 >
-                  <option value="reader">Reader</option>
-                  <option value="standard">Standard</option>
-                  <option value="pro">Pro</option>
+                  <option value="reader">Lecteur</option>
+                  <option value="premium">Premium</option>
                   <option value="admin">Admin</option>
                 </select>
               </div>
@@ -839,18 +826,15 @@ function UserRow({ user, expanded, processing, onToggle, onAction }: {
               {/* Activate subscription */}
               <div className="flex items-end gap-2 ml-4 border-l pl-4 border-gray-200">
                 <div>
-                  <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Plan</label>
-                  <select value={subTier} onChange={(e) => setSubTier(e.target.value as TierId)} className="text-[12px] border border-gray-200 rounded px-2 py-1.5 bg-white">
-                    <option value="standard">Standard</option>
-                    <option value="pro">Pro</option>
-                  </select>
-                </div>
-                <div>
                   <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Durée</label>
-                  <select value={subCycle} onChange={(e) => setSubCycle(e.target.value as BillingCycle)} className="text-[12px] border border-gray-200 rounded px-2 py-1.5 bg-white">
-                    <option value="monthly">1 mois</option>
-                    <option value="quarterly">3 mois</option>
-                    <option value="yearly">1 an</option>
+                  <select
+                    value={subCycle}
+                    onChange={(e) => setSubCycle(e.target.value)}
+                    className="text-[12px] border border-gray-200 rounded px-2 py-1.5 bg-white"
+                  >
+                    <option value="monthly">Mensuel</option>
+                    <option value="quarterly">Trimestriel</option>
+                    <option value="yearly">Annuel</option>
                   </select>
                 </div>
                 <button
@@ -858,7 +842,7 @@ function UserRow({ user, expanded, processing, onToggle, onAction }: {
                   disabled={processing}
                   className="text-[12px] bg-[#111] text-white px-3 py-1.5 rounded hover:bg-[#333] transition-colors disabled:opacity-50"
                 >
-                  Activer
+                  Activer Premium
                 </button>
               </div>
 

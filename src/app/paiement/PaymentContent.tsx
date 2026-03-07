@@ -11,6 +11,7 @@ import {
   AlertCircle,
   Clock,
 } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import {
@@ -198,7 +199,16 @@ export function PaymentContent() {
                       : 'border-black/[0.06] hover:border-black/20'
                   }`}
                 >
-                  <h3 className="font-bold text-lg mb-1">{m.shortName}</h3>
+                  <div className="flex items-center gap-3 mb-2">
+                    <Image
+                      src={m.logo}
+                      alt={m.shortName}
+                      width={40}
+                      height={40}
+                      className="rounded-lg object-contain"
+                    />
+                    <h3 className="font-bold text-lg">{m.shortName}</h3>
+                  </div>
                   <p className="text-gray-500 text-[13px]">{m.name}</p>
                 </button>
               ))}

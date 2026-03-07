@@ -120,16 +120,16 @@ function getOverlayConfig(overlayCase: OverlayCase, remaining: number): OverlayC
         isBlocking: true,
         scrollTriggerPercent: 30,
         title: 'Contenu Premium',
-        message: 'Authentifiez-vous pour acceder a l\'article complet',
+        message: 'Authentifiez-vous pour accéder à l\'article complet',
         showEmailField: true,
         benefits: [
-          'Acces aux contenus premium',
-          'Interaction avec la communaute',
+          'Accès aux contenus premium',
+          'Interaction avec la communauté',
           'Alertes et notifications',
-          'Personnalisation de l\'experience',
+          'Personnalisation de l\'expérience',
         ],
         ctaPrimary: { text: 'Continuer', href: '/connexion' },
-        ctaSecondary: { text: 'Creer un compte', href: '/inscription' },
+        ctaSecondary: { text: 'Créer un compte', href: '/inscription' },
       };
 
     case 'connected_has_articles':
@@ -137,7 +137,7 @@ function getOverlayConfig(overlayCase: OverlayCase, remaining: number): OverlayC
         isBlocking: false,
         scrollTriggerPercent: 40,
         title: 'Contenu Premium',
-        message: 'Vous beneficiez de 3 articles premium gratuits chaque mois.',
+        message: 'Vous bénéficiez de 3 articles premium gratuits chaque mois.',
         counterText: `Il vous reste ${remaining} article${remaining !== 1 ? 's' : ''}.`,
         ctaPrimary: { text: 'Continuer la lecture', href: '' },
         ctaSecondary: { text: 'Passer en Premium', href: '/pricing' },
@@ -148,12 +148,12 @@ function getOverlayConfig(overlayCase: OverlayCase, remaining: number): OverlayC
         isBlocking: true,
         scrollTriggerPercent: 30,
         title: 'Contenu Premium',
-        message: 'Vous avez utilise vos 3 articles premium gratuits ce mois-ci.',
+        message: 'Vous avez utilisé vos 3 articles premium gratuits ce mois-ci.',
         benefits: [
-          'Acces illimite aux articles',
-          'Analyses economiques approfondies',
+          'Accès illimité aux articles',
+          'Analyses économiques approfondies',
           'Outils d\'analyse automatique',
-          'Donnees marches en temps reel',
+          'Données marchés en temps réel',
         ],
         ctaPrimary: { text: 'Passer en Premium', href: '/pricing' },
       };
@@ -174,11 +174,11 @@ function getOverlayConfig(overlayCase: OverlayCase, remaining: number): OverlayC
         isBlocking: true,
         scrollTriggerPercent: 30,
         title: 'Contenu Premium',
-        message: 'Limite mensuelle atteinte. Passez en Premium pour un acces illimite.',
+        message: 'Limite mensuelle atteinte. Passez en Premium pour un accès illimité.',
         benefits: [
-          'Acces total aux analyses',
-          'Acces complet aux outils',
-          'Contenu exclusif reserve aux membres Premium',
+          'Accès total aux analyses',
+          'Accès complet aux outils',
+          'Contenu exclusif réservé aux membres Premium',
         ],
         ctaPrimary: { text: 'Passer en Premium', href: '/pricing' },
       };
@@ -502,7 +502,7 @@ export function PremiumOverlay({ articleId, articleTitle, isPremium }: PremiumOv
                 <p className="text-center text-[13px] text-gray-500 mb-6">
                   Nouveau sur la plateforme ?{' '}
                   <Link
-                    href={config.ctaSecondary.href}
+                    href={`${config.ctaSecondary.href}${email ? '?email=' + encodeURIComponent(email) : ''}`}
                     onClick={() => handleCtaClick('secondary')}
                     className="font-semibold text-gray-900 hover:underline"
                   >
@@ -516,7 +516,7 @@ export function PremiumOverlay({ articleId, articleTitle, isPremium }: PremiumOv
             {config.benefits && config.benefits.length > 0 && (
               <div className="bg-gray-50 rounded-xl p-5">
                 <p className="text-[13px] sm:text-[14px] font-semibold text-gray-900 mb-3">
-                  {overlayCase === 'not_connected' ? 'Acces authentifie :' : 'Avantages Premium :'}
+                  {overlayCase === 'not_connected' ? 'Accès authentifié :' : 'Avantages Premium :'}
                 </p>
                 <div className="space-y-2">
                   {config.benefits.map((benefit, i) => (

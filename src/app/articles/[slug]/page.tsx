@@ -63,11 +63,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   const { article, htmlBody } = result;
 
-  // Security: never include premium article body in static page payload.
-  // The client will fetch it via authenticated API after access verification.
-  const isPremium = article.contentType === 'premium' || article.isPremium;
-  const safeHtmlBody = isPremium ? '' : htmlBody;
-
   const related = await getRelatedArticles(
     article.slug.current,
     article.category,
@@ -75,6 +70,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   );
 
   return (
-    <ArticleContent article={article} htmlBody={safeHtmlBody} marketData={marketData} relatedArticles={related} />
+    <ArticleContent article={article} htmlBody={htmlBody} marketData={marketData} relatedArticles={related} />
   );
 }

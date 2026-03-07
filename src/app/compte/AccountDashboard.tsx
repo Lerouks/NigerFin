@@ -74,6 +74,7 @@ export function AccountDashboard() {
   const [cancelLoading, setCancelLoading] = useState(false);
   const [reactivateLoading, setReactivateLoading] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [premiumLimit, setPremiumLimit] = useState(3);
   const [subActionMsg, setSubActionMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
@@ -103,6 +104,16 @@ export function AccountDashboard() {
   useEffect(() => {
     if (isSignedIn) fetchSummary();
   }, [isSignedIn, fetchSummary]);
+
+  // Fetch configurable premium limit
+  useEffect(() => {
+    fetch('/api/paywall-config')
+      .then((r) => r.ok ? r.json() : null)
+      .then((cfg) => {
+        if (cfg?.free_articles_count) setPremiumLimit(cfg.free_articles_count);
+      })
+      .catch(() => {});
+  }, []);
 
   const handleCancelSubscription = async () => {
     setCancelLoading(true);
@@ -226,7 +237,7 @@ export function AccountDashboard() {
             <QuickStat
               icon={BookOpen}
               label="Articles lus"
-              value={userRole === 'reader' ? `${premiumArticlesUsed}/3 premium` : 'Illimité'}
+              value={userRole === 'reader' ? `${premiumArticlesUsed}/${premiumLimit} premium` : 'Illimité'}
               accent={isSubscribed}
             />
             <QuickStat

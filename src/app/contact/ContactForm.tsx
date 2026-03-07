@@ -104,17 +104,17 @@ export function ContactForm() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label htmlFor="name" className="block text-sm font-medium mb-2">Nom complet</label>
-                      <input id="name" type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full border border-black/[0.08] rounded-lg px-4 py-2.5 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 transition-all text-[14px]" placeholder="Votre nom" />
+                      <input id="name" type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full border border-black/[0.08] rounded-lg px-4 py-2.5 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 transition-all text-base" placeholder="Votre nom" />
                     </div>
                     <div>
                       <label htmlFor="email" className="block text-sm font-medium mb-2">Email</label>
-                      <input id="email" type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="w-full border border-black/[0.08] rounded-lg px-4 py-2.5 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 transition-all text-[14px]" placeholder="votre@email.com" />
+                      <input id="email" type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="w-full border border-black/[0.08] rounded-lg px-4 py-2.5 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 transition-all text-base" placeholder="votre@email.com" />
                     </div>
                   </div>
 
                   <div>
                     <label htmlFor="subject" className="block text-sm font-medium mb-2">Sujet</label>
-                    <select id="subject" required value={formData.subject} onChange={(e) => setFormData({ ...formData, subject: e.target.value })} className="w-full border border-black/[0.08] rounded-lg px-4 py-2.5 bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black/5 transition-all text-[14px]">
+                    <select id="subject" required value={formData.subject} onChange={(e) => setFormData({ ...formData, subject: e.target.value })} className="w-full border border-black/[0.08] rounded-lg px-4 py-2.5 bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black/5 transition-all text-base">
                       <option value="">Choisir un sujet</option>
                       <option value="general">Question générale</option>
                       <option value="partenariat">Partenariat / Publicité</option>
@@ -126,7 +126,7 @@ export function ContactForm() {
 
                   <div>
                     <label htmlFor="message" className="block text-sm font-medium mb-2">Message</label>
-                    <textarea id="message" required rows={6} value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} className="w-full border border-black/[0.08] rounded-lg px-4 py-3 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 resize-none transition-all text-[14px]" placeholder="Votre message..." />
+                    <textarea id="message" required rows={6} value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} className="w-full border border-black/[0.08] rounded-lg px-4 py-3 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 resize-none transition-all text-base" placeholder="Votre message..." />
                   </div>
 
                   <button type="submit" disabled={loading} className="bg-[#111] text-white px-7 py-3 rounded-lg hover:bg-[#333] transition-colors flex items-center gap-2 text-[14px] disabled:opacity-50">

@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { X, Lock, ArrowRight, Crown, BookOpen, BarChart3, Globe, Zap, TrendingUp } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { X, Check } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { getReaderPremiumLimit } from '@/lib/access-control';
 import type { UserRole } from '@/types';
@@ -23,15 +24,16 @@ interface OverlayConfig {
   scrollTriggerPercent: number;
   title: string;
   message: string;
-  arguments?: string[];
+  benefits?: string[];
   ctaPrimary: { text: string; href: string };
   ctaSecondary?: { text: string; href: string };
   counterText?: string;
-  showCloseButton: boolean;
+  showEmailField?: boolean;
 }
 
 interface PremiumOverlayProps {
   articleId?: string;
+  articleTitle?: string;
   isPremium: boolean;
 }
 
@@ -91,7 +93,6 @@ function getOverlayCase(
   isPremiumArticle: boolean,
   configuredLimit?: number
 ): OverlayCase {
-  // Free articles never show an overlay (same as having premium access)
   if (!isPremiumArticle) return 'premium';
   if (!isSignedIn) return 'not_connected';
   if (userRole === 'admin') return 'admin';
@@ -118,92 +119,81 @@ function getOverlayConfig(overlayCase: OverlayCase, remaining: number): OverlayC
       return {
         isBlocking: true,
         scrollTriggerPercent: 30,
-        title: 'Cet article est r\u00e9serv\u00e9 aux membres',
-        message: 'Acc\u00e9dez \u00e0 l\'analyse compl\u00e8te et \u00e0 l\'ensemble des contenus premium.',
-        arguments: [
-          'Analyses \u00e9conomiques exclusives',
-          'D\u00e9cryptages g\u00e9opolitiques',
-          'Acc\u00e8s aux outils et donn\u00e9es avanc\u00e9es',
-          '3 articles premium gratuits chaque mois',
+        title: 'Contenu Premium',
+        message: 'Authentifiez-vous pour acceder a l\'article complet',
+        showEmailField: true,
+        benefits: [
+          'Acces aux contenus premium',
+          'Interaction avec la communaute',
+          'Alertes et notifications',
+          'Personnalisation de l\'experience',
         ],
-        ctaPrimary: { text: 'S\'inscrire gratuitement', href: '/inscription' },
-        ctaSecondary: { text: 'D\u00e9j\u00e0 membre ? Se connecter', href: '/connexion' },
-        showCloseButton: false,
+        ctaPrimary: { text: 'Continuer', href: '/connexion' },
+        ctaSecondary: { text: 'Creer un compte', href: '/inscription' },
       };
 
     case 'connected_has_articles':
       return {
         isBlocking: false,
         scrollTriggerPercent: 40,
-        title: 'Articles premium gratuits',
-        message: `B\u00e9n\u00e9ficiez de 3 articles premium gratuits chaque mois.`,
+        title: 'Contenu Premium',
+        message: 'Vous beneficiez de 3 articles premium gratuits chaque mois.',
         counterText: `Il vous reste ${remaining} article${remaining !== 1 ? 's' : ''}.`,
         ctaPrimary: { text: 'Continuer la lecture', href: '' },
         ctaSecondary: { text: 'Passer en Premium', href: '/pricing' },
-        showCloseButton: true,
       };
 
     case 'connected_no_articles':
       return {
         isBlocking: true,
         scrollTriggerPercent: 30,
-        title: 'Vous avez utilis\u00e9 vos 3 articles premium gratuits',
-        message: 'Passez en Premium pour un acc\u00e8s illimit\u00e9 aux analyses et aux outils.',
-        arguments: [
-          'Acc\u00e8s illimit\u00e9 aux articles',
-          'Analyses \u00e9conomiques approfondies',
+        title: 'Contenu Premium',
+        message: 'Vous avez utilise vos 3 articles premium gratuits ce mois-ci.',
+        benefits: [
+          'Acces illimite aux articles',
+          'Analyses economiques approfondies',
           'Outils d\'analyse automatique',
-          'Donn\u00e9es march\u00e9s en temps r\u00e9el',
+          'Donnees marches en temps reel',
         ],
         ctaPrimary: { text: 'Passer en Premium', href: '/pricing' },
-        ctaSecondary: { text: 'Voir les offres', href: '/pricing' },
-        showCloseButton: false,
       };
 
     case 'reader_has_articles':
       return {
         isBlocking: false,
         scrollTriggerPercent: 40,
-        title: 'Formule Lecteur',
+        title: 'Contenu Premium',
         message: 'Votre formule inclut 3 analyses premium par mois.',
         counterText: `Il vous reste ${remaining} article${remaining !== 1 ? 's' : ''}.`,
         ctaPrimary: { text: 'Continuer la lecture', href: '' },
-        ctaSecondary: { text: 'Passer en Premium illimit\u00e9', href: '/pricing' },
-        showCloseButton: true,
+        ctaSecondary: { text: 'Passer en Premium', href: '/pricing' },
       };
 
     case 'reader_no_articles':
       return {
         isBlocking: true,
         scrollTriggerPercent: 30,
-        title: 'Limite mensuelle atteinte',
-        message: 'La formule Lecteur inclut 3 analyses premium par mois. Passez en Premium pour un acc\u00e8s illimit\u00e9.',
-        arguments: [
-          'Acc\u00e8s total aux analyses',
-          'Acc\u00e8s complet aux outils',
-          'Contenu exclusif r\u00e9serv\u00e9 aux membres Premium',
+        title: 'Contenu Premium',
+        message: 'Limite mensuelle atteinte. Passez en Premium pour un acces illimite.',
+        benefits: [
+          'Acces total aux analyses',
+          'Acces complet aux outils',
+          'Contenu exclusif reserve aux membres Premium',
         ],
         ctaPrimary: { text: 'Passer en Premium', href: '/pricing' },
-        showCloseButton: false,
       };
   }
 }
 
-// ─── Icon helper ─────────────────────────────────────────────────────────────
-
-function ArgumentIcon({ index }: { index: number }) {
-  const icons = [BookOpen, Globe, BarChart3, Zap, TrendingUp, Crown];
-  const Icon = icons[index % icons.length];
-  return <Icon className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />;
-}
-
 // ─── Main Component ──────────────────────────────────────────────────────────
 
-export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
+export function PremiumOverlay({ articleId, articleTitle, isPremium }: PremiumOverlayProps) {
   const { isSignedIn, userRole, premiumArticlesUsed, user, isLoading } = useAuth();
+  const router = useRouter();
   const [visible, setVisible] = useState(false);
   const [animateIn, setAnimateIn] = useState(false);
   const [configuredLimit, setConfiguredLimit] = useState<number | undefined>(undefined);
+  const [email, setEmail] = useState('');
   const hasTriggered = useRef(false);
   const mountedRef = useRef(true);
   const pageLoadTime = useRef(Date.now());
@@ -231,7 +221,6 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
     pageLoadTime.current = Date.now();
     return () => {
       mountedRef.current = false;
-      // Always restore body scroll on unmount (e.g. client-side navigation)
       document.body.style.overflow = '';
     };
   }, []);
@@ -241,23 +230,19 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
   useEffect(() => {
     if (!visible) return;
 
-    // Save current focus to restore later
     previousFocusRef.current = document.activeElement;
 
-    // Focus the dialog
     requestAnimationFrame(() => {
       dialogRef.current?.focus();
     });
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Escape key to close overlay
       if (e.key === 'Escape') {
         e.preventDefault();
         handleDismiss();
         return;
       }
 
-      // Focus trap: Tab key cycles within the dialog
       if (e.key === 'Tab' && dialogRef.current) {
         const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
@@ -280,12 +265,11 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
     document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
-      // Restore focus when overlay closes
       if (previousFocusRef.current instanceof HTMLElement) {
         previousFocusRef.current.focus();
       }
     };
-  }, [visible, config?.isBlocking]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [visible]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ─── Show overlay logic ────────────────────────────────────────────────────
 
@@ -362,6 +346,7 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
   const handleContinueReading = useCallback(() => {
     setAnimateIn(false);
     markDismissed();
+    document.body.style.overflow = '';
 
     trackOverlayEvent('continue_reading', { articleId, userId: user?.id, overlayCase });
 
@@ -374,21 +359,26 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
     trackOverlayEvent(`click_${ctaType}`, { articleId, userId: user?.id, overlayCase });
   }, [articleId, user?.id, overlayCase]);
 
+  const handleEmailSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    trackOverlayEvent('click_primary', { articleId, userId: user?.id, overlayCase });
+    const params = new URLSearchParams();
+    if (email) params.set('email', email);
+    if (articleId) params.set('redirect', `/articles/${articleId}`);
+    router.push(`/connexion${params.toString() ? '?' + params.toString() : ''}`);
+  }, [email, articleId, user?.id, overlayCase, router]);
+
   // ─── Render ────────────────────────────────────────────────────────────────
 
   if (!config || !isPremium || isLoading) return null;
   if (!visible) return null;
-
-  const isBlocking = config.isBlocking;
 
   return (
     <>
       {/* Backdrop */}
       <div
         className={`fixed inset-0 z-[100] motion-safe:transition-all motion-safe:duration-500 ${
-          animateIn
-            ? 'bg-black/80'
-            : 'bg-black/0'
+          animateIn ? 'bg-black/80' : 'bg-black/0'
         }`}
         onClick={handleDismiss}
         aria-hidden="true"
@@ -407,38 +397,20 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
         }`}
       >
         <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-auto relative overflow-hidden">
-          {/* Decorative top bar */}
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-500" />
-
           {/* Close button */}
           <button
             onClick={handleDismiss}
-            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all z-10"
+            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-700 focus:outline-none transition-colors z-10"
             aria-label="Fermer"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
 
-          <div className="px-6 pb-8 pt-6 sm:px-8">
-            {/* Icon */}
-            <div className="flex justify-center mb-5">
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
-                isBlocking
-                  ? 'bg-gradient-to-br from-amber-50 to-amber-100'
-                  : 'bg-gradient-to-br from-emerald-50 to-emerald-100'
-              }`}>
-                {isBlocking ? (
-                  <Lock className="w-6 h-6 text-amber-600" />
-                ) : (
-                  <Crown className="w-6 h-6 text-emerald-600" />
-                )}
-              </div>
-            </div>
-
+          <div className="px-6 pb-8 pt-8 sm:px-8">
             {/* Title */}
             <h2
               id="premium-overlay-title"
-              className="text-center text-[22px] sm:text-[26px] font-extrabold leading-tight text-gray-900 mb-2"
+              className="text-[22px] sm:text-[26px] font-bold leading-tight text-gray-900 mb-2"
             >
               {config.title}
             </h2>
@@ -446,69 +418,115 @@ export function PremiumOverlay({ articleId, isPremium }: PremiumOverlayProps) {
             {/* Message */}
             <p
               id="premium-overlay-desc"
-              className="text-center text-[14px] sm:text-[15px] text-gray-500 leading-relaxed mb-5 max-w-md mx-auto"
+              className="text-[14px] sm:text-[15px] text-gray-500 leading-relaxed mb-6"
             >
               {config.message}
             </p>
 
-            {/* Counter badge */}
+            {/* Article title card */}
+            {articleTitle && (
+              <div className="bg-gray-50 rounded-xl p-4 mb-6">
+                <p className="text-[14px] sm:text-[15px] font-semibold text-gray-900 leading-snug">
+                  {articleTitle}
+                </p>
+              </div>
+            )}
+
+            {/* Counter text */}
             {config.counterText && (
-              <div className="flex justify-center mb-5">
-                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 text-emerald-700 text-[13px] font-medium">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 motion-safe:animate-pulse" />
+              <div className="bg-gray-50 rounded-xl p-4 mb-6">
+                <p className="text-[14px] text-gray-600 font-medium">
                   {config.counterText}
-                </span>
+                </p>
               </div>
             )}
 
-            {/* Marketing arguments */}
-            {config.arguments && config.arguments.length > 0 && (
-              <div className="mb-6 space-y-2.5 max-w-sm mx-auto">
-                {config.arguments.map((arg, i) => (
-                  <div key={i} className="flex items-start gap-3 text-[13px] sm:text-[14px] text-gray-700">
-                    <ArgumentIcon index={i} />
-                    <span>{arg}</span>
-                  </div>
-                ))}
-              </div>
-            )}
+            {/* Email field for not_connected */}
+            {config.showEmailField ? (
+              <form onSubmit={handleEmailSubmit} className="mb-6">
+                <label htmlFor="overlay-email" className="block text-[14px] font-medium text-gray-900 mb-2">
+                  Email
+                </label>
+                <input
+                  id="overlay-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="votre@email.com"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[14px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-shadow"
+                />
 
-            {/* CTA buttons */}
-            <div className="flex flex-col gap-3 max-w-sm mx-auto">
-              {config.ctaPrimary.href === '' ? (
                 <button
-                  onClick={handleContinueReading}
-                  className="w-full py-3.5 bg-[#111] text-white rounded-xl text-[14px] sm:text-[15px] font-semibold hover:bg-[#222] active:bg-[#000] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors flex items-center justify-center gap-2"
+                  type="submit"
+                  className="w-full mt-4 py-3.5 bg-gray-900 text-white rounded-xl text-[14px] sm:text-[15px] font-semibold hover:bg-black active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors"
                 >
                   {config.ctaPrimary.text}
-                  <ArrowRight className="w-4 h-4" />
                 </button>
-              ) : (
-                <Link
-                  href={config.ctaPrimary.href}
-                  onClick={() => handleCtaClick('primary')}
-                  className="w-full py-3.5 bg-[#111] text-white rounded-xl text-[14px] sm:text-[15px] font-semibold hover:bg-[#222] active:bg-[#000] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors flex items-center justify-center gap-2 text-center"
-                >
-                  {config.ctaPrimary.text}
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              )}
+              </form>
+            ) : (
+              /* CTA buttons for other cases */
+              <div className="flex flex-col gap-3 mb-6">
+                {config.ctaPrimary.href === '' ? (
+                  <button
+                    onClick={handleContinueReading}
+                    className="w-full py-3.5 bg-gray-900 text-white rounded-xl text-[14px] sm:text-[15px] font-semibold hover:bg-black active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors"
+                  >
+                    {config.ctaPrimary.text}
+                  </button>
+                ) : (
+                  <Link
+                    href={config.ctaPrimary.href}
+                    onClick={() => handleCtaClick('primary')}
+                    className="w-full py-3.5 bg-gray-900 text-white rounded-xl text-[14px] sm:text-[15px] font-semibold hover:bg-black active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors text-center"
+                  >
+                    {config.ctaPrimary.text}
+                  </Link>
+                )}
 
-              {config.ctaSecondary && (
-                <Link
-                  href={config.ctaSecondary.href}
-                  onClick={() => handleCtaClick('secondary')}
-                  className="w-full py-3 border border-gray-200 text-gray-700 rounded-xl text-[13px] sm:text-[14px] font-medium hover:bg-gray-50 active:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors text-center"
-                >
-                  {config.ctaSecondary.text}
-                </Link>
-              )}
-            </div>
+                {config.ctaSecondary && (
+                  <Link
+                    href={config.ctaSecondary.href}
+                    onClick={() => handleCtaClick('secondary')}
+                    className="w-full py-3 border border-gray-200 text-gray-700 rounded-xl text-[13px] sm:text-[14px] font-medium hover:bg-gray-50 active:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors text-center"
+                  >
+                    {config.ctaSecondary.text}
+                  </Link>
+                )}
+              </div>
+            )}
 
-            {overlayCase === 'not_connected' && (
-              <p className="text-center text-[11px] text-gray-400 mt-4">
-                Inscription gratuite, sans engagement.
-              </p>
+            {/* Separator + secondary link for not_connected */}
+            {config.showEmailField && config.ctaSecondary && (
+              <>
+                <div className="border-t border-gray-100 mb-6" />
+                <p className="text-center text-[13px] text-gray-500 mb-6">
+                  Nouveau sur la plateforme ?{' '}
+                  <Link
+                    href={config.ctaSecondary.href}
+                    onClick={() => handleCtaClick('secondary')}
+                    className="font-semibold text-gray-900 hover:underline"
+                  >
+                    {config.ctaSecondary.text}
+                  </Link>
+                </p>
+              </>
+            )}
+
+            {/* Benefits */}
+            {config.benefits && config.benefits.length > 0 && (
+              <div className="bg-gray-50 rounded-xl p-5">
+                <p className="text-[13px] sm:text-[14px] font-semibold text-gray-900 mb-3">
+                  {overlayCase === 'not_connected' ? 'Acces authentifie :' : 'Avantages Premium :'}
+                </p>
+                <div className="space-y-2">
+                  {config.benefits.map((benefit, i) => (
+                    <div key={i} className="flex items-center gap-2.5 text-[13px] text-gray-600">
+                      <Check className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                      <span>{benefit}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
         </div>

@@ -53,7 +53,7 @@ export function PricingContent() {
         <div className="bg-emerald-600 text-white">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
             <p className="text-sm">
-              Vous êtes abonné <strong>Premium</strong> — votre accès est actif.
+              Vous êtes abonné <strong>Premium</strong>, votre accès est actif.
             </p>
             <Link href="/compte" className="text-sm underline hover:no-underline">
               Mon compte &rarr;

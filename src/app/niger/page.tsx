@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { NigerSection } from '@/components/niger/NigerSection';
 
 export const metadata: Metadata = {
-  title: 'Niger — Intelligence interactive',
+  title: 'Niger - Intelligence interactive',
   description: 'Explorez le Niger à travers des cartes interactives, des données économiques, un tracker des ressources naturelles et un profil complet du pays.',
 };
 

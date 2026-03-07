@@ -13,8 +13,8 @@ const defaultSocialLinks = {
 };
 
 const breakingNews = [
-  { _id: 'f1', tag: 'MARCHES', text: "EUR/XOF stable a 655,957 — Le franc CFA maintient sa parite fixe avec l'euro" },
-  { _id: 'f2', tag: 'BRVM', text: "L'indice composite gagne 1,01% en cloture — Hausse portee par les valeurs bancaires" },
+  { _id: 'f1', tag: 'MARCHES', text: "EUR/XOF stable a 655,957 : le franc CFA maintient sa parite fixe avec l'euro" },
+  { _id: 'f2', tag: 'BRVM', text: "L'indice composite gagne 1,01% en cloture, hausse portee par les valeurs bancaires" },
   { _id: 'f3', tag: 'NIGER', text: 'Le secteur minier enregistre une croissance de 18% au T1 2026' },
   { _id: 'f4', tag: 'MATIERES', text: 'Uranium : les cours mondiaux atteignent 89,50 USD/lb, +1,42% cette semaine' },
   { _id: 'f5', tag: 'UEMOA', text: "Les echanges commerciaux intra-regionaux en hausse de 23% sur l'annee" },

@@ -34,28 +34,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: trackError.message }, { status: 500 });
   }
 
-  // Increment the monthly counter on user_profiles
-  try {
-    await supabase.rpc('increment_premium_count', {
-      p_user_id: user.id,
-    });
-  } catch {
-    // Fallback: manual increment
-    const { data: profile } = await supabase
-      .from('user_profiles')
-      .select('premium_articles_read_this_month')
-      .eq('id', user.id)
-      .single();
-
-    if (profile) {
-      await supabase
-        .from('user_profiles')
-        .update({
-          premium_articles_read_this_month: (profile.premium_articles_read_this_month || 0) + 1,
-        })
-        .eq('id', user.id);
-    }
-  }
+  // Count is always derived from premium_article_tracking table (dedup'd).
+  // No separate counter increment needed — eliminates double-count bugs.
 
   return NextResponse.json({ success: true });
 }

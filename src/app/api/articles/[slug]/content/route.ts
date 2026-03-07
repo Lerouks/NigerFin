@@ -41,7 +41,7 @@ export async function GET(
 
   const { data: profile } = await service
     .from('user_profiles')
-    .select('role, premium_articles_read_this_month')
+    .select('role')
     .eq('id', user.id)
     .single();
 
@@ -53,7 +53,27 @@ export async function GET(
     return NextResponse.json({ body: bodyToHtml(article.body || '') });
   }
 
-  if (profile.premium_articles_read_this_month < 3) {
+  // Get configurable limit from paywall_config
+  const { data: config } = await service
+    .from('paywall_config')
+    .select('free_articles_count')
+    .eq('id', 1)
+    .single();
+  const limit = config?.free_articles_count ?? 3;
+
+  // Count from tracking table (dedup'd source of truth) for current month
+  const startOfMonth = new Date(Date.UTC(
+    new Date().getUTCFullYear(),
+    new Date().getUTCMonth(),
+    1
+  ));
+  const { count } = await service
+    .from('premium_article_tracking')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .gte('read_at', startOfMonth.toISOString());
+
+  if ((count ?? 0) < limit) {
     return NextResponse.json({ body: bodyToHtml(article.body || '') });
   }
 

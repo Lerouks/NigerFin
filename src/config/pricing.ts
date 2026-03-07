@@ -108,6 +108,7 @@ export interface PaymentMethod {
   id: PaymentMethodId;
   name: string;
   shortName: string;
+  logo: string;
   instructions: string;
   recipientNumber: string;
   recipientName: string;
@@ -118,6 +119,7 @@ export const PAYMENT_METHODS: Record<PaymentMethodId, PaymentMethod> = {
     id: 'nita',
     name: 'Nita Transfert d\'Argent',
     shortName: 'Nita',
+    logo: '/nita.png',
     instructions: 'Effectuez votre transfert via Nita au numéro ci-dessous, puis saisissez votre numéro de transaction.',
     recipientNumber: '+227 98 54 38 37',
     recipientName: 'NFI REPORT',
@@ -126,6 +128,7 @@ export const PAYMENT_METHODS: Record<PaymentMethodId, PaymentMethod> = {
     id: 'amana',
     name: 'Amana Transfert d\'Argent',
     shortName: 'Amana',
+    logo: '/amana.png',
     instructions: 'Effectuez votre transfert via Amana au numéro ci-dessous, puis saisissez votre numéro de transaction.',
     recipientNumber: '+227 98 54 38 37',
     recipientName: 'NFI REPORT',

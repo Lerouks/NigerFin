@@ -66,10 +66,29 @@ export const metadata: Metadata = {
     'uranium',
     'FCFA',
   ],
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: '32x32' },
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: '/apple-icon.png',
+  },
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
     siteName: 'NFI Report',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'NFI Report - Actualités économiques et financières du Niger',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    images: ['/og-image.png'],
   },
   robots: {
     index: true,

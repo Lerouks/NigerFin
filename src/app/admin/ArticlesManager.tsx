@@ -13,6 +13,7 @@ interface ArticleRow {
   title: string;
   slug: string;
   category: string;
+  sections: string[];
   status: 'draft' | 'published' | 'archived';
   content_type: 'free' | 'premium';
   is_featured: boolean;
@@ -29,6 +30,7 @@ interface ArticleForm {
   slug: string;
   excerpt: string;
   category: string;
+  sections: string[];
   content_type: string;
   is_featured: boolean;
   featured_order: number;
@@ -50,6 +52,7 @@ const EMPTY_FORM: ArticleForm = {
   slug: '',
   excerpt: '',
   category: 'economie',
+  sections: ['economie'],
   content_type: 'free',
   is_featured: false,
   featured_order: 0,
@@ -65,11 +68,12 @@ const EMPTY_FORM: ArticleForm = {
   published_at: '',
 };
 
-const CATEGORIES = [
+const SECTIONS = [
   { value: 'economie', label: 'Économie' },
   { value: 'finance', label: 'Finance' },
   { value: 'marches', label: 'Marchés' },
   { value: 'entreprises', label: 'Entreprises' },
+  { value: 'niger', label: 'Niger' },
   { value: 'education', label: 'Éducation' },
 ];
 
@@ -138,6 +142,7 @@ export function ArticlesManager() {
         slug: full.slug || '',
         excerpt: full.excerpt || '',
         category: full.category || 'economie',
+        sections: full.sections || [full.category || 'economie'],
         content_type: full.content_type || 'free',
         is_featured: full.is_featured || false,
         featured_order: full.featured_order || 0,
@@ -163,9 +168,12 @@ export function ArticlesManager() {
     setSuccess('');
 
     const slug = form.slug || slugify(form.title);
+    const sections = form.sections.length > 0 ? form.sections : ['economie'];
     const payload = {
       ...form,
       slug,
+      category: sections[0],
+      sections,
       status: publishNow ? 'published' : form.status,
       published_at: publishNow && !form.published_at ? new Date().toISOString() : form.published_at || null,
     };
@@ -407,14 +415,34 @@ export function ArticlesManager() {
               />
             </div>
 
-            {/* Category */}
+            {/* Sections (multi-select) */}
             <div className="bg-white border border-black/[0.06] rounded-xl p-4">
-              <label className="text-[11px] uppercase tracking-wider text-gray-400 block mb-1.5">Catégorie</label>
-              <select value={form.category}
-                onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-                className="w-full px-3 py-2 border border-black/[0.08] rounded-lg text-sm focus:outline-none bg-white">
-                {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
-              </select>
+              <label className="text-[11px] uppercase tracking-wider text-gray-400 block mb-2">Sections</label>
+              <div className="space-y-1.5">
+                {SECTIONS.map((s) => {
+                  const checked = form.sections.includes(s.value);
+                  return (
+                    <label key={s.value} className={`flex items-center gap-2.5 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
+                      checked ? 'bg-gray-100' : 'hover:bg-gray-50'
+                    }`}>
+                      <input type="checkbox" checked={checked}
+                        onChange={() => {
+                          setForm((f) => {
+                            const next = checked
+                              ? f.sections.filter((v) => v !== s.value)
+                              : [...f.sections, s.value];
+                            return { ...f, sections: next, category: next[0] || 'economie' };
+                          });
+                        }}
+                        className="w-4 h-4 rounded border-gray-300 text-black focus:ring-black" />
+                      <span className="text-sm">{s.label}</span>
+                    </label>
+                  );
+                })}
+              </div>
+              {form.sections.length === 0 && (
+                <p className="text-[11px] text-red-500 mt-2">Selectionnez au moins une section</p>
+              )}
             </div>
 
             {/* Content type */}
@@ -565,7 +593,7 @@ export function ArticlesManager() {
             <thead>
               <tr className="border-b border-black/[0.04]">
                 <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Article</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Catégorie</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Sections</th>
                 <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Statut</th>
                 <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Accès</th>
                 <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Date</th>
@@ -594,7 +622,11 @@ export function ArticlesManager() {
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="text-[11px] uppercase tracking-wider text-gray-600">{a.category}</span>
+                    <div className="flex flex-wrap gap-1">
+                      {(a.sections || [a.category]).map((s) => (
+                        <span key={s} className="text-[10px] uppercase tracking-wider text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded">{s}</span>
+                      ))}
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <span className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full ${

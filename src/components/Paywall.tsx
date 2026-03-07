@@ -1,8 +1,9 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Lock, Check, Star, ArrowRight, X } from 'lucide-react';
-import { PREMIUM_TIER, BILLING_OPTIONS } from '@/config/pricing';
+import { X } from 'lucide-react';
+import { BILLING_OPTIONS, CURRENCY } from '@/config/pricing';
 
 type PaywallReason = 'login_required' | 'paywall_reader' | 'visitor_limit';
 
@@ -21,106 +22,133 @@ export function Paywall({
   premiumArticlesLimit = 3,
   inline = false,
 }: PaywallProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    requestAnimationFrame(() => setMounted(true));
+    if (!inline) {
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = ''; };
+    }
+  }, [inline]);
+
   const content = getPaywallContent(reason, premiumArticlesUsed, premiumArticlesLimit);
 
+  // Inline mode: gradient fade with card below (used inside article body)
   if (inline) {
     return (
       <div className="bg-gradient-to-t from-white via-white/95 to-transparent pt-20 pb-8 -mt-20 relative">
-        <div className="bg-white border border-black/[0.06] rounded-xl p-8 text-center max-w-lg mx-auto shadow-lg">
-          <InnerContent content={content} reason={reason} />
+        <div className="bg-white border border-black/[0.06] rounded-2xl p-8 sm:p-10 max-w-lg mx-auto shadow-lg">
+          <OverlayCard content={content} reason={reason} onClose={onClose} />
         </div>
       </div>
     );
   }
 
+  // Modal mode: full-screen overlay like RFI
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-2xl w-full p-8 relative shadow-2xl">
+    <div
+      className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center transition-opacity duration-300 ${
+        mounted ? 'opacity-100' : 'opacity-0'
+      }`}
+    >
+      {/* Dimmed background */}
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+
+      {/* Card */}
+      <div
+        className={`relative bg-white w-full sm:max-w-xl sm:rounded-2xl rounded-t-2xl shadow-2xl overflow-hidden transition-all duration-300 ease-out ${
+          mounted
+            ? 'translate-y-0 opacity-100'
+            : 'translate-y-8 opacity-0'
+        }`}
+      >
+        {/* Close button */}
         {onClose && (
-          <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
-            <X className="w-5 h-5" />
+          <button
+            onClick={onClose}
+            className="absolute top-5 right-5 z-10 text-gray-400 hover:text-gray-900 transition-colors"
+            aria-label="Fermer"
+          >
+            <X className="w-6 h-6" />
           </button>
         )}
-        <InnerContent content={content} reason={reason} />
+
+        <div className="p-8 sm:p-10">
+          <OverlayCard content={content} reason={reason} onClose={onClose} />
+        </div>
       </div>
     </div>
   );
 }
 
-function InnerContent({ content, reason }: { content: PaywallContentData; reason: PaywallReason }) {
+// ─── The shared card content, styled like RFI ───────────────────────────────
+
+interface OverlayCardProps {
+  content: PaywallContentData;
+  reason: PaywallReason;
+  onClose?: () => void;
+}
+
+function OverlayCard({ content, reason }: OverlayCardProps) {
   return (
-    <>
-      <div className="flex justify-center mb-4">
-        <div className="w-14 h-14 bg-[#f5f5f0] rounded-full flex items-center justify-center">
-          <Lock className="w-6 h-6 text-gray-500" />
-        </div>
-      </div>
+    <div className="text-center">
+      {/* Title — big, bold, editorial */}
+      <h2 className="text-[26px] sm:text-[30px] font-extrabold leading-tight text-gray-900 mb-3">
+        {content.title}
+      </h2>
 
-      <h2 className="text-2xl font-bold mb-2">{content.title}</h2>
-      <p className="text-gray-600 mb-6">{content.message}</p>
+      {/* Subtitle */}
+      <p className="text-[15px] sm:text-base text-gray-500 leading-relaxed mb-8 max-w-md mx-auto">
+        {content.message}
+      </p>
 
-      {content.showPremiumCard && (
-        <div className="mb-6 text-left max-w-sm mx-auto">
-          <div className="rounded-lg p-5 border bg-[#111] text-white border-white/10">
-            <div className="flex items-center gap-2 mb-2">
-              <Star className="w-4 h-4" style={{ color: '#d4a843', fill: '#d4a843' }} />
-              <span className="text-[10px] tracking-[0.15em] uppercase text-white/40">PREMIUM</span>
+      {/* Pricing — simple, clean lines */}
+      {(reason === 'paywall_reader' || reason === 'login_required') && (
+        <div className="mb-8 space-y-3 max-w-xs mx-auto">
+          {BILLING_OPTIONS.map((opt) => (
+            <div
+              key={opt.cycle}
+              className="flex items-center justify-between text-[15px]"
+            >
+              <span className="text-gray-600">{opt.durationLabel}</span>
+              <span className="font-bold text-gray-900">
+                {opt.price.toLocaleString('fr-FR')} {CURRENCY}
+                {opt.savings && (
+                  <span className="ml-2 text-[11px] font-medium text-emerald-600">
+                    {opt.savings}
+                  </span>
+                )}
+              </span>
             </div>
-            <h3 className="text-lg font-bold mb-1">Premium</h3>
-            <div className="space-y-0.5 mb-3">
-              {BILLING_OPTIONS.map((opt) => (
-                <p key={opt.cycle} className="text-xs text-white/60">
-                  {opt.label}
-                  {opt.savings && <span className="ml-1.5 text-emerald-400 text-[10px]">({opt.savings})</span>}
-                </p>
-              ))}
-            </div>
-            <ul className="space-y-1.5">
-              {PREMIUM_TIER.features.slice(0, 4).map((f) => (
-                <li key={f} className="flex items-center gap-2 text-xs text-white/70">
-                  <Check className="w-3.5 h-3.5 flex-shrink-0 text-emerald-400" />
-                  {f}
-                </li>
-              ))}
-            </ul>
-          </div>
+          ))}
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row gap-3 justify-center">
-        {reason === 'login_required' || reason === 'visitor_limit' ? (
-          <>
-            <Link
-              href="/connexion"
-              className="bg-[#111] text-white px-8 py-3 rounded-lg hover:bg-[#333] transition-colors text-[14px] text-center"
-            >
-              Se connecter
-            </Link>
-            <Link
-              href="/inscription"
-              className="border border-black/[0.1] px-8 py-3 rounded-lg hover:bg-gray-50 transition-colors text-[14px] text-center"
-            >
-              Créer un compte gratuit
-            </Link>
-          </>
-        ) : (
-          <Link
-            href="/pricing"
-            className="inline-flex items-center gap-2 bg-[#111] text-white px-8 py-3 rounded-lg hover:bg-[#333] transition-colors text-[14px]"
-          >
-            Voir les abonnements
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        )}
+      {/* CTA buttons */}
+      <div className="flex flex-col gap-3">
+        <Link
+          href="/pricing"
+          className="w-full py-3.5 bg-[#111] text-white rounded-lg text-[15px] font-semibold hover:bg-[#222] transition-colors text-center"
+        >
+          S&apos;abonner maintenant
+        </Link>
+        <Link
+          href="/connexion"
+          className="w-full py-3 border border-gray-200 text-gray-700 rounded-lg text-[14px] font-medium hover:bg-gray-50 transition-colors text-center"
+        >
+          Se connecter
+        </Link>
       </div>
-    </>
+    </div>
   );
 }
+
+// ─── Content per reason ─────────────────────────────────────────────────────
 
 interface PaywallContentData {
   title: string;
   message: string;
-  showPremiumCard: boolean;
 }
 
 function getPaywallContent(
@@ -132,20 +160,17 @@ function getPaywallContent(
     case 'visitor_limit':
       return {
         title: 'Créez un compte pour continuer',
-        message: `Vous avez lu vos ${limit} articles gratuits. Créez un compte gratuit pour continuer à lire.`,
-        showPremiumCard: false,
+        message: `Vous avez lu vos ${limit} articles gratuits ce mois-ci. Créez un compte gratuit pour continuer à lire.`,
       };
     case 'login_required':
       return {
         title: 'Contenu réservé aux abonnés',
-        message: 'Connectez-vous ou créez un compte pour accéder à ce contenu premium.',
-        showPremiumCard: false,
+        message: 'Cet article fait partie du contenu premium. Abonnez-vous pour accéder aux analyses complètes et aux outils avancés.',
       };
     case 'paywall_reader':
       return {
-        title: 'Limite atteinte',
-        message: `Vous avez lu ${used}/${limit} articles premium ce mois-ci. Passez au Premium pour un accès illimité.`,
-        showPremiumCard: true,
+        title: 'Accès réservé aux abonnés',
+        message: `Vous avez lu ${used}/${limit} articles premium ce mois-ci. Abonnez-vous pour un accès illimité à tout notre contenu.`,
       };
   }
 }

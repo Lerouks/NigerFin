@@ -18,9 +18,8 @@ const defaultNavigation: NavItem[] = [
   { label: 'Finance', path: '/finance', order: 2 },
   { label: 'Marchés', path: '/marches', order: 3 },
   { label: 'Entreprises', path: '/entreprises', order: 4 },
-  { label: 'Niger', path: '/niger', order: 5 },
-  { label: 'Éducation', path: '/education', order: 6 },
-  { label: 'Outils', path: '/outils', order: 7 },
+  { label: 'Éducation', path: '/education', order: 5 },
+  { label: 'Outils', path: '/outils', order: 6 },
 ];
 
 export function Header() {

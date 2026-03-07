@@ -28,24 +28,57 @@ const SECURITY_COLORS: Record<string, { fill: string; label: string; dot: string
   critical: { fill: '#ef4444', label: 'Critique',  dot: 'bg-red-500' },
 };
 
-// Simplified SVG paths for Niger's 8 regions
+// Geographically accurate SVG paths for Niger's 8 regions
+// Coordinate system: viewBox 0 0 800 600
+// x ≈ longitude × 50  (0°E → 0, 16°E → 800)
+// y ≈ (23.5° - latitude) × 50  (23.5°N → 0, 11.5°N → 600)
 const REGION_PATHS: Record<string, string> = {
   'Agadez':
-    'M 140 10 L 280 10 L 310 30 L 320 80 L 310 140 L 280 180 L 240 200 L 200 210 L 160 200 L 130 180 L 110 140 L 100 100 L 110 50 Z',
-  'Diffa':
-    'M 310 140 L 320 80 L 360 90 L 390 120 L 400 160 L 390 200 L 360 220 L 320 210 L 310 180 L 280 180 Z',
-  'Dosso':
-    'M 80 280 L 120 260 L 160 270 L 180 290 L 170 320 L 140 340 L 100 330 L 70 310 Z',
-  'Maradi':
-    'M 200 250 L 240 240 L 280 250 L 300 270 L 290 300 L 260 320 L 220 310 L 190 290 Z',
-  'Niamey':
-    'M 90 260 L 110 250 L 120 260 L 115 275 L 100 280 L 85 275 Z',
+    'M 28 230 L 18 195 L 15 150 L 20 105 L 95 85 L 140 78 L 175 90 ' +
+    'L 215 55 L 270 40 L 320 28 L 395 18 L 470 12 L 550 8 L 630 5 L 700 3 L 760 8 ' +
+    'L 770 55 L 758 110 L 762 160 L 755 215 L 748 280 L 740 340 L 735 370 ' +
+    'L 640 378 L 560 365 L 470 348 L 390 332 L 320 315 L 260 298 ' +
+    'L 200 280 L 145 262 L 90 248 L 50 240 Z',
   'Tahoua':
-    'M 110 140 L 160 200 L 200 210 L 200 250 L 160 270 L 120 260 L 90 260 L 80 230 L 80 180 Z',
+    'M 145 262 L 200 280 L 260 298 L 320 315 L 390 332 L 390 420 ' +
+    'L 375 455 L 350 480 L 330 500 L 305 515 L 280 525 ' +
+    'L 220 510 L 175 495 L 155 478 L 145 455 L 140 420 L 135 380 L 135 330 L 140 295 Z',
   'Tillabéri':
-    'M 40 160 L 80 180 L 80 230 L 90 260 L 80 280 L 50 300 L 20 280 L 10 240 L 20 200 Z',
+    'M 28 230 L 50 240 L 90 248 L 145 262 L 140 295 L 135 330 L 135 380 ' +
+    'L 140 420 L 145 455 L 120 465 L 95 472 ' +
+    'L 80 488 L 65 510 L 48 535 L 35 555 L 22 565 L 12 555 L 8 530 ' +
+    'L 10 490 L 12 450 L 14 410 L 16 370 L 18 330 L 20 290 L 24 260 Z',
+  'Niamey':
+    'M 95 472 L 120 465 L 128 475 L 125 492 L 112 500 L 95 495 L 88 485 Z',
+  'Dosso':
+    'M 95 495 L 112 500 L 125 492 L 128 475 L 145 455 L 155 478 L 175 495 ' +
+    'L 220 510 L 280 525 L 275 540 L 260 555 L 235 565 L 195 572 ' +
+    'L 150 578 L 110 580 L 75 575 L 48 535 L 65 510 L 80 488 Z',
+  'Maradi':
+    'M 280 525 L 305 515 L 330 500 L 350 480 L 375 455 L 390 420 L 390 332 ' +
+    'L 470 348 L 475 385 L 475 420 L 470 460 L 460 500 L 450 530 ' +
+    'L 425 545 L 390 555 L 350 562 L 310 558 L 275 540 Z',
   'Zinder':
-    'M 240 200 L 280 180 L 310 180 L 320 210 L 310 240 L 280 250 L 240 240 L 220 220 Z',
+    'M 470 348 L 560 365 L 640 378 L 640 410 L 638 445 L 632 480 L 625 510 ' +
+    'L 610 530 L 580 545 L 540 555 L 500 550 L 465 542 L 450 530 ' +
+    'L 460 500 L 470 460 L 475 420 L 475 385 Z',
+  'Diffa':
+    'M 640 378 L 735 370 L 740 340 L 748 280 L 755 215 L 762 160 ' +
+    'L 770 185 L 772 230 L 768 290 L 758 350 L 748 400 L 735 440 ' +
+    'L 720 475 L 700 505 L 680 525 L 655 535 L 625 510 L 632 480 ' +
+    'L 638 445 L 640 410 Z',
+};
+
+// Pre-computed label positions for better placement
+const LABEL_POSITIONS: Record<string, { x: number; y: number; size: number }> = {
+  'Agadez':    { x: 420, y: 165, size: 14 },
+  'Tahoua':    { x: 260, y: 390, size: 12 },
+  'Tillabéri': { x: 65,  y: 380, size: 10 },
+  'Niamey':    { x: 108, y: 483, size: 7 },
+  'Dosso':     { x: 170, y: 545, size: 11 },
+  'Maradi':    { x: 400, y: 470, size: 12 },
+  'Zinder':    { x: 555, y: 465, size: 12 },
+  'Diffa':     { x: 705, y: 400, size: 11 },
 };
 
 function getRegionFill(region: Region, filter: string, isHovered: boolean): string {
@@ -85,7 +118,7 @@ export function NigerMap({ regions, filter }: NigerMapProps) {
         {/* Map */}
         <div className="flex-1 bg-white rounded-2xl border border-black/[0.06] p-4 sm:p-6">
           <svg
-            viewBox="0 0 420 360"
+            viewBox="0 0 800 600"
             className="w-full h-auto max-h-[500px]"
             role="img"
             aria-label="Carte interactive du Niger"
@@ -94,6 +127,7 @@ export function NigerMap({ regions, filter }: NigerMapProps) {
               const region = regionMap[name];
               if (!region) return null;
               const isHovered = hoveredRegion === name;
+              const label = LABEL_POSITIONS[name] || { x: 400, y: 300, size: 11 };
 
               return (
                 <g key={name}>
@@ -108,12 +142,12 @@ export function NigerMap({ regions, filter }: NigerMapProps) {
                     onClick={() => handleRegionClick(region)}
                   />
                   <text
-                    x={getPathCenter(path).x}
-                    y={getPathCenter(path).y}
+                    x={label.x}
+                    y={label.y}
                     textAnchor="middle"
                     className="pointer-events-none select-none"
                     fill={isHovered ? '#fff' : '#374151'}
-                    fontSize={name === 'Niamey' ? 8 : 11}
+                    fontSize={label.size}
                     fontWeight={600}
                   >
                     {name}
@@ -215,17 +249,4 @@ export function NigerMap({ regions, filter }: NigerMapProps) {
       </div>
     </div>
   );
-}
-
-// Helper to calculate center of SVG path for labels
-function getPathCenter(path: string): { x: number; y: number } {
-  const coords = path.match(/(\d+)\s+(\d+)/g);
-  if (!coords) return { x: 0, y: 0 };
-  let sumX = 0, sumY = 0;
-  coords.forEach((c) => {
-    const [x, y] = c.split(/\s+/).map(Number);
-    sumX += x;
-    sumY += y;
-  });
-  return { x: sumX / coords.length, y: sumY / coords.length };
 }

@@ -62,12 +62,14 @@ export async function POST(req: NextRequest) {
   // Validate content_type — must be 'free' or 'premium'
   const contentType = body.content_type === 'premium' ? 'premium' : 'free';
 
+  const sections = Array.isArray(body.sections) && body.sections.length > 0 ? body.sections : [body.category || 'economie'];
   const { data, error } = await auth.service.from('articles').insert({
     title: body.title,
     subtitle: body.subtitle || null,
     slug,
     excerpt: body.excerpt || null,
-    category: body.category || 'economie',
+    category: sections[0],
+    sections,
     content_type: contentType,
     is_featured: body.is_featured || false,
     featured_order: body.featured_order || 0,
@@ -98,7 +100,7 @@ export async function PUT(req: NextRequest) {
 
   const updateData: Record<string, unknown> = {};
   const fields = [
-    'title', 'subtitle', 'slug', 'excerpt', 'category',
+    'title', 'subtitle', 'slug', 'excerpt', 'category', 'sections',
     'is_featured', 'featured_order', 'author_name', 'author_avatar',
     'main_image_url', 'main_image_alt', 'body', 'read_time', 'tags',
     'seo_title', 'seo_description', 'status', 'published_at',
@@ -108,6 +110,11 @@ export async function PUT(req: NextRequest) {
     if (body[field] !== undefined) {
       updateData[field] = body[field];
     }
+  }
+
+  // Keep category in sync with first section
+  if (Array.isArray(body.sections) && body.sections.length > 0) {
+    updateData.category = body.sections[0];
   }
 
   // Validate content_type separately — must be 'free' or 'premium'

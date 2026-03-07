@@ -21,6 +21,7 @@ import {
   type AccessResult,
 } from '@/lib/access-control';
 import { trackPremiumArticleRead } from '@/lib/user-profile';
+import { SECTION_META } from '@/lib/sections';
 
 interface ArticleContentProps {
   article: Article;
@@ -142,7 +143,13 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
           <div className="max-w-3xl mx-auto">
             <article className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] overflow-hidden">
               <div className="p-8 md:p-12">
-                <span className="inline-block text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">{article.category}</span>
+                <div className="flex flex-wrap items-center gap-2 mb-4">
+                  {(article.sections || [article.category]).map((s) => (
+                    <Link key={s} href={SECTION_META[s]?.path || `/${s}`} className="text-[11px] tracking-[0.15em] uppercase text-gray-400 hover:text-black transition-colors">
+                      {SECTION_META[s]?.label || s}
+                    </Link>
+                  ))}
+                </div>
                 <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">{article.title}</h1>
                 {article.excerpt && <p className="text-lg text-gray-600 mb-6">{article.excerpt}</p>}
                 <div className="flex items-center justify-center py-16">
@@ -169,7 +176,13 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
           <div className="max-w-3xl mx-auto">
             <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] overflow-hidden">
               <div className="p-8 md:p-12">
-                <span className="inline-block text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">{article.category}</span>
+                <div className="flex flex-wrap items-center gap-2 mb-4">
+                  {(article.sections || [article.category]).map((s) => (
+                    <Link key={s} href={SECTION_META[s]?.path || `/${s}`} className="text-[11px] tracking-[0.15em] uppercase text-gray-400 hover:text-black transition-colors">
+                      {SECTION_META[s]?.label || s}
+                    </Link>
+                  ))}
+                </div>
                 <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">{article.title}</h1>
                 {article.excerpt && <p className="text-lg text-gray-600 mb-6">{article.excerpt}</p>}
 
@@ -221,7 +234,13 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
             <article className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] overflow-hidden">
               <div className="p-8 md:p-12">
                 <div className="flex items-center gap-2 mb-4">
-                  <span className="inline-block text-[11px] tracking-[0.15em] uppercase text-gray-400">{article.category}</span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {(article.sections || [article.category]).map((s) => (
+                      <Link key={s} href={SECTION_META[s]?.path || `/${s}`} className="text-[11px] tracking-[0.15em] uppercase text-gray-400 hover:text-black transition-colors">
+                        {SECTION_META[s]?.label || s}
+                      </Link>
+                    ))}
+                  </div>
                   {contentType !== 'free' && (
                     <span className="text-[10px] tracking-[0.12em] uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-700">
                       PREMIUM

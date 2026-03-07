@@ -9,6 +9,7 @@ export interface SupabaseArticle {
   slug: string;
   excerpt: string | null;
   category: string;
+  sections: string[];
   content_type: 'free' | 'premium';
   is_featured: boolean;
   featured_order: number;
@@ -39,6 +40,7 @@ export function toArticle(row: SupabaseArticle): Article {
     subtitle: row.subtitle || undefined,
     excerpt: row.excerpt || '',
     category: row.category,
+    sections: row.sections || [row.category],
     author: {
       name: row.author_name,
       avatar: row.author_avatar,
@@ -111,7 +113,7 @@ export async function getArticlesByCategory(category: string): Promise<Article[]
     .from('articles')
     .select('*')
     .eq('status', 'published')
-    .eq('category', category)
+    .contains('sections', [category])
     .order('published_at', { ascending: false });
   return (data || []).map(toArticle);
 }
@@ -136,7 +138,7 @@ export async function getRelatedArticles(currentSlug: string, category: string, 
     .from('articles')
     .select('*')
     .eq('status', 'published')
-    .eq('category', category)
+    .contains('sections', [category])
     .neq('slug', currentSlug)
     .order('published_at', { ascending: false })
     .limit(3);

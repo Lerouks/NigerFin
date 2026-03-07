@@ -296,7 +296,7 @@ export function AdminDashboard() {
               <Shield className="w-6 h-6 text-red-400" />
               <div>
                 <h1 className="text-2xl font-bold">CEO Cockpit</h1>
-                <p className="text-white/40 text-[13px]">NFI Report — Tableau de bord</p>
+                <p className="text-white/40 text-[13px]">NFI Report - Tableau de bord</p>
               </div>
             </div>
             <div className="flex gap-2">
@@ -585,7 +585,7 @@ export function AdminDashboard() {
                     {payments.map((p) => (
                       <tr key={p.id} className="border-b border-black/[0.03] last:border-0">
                         <td className="px-4 py-3">
-                          <p className="text-sm font-medium">{p.user_profiles?.full_name || '—'}</p>
+                          <p className="text-sm font-medium">{p.user_profiles?.full_name || '-'}</p>
                           <p className="text-[12px] text-gray-400">{p.user_profiles?.email || p.user_id}</p>
                         </td>
                         <td className="px-4 py-3">
@@ -762,7 +762,7 @@ function UserRow({ user, expanded, processing, onToggle, onAction }: {
         <td className="px-4 py-3">
           <div className="flex items-center gap-2">
             <div>
-              <p className="text-sm font-medium">{user.full_name || '—'}</p>
+              <p className="text-sm font-medium">{user.full_name || '-'}</p>
               <p className="text-[12px] text-gray-400">{user.email}</p>
             </div>
             {user.blocked && (

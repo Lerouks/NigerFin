@@ -173,7 +173,7 @@ export function CategoriesManager() {
               <tr key={cat.id} className="border-b border-black/[0.03] last:border-0">
                 <td className="px-4 py-3 text-sm font-medium">{cat.name}</td>
                 <td className="px-4 py-3 text-[12px] text-gray-500 font-mono">{cat.slug}</td>
-                <td className="px-4 py-3 text-[12px] text-gray-500">{cat.description || '—'}</td>
+                <td className="px-4 py-3 text-[12px] text-gray-500">{cat.description || '-'}</td>
                 <td className="px-4 py-3">
                   <div className="flex gap-2">
                     <button onClick={() => startEdit(cat)} className="p-1.5 hover:bg-gray-100 rounded transition-colors">

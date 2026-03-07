@@ -3,13 +3,12 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import DOMPurify from 'isomorphic-dompurify';
 import { Clock, Calendar, User, Facebook, Linkedin, Link2, Check, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { CommentsSection } from '@/components/CommentsSection';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
-import { Paywall } from '@/components/Paywall';
-import { PaywallOverlay } from '@/components/PaywallOverlay';
-import { LoginGate } from '@/components/LoginGate';
+import { PremiumOverlay } from '@/components/PremiumOverlay';
 import { ArticleCard } from '@/components/ArticleCard';
 import { ArticleLikes } from '@/components/ArticleLikes';
 import type { Article, MarketData } from '@/types';
@@ -19,8 +18,6 @@ import {
   checkArticleAccess,
   getContentTypeFromArticle,
   trackVisitorArticle,
-  getReaderPremiumLimit,
-  getVisitorLimit,
   type AccessResult,
 } from '@/lib/access-control';
 import { trackPremiumArticleRead } from '@/lib/user-profile';
@@ -59,7 +56,6 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
   const [linkCopied, setLinkCopied] = useState(false);
   const [hasTracked, setHasTracked] = useState(false);
   const [resolvedBody, setResolvedBody] = useState<string | null>(null);
-  const [showLoginGate, setShowLoginGate] = useState(false);
   const imageUrl = getArticleImageUrl(article);
   const contentType = getContentTypeFromArticle(article);
 
@@ -107,18 +103,6 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
       .catch(() => {});
     return () => { cancelled = true; };
   }, [accessResult, htmlBody, article.slug]);
-
-  // Auto-trigger LoginGate after 3s for premium articles when not authenticated
-  useEffect(() => {
-    if (isLoading) return;
-    const isPremium = contentType === 'premium';
-    if (isPremium && !isSignedIn) {
-      const timer = setTimeout(() => {
-        setShowLoginGate(true);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [contentType, isSignedIn, isLoading]);
 
   const handleCopyLink = async () => {
     await navigator.clipboard.writeText(articleUrl);
@@ -190,14 +174,14 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
                   {/* White gradient overlay — progressive blur effect */}
                   <div className="absolute inset-0 bg-gradient-to-t from-white via-white/90 to-transparent" />
 
-                  {/* "Connectez-vous pour lire la suite" button overlaid */}
+                  {/* CTA button overlaid */}
                   <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-4">
-                    <button
-                      onClick={() => setShowLoginGate(true)}
+                    <Link
+                      href={isSignedIn ? '/pricing' : '/inscription'}
                       className="bg-[#111] text-white px-8 py-3 rounded-lg text-[14px] font-medium hover:bg-[#333] transition-colors shadow-lg"
                     >
-                      Connectez-vous pour lire la suite
-                    </button>
+                      {isSignedIn ? 'Passer en Premium' : 'S\'inscrire pour lire la suite'}
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -205,21 +189,8 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
           </div>
         </div>
 
-        {/* LoginGate modal — auto-triggered or on button click */}
-        <LoginGate
-          isOpen={showLoginGate}
-          onClose={() => setShowLoginGate(false)}
-          articleTitle={article.title}
-        />
-
-        {/* Paywall modal for users who ARE signed in but hit their limit */}
-        {accessResult.reason === 'paywall_reader' && (
-          <Paywall
-            reason={accessResult.reason}
-            premiumArticlesUsed={premiumArticlesUsed}
-            premiumArticlesLimit={getReaderPremiumLimit()}
-          />
-        )}
+        {/* Unified premium overlay - handles all blocked states */}
+        <PremiumOverlay articleId={article._id} isPremium={contentType === 'premium'} />
       </div>
     );
   }
@@ -262,11 +233,11 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
                   </div>
                 </div>
 
-                {/* Render HTML body (fetched securely for premium) */}
+                {/* Render HTML body (fetched securely for premium, sanitized) */}
                 {resolvedBody ? (
                   <div
                     className="prose prose-lg max-w-none prose-headings:font-bold prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3 prose-p:mb-4 prose-p:leading-relaxed prose-blockquote:border-l-4 prose-blockquote:border-black prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:my-6 prose-a:text-black prose-a:underline hover:prose-a:no-underline prose-img:rounded-lg prose-img:my-6"
-                    dangerouslySetInnerHTML={{ __html: resolvedBody }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(resolvedBody) }}
                   />
                 ) : (
                   <div className="flex items-center justify-center py-16">
@@ -338,8 +309,8 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
         </div>
       </div>
 
-      {/* Soft paywall overlay for non-subscribers (nudge, not block) */}
-      <PaywallOverlay articleId={article._id} />
+      {/* Unified premium overlay - adapts to user status */}
+      <PremiumOverlay articleId={article._id} isPremium={contentType === 'premium'} />
     </div>
   );
 }

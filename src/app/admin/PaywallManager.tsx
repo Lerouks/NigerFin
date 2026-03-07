@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Loader2, Check, Eye, MousePointerClick, X as XIcon, BarChart3 } from 'lucide-react';
+import { Loader2, Check, Eye, MousePointerClick, X as XIcon, BarChart3, Clock, ArrowRight, Users, TrendingUp } from 'lucide-react';
 
 interface PaywallConfig {
   enabled: boolean;
@@ -25,12 +25,26 @@ interface PaywallConfig {
 interface AnalyticsSummary {
   period_days: number;
   views: number;
+  click_primary: number;
+  click_secondary: number;
   click_subscribe: number;
   click_login: number;
+  continue_reading: number;
   dismiss: number;
   total: number;
   conversion_rate: string;
+  avg_scroll_depth: number | null;
+  avg_read_time_seconds: number | null;
+  case_breakdown: Record<string, number>;
 }
+
+const CASE_LABELS: Record<string, string> = {
+  not_connected: 'Non connecte',
+  connected_has_articles: 'Connecte (articles restants)',
+  connected_no_articles: 'Connecte (limite atteinte)',
+  reader_has_articles: 'Lecteur (articles restants)',
+  reader_no_articles: 'Lecteur (limite atteinte)',
+};
 
 export function PaywallManager() {
   const [config, setConfig] = useState<PaywallConfig | null>(null);
@@ -38,6 +52,7 @@ export function PaywallManager() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState('');
 
   const fetchConfig = useCallback(async () => {
     setLoading(true);
@@ -53,8 +68,6 @@ export function PaywallManager() {
   }, []);
 
   useEffect(() => { fetchConfig(); }, [fetchConfig]);
-
-  const [error, setError] = useState('');
 
   const handleSave = async () => {
     if (!config) return;
@@ -76,7 +89,7 @@ export function PaywallManager() {
         setError(err.error || 'Erreur lors de la sauvegarde');
       }
     } catch {
-      setError('Erreur réseau');
+      setError('Erreur r\u00e9seau');
     }
     setSaving(false);
   };
@@ -100,14 +113,63 @@ export function PaywallManager() {
 
   return (
     <div className="space-y-6">
-      {/* Analytics cards */}
+      {/* Enhanced analytics dashboard */}
       {analytics && (
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-          <StatCard icon={<Eye className="w-4 h-4" />} label="Vues" value={analytics.views} />
-          <StatCard icon={<MousePointerClick className="w-4 h-4" />} label="Clics abonnement" value={analytics.click_subscribe} accent />
-          <StatCard icon={<MousePointerClick className="w-4 h-4" />} label="Clics connexion" value={analytics.click_login} />
-          <StatCard icon={<XIcon className="w-4 h-4" />} label="Fermetures" value={analytics.dismiss} />
-          <StatCard icon={<BarChart3 className="w-4 h-4" />} label="Taux conversion" value={`${analytics.conversion_rate}%`} accent />
+        <div className="space-y-4">
+          {/* Main KPI row */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <StatCard icon={<Eye className="w-4 h-4" />} label="Vues overlay" value={analytics.views} />
+            <StatCard icon={<MousePointerClick className="w-4 h-4" />} label="Clics CTA" value={(analytics.click_primary || 0) + (analytics.click_secondary || 0) + (analytics.click_subscribe || 0) + (analytics.click_login || 0)} accent />
+            <StatCard icon={<XIcon className="w-4 h-4" />} label="Fermetures" value={analytics.dismiss} />
+            <StatCard icon={<TrendingUp className="w-4 h-4" />} label="Taux conversion" value={`${analytics.conversion_rate}%`} accent />
+          </div>
+
+          {/* Secondary metrics */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <StatCard icon={<ArrowRight className="w-4 h-4" />} label="Continue lecture" value={analytics.continue_reading || 0} />
+            <StatCard
+              icon={<BarChart3 className="w-4 h-4" />}
+              label="Scroll moyen"
+              value={analytics.avg_scroll_depth !== null ? `${analytics.avg_scroll_depth}%` : '-'}
+            />
+            <StatCard
+              icon={<Clock className="w-4 h-4" />}
+              label="Temps lecture moy."
+              value={analytics.avg_read_time_seconds !== null ? `${analytics.avg_read_time_seconds}s` : '-'}
+            />
+            <StatCard icon={<Users className="w-4 h-4" />} label="Total evenements" value={analytics.total} />
+          </div>
+
+          {/* Case breakdown */}
+          {analytics.case_breakdown && Object.keys(analytics.case_breakdown).length > 0 && (
+            <div className="bg-white rounded-xl border border-black/[0.06] p-5">
+              <h4 className="text-[11px] uppercase tracking-wider text-gray-400 mb-3">Repartition par cas utilisateur</h4>
+              <div className="space-y-2">
+                {Object.entries(analytics.case_breakdown)
+                  .sort(([, a], [, b]) => b - a)
+                  .map(([caseId, count]) => {
+                    const total = Object.values(analytics.case_breakdown).reduce((s, v) => s + v, 0);
+                    const percent = total > 0 ? ((count / total) * 100).toFixed(1) : '0';
+                    return (
+                      <div key={caseId} className="flex items-center gap-3">
+                        <span className="text-[12px] text-gray-600 w-48 truncate">
+                          {CASE_LABELS[caseId] || caseId}
+                        </span>
+                        <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-emerald-500 rounded-full transition-all"
+                            style={{ width: `${percent}%` }}
+                          />
+                        </div>
+                        <span className="text-[12px] text-gray-500 font-medium w-16 text-right">
+                          {count} ({percent}%)
+                        </span>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -116,7 +178,7 @@ export function PaywallManager() {
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-semibold">Paywall overlay</h3>
-            <p className="text-[12px] text-gray-400 mt-0.5">Affiche un overlay incitatif aux non-abonnés</p>
+            <p className="text-[12px] text-gray-400 mt-0.5">Affiche un overlay incitatif aux non-abonnes</p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input
@@ -133,7 +195,7 @@ export function PaywallManager() {
 
         {/* Trigger settings */}
         <div>
-          <h4 className="text-[11px] uppercase tracking-wider text-gray-400 mb-3">Déclenchement</h4>
+          <h4 className="text-[11px] uppercase tracking-wider text-gray-400 mb-3">Declenchement</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
               <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Mode</label>
@@ -159,7 +221,7 @@ export function PaywallManager() {
               />
             </div>
             <div>
-              <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Délai (secondes)</label>
+              <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Delai (secondes)</label>
               <input
                 type="number"
                 min={1}
@@ -176,7 +238,7 @@ export function PaywallManager() {
 
         {/* Content */}
         <div>
-          <h4 className="text-[11px] uppercase tracking-wider text-gray-400 mb-3">Contenu</h4>
+          <h4 className="text-[11px] uppercase tracking-wider text-gray-400 mb-3">Contenu (overlay legacy)</h4>
           <div className="space-y-3">
             <div>
               <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Titre</label>
@@ -270,7 +332,7 @@ export function PaywallManager() {
             <ColorField label="Texte bouton" value={config.cta_text_color} onChange={(v) => update('cta_text_color', v)} />
           </div>
           <div className="mt-3">
-            <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Durée cookie dismiss (heures)</label>
+            <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Duree cookie dismiss (heures)</label>
             <input
               type="number"
               min={1}
@@ -279,6 +341,24 @@ export function PaywallManager() {
               onChange={(e) => update('dismiss_cookie_hours', parseInt(e.target.value) || 24)}
               className="w-40 border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
             />
+          </div>
+        </div>
+
+        {/* Premium Overlay info */}
+        <hr className="border-black/[0.04]" />
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+          <h4 className="text-sm font-semibold text-blue-900 mb-2">Systeme d&apos;overlay intelligent</h4>
+          <p className="text-[13px] text-blue-700 leading-relaxed mb-3">
+            Le nouveau systeme d&apos;overlay s&apos;adapte automatiquement au statut de chaque utilisateur.
+            Les textes et comportements sont geres directement dans le composant PremiumOverlay.
+          </p>
+          <div className="space-y-1.5 text-[12px] text-blue-600">
+            <p><strong>Non connecte :</strong> Overlay bloquant a 30% du scroll, incitation a l&apos;inscription</p>
+            <p><strong>Connecte (articles restants) :</strong> Overlay leger a 40%, compteur d&apos;articles</p>
+            <p><strong>Connecte (limite atteinte) :</strong> Overlay bloquant, incitation Premium</p>
+            <p><strong>Lecteur (articles restants) :</strong> Overlay leger a 40%, compteur</p>
+            <p><strong>Lecteur (limite atteinte) :</strong> Overlay bloquant, upgrade Premium</p>
+            <p><strong>Premium / Admin :</strong> Aucun overlay</p>
           </div>
         </div>
 
@@ -319,7 +399,7 @@ export function PaywallManager() {
             className="flex items-center gap-1.5 px-5 py-2.5 bg-[#111] text-white rounded-lg text-[13px] hover:bg-[#333] transition-colors disabled:opacity-30"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-            {saved ? 'Enregistré !' : 'Enregistrer'}
+            {saved ? 'Enregistre !' : 'Enregistrer'}
           </button>
           {error && <p className="text-red-500 text-[13px]">{error}</p>}
         </div>

@@ -73,7 +73,47 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     article.tags || [],
   );
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://nfireport.com';
+  const articleUrl = `${siteUrl}/articles/${article.slug.current}`;
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: article.title,
+    description: article.excerpt,
+    image: article.mainImage?.url || `${siteUrl}/og-default.jpg`,
+    datePublished: article.publishedAt,
+    dateModified: article.publishedAt,
+    author: {
+      '@type': 'Person',
+      name: article.author.name,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'NFI Report',
+      url: siteUrl,
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': articleUrl,
+    },
+    isAccessibleForFree: !isPremium,
+    ...(isPremium && {
+      hasPart: {
+        '@type': 'WebPageElement',
+        isAccessibleForFree: false,
+        cssSelector: '.prose',
+      },
+    }),
+  };
+
   return (
-    <ArticleContent article={article} htmlBody={safeHtmlBody} marketData={marketData} relatedArticles={related} />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <ArticleContent article={article} htmlBody={safeHtmlBody} marketData={marketData} relatedArticles={related} />
+    </>
   );
 }

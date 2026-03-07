@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { logAuditEvent } from '@/lib/audit';
+import { BILLING_OPTIONS } from '@/config/pricing';
+
+// Build minimum price map from config
+const CONFIG_MINIMUMS: Record<string, number> = {};
+for (const opt of BILLING_OPTIONS) {
+  CONFIG_MINIMUMS[`premium_${opt.cycle}`] = opt.price;
+}
 
 // GET: Read current dynamic prices
 export async function GET() {
@@ -27,6 +34,14 @@ export async function PUT(request: NextRequest) {
 
   if (!tier || !billingCycle || !amount || amount < 100) {
     return NextResponse.json({ error: 'Paramètres invalides' }, { status: 400 });
+  }
+
+  const minPrice = CONFIG_MINIMUMS[`${tier}_${billingCycle}`];
+  if (minPrice && amount < minPrice) {
+    return NextResponse.json(
+      { error: `Le prix ne peut pas être inférieur à ${minPrice.toLocaleString('fr-FR')} FCFA` },
+      { status: 400 }
+    );
   }
 
   const validTiers = ['premium'];

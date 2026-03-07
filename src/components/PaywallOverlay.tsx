@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { X, Lock, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
-import { getVisitorArticlesRead, getVisitorLimit } from '@/lib/access-control';
+import { getVisitorArticlesRead, getVisitorLimit, getReaderPremiumLimit } from '@/lib/access-control';
 
 interface PaywallConfig {
   enabled: boolean;
@@ -66,7 +66,7 @@ interface PaywallOverlayProps {
 }
 
 export function PaywallOverlay({ articleId }: PaywallOverlayProps) {
-  const { isSignedIn, userRole, user } = useAuth();
+  const { isSignedIn, userRole, premiumArticlesUsed, user } = useAuth();
   const [config, setConfig] = useState<PaywallConfig | null>(null);
   const [visible, setVisible] = useState(false);
   const [animateIn, setAnimateIn] = useState(false);
@@ -149,13 +149,19 @@ export function PaywallOverlay({ articleId }: PaywallOverlayProps) {
 
   if (shouldSkip || !config?.enabled || !visible) return null;
 
-  // Build counter message
+  // Build counter message for both visitors and free users (readers)
   let counterText = '';
-  if (config.show_article_counter && !isSignedIn) {
-    const read = getVisitorArticlesRead();
-    const limit = getVisitorLimit();
-    const remaining = Math.max(0, limit - read);
-    counterText = config.counter_message.replace('{remaining}', String(remaining));
+  if (config.show_article_counter) {
+    if (!isSignedIn) {
+      const read = getVisitorArticlesRead();
+      const limit = getVisitorLimit();
+      const remaining = Math.max(0, limit - read);
+      counterText = config.counter_message.replace('{remaining}', String(remaining));
+    } else if (userRole === 'reader') {
+      const limit = getReaderPremiumLimit();
+      const remaining = Math.max(0, limit - premiumArticlesUsed);
+      counterText = `Il vous reste ${remaining} article${remaining !== 1 ? 's' : ''} premium ce mois-ci.`;
+    }
   }
 
   return (
@@ -217,7 +223,7 @@ export function PaywallOverlay({ articleId }: PaywallOverlayProps) {
               </p>
             )}
 
-            {/* CTAs */}
+            {/* CTAs - adapt to user state */}
             <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
               <Link
                 href="/pricing"
@@ -225,17 +231,19 @@ export function PaywallOverlay({ articleId }: PaywallOverlayProps) {
                 className="flex items-center gap-2 px-8 py-3.5 rounded-lg font-semibold text-[14px] transition-opacity hover:opacity-90 w-full sm:w-auto justify-center"
                 style={{ backgroundColor: config.cta_bg_color, color: config.cta_text_color }}
               >
-                {config.cta_subscribe_text}
+                {isSignedIn ? 'Passer au Premium' : config.cta_subscribe_text}
                 <ArrowRight className="w-4 h-4" />
               </Link>
-              <Link
-                href="/connexion"
-                onClick={handleLoginClick}
-                className="text-[14px] opacity-70 hover:opacity-100 transition-opacity underline underline-offset-4"
-                style={{ color: config.text_color }}
-              >
-                {config.cta_login_text}
-              </Link>
+              {!isSignedIn && (
+                <Link
+                  href="/connexion"
+                  onClick={handleLoginClick}
+                  className="text-[14px] opacity-70 hover:opacity-100 transition-opacity underline underline-offset-4"
+                  style={{ color: config.text_color }}
+                >
+                  {config.cta_login_text}
+                </Link>
+              )}
             </div>
 
             {/* Dismiss */}

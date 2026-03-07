@@ -96,7 +96,7 @@ export default function ConnexionPage() {
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input id="reset-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-                    className="w-full border border-black/[0.08] rounded-lg pl-12 pr-4 py-3.5 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 transition-all text-[15px]"
+                    className="w-full border border-black/[0.08] rounded-lg pl-12 pr-4 py-3.5 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 transition-all text-base"
                     placeholder="votre@email.com" />
                 </div>
               </div>
@@ -139,7 +139,7 @@ export default function ConnexionPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full border border-black/[0.08] rounded-lg pl-12 pr-4 py-3.5 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 transition-all text-[15px]"
+                  className="w-full border border-black/[0.08] rounded-lg pl-12 pr-4 py-3.5 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 transition-all text-base"
                   placeholder="votre@email.com"
                 />
               </div>
@@ -160,7 +160,7 @@ export default function ConnexionPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full border border-black/[0.08] rounded-lg pl-12 pr-12 py-3.5 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 transition-all text-[15px]"
+                  className="w-full border border-black/[0.08] rounded-lg pl-12 pr-12 py-3.5 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 transition-all text-base"
                   placeholder="Votre mot de passe"
                 />
                 <button

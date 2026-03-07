@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Lock, Check, Star, ArrowRight, X } from 'lucide-react';
-import { PREMIUM_TIER, FREE_TIER_FEATURES } from '@/config/pricing';
+import { PREMIUM_TIER, BILLING_OPTIONS } from '@/config/pricing';
 
 type PaywallReason = 'login_required' | 'paywall_reader' | 'visitor_limit';
 
@@ -67,7 +67,14 @@ function InnerContent({ content, reason }: { content: PaywallContentData; reason
               <span className="text-[10px] tracking-[0.15em] uppercase text-white/40">PREMIUM</span>
             </div>
             <h3 className="text-lg font-bold mb-1">Premium</h3>
-            <p className="text-sm mb-3 text-white/60">{PREMIUM_TIER.price.toLocaleString('fr-FR')} FCFA/mois</p>
+            <div className="space-y-0.5 mb-3">
+              {BILLING_OPTIONS.map((opt) => (
+                <p key={opt.cycle} className="text-xs text-white/60">
+                  {opt.label}
+                  {opt.savings && <span className="ml-1.5 text-emerald-400 text-[10px]">({opt.savings})</span>}
+                </p>
+              ))}
+            </div>
             <ul className="space-y-1.5">
               {PREMIUM_TIER.features.slice(0, 4).map((f) => (
                 <li key={f} className="flex items-center gap-2 text-xs text-white/70">

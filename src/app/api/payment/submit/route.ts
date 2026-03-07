@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase';
-import { PREMIUM_TIER, PAYMENT_METHODS, type PaymentMethodId } from '@/config/pricing';
+import { PAYMENT_METHODS, isValidBillingCycle, getBillingOption, type PaymentMethodId } from '@/config/pricing';
 
 export async function POST(request: NextRequest) {
   const supabase = await createServerSupabaseClient();
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Validate billing cycle
-  if (billingCycle !== 'monthly') {
+  if (!isValidBillingCycle(billingCycle)) {
     return NextResponse.json({ error: 'Durée invalide' }, { status: 400 });
   }
 
@@ -42,14 +42,15 @@ export async function POST(request: NextRequest) {
   }
 
   // Get the correct amount: check dynamic pricing first, then fallback to config
-  let amount = PREMIUM_TIER.price;
+  const billingOption = getBillingOption(billingCycle);
+  let amount = billingOption.price;
   const serviceClient = createServiceClient();
   if (serviceClient) {
     const { data: dp } = await serviceClient
       .from('dynamic_pricing')
       .select('amount')
       .eq('tier', 'premium')
-      .eq('billing_cycle', 'monthly')
+      .eq('billing_cycle', billingCycle)
       .single();
     if (dp?.amount) amount = dp.amount;
   }
@@ -60,7 +61,7 @@ export async function POST(request: NextRequest) {
     .insert({
       user_id: user.id,
       tier: 'premium',
-      billing_cycle: 'monthly',
+      billing_cycle: billingCycle,
       amount,
       payment_method: paymentMethod,
       transaction_number: transactionNumber.trim(),

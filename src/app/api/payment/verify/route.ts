@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { logAuditEvent } from '@/lib/audit';
+import { getBillingOption, type BillingCycle } from '@/config/pricing';
 
 export async function POST(request: NextRequest) {
   const auth = await requireAdmin();
@@ -54,9 +55,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, status: 'rejected' });
   }
 
-  // action === 'verify' — always 1 month
+  // action === 'verify' — duration depends on billing cycle
+  const cycle = (paymentRequest.billing_cycle || 'monthly') as BillingCycle;
+  const billingOption = getBillingOption(cycle);
   const expiresAt = new Date();
-  expiresAt.setMonth(expiresAt.getMonth() + 1);
+  expiresAt.setMonth(expiresAt.getMonth() + billingOption.durationMonths);
 
   const now = new Date().toISOString();
 
@@ -89,7 +92,7 @@ export async function POST(request: NextRequest) {
         user_id: paymentRequest.user_id,
         tier: 'premium',
         status: 'active',
-        billing_cycle: 'monthly',
+        billing_cycle: cycle,
         current_period_start: now,
         current_period_end: expiresAt.toISOString(),
         price_amount: paymentRequest.amount,

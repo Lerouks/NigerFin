@@ -4,7 +4,14 @@ import { useState, useEffect } from 'react';
 import { Check, Star, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
-import { PREMIUM_TIER, FREE_TIER_FEATURES, formatPrice } from '@/config/pricing';
+import {
+  PREMIUM_TIER,
+  FREE_TIER_FEATURES,
+  BILLING_OPTIONS,
+  formatPrice,
+  getBillingCycleLabel,
+  type BillingCycle,
+} from '@/config/pricing';
 
 export function PricingContent() {
   const { isSignedIn, userRole, refreshProfile } = useAuth();
@@ -13,26 +20,26 @@ export function PricingContent() {
   const isSubscribed = userRole === 'premium' || userRole === 'admin';
 
   const [loadingPlan, setLoadingPlan] = useState(false);
-  const [dynamicPrice, setDynamicPrice] = useState<number | null>(null);
+  const [selectedCycle, setSelectedCycle] = useState<BillingCycle>('monthly');
+  const [dynamicPrices, setDynamicPrices] = useState<Record<string, number>>({});
 
   useEffect(() => {
     fetch('/api/prices')
       .then((r) => r.json())
-      .then((data) => {
-        if (data.premium_monthly) setDynamicPrice(data.premium_monthly);
-      })
+      .then((data) => setDynamicPrices(data))
       .catch(() => {});
   }, []);
 
-  const price = dynamicPrice ?? PREMIUM_TIER.price;
+  const selectedOption = BILLING_OPTIONS.find((b) => b.cycle === selectedCycle) || BILLING_OPTIONS[0];
+  const price = dynamicPrices[`premium_${selectedCycle}`] ?? selectedOption.price;
 
   const handleSubscribe = async () => {
     if (!isSignedIn) return;
     setLoadingPlan(true);
     try {
-      window.location.href = `/paiement?tier=premium`;
+      window.location.href = `/paiement?tier=premium&cycle=${selectedCycle}`;
     } catch {
-      window.location.href = `/paiement?tier=premium`;
+      window.location.href = `/paiement?tier=premium&cycle=${selectedCycle}`;
     } finally {
       setLoadingPlan(false);
     }
@@ -78,7 +85,7 @@ export function PricingContent() {
                 <div className="mb-2">
                   <span className="text-3xl font-bold">Gratuit</span>
                 </div>
-                <div className="mb-4" />
+                <p className="text-sm text-gray-500 mb-6">Accès de base pour suivre l&apos;actualité</p>
                 <ul className="space-y-3 mb-8">
                   {FREE_TIER_FEATURES.map((feature) => (
                     <li key={feature} className="flex items-start gap-3">
@@ -122,12 +129,35 @@ export function PricingContent() {
                   </span>
                 </div>
                 <h3 className="text-2xl font-bold mb-2 text-white">Premium</h3>
+
+                {/* Billing cycle selector */}
+                <div className="flex gap-1 mb-4 bg-white/5 rounded-lg p-1">
+                  {BILLING_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.cycle}
+                      onClick={() => setSelectedCycle(opt.cycle)}
+                      className={`flex-1 text-[12px] py-2 px-1 rounded-md transition-all text-center ${
+                        selectedCycle === opt.cycle
+                          ? 'bg-white text-black font-semibold'
+                          : 'text-white/50 hover:text-white/80'
+                      }`}
+                    >
+                      {getBillingCycleLabel(opt.cycle)}
+                    </button>
+                  ))}
+                </div>
+
                 <div className="mb-2">
                   <span className="text-3xl font-bold text-white">
                     {price.toLocaleString('fr-FR')}
                   </span>
-                  <span className="text-sm ml-1 text-white/50">FCFA/mois</span>
+                  <span className="text-sm ml-1 text-white/50">
+                    FCFA/{selectedOption.durationLabel}
+                  </span>
                 </div>
+                {selectedOption.savings && (
+                  <p className="text-emerald-400 text-[13px] mb-2">{selectedOption.savings}</p>
+                )}
                 <div className="mb-4" />
                 <ul className="space-y-3 mb-8">
                   {PREMIUM_TIER.features.map((feature) => (
@@ -169,6 +199,29 @@ export function PricingContent() {
               </div>
             </div>
           </div>
+
+          {/* All plans comparison */}
+          <div className="mt-12 bg-white rounded-xl border border-black/[0.06] overflow-hidden">
+            <div className="p-6 border-b border-black/[0.04]">
+              <h3 className="text-lg font-bold">Tous les tarifs Premium</h3>
+              <p className="text-sm text-gray-500 mt-1">Choisissez la durée qui vous convient</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-black/[0.04]">
+              {BILLING_OPTIONS.map((opt) => {
+                const dynPrice = dynamicPrices[`premium_${opt.cycle}`] ?? opt.price;
+                return (
+                  <div key={opt.cycle} className="p-6 text-center">
+                    <p className="text-sm font-medium text-gray-500 mb-2">{getBillingCycleLabel(opt.cycle)}</p>
+                    <p className="text-2xl font-bold">{formatPrice(dynPrice)}</p>
+                    <p className="text-sm text-gray-400 mt-1">{opt.durationLabel}</p>
+                    {opt.savings && (
+                      <p className="text-emerald-600 text-[13px] font-medium mt-2">{opt.savings}</p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -177,6 +230,10 @@ export function PricingContent() {
           <h2 className="text-2xl text-center mb-10">Questions fréquentes</h2>
           <div className="space-y-6">
             {[
+              {
+                q: 'Quelles sont les durées d\'abonnement disponibles ?',
+                a: 'Nous proposons trois formules : mensuel à 5 000 FCFA, trimestriel à 10 000 FCFA (3 mois) et annuel à 50 000 FCFA. Plus la durée est longue, plus vous économisez.',
+              },
               {
                 q: 'Puis-je changer de plan à tout moment ?',
                 a: 'Oui, vous pouvez passer au plan Premium à tout moment. Les changements prennent effet immédiatement.',

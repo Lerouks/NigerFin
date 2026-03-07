@@ -59,13 +59,16 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const slug = body.slug || slugify(body.title);
 
+  // Validate content_type — must be 'free' or 'premium'
+  const contentType = body.content_type === 'premium' ? 'premium' : 'free';
+
   const { data, error } = await auth.service.from('articles').insert({
     title: body.title,
     subtitle: body.subtitle || null,
     slug,
     excerpt: body.excerpt || null,
     category: body.category || 'economie',
-    content_type: body.content_type || 'free',
+    content_type: contentType,
     is_featured: body.is_featured || false,
     featured_order: body.featured_order || 0,
     author_name: body.author_name || 'NFI Report',
@@ -95,7 +98,7 @@ export async function PUT(req: NextRequest) {
 
   const updateData: Record<string, unknown> = {};
   const fields = [
-    'title', 'subtitle', 'slug', 'excerpt', 'category', 'content_type',
+    'title', 'subtitle', 'slug', 'excerpt', 'category',
     'is_featured', 'featured_order', 'author_name', 'author_avatar',
     'main_image_url', 'main_image_alt', 'body', 'read_time', 'tags',
     'seo_title', 'seo_description', 'status', 'published_at',
@@ -105,6 +108,11 @@ export async function PUT(req: NextRequest) {
     if (body[field] !== undefined) {
       updateData[field] = body[field];
     }
+  }
+
+  // Validate content_type separately — must be 'free' or 'premium'
+  if (body.content_type !== undefined) {
+    updateData.content_type = body.content_type === 'premium' ? 'premium' : 'free';
   }
 
   // Auto-set published_at when publishing for the first time

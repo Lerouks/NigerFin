@@ -44,8 +44,6 @@ export const BILLING_OPTIONS: BillingOption[] = [
   },
 ];
 
-export const DEFAULT_BILLING_CYCLE: BillingCycle = 'monthly';
-
 export const PREMIUM_MONTHLY_PRICE = 5_000;
 
 // ─── Premium tier ───────────────────────────────────────────────────────────

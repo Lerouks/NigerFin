@@ -31,7 +31,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { getRoleLabel } from '@/lib/user-profile';
-import { formatPrice, PREMIUM_TIER, getBillingCycleLabel } from '@/config/pricing';
+import { formatPrice, PREMIUM_TIER, CURRENCY, getBillingCycleLabel } from '@/config/pricing';
 import type { NewsletterPreferences } from '@/types';
 
 interface AccountSummary {
@@ -280,7 +280,7 @@ export function AccountDashboard() {
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold">{(sub.price_amount || 0).toLocaleString('fr-FR')}</p>
-                    <p className="text-white/40 text-sm">FCFA</p>
+                    <p className="text-white/40 text-sm">{CURRENCY}</p>
                   </div>
                 </div>
 
@@ -474,7 +474,7 @@ export function AccountDashboard() {
                   }
                 />
                 {sub?.price_amount != null && sub.price_amount > 0 && (
-                  <InfoRow label="Montant" value={`${sub.price_amount.toLocaleString('fr-FR')} FCFA`} />
+                  <InfoRow label="Montant" value={formatPrice(sub.price_amount)} />
                 )}
                 {sub?.current_period_start && (
                   <InfoRow label="Début de la période" value={
@@ -621,7 +621,7 @@ export function AccountDashboard() {
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-medium">{payment.amount.toLocaleString('fr-FR')} FCFA</p>
+                        <p className="text-sm font-medium">{formatPrice(payment.amount)}</p>
                         <span className={`text-[10px] px-2 py-0.5 rounded-full ${
                           payment.status === 'verified' ? 'bg-emerald-50 text-emerald-600' :
                           payment.status === 'pending' ? 'bg-amber-50 text-amber-600' :

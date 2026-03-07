@@ -16,7 +16,3 @@ export function formatDate(dateString: string): string {
 export function formatNumber(num: number): string {
   return num.toLocaleString('fr-FR');
 }
-
-export function formatCurrency(amount: number): string {
-  return `${amount.toLocaleString('fr-FR')} FCFA`;
-}

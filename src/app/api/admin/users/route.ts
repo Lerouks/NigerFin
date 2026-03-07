@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { logAuditEvent } from '@/lib/audit';
+import { getBillingOption, isValidBillingCycle } from '@/config/pricing';
 
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin();
@@ -77,8 +78,10 @@ export async function PUT(request: NextRequest) {
     }
 
     case 'activateSubscription': {
+      const cycle = isValidBillingCycle(body.billingCycle || '') ? body.billingCycle : 'monthly';
+      const billingOpt = getBillingOption(cycle);
       const expiresAt = new Date();
-      expiresAt.setMonth(expiresAt.getMonth() + 1);
+      expiresAt.setMonth(expiresAt.getMonth() + billingOpt.durationMonths);
 
       // Preserve admin role — only change role for non-admin users
       const { data: targetProfile } = await serviceClient
@@ -101,14 +104,14 @@ export async function PUT(request: NextRequest) {
             user_id: userId,
             tier: 'premium',
             status: 'active',
-            billing_cycle: 'monthly',
+            billing_cycle: cycle,
             current_period_start: now,
             current_period_end: expiresAt.toISOString(),
           },
           { onConflict: 'user_id' }
         );
 
-      await logAuditEvent(user.id, 'activate_subscription', 'user', userId, { tier: 'premium', expiresAt: expiresAt.toISOString() });
+      await logAuditEvent(user.id, 'activate_subscription', 'user', userId, { tier: 'premium', billingCycle: cycle, expiresAt: expiresAt.toISOString() });
       return NextResponse.json({ success: true });
     }
 

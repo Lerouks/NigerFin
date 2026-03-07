@@ -30,7 +30,7 @@ export async function PUT(request: NextRequest) {
   }
 
   const validTiers = ['premium'];
-  const validCycles = ['monthly'];
+  const validCycles = ['monthly', 'quarterly', 'yearly'];
   if (!validTiers.includes(tier) || !validCycles.includes(billingCycle)) {
     return NextResponse.json({ error: 'Tier ou cycle invalide' }, { status: 400 });
   }

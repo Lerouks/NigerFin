@@ -5,9 +5,50 @@
 
 export const CURRENCY = 'FCFA';
 
-// ─── Premium tier ────────────────────────────────────────────────────────────
+// ─── Billing cycles ─────────────────────────────────────────────────────────
 
-export const PREMIUM_MONTHLY_PRICE = 2_500;
+export type BillingCycle = 'monthly' | 'quarterly' | 'yearly';
+
+export interface BillingOption {
+  cycle: BillingCycle;
+  price: number;
+  label: string;
+  durationLabel: string;
+  durationMonths: number;
+  savings?: string;
+}
+
+export const BILLING_OPTIONS: BillingOption[] = [
+  {
+    cycle: 'monthly',
+    price: 5_000,
+    label: '5 000 FCFA/mois',
+    durationLabel: '1 mois',
+    durationMonths: 1,
+  },
+  {
+    cycle: 'quarterly',
+    price: 10_000,
+    label: '10 000 FCFA/3 mois',
+    durationLabel: '3 mois',
+    durationMonths: 3,
+    savings: 'Économisez 5 000 FCFA',
+  },
+  {
+    cycle: 'yearly',
+    price: 50_000,
+    label: '50 000 FCFA/an',
+    durationLabel: '1 an',
+    durationMonths: 12,
+    savings: 'Économisez 10 000 FCFA',
+  },
+];
+
+export const DEFAULT_BILLING_CYCLE: BillingCycle = 'monthly';
+
+export const PREMIUM_MONTHLY_PRICE = 5_000;
+
+// ─── Premium tier ───────────────────────────────────────────────────────────
 
 export interface PremiumTier {
   id: 'premium';
@@ -21,7 +62,7 @@ export const PREMIUM_TIER: PremiumTier = {
   id: 'premium',
   name: 'Premium',
   price: PREMIUM_MONTHLY_PRICE,
-  label: `${PREMIUM_MONTHLY_PRICE.toLocaleString('fr-FR')} ${CURRENCY}/mois`,
+  label: `À partir de ${PREMIUM_MONTHLY_PRICE.toLocaleString('fr-FR')} ${CURRENCY}/mois`,
   features: [
     'Accès illimité à tous les articles',
     'Analyses et rapports complets',
@@ -42,6 +83,23 @@ export const FREE_TIER_FEATURES = [
 
 export function formatPrice(amount: number): string {
   return `${amount.toLocaleString('fr-FR')} ${CURRENCY}`;
+}
+
+export function getBillingOption(cycle: BillingCycle): BillingOption {
+  return BILLING_OPTIONS.find((b) => b.cycle === cycle) || BILLING_OPTIONS[0];
+}
+
+export function isValidBillingCycle(cycle: string): cycle is BillingCycle {
+  return ['monthly', 'quarterly', 'yearly'].includes(cycle);
+}
+
+export function getBillingCycleLabel(cycle: string): string {
+  switch (cycle) {
+    case 'monthly': return 'Mensuel';
+    case 'quarterly': return 'Trimestriel';
+    case 'yearly': return 'Annuel';
+    default: return 'Mensuel';
+  }
 }
 
 // ─── Payment methods (Nita & Amana) ─────────────────────────────────────────

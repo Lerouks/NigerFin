@@ -31,7 +31,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { getRoleLabel } from '@/lib/user-profile';
-import { formatPrice, PREMIUM_TIER } from '@/config/pricing';
+import { formatPrice, PREMIUM_TIER, getBillingCycleLabel } from '@/config/pricing';
 import type { NewsletterPreferences } from '@/types';
 
 interface AccountSummary {
@@ -275,12 +275,12 @@ export function AccountDashboard() {
                       <span className="text-[11px] tracking-[0.15em] uppercase text-white/40">Abonnement actif</span>
                     </div>
                     <h2 className="text-2xl font-bold">
-                      Premium — Mensuel
+                      Premium — {getBillingCycleLabel(sub.billing_cycle || 'monthly')}
                     </h2>
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold">{(sub.price_amount || 0).toLocaleString('fr-FR')}</p>
-                    <p className="text-white/40 text-sm">FCFA/mois</p>
+                    <p className="text-white/40 text-sm">FCFA</p>
                   </div>
                 </div>
 
@@ -375,7 +375,7 @@ export function AccountDashboard() {
                     {summary.recentPayments.map((payment) => (
                       <li key={payment.id} className="flex items-center justify-between py-2 border-b border-black/[0.03] last:border-0">
                         <div>
-                          <p className="text-sm font-medium capitalize">{payment.tier} — Mensuel</p>
+                          <p className="text-sm font-medium capitalize">{payment.tier} — {getBillingCycleLabel(payment.billing_cycle || 'monthly')}</p>
                           <p className="text-[11px] text-gray-400">
                             {new Date(payment.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
                           </p>
@@ -615,7 +615,7 @@ export function AccountDashboard() {
                   {summary.recentPayments.map((payment) => (
                     <li key={payment.id} className="flex items-center justify-between py-3 px-4 border border-black/[0.03] rounded-lg">
                       <div>
-                        <p className="text-sm font-medium capitalize">{payment.tier} — Mensuel</p>
+                        <p className="text-sm font-medium capitalize">{payment.tier} — {getBillingCycleLabel(payment.billing_cycle || 'monthly')}</p>
                         <p className="text-[11px] text-gray-400">
                           {new Date(payment.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                         </p>

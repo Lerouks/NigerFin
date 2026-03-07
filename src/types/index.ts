@@ -78,6 +78,7 @@ export interface Subscription {
   user_id: string;
   tier: 'premium';
   status: string;
+  billing_cycle: 'monthly' | 'quarterly' | 'yearly';
   current_period_start: string | null;
   current_period_end: string | null;
   cancel_at_period_end: boolean;

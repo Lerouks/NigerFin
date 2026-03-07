@@ -8,7 +8,7 @@ import {
   Unlock, Settings, FileText, AlertTriangle, ChevronDown, ChevronUp, Newspaper, LineChart, Zap, BookOpen, SlidersHorizontal,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
-import { formatPrice, PREMIUM_TIER, CURRENCY } from '@/config/pricing';
+import { formatPrice, PREMIUM_TIER, CURRENCY, BILLING_OPTIONS, getBillingCycleLabel } from '@/config/pricing';
 import { ArticlesManager } from './ArticlesManager';
 import { CategoriesManager } from './CategoriesManager';
 import { MarketDataManager } from './MarketDataManager';
@@ -652,25 +652,24 @@ export function AdminDashboard() {
                 Plan Premium
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {(() => {
-                  const defaultAmount = PREMIUM_TIER.price;
+                {BILLING_OPTIONS.map((opt) => {
                   const dynamic = dynamicPrices.find(
-                    (dp) => dp.tier === 'premium' && dp.billing_cycle === 'monthly'
+                    (dp) => dp.tier === 'premium' && dp.billing_cycle === opt.cycle
                   );
-                  const currentAmount = dynamic?.amount ?? defaultAmount;
-                  const key = 'premium_monthly';
+                  const currentAmount = dynamic?.amount ?? opt.price;
+                  const key = `premium_${opt.cycle}`;
 
                   return (
                     <PriceEditor
                       key={key}
-                      label="Mensuel"
-                      defaultAmount={defaultAmount}
+                      label={getBillingCycleLabel(opt.cycle)}
+                      defaultAmount={opt.price}
                       currentAmount={currentAmount}
                       saving={savingPrice === key}
-                      onSave={(amount) => handlePriceUpdate('premium', 'monthly', amount)}
+                      onSave={(amount) => handlePriceUpdate('premium', opt.cycle, amount)}
                     />
                   );
-                })()}
+                })}
               </div>
             </div>
           </div>
@@ -747,6 +746,7 @@ function UserRow({ user, expanded, processing, onToggle, onAction }: {
   onAction: (action: string, extra?: Record<string, string>) => void;
 }) {
   const [subTier] = useState('premium');
+  const [subCycle, setSubCycle] = useState('monthly');
 
   return (
     <>
@@ -826,11 +826,19 @@ function UserRow({ user, expanded, processing, onToggle, onAction }: {
               {/* Activate subscription */}
               <div className="flex items-end gap-2 ml-4 border-l pl-4 border-gray-200">
                 <div>
-                  <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Plan</label>
-                  <span className="text-[12px] border border-gray-200 rounded px-2 py-1.5 bg-white inline-block">Premium</span>
+                  <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Durée</label>
+                  <select
+                    value={subCycle}
+                    onChange={(e) => setSubCycle(e.target.value)}
+                    className="text-[12px] border border-gray-200 rounded px-2 py-1.5 bg-white"
+                  >
+                    <option value="monthly">Mensuel</option>
+                    <option value="quarterly">Trimestriel</option>
+                    <option value="yearly">Annuel</option>
+                  </select>
                 </div>
                 <button
-                  onClick={() => onAction('activateSubscription', { tier: subTier, billingCycle: 'monthly' })}
+                  onClick={() => onAction('activateSubscription', { tier: subTier, billingCycle: subCycle })}
                   disabled={processing}
                   className="text-[12px] bg-[#111] text-white px-3 py-1.5 rounded hover:bg-[#333] transition-colors disabled:opacity-50"
                 >

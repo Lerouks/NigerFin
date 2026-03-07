@@ -1,5 +1,5 @@
 import type { UserRole } from '@/types';
-import { PREMIUM_TIER } from '@/config/pricing';
+import { PREMIUM_TIER, BILLING_OPTIONS, type BillingCycle } from '@/config/pricing';
 
 export interface SubscriptionPlan {
   id: 'lecteur' | 'premium';
@@ -66,6 +66,11 @@ export const subscriptionPlans: SubscriptionPlan[] = [
     },
   },
 ];
+
+export function getPriceForCycle(cycle: BillingCycle): number {
+  const option = BILLING_OPTIONS.find((b) => b.cycle === cycle);
+  return option?.price ?? BILLING_OPTIONS[0].price;
+}
 
 export function canAccessPremiumContent(
   role: UserRole | null,

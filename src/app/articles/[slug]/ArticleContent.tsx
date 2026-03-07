@@ -8,6 +8,7 @@ import { useAuth } from '@/lib/auth-context';
 import { CommentsSection } from '@/components/CommentsSection';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
 import { Paywall } from '@/components/Paywall';
+import { PaywallOverlay } from '@/components/PaywallOverlay';
 import { ArticleCard } from '@/components/ArticleCard';
 import { ArticleLikes } from '@/components/ArticleLikes';
 import type { Article, MarketData } from '@/types';
@@ -245,6 +246,9 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
           </aside>
         </div>
       </div>
+
+      {/* Soft paywall overlay for non-subscribers (nudge, not block) */}
+      <PaywallOverlay articleId={article._id} contentType={contentType} />
     </div>
   );
 }

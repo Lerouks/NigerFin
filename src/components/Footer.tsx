@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Facebook, Twitter, Linkedin, Instagram, Mail, Youtube, Phone, MapPin } from 'lucide-react';
 
 interface SocialLinks {
@@ -49,7 +50,15 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
           <div>
-            <h3 className="text-[20px] mb-1 font-semibold uppercase tracking-wide">NFI REPORT</h3>
+            <div className="flex items-center gap-2 mb-1">
+              <Image
+                src="/logo-about.png"
+                alt=""
+                width={28}
+                height={20}
+              />
+              <h3 className="text-[20px] font-semibold uppercase tracking-wide">NFI REPORT</h3>
+            </div>
             <p className="text-white/50 text-[13px] mb-4">Niger Financial Insights</p>
             <p className="text-white/40 text-[13px] leading-relaxed">
               Votre source d&apos;informations économiques et financières pour le Niger et

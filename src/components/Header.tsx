@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Menu, Search, User, X, ChevronRight, LogOut } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
@@ -84,7 +85,15 @@ export function Header() {
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
-            <Link href="/" className="flex items-center">
+            <Link href="/" className="flex items-center gap-2">
+              <Image
+                src="/logo-about.png"
+                alt=""
+                width={28}
+                height={20}
+                className="dark:invert-0"
+                style={{ filter: 'brightness(0)' }}
+              />
               <h1 className="text-[22px] md:text-[26px] tracking-[-0.03em] font-bold">
                 NFI REPORT
               </h1>

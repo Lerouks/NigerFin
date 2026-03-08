@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase';
+import { serverError } from '@/lib/api-error';
 
 const VALID_EVENTS = [
   'view',
@@ -55,11 +56,11 @@ export async function POST(request: NextRequest) {
           session_id: session_id || null,
         });
       if (fallbackError) {
-        return NextResponse.json({ error: fallbackError.message }, { status: 500 });
+        return serverError(fallbackError, 'paywall-analytics');
       }
       return NextResponse.json({ success: true });
     }
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return serverError(error, 'paywall-analytics');
   }
 
   return NextResponse.json({ success: true });

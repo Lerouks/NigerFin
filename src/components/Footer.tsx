@@ -188,6 +188,9 @@ export function Footer() {
               <Link href="/cgu" className="hover:text-white/50 transition-colors">
                 CGU
               </Link>
+              <Link href="/plan-du-site" className="hover:text-white/50 transition-colors">
+                Plan du site
+              </Link>
             </div>
           </div>
         </div>

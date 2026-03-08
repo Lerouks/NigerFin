@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { LegalPageLayout } from '@/components/LegalPageLayout';
 
+export const revalidate = 86400;
+
 export const metadata: Metadata = { title: 'Politique de Confidentialité', description: 'Politique de confidentialité de NFI Report : collecte, utilisation et protection de vos données personnelles.' };
 
 export default function ConfidentialitePage() {

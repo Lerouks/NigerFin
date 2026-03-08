@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { EducationGrid } from './EducationGrid';
 
+export const revalidate = 3600;
+
 export const metadata: Metadata = { title: 'Éducation', description: 'Apprenez la finance, l\'économie et les marchés à votre rythme grâce à nos cours et ressources pédagogiques gratuits.' };
 
 export default function EducationPage() {

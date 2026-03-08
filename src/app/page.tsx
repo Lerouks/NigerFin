@@ -1,9 +1,15 @@
+import type { Metadata } from 'next';
 import { ArticleCard } from '@/components/ArticleCard';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
 import { NewsletterForm } from '@/components/NewsletterForm';
 import { PracticalTools } from '@/components/PracticalTools';
 import { getAllArticles, getFeaturedArticles } from '@/lib/articles';
 import { marketData } from '@/data/mock-data';
+
+export const metadata: Metadata = {
+  title: 'NFI Report - Actualités économiques et financières du Niger',
+  description: "Votre source d'informations économiques et financières pour le Niger et l'Afrique de l'Ouest. Articles, analyses, outils financiers et données de marché.",
+};
 
 export const revalidate = 60;
 
@@ -17,6 +23,7 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#fafaf9]">
+      <h1 className="sr-only">NFI Report — Actualités économiques et financières du Niger</h1>
       {/* Featured Article */}
       {featuredArticle && (
         <section>

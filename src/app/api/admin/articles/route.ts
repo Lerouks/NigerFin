@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase';
 import { createServiceClient } from '@/lib/supabase';
+import { serverError } from '@/lib/api-error';
 
 async function requireAdmin(req: NextRequest) {
   const supabase = await createServerSupabaseClient();
@@ -37,7 +38,7 @@ export async function GET(req: NextRequest) {
       .select('*')
       .eq('id', id)
       .single();
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return serverError(error, 'admin-articles');
     return NextResponse.json(data);
   }
 
@@ -47,7 +48,7 @@ export async function GET(req: NextRequest) {
     .select('*')
     .order('created_at', { ascending: false });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return serverError(error, 'admin-articles');
   return NextResponse.json(data);
 }
 
@@ -86,7 +87,7 @@ export async function POST(req: NextRequest) {
     published_at: body.status === 'published' ? (body.published_at || new Date().toISOString()) : body.published_at || null,
   }).select().single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return serverError(error, 'admin-articles');
   return NextResponse.json(data);
 }
 
@@ -134,7 +135,7 @@ export async function PUT(req: NextRequest) {
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return serverError(error, 'admin-articles');
   return NextResponse.json(data);
 }
 
@@ -148,6 +149,6 @@ export async function DELETE(req: NextRequest) {
   if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
 
   const { error } = await auth.service.from('articles').delete().eq('id', id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return serverError(error, 'admin-articles');
   return NextResponse.json({ success: true });
 }

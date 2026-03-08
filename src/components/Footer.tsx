@@ -53,7 +53,7 @@ export function Footer() {
             <div className="flex items-center gap-2.5 mb-1">
               <Image
                 src="/logo-about.png"
-                alt=""
+                alt="NFI Report"
                 width={24}
                 height={17}
                 className="shrink-0"

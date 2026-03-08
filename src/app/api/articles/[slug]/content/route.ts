@@ -49,8 +49,32 @@ export async function GET(
     return NextResponse.json({ error: 'Profile not found' }, { status: 403 });
   }
 
-  if (profile.role === 'admin' || profile.role === 'premium') {
+  // Admins always have access
+  if (profile.role === 'admin') {
     return NextResponse.json({ body: bodyToHtml(article.body || '') });
+  }
+
+  // Premium users: verify subscription is still active
+  if (profile.role === 'premium') {
+    const { data: subscription } = await service
+      .from('subscriptions')
+      .select('current_period_end, status')
+      .eq('user_id', user.id)
+      .in('status', ['active', 'trialing'])
+      .order('current_period_end', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (subscription && new Date(subscription.current_period_end) > new Date()) {
+      return NextResponse.json({ body: bodyToHtml(article.body || '') });
+    }
+
+    // Subscription expired — downgrade role to reader
+    await service
+      .from('user_profiles')
+      .update({ role: 'reader' })
+      .eq('id', user.id);
+    // Fall through to monthly free article limit check
   }
 
   // Get configurable limit from paywall_config

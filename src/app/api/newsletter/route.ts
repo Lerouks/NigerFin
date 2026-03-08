@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { subscribeToMailchimpNewsletter } from '@/lib/email';
-import { sendTransactionalEmail } from '@/lib/email';
+import { subscribeToMailchimpNewsletter, sendTransactionalEmail } from '@/lib/email';
+import { newsletterWelcomeEmail } from '@/lib/email-templates';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,16 +13,12 @@ export async function POST(request: NextRequest) {
     // Subscribe to Mailchimp newsletter
     await subscribeToMailchimpNewsletter(email);
 
-    // Send welcome email via Resend
+    // Send branded welcome email
+    const welcome = newsletterWelcomeEmail();
     await sendTransactionalEmail({
       to: email,
-      subject: 'Bienvenue sur NFI Report !',
-      html: `
-        <h1>Bienvenue sur NFI Report</h1>
-        <p>Merci de vous être inscrit à notre newsletter.</p>
-        <p>Vous recevrez régulièrement nos analyses économiques et financières du Niger et de l'Afrique de l'Ouest.</p>
-        <p>À bientôt,<br/>L'équipe NFI Report</p>
-      `,
+      subject: welcome.subject,
+      html: welcome.html,
     });
 
     return NextResponse.json({ success: true });

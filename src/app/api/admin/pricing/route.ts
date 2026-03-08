@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { logAuditEvent } from '@/lib/audit';
 import { BILLING_OPTIONS } from '@/config/pricing';
+import { serverError } from '@/lib/api-error';
 
 // Build minimum price map from config
 const CONFIG_MINIMUMS: Record<string, number> = {};
@@ -64,7 +65,7 @@ export async function PUT(request: NextRequest) {
     );
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return serverError(error, 'admin-pricing');
   }
 
   await logAuditEvent(user.id, 'update_price', 'pricing', `${tier}_${billingCycle}`, {

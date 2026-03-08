@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import { LegalPageLayout } from '@/components/LegalPageLayout';
 
-export const metadata: Metadata = { title: 'Publicité & Partenariats' };
+export const revalidate = 86400;
+
+export const metadata: Metadata = { title: 'Publicité & Partenariats', description: 'Découvrez nos offres publicitaires et partenariats pour toucher une audience de professionnels et investisseurs au Niger.' };
 
 export default function PublicitePage() {
   return (

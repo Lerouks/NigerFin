@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ToolContent } from './ToolContent';
 
+export const revalidate = 86400;
+
 const toolsMeta: Record<string, { title: string; description: string; premium: boolean }> = {
   'simulateur-emprunt': {
     title: "Simulateur d'Emprunt",

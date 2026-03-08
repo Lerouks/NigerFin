@@ -1,13 +1,17 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { ArrowLeft, Calculator, Percent, DollarSign, BarChart3, TrendingUp, Lock } from 'lucide-react';
+import { ArrowLeft, Calculator, Percent, DollarSign, BarChart3, TrendingUp, Lock, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
-import { SimulateurEmprunt } from '@/components/tools/SimulateurEmprunt';
-import { InteretSimple } from '@/components/tools/InteretSimple';
-import { SimulateurSalaire } from '@/components/tools/SimulateurSalaire';
-import { IndicesEconomiques } from '@/components/tools/IndicesEconomiques';
-import { InteretCompose } from '@/components/tools/InteretCompose';
+
+const Spinner = () => <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>;
+
+const SimulateurEmprunt = dynamic(() => import('@/components/tools/SimulateurEmprunt').then(m => ({ default: m.SimulateurEmprunt })), { loading: Spinner });
+const InteretSimple = dynamic(() => import('@/components/tools/InteretSimple').then(m => ({ default: m.InteretSimple })), { loading: Spinner });
+const SimulateurSalaire = dynamic(() => import('@/components/tools/SimulateurSalaire').then(m => ({ default: m.SimulateurSalaire })), { loading: Spinner });
+const IndicesEconomiques = dynamic(() => import('@/components/tools/IndicesEconomiques').then(m => ({ default: m.IndicesEconomiques })), { loading: Spinner });
+const InteretCompose = dynamic(() => import('@/components/tools/InteretCompose').then(m => ({ default: m.InteretCompose })), { loading: Spinner });
 
 interface ToolContentProps {
   slug: string;

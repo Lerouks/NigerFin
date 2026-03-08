@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
+import { serverError } from '@/lib/api-error';
 
 export async function GET() {
   const auth = await requireAdmin();
@@ -35,7 +36,7 @@ export async function PUT(req: NextRequest) {
       })
       .eq('id', 1);
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return serverError(error, 'admin-niger-presentation');
   }
 
   // Update facts

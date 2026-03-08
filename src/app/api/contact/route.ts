@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendTransactionalEmail } from '@/lib/email';
+import { contactConfirmationEmail, contactNotificationEmail } from '@/lib/email-templates';
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,29 +18,19 @@ export async function POST(request: NextRequest) {
     const safeMessage = esc(String(message)).replace(/\n/g, '<br/>');
 
     // Send notification to the team
+    const notification = contactNotificationEmail(safeName, safeEmail, safeSubject, safeMessage);
     await sendTransactionalEmail({
       to: 'contact@nfireport.com',
-      subject: `[Contact] ${safeSubject} - ${safeName}`,
-      html: `
-        <h2>Nouveau message de contact</h2>
-        <p><strong>Nom :</strong> ${safeName}</p>
-        <p><strong>Email :</strong> ${safeEmail}</p>
-        <p><strong>Sujet :</strong> ${safeSubject}</p>
-        <p><strong>Message :</strong></p>
-        <p>${safeMessage}</p>
-      `,
+      subject: notification.subject,
+      html: notification.html,
     });
 
     // Send confirmation to the user
+    const confirmation = contactConfirmationEmail(safeName);
     await sendTransactionalEmail({
       to: email,
-      subject: 'Nous avons bien reçu votre message - NFI Report',
-      html: `
-        <h2>Merci pour votre message</h2>
-        <p>Bonjour ${safeName},</p>
-        <p>Nous avons bien reçu votre message et notre équipe vous répondra dans les plus brefs délais.</p>
-        <p>Cordialement,<br/>L'équipe NFI Report</p>
-      `,
+      subject: confirmation.subject,
+      html: confirmation.html,
     });
 
     return NextResponse.json({ success: true });

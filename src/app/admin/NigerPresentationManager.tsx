@@ -149,7 +149,7 @@ export function NigerPresentationManager() {
             </div>
             {presentation.map_image_url && (
               <div className="w-24 h-20 rounded-lg overflow-hidden bg-gray-100 border border-black/[0.06] flex-shrink-0">
-                <img src={presentation.map_image_url} alt="" className="w-full h-full object-contain" />
+                <img src={presentation.map_image_url} alt="Carte du Niger" className="w-full h-full object-contain" />
               </div>
             )}
           </div>

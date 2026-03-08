@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { createServerSupabaseClient } from '@/lib/supabase';
+import { serverError } from '@/lib/api-error';
 
 // GET: list lessons for a category
 export async function GET(request: NextRequest) {
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
   const { data, error } = await query;
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return serverError(error, 'admin-education-lessons');
   }
 
   return NextResponse.json(data);
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return serverError(error, 'admin-education-lessons');
   }
 
   return NextResponse.json(data);
@@ -94,7 +95,7 @@ export async function PUT(request: NextRequest) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return serverError(error, 'admin-education-lessons');
   }
 
   return NextResponse.json(data);
@@ -119,7 +120,7 @@ export async function DELETE(request: NextRequest) {
     .eq('id', id);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return serverError(error, 'admin-education-lessons');
   }
 
   return NextResponse.json({ success: true });

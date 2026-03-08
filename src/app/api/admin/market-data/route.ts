@@ -1,22 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
-import { createServerSupabaseClient } from '@/lib/supabase';
+import { serverError } from '@/lib/api-error';
 
-// GET: list all market data (public read via server client)
+// GET: list all market data (admin only)
 export async function GET() {
-  const supabase = await createServerSupabaseClient();
-  if (!supabase) {
-    return NextResponse.json({ error: 'Service indisponible' }, { status: 503 });
-  }
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
 
-  const { data, error } = await supabase
+  const { data, error } = await auth.serviceClient
     .from('market_data')
     .select('*')
     .order('type')
     .order('name');
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return serverError(error, 'admin-market-data');
   }
 
   return NextResponse.json(data);
@@ -57,7 +55,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return serverError(error, 'admin-market-data');
   }
 
   return NextResponse.json(data);
@@ -106,7 +104,7 @@ export async function PUT(request: NextRequest) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return serverError(error, 'admin-market-data');
   }
 
   return NextResponse.json(data);
@@ -131,7 +129,7 @@ export async function DELETE(request: NextRequest) {
     .eq('id', id);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return serverError(error, 'admin-market-data');
   }
 
   return NextResponse.json({ success: true });

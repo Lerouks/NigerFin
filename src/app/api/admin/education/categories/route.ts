@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { createServerSupabaseClient } from '@/lib/supabase';
+import { serverError } from '@/lib/api-error';
 
 // GET: list all categories with lesson counts
 export async function GET() {
@@ -15,7 +16,7 @@ export async function GET() {
     .order('sort_order');
 
   if (catError) {
-    return NextResponse.json({ error: catError.message }, { status: 500 });
+    return serverError(catError, 'admin-education-categories');
   }
 
   const result = (categories || []).map((cat: any) => ({
@@ -53,7 +54,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return serverError(error, 'admin-education-categories');
   }
 
   return NextResponse.json(data);
@@ -82,7 +83,7 @@ export async function PUT(request: NextRequest) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return serverError(error, 'admin-education-categories');
   }
 
   return NextResponse.json(data);
@@ -107,7 +108,7 @@ export async function DELETE(request: NextRequest) {
     .eq('id', id);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return serverError(error, 'admin-education-categories');
   }
 
   return NextResponse.json({ success: true });

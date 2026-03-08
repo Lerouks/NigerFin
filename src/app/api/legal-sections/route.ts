@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
+import { serverError } from '@/lib/api-error';
 
 export async function GET(req: NextRequest) {
   const slug = req.nextUrl.searchParams.get('page');
@@ -14,7 +15,7 @@ export async function GET(req: NextRequest) {
     .eq('page_slug', slug)
     .order('display_order', { ascending: true });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return serverError(error, 'legal-sections');
 
   return NextResponse.json(data || []);
 }

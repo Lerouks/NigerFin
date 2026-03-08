@@ -9,6 +9,11 @@ export const revalidate = 60;
 export const metadata: Metadata = {
   title: 'Niger : économie, entreprises et analyses',
   description: 'Analyses économiques, entreprises, marchés et actualités du Niger.',
+  openGraph: {
+    title: 'Niger : économie, entreprises et analyses',
+    description: 'Analyses économiques, entreprises, marchés et actualités du Niger.',
+    type: 'website',
+  },
 };
 
 export default async function NigerPage() {

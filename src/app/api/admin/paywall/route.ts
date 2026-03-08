@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
+import { serverError } from '@/lib/api-error';
 
 // GET: fetch paywall config (admin)
 export async function GET() {
@@ -14,7 +15,7 @@ export async function GET() {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return serverError(error, 'admin-paywall');
   }
 
   return NextResponse.json(data);
@@ -38,7 +39,7 @@ export async function PUT(request: NextRequest) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return serverError(error, 'admin-paywall');
   }
 
   return NextResponse.json(data);

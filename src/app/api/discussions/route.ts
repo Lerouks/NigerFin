@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase';
+import { serverError } from '@/lib/api-error';
 
 export async function GET(request: NextRequest) {
   const category = request.nextUrl.searchParams.get('category');
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest) {
   const { data, error } = await query;
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return serverError(error, 'discussions');
   }
 
   return NextResponse.json(data || []);
@@ -60,7 +61,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return serverError(error, 'discussions');
   }
 
   return NextResponse.json(data, { status: 201 });

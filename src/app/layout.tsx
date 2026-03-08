@@ -49,6 +49,7 @@ const playfair = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://nfireport.com'),
   title: {
     default: 'NFI Report - Actualités économiques et financières du Niger',
     template: '%s | NFI Report',

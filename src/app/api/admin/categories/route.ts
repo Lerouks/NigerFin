@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
-import { createServiceClient } from '@/lib/supabase';
+import { serverError } from '@/lib/api-error';
 
 export async function GET() {
-  const service = createServiceClient();
-  if (!service) return NextResponse.json({ error: 'Service indisponible' }, { status: 503 });
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
 
-  const { data, error } = await service
+  const { data, error } = await auth.serviceClient
     .from('categories')
     .select('*')
     .order('name');
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return serverError(error, 'admin-categories');
   return NextResponse.json(data);
 }
 
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return serverError(error, 'admin-categories');
   return NextResponse.json(data);
 }
 
@@ -46,7 +46,7 @@ export async function PUT(request: NextRequest) {
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return serverError(error, 'admin-categories');
   return NextResponse.json(data);
 }
 
@@ -59,6 +59,6 @@ export async function DELETE(request: NextRequest) {
 
   const { error } = await auth.serviceClient.from('categories').delete().eq('id', id);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return serverError(error, 'admin-categories');
   return NextResponse.json({ success: true });
 }

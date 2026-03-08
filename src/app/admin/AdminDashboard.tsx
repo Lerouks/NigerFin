@@ -16,6 +16,7 @@ import { FlashBannerManager } from './FlashBannerManager';
 import { EducationManager } from './EducationManager';
 import { PaywallManager } from './PaywallManager';
 import { NigerPresentationManager } from './NigerPresentationManager';
+import { LegalSectionsManager } from './LegalSectionsManager';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -85,7 +86,7 @@ interface DynamicPrice {
   updated_at: string;
 }
 
-type TabId = 'overview' | 'articles' | 'categories' | 'market' | 'flash' | 'education' | 'niger' | 'paywall' | 'users' | 'payments' | 'pricing' | 'audit';
+type TabId = 'overview' | 'articles' | 'categories' | 'market' | 'flash' | 'education' | 'niger' | 'legal' | 'paywall' | 'users' | 'payments' | 'pricing' | 'audit';
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -279,6 +280,7 @@ export function AdminDashboard() {
     { id: 'flash', label: 'Flash Info', icon: Zap },
     { id: 'education', label: 'Éducation', icon: BookOpen },
     { id: 'niger', label: 'Niger', icon: Activity },
+    { id: 'legal', label: 'Mentions légales', icon: FileText },
     { id: 'paywall', label: 'Paywall', icon: SlidersHorizontal },
     { id: 'users', label: 'Utilisateurs', icon: Users },
     { id: 'payments', label: 'Paiements', icon: CreditCard, badge: stats.pendingPayments },
@@ -461,6 +463,9 @@ export function AdminDashboard() {
 
         {/* ─── NIGER TAB ──────────────────────────────────────────── */}
         {activeTab === 'niger' && <NigerPresentationManager />}
+
+        {/* ─── LEGAL TAB ──────────────────────────────────────────── */}
+        {activeTab === 'legal' && <LegalSectionsManager />}
 
         {/* ─── PAYWALL TAB ────────────────────────────────────────── */}
         {activeTab === 'paywall' && <PaywallManager />}

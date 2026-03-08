@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase';
+import { serverError } from '@/lib/api-error';
 
 // GET: public endpoint to fetch paywall config
 export async function GET() {
@@ -15,7 +16,7 @@ export async function GET() {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return serverError(error, 'paywall');
   }
 
   return NextResponse.json(data);

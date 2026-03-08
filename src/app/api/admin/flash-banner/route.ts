@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { createServerSupabaseClient } from '@/lib/supabase';
+import { serverError } from '@/lib/api-error';
 
 // GET: public read of flash banner config
 export async function GET() {
@@ -56,7 +57,7 @@ export async function PUT(request: NextRequest) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return serverError(error, 'admin-flash-banner');
   }
 
   return NextResponse.json(data);

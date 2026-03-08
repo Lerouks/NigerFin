@@ -14,7 +14,7 @@ export default function AboutPage() {
       <section className="bg-[#111] text-white py-20 md:py-28">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <Image
-            src="/logo-white.svg"
+            src="/logo-white.png"
             alt="NFI Report"
             width={160}
             height={48}

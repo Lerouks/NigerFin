@@ -6,7 +6,6 @@ import { MapPin, Users, Ruler, Coins, Gem, Factory, Globe, Calendar, TrendingUp,
 import { NigerRegions } from './niger/NigerRegions';
 import { NigerResources } from './niger/NigerResources';
 import { NigerIndicators } from './niger/NigerIndicators';
-import { NigerPartners } from './niger/NigerPartners';
 
 interface Presentation {
   map_image_url: string;
@@ -40,10 +39,10 @@ const FACT_ICONS: Record<string, typeof MapPin> = {
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
-  general: 'Informations generales',
-  economie: 'Economie',
-  demographie: 'Demographie',
-  geographie: 'Geographie',
+  general: 'Informations générales',
+  economie: 'Économie',
+  demographie: 'Démographie',
+  geographie: 'Géographie',
 };
 
 export function NigerPresentation() {
@@ -55,8 +54,6 @@ export function NigerPresentation() {
   const [resources, setResources] = useState<any[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [indicators, setIndicators] = useState<any[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [partners, setPartners] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -68,7 +65,6 @@ export function NigerPresentation() {
         setRegions(data.regions || []);
         setResources(data.resources || []);
         setIndicators(data.indicators || []);
-        setPartners(data.partners || []);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -104,8 +100,17 @@ export function NigerPresentation() {
           <h2 className="text-2xl md:text-3xl leading-tight">{presentation.intro_title}</h2>
         </div>
 
-        {/* Full-width map */}
-        <div className="mb-12">
+        {/* Texte d'introduction */}
+        {presentation.intro_text && (
+          <div className="mb-12 max-w-3xl">
+            <p className="text-[15px] md:text-base leading-relaxed text-gray-600 whitespace-pre-line">
+              {presentation.intro_text}
+            </p>
+          </div>
+        )}
+
+        {/* Carte pleine largeur */}
+        <div className="mb-14">
           {presentation.map_image_url ? (
             <div className="rounded-xl overflow-hidden bg-[#f5f5f0] border border-black/[0.06]">
               <Image
@@ -127,62 +132,49 @@ export function NigerPresentation() {
             </div>
           )}
           <p className="text-[11px] text-gray-400 mt-3 text-center">
-            Carte administrative du Niger &mdash; Source : Ministere des Affaires etrangeres / NFI Report
+            Carte administrative du Niger &mdash; Source : Ministère des Affaires étrangères / NFI Report
           </p>
         </div>
 
-        {/* Info + Facts — full width below the map */}
-        <div>
-          {presentation.intro_text && (
-            <div className="mb-10 max-w-3xl">
-              <p className="text-[15px] md:text-base leading-relaxed text-gray-600 whitespace-pre-line">
-                {presentation.intro_text}
-              </p>
-            </div>
-          )}
-
-          <div className="space-y-8">
-            {sortedCategories.map((cat) => (
-              <div key={cat}>
-                <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4 pb-2 border-b border-black/[0.06]">
-                  {CATEGORY_LABELS[cat] || cat}
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {grouped[cat].map((fact) => {
-                    const Icon = FACT_ICONS[fact.fact_key] || Factory;
-                    return (
-                      <div
-                        key={fact.id}
-                        className="flex items-start gap-3 p-4 rounded-lg bg-[#fafaf9] border border-black/[0.04] hover:border-black/[0.08] transition-colors"
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-white border border-black/[0.06] flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <Icon className="w-3.5 h-3.5 text-gray-500" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-0.5">{fact.label}</p>
-                          <p className="text-[14px] font-medium text-gray-900 leading-snug">{fact.value}</p>
-                        </div>
+        {/* Données clés */}
+        <div className="space-y-10">
+          {sortedCategories.map((cat) => (
+            <div key={cat}>
+              <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4 pb-2 border-b border-black/[0.06]">
+                {CATEGORY_LABELS[cat] || cat}
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {grouped[cat].map((fact) => {
+                  const Icon = FACT_ICONS[fact.fact_key] || Factory;
+                  return (
+                    <div
+                      key={fact.id}
+                      className="group flex items-start gap-3.5 p-5 rounded-xl bg-white border border-black/[0.06] hover:border-black/[0.1] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+                    >
+                      <div className="w-9 h-9 rounded-lg bg-[#fafaf9] border border-black/[0.06] flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:bg-[#111] group-hover:border-[#111] transition-colors duration-200">
+                        <Icon className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors duration-200" />
                       </div>
-                    );
-                  })}
-                </div>
+                      <div className="min-w-0">
+                        <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1">{fact.label}</p>
+                        <p className="text-[14px] font-semibold text-gray-900 leading-snug">{fact.value}</p>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Economic Indicators */}
+      {/* Indicateurs économiques */}
       <NigerIndicators indicators={indicators} />
 
-      {/* Regions */}
+      {/* Régions */}
       <NigerRegions regions={regions} />
 
-      {/* Resources */}
+      {/* Ressources */}
       <NigerResources resources={resources} />
-
-      {/* Partners */}
-      <NigerPartners partners={partners} />
     </div>
   );
 }

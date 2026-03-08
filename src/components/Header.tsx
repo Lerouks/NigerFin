@@ -86,7 +86,7 @@ export function Header() {
 
             <Link href="/" className="flex items-center">
               <h1 className="text-[22px] md:text-[26px] tracking-[-0.03em] font-bold">
-                NFI Report
+                NFI REPORT
               </h1>
             </Link>
 

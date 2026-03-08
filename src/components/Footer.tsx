@@ -50,12 +50,14 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
           <div>
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2.5 mb-1">
               <Image
                 src="/logo-about.png"
                 alt=""
-                width={28}
-                height={20}
+                width={24}
+                height={17}
+                className="shrink-0"
+                unoptimized
               />
               <h3 className="text-[20px] font-semibold uppercase tracking-wide">NFI REPORT</h3>
             </div>

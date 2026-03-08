@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 40" width="200" height="40">
+  <!-- Visa -->
+  <g transform="translate(10,5)">
+    <rect width="50" height="30" rx="3" fill="#fff" stroke="#e0e0e0" stroke-width="0.5"/>
+    <text x="25" y="20" text-anchor="middle" font-family="Arial, sans-serif" font-weight="bold" font-size="14" fill="#1a1f71">VISA</text>
+  </g>
+  <!-- Mastercard -->
+  <g transform="translate(75,5)">
+    <rect width="50" height="30" rx="3" fill="#fff" stroke="#e0e0e0" stroke-width="0.5"/>
+    <circle cx="20" cy="15" r="9" fill="#eb001b" opacity="0.9"/>
+    <circle cx="30" cy="15" r="9" fill="#f79e1b" opacity="0.9"/>
+    <circle cx="25" cy="15" r="5" fill="#ff5f00" opacity="0.7"/>
+  </g>
+  <!-- Amex -->
+  <g transform="translate(140,5)">
+    <rect width="50" height="30" rx="3" fill="#2e77bc"/>
+    <text x="25" y="14" text-anchor="middle" font-family="Arial, sans-serif" font-weight="bold" font-size="5.5" fill="#fff">AMERICAN</text>
+    <text x="25" y="22" text-anchor="middle" font-family="Arial, sans-serif" font-weight="bold" font-size="5.5" fill="#fff">EXPRESS</text>
+  </g>
+</svg>

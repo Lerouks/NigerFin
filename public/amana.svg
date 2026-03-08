@@ -1,13 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 350" fill="none">
   <!-- AMANA Transfert d'Argent Logo -->
-  <!-- Ellipse with arrows -->
-  <ellipse cx="200" cy="130" rx="140" ry="70" stroke="#1a8a3a" stroke-width="8" fill="none"/>
-  <!-- Top-right arrow -->
-  <polygon points="330,95 345,80 325,85" fill="#1a8a3a"/>
-  <!-- Bottom-left arrow -->
-  <polygon points="70,165 55,180 75,175" fill="#1a8a3a"/>
+  <!-- Main ellipse -->
+  <ellipse cx="250" cy="140" rx="170" ry="85" stroke="#1a8a3a" stroke-width="10" fill="none"/>
+  <!-- Top-right arrow (going right) -->
+  <path d="M380,80 C400,60 410,55 420,55" stroke="#1a8a3a" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <polygon points="418,42 430,55 415,62" fill="#1a8a3a"/>
+  <!-- Bottom-left arrow (going left) -->
+  <path d="M120,200 C100,220 90,225 80,225" stroke="#1a8a3a" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <polygon points="82,238 70,225 85,218" fill="#1a8a3a"/>
   <!-- AMANA text -->
-  <text x="200" y="145" font-family="Georgia, Times, serif" font-weight="700" font-size="56" fill="#e8601c" text-anchor="middle" letter-spacing="4">AMANA</text>
+  <text x="250" y="160" font-family="Georgia, 'Times New Roman', serif" font-weight="700" font-size="72" fill="#e8711a" text-anchor="middle" letter-spacing="6">AMANA</text>
   <!-- Subtitle -->
-  <text x="200" y="235" font-family="Georgia, Times, serif" font-style="italic" font-size="26" fill="#e8601c" text-anchor="middle" letter-spacing="2">TRANSFERT D'ARGENT</text>
+  <text x="250" y="275" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="32" fill="#e8711a" text-anchor="middle" letter-spacing="3">TRANSFERT D'ARGENT</text>
 </svg>

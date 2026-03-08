@@ -13,8 +13,8 @@ interface Indicator {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  macro: 'Indicateurs macroeconomiques',
-  prix: 'Prix a la consommation',
+  macro: 'Indicateurs macroéconomiques',
+  prix: 'Prix à la consommation',
   change: 'Taux de change',
 };
 
@@ -34,7 +34,7 @@ export function NigerIndicators({ indicators }: { indicators: Indicator[] }) {
     <section className="border-t border-black/[0.06] pt-14 md:pt-20">
       <div className="mb-10">
         <span className="text-[11px] tracking-[0.2em] uppercase text-gray-400 block mb-3">Conjoncture</span>
-        <h2 className="text-2xl md:text-3xl leading-tight">Indicateurs economiques</h2>
+        <h2 className="text-2xl md:text-3xl leading-tight">Indicateurs économiques</h2>
       </div>
 
       <div className="space-y-8">
@@ -43,7 +43,7 @@ export function NigerIndicators({ indicators }: { indicators: Indicator[] }) {
             <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4 pb-2 border-b border-black/[0.06]">
               {CATEGORY_LABELS[cat] || cat}
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {grouped[cat].map((ind) => {
                 const current = parseFloat(ind.value);
                 const previous = parseFloat(ind.previous_value);
@@ -55,12 +55,12 @@ export function NigerIndicators({ indicators }: { indicators: Indicator[] }) {
                 return (
                   <div
                     key={ind.id}
-                    className="bg-white rounded-xl border border-black/[0.06] p-4 hover:shadow-sm transition-shadow"
+                    className="group bg-white rounded-xl border border-black/[0.06] p-5 hover:border-black/[0.1] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
                   >
                     <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-3">{ind.label}</p>
                     <div className="flex items-end justify-between">
                       <div>
-                        <p className="text-2xl font-medium text-gray-900 leading-none">
+                        <p className="text-2xl font-semibold text-gray-900 leading-none">
                           {ind.value}
                         </p>
                         <p className="text-[12px] text-gray-400 mt-1">{ind.unit}</p>

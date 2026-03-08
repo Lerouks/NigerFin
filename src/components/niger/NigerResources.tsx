@@ -25,7 +25,7 @@ const TYPE_CONFIG: Record<string, { icon: typeof Atom; color: string; bg: string
 const IMPORTANCE_LABELS: Record<string, { label: string; style: string }> = {
   critique: { label: 'Critique', style: 'bg-red-50 text-red-700 border-red-100' },
   majeure: { label: 'Majeure', style: 'bg-amber-50 text-amber-700 border-amber-100' },
-  moderee: { label: 'Moderee', style: 'bg-blue-50 text-blue-700 border-blue-100' },
+  moderee: { label: 'Modérée', style: 'bg-blue-50 text-blue-700 border-blue-100' },
 };
 
 export function NigerResources({ resources }: { resources: Resource[] }) {
@@ -35,7 +35,7 @@ export function NigerResources({ resources }: { resources: Resource[] }) {
     <section className="border-t border-black/[0.06] pt-14 md:pt-20">
       <div className="mb-10">
         <span className="text-[11px] tracking-[0.2em] uppercase text-gray-400 block mb-3">Richesses naturelles</span>
-        <h2 className="text-2xl md:text-3xl leading-tight">Ressources strategiques</h2>
+        <h2 className="text-2xl md:text-3xl leading-tight">Ressources stratégiques</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -47,7 +47,7 @@ export function NigerResources({ resources }: { resources: Resource[] }) {
           return (
             <div
               key={resource.id}
-              className="bg-white rounded-xl border border-black/[0.06] p-5 hover:shadow-sm transition-shadow"
+              className="group bg-white rounded-xl border border-black/[0.06] p-5 hover:border-black/[0.1] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className={`w-10 h-10 rounded-xl ${config.bg} flex items-center justify-center`}>
@@ -64,7 +64,7 @@ export function NigerResources({ resources }: { resources: Resource[] }) {
               <p className="text-[12px] text-gray-400 mb-4">{resource.location_name}</p>
 
               <div className="bg-gray-50 rounded-lg p-3 mb-4">
-                <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1">Production estimee</p>
+                <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1">Production estimée</p>
                 <p className="text-[15px] font-medium text-gray-900">
                   {resource.estimated_production} <span className="text-[12px] text-gray-400 font-normal">{resource.production_unit}</span>
                 </p>

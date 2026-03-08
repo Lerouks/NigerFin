@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { LegalPageLayout } from '@/components/LegalPageLayout';
 
+export const revalidate = 86400;
+
 export const metadata: Metadata = { title: 'Politique de Cookies', description: 'Politique de cookies de NFI Report : types de cookies utilisés, finalités et gestion de vos préférences.' };
 
 export default function CookiesPage() {

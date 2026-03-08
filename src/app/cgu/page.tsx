@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { LegalPageLayout } from '@/components/LegalPageLayout';
 
+export const revalidate = 86400;
+
 export const metadata: Metadata = { title: "Conditions Générales d'Utilisation", description: "Conditions générales d'utilisation de NFI Report : accès au service, abonnement premium, droits et obligations." };
 
 export default function CGUPage() {

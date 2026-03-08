@@ -82,6 +82,16 @@ export function Footer() {
                   Entreprises
                 </Link>
               </li>
+              <li>
+                <Link href="/niger" className="text-white/45 hover:text-white/80 transition-colors">
+                  Niger
+                </Link>
+              </li>
+              <li>
+                <Link href="/education" className="text-white/45 hover:text-white/80 transition-colors">
+                  Éducation
+                </Link>
+              </li>
             </ul>
           </div>
 

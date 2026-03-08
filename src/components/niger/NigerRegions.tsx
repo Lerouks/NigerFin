@@ -17,7 +17,7 @@ interface Region {
 
 const SECURITY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   stable: { bg: 'bg-emerald-50', text: 'text-emerald-700', label: 'Stable' },
-  moderate: { bg: 'bg-amber-50', text: 'text-amber-700', label: 'Modere' },
+  moderate: { bg: 'bg-amber-50', text: 'text-amber-700', label: 'Modéré' },
   elevated: { bg: 'bg-orange-50', text: 'text-orange-700', label: 'Vigilance' },
   critical: { bg: 'bg-red-50', text: 'text-red-700', label: 'Critique' },
 };
@@ -32,9 +32,9 @@ export function NigerRegions({ regions }: { regions: Region[] }) {
   return (
     <section className="border-t border-black/[0.06] pt-14 md:pt-20">
       <div className="mb-10">
-        <span className="text-[11px] tracking-[0.2em] uppercase text-gray-400 block mb-3">Geographie</span>
-        <h2 className="text-2xl md:text-3xl leading-tight">Regions du Niger</h2>
-        <p className="text-[15px] text-gray-500 mt-2">8 regions aux profils economiques distincts</p>
+        <span className="text-[11px] tracking-[0.2em] uppercase text-gray-400 block mb-3">Géographie</span>
+        <h2 className="text-2xl md:text-3xl leading-tight">Régions du Niger</h2>
+        <p className="text-[15px] text-gray-500 mt-2">8 régions aux profils économiques distincts</p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
@@ -44,10 +44,10 @@ export function NigerRegions({ regions }: { regions: Region[] }) {
             <button
               key={region.id}
               onClick={() => setSelected(isSelected ? null : region.id)}
-              className={`text-left p-4 rounded-xl border transition-all ${
+              className={`text-left p-4 rounded-xl border transition-all duration-200 ${
                 isSelected
-                  ? 'border-black/20 bg-[#111] text-white shadow-lg'
-                  : 'border-black/[0.06] bg-white hover:border-black/10 hover:shadow-sm'
+                  ? 'border-black/20 bg-[#111] text-white shadow-lg -translate-y-0.5'
+                  : 'border-black/[0.06] bg-white hover:border-black/10 hover:shadow-md hover:-translate-y-0.5'
               }`}
             >
               <div className="flex items-center gap-2 mb-2">
@@ -90,7 +90,7 @@ export function NigerRegions({ regions }: { regions: Region[] }) {
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <Briefcase className="w-3.5 h-3.5 text-gray-400" />
-                <span className="text-[11px] uppercase tracking-wider text-gray-400">Activites</span>
+                <span className="text-[11px] uppercase tracking-wider text-gray-400">Activités</span>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {selectedRegion.economic_activities.map((a) => (

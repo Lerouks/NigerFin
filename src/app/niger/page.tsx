@@ -7,8 +7,8 @@ import { marketData } from '@/data/mock-data';
 
 export const revalidate = 60;
 export const metadata: Metadata = {
-  title: 'Niger : economie, entreprises et analyses',
-  description: 'Analyses economiques, entreprises, marches et actualites du Niger.',
+  title: 'Niger : économie, entreprises et analyses',
+  description: 'Analyses économiques, entreprises, marchés et actualités du Niger.',
 };
 
 export default async function NigerPage() {
@@ -20,7 +20,7 @@ export default async function NigerPage() {
           <span className="text-[11px] tracking-[0.2em] uppercase text-white/40 block mb-4">Rubrique</span>
           <h1 className="text-4xl md:text-5xl">Niger</h1>
           <p className="text-white/50 mt-3 text-[15px] max-w-xl">
-            Analyses economiques, entreprises, marches et actualites du Niger.
+            Analyses économiques, entreprises, marchés et actualités du Niger.
           </p>
         </div>
       </section>
@@ -35,7 +35,7 @@ export default async function NigerPage() {
           <aside className="lg:col-span-4"><MarketDataWidget data={marketData} /></aside>
         </div>
 
-        {/* Country presentation */}
+        {/* Présentation du pays */}
         <NigerPresentation />
       </div>
     </div>

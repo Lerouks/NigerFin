@@ -1,15 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
-import { createServerSupabaseClient } from '@/lib/supabase';
 
-// GET: list all market data (public read via server client)
+// GET: list all market data (admin only)
 export async function GET() {
-  const supabase = await createServerSupabaseClient();
-  if (!supabase) {
-    return NextResponse.json({ error: 'Service indisponible' }, { status: 503 });
-  }
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
 
-  const { data, error } = await supabase
+  const { data, error } = await auth.serviceClient
     .from('market_data')
     .select('*')
     .order('type')

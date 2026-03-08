@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
-import { createServiceClient } from '@/lib/supabase';
 
 export async function GET() {
-  const service = createServiceClient();
-  if (!service) return NextResponse.json({ error: 'Service indisponible' }, { status: 503 });
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
 
-  const { data, error } = await service
+  const { data, error } = await auth.serviceClient
     .from('categories')
     .select('*')
     .order('name');

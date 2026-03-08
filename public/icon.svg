@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="30" fill="#000000"/>
+  <!-- NFI Report Pyramid Icon -->
+  <path d="M96 22 L166 154 H26 Z" stroke="white" stroke-width="2.2" fill="none" opacity="0.95"/>
+  <path d="M96 32 L160 150 H32 Z" stroke="white" stroke-width="1.8" fill="none" opacity="0.85"/>
+  <path d="M96 42 L154 146 H38 Z" stroke="white" stroke-width="1.6" fill="none" opacity="0.75"/>
+  <path d="M96 52 L148 142 H44 Z" stroke="white" stroke-width="1.4" fill="none" opacity="0.65"/>
+  <path d="M96 62 L142 138 H50 Z" stroke="white" stroke-width="1.2" fill="none" opacity="0.55"/>
+  <path d="M96 72 L136 134 H56 Z" stroke="white" stroke-width="1" fill="none" opacity="0.45"/>
+  <path d="M96 82 L128 129 H64 Z" stroke="white" stroke-width="0.8" fill="none" opacity="0.35"/>
+  <!-- Door -->
+  <rect x="86" y="140" width="20" height="14" stroke="white" stroke-width="1.4" fill="none" opacity="0.8"/>
+</svg>

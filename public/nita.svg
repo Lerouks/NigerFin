@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" fill="none">
+  <!-- NITA Transfert d'Argent -->
+  <!-- Letters NITA -->
+  <text x="82" y="185" font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="130" fill="#1b3c7d" letter-spacing="-2">N</text>
+  <text x="172" y="185" font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="130" fill="#e85d1a" letter-spacing="-2">ITA</text>
+  <!-- Sweeping curve from bottom-left under N, curving up to top-right of A -->
+  <path d="M95 200 C130 240, 220 230, 280 190 Q330 160, 370 115" stroke="#1b3c7d" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <!-- Arrow tip pointing upper-right -->
+  <path d="M362 104 L375 108 L370 122" stroke="#1b3c7d" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Subtitle -->
+  <text x="240" y="265" font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="30" fill="#1b3c7d" text-anchor="middle" letter-spacing="3">TRANSFERT D&apos;ARGENT</text>
+</svg>

@@ -606,7 +606,7 @@ export function ArticlesManager() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       {a.main_image_url ? (
-                        <img src={a.main_image_url} alt="" className="w-12 h-8 rounded object-cover flex-shrink-0" />
+                        <img src={a.main_image_url} alt={a.title || 'Article'} className="w-12 h-8 rounded object-cover flex-shrink-0" />
                       ) : (
                         <div className="w-12 h-8 rounded bg-gray-100 flex items-center justify-center flex-shrink-0">
                           <ImageIcon className="w-4 h-4 text-gray-300" />

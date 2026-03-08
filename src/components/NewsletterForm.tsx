@@ -56,6 +56,7 @@ export function NewsletterForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Votre adresse email"
+            aria-label="Adresse email pour la newsletter"
             className="flex-1 px-4 py-3 rounded-lg bg-white/[0.08] border border-white/[0.08] text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 transition-all text-[14px]"
             required
           />

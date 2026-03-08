@@ -9,6 +9,7 @@ export interface Article {
   subtitle?: string;
   excerpt: string;
   category: string;
+  sections: string[];
   author: {
     name: string;
     avatar?: any;

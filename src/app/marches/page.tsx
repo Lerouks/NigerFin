@@ -1,10 +1,14 @@
 import type { Metadata } from 'next';
 import { MarchesContent } from './MarchesContent';
+import { ArticleCard } from '@/components/ArticleCard';
+import { getArticlesByCategory } from '@/lib/articles';
 import { marketData } from '@/data/mock-data';
 
+export const revalidate = 60;
 export const metadata: Metadata = { title: 'Marchés' };
 
-export default function MarchesPage() {
+export default async function MarchesPage() {
+  const articles = await getArticlesByCategory('marches');
   return (
     <div className="min-h-screen bg-[#fafaf9]">
       <section className="bg-[#111] text-white py-16 md:py-20">
@@ -19,6 +23,14 @@ export default function MarchesPage() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
         <MarchesContent fallbackData={marketData} />
       </div>
+      {articles.length > 0 && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14 md:pb-20">
+          <h2 className="text-2xl font-bold mb-8">Articles Marchés</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {articles.map((article) => (<ArticleCard key={article._id} article={article} />))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

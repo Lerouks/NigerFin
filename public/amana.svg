@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 340" fill="none">
+  <!-- AMANA Transfert d'Argent -->
+  <!-- Ellipse body -->
+  <path d="M80 140 C80 80, 400 80, 400 140 C400 200, 80 200, 80 140 Z" stroke="#1a8a3a" stroke-width="10" fill="none"/>
+  <!-- Top-right arrow swooping out -->
+  <path d="M340 92 C360 80, 380 70, 395 62" stroke="#1a8a3a" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <polygon points="395,55 402,68 388,67" fill="#1a8a3a"/>
+  <!-- Bottom-left arrow swooping out -->
+  <path d="M140 188 C120 200, 100 210, 85 218" stroke="#1a8a3a" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <polygon points="78,225 85,212 92,224" fill="#1a8a3a"/>
+  <!-- AMANA text -->
+  <text x="240" y="155" font-family="Georgia, 'Times New Roman', serif" font-weight="700" font-size="62" fill="#e8601c" text-anchor="middle" letter-spacing="6">AMANA</text>
+  <!-- Subtitle italic -->
+  <text x="240" y="270" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-weight="400" font-size="28" fill="#e8601c" text-anchor="middle" letter-spacing="3">TRANSFERT D&apos;ARGENT</text>
+</svg>

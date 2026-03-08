@@ -5,7 +5,7 @@ import { getArticlesByCategory } from '@/lib/articles';
 import { marketData } from '@/data/mock-data';
 
 export const revalidate = 60;
-export const metadata: Metadata = { title: 'Finance' };
+export const metadata: Metadata = { title: 'Finance', description: 'Actualités financières, analyses bancaires et tendances du secteur financier au Niger et en Afrique de l\'Ouest.' };
 
 export default async function FinancePage() {
   const articles = await getArticlesByCategory('finance');

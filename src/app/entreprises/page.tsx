@@ -5,7 +5,7 @@ import { getArticlesByCategory } from '@/lib/articles';
 import { marketData } from '@/data/mock-data';
 
 export const revalidate = 60;
-export const metadata: Metadata = { title: 'Entreprises' };
+export const metadata: Metadata = { title: 'Entreprises', description: 'Actualités des entreprises nigériennes et ouest-africaines : résultats, stratégies, fusions et opportunités d\'investissement.' };
 
 export default async function EntreprisesPage() {
   const articles = await getArticlesByCategory('entreprises');

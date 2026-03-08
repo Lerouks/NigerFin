@@ -5,7 +5,7 @@ import { getArticlesByCategory } from '@/lib/articles';
 import { marketData } from '@/data/mock-data';
 
 export const revalidate = 60;
-export const metadata: Metadata = { title: 'Marchés' };
+export const metadata: Metadata = { title: 'Marchés', description: 'Suivez les cours des marchés en temps réel : matières premières, devises, indices boursiers et actifs financiers africains.' };
 
 export default async function MarchesPage() {
   const articles = await getArticlesByCategory('marches');

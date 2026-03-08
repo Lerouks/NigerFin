@@ -64,7 +64,7 @@ export const PREMIUM_TIER: PremiumTier = {
   features: [
     'Accès illimité à tous les articles',
     'Analyses et rapports complets',
-    '2 newsletters exclusives par semaine — briefing du lundi & bilan du vendredi',
+    '2 newsletters exclusives par semaine, briefing du lundi et bilan du vendredi',
     'Alertes en temps réel sur les actualités majeures',
     'Accès à tous les outils premium',
   ],

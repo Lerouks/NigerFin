@@ -3,7 +3,15 @@ import { PracticalTools } from '@/components/PracticalTools';
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = { title: 'Outils Financiers', description: 'Simulateurs et calculateurs financiers pour les professionnels au Niger.' };
+export const metadata: Metadata = {
+  title: 'Outils Financiers',
+  description: 'Simulateurs et calculateurs financiers pour les professionnels au Niger.',
+  openGraph: {
+    title: 'Outils Financiers',
+    description: 'Simulateurs et calculateurs financiers pour les professionnels au Niger.',
+    type: 'website',
+  },
+};
 
 export default function OutilsPage() {
   return (

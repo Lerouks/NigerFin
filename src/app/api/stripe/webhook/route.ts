@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { syncContactToBrevo } from '@/lib/brevo';
+import { sendTransactionalEmail } from '@/lib/email';
+import { stripePaymentConfirmationEmail } from '@/lib/email-templates';
 import Stripe from 'stripe';
 
 function getStripe() {
@@ -75,6 +77,17 @@ export async function POST(request: NextRequest) {
           .eq('id', userId);
 
         await syncMailchimpContact(userId, role, supabase);
+
+        // Send confirmation email
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('email, full_name')
+          .eq('id', userId)
+          .single();
+        if (profile?.email) {
+          const confirmation = stripePaymentConfirmationEmail(profile.full_name || 'Client', billingCycle);
+          await sendTransactionalEmail({ to: profile.email, ...confirmation }).catch(() => {});
+        }
       }
       break;
     }

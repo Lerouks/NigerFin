@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { logAuditEvent } from '@/lib/audit';
 import { getBillingOption, type BillingCycle } from '@/config/pricing';
+import { sendTransactionalEmail } from '@/lib/email';
+import { paymentConfirmationEmail, paymentRejectionEmail } from '@/lib/email-templates';
 
 export async function POST(request: NextRequest) {
   const auth = await requireAdmin();
@@ -51,6 +53,17 @@ export async function POST(request: NextRequest) {
       amount: paymentRequest.amount,
       reason: rejectionReason,
     });
+
+    // Send rejection email to user
+    const { data: rejectedProfile } = await serviceClient
+      .from('user_profiles')
+      .select('email, full_name')
+      .eq('id', paymentRequest.user_id)
+      .single();
+    if (rejectedProfile?.email) {
+      const rejection = paymentRejectionEmail(rejectedProfile.full_name || 'Client', rejectionReason);
+      await sendTransactionalEmail({ to: rejectedProfile.email, ...rejection }).catch(() => {});
+    }
 
     return NextResponse.json({ success: true, status: 'rejected' });
   }
@@ -115,6 +128,22 @@ export async function POST(request: NextRequest) {
     amount: paymentRequest.amount,
     expiresAt: expiresAt.toISOString(),
   });
+
+  // Send confirmation email to user
+  const { data: verifiedProfile } = await serviceClient
+    .from('user_profiles')
+    .select('email, full_name')
+    .eq('id', paymentRequest.user_id)
+    .single();
+  if (verifiedProfile?.email) {
+    const confirmation = paymentConfirmationEmail(
+      verifiedProfile.full_name || 'Client',
+      'premium',
+      cycle,
+      expiresAt.toISOString(),
+    );
+    await sendTransactionalEmail({ to: verifiedProfile.email, ...confirmation }).catch(() => {});
+  }
 
   return NextResponse.json({
     success: true,

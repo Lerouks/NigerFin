@@ -5,8 +5,9 @@ export const navigationSections: NavigationSection[] = [
   { id: '2', label: 'Finance', path: '/finance', order: 2 },
   { id: '3', label: 'Marchés', path: '/marches', order: 3 },
   { id: '4', label: 'Entreprises', path: '/entreprises', order: 4 },
-  { id: '5', label: 'Éducation', path: '/education', order: 5 },
-  { id: '6', label: 'Outils', path: '/outils', order: 6 },
+  { id: '5', label: 'Niger', path: '/niger', order: 5 },
+  { id: '6', label: 'Éducation', path: '/education', order: 6 },
+  { id: '7', label: 'Outils', path: '/outils', order: 7 },
 ];
 
 export const marketData: MarketData[] = [

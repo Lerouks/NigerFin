@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- NFI Report Pyramid Logo -->
+  <!-- Outer pyramid -->
+  <path d="M100 15 L180 175 H20 Z" stroke="white" stroke-width="2" fill="none" opacity="0.9"/>
+  <!-- Inner chevron lines -->
+  <path d="M100 40 L155 155 H45 Z" stroke="white" stroke-width="1.5" fill="none" opacity="0.7"/>
+  <path d="M100 55 L140 145 H60 Z" stroke="white" stroke-width="1.5" fill="none" opacity="0.6"/>
+  <path d="M100 70 L125 135 H75 Z" stroke="white" stroke-width="1.5" fill="none" opacity="0.5"/>
+  <path d="M100 85 L115 125 H85 Z" stroke="white" stroke-width="1.5" fill="none" opacity="0.4"/>
+  <!-- Door/entrance -->
+  <rect x="88" y="140" width="24" height="35" stroke="white" stroke-width="1.5" fill="none" opacity="0.8"/>
+</svg>

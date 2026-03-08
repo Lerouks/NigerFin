@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <!-- AMANA Transfert d'Argent Logo -->
+  <!-- Ellipse with arrows -->
+  <ellipse cx="200" cy="130" rx="140" ry="70" stroke="#1a8a3a" stroke-width="8" fill="none"/>
+  <!-- Top-right arrow -->
+  <polygon points="330,95 345,80 325,85" fill="#1a8a3a"/>
+  <!-- Bottom-left arrow -->
+  <polygon points="70,165 55,180 75,175" fill="#1a8a3a"/>
+  <!-- AMANA text -->
+  <text x="200" y="145" font-family="Georgia, Times, serif" font-weight="700" font-size="56" fill="#e8601c" text-anchor="middle" letter-spacing="4">AMANA</text>
+  <!-- Subtitle -->
+  <text x="200" y="235" font-family="Georgia, Times, serif" font-style="italic" font-size="26" fill="#e8601c" text-anchor="middle" letter-spacing="2">TRANSFERT D'ARGENT</text>
+</svg>

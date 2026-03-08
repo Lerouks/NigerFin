@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <!-- NITA Transfert d'Argent Logo -->
+  <!-- N (blue) -->
+  <text x="68" y="175" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="120" fill="#1a3a7a">N</text>
+  <!-- I (orange) -->
+  <text x="148" y="175" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="120" fill="#e8601c">I</text>
+  <!-- T (orange) -->
+  <text x="185" y="175" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="120" fill="#e8601c">T</text>
+  <!-- A (orange) -->
+  <text x="248" y="175" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="120" fill="#e8601c">A</text>
+  <!-- Curved arrow under/around text -->
+  <path d="M100 185 Q140 220 200 200 Q260 180 300 140" stroke="#1a3a7a" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <!-- Arrow head -->
+  <polygon points="300,140 290,155 305,152" fill="#1a3a7a"/>
+  <!-- Subtitle -->
+  <text x="200" y="240" font-family="Arial, sans-serif" font-weight="900" font-size="28" fill="#1a3a7a" text-anchor="middle" letter-spacing="2">TRANSFERT D'ARGENT</text>
+</svg>

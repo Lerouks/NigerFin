@@ -16,8 +16,8 @@ export default function AboutPage() {
           <Image
             src="/logo-about.png"
             alt="NFI Report"
-            width={80}
-            height={57}
+            width={160}
+            height={114}
             className="mb-8 mx-auto"
             priority
           />

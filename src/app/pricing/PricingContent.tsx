@@ -322,7 +322,7 @@ export function PricingContent() {
                 </p>
                 <div className="flex items-center gap-2">
                   <Image
-                    src="/card-logos.svg"
+                    src="/card-logos.png"
                     alt="Visa, Mastercard, American Express"
                     width={100}
                     height={24}

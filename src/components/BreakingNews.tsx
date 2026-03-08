@@ -78,7 +78,7 @@ export function BreakingNews() {
       <div
         className="absolute bottom-0 left-0 h-[2px]"
         style={{
-          background: 'linear-gradient(90deg, #b8860b, #d4a843, #f5d576, #d4a843, #b8860b)',
+          background: 'linear-gradient(90deg, #8a7550, #a08a5e, #bfae82, #a08a5e, #8a7550)',
           animation: 'progress 5s linear infinite',
           width: '100%',
         }}
@@ -87,10 +87,10 @@ export function BreakingNews() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center h-10 gap-3">
           <div className="flex items-center gap-1.5 flex-shrink-0">
-            <Zap className="w-3.5 h-3.5" style={{ color: '#d4a843', fill: '#d4a843' }} />
+            <Zap className="w-3.5 h-3.5" style={{ color: '#a08a5e', fill: '#a08a5e' }} />
             <span
               className="text-[11px] font-black uppercase tracking-[0.15em]"
-              style={{ color: '#d4a843' }}
+              style={{ color: '#a08a5e' }}
             >
               Flash
             </span>
@@ -121,7 +121,7 @@ export function BreakingNews() {
                   className={`rounded-full transition-all duration-300 ${
                     i === currentIndex ? 'w-4 h-1.5' : 'w-1.5 h-1.5 bg-gray-600 hover:bg-gray-500'
                   }`}
-                  style={i === currentIndex ? { backgroundColor: '#d4a843' } : undefined}
+                  style={i === currentIndex ? { backgroundColor: '#a08a5e' } : undefined}
                   aria-label={`Info ${i + 1}`}
                 />
               ))}

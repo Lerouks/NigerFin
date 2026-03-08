@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { PricingContent } from './PricingContent';
 
 export const metadata: Metadata = {
-  title: 'Abonnements',
-  description: 'Choisissez le plan NFI Report adapté à vos besoins. Accédez aux articles premium, analyses et outils financiers.',
+  title: 'S\u2019abonner — NFI Report',
+  description: 'Accédez à une analyse économique complète. Abonnement Premium pour un accès illimité aux articles, analyses et outils.',
 };
 
 export default function PricingPage() {

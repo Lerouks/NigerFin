@@ -101,7 +101,7 @@ export function FlashBannerManager() {
       {/* Toggle + header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Zap className="w-5 h-5" style={{ color: '#d4a843' }} />
+          <Zap className="w-5 h-5" style={{ color: '#a08a5e' }} />
           <h3 className="text-sm font-semibold">Bandeau Flash</h3>
         </div>
         <button

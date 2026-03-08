@@ -128,7 +128,7 @@ export const PAYMENT_METHODS: Record<PaymentMethodId, PaymentMethod> = {
     id: 'amana',
     name: 'Amana Transfert d\'Argent',
     shortName: 'Amana',
-    logo: '/log amana.png',
+    logo: '/amana.png',
     instructions: 'Effectuez votre transfert via Amana au numéro ci-dessous, puis saisissez votre numéro de transaction.',
     recipientNumber: '+227 98 54 38 37',
     recipientName: 'NFI REPORT',

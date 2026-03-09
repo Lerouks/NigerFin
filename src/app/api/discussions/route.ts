@@ -46,6 +46,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'title and content required' }, { status: 400 });
   }
 
+  if (title.trim().length > 200) {
+    return NextResponse.json({ error: 'Titre trop long (max 200 caractères)' }, { status: 400 });
+  }
+
+  if (content.trim().length > 10000) {
+    return NextResponse.json({ error: 'Contenu trop long (max 10000 caractères)' }, { status: 400 });
+  }
+
   const username = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Utilisateur';
 
   const { data, error } = await supabase

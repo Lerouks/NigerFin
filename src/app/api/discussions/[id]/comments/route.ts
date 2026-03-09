@@ -45,6 +45,10 @@ export async function POST(
     return NextResponse.json({ error: 'content required' }, { status: 400 });
   }
 
+  if (content.trim().length > 5000) {
+    return NextResponse.json({ error: 'Commentaire trop long (max 5000 caractères)' }, { status: 400 });
+  }
+
   const username = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Utilisateur';
 
   const { data, error } = await supabase

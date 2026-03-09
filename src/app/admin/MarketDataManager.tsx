@@ -9,7 +9,7 @@ interface MarketEntry {
   id: string;
   name: string;
   symbol: string;
-  type: 'currency' | 'commodity' | 'index';
+  type: 'currency' | 'commodity' | 'index' | 'crypto';
   value: number;
   change: number;
   change_percent: number;
@@ -25,12 +25,13 @@ const TYPES = [
   { value: 'currency', label: 'Devise' },
   { value: 'commodity', label: 'Matière première' },
   { value: 'index', label: 'Indice' },
+  { value: 'crypto', label: 'Cryptomonnaie' },
 ];
 
 const emptyForm = {
   name: '',
   symbol: '',
-  type: 'currency' as 'currency' | 'commodity' | 'index',
+  type: 'currency' as 'currency' | 'commodity' | 'index' | 'crypto',
   value: 0,
   unit: '',
   source: '',
@@ -219,6 +220,7 @@ export function MarketDataManager() {
                       <span className={`text-[11px] px-2 py-1 rounded ${
                         entry.type === 'currency' ? 'bg-blue-100 text-blue-700' :
                         entry.type === 'commodity' ? 'bg-amber-100 text-amber-700' :
+                        entry.type === 'crypto' ? 'bg-orange-100 text-orange-700' :
                         'bg-purple-100 text-purple-700'
                       }`}>
                         {getTypeLabel(entry.type)}

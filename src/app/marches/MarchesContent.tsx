@@ -27,6 +27,7 @@ export function MarchesContent({ fallbackData }: MarchesContentProps) {
       case 'currency': return 'Devises';
       case 'commodity': return 'Matières premières';
       case 'index': return 'Indices';
+      case 'crypto': return 'Cryptomonnaies';
     }
   };
 
@@ -35,6 +36,7 @@ export function MarchesContent({ fallbackData }: MarchesContentProps) {
       case 'currency': return 'Taux de change des principales devises';
       case 'commodity': return 'Cours des matières premières stratégiques';
       case 'index': return 'Performance des principaux indices boursiers';
+      case 'crypto': return 'Cours des principales cryptomonnaies';
     }
   };
 
@@ -158,7 +160,7 @@ export function MarchesContent({ fallbackData }: MarchesContentProps) {
         <BookOpen className="w-6 h-6 text-white/60 mx-auto mb-3" />
         <h3 className="text-white text-lg font-semibold mb-2">Comprendre les marchés financiers</h3>
         <p className="text-white/50 text-[14px] mb-4 max-w-md mx-auto">
-          Accédez à nos cours pour comprendre les indices, devises et matières premières en profondeur.
+          Accédez à nos cours pour comprendre les indices, devises, matières premières et cryptomonnaies en profondeur.
         </p>
         <Link
           href="/education"

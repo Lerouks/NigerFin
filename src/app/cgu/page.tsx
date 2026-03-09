@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { LegalPageLayout } from '@/components/LegalPageLayout';
+import { DynamicLegalPage } from '@/components/DynamicLegalPage';
 
 export const revalidate = 86400;
 
@@ -7,9 +7,10 @@ export const metadata: Metadata = { title: "Conditions Générales d'Utilisation
 
 export default function CGUPage() {
   return (
-    <LegalPageLayout
+    <DynamicLegalPage
+      slug="cgu"
       title="Conditions Générales d'Utilisation"
-      sections={[
+      fallbackSections={[
         { heading: 'Objet', text: "Les présentes conditions générales d'utilisation régissent l'accès et l'utilisation du site NFI REPORT. En accédant au site, vous acceptez sans réserve les présentes conditions." },
         { heading: 'Accès au service', text: "L'accès aux articles gratuits est ouvert à tous. L'accès au contenu premium nécessite la création d'un compte et la souscription d'un abonnement payant." },
         { heading: 'Abonnement Premium', text: "L'abonnement Premium donne accès à l'ensemble du contenu du site, aux outils d'analyse avancés et aux indices économiques. L'abonnement est renouvelable et peut être résilié à tout moment." },

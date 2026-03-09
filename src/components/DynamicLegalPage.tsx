@@ -11,22 +11,33 @@ interface LegalSection {
   updated_at: string;
 }
 
+interface FallbackSection {
+  heading: string;
+  text: string;
+}
+
 interface DynamicLegalPageProps {
   slug: string;
   title: string;
+  fallbackSections?: FallbackSection[];
 }
 
-export function DynamicLegalPage({ slug, title }: DynamicLegalPageProps) {
+export function DynamicLegalPage({ slug, title, fallbackSections }: DynamicLegalPageProps) {
   const [sections, setSections] = useState<LegalSection[]>([]);
   const [loading, setLoading] = useState(true);
+  const [useFallback, setUseFallback] = useState(false);
 
   useEffect(() => {
     fetch(`/api/legal-sections?page=${slug}`)
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data)) setSections(data);
+        if (Array.isArray(data) && data.length > 0) {
+          setSections(data);
+        } else {
+          setUseFallback(true);
+        }
       })
-      .catch(() => {})
+      .catch(() => { setUseFallback(true); })
       .finally(() => setLoading(false));
   }, [slug]);
 
@@ -48,6 +59,15 @@ export function DynamicLegalPage({ slug, title }: DynamicLegalPageProps) {
             {loading ? (
               <div className="flex items-center justify-center py-16">
                 <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+              </div>
+            ) : useFallback && fallbackSections ? (
+              <div className="space-y-10">
+                {fallbackSections.map((section, index) => (
+                  <div key={index}>
+                    <h2 className="text-xl font-bold mb-3">{section.heading}</h2>
+                    <p className="text-gray-600 leading-relaxed">{section.text}</p>
+                  </div>
+                ))}
               </div>
             ) : (
               <div className="space-y-10">

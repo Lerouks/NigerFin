@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Loader2, Save, Plus, Trash2, GripVertical } from 'lucide-react';
+import { Loader2, Save, Plus, Trash2, GripVertical, FileText } from 'lucide-react';
 
 interface LegalSection {
   id: string;
@@ -12,7 +12,18 @@ interface LegalSection {
   updated_at: string;
 }
 
+const PAGES = [
+  { slug: 'mentions-legales', label: 'Mentions Légales', route: '/mentions-legales' },
+  { slug: 'confidentialite', label: 'Confidentialité', route: '/confidentialite' },
+  { slug: 'cgu', label: 'CGU', route: '/cgu' },
+  { slug: 'cookies', label: 'Cookies', route: '/cookies' },
+  { slug: 'publicite', label: 'Publicité', route: '/publicite' },
+  { slug: 'about', label: 'À propos', route: '/about' },
+  { slug: 'contact', label: 'Contact', route: '/contact' },
+];
+
 export function LegalSectionsManager() {
+  const [activeSlug, setActiveSlug] = useState('mentions-legales');
   const [sections, setSections] = useState<LegalSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -20,18 +31,23 @@ export function LegalSectionsManager() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  const fetchSections = useCallback(async () => {
+  const activePage = PAGES.find((p) => p.slug === activeSlug)!;
+
+  const fetchSections = useCallback(async (slug: string) => {
+    setLoading(true);
+    setMessage(null);
     try {
-      const res = await fetch('/api/admin/legal-sections?page=mentions-legales');
+      const res = await fetch(`/api/admin/legal-sections?page=${slug}`);
       const data = await res.json();
       if (Array.isArray(data)) setSections(data);
+      else setSections([]);
     } catch {
       setMessage({ type: 'error', text: 'Erreur de chargement' });
     }
     setLoading(false);
   }, []);
 
-  useEffect(() => { fetchSections(); }, [fetchSections]);
+  useEffect(() => { fetchSections(activeSlug); }, [activeSlug, fetchSections]);
 
   const handleFieldChange = (id: string, field: 'heading' | 'text', value: string) => {
     setSections((prev) => prev.map((s) => s.id === id ? { ...s, [field]: value } : s));
@@ -50,7 +66,7 @@ export function LegalSectionsManager() {
       });
       if (res.ok) {
         setMessage({ type: 'success', text: 'Sections sauvegardées' });
-        await fetchSections();
+        await fetchSections(activeSlug);
       } else {
         setMessage({ type: 'error', text: 'Erreur lors de la sauvegarde' });
       }
@@ -68,18 +84,18 @@ export function LegalSectionsManager() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          page_slug: 'mentions-legales',
+          page_slug: activeSlug,
           heading: 'Nouvelle section',
           text: '',
           display_order: sections.length + 1,
         }),
       });
       if (res.ok) {
-        await fetchSections();
+        await fetchSections(activeSlug);
         setMessage({ type: 'success', text: 'Section ajoutée' });
       }
     } catch {
-      setMessage({ type: 'error', text: 'Erreur lors de l\'ajout' });
+      setMessage({ type: 'error', text: "Erreur lors de l'ajout" });
     }
     setAdding(false);
   };
@@ -95,7 +111,7 @@ export function LegalSectionsManager() {
         body: JSON.stringify({ id }),
       });
       if (res.ok) {
-        await fetchSections();
+        await fetchSections(activeSlug);
         setMessage({ type: 'success', text: 'Section supprimée' });
       }
     } catch {
@@ -112,21 +128,40 @@ export function LegalSectionsManager() {
     setSections(newSections);
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Page selector */}
+      <div>
+        <h2 className="text-lg font-bold">Pages éditables</h2>
+        <p className="text-[13px] text-gray-400 mb-3">Sélectionnez une page pour éditer ses sections</p>
+        <div className="flex gap-2 flex-wrap">
+          {PAGES.map((page) => (
+            <button
+              key={page.slug}
+              onClick={() => setActiveSlug(page.slug)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] transition-all ${
+                activeSlug === page.slug
+                  ? 'bg-[#111] text-white'
+                  : 'bg-white border border-black/[0.06] text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <FileText className="w-3.5 h-3.5" />
+              {page.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Header for active page */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold">Mentions Légales</h2>
-          <p className="text-[13px] text-gray-400">Gérez les sections de la page mentions légales</p>
+          <h3 className="text-sm font-semibold">{activePage.label}</h3>
+          <p className="text-[12px] text-gray-400">
+            Route : <span className="font-mono">{activePage.route}</span>
+            {sections.length === 0 && !loading && (
+              <span className="ml-2 text-amber-600">— Aucune section (contenu vide)</span>
+            )}
+          </p>
         </div>
         <div className="flex gap-2">
           <button
@@ -139,7 +174,7 @@ export function LegalSectionsManager() {
           </button>
           <button
             onClick={handleSave}
-            disabled={saving}
+            disabled={saving || sections.length === 0}
             className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] bg-[#111] text-white hover:bg-[#333] transition-colors disabled:opacity-50"
           >
             {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
@@ -158,6 +193,11 @@ export function LegalSectionsManager() {
       )}
 
       {/* Sections */}
+      {loading ? (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+        </div>
+      ) : (
       <div className="space-y-4">
         {sections.map((section, index) => (
           <div key={section.id} className="bg-white rounded-xl border border-black/[0.06] p-5">
@@ -228,10 +268,11 @@ export function LegalSectionsManager() {
 
         {sections.length === 0 && (
           <div className="text-center py-12 text-sm text-gray-400">
-            Aucune section. Cliquez sur &quot;Ajouter une section&quot; pour commencer.
+            Aucune section pour cette page. Cliquez sur &quot;Ajouter une section&quot; pour commencer.
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }

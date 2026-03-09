@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import { Providers } from './providers';
 import { MainLayoutShell } from '@/components/MainLayoutShell';
+import { ViewTracker } from '@/components/ViewTracker';
 import './globals.css';
 
 const inter = localFont({
@@ -106,6 +107,7 @@ export default function RootLayout({
     <html lang="fr" className={`${inter.variable} ${playfair.variable}`}>
       <body className="min-h-screen flex flex-col">
         <Providers>
+          <ViewTracker />
           <MainLayoutShell>{children}</MainLayoutShell>
         </Providers>
       </body>

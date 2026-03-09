@@ -17,6 +17,7 @@ import { EducationManager } from './EducationManager';
 import { PaywallManager } from './PaywallManager';
 import { NigerPresentationManager } from './NigerPresentationManager';
 import { LegalSectionsManager } from './LegalSectionsManager';
+import { StatsManager } from './StatsManager';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -86,7 +87,7 @@ interface DynamicPrice {
   updated_at: string;
 }
 
-type TabId = 'overview' | 'articles' | 'categories' | 'market' | 'flash' | 'education' | 'niger' | 'legal' | 'paywall' | 'users' | 'payments' | 'pricing' | 'audit';
+type TabId = 'overview' | 'articles' | 'categories' | 'market' | 'flash' | 'education' | 'niger' | 'legal' | 'paywall' | 'users' | 'payments' | 'pricing' | 'stats' | 'audit';
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -280,11 +281,12 @@ export function AdminDashboard() {
     { id: 'flash', label: 'Flash Info', icon: Zap },
     { id: 'education', label: 'Éducation', icon: BookOpen },
     { id: 'niger', label: 'Niger', icon: Activity },
-    { id: 'legal', label: 'Mentions légales', icon: FileText },
+    { id: 'legal', label: 'Pages', icon: FileText },
     { id: 'paywall', label: 'Paywall', icon: SlidersHorizontal },
     { id: 'users', label: 'Utilisateurs', icon: Users },
     { id: 'payments', label: 'Paiements', icon: CreditCard, badge: stats.pendingPayments },
     { id: 'pricing', label: 'Tarifs', icon: DollarSign },
+    { id: 'stats', label: 'Statistiques', icon: BarChart3 },
     { id: 'audit', label: 'Journal', icon: FileText },
   ];
 
@@ -317,11 +319,18 @@ export function AdminDashboard() {
                 Export Paiements
               </button>
               <button
-                onClick={() => setActiveTab('articles')}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 transition-colors"
+                onClick={() => handleExport('articles')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] bg-white/10 hover:bg-white/20 transition-colors"
               >
-                <Newspaper className="w-3.5 h-3.5" />
-                Gestion Articles
+                <Download className="w-3.5 h-3.5" />
+                Export Articles
+              </button>
+              <button
+                onClick={() => handleExport('stats')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] bg-white/10 hover:bg-white/20 transition-colors"
+              >
+                <Download className="w-3.5 h-3.5" />
+                Export Stats
               </button>
             </div>
           </div>
@@ -687,6 +696,9 @@ export function AdminDashboard() {
             </div>
           </div>
         )}
+
+        {/* ─── STATS TAB ──────────────────────────────────────── */}
+        {activeTab === 'stats' && <StatsManager />}
 
         {/* ─── AUDIT LOG TAB ──────────────────────────────────── */}
         {activeTab === 'audit' && (

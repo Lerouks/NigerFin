@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowRight, Check } from 'lucide-react';
+import { ArrowRight, Check, Loader2 } from 'lucide-react';
 
 export function NewsletterForm() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,6 +28,8 @@ export function NewsletterForm() {
       }, 3000);
     } catch {
       setEmail('');
+      setError(true);
+      setTimeout(() => setError(false), 3000);
     } finally {
       setLoading(false);
     }
@@ -42,7 +45,11 @@ export function NewsletterForm() {
         Recevez les analyses économiques et financières du Niger et de l&apos;Afrique de l&apos;Ouest.
       </p>
 
-      {subscribed ? (
+      {error ? (
+        <div className="flex items-center gap-3 bg-red-500/10 rounded-lg px-5 py-4">
+          <p className="text-[14px] text-red-400">Une erreur est survenue. Veuillez réessayer.</p>
+        </div>
+      ) : subscribed ? (
         <div className="flex items-center gap-3 bg-white/10 rounded-lg px-5 py-4">
           <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
             <Check className="w-4 h-4 text-emerald-400" />
@@ -65,8 +72,8 @@ export function NewsletterForm() {
             disabled={loading}
             className="bg-white text-black px-6 py-3 rounded-lg hover:bg-white/90 transition-colors flex items-center justify-center gap-2 text-[14px] flex-shrink-0 disabled:opacity-50"
           >
-            S&apos;abonner
-            <ArrowRight className="w-4 h-4" />
+            {loading ? 'Envoi...' : 'S\'abonner'}
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
           </button>
         </form>
       )}

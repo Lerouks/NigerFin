@@ -7,19 +7,26 @@ export function ContactForm() {
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
     try {
-      await fetch('/api/contact', {
+      const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setError(data?.error || 'Une erreur est survenue. Veuillez réessayer.');
+        return;
+      }
       setSubmitted(true);
     } catch {
-      // Handle error
+      setError('Impossible de contacter le serveur. Vérifiez votre connexion.');
     } finally {
       setLoading(false);
     }
@@ -128,6 +135,12 @@ export function ContactForm() {
                     <label htmlFor="message" className="block text-sm font-medium mb-2">Message</label>
                     <textarea id="message" required rows={6} value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} className="w-full border border-black/[0.08] rounded-lg px-4 py-3 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 resize-none transition-all text-base" placeholder="Votre message..." />
                   </div>
+
+                  {error && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+                      {error}
+                    </div>
+                  )}
 
                   <button type="submit" disabled={loading} className="bg-[#111] text-white px-7 py-3 rounded-lg hover:bg-[#333] transition-colors flex items-center gap-2 text-[14px] disabled:opacity-50">
                     <Send className="w-4 h-4" />

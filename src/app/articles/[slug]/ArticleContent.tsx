@@ -11,6 +11,7 @@ import { MarketDataWidget } from '@/components/MarketDataWidget';
 import { PremiumOverlay } from '@/components/PremiumOverlay';
 import { ArticleCard } from '@/components/ArticleCard';
 import { ArticleLikes } from '@/components/ArticleLikes';
+import { ViewTracker } from '@/components/ViewTracker';
 import type { Article, MarketData } from '@/types';
 import { fallbackImageUrl } from '@/data/mock-data';
 import { formatDate } from '@/lib/utils';
@@ -223,6 +224,7 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
 
   return (
     <div className="min-h-screen bg-[#fafaf9]">
+      <ViewTracker articleId={article._id} />
       <div className="relative h-[450px] md:h-[500px] bg-[#111]">
         <Image src={imageUrl} alt={article.title} fill className="object-cover opacity-60" priority />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />

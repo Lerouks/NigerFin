@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase';
 import { createServiceClient } from '@/lib/supabase';
@@ -25,9 +26,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid file type' }, { status: 400 });
   }
 
-  // Generate unique filename
-  const ext = file.name.split('.').pop() || 'jpg';
-  const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  // Validate file size (max 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    return NextResponse.json({ error: 'File too large (max 5MB)' }, { status: 400 });
+  }
+
+  // Generate unique filename with cryptographically secure random ID
+  const ext = file.name.split('.').pop()?.replace(/[^a-zA-Z0-9]/g, '') || 'jpg';
+  const filename = `${Date.now()}-${randomUUID()}.${ext}`;
   const path = `articles/${filename}`;
 
   // Upload to Supabase Storage

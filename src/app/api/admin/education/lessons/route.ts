@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Catégorie et titre requis' }, { status: 400 });
   }
 
-  if (access_level && !['free', 'premium'].includes(access_level)) {
+  if (access_level && !['free', 'standard', 'premium', 'pro'].includes(access_level)) {
     return NextResponse.json({ error: 'Niveau d\'accès invalide' }, { status: 400 });
   }
 
@@ -81,7 +81,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'ID requis' }, { status: 400 });
   }
 
-  if (updates.access_level && !['free', 'premium'].includes(updates.access_level)) {
+  if (updates.access_level && !['free', 'standard', 'premium', 'pro'].includes(updates.access_level)) {
     return NextResponse.json({ error: 'Niveau d\'accès invalide' }, { status: 400 });
   }
 

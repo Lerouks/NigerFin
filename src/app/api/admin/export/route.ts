@@ -69,5 +69,55 @@ export async function GET(request: NextRequest) {
     });
   }
 
+  if (type === 'articles') {
+    const { data } = await serviceClient
+      .from('articles')
+      .select('id, title, slug, category, sections, status, content_type, is_featured, author_name, published_at, created_at')
+      .order('created_at', { ascending: false });
+
+    if (!data) return NextResponse.json({ error: 'No data' }, { status: 404 });
+
+    const header = 'ID,Titre,Slug,Catégorie,Sections,Statut,Accès,À la une,Auteur,Publié le,Créé le\n';
+    const rows = data.map((a: Record<string, unknown>) =>
+      [a.id, a.title, a.slug, a.category, Array.isArray(a.sections) ? (a.sections as string[]).join(';') : '', a.status, a.content_type, a.is_featured ? 'Oui' : 'Non', a.author_name, a.published_at || '', a.created_at]
+        .map((v) => `"${String(v).replace(/"/g, '""')}"`).join(',')
+    ).join('\n');
+
+    await logAuditEvent(user.id, 'export_csv', 'articles', undefined, { rowCount: data.length });
+
+    return new NextResponse(header + rows, {
+      headers: {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename="articles_${new Date().toISOString().slice(0, 10)}.csv"`,
+      },
+    });
+  }
+
+  if (type === 'stats') {
+    const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const { data } = await serviceClient
+      .from('page_views')
+      .select('page_path, article_id, referrer, viewed_at')
+      .gte('viewed_at', monthAgo)
+      .order('viewed_at', { ascending: false });
+
+    if (!data) return NextResponse.json({ error: 'No data' }, { status: 404 });
+
+    const header = 'Page,Article ID,Referrer,Date\n';
+    const rows = data.map((v: Record<string, unknown>) =>
+      [v.page_path, v.article_id || '', v.referrer || '', v.viewed_at]
+        .map((val) => `"${String(val).replace(/"/g, '""')}"`).join(',')
+    ).join('\n');
+
+    await logAuditEvent(user.id, 'export_csv', 'stats', undefined, { rowCount: data.length });
+
+    return new NextResponse(header + rows, {
+      headers: {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename="statistiques_${new Date().toISOString().slice(0, 10)}.csv"`,
+      },
+    });
+  }
+
   return NextResponse.json({ error: 'Type invalide' }, { status: 400 });
 }

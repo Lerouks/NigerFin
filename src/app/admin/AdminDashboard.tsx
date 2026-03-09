@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
   Users, BarChart3, Shield, Loader2, Search, CreditCard, CheckCircle, XCircle,
   Clock, Download, TrendingUp, TrendingDown, DollarSign, Activity, Ban,
-  Unlock, Settings, FileText, AlertTriangle, ChevronDown, ChevronUp, Newspaper, LineChart, Zap, BookOpen, SlidersHorizontal,
+  Unlock, Settings, FileText, AlertTriangle, ChevronDown, ChevronUp, Newspaper, LineChart, Zap, BookOpen, SlidersHorizontal, Mail,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { formatPrice, PREMIUM_TIER, CURRENCY, BILLING_OPTIONS, getBillingCycleLabel } from '@/config/pricing';
@@ -18,6 +18,7 @@ import { PaywallManager } from './PaywallManager';
 import { NigerPresentationManager } from './NigerPresentationManager';
 import { LegalSectionsManager } from './LegalSectionsManager';
 import { StatsManager } from './StatsManager';
+import { MessagesManager } from './MessagesManager';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -87,7 +88,7 @@ interface DynamicPrice {
   updated_at: string;
 }
 
-type TabId = 'overview' | 'articles' | 'categories' | 'market' | 'flash' | 'education' | 'niger' | 'legal' | 'paywall' | 'users' | 'payments' | 'pricing' | 'stats' | 'audit';
+type TabId = 'overview' | 'articles' | 'categories' | 'market' | 'flash' | 'education' | 'niger' | 'legal' | 'paywall' | 'users' | 'payments' | 'pricing' | 'stats' | 'audit' | 'messages';
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -114,6 +115,7 @@ export function AdminDashboard() {
   const [paymentFilter, setPaymentFilter] = useState('pending');
   const [expandedUser, setExpandedUser] = useState<string | null>(null);
   const [savingPrice, setSavingPrice] = useState<string | null>(null);
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
   useEffect(() => {
     if (!isLoading && (!isSignedIn || userRole !== 'admin')) {
@@ -177,13 +179,24 @@ export function AdminDashboard() {
     } catch { /* ignore */ }
   }, []);
 
+  const fetchUnreadCount = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/messages?count_only=true');
+      if (res.ok) {
+        const data = await res.json();
+        setUnreadMessages(data.unread || 0);
+      }
+    } catch { /* ignore */ }
+  }, []);
+
   useEffect(() => {
     if (userRole === 'admin') {
       fetchStats();
       fetchUsers();
       fetchPayments('pending');
+      fetchUnreadCount();
     }
-  }, [userRole, fetchStats, fetchUsers, fetchPayments]);
+  }, [userRole, fetchStats, fetchUsers, fetchPayments, fetchUnreadCount]);
 
   // Fetch tab-specific data when tab changes
   useEffect(() => {
@@ -284,6 +297,7 @@ export function AdminDashboard() {
     { id: 'legal', label: 'Pages', icon: FileText },
     { id: 'paywall', label: 'Paywall', icon: SlidersHorizontal },
     { id: 'users', label: 'Utilisateurs', icon: Users },
+    { id: 'messages', label: 'Messages', icon: Mail, badge: unreadMessages },
     { id: 'payments', label: 'Paiements', icon: CreditCard, badge: stats.pendingPayments },
     { id: 'pricing', label: 'Tarifs', icon: DollarSign },
     { id: 'stats', label: 'Statistiques', icon: BarChart3 },
@@ -324,6 +338,13 @@ export function AdminDashboard() {
               >
                 <Download className="w-3.5 h-3.5" />
                 Export Articles
+              </button>
+              <button
+                onClick={() => handleExport('messages')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] bg-white/10 hover:bg-white/20 transition-colors"
+              >
+                <Download className="w-3.5 h-3.5" />
+                Export Messages
               </button>
               <button
                 onClick={() => handleExport('stats')}
@@ -699,6 +720,9 @@ export function AdminDashboard() {
 
         {/* ─── STATS TAB ──────────────────────────────────────── */}
         {activeTab === 'stats' && <StatsManager />}
+
+        {/* ─── MESSAGES TAB ──────────────────────────────────── */}
+        {activeTab === 'messages' && <MessagesManager />}
 
         {/* ─── AUDIT LOG TAB ──────────────────────────────────── */}
         {activeTab === 'audit' && (

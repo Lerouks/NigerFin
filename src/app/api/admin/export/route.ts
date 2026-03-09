@@ -119,5 +119,29 @@ export async function GET(request: NextRequest) {
     });
   }
 
+  if (type === 'messages') {
+    const { data } = await serviceClient
+      .from('messages_contact')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (!data) return NextResponse.json({ error: 'No data' }, { status: 404 });
+
+    const header = 'ID,Nom,Email,Sujet,Message,Statut,IP,Date\n';
+    const rows = data.map((m: Record<string, unknown>) =>
+      [m.id, m.full_name, m.email, m.subject, m.message, m.status, m.ip_address, m.created_at]
+        .map((v) => `"${String(v).replace(/"/g, '""')}"`).join(',')
+    ).join('\n');
+
+    await logAuditEvent(user.id, 'export_csv', 'messages', undefined, { rowCount: data.length });
+
+    return new NextResponse(header + rows, {
+      headers: {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename="messages_contact_${new Date().toISOString().slice(0, 10)}.csv"`,
+      },
+    });
+  }
+
   return NextResponse.json({ error: 'Type invalide' }, { status: 400 });
 }

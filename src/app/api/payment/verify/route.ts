@@ -49,8 +49,11 @@ export async function POST(request: NextRequest) {
       .eq('id', paymentRequestId);
 
     await logAuditEvent(user.id, 'reject_payment', 'payment', paymentRequestId, {
+      target_user_id: paymentRequest.user_id,
       tier: paymentRequest.tier,
+      billing_cycle: paymentRequest.billing_cycle,
       amount: paymentRequest.amount,
+      payment_method: paymentRequest.payment_method,
       reason: rejectionReason,
     });
 
@@ -124,8 +127,11 @@ export async function POST(request: NextRequest) {
     .eq('id', paymentRequest.user_id);
 
   await logAuditEvent(user.id, 'verify_payment', 'payment', paymentRequestId, {
+    target_user_id: paymentRequest.user_id,
     tier: 'premium',
+    billing_cycle: paymentRequest.billing_cycle,
     amount: paymentRequest.amount,
+    payment_method: paymentRequest.payment_method,
     expiresAt: expiresAt.toISOString(),
   });
 

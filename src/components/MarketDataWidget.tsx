@@ -25,6 +25,7 @@ export function MarketDataWidget({ data: fallbackData }: MarketDataWidgetProps) 
       case 'currency': return 'Devises';
       case 'commodity': return 'Matières premières';
       case 'index': return 'Indices';
+      case 'crypto': return 'Cryptomonnaies';
     }
   };
 

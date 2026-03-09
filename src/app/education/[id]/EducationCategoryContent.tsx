@@ -10,20 +10,23 @@ interface Category {
   id: string;
   slug: string;
   title: string;
+  description?: string;
 }
 
 interface Lesson {
   id: string;
   title: string;
   duration: string;
-  access_level: 'free' | 'premium';
+  access_level: 'free' | 'standard' | 'premium' | 'pro';
   sort_order: number;
   content: string;
 }
 
 const ACCESS_CONFIG: Record<string, { label: string; color: string; requiredRoles: string[] }> = {
   free: { label: 'Gratuit', color: 'bg-emerald-100 text-emerald-700', requiredRoles: ['reader', 'premium', 'admin'] },
+  standard: { label: 'Standard', color: 'bg-amber-100 text-amber-700', requiredRoles: ['premium', 'admin'] },
   premium: { label: 'Premium', color: 'bg-blue-100 text-blue-700', requiredRoles: ['premium', 'admin'] },
+  pro: { label: 'Pro', color: 'bg-purple-100 text-purple-700', requiredRoles: ['premium', 'admin'] },
 };
 
 export function EducationCategoryContent({ slug }: { slug: string }) {
@@ -37,14 +40,13 @@ export function EducationCategoryContent({ slug }: { slug: string }) {
   useEffect(() => {
     (async () => {
       try {
-        const catRes = await fetch('/api/admin/education/categories');
+        const catRes = await fetch(`/api/education?slug=${encodeURIComponent(slug)}`);
         if (!catRes.ok) { setNotFound(true); setLoading(false); return; }
-        const cats: Category[] = await catRes.json();
-        const found = cats.find((c: any) => c.slug === slug && c.available !== false);
-        if (!found) { setNotFound(true); setLoading(false); return; }
+        const found: Category = await catRes.json();
+        if (!found?.id) { setNotFound(true); setLoading(false); return; }
         setCategory(found);
 
-        const lessonsRes = await fetch(`/api/admin/education/lessons?category_id=${found.id}`);
+        const lessonsRes = await fetch(`/api/education?category_id=${found.id}`);
         if (lessonsRes.ok) setLessons(await lessonsRes.json());
       } catch { setNotFound(true); }
       setLoading(false);
@@ -100,6 +102,9 @@ export function EducationCategoryContent({ slug }: { slug: string }) {
             </span>
           </div>
           <h1 className="text-3xl md:text-4xl font-bold mb-3">{category.title}</h1>
+          {category.description && (
+            <p className="text-white/50 text-[15px] max-w-xl">{category.description}</p>
+          )}
         </div>
       </section>
 

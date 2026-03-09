@@ -11,6 +11,7 @@ interface Category {
   slug: string;
   title: string;
   icon: string;
+  description: string;
   available: boolean;
   sort_order: number;
   lesson_count: number;
@@ -21,14 +22,16 @@ interface Lesson {
   category_id: string;
   title: string;
   duration: string;
-  access_level: 'free' | 'premium';
+  access_level: 'free' | 'standard' | 'premium' | 'pro';
   sort_order: number;
   content: string;
 }
 
 const ACCESS_LEVELS = [
   { value: 'free', label: 'Gratuit', color: 'bg-emerald-100 text-emerald-700' },
+  { value: 'standard', label: 'Standard', color: 'bg-amber-100 text-amber-700' },
   { value: 'premium', label: 'Premium', color: 'bg-blue-100 text-blue-700' },
+  { value: 'pro', label: 'Pro', color: 'bg-purple-100 text-purple-700' },
 ];
 
 const ICONS = [
@@ -47,7 +50,7 @@ export function EducationManager() {
   // Category form
   const [showCatForm, setShowCatForm] = useState(false);
   const [editCatId, setEditCatId] = useState<string | null>(null);
-  const [catForm, setCatForm] = useState({ title: '', slug: '', icon: 'BookOpen', available: true, sort_order: 0 });
+  const [catForm, setCatForm] = useState({ title: '', slug: '', icon: 'BookOpen', description: '', available: true, sort_order: 0 });
 
   // Lesson form
   const [showLessonForm, setShowLessonForm] = useState(false);
@@ -108,13 +111,13 @@ export function EducationManager() {
   const startEditCategory = (cat: Category) => {
     setEditCatId(cat.id);
     setShowCatForm(true);
-    setCatForm({ title: cat.title, slug: cat.slug, icon: cat.icon, available: cat.available, sort_order: cat.sort_order });
+    setCatForm({ title: cat.title, slug: cat.slug, icon: cat.icon, description: cat.description || '', available: cat.available, sort_order: cat.sort_order });
   };
 
   const resetCatForm = () => {
     setEditCatId(null);
     setShowCatForm(false);
-    setCatForm({ title: '', slug: '', icon: 'BookOpen', available: true, sort_order: 0 });
+    setCatForm({ title: '', slug: '', icon: 'BookOpen', description: '', available: true, sort_order: 0 });
   };
 
   const toggleCategoryAvailable = async (cat: Category) => {
@@ -421,6 +424,16 @@ export function EducationManager() {
                 </label>
               </div>
             </div>
+            <div>
+              <label className="text-[10px] text-gray-400 uppercase tracking-wider block mb-1">Description</label>
+              <textarea
+                value={catForm.description}
+                onChange={(e) => setCatForm({ ...catForm, description: e.target.value })}
+                rows={2}
+                placeholder="Courte description de la catégorie (affichée sur la page du cours)"
+                className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black resize-y"
+              />
+            </div>
             <div className="flex gap-2 pt-1">
               <button
                 onClick={handleSaveCategory}
@@ -455,6 +468,7 @@ export function EducationManager() {
               <div className="min-w-0">
                 <p className="text-sm font-medium truncate">{cat.title}</p>
                 <p className="text-[11px] text-gray-400">{cat.lesson_count} leçon{cat.lesson_count !== 1 ? 's' : ''} · /{cat.slug}</p>
+                {cat.description && <p className="text-[11px] text-gray-400 truncate mt-0.5">{cat.description}</p>}
               </div>
             </button>
             <div className="flex items-center gap-2 flex-shrink-0">

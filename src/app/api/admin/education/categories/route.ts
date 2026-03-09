@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
   const { serviceClient } = auth;
 
   const body = await request.json();
-  const { title, slug, icon, available, sort_order } = body;
+  const { title, slug, icon, available, sort_order, description } = body;
 
   if (!title || !slug) {
     return NextResponse.json({ error: 'Titre et slug requis' }, { status: 400 });
@@ -49,6 +49,7 @@ export async function POST(request: NextRequest) {
       icon: icon || 'BookOpen',
       available: available ?? false,
       sort_order: sort_order ?? 0,
+      description: description || '',
     })
     .select()
     .single();

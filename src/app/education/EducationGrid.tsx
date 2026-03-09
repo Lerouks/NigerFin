@@ -19,8 +19,10 @@ interface Category {
   slug: string;
   title: string;
   icon: string;
+  description: string;
   available: boolean;
   sort_order: number;
+  lesson_count: number;
 }
 
 export function EducationGrid() {
@@ -28,7 +30,7 @@ export function EducationGrid() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/admin/education/categories')
+    fetch('/api/education')
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setCategories(data);
@@ -58,7 +60,12 @@ export function EducationGrid() {
               className="group relative flex flex-col justify-between rounded-xl p-5 h-[160px] md:h-[180px] text-left transition-all duration-150 border bg-[#1a1a1a] border-white/[0.06] text-white hover:border-white/20 hover:bg-[#222] hover:shadow-lg hover:-translate-y-0.5"
             >
               <Icon className="w-7 h-7 text-white/70 group-hover:text-white transition-colors" />
-              <p className="text-[14px] font-semibold leading-tight">{cat.title}</p>
+              <div>
+                <p className="text-[14px] font-semibold leading-tight">{cat.title}</p>
+                {cat.lesson_count > 0 && (
+                  <span className="text-[10px] text-white/30 mt-1 block">{cat.lesson_count} leçon{cat.lesson_count !== 1 ? 's' : ''}</span>
+                )}
+              </div>
             </Link>
           );
         }

@@ -34,7 +34,7 @@ export interface MarketData {
   value: number;
   change: number;
   changePercent: number;
-  type: 'currency' | 'commodity' | 'index';
+  type: 'currency' | 'commodity' | 'index' | 'crypto';
   symbol: string;
   unit?: string;
   source?: string;

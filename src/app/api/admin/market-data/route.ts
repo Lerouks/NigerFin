@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Nom, symbole et type requis' }, { status: 400 });
   }
 
-  if (!['currency', 'commodity', 'index'].includes(type)) {
+  if (!['currency', 'commodity', 'index', 'crypto'].includes(type)) {
     return NextResponse.json({ error: 'Type invalide' }, { status: 400 });
   }
 
@@ -74,7 +74,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'ID requis' }, { status: 400 });
   }
 
-  if (updates.type && !['currency', 'commodity', 'index'].includes(updates.type)) {
+  if (updates.type && !['currency', 'commodity', 'index', 'crypto'].includes(updates.type)) {
     return NextResponse.json({ error: 'Type invalide' }, { status: 400 });
   }
 

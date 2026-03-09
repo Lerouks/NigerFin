@@ -27,7 +27,7 @@ export async function GET() {
     value: Number(item.value),
     change: Number(item.change),
     changePercent: Number(item.change_percent),
-    type: item.type as 'currency' | 'commodity' | 'index',
+    type: item.type as 'currency' | 'commodity' | 'index' | 'crypto',
     symbol: item.symbol,
     unit: item.unit || '',
     source: item.source || '',

@@ -176,12 +176,15 @@ export function AccountDashboard() {
   }
 
   const isSubscribed = userRole === 'premium' || userRole === 'admin';
+  const isExpired = profile?.subscription_status === 'expired';
   const sub = summary?.subscription;
   const memberSince = profile?.created_at
     ? new Date(profile.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
     : '-';
-  const periodEnd = sub?.current_period_end
-    ? new Date(sub.current_period_end).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+  // Use profile.subscription_end (set by admin) as primary source, fallback to subscriptions table
+  const rawPeriodEnd = profile?.subscription_end || sub?.current_period_end;
+  const periodEnd = rawPeriodEnd
+    ? new Date(rawPeriodEnd).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
     : null;
 
   const tabs = [
@@ -474,12 +477,14 @@ export function AccountDashboard() {
                   label="Statut abonnement"
                   value={
                     sub?.cancel_at_period_end ? 'Annulation programmée'
-                    : sub?.status === 'active' ? 'Actif'
-                    : profile?.subscription_status === 'active' ? 'Actif'
-                    : 'Inactif'
+                    : isExpired ? 'Expiré'
+                    : sub?.status === 'active' ? 'Premium actif'
+                    : profile?.subscription_status === 'active' ? 'Premium actif'
+                    : 'Lecteur gratuit'
                   }
                   valueColor={
                     sub?.cancel_at_period_end ? 'text-amber-600'
+                    : isExpired ? 'text-red-600'
                     : (sub?.status === 'active' || profile?.subscription_status === 'active') ? 'text-emerald-600'
                     : 'text-gray-400'
                   }
@@ -518,8 +523,27 @@ export function AccountDashboard() {
                 </div>
               )}
 
-              {/* Expired subscription */}
-              {!isSubscribed && summary?.recentPayments && summary.recentPayments.length > 0 && (
+              {/* Expired subscription (from profile status or payment history) */}
+              {isExpired && periodEnd && (
+                <div className="mt-5 bg-red-50 border border-red-200 rounded-xl px-5 py-4 flex items-start gap-3">
+                  <XCircle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-red-800">Abonnement Premium expiré</p>
+                    <p className="text-[13px] text-red-700 mt-1">
+                      Votre abonnement Premium a expiré le {periodEnd}. Renouvelez-le pour retrouver l&apos;accès complet.
+                    </p>
+                    <Link
+                      href="/pricing"
+                      className="mt-3 inline-flex items-center gap-2 bg-[#111] text-white px-4 py-2 rounded-lg text-[13px] hover:bg-[#333] transition-colors"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                      Renouveler mon abonnement
+                    </Link>
+                  </div>
+                </div>
+              )}
+
+              {!isSubscribed && !isExpired && summary?.recentPayments && summary.recentPayments.length > 0 && (
                 <div className="mt-5 bg-gray-50 border border-gray-200 rounded-xl px-5 py-4 flex items-start gap-3">
                   <Clock className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
                   <div>

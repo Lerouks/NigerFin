@@ -195,3 +195,59 @@ ${signature()}
     `),
   };
 }
+
+// ─── Admin subscription management emails ───
+
+export function adminPremiumGrantedEmail(name: string, startDate: string, endDate: string): { subject: string; html: string } {
+  const formattedStart = new Date(startDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+  const formattedEnd = new Date(endDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  return {
+    subject: 'Votre abonnement Premium NFI REPORT est activé',
+    html: emailLayout(`
+${heading('Votre abonnement Premium est activé')}
+${paragraph(`Bonjour ${name},`)}
+${paragraph("Nous avons le plaisir de vous informer que votre abonnement <strong>Premium NFI Report</strong> est désormais actif.")}
+<table style="width:100%;border-collapse:collapse;background-color:#fafaf9;border-radius:8px;margin:16px 0;">
+  <tr><td style="padding:12px 16px;font-size:14px;color:#737373;">Type d'abonnement</td><td style="padding:12px 16px;font-size:15px;color:#111;font-weight:600;">Premium</td></tr>
+  <tr><td style="padding:12px 16px;font-size:14px;color:#737373;">Date de début</td><td style="padding:12px 16px;font-size:15px;color:#111;font-weight:600;">${formattedStart}</td></tr>
+  <tr><td style="padding:12px 16px;font-size:14px;color:#737373;">Date de fin</td><td style="padding:12px 16px;font-size:15px;color:#111;font-weight:600;">${formattedEnd}</td></tr>
+</table>
+${paragraph("Vous avez désormais un accès immédiat et illimité à tous les contenus premium : articles, analyses, outils avancés et newsletters exclusives.")}
+${button('Accéder aux contenus Premium', `${SITE_URL}/compte`)}
+${signature()}
+    `),
+  };
+}
+
+export function adminDowngradeToFreeEmail(name: string): { subject: string; html: string } {
+  return {
+    subject: 'Modification de votre abonnement NFI REPORT',
+    html: emailLayout(`
+${heading('Modification de votre abonnement')}
+${paragraph(`Bonjour ${name},`)}
+${paragraph("Votre abonnement a été modifié. Votre statut est désormais <strong>Lecteur gratuit</strong>.")}
+${paragraph("Ce changement prend effet immédiatement. Vous conservez l'accès aux articles gratuits et à un nombre limité d'articles premium par mois.")}
+${paragraph("Pour retrouver un accès illimité à tous nos contenus et outils premium, vous pouvez vous réabonner à tout moment.")}
+${button('Voir les offres Premium', `${SITE_URL}/pricing`)}
+${signature()}
+    `),
+  };
+}
+
+export function subscriptionExpiredEmail(name: string, expiresAt: string): { subject: string; html: string } {
+  const formattedDate = new Date(expiresAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  return {
+    subject: 'Votre abonnement Premium NFI REPORT a expiré',
+    html: emailLayout(`
+${heading('Votre abonnement Premium a expiré')}
+${paragraph(`Bonjour ${name},`)}
+${paragraph(`Votre abonnement Premium a expiré le <strong>${formattedDate}</strong>.`)}
+${paragraph("Vous n'avez plus accès aux articles premium, outils avancés et newsletters exclusives. Votre statut est désormais Lecteur gratuit.")}
+${paragraph("Renouvelez votre abonnement dès maintenant pour retrouver un accès illimité à tous nos contenus.")}
+${button('Renouveler mon abonnement', `${SITE_URL}/pricing`)}
+${signature()}
+    `),
+  };
+}

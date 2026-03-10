@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { logAuditEvent } from '@/lib/audit';
-import { getBillingOption, isValidBillingCycle } from '@/config/pricing';
+import { sendTransactionalEmail } from '@/lib/email';
+import { adminPremiumGrantedEmail, adminDowngradeToFreeEmail } from '@/lib/email-templates';
 
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin();
@@ -12,10 +13,32 @@ export async function GET(request: NextRequest) {
   const search = url.searchParams.get('search') || '';
   const roleFilter = url.searchParams.get('role') || '';
   const statusFilter = url.searchParams.get('status') || '';
+  const userId = url.searchParams.get('userId') || '';
+
+  // Single user detail fetch
+  if (userId) {
+    const { data } = await serviceClient
+      .from('user_profiles')
+      .select('id, email, full_name, role, subscription_status, blocked, created_at, subscription_start, subscription_end, subscription_granted_by, subscription_updated_at')
+      .eq('id', userId)
+      .single();
+
+    if (!data) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    const { data: sub } = await serviceClient
+      .from('subscriptions')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    return NextResponse.json({ ...data, subscription: sub || null });
+  }
 
   let query = serviceClient
     .from('user_profiles')
-    .select('id, email, full_name, role, subscription_status, blocked, created_at')
+    .select('id, email, full_name, role, subscription_status, blocked, created_at, subscription_start, subscription_end')
     .order('created_at', { ascending: false })
     .limit(500);
 
@@ -40,6 +63,17 @@ export async function PUT(request: NextRequest) {
   }
 
   const now = new Date().toISOString();
+
+  // Fetch target user for email and role checks
+  const { data: targetUser } = await serviceClient
+    .from('user_profiles')
+    .select('email, full_name, role, subscription_status')
+    .eq('id', userId)
+    .single();
+
+  if (!targetUser) {
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  }
 
   switch (action) {
     case 'changeRole': {
@@ -78,23 +112,33 @@ export async function PUT(request: NextRequest) {
     }
 
     case 'activateSubscription': {
-      const cycle = isValidBillingCycle(body.billingCycle || '') ? body.billingCycle : 'monthly';
-      const billingOpt = getBillingOption(cycle);
-      const expiresAt = new Date();
-      expiresAt.setMonth(expiresAt.getMonth() + billingOpt.durationMonths);
+      const { durationMonths, customDays } = body;
+      const months = parseInt(durationMonths) || 1;
 
-      // Preserve admin role — only change role for non-admin users
-      const { data: targetProfile } = await serviceClient
-        .from('user_profiles')
-        .select('role')
-        .eq('id', userId)
-        .single();
+      const startDate = new Date();
+      const endDate = new Date();
 
-      const newRole = targetProfile?.role === 'admin' ? 'admin' : 'premium';
+      if (customDays && parseInt(customDays) > 0) {
+        endDate.setDate(endDate.getDate() + parseInt(customDays));
+      } else {
+        endDate.setMonth(endDate.getMonth() + months);
+      }
+
+      const billingCycle = months === 1 ? 'monthly' : months === 3 ? 'quarterly' : 'yearly';
+      const newRole = targetUser.role === 'admin' ? 'admin' : 'premium';
 
       await serviceClient
         .from('user_profiles')
-        .update({ role: newRole, subscription_status: 'active', updated_at: now })
+        .update({
+          role: newRole,
+          subscription_status: 'active',
+          subscription_start: startDate.toISOString(),
+          subscription_end: endDate.toISOString(),
+          subscription_granted_by: user.id,
+          subscription_updated_at: now,
+          expiration_warning_sent: false,
+          updated_at: now,
+        })
         .eq('id', userId);
 
       await serviceClient
@@ -104,30 +148,55 @@ export async function PUT(request: NextRequest) {
             user_id: userId,
             tier: 'premium',
             status: 'active',
-            billing_cycle: cycle,
-            current_period_start: now,
-            current_period_end: expiresAt.toISOString(),
+            billing_cycle: billingCycle,
+            current_period_start: startDate.toISOString(),
+            current_period_end: endDate.toISOString(),
           },
           { onConflict: 'user_id' }
         );
 
-      await logAuditEvent(user.id, 'activate_subscription', 'user', userId, { tier: 'premium', billingCycle: cycle, expiresAt: expiresAt.toISOString() });
-      return NextResponse.json({ success: true });
+      const durationLabel = customDays
+        ? `${customDays} jours`
+        : months === 1 ? '1 mois' : months === 3 ? '3 mois' : months === 6 ? '6 mois' : `${months} mois`;
+
+      try {
+        const emailData = adminPremiumGrantedEmail(
+          targetUser.full_name || 'Client',
+          startDate.toISOString(),
+          endDate.toISOString(),
+        );
+        await sendTransactionalEmail({ to: targetUser.email, ...emailData });
+      } catch {
+        // Email failure should not block subscription activation
+      }
+
+      await logAuditEvent(user.id, 'activate_subscription', 'user', userId, {
+        tier: 'premium',
+        duration: durationLabel,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        userName: targetUser.full_name,
+        userEmail: targetUser.email,
+      });
+
+      return NextResponse.json({
+        success: true,
+        subscription_start: startDate.toISOString(),
+        subscription_end: endDate.toISOString(),
+      });
     }
 
     case 'deactivateSubscription': {
-      // Preserve admin role on deactivation
-      const { data: deactProfile } = await serviceClient
-        .from('user_profiles')
-        .select('role')
-        .eq('id', userId)
-        .single();
-
-      const deactRole = deactProfile?.role === 'admin' ? 'admin' : 'reader';
+      const deactRole = targetUser.role === 'admin' ? 'admin' : 'reader';
 
       await serviceClient
         .from('user_profiles')
-        .update({ role: deactRole, subscription_status: 'inactive', updated_at: now })
+        .update({
+          role: deactRole,
+          subscription_status: 'inactive',
+          subscription_updated_at: now,
+          updated_at: now,
+        })
         .eq('id', userId);
 
       await serviceClient
@@ -135,7 +204,18 @@ export async function PUT(request: NextRequest) {
         .update({ status: 'cancelled', updated_at: now })
         .eq('user_id', userId);
 
-      await logAuditEvent(user.id, 'deactivate_subscription', 'user', userId);
+      try {
+        const emailData = adminDowngradeToFreeEmail(targetUser.full_name || 'Client');
+        await sendTransactionalEmail({ to: targetUser.email, ...emailData });
+      } catch {
+        // Email failure should not block deactivation
+      }
+
+      await logAuditEvent(user.id, 'deactivate_subscription', 'user', userId, {
+        userName: targetUser.full_name,
+        userEmail: targetUser.email,
+      });
+
       return NextResponse.json({ success: true });
     }
 

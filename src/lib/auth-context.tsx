@@ -96,6 +96,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, [supabase, fetchProfile, fetchPremiumCount]);
 
+  // Refresh profile when tab becomes visible (detects admin subscription changes)
+  useEffect(() => {
+    if (!supabase) return;
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && session?.user) {
+        fetchProfile();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [supabase, session, fetchProfile]);
+
   const signIn = async (email: string, password: string) => {
     if (!supabase) return { error: { message: 'Supabase not configured' } };
     const { error } = await supabase.auth.signInWithPassword({ email, password });

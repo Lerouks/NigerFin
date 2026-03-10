@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
   Users, BarChart3, Shield, Loader2, Search, CreditCard, CheckCircle, XCircle,
   Clock, Download, TrendingUp, TrendingDown, DollarSign, Activity, Ban,
-  Unlock, Settings, FileText, AlertTriangle, ChevronDown, ChevronUp, Newspaper, LineChart, Zap, BookOpen, SlidersHorizontal, Mail,
+  Unlock, Settings, FileText, AlertTriangle, ChevronDown, ChevronUp, Newspaper, LineChart, Zap, BookOpen, SlidersHorizontal, Mail, Crown, Calendar,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { formatPrice, PREMIUM_TIER, CURRENCY, BILLING_OPTIONS, getBillingCycleLabel } from '@/config/pricing';
@@ -40,6 +40,8 @@ interface UserEntry {
   billing_cycle: string | null;
   blocked: boolean;
   created_at: string;
+  subscription_start: string | null;
+  subscription_end: string | null;
 }
 
 interface PaymentRequest {
@@ -794,12 +796,50 @@ function UserRow({ user, expanded, processing, onToggle, onAction }: {
   onToggle: () => void;
   onAction: (action: string, extra?: Record<string, string>) => void;
 }) {
-  const [subTier] = useState('premium');
-  const [subCycle, setSubCycle] = useState('monthly');
+  const [durationMonths, setDurationMonths] = useState('1');
+  const [customDays, setCustomDays] = useState('');
+  const [showCustom, setShowCustom] = useState(false);
+  const [showDowngradeConfirm, setShowDowngradeConfirm] = useState(false);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+
+  const isActive = user.subscription_status === 'active';
+  const isExpired = user.subscription_status === 'expired';
+
+  // Calculate projected end date for display
+  const getProjectedEnd = () => {
+    const end = new Date();
+    if (showCustom && customDays) {
+      end.setDate(end.getDate() + parseInt(customDays));
+    } else {
+      end.setMonth(end.getMonth() + parseInt(durationMonths));
+    }
+    return end.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+  };
+
+  const handleActivate = async () => {
+    const extra: Record<string, string> = { durationMonths };
+    if (showCustom && customDays) {
+      extra.customDays = customDays;
+    }
+    onAction('activateSubscription', extra);
+    setActionSuccess('premium');
+    setTimeout(() => setActionSuccess(null), 3000);
+  };
+
+  const handleDeactivate = () => {
+    setShowDowngradeConfirm(false);
+    onAction('deactivateSubscription');
+    setActionSuccess('downgrade');
+    setTimeout(() => setActionSuccess(null), 3000);
+  };
+
+  const statusLabel = isActive ? 'Premium actif' : isExpired ? 'Expiré' : 'Lecteur gratuit';
+  const statusColor = isActive ? 'text-emerald-600' : isExpired ? 'text-amber-600' : 'text-gray-400';
+  const statusBg = isActive ? 'bg-emerald-50' : isExpired ? 'bg-amber-50' : 'bg-gray-50';
 
   return (
     <>
-      <tr className="border-b border-black/[0.03] last:border-0">
+      <tr className="border-b border-black/[0.03] last:border-0 hover:bg-gray-50/50 transition-colors">
         <td className="px-4 py-3">
           <div className="flex items-center gap-2">
             <div>
@@ -821,9 +861,16 @@ function UserRow({ user, expanded, processing, onToggle, onAction }: {
           </span>
         </td>
         <td className="px-4 py-3">
-          <span className={`text-[12px] ${user.subscription_status === 'active' ? 'text-green-600' : 'text-gray-400'}`}>
-            {user.subscription_status === 'active' ? 'Actif' : 'Inactif'}
-          </span>
+          <div className="flex flex-col gap-0.5">
+            <span className={`text-[12px] font-medium ${statusColor}`}>
+              {statusLabel}
+            </span>
+            {isActive && user.subscription_end && (
+              <span className="text-[10px] text-gray-400">
+                Exp. {new Date(user.subscription_end).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+              </span>
+            )}
+          </div>
         </td>
         <td className="px-4 py-3 text-[12px] text-gray-500">
           {new Date(user.created_at).toLocaleDateString('fr-FR')}
@@ -836,78 +883,226 @@ function UserRow({ user, expanded, processing, onToggle, onAction }: {
       </tr>
       {expanded && (
         <tr className="bg-gray-50/80">
-          <td colSpan={5} className="px-4 py-4">
-            <div className="flex flex-wrap gap-3 items-end">
-              {/* Role change */}
-              <div>
-                <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Rôle</label>
-                <select
-                  defaultValue={user.role}
-                  onChange={(e) => onAction('changeRole', { role: e.target.value })}
-                  disabled={processing}
-                  className="text-[12px] border border-gray-200 rounded px-2 py-1.5 bg-white"
-                >
-                  <option value="reader">Lecteur</option>
-                  <option value="premium">Premium</option>
-                  <option value="admin">Admin</option>
-                </select>
+          <td colSpan={5} className="px-4 py-5">
+            {/* Success feedback */}
+            {actionSuccess && (
+              <div className="mb-4 flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-2.5 rounded-lg text-[13px]">
+                <CheckCircle className="w-4 h-4" />
+                {actionSuccess === 'premium'
+                  ? 'Abonnement Premium activé avec succès. Email envoyé.'
+                  : 'Abonnement rétrogradé en Lecteur gratuit. Email envoyé.'}
               </div>
+            )}
 
-              {/* Block / Unblock */}
-              {user.blocked ? (
-                <button
-                  onClick={() => onAction('unblock')}
-                  disabled={processing}
-                  className="text-[12px] bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded hover:bg-emerald-100 transition-colors disabled:opacity-50 flex items-center gap-1"
-                >
-                  <Unlock className="w-3 h-3" /> Débloquer
-                </button>
-              ) : (
-                <button
-                  onClick={() => onAction('block')}
-                  disabled={processing}
-                  className="text-[12px] bg-red-50 text-red-700 px-3 py-1.5 rounded hover:bg-red-100 transition-colors disabled:opacity-50 flex items-center gap-1"
-                >
-                  <Ban className="w-3 h-3" /> Bloquer
-                </button>
-              )}
-
-              {/* Activate subscription */}
-              <div className="flex items-end gap-2 ml-4 border-l pl-4 border-gray-200">
-                <div>
-                  <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Durée</label>
-                  <select
-                    value={subCycle}
-                    onChange={(e) => setSubCycle(e.target.value)}
-                    className="text-[12px] border border-gray-200 rounded px-2 py-1.5 bg-white"
-                  >
-                    <option value="monthly">Mensuel</option>
-                    <option value="quarterly">Trimestriel</option>
-                    <option value="yearly">Annuel</option>
-                  </select>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Left: Current status + role management */}
+              <div className="space-y-3">
+                {/* Current subscription status card */}
+                <div className={`${statusBg} rounded-lg p-4 border border-black/[0.04]`}>
+                  <div className="flex items-center gap-2 mb-2">
+                    {isActive ? <Crown className="w-4 h-4 text-amber-500" /> : <Users className="w-4 h-4 text-gray-400" />}
+                    <span className="text-[11px] uppercase tracking-wider text-gray-500 font-medium">Statut actuel</span>
+                  </div>
+                  <p className={`text-sm font-semibold ${statusColor}`}>{statusLabel}</p>
+                  {isActive && user.subscription_start && (
+                    <div className="mt-2 space-y-1">
+                      <p className="text-[11px] text-gray-500">
+                        Début : {new Date(user.subscription_start).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      </p>
+                      {user.subscription_end && (
+                        <p className="text-[11px] text-gray-500">
+                          Fin : {new Date(user.subscription_end).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <button
-                  onClick={() => onAction('activateSubscription', { tier: subTier, billingCycle: subCycle })}
-                  disabled={processing}
-                  className="text-[12px] bg-[#111] text-white px-3 py-1.5 rounded hover:bg-[#333] transition-colors disabled:opacity-50"
-                >
-                  Activer Premium
-                </button>
+
+                {/* Role change */}
+                <div className="flex items-end gap-2">
+                  <div>
+                    <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Rôle</label>
+                    <select
+                      defaultValue={user.role}
+                      onChange={(e) => onAction('changeRole', { role: e.target.value })}
+                      disabled={processing}
+                      className="text-[12px] border border-gray-200 rounded px-2 py-1.5 bg-white"
+                    >
+                      <option value="reader">Lecteur</option>
+                      <option value="premium">Premium</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </div>
+
+                  {/* Block / Unblock */}
+                  {user.blocked ? (
+                    <button
+                      onClick={() => onAction('unblock')}
+                      disabled={processing}
+                      className="text-[12px] bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded hover:bg-emerald-100 transition-colors disabled:opacity-50 flex items-center gap-1"
+                    >
+                      <Unlock className="w-3 h-3" /> Débloquer
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => onAction('block')}
+                      disabled={processing}
+                      className="text-[12px] bg-red-50 text-red-700 px-3 py-1.5 rounded hover:bg-red-100 transition-colors disabled:opacity-50 flex items-center gap-1"
+                    >
+                      <Ban className="w-3 h-3" /> Bloquer
+                    </button>
+                  )}
+                </div>
               </div>
 
-              {/* Deactivate */}
-              {user.subscription_status === 'active' && (
-                <button
-                  onClick={() => onAction('deactivateSubscription')}
-                  disabled={processing}
-                  className="text-[12px] bg-gray-100 text-gray-700 px-3 py-1.5 rounded hover:bg-gray-200 transition-colors disabled:opacity-50"
-                >
-                  Désactiver abonnement
-                </button>
-              )}
+              {/* Right: Subscription management */}
+              <div className="bg-white rounded-lg border border-black/[0.06] p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-gray-400" />
+                  <span className="text-[11px] uppercase tracking-wider text-gray-500 font-medium">Gestion abonnement</span>
+                </div>
 
-              {processing && <Loader2 className="w-4 h-4 animate-spin text-gray-400" />}
+                {/* Status selector */}
+                <div>
+                  <label className="text-[11px] text-gray-400 block mb-1">Nouveau statut</label>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        if (isActive) {
+                          setShowDowngradeConfirm(true);
+                        }
+                      }}
+                      className={`flex-1 text-[12px] px-3 py-2 rounded border transition-colors ${
+                        !isActive
+                          ? 'bg-gray-100 border-gray-300 text-gray-700 font-medium'
+                          : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300'
+                      }`}
+                    >
+                      Lecteur gratuit
+                    </button>
+                    <button
+                      className={`flex-1 text-[12px] px-3 py-2 rounded border transition-colors ${
+                        isActive
+                          ? 'bg-amber-50 border-amber-300 text-amber-700 font-medium'
+                          : 'bg-white border-gray-200 text-gray-500 hover:border-amber-300'
+                      }`}
+                      disabled
+                    >
+                      Premium
+                    </button>
+                  </div>
+                </div>
+
+                {/* Duration selector */}
+                <div>
+                  <label className="text-[11px] text-gray-400 block mb-1">Durée de l&apos;abonnement</label>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {[
+                      { value: '1', label: '1 mois' },
+                      { value: '3', label: '3 mois' },
+                      { value: '6', label: '6 mois' },
+                      { value: '12', label: '12 mois' },
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        onClick={() => { setDurationMonths(opt.value); setShowCustom(false); setCustomDays(''); }}
+                        className={`text-[12px] px-2 py-1.5 rounded border transition-colors ${
+                          durationMonths === opt.value && !showCustom
+                            ? 'bg-[#111] text-white border-[#111]'
+                            : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => setShowCustom(!showCustom)}
+                    className={`mt-1.5 text-[11px] px-2 py-1 rounded border transition-colors w-full ${
+                      showCustom ? 'bg-[#111] text-white border-[#111]' : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300'
+                    }`}
+                  >
+                    Durée personnalisée
+                  </button>
+                  {showCustom && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <input
+                        type="number"
+                        placeholder="Nombre de jours"
+                        value={customDays}
+                        onChange={(e) => setCustomDays(e.target.value)}
+                        min={1}
+                        className="flex-1 text-[12px] border border-gray-200 rounded px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-black"
+                      />
+                      <span className="text-[11px] text-gray-400">jours</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Projected end date */}
+                <div className="bg-[#fafaf9] rounded-lg p-3 border border-black/[0.04]">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                    <span className="text-[11px] text-gray-400">Date de fin calculée</span>
+                  </div>
+                  <p className="text-[13px] font-medium">{getProjectedEnd()}</p>
+                </div>
+
+                {/* Action buttons */}
+                <button
+                  onClick={handleActivate}
+                  disabled={processing || (showCustom && !customDays)}
+                  className="w-full text-[13px] bg-[#111] text-white px-4 py-2.5 rounded-lg hover:bg-[#333] transition-colors disabled:opacity-50 flex items-center justify-center gap-2 font-medium"
+                >
+                  {processing ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                  Confirmer et appliquer Premium
+                </button>
+
+                {/* Downgrade button */}
+                {isActive && !showDowngradeConfirm && (
+                  <button
+                    onClick={() => setShowDowngradeConfirm(true)}
+                    disabled={processing}
+                    className="w-full text-[12px] bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
+                  >
+                    Rétrograder en Lecteur gratuit
+                  </button>
+                )}
+
+                {/* Downgrade confirmation */}
+                {showDowngradeConfirm && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <p className="text-[12px] text-red-700 mb-2 font-medium">
+                      Confirmer la rétrogradation en Lecteur gratuit ?
+                    </p>
+                    <p className="text-[11px] text-red-600 mb-3">
+                      L&apos;utilisateur perdra immédiatement l&apos;accès premium et recevra un email de notification.
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setShowDowngradeConfirm(false)}
+                        className="flex-1 text-[12px] px-3 py-1.5 rounded bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                      >
+                        Annuler
+                      </button>
+                      <button
+                        onClick={handleDeactivate}
+                        disabled={processing}
+                        className="flex-1 text-[12px] px-3 py-1.5 rounded bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50"
+                      >
+                        {processing ? <Loader2 className="w-3 h-3 animate-spin inline" /> : 'Confirmer'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
+
+            {processing && (
+              <div className="mt-3 flex items-center gap-2 text-[12px] text-gray-400">
+                <Loader2 className="w-4 h-4 animate-spin" /> Traitement en cours...
+              </div>
+            )}
           </td>
         </tr>
       )}
@@ -970,6 +1165,7 @@ function AuditActionBadge({ action }: { action: string }) {
     unblock_user: 'bg-emerald-100 text-emerald-700',
     activate_subscription: 'bg-purple-100 text-purple-700',
     deactivate_subscription: 'bg-gray-100 text-gray-700',
+    subscription_expired: 'bg-orange-100 text-orange-700',
     update_price: 'bg-amber-100 text-amber-700',
     export_csv: 'bg-blue-100 text-blue-700',
   };
@@ -982,6 +1178,7 @@ function AuditActionBadge({ action }: { action: string }) {
     unblock_user: 'Utilisateur débloqué',
     activate_subscription: 'Abo activé',
     deactivate_subscription: 'Abo désactivé',
+    subscription_expired: 'Abo expiré (auto)',
     update_price: 'Prix modifié',
     export_csv: 'Export CSV',
   };

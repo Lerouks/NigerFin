@@ -23,7 +23,7 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#fafaf9]">
-      <h1 className="sr-only">NFI Report — Actualités économiques et financières du Niger</h1>
+      <h1 className="sr-only">NFI Report - Actualités économiques et financières du Niger</h1>
       {/* Featured Article */}
       {featuredArticle && (
         <section>

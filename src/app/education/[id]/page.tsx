@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   if (!category) return { title: 'Éducation' };
 
   const title = category.title;
-  const description = `Cours et leçons sur ${category.title.toLowerCase()} — formation gratuite en finance et économie au Niger.`;
+  const description = `Cours et leçons sur ${category.title.toLowerCase()} - formation gratuite en finance et économie au Niger.`;
 
   return {
     title,

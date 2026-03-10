@@ -24,7 +24,7 @@ ${content}
 
 <!-- Footer -->
 <tr><td style="background-color:#fafaf9;padding:24px 32px;border-top:1px solid #e5e5e5;text-align:center;">
-  <p style="margin:0 0 8px;font-size:13px;color:#a3a3a3;">NFI Report — Actualités économiques et financières du Niger</p>
+  <p style="margin:0 0 8px;font-size:13px;color:#a3a3a3;">NFI Report - Actualités économiques et financières du Niger</p>
   <p style="margin:0;font-size:12px;color:#d4d4d4;">
     <a href="${SITE_URL}" style="color:#a3a3a3;text-decoration:underline;">nfireport.com</a>
     &nbsp;&middot;&nbsp;
@@ -93,7 +93,7 @@ ${signature()}
 
 export function contactConfirmationEmail(name: string): { subject: string; html: string } {
   return {
-    subject: 'Nous avons bien reçu votre message — NFI Report',
+    subject: 'Nous avons bien reçu votre message - NFI Report',
     html: emailLayout(`
 ${heading('Message bien reçu')}
 ${paragraph(`Bonjour ${name},`)}
@@ -107,7 +107,7 @@ ${signature()}
 
 export function contactNotificationEmail(name: string, email: string, subject: string, message: string): { subject: string; html: string } {
   return {
-    subject: `[Contact] ${subject} — ${name}`,
+    subject: `[Contact] ${subject} - ${name}`,
     html: emailLayout(`
 ${heading('Nouveau message de contact')}
 <table style="width:100%;border-collapse:collapse;margin-bottom:16px;">
@@ -127,7 +127,7 @@ export function paymentConfirmationEmail(name: string, tier: string, billingCycl
   const formattedDate = new Date(expiresAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
 
   return {
-    subject: 'Votre abonnement Premium est activé — NFI Report',
+    subject: 'Votre abonnement Premium est activé - NFI Report',
     html: emailLayout(`
 ${heading('Abonnement Premium activé')}
 ${paragraph(`Bonjour ${name},`)}
@@ -149,7 +149,7 @@ export function paymentRejectionEmail(name: string, reason?: string): { subject:
     : '';
 
   return {
-    subject: 'Paiement non validé — NFI Report',
+    subject: 'Paiement non validé - NFI Report',
     html: emailLayout(`
 ${heading('Paiement non validé')}
 ${paragraph(`Bonjour ${name},`)}
@@ -167,7 +167,7 @@ export function subscriptionExpirationWarningEmail(name: string, expiresAt: stri
   const formattedDate = new Date(expiresAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
 
   return {
-    subject: 'Votre abonnement expire bientôt — NFI Report',
+    subject: 'Votre abonnement expire bientôt - NFI Report',
     html: emailLayout(`
 ${heading('Votre abonnement expire bientôt')}
 ${paragraph(`Bonjour ${name},`)}

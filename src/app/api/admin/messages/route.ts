@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { serverError } from '@/lib/api-error';
+import { logAuditEvent } from '@/lib/audit';
 
 // GET: list all contact messages (newest first)
 export async function GET(request: NextRequest) {
@@ -63,6 +64,9 @@ export async function PUT(request: NextRequest) {
     .single();
 
   if (error) return serverError(error, 'admin-messages-update');
+
+  await logAuditEvent(auth.user.id, 'update_message_status', 'message', id, { status });
+
   return NextResponse.json(data);
 }
 
@@ -85,5 +89,8 @@ export async function DELETE(request: NextRequest) {
     .eq('id', id);
 
   if (error) return serverError(error, 'admin-messages-delete');
+
+  await logAuditEvent(auth.user.id, 'delete_message', 'message', id);
+
   return NextResponse.json({ success: true });
 }

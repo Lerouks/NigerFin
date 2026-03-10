@@ -159,7 +159,7 @@ export function LegalSectionsManager() {
           <p className="text-[12px] text-gray-400">
             Route : <span className="font-mono">{activePage.route}</span>
             {sections.length === 0 && !loading && (
-              <span className="ml-2 text-amber-600">— Aucune section (contenu vide)</span>
+              <span className="ml-2 text-amber-600">· Aucune section (contenu vide)</span>
             )}
           </p>
         </div>

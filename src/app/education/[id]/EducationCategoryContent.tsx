@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { ArrowLeft, BookOpen, Clock, Lock, Crown, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useAuth } from '@/lib/auth-context';
@@ -36,6 +37,7 @@ export function EducationCategoryContent({ slug }: { slug: string }) {
   const [notFound, setNotFound] = useState(false);
   const [openLesson, setOpenLesson] = useState<string | null>(null);
   const { isSignedIn, userRole } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     (async () => {
@@ -121,14 +123,22 @@ export function EducationCategoryContent({ slug }: { slug: string }) {
             const isOpen = openLesson === lesson.id;
             const config = ACCESS_CONFIG[lesson.access_level] || ACCESS_CONFIG.free;
 
+            const handleLessonClick = () => {
+              if (accessible && lesson.content) {
+                setOpenLesson(isOpen ? null : lesson.id);
+              } else if (!accessible) {
+                router.push('/pricing');
+              }
+            };
+
             return (
               <div key={lesson.id}>
                 <div
-                  onClick={() => accessible && lesson.content && setOpenLesson(isOpen ? null : lesson.id)}
+                  onClick={handleLessonClick}
                   className={`group flex items-center justify-between p-5 rounded-xl border transition-all duration-150 ${
                     accessible
                       ? 'bg-white border-black/[0.06] hover:border-black/[0.12] hover:shadow-sm cursor-pointer'
-                      : 'bg-white/60 border-black/[0.04] cursor-default'
+                      : 'bg-white/60 border-black/[0.04] cursor-pointer hover:border-black/[0.08]'
                   } ${isOpen ? 'border-black/[0.12] shadow-sm' : ''}`}
                 >
                   <div className="flex items-center gap-4">
@@ -166,17 +176,20 @@ export function EducationCategoryContent({ slug }: { slug: string }) {
         </div>
 
         {/* Upsell for non-subscribed */}
-        {!isSignedIn && lessons.some((l) => l.access_level !== 'free') && (
+        {lessons.some((l) => !canAccess(l.access_level)) && (
           <div className="mt-10 p-6 bg-[#111] text-white rounded-xl text-center">
             <h3 className="text-lg font-semibold mb-2">Débloquez toutes les leçons</h3>
             <p className="text-white/50 text-[14px] mb-4">
-              Connectez-vous et abonnez-vous pour accéder à l&apos;ensemble du contenu éducatif.
+              {isSignedIn
+                ? 'Abonnez-vous pour accéder à l\u2019ensemble du contenu éducatif.'
+                : 'Connectez-vous et abonnez-vous pour accéder à l\u2019ensemble du contenu éducatif.'}
             </p>
             <Link
-              href="/connexion"
+              href={isSignedIn ? '/pricing' : '/pricing'}
               className="inline-flex items-center gap-2 bg-white text-black px-6 py-2.5 rounded-lg text-[14px] font-medium hover:bg-white/90 transition-colors"
             >
-              Se connecter
+              <Crown className="w-4 h-4" />
+              Voir les offres
             </Link>
           </div>
         )}

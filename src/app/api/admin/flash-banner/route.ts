@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
-import { createServerSupabaseClient } from '@/lib/supabase';
 import { serverError } from '@/lib/api-error';
 
-// GET: public read of flash banner config
+// GET: admin read of flash banner config
 export async function GET() {
-  const supabase = await createServerSupabaseClient();
-  if (!supabase) {
-    return NextResponse.json({ enabled: false, items: [] });
-  }
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
 
-  const { data } = await supabase
+  const { data } = await auth.serviceClient
     .from('flash_banner')
     .select('enabled, items, updated_at')
     .order('id')

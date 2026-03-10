@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { X, Check } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { getReaderPremiumLimit } from '@/lib/access-control';
+import { PREMIUM_TIER } from '@/config/pricing';
 import type { UserRole } from '@/types';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -149,12 +150,7 @@ function getOverlayConfig(overlayCase: OverlayCase, remaining: number): OverlayC
         scrollTriggerPercent: 30,
         title: 'Contenu Premium',
         message: 'Vous avez utilisé vos 3 articles premium gratuits ce mois-ci.',
-        benefits: [
-          'Accès illimité aux articles',
-          'Analyses économiques approfondies',
-          'Outils d\'analyse automatique',
-          'Données marchés en temps réel',
-        ],
+        benefits: PREMIUM_TIER.features,
         ctaPrimary: { text: 'Passer en Premium', href: '/pricing' },
       };
 
@@ -175,11 +171,7 @@ function getOverlayConfig(overlayCase: OverlayCase, remaining: number): OverlayC
         scrollTriggerPercent: 30,
         title: 'Contenu Premium',
         message: 'Limite mensuelle atteinte. Passez en Premium pour un accès illimité.',
-        benefits: [
-          'Accès total aux analyses',
-          'Accès complet aux outils',
-          'Contenu exclusif réservé aux membres Premium',
-        ],
+        benefits: PREMIUM_TIER.features,
         ctaPrimary: { text: 'Passer en Premium', href: '/pricing' },
       };
   }

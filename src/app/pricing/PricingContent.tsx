@@ -9,6 +9,7 @@ import {
   BILLING_OPTIONS,
   CURRENCY,
   PAYMENT_METHODS,
+  PREMIUM_TIER,
   formatPrice,
   type BillingCycle,
 } from '@/config/pricing';
@@ -43,13 +44,7 @@ export function PricingContent() {
     window.location.href = `/paiement?tier=premium&cycle=${selectedCycle}`;
   };
 
-  const advantages = [
-    'Accès illimité à tous les articles',
-    'Analyses économiques approfondies',
-    'Décryptages marchés et entreprises',
-    'Accès aux outils d\u2019analyse',
-    'Contenu exclusif réservé aux abonnés',
-  ];
+  const advantages = PREMIUM_TIER.features;
 
   return (
     <div className="min-h-screen bg-[#fafaf9]">

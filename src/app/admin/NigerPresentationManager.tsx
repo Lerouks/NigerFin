@@ -250,7 +250,7 @@ function VisibilityToggle({ visible, onToggle }: { visible: boolean; onToggle: (
           ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
           : 'bg-red-50 text-red-500 hover:bg-red-100'
       }`}
-      title={visible ? 'Visible — cliquer pour masquer' : 'Masqué — cliquer pour afficher'}
+      title={visible ? 'Visible - cliquer pour masquer' : 'Masqué - cliquer pour afficher'}
     >
       {visible ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
       {visible ? 'Visible' : 'Masqué'}

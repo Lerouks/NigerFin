@@ -1,13 +1,39 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, Send, Check } from 'lucide-react';
+
+interface ContactSection {
+  heading: string;
+  text: string;
+  display_order: number;
+}
 
 export function ContactForm() {
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [contactInfo, setContactInfo] = useState<ContactSection[]>([]);
+
+  useEffect(() => {
+    fetch('/api/legal-sections?page=contact')
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) setContactInfo(data);
+      })
+      .catch(() => {});
+  }, []);
+
+  const getInfo = (order: number, fallback: string) => {
+    const section = contactInfo.find((s) => s.display_order === order);
+    return section?.text || fallback;
+  };
+
+  const address = getInfo(1, 'Niamey, Niger\nPlateau – BP 800');
+  const email = getInfo(2, 'contact@nfireport.com');
+  const phone = getInfo(3, '+227 98 54 38 37');
+  const hoursText = getInfo(4, 'Lundi - Vendredi : 08h00 - 18h00 | Samedi : 09h00 - 13h00 | Dimanche : Fermé');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +81,7 @@ export function ContactForm() {
                   </div>
                   <div>
                     <h3 className="font-semibold mb-1">Adresse</h3>
-                    <p className="text-gray-600 text-sm">Niamey, Niger<br />Plateau &ndash; BP 800</p>
+                    <p className="text-gray-600 text-sm">{address.split('\n').map((line, i) => <span key={i}>{i > 0 && <br />}{line}</span>)}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -64,7 +90,7 @@ export function ContactForm() {
                   </div>
                   <div>
                     <h3 className="font-semibold mb-1">Email</h3>
-                    <a href="mailto:contact@nfireport.com" className="text-gray-600 text-sm hover:text-black transition-colors block">contact@nfireport.com</a>
+                    <a href={`mailto:${email}`} className="text-gray-600 text-sm hover:text-black transition-colors block">{email}</a>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -73,7 +99,7 @@ export function ContactForm() {
                   </div>
                   <div>
                     <h3 className="font-semibold mb-1">Téléphone</h3>
-                    <a href="tel:+22798543837" className="text-gray-600 text-sm hover:text-black transition-colors block">+227 98 54 38 37</a>
+                    <a href={`tel:${phone.replace(/\s/g, '')}`} className="text-gray-600 text-sm hover:text-black transition-colors block">{phone}</a>
                   </div>
                 </div>
               </div>
@@ -81,9 +107,17 @@ export function ContactForm() {
               <div className="bg-white p-5 rounded-lg border border-black/[0.06]">
                 <h3 className="font-bold mb-3">Heures d&apos;ouverture</h3>
                 <div className="space-y-2 text-sm text-gray-600">
-                  <div className="flex justify-between"><span>Lundi - Vendredi</span><span>08h00 - 18h00</span></div>
-                  <div className="flex justify-between"><span>Samedi</span><span>09h00 - 13h00</span></div>
-                  <div className="flex justify-between"><span>Dimanche</span><span>Fermé</span></div>
+                  {hoursText.split('|').map((line, i) => {
+                    const parts = line.trim().split(/\s*:\s*/);
+                    const label = parts[0] || '';
+                    const value = parts.slice(1).join(':') || '';
+                    return (
+                      <div key={i} className="flex justify-between">
+                        <span>{label}</span>
+                        <span>{value}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>

@@ -25,7 +25,7 @@ export function BreakingNews() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    fetch('/api/admin/flash-banner')
+    fetch('/api/flash-banner')
       .then((res) => res.json())
       .then((data) => {
         if (data.enabled === false || !data.items?.length) {

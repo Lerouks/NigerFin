@@ -21,7 +21,32 @@ export async function GET(request: NextRequest) {
       .order('sort_order');
 
     if (error) return serverError(error, 'education-lessons');
-    return NextResponse.json(data || []);
+
+    // Check user subscription to decide whether to strip premium content
+    const { data: { user } } = await supabase.auth.getUser();
+    let userRole: string | null = null;
+    if (user) {
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('role, subscription_status')
+        .eq('id', user.id)
+        .single();
+      if (profile && profile.subscription_status === 'active') {
+        userRole = profile.role;
+      }
+    }
+
+    const isPremiumUser = userRole === 'premium' || userRole === 'admin' || userRole === 'pro';
+
+    // Strip content from non-free lessons for non-premium users
+    const sanitized = (data || []).map((lesson: any) => {
+      if (lesson.access_level === 'free' || isPremiumUser) {
+        return lesson;
+      }
+      return { ...lesson, content: '' };
+    });
+
+    return NextResponse.json(sanitized);
   }
 
   // If slug is provided, return that single category

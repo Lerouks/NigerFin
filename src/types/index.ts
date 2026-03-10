@@ -1,6 +1,6 @@
 export type ContentType = 'free' | 'premium';
 export type UserRole = 'reader' | 'premium' | 'admin';
-export type SubscriptionStatus = 'active' | 'inactive' | 'cancelled' | 'past_due';
+export type SubscriptionStatus = 'active' | 'inactive' | 'cancelled' | 'past_due' | 'expired' | 'free';
 
 export interface Article {
   _id: string;
@@ -70,6 +70,10 @@ export interface UserProfile {
   subscription_status: SubscriptionStatus;
   premium_articles_read_this_month: number;
   premium_articles_reset_at: string;
+  subscription_start: string | null;
+  subscription_end: string | null;
+  subscription_granted_by: string | null;
+  subscription_updated_at: string | null;
   created_at: string;
   updated_at: string;
 }

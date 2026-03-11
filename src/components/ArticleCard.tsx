@@ -50,7 +50,7 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
             height={600}
             sizes="100vw"
             quality={90}
-            className="w-full h-[500px] object-cover opacity-70 group-hover:opacity-60 group-hover:scale-[1.02] transition-all duration-700"
+            className="w-full h-[300px] md:h-[500px] object-cover opacity-70 group-hover:opacity-60 group-hover:scale-[1.02] transition-all duration-700"
             priority
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
@@ -93,7 +93,7 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
             height={300}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             quality={85}
-            className="w-full h-48 object-cover group-hover:scale-[1.03] transition-transform duration-500"
+            className="w-full h-60 md:h-48 object-cover group-hover:scale-[1.03] transition-transform duration-500"
           />
           {article.isPremium && (
             <div className="absolute top-3 left-3 bg-black/80 backdrop-blur-sm text-white text-[10px] tracking-[0.1em] uppercase px-2.5 py-1 rounded-full">

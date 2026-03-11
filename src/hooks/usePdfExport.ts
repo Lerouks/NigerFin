@@ -4,8 +4,13 @@ import { useCallback } from 'react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
+/** Replace narrow no-break space (U+202F) and non-breaking space (U+00A0) with regular spaces so jsPDF can render them. */
+function sanitize(s: string): string {
+  return s.replace(/[\u00A0\u202F]/g, ' ');
+}
+
 function fmtFCFA(n: number): string {
-  return Math.round(n).toLocaleString('fr-FR') + ' FCFA';
+  return sanitize(Math.round(n).toLocaleString('fr-FR')) + ' FCFA';
 }
 
 function slugify(text: string): string {
@@ -111,7 +116,7 @@ export function usePdfExport() {
       startY: y,
       margin: { left: marginL, right: marginR },
       head: [['Paramètre', 'Valeur']],
-      body: params.map((p) => [p.label, p.value]),
+      body: params.map((p) => [sanitize(p.label), sanitize(p.value)]),
       headStyles: {
         fillColor: [17, 17, 17],
         textColor: [255, 255, 255],
@@ -146,7 +151,7 @@ export function usePdfExport() {
       startY: y,
       margin: { left: marginL, right: marginR },
       head: [['Indicateur', 'Valeur']],
-      body: results.map((r) => [r.label, r.value]),
+      body: results.map((r) => [sanitize(r.label), sanitize(r.value)]),
       headStyles: {
         fillColor: [17, 17, 17],
         textColor: [255, 255, 255],
@@ -182,7 +187,7 @@ export function usePdfExport() {
         startY: y,
         margin: { left: marginL, right: marginR },
         head: [table.head],
-        body: table.body.map((row) => row.map((cell) => String(cell))),
+        body: table.body.map((row) => row.map((cell) => sanitize(String(cell)))),
         headStyles: {
           fillColor: [17, 17, 17],
           textColor: [255, 255, 255],

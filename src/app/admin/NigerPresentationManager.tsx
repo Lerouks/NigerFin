@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import {
   Loader2, Save, MapPin, Upload, Eye, EyeOff, ChevronDown, ChevronUp,
   BarChart3, Globe, Pickaxe, Pencil,
@@ -293,7 +294,7 @@ function PresentationEditor({
           </div>
           {presentation.map_image_url && (
             <div className="w-24 h-20 rounded-lg overflow-hidden bg-gray-100 border border-black/[0.06] flex-shrink-0">
-              <img src={presentation.map_image_url} alt="Carte du Niger" className="w-full h-full object-contain" />
+              <Image src={presentation.map_image_url} alt="Carte du Niger" width={96} height={80} className="w-full h-full object-contain" unoptimized />
             </div>
           )}
         </div>

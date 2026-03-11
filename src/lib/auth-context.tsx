@@ -13,8 +13,8 @@ interface AuthContextType {
   isSignedIn: boolean;
   userRole: UserRole | null;
   premiumArticlesUsed: number;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: any; existingUser: boolean }>;
+  signIn: (email: string, password: string) => Promise<{ error: { message: string } | null }>;
+  signUp: (email: string, password: string, fullName: string) => Promise<{ error: { message: string } | null; existingUser: boolean }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }

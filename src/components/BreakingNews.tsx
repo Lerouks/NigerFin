@@ -32,7 +32,7 @@ export function BreakingNews() {
           setReady(false);
           return;
         }
-        setItems(data.items.map((n: any) => ({ tag: n.tag, text: n.text })));
+        setItems(data.items.map((n: NewsItem) => ({ tag: n.tag, text: n.text })));
         setReady(true);
       })
       .catch(() => {});

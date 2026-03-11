@@ -19,7 +19,7 @@ export async function GET() {
     return serverError(catError, 'admin-education-categories');
   }
 
-  const result = (categories || []).map((cat: any) => ({
+  const result = (categories || []).map((cat: Record<string, unknown> & { education_lessons?: { id: string }[] }) => ({
     ...cat,
     lesson_count: cat.education_lessons?.length || 0,
     education_lessons: undefined,

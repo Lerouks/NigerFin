@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createServerSupabaseClient } from '@/lib/supabase';
 import { createServiceClient } from '@/lib/supabase';
 import { serverError } from '@/lib/api-error';
@@ -88,6 +89,13 @@ export async function POST(req: NextRequest) {
   }).select().single();
 
   if (error) return serverError(error, 'admin-articles');
+
+  // Revalidate caches so the article appears immediately on the site
+  if (data?.status === 'published') {
+    revalidatePath('/');
+    if (data?.slug) revalidatePath(`/articles/${data.slug}`);
+  }
+
   return NextResponse.json(data);
 }
 
@@ -136,6 +144,13 @@ export async function PUT(req: NextRequest) {
     .single();
 
   if (error) return serverError(error, 'admin-articles');
+
+  // Revalidate caches when article is published or updated
+  if (data?.status === 'published') {
+    revalidatePath('/');
+    if (data?.slug) revalidatePath(`/articles/${data.slug}`);
+  }
+
   return NextResponse.json(data);
 }
 

@@ -148,11 +148,7 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
   if (accessResult === null) {
     return (
       <div className="min-h-screen bg-[#fafaf9]">
-        <div className="relative aspect-[2/1] max-h-[600px] bg-[#111]">
-          <Image src={imageUrl} alt={article.title} fill sizes="100vw" quality={90} className="object-cover opacity-60" priority />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-        </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-32 relative z-10 pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-20">
           <div className="max-w-3xl mx-auto">
             <article className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] overflow-hidden">
               <div className="p-8 md:p-12">
@@ -179,13 +175,7 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
   if (!accessResult.allowed) {
     return (
       <div className="min-h-screen bg-[#fafaf9]">
-        {/* Article header — visible normally */}
-        <div className="relative aspect-[2/1] max-h-[600px] bg-[#111]">
-          <Image src={imageUrl} alt={article.title} fill sizes="100vw" quality={90} className="object-cover opacity-60" priority />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-32 relative z-10 pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-20">
           <div className="max-w-3xl mx-auto">
             <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] overflow-hidden">
               <div className="p-8 md:p-12">
@@ -237,12 +227,8 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
   return (
     <div className="min-h-screen bg-[#fafaf9]">
       <ViewTracker articleId={article._id} />
-      <div className="relative aspect-[2/1] max-h-[600px] bg-[#111]">
-        <Image src={imageUrl} alt={article.title} fill sizes="100vw" quality={90} className="object-cover opacity-60" priority />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-32 relative z-10 pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           <div className="lg:col-span-8">
             <article className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] overflow-hidden">
@@ -264,7 +250,7 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
                 <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">{article.title}</h1>
                 {article.subtitle && <p className="text-xl text-gray-600 mb-6">{article.subtitle}</p>}
 
-                <div className="flex flex-wrap items-center gap-4 pb-6 mb-8 border-b border-black/[0.06]">
+                <div className="flex flex-wrap items-center gap-4 pb-6 mb-6 border-b border-black/[0.06]">
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-full bg-[#f0efe9] flex items-center justify-center">
                       <User className="w-3.5 h-3.5 text-gray-500" />
@@ -278,6 +264,28 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
                     <Clock className="w-4 h-4" />{article.readTime} min de lecture
                   </div>
                 </div>
+
+                {/* Cover image — after title & metadata */}
+                {imageUrl && (
+                  <figure className="mb-8">
+                    <div className="relative aspect-video w-full overflow-hidden rounded-lg">
+                      <Image
+                        src={imageUrl}
+                        alt={article.mainImage?.alt || article.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 800px"
+                        quality={90}
+                        className="object-contain bg-[#f5f5f0]"
+                        priority
+                      />
+                    </div>
+                    {article.mainImage?.caption && (
+                      <figcaption className="text-[12px] text-gray-500 mt-2 text-center">
+                        {article.mainImage.caption}
+                      </figcaption>
+                    )}
+                  </figure>
+                )}
 
                 {/* Render HTML body (fetched securely for premium, sanitized) */}
                 {resolvedBody ? (

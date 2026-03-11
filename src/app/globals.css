@@ -349,10 +349,13 @@ small, footer, .text-xs, .text-sm {
 
 /* ─── Images & Figures ─────────────────────────────────────────── */
 .article-content img {
-  width: 100%;
+  max-width: 100%;
+  width: auto;
   height: auto;
   border-radius: 8px;
-  margin: 2rem 0 0.5rem;
+  margin: 2rem auto 0.5rem;
+  display: block;
+  image-rendering: -webkit-optimize-contrast;
 }
 .article-content figure[data-type="image"] {
   margin: 2rem -2rem;

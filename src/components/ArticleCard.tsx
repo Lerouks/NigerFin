@@ -47,7 +47,9 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
             src={imageUrl}
             alt={article.title}
             width={1200}
-            height={500}
+            height={600}
+            sizes="100vw"
+            quality={90}
             className="w-full h-[500px] object-cover opacity-70 group-hover:opacity-60 group-hover:scale-[1.02] transition-all duration-700"
             priority
           />
@@ -89,6 +91,8 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
             alt={article.title}
             width={600}
             height={300}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            quality={85}
             className="w-full h-48 object-cover group-hover:scale-[1.03] transition-transform duration-500"
           />
           {article.isPremium && (

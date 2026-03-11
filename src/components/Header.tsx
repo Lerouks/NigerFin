@@ -79,6 +79,7 @@ export function Header() {
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="lg:hidden p-1.5 -ml-1.5 hover:bg-black/5 rounded-lg transition-colors"
+              aria-expanded={mobileMenuOpen}
               aria-label={mobileMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}

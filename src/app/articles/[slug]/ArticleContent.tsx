@@ -267,20 +267,20 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
 
                 {/* Cover image — after title & metadata */}
                 {imageUrl && (
-                  <figure className="mb-8">
-                    <div className="relative aspect-video w-full overflow-hidden rounded-lg">
+                  <figure className="-mx-8 md:-mx-12 mb-8">
+                    <div className="relative aspect-video w-full overflow-hidden">
                       <Image
                         src={imageUrl}
                         alt={article.mainImage?.alt || article.title}
                         fill
-                        sizes="(max-width: 768px) 100vw, 800px"
+                        sizes="(max-width: 768px) 100vw, 900px"
                         quality={90}
-                        className="object-contain bg-[#f5f5f0]"
+                        className="object-cover"
                         priority
                       />
                     </div>
                     {article.mainImage?.caption && (
-                      <figcaption className="text-[12px] text-gray-500 mt-2 text-center">
+                      <figcaption className="text-[12px] text-gray-500 mt-2 text-center px-8 md:px-12">
                         {article.mainImage.caption}
                       </figcaption>
                     )}

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { AccountDashboard } from './AccountDashboard';
 
 export const metadata: Metadata = {
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function ComptePage() {
-  return <AccountDashboard />;
+  return (
+    <Suspense>
+      <AccountDashboard />
+    </Suspense>
+  );
 }

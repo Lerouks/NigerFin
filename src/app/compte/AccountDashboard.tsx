@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   User,
   CreditCard,
@@ -28,6 +28,9 @@ import {
   AlertTriangle,
   RefreshCw,
   XCircle,
+  Lock,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { getRoleLabel } from '@/lib/user-profile';
@@ -59,7 +62,9 @@ interface AccountSummary {
 export function AccountDashboard() {
   const { isSignedIn, isLoading, user, profile, userRole, premiumArticlesUsed, signOut, refreshProfile } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'overview' | 'subscription' | 'newsletter' | 'alerts'>('overview');
+  const searchParams = useSearchParams();
+  const isPasswordReset = searchParams.get('reset') === 'true';
+  const [activeTab, setActiveTab] = useState<'overview' | 'subscription' | 'security' | 'newsletter' | 'alerts'>(isPasswordReset ? 'security' : 'overview');
   const [summary, setSummary] = useState<AccountSummary | null>(null);
   const [summaryLoading, setSummaryLoading] = useState(true);
   const [likedArticles, setLikedArticles] = useState<{ article_id: string; created_at: string }[]>([]);
@@ -190,6 +195,7 @@ export function AccountDashboard() {
   const tabs = [
     { id: 'overview' as const, label: 'Vue d\'ensemble', icon: BarChart3 },
     { id: 'subscription' as const, label: 'Abonnement', icon: CreditCard },
+    { id: 'security' as const, label: 'Sécurité', icon: Lock },
     { id: 'newsletter' as const, label: 'Newsletter', icon: Mail },
     { id: 'alerts' as const, label: 'Alertes', icon: Bell },
   ];
@@ -686,6 +692,11 @@ export function AccountDashboard() {
           </div>
         )}
 
+        {/* ─── SECURITY TAB ─── */}
+        {activeTab === 'security' && (
+          <PasswordChangeSection isReset={isPasswordReset} />
+        )}
+
         {/* ─── NEWSLETTER TAB ─── */}
         {activeTab === 'newsletter' && (
           <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
@@ -779,6 +790,231 @@ function InfoRow({ label, value, valueColor }: { label: string; value: string; v
     <div className="flex items-center justify-between py-3 border-b border-black/[0.04] last:border-0">
       <span className="text-sm text-gray-500">{label}</span>
       <span className={`text-sm font-medium ${valueColor || ''}`}>{value}</span>
+    </div>
+  );
+}
+
+function getPasswordStrength(password: string): { level: 'weak' | 'medium' | 'strong'; label: string; color: string; bgColor: string; width: string } {
+  let score = 0;
+  if (password.length >= 8) score++;
+  if (password.length >= 12) score++;
+  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
+  if (/\d/.test(password)) score++;
+  if (/[^a-zA-Z0-9]/.test(password)) score++;
+
+  if (score <= 2) return { level: 'weak', label: 'Faible', color: 'text-red-600', bgColor: 'bg-red-500', width: 'w-1/3' };
+  if (score <= 3) return { level: 'medium', label: 'Moyen', color: 'text-amber-600', bgColor: 'bg-amber-500', width: 'w-2/3' };
+  return { level: 'strong', label: 'Fort', color: 'text-emerald-600', bgColor: 'bg-emerald-500', width: 'w-full' };
+}
+
+function PasswordChangeSection({ isReset = false }: { isReset?: boolean }) {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const router = useRouter();
+
+  const strength = newPassword ? getPasswordStrength(newPassword) : null;
+  const passwordsMatch = confirmPassword ? newPassword === confirmPassword : true;
+  const canSubmit = (isReset || currentPassword) && newPassword.length >= 8 && newPassword === confirmPassword && !loading;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMessage(null);
+
+    if (newPassword.length < 8) {
+      setMessage({ type: 'error', text: 'Le mot de passe doit contenir au moins 8 caractères.' });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setMessage({ type: 'error', text: 'Les mots de passe ne correspondent pas.' });
+      return;
+    }
+
+    setLoading(true);
+
+    if (isReset) {
+      // Direct password update via Supabase (recovery session)
+      try {
+        const { createBrowserSupabaseClient } = await import('@/lib/supabase-browser');
+        const supabase = createBrowserSupabaseClient();
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+        if (error) {
+          setMessage({ type: 'error', text: error.message || 'Erreur lors de la mise à jour du mot de passe.' });
+        } else {
+          setMessage({ type: 'success', text: 'Votre mot de passe a été mis à jour avec succès.' });
+          setNewPassword('');
+          setConfirmPassword('');
+          // Remove reset query param from URL
+          router.replace('/compte');
+        }
+      } catch {
+        setMessage({ type: 'error', text: 'Erreur réseau. Veuillez réessayer.' });
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    // Normal password change via API (verifies current password)
+    try {
+      const res = await fetch('/api/user/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setMessage({ type: 'success', text: data.message || 'Votre mot de passe a été mis à jour avec succès.' });
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Une erreur est survenue.' });
+      }
+    } catch {
+      setMessage({ type: 'error', text: 'Erreur réseau. Veuillez réessayer.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
+      <div className="flex items-center gap-2 mb-2">
+        <Lock className="w-4 h-4 text-gray-500" />
+        <h3 className="text-lg font-semibold">
+          {isReset ? 'Définir un nouveau mot de passe' : 'Modifier le mot de passe'}
+        </h3>
+      </div>
+      {isReset && (
+        <p className="text-sm text-gray-500 mb-6">
+          Vous avez demandé une réinitialisation de mot de passe. Définissez votre nouveau mot de passe ci-dessous.
+        </p>
+      )}
+      {!isReset && <div className="mb-6" />}
+
+      {message && (
+        <div className={`rounded-xl px-5 py-4 text-sm flex items-start gap-3 mb-6 ${
+          message.type === 'success'
+            ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
+            : 'bg-red-50 border border-red-200 text-red-800'
+        }`}>
+          {message.type === 'success' ? <Check className="w-4 h-4 mt-0.5 flex-shrink-0" /> : <XCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />}
+          <span>{message.text}</span>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-5 max-w-md">
+        {/* Current password (only when not resetting) */}
+        {!isReset && (
+          <div>
+            <label htmlFor="current-password" className="block text-sm font-medium mb-2">Mot de passe actuel</label>
+            <div className="relative">
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                id="current-password"
+                type={showCurrent ? 'text' : 'password'}
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="w-full border border-black/[0.08] rounded-lg pl-10 pr-10 py-3 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 transition-all text-sm"
+                placeholder="Entrez votre mot de passe actuel"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrent(!showCurrent)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* New password */}
+        <div>
+          <label htmlFor="new-password" className="block text-sm font-medium mb-2">Nouveau mot de passe</label>
+          <div className="relative">
+            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              id="new-password"
+              type={showNew ? 'text' : 'password'}
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full border border-black/[0.08] rounded-lg pl-10 pr-10 py-3 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 transition-all text-sm"
+              placeholder="Minimum 8 caractères"
+              required
+              minLength={8}
+            />
+            <button
+              type="button"
+              onClick={() => setShowNew(!showNew)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+          {/* Password strength indicator */}
+          {newPassword && strength && (
+            <div className="mt-2">
+              <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div className={`h-full ${strength.bgColor} ${strength.width} rounded-full transition-all duration-300`} />
+              </div>
+              <p className={`text-[11px] mt-1 ${strength.color}`}>
+                Force du mot de passe : {strength.label}
+              </p>
+            </div>
+          )}
+          {newPassword && newPassword.length < 8 && (
+            <p className="text-[11px] mt-1 text-red-500">Le mot de passe doit contenir au moins 8 caractères.</p>
+          )}
+        </div>
+
+        {/* Confirm new password */}
+        <div>
+          <label htmlFor="confirm-password" className="block text-sm font-medium mb-2">Confirmer le nouveau mot de passe</label>
+          <div className="relative">
+            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              id="confirm-password"
+              type={showConfirm ? 'text' : 'password'}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className={`w-full border rounded-lg pl-10 pr-10 py-3 bg-[#fafaf9] focus:outline-none focus:ring-1 transition-all text-sm ${
+                confirmPassword && !passwordsMatch
+                  ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
+                  : 'border-black/[0.08] focus:border-black/15 focus:ring-black/5'
+              }`}
+              placeholder="Confirmez le nouveau mot de passe"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirm(!showConfirm)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+          {confirmPassword && !passwordsMatch && (
+            <p className="text-[11px] mt-1 text-red-500">Les mots de passe ne correspondent pas.</p>
+          )}
+        </div>
+
+        <button
+          type="submit"
+          disabled={!canSubmit}
+          className="flex items-center gap-2 bg-[#111] text-white px-6 py-2.5 rounded-xl text-[13px] hover:bg-[#333] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+          Mettre à jour le mot de passe
+        </button>
+      </form>
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { GraphEvolution } from './GraphEvolution';
 import { ResultSummary } from './ResultSummary';
 import { AutoAnalysis } from './AutoAnalysis';
 import { EmptyState } from './EmptyState';
+import { PdfDownloadButton } from '@/components/PdfDownloadButton';
 import { Calculator } from 'lucide-react';
 
 function fmt(n: number): string {
@@ -192,6 +193,27 @@ export function SimulateurEmprunt() {
             />
             <AutoAnalysis paragraphs={analysis} />
           </div>
+
+          <PdfDownloadButton
+            hasResults={!!calc}
+            options={{
+              title: "Simulateur d'Emprunt",
+              params: [
+                { label: 'Montant emprunté', value: `${fmt(numAmount)} FCFA` },
+                { label: 'Taux annuel', value: `${numRate}%` },
+                { label: 'Durée', value: `${numDuration} mois` },
+              ],
+              results: [
+                { label: 'Mensualité estimée', value: `${fmt(calc.monthly)} FCFA` },
+                { label: 'Coût total du crédit', value: `${fmt(calc.totalCost)} FCFA` },
+                { label: 'Total des intérêts', value: `${fmt(calc.totalInterest)} FCFA` },
+              ],
+              table: {
+                head: ['Mois', 'Capital restant', 'Intérêts cumulés'],
+                body: calc.schedule.map((row) => [row.label, `${fmt(row.capitalRestant)} FCFA`, `${fmt(row.interetsCumules)} FCFA`]),
+              },
+            }}
+          />
         </>
       ) : null}
     </div>

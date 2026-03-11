@@ -6,6 +6,7 @@ import { GraphEvolution } from './GraphEvolution';
 import { ResultSummary } from './ResultSummary';
 import { AutoAnalysis } from './AutoAnalysis';
 import { EmptyState } from './EmptyState';
+import { PdfDownloadButton } from '@/components/PdfDownloadButton';
 import { Percent } from 'lucide-react';
 
 function fmt(n: number): string {
@@ -126,6 +127,27 @@ export function InteretSimple() {
             />
             <AutoAnalysis paragraphs={analysis} />
           </div>
+
+          <PdfDownloadButton
+            hasResults={!!calc}
+            options={{
+              title: 'Intérêt Simple',
+              params: [
+                { label: 'Capital initial', value: `${fmt(numCapital)} FCFA` },
+                { label: 'Taux annuel', value: `${numRate}%` },
+                { label: 'Durée', value: `${numYears} an${numYears > 1 ? 's' : ''}` },
+              ],
+              results: [
+                { label: 'Intérêts gagnés', value: `${fmt(calc.interest)} FCFA` },
+                { label: 'Montant total', value: `${fmt(calc.total)} FCFA` },
+                { label: 'Intérêt annuel', value: `${fmt(calc.annualInterest)} FCFA` },
+              ],
+              table: {
+                head: ['Année', 'Capital', 'Intérêts cumulés'],
+                body: calc.schedule.map((row) => [row.label, `${fmt(row.capitalRestant)} FCFA`, `${fmt(row.interetsCumules)} FCFA`]),
+              },
+            }}
+          />
         </>
       ) : null}
     </div>

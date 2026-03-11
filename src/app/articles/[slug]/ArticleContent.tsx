@@ -270,8 +270,11 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
                 {/* Render HTML body (fetched securely for premium, sanitized) */}
                 {resolvedBody ? (
                   <div
-                    className="prose prose-lg max-w-none prose-headings:font-bold prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3 prose-p:mb-4 prose-p:leading-relaxed prose-blockquote:border-l-4 prose-blockquote:border-black prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:my-6 prose-a:text-black prose-a:underline hover:prose-a:no-underline prose-img:rounded-lg prose-img:my-6"
-                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(resolvedBody) }}
+                    className="article-content"
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(resolvedBody, {
+                      ADD_TAGS: ['figure', 'figcaption'],
+                      ADD_ATTR: ['data-type', 'data-value', 'data-label', 'target', 'rel'],
+                    }) }}
                   />
                 ) : (
                   <div className="flex items-center justify-center py-16">

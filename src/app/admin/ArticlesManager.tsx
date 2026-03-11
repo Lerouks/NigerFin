@@ -5,6 +5,7 @@ import {
   Plus, Edit3, Trash2, Eye, Loader2, ArrowLeft, Save, Upload, Star, StarOff,
   Image as ImageIcon, X, Globe, Lock,
 } from 'lucide-react';
+import { RichTextEditor } from '@/components/RichTextEditor';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -235,10 +236,6 @@ export function ArticlesManager() {
     setForm((f) => ({ ...f, tags: f.tags.filter((t) => t !== tag) }));
   };
 
-  const handleInsertImageInBody = async () => {
-    fileInputRef.current?.click();
-  };
-
   // ─── Editor View ──────────────────────────────────────────────────────────
 
   if (editing) {
@@ -337,45 +334,20 @@ export function ArticlesManager() {
               />
             </div>
 
-            {/* Body (HTML editor) */}
+            {/* Body (Rich Text Editor) */}
             <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-[11px] uppercase tracking-wider text-gray-400">Contenu de l&apos;article</label>
-                <div className="flex gap-1">
-                  <button type="button" onClick={() => {
-                    const sel = window.getSelection()?.toString() || '';
-                    const b = `<strong>${sel || 'texte en gras'}</strong>`;
-                    setForm((f) => ({ ...f, body: f.body + b }));
-                  }} className="px-2 py-1 text-[11px] bg-gray-100 rounded hover:bg-gray-200" title="Gras">
-                    <strong>B</strong>
-                  </button>
-                  <button type="button" onClick={() => {
-                    setForm((f) => ({ ...f, body: f.body + '<h2>Sous-titre</h2>\n' }));
-                  }} className="px-2 py-1 text-[11px] bg-gray-100 rounded hover:bg-gray-200" title="Titre H2">
-                    H2
-                  </button>
-                  <button type="button" onClick={() => {
-                    setForm((f) => ({ ...f, body: f.body + '<h3>Sous-titre</h3>\n' }));
-                  }} className="px-2 py-1 text-[11px] bg-gray-100 rounded hover:bg-gray-200" title="Titre H3">
-                    H3
-                  </button>
-                  <button type="button" onClick={() => {
-                    setForm((f) => ({ ...f, body: f.body + '<blockquote>Citation</blockquote>\n' }));
-                  }} className="px-2 py-1 text-[11px] bg-gray-100 rounded hover:bg-gray-200" title="Citation">
-                    &ldquo;&rdquo;
-                  </button>
-                  <button type="button" onClick={() => {
-                    setForm((f) => ({ ...f, body: f.body + '<ul>\n<li>Element 1</li>\n<li>Element 2</li>\n</ul>\n' }));
-                  }} className="px-2 py-1 text-[11px] bg-gray-100 rounded hover:bg-gray-200" title="Liste">
-                    &bull;
-                  </button>
-                </div>
-              </div>
-              <textarea value={form.body}
-                onChange={(e) => setForm((f) => ({ ...f, body: e.target.value }))}
-                rows={18}
-                className="w-full px-4 py-3 border border-black/[0.08] rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-black bg-white resize-y leading-relaxed"
-                placeholder="Ecrivez le contenu de l'article ici... Vous pouvez utiliser du HTML: <p>, <h2>, <h3>, <strong>, <em>, <blockquote>, <ul>, <li>, <a href='...'>"
+              <label className="text-[11px] uppercase tracking-wider text-gray-400 block mb-1.5">Contenu de l&apos;article</label>
+              <RichTextEditor
+                content={form.body}
+                onChange={(html) => setForm((f) => ({ ...f, body: html }))}
+                onImageUpload={async (file) => {
+                  const formData = new FormData();
+                  formData.append('file', file);
+                  const res = await fetch('/api/admin/upload', { method: 'POST', body: formData });
+                  const data = await res.json();
+                  if (!res.ok) throw new Error(data.error || 'Upload failed');
+                  return data.url;
+                }}
               />
             </div>
           </div>

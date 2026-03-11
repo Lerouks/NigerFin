@@ -6,6 +6,7 @@ import { GraphEvolution } from './GraphEvolution';
 import { ResultSummary } from './ResultSummary';
 import { AutoAnalysis } from './AutoAnalysis';
 import { EmptyState } from './EmptyState';
+import { PdfDownloadButton } from '@/components/PdfDownloadButton';
 import { TrendingUp } from 'lucide-react';
 
 function fmt(n: number): string {
@@ -144,6 +145,29 @@ export function InteretCompose() {
             />
             <AutoAnalysis paragraphs={analysis} />
           </div>
+
+          <PdfDownloadButton
+            hasResults={!!calc}
+            options={{
+              title: 'Intérêt Composé',
+              params: [
+                { label: 'Capital initial', value: `${fmt(numCapital)} FCFA` },
+                { label: 'Taux annuel', value: `${numRate}%` },
+                { label: 'Durée', value: `${numYears} an${numYears > 1 ? 's' : ''}` },
+                { label: 'Capitalisation', value: COMPOUNDS.find(c => c.value === compoundsPerYear)?.label || '' },
+              ],
+              results: [
+                { label: 'Intérêts composés', value: `${fmt(calc.interest)} FCFA` },
+                { label: 'Montant final', value: `${fmt(calc.total)} FCFA` },
+                { label: 'Intérêts simples (comparaison)', value: `${fmt(calc.simpleInterest)} FCFA` },
+                { label: 'Bonus capitalisation', value: `+${fmt(calc.bonus)} FCFA` },
+              ],
+              table: {
+                head: ['Année', 'Valeur du capital', 'Intérêts cumulés'],
+                body: calc.schedule.map((row) => [row.label, `${fmt(row.capitalRestant)} FCFA`, `${fmt(row.interetsCumules)} FCFA`]),
+              },
+            }}
+          />
         </>
       ) : null}
     </div>

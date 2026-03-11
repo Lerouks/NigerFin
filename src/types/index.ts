@@ -12,16 +12,16 @@ export interface Article {
   sections: string[];
   author: {
     name: string;
-    avatar?: any;
+    avatar?: { url: string; alt?: string } | string | null;
   };
   publishedAt: string;
-  mainImage: any;
-  body: any[];
+  mainImage: { url: string; alt?: string | null; width?: number; height?: number; caption?: string | null } | null;
+  body: Record<string, unknown>[];
   isPremium: boolean;
   contentType?: ContentType;
   readTime: number;
   tags: string[];
-  shareImage?: any;
+  shareImage?: { url: string; alt?: string } | null;
   seo?: {
     metaTitle?: string;
     metaDescription?: string;

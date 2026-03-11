@@ -23,6 +23,40 @@ interface Fact {
   display_order: number;
 }
 
+interface Region {
+  id: string;
+  name: string;
+  capital: string;
+  population: number;
+  area_km2: string;
+  economic_activities: string[];
+  natural_resources: string[];
+  security_level: string;
+  security_note: string;
+}
+
+interface Resource {
+  id: string;
+  name: string;
+  type: string;
+  location_name: string;
+  estimated_production: string;
+  production_unit: string;
+  operating_companies: string[];
+  economic_importance: string;
+  importance_description: string;
+}
+
+interface Indicator {
+  id: string;
+  indicator_key: string;
+  label: string;
+  value: string;
+  previous_value: string;
+  unit: string;
+  category: string;
+}
+
 const FACT_ICONS: Record<string, typeof MapPin> = {
   capitale: MapPin,
   population: Users,
@@ -48,12 +82,9 @@ const CATEGORY_LABELS: Record<string, string> = {
 export function NigerPresentation() {
   const [presentation, setPresentation] = useState<Presentation | null>(null);
   const [facts, setFacts] = useState<Fact[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [regions, setRegions] = useState<any[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [resources, setResources] = useState<any[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [indicators, setIndicators] = useState<any[]>([]);
+  const [regions, setRegions] = useState<Region[]>([]);
+  const [resources, setResources] = useState<Resource[]>([]);
+  const [indicators, setIndicators] = useState<Indicator[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

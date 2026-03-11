@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     const isPremiumUser = userRole === 'premium' || userRole === 'admin' || userRole === 'pro';
 
     // Strip content from non-free lessons for non-premium users
-    const sanitized = (data || []).map((lesson: any) => {
+    const sanitized = (data || []).map((lesson: Record<string, unknown>) => {
       if (lesson.access_level === 'free' || isPremiumUser) {
         return lesson;
       }
@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
 
   if (error) return serverError(error, 'education-categories');
 
-  const result = (categories || []).map((cat: any) => ({
+  const result = (categories || []).map((cat: Record<string, unknown> & { education_lessons?: { id: string }[] }) => ({
     ...cat,
     lesson_count: cat.education_lessons?.length || 0,
     education_lessons: undefined,

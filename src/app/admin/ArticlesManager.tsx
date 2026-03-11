@@ -5,7 +5,13 @@ import {
   Plus, Edit3, Trash2, Eye, Loader2, ArrowLeft, Save, Upload, Star, StarOff,
   Image as ImageIcon, X, Globe, Lock,
 } from 'lucide-react';
-import { RichTextEditor } from '@/components/RichTextEditor';
+import dynamic from 'next/dynamic';
+import Image from 'next/image';
+
+const RichTextEditor = dynamic(
+  () => import('@/components/RichTextEditor').then(m => ({ default: m.RichTextEditor })),
+  { ssr: false, loading: () => <div className="h-64 bg-gray-50 rounded-lg animate-pulse" /> }
+);
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -206,8 +212,8 @@ export function ArticlesManager() {
       setSuccess(publishNow ? 'Article publié !' : 'Article sauvegardé !');
       setForm({ ...form, id: data.id, slug: data.slug, status: data.status, published_at: data.published_at || '' });
       fetchArticles();
-    } catch (e: any) {
-      setError(e.message || 'Erreur');
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Erreur');
     }
     setSaving(false);
   };
@@ -232,8 +238,8 @@ export function ArticlesManager() {
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'Erreur upload'); setUploading(false); return; }
       setForm((f) => ({ ...f, main_image_url: data.url }));
-    } catch (err: any) {
-      setError(err.message || 'Erreur upload');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erreur upload');
     }
     setUploading(false);
   };
@@ -353,7 +359,7 @@ export function ArticlesManager() {
               <label className="text-[11px] uppercase tracking-wider text-gray-400 block mb-1.5">Image principale</label>
               {form.main_image_url ? (
                 <div className="relative rounded-lg overflow-hidden border border-black/[0.08]">
-                  <img src={form.main_image_url} alt={form.main_image_alt || form.title} className="w-full h-48 object-cover" />
+                  <Image src={form.main_image_url} alt={form.main_image_alt || form.title} width={600} height={192} className="w-full h-48 object-cover" unoptimized />
                   <button onClick={() => setForm((f) => ({ ...f, main_image_url: '' }))}
                     className="absolute top-2 right-2 bg-black/60 text-white p-1.5 rounded-full hover:bg-black/80">
                     <X className="w-3.5 h-3.5" />
@@ -636,7 +642,7 @@ export function ArticlesManager() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       {a.main_image_url ? (
-                        <img src={a.main_image_url} alt={a.title || 'Article'} className="w-12 h-8 rounded object-cover flex-shrink-0" />
+                        <Image src={a.main_image_url} alt={a.title || 'Article'} width={48} height={32} className="w-12 h-8 rounded object-cover flex-shrink-0" unoptimized />
                       ) : (
                         <div className="w-12 h-8 rounded bg-gray-100 flex items-center justify-center flex-shrink-0">
                           <ImageIcon className="w-4 h-4 text-gray-300" />

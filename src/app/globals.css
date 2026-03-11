@@ -504,3 +504,57 @@ small, footer, .text-xs, .text-sm {
     padding: 0.5rem 0.6rem;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   EDUCATION LESSONS — Table styling for courses
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e5e5e5;
+}
+
+.prose thead th {
+  background: #f5f5f0;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.625rem 0.875rem;
+  border-bottom: 2px solid #ddd;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #555;
+  white-space: nowrap;
+}
+
+.prose tbody td {
+  padding: 0.625rem 0.875rem;
+  border-bottom: 1px solid #eee;
+  vertical-align: top;
+}
+
+.prose tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.prose tbody tr:hover {
+  background: #fafaf9;
+}
+
+@media screen and (max-width: 768px) {
+  .prose table {
+    font-size: 0.8rem;
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .prose thead th,
+  .prose tbody td {
+    padding: 0.5rem 0.625rem;
+  }
+}

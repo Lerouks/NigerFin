@@ -120,6 +120,7 @@ export function NigerPresentation() {
                 height={916}
                 className="w-full h-auto block"
                 priority
+                quality={90}
                 sizes="(max-width: 1280px) 100vw, 1200px"
               />
             </div>

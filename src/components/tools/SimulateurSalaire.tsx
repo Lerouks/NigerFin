@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useMemo } from 'react';
+import { PdfDownloadButton } from '@/components/PdfDownloadButton';
 
 /* ─── ITS brackets (Art. 150 nouveau, Ord. N°2025-44) ─── */
 const ITS_BRACKETS = [
@@ -556,6 +557,51 @@ export default function SimulateurSalaireNiger() {
             </div>
           </div>
         </>
+      )}
+
+      {/* ─── PDF Download ─── */}
+      {c && (
+        <PdfDownloadButton
+          hasResults={!!c}
+          options={{
+            title: 'Simulateur Salaire Niger',
+            params: [
+              { label: 'Salaire brut mensuel', value: `${fmt(c.brut)} F CFA` },
+              { label: 'Mode', value: mode === 'salarie' ? 'Salarié' : 'Employeur' },
+            ],
+            results: mode === 'salarie'
+              ? [
+                  { label: 'Salaire NET perçu', value: `${fmt(c.salaireNet)} F CFA` },
+                  { label: 'ITS du mois', value: `${fmt(c.its)} F CFA` },
+                  { label: 'CNSS salarié', value: `${fmt(c.cnssSal)} F CFA` },
+                  { label: 'INAM salarié', value: `${fmt(c.inamSal)} F CFA` },
+                  { label: 'Taux effectif', value: `${c.tauxEffectif.toFixed(2)}%` },
+                  { label: 'Net annuel', value: `${fmt(c.salaireNet * 12)} F CFA` },
+                  { label: 'ITS annuel', value: `${fmt(c.its * 12)} F CFA` },
+                ]
+              : [
+                  { label: 'Coût total employeur', value: `${fmt(c.coutTotal)} F CFA` },
+                  { label: 'Charges patronales', value: `${fmt(c.chargesPat)} F CFA` },
+                  { label: 'CNSS patronal', value: `${fmt(c.cnssPat)} F CFA` },
+                  { label: 'INAM patronal', value: `${fmt(c.inamPat)} F CFA` },
+                  { label: 'Surcoût / brut', value: `${c.surcout.toFixed(2)}%` },
+                  { label: 'Coût total annuel', value: `${fmt(c.coutTotal * 12)} F CFA` },
+                ],
+            table: mode === 'salarie'
+              ? {
+                  head: ['Tranche', 'Taux', 'Base imposable', 'Impôt'],
+                  body: c.itsDetails
+                    .filter((tr) => tr.active)
+                    .map((tr) => [
+                      tr.max === Infinity ? `Au-delà de ${fmt(tr.min)} F CFA` : `${fmt(tr.min)} - ${fmt(tr.max)} F CFA`,
+                      `${(tr.rate * 100).toFixed(0)}%`,
+                      `${fmt(tr.taxable)} F CFA`,
+                      `${fmt(tr.tax)} F CFA`,
+                    ]),
+                }
+              : undefined,
+          }}
+        />
       )}
 
       {/* ─── Legal footer ─── */}

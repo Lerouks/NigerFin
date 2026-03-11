@@ -38,6 +38,7 @@ interface ArticleForm {
   author_name: string;
   main_image_url: string;
   main_image_alt: string;
+  main_image_caption: string;
   body: string;
   read_time: number;
   tags: string[];
@@ -60,6 +61,7 @@ const EMPTY_FORM: ArticleForm = {
   author_name: 'NFI Report',
   main_image_url: '',
   main_image_alt: '',
+  main_image_caption: '',
   body: '',
   read_time: 3,
   tags: [],
@@ -152,6 +154,7 @@ export function ArticlesManager() {
         author_name: full.author_name || 'NFI Report',
         main_image_url: full.main_image_url || '',
         main_image_alt: full.main_image_alt || '',
+        main_image_caption: full.main_image_caption || '',
         body: full.body || '',
         read_time: full.read_time || 3,
         tags: full.tags || [],
@@ -374,6 +377,11 @@ export function ArticlesManager() {
                 onChange={(e) => setForm((f) => ({ ...f, main_image_alt: e.target.value }))}
                 className="w-full px-3 py-2 border border-black/[0.08] rounded-lg text-[12px] focus:outline-none bg-white mt-2"
                 placeholder="Texte alternatif de l'image (SEO)"
+              />
+              <input type="text" value={form.main_image_caption}
+                onChange={(e) => setForm((f) => ({ ...f, main_image_caption: e.target.value }))}
+                className="w-full px-3 py-2 border border-black/[0.08] rounded-lg text-[12px] focus:outline-none bg-white mt-2"
+                placeholder="Légende de l'image (optionnel, visible sous l'image)"
               />
             </div>
 

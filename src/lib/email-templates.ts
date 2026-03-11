@@ -235,6 +235,20 @@ ${signature()}
   };
 }
 
+export function passwordChangedEmail(name: string): { subject: string; html: string } {
+  return {
+    subject: 'Votre mot de passe NFI REPORT a été modifié',
+    html: emailLayout(`
+${heading('Mot de passe modifié')}
+${paragraph(`Bonjour ${name},`)}
+${paragraph("Votre mot de passe NFI Report a été modifié avec succès.")}
+${paragraph("Si vous n'êtes pas à l'origine de cette modification, veuillez nous contacter immédiatement à <a href=\"mailto:contact@nfireport.com\" style=\"color:#111;text-decoration:underline;\">contact@nfireport.com</a> pour sécuriser votre compte.")}
+${button('Accéder à votre compte', `${SITE_URL}/compte`)}
+${signature()}
+    `),
+  };
+}
+
 export function subscriptionExpiredEmail(name: string, expiresAt: string): { subject: string; html: string } {
   const formattedDate = new Date(expiresAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
 

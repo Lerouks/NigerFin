@@ -148,8 +148,8 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
   if (accessResult === null) {
     return (
       <div className="min-h-screen bg-[#fafaf9]">
-        <div className="relative h-[450px] md:h-[500px] bg-[#111]">
-          <Image src={imageUrl} alt={article.title} fill className="object-cover opacity-60" priority />
+        <div className="relative aspect-[2/1] max-h-[600px] bg-[#111]">
+          <Image src={imageUrl} alt={article.title} fill sizes="100vw" quality={90} className="object-cover opacity-60" priority />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-32 relative z-10 pb-20">
@@ -180,8 +180,8 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
     return (
       <div className="min-h-screen bg-[#fafaf9]">
         {/* Article header — visible normally */}
-        <div className="relative h-[450px] md:h-[500px] bg-[#111]">
-          <Image src={imageUrl} alt={article.title} fill className="object-cover opacity-60" priority />
+        <div className="relative aspect-[2/1] max-h-[600px] bg-[#111]">
+          <Image src={imageUrl} alt={article.title} fill sizes="100vw" quality={90} className="object-cover opacity-60" priority />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
         </div>
 
@@ -237,8 +237,8 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
   return (
     <div className="min-h-screen bg-[#fafaf9]">
       <ViewTracker articleId={article._id} />
-      <div className="relative h-[450px] md:h-[500px] bg-[#111]">
-        <Image src={imageUrl} alt={article.title} fill className="object-cover opacity-60" priority />
+      <div className="relative aspect-[2/1] max-h-[600px] bg-[#111]">
+        <Image src={imageUrl} alt={article.title} fill sizes="100vw" quality={90} className="object-cover opacity-60" priority />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
       </div>
 

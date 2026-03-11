@@ -21,4 +21,4 @@ export const marketData: MarketData[] = [
   { id: '8', name: 'Ethereum', value: 3380.00, change: -45.20, changePercent: -1.32, type: 'crypto', symbol: 'ETH', unit: 'USD', description: 'Deuxième cryptomonnaie par capitalisation. Plateforme de contrats intelligents (smart contracts) et base de la finance décentralisée (DeFi).', educationLink: '/education/cryptomonnaies' },
 ];
 
-export const fallbackImageUrl = 'https://images.unsplash.com/photo-1658402834565-80bf66bda0f0?w=1200&h=600&fit=crop';
+export const fallbackImageUrl = 'https://images.unsplash.com/photo-1658402834565-80bf66bda0f0?w=1920&h=960&fit=crop&q=90';

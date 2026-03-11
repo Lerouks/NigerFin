@@ -71,3 +71,490 @@ small, footer, .text-xs, .text-sm {
     overflow: hidden;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   TIPTAP RICH TEXT EDITOR — Admin styles
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.rich-editor-wrapper .tiptap {
+  min-height: 400px;
+  padding: 1.25rem 1.5rem;
+  font-size: 15px;
+  line-height: 1.7;
+  outline: none;
+}
+
+.rich-editor-wrapper .tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #adb5bd;
+  pointer-events: none;
+  height: 0;
+}
+
+.rich-editor-wrapper .tiptap h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 1.5rem 0 0.75rem;
+  line-height: 1.3;
+}
+
+.rich-editor-wrapper .tiptap h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0.5rem;
+  line-height: 1.4;
+}
+
+.rich-editor-wrapper .tiptap p {
+  margin-bottom: 0.75rem;
+}
+
+.rich-editor-wrapper .tiptap strong { font-weight: 700; }
+.rich-editor-wrapper .tiptap em { font-style: italic; }
+.rich-editor-wrapper .tiptap u { text-decoration: underline; }
+.rich-editor-wrapper .tiptap s { text-decoration: line-through; }
+
+.rich-editor-wrapper .tiptap mark {
+  background-color: #fef3c7;
+  padding: 0.1em 0.25em;
+  border-radius: 2px;
+}
+
+.rich-editor-wrapper .tiptap blockquote {
+  border-left: 3px solid #111;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
+  color: #555;
+}
+
+.rich-editor-wrapper .tiptap ul,
+.rich-editor-wrapper .tiptap ol {
+  padding-left: 1.5rem;
+  margin: 0.75rem 0;
+}
+
+.rich-editor-wrapper .tiptap ul { list-style: disc; }
+.rich-editor-wrapper .tiptap ol { list-style: decimal; }
+.rich-editor-wrapper .tiptap li { margin-bottom: 0.25rem; }
+
+.rich-editor-wrapper .tiptap a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.rich-editor-wrapper .tiptap hr {
+  border: none;
+  border-top: 2px solid #e5e5e5;
+  margin: 1.5rem 0;
+}
+
+.rich-editor-wrapper .tiptap img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+/* Table in editor */
+.rich-editor-wrapper .tiptap table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+.rich-editor-wrapper .tiptap th,
+.rich-editor-wrapper .tiptap td {
+  border: 1px solid #ddd;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+.rich-editor-wrapper .tiptap th {
+  background: #f5f5f0;
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
+/* Key Figure node in editor */
+.rich-editor-wrapper .key-figure-node {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid #bae6fd;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin: 1rem 0;
+  text-align: center;
+  cursor: default;
+}
+.rich-editor-wrapper .key-figure-node .kf-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #0c4a6e;
+  line-height: 1.2;
+  outline: none;
+}
+.rich-editor-wrapper .key-figure-node .kf-label {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+  outline: none;
+}
+
+/* Callout node in editor */
+.rich-editor-wrapper .tiptap div[data-type="callout"] {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-left: 4px solid #22c55e;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1rem 0;
+}
+
+/* Figure image in editor */
+.rich-editor-wrapper .figure-image-node {
+  margin: 1rem 0;
+}
+.rich-editor-wrapper .figure-image-node img {
+  width: 100%;
+  border-radius: 8px;
+}
+.rich-editor-wrapper .figure-image-node figcaption {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #888;
+  font-style: italic;
+  margin-top: 0.5rem;
+  outline: none;
+  padding: 0.25rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ARTICLE CONTENT — Professional editorial rendering (Bloomberg / FT style)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.article-content {
+  max-width: 720px;
+  margin: 0 auto;
+  font-size: 1.125rem;  /* 18px */
+  line-height: 1.8;
+  color: #1a1a1a;
+  letter-spacing: -0.003em;
+}
+
+/* ─── Drop Cap ─────────────────────────────────────────────────── */
+.article-content > p:first-of-type::first-letter {
+  float: left;
+  font-size: 3.75rem;
+  line-height: 0.85;
+  font-weight: 700;
+  margin-right: 0.1em;
+  margin-top: 0.05em;
+  color: #111;
+}
+
+/* ─── Paragraphs ───────────────────────────────────────────────── */
+.article-content p {
+  margin-bottom: 1.5rem;
+}
+
+/* ─── Headings ─────────────────────────────────────────────────── */
+.article-content h2 {
+  font-size: 1.625rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  letter-spacing: -0.02em;
+  color: #111;
+}
+
+.article-content h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  color: #222;
+}
+
+/* ─── Inline formatting ────────────────────────────────────────── */
+.article-content strong { font-weight: 700; }
+.article-content em { font-style: italic; }
+.article-content u { text-decoration: underline; text-underline-offset: 3px; }
+.article-content s { text-decoration: line-through; color: #888; }
+
+.article-content mark {
+  background: linear-gradient(120deg, #fef3c7 0%, #fde68a 100%);
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+/* ─── Links ────────────────────────────────────────────────────── */
+.article-content a {
+  color: #0f4c81;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease;
+}
+.article-content a:hover {
+  border-bottom-color: #0f4c81;
+}
+
+/* ─── Blockquote / Citation ────────────────────────────────────── */
+.article-content blockquote {
+  position: relative;
+  margin: 2rem 0;
+  padding: 1.5rem 1.5rem 1.5rem 2rem;
+  border-left: 4px solid #111;
+  background: #fafaf9;
+  border-radius: 0 8px 8px 0;
+}
+.article-content blockquote p {
+  font-size: 1.2rem;
+  font-style: italic;
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 0;
+}
+.article-content blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+/* ─── Lists ────────────────────────────────────────────────────── */
+.article-content ul,
+.article-content ol {
+  margin: 1.25rem 0;
+  padding-left: 1.75rem;
+}
+.article-content ul { list-style: disc; }
+.article-content ol { list-style: decimal; }
+.article-content li {
+  margin-bottom: 0.5rem;
+  line-height: 1.7;
+}
+.article-content li::marker {
+  color: #888;
+}
+
+/* ─── Horizontal Rule / Section Separator ──────────────────────── */
+.article-content hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(0,0,0,0.12), transparent);
+  margin: 2.5rem 0;
+}
+
+/* ─── Images & Figures ─────────────────────────────────────────── */
+.article-content img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 2rem 0 0.5rem;
+}
+.article-content figure[data-type="image"] {
+  margin: 2rem -2rem;
+}
+.article-content figure[data-type="image"] img {
+  width: 100%;
+  border-radius: 8px;
+}
+.article-content figure[data-type="image"] figcaption,
+.article-content figcaption {
+  text-align: center;
+  font-size: 0.875rem;
+  color: #888;
+  font-style: italic;
+  margin-top: 0.5rem;
+  padding: 0 2rem;
+}
+
+/* ─── Table ────────────────────────────────────────────────────── */
+.article-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+}
+.article-content thead th {
+  background: #f5f5f0;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid #ddd;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #555;
+}
+.article-content tbody td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #eee;
+}
+.article-content tbody tr:hover {
+  background: #fafaf9;
+}
+
+/* ─── Key Figure Block ─────────────────────────────────────────── */
+.article-content div[data-type="key-figure"] {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid #bae6fd;
+  border-radius: 12px;
+  padding: 2rem;
+  margin: 2rem 0;
+  text-align: center;
+}
+.article-content div[data-type="key-figure"] .key-figure-value,
+.article-content div[data-type="key-figure"] > span:first-child {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #0c4a6e;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+.article-content div[data-type="key-figure"] .key-figure-label,
+.article-content div[data-type="key-figure"] > span:last-child {
+  display: block;
+  font-size: 0.95rem;
+  color: #64748b;
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+
+/* ─── Callout / "À retenir" Block ──────────────────────────────── */
+.article-content div[data-type="callout"] {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-left: 4px solid #22c55e;
+  border-radius: 0 12px 12px 0;
+  padding: 1.5rem 1.75rem;
+  margin: 2rem 0;
+}
+.article-content div[data-type="callout"]::before {
+  content: "💡";
+  display: block;
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+.article-content div[data-type="callout"] h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  border: none;
+  color: #166534;
+}
+.article-content div[data-type="callout"] ul {
+  margin: 0;
+}
+.article-content div[data-type="callout"] li {
+  color: #15803d;
+  font-size: 1rem;
+}
+
+/* ─── Mobile Responsiveness ────────────────────────────────────── */
+@media screen and (max-width: 768px) {
+  .article-content {
+    font-size: 1rem; /* 16px min */
+    line-height: 1.75;
+  }
+
+  .article-content > p:first-of-type::first-letter {
+    font-size: 3rem;
+  }
+
+  .article-content h2 {
+    font-size: 1.375rem;
+    margin-top: 2rem;
+  }
+
+  .article-content h3 {
+    font-size: 1.125rem;
+    margin-top: 1.5rem;
+  }
+
+  .article-content blockquote {
+    margin: 1.5rem 0;
+    padding: 1rem 1rem 1rem 1.25rem;
+  }
+  .article-content blockquote p {
+    font-size: 1.05rem;
+  }
+
+  .article-content figure[data-type="image"] {
+    margin: 1.5rem -1rem;
+  }
+
+  .article-content div[data-type="key-figure"] {
+    padding: 1.5rem 1rem;
+  }
+  .article-content div[data-type="key-figure"] .key-figure-value,
+  .article-content div[data-type="key-figure"] > span:first-child {
+    font-size: 2rem;
+  }
+
+  .article-content table {
+    font-size: 0.85rem;
+  }
+  .article-content thead th,
+  .article-content tbody td {
+    padding: 0.5rem 0.6rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   EDUCATION LESSONS — Table styling for courses
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e5e5e5;
+}
+
+.prose thead th {
+  background: #f5f5f0;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.625rem 0.875rem;
+  border-bottom: 2px solid #ddd;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #555;
+  white-space: nowrap;
+}
+
+.prose tbody td {
+  padding: 0.625rem 0.875rem;
+  border-bottom: 1px solid #eee;
+  vertical-align: top;
+}
+
+.prose tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.prose tbody tr:hover {
+  background: #fafaf9;
+}
+
+@media screen and (max-width: 768px) {
+  .prose table {
+    font-size: 0.8rem;
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .prose thead th,
+  .prose tbody td {
+    padding: 0.5rem 0.625rem;
+  }
+}

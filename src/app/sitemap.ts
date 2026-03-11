@@ -73,14 +73,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  const articlePages: MetadataRoute.Sitemap = articles.map((a: any) => ({
+  const articlePages: MetadataRoute.Sitemap = articles.map((a: { slug: string; published_at: string; updated_at: string | null }) => ({
     url: `${SITE_URL}/articles/${a.slug}`,
     lastModified: new Date(a.updated_at || a.published_at),
     changeFrequency: 'weekly',
     priority: 0.9,
   }));
 
-  const educationPages: MetadataRoute.Sitemap = categories.map((cat: any) => ({
+  const educationPages: MetadataRoute.Sitemap = categories.map((cat: { slug: string; updated_at: string | null }) => ({
     url: `${SITE_URL}/education/${cat.slug}`,
     lastModified: cat.updated_at ? new Date(cat.updated_at) : new Date(),
     changeFrequency: 'weekly',

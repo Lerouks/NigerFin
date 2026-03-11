@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ received: true });
 }
 
-async function syncMailchimpContact(userId: string, role: string, supabase: any) {
+async function syncMailchimpContact(userId: string, role: string, supabase: NonNullable<ReturnType<typeof createServiceClient>>) {
   const { data: profile } = await supabase
     .from('user_profiles')
     .select('email, full_name')

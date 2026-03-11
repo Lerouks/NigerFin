@@ -773,7 +773,7 @@ export function AccountDashboard() {
   );
 }
 
-function QuickStat({ icon: Icon, label, value, accent }: { icon: any; label: string; value: string; accent?: boolean }) {
+function QuickStat({ icon: Icon, label, value, accent }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string; accent?: boolean }) {
   return (
     <div className="bg-white/[0.06] backdrop-blur-sm rounded-xl p-4 border border-white/[0.06]">
       <div className="flex items-center gap-2 mb-1.5">

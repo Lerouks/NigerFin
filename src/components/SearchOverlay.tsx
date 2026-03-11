@@ -58,7 +58,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
       : [];
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex flex-col">
+    <div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex flex-col" role="dialog" aria-modal="true" aria-label="Recherche">
       <div className="bg-white shadow-lg">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-4 h-16">

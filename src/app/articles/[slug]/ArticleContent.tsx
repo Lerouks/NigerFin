@@ -58,6 +58,7 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
   const [linkCopied, setLinkCopied] = useState(false);
   const [hasTracked, setHasTracked] = useState(false);
   const [resolvedBody, setResolvedBody] = useState<string | null>(null);
+  const [bodyError, setBodyError] = useState(false);
   const [premiumLimit, setPremiumLimit] = useState(3);
   const imageUrl = getArticleImageUrl(article);
   const contentType = getContentTypeFromArticle(article);
@@ -112,10 +113,21 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
       return;
     }
     let cancelled = false;
-    fetch(`/api/articles/${article.slug.current}/content`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => { if (!cancelled && data?.body) setResolvedBody(data.body); })
-      .catch(() => {});
+    setBodyError(false);
+    fetch(`/api/articles/${article.slug.current}/content`, { credentials: 'include' })
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((data) => {
+        if (cancelled) return;
+        if (data?.body) {
+          setResolvedBody(data.body);
+        } else {
+          setBodyError(true);
+        }
+      })
+      .catch(() => { if (!cancelled) setBodyError(true); });
     return () => { cancelled = true; };
   }, [accessResult, htmlBody, article.slug]);
 
@@ -276,6 +288,21 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
                       ADD_ATTR: ['data-type', 'data-value', 'data-label', 'target', 'rel'],
                     }) }}
                   />
+                ) : bodyError ? (
+                  <div className="text-center py-16">
+                    <p className="text-gray-500 mb-4">Impossible de charger le contenu de cet article.</p>
+                    <button
+                      onClick={() => {
+                        setBodyError(false);
+                        setResolvedBody(null);
+                        // Re-trigger fetch by toggling accessResult
+                        setAccessResult(prev => prev ? { ...prev } : prev);
+                      }}
+                      className="px-4 py-2 bg-[#111] text-white rounded-lg text-sm hover:bg-[#333] transition-colors"
+                    >
+                      Réessayer
+                    </button>
+                  </div>
                 ) : (
                   <div className="flex items-center justify-center py-16">
                     <Loader2 className="w-8 h-8 animate-spin text-gray-300" />

@@ -47,7 +47,7 @@ function ConnexionContent() {
     try {
       const supabase = createBrowserSupabaseClient();
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/compte?reset=true`,
+        redirectTo: `${window.location.origin}/api/auth/callback?next=${encodeURIComponent('/compte?reset=true')}`,
       });
       if (error) throw error;
       setResetSent(true);

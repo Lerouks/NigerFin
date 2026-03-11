@@ -96,6 +96,8 @@ export function ArticlesManager() {
   const [success, setSuccess] = useState('');
   const [filter, setFilter] = useState<'all' | 'published' | 'draft'>('all');
   const [tagInput, setTagInput] = useState('');
+  const [togglingFeatured, setTogglingFeatured] = useState<string | null>(null);
+  const [featuredWarning, setFeaturedWarning] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchArticles = useCallback(async () => {
@@ -189,6 +191,15 @@ export function ArticlesManager() {
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'Erreur'); setSaving(false); return; }
 
+      // If featured was toggled on, use atomic endpoint to ensure only one featured
+      if (payload.is_featured) {
+        await fetch('/api/admin/articles/featured', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ articleId: data.id }),
+        });
+      }
+
       setSuccess(publishNow ? 'Article publié !' : 'Article sauvegardé !');
       setForm({ ...form, id: data.id, slug: data.slug, status: data.status, published_at: data.published_at || '' });
       fetchArticles();
@@ -234,6 +245,38 @@ export function ArticlesManager() {
 
   const handleRemoveTag = (tag: string) => {
     setForm((f) => ({ ...f, tags: f.tags.filter((t) => t !== tag) }));
+  };
+
+  const handleToggleFeatured = async (article: ArticleRow) => {
+    setTogglingFeatured(article.id);
+    setFeaturedWarning('');
+    try {
+      if (article.is_featured) {
+        // Trying to unfeature — server will block if it's the only one
+        const res = await fetch(`/api/admin/articles/featured?articleId=${article.id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (!res.ok) {
+          setFeaturedWarning(data.error || 'Erreur');
+          setTogglingFeatured(null);
+          return;
+        }
+      } else {
+        // Set as featured — atomic: unfeaturing all others first
+        const res = await fetch('/api/admin/articles/featured', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ articleId: article.id }),
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          setFeaturedWarning(data.error || 'Erreur');
+          setTogglingFeatured(null);
+          return;
+        }
+      }
+      await fetchArticles();
+    } catch { /* ignore */ }
+    setTogglingFeatured(null);
   };
 
   // ─── Editor View ──────────────────────────────────────────────────────────
@@ -549,6 +592,13 @@ export function ArticlesManager() {
         </button>
       </div>
 
+      {featuredWarning && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-700 flex items-center gap-2">
+          <Star className="w-4 h-4 text-amber-500 flex-shrink-0" />
+          {featuredWarning}
+        </div>
+      )}
+
       {loading ? (
         <div className="text-center py-16"><Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto" /></div>
       ) : filteredArticles.length === 0 ? (
@@ -586,7 +636,11 @@ export function ArticlesManager() {
                       )}
                       <div>
                         <p className="text-sm font-medium line-clamp-1 flex items-center gap-1.5">
-                          {a.is_featured && <Star className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />}
+                          {a.is_featured && (
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[10px] uppercase tracking-wider rounded font-bold flex-shrink-0">
+                              <Star className="w-3 h-3 fill-amber-500 text-amber-500" /> À la une
+                            </span>
+                          )}
                           {a.title}
                         </p>
                         <p className="text-[11px] text-gray-400 font-mono">/articles/{a.slug}</p>
@@ -621,6 +675,24 @@ export function ArticlesManager() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1.5">
+                      <button
+                        onClick={() => handleToggleFeatured(a)}
+                        disabled={togglingFeatured === a.id}
+                        className={`p-1.5 rounded transition-colors ${
+                          a.is_featured
+                            ? 'bg-amber-100 hover:bg-amber-200'
+                            : 'hover:bg-amber-50'
+                        }`}
+                        title={a.is_featured ? 'Retirer de la une' : 'Mettre à la une'}
+                      >
+                        {togglingFeatured === a.id ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-500" />
+                        ) : a.is_featured ? (
+                          <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                        ) : (
+                          <StarOff className="w-3.5 h-3.5 text-gray-400" />
+                        )}
+                      </button>
                       <button onClick={() => handleEdit(a)} className="p-1.5 hover:bg-gray-100 rounded transition-colors" title="Modifier">
                         <Edit3 className="w-3.5 h-3.5 text-gray-500" />
                       </button>

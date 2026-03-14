@@ -79,18 +79,9 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'fr_FR',
     siteName: 'NFI Report',
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'NFI Report - Actualités économiques et financières du Niger',
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
-    images: ['/og-image.png'],
   },
   robots: {
     index: true,

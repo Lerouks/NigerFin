@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const [featured, articles] = await Promise.all([
+  const [featured, { articles }] = await Promise.all([
     getFeaturedArticles(),
     getAllArticles(),
   ]);

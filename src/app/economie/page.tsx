@@ -8,7 +8,7 @@ export const revalidate = 60;
 export const metadata: Metadata = { title: 'Économie', description: 'Actualités économiques du Niger et de l\'Afrique de l\'Ouest.' };
 
 export default async function EconomiePage() {
-  const articles = await getArticlesByCategory('economie');
+  const { articles } = await getArticlesByCategory('economie');
   return (
     <div className="min-h-screen bg-[#fafaf9]">
       <section className="bg-[#111] text-white py-16 md:py-20">

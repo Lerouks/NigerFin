@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 };
 
 export default async function NigerPage() {
-  const articles = await getArticlesByCategory('niger');
+  const { articles } = await getArticlesByCategory('niger');
   return (
     <div className="min-h-screen bg-[#fafaf9]">
       <section className="bg-[#111] text-white py-16 md:py-20">

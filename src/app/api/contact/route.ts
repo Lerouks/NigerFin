@@ -2,37 +2,43 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { sendTransactionalEmail } from '@/lib/email';
 import { contactConfirmationEmail, contactNotificationEmail } from '@/lib/email-templates';
+import { isValidEmail, safeParseJSON } from '@/lib/validation';
+import { checkRateLimit, getClientIP, RATE_LIMITS } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, subject, message } = await request.json();
+    const ip = getClientIP(request);
+
+    // Persistent rate limit: 3 per hour per IP
+    const rl = await checkRateLimit(`contact:${ip}`, RATE_LIMITS.contact.limit, RATE_LIMITS.contact.windowMs);
+    if (rl.limited) {
+      return NextResponse.json(
+        { error: 'Trop de messages envoyés. Veuillez réessayer dans une heure.' },
+        { status: 429 }
+      );
+    }
+
+    const body = await safeParseJSON(request);
+    if (!body) {
+      return NextResponse.json({ error: 'Corps de requête JSON invalide' }, { status: 400 });
+    }
+
+    const { name, email, subject, message } = body as {
+      name?: string;
+      email?: string;
+      subject?: string;
+      message?: string;
+    };
 
     if (!name || !email || !subject || !message) {
       return NextResponse.json({ error: 'Champs requis manquants' }, { status: 400 });
     }
 
-    // Get client IP for rate limiting
-    const forwarded = request.headers.get('x-forwarded-for');
-    const ip = forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown';
+    if (!isValidEmail(email)) {
+      return NextResponse.json({ error: 'Email invalide' }, { status: 400 });
+    }
 
     const serviceClient = createServiceClient();
-
-    // Rate limiting: max 3 messages per IP per hour
-    if (serviceClient) {
-      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-      const { count } = await serviceClient
-        .from('messages_contact')
-        .select('id', { count: 'exact', head: true })
-        .eq('ip_address', ip)
-        .gte('created_at', oneHourAgo);
-
-      if (count !== null && count >= 3) {
-        return NextResponse.json(
-          { error: 'Trop de messages envoyés. Veuillez réessayer dans une heure.' },
-          { status: 429 }
-        );
-      }
-    }
 
     // Save to database first (must succeed even if email fails)
     let saved = false;

@@ -7,9 +7,11 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!isValidUUID(params.id)) {
+  const { id } = await params;
+
+  if (!isValidUUID(id)) {
     return NextResponse.json({ error: 'ID de discussion invalide (UUID requis)' }, { status: 400 });
   }
 
@@ -23,12 +25,12 @@ export async function GET(
   const { count } = await supabase
     .from('discussion_comments')
     .select('*', { count: 'exact', head: true })
-    .eq('discussion_id', params.id);
+    .eq('discussion_id', id);
 
   const { data, error } = await supabase
     .from('discussion_comments')
     .select('*')
-    .eq('discussion_id', params.id)
+    .eq('discussion_id', id)
     .order('created_at', { ascending: true })
     .range(pagination.offset, pagination.offset + pagination.limit - 1);
 
@@ -41,10 +43,12 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (!isValidUUID(params.id)) {
+    const { id } = await params;
+
+    if (!isValidUUID(id)) {
       return NextResponse.json({ error: 'ID de discussion invalide (UUID requis)' }, { status: 400 });
     }
 
@@ -88,7 +92,7 @@ export async function POST(
     const { data, error } = await supabase
       .from('discussion_comments')
       .insert({
-        discussion_id: params.id,
+        discussion_id: id,
         user_id: user.id,
         username,
         content: content.trim(),

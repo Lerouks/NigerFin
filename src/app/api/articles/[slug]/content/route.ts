@@ -3,9 +3,9 @@ import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase'
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
-  const { slug } = params;
+  const { slug } = await params;
 
   const service = createServiceClient();
   if (!service) {

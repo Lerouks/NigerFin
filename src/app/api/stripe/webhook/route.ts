@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase';
 import { syncContactToBrevo } from '@/lib/brevo';
 import { sendTransactionalEmail } from '@/lib/email';
 import { stripePaymentConfirmationEmail } from '@/lib/email-templates';
+import * as Sentry from '@sentry/nextjs';
 import Stripe from 'stripe';
 
 function getStripe() {
@@ -16,19 +17,28 @@ function mapTierToRole(tier: string): string {
 }
 
 export async function POST(request: NextRequest) {
+  // Guard: Stripe keys must be configured
   if (!process.env.STRIPE_SECRET_KEY) {
     return NextResponse.json({ error: 'Stripe not configured' }, { status: 503 });
   }
 
+  // Guard: Webhook secret MUST be defined — never process webhooks without signature verification
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    Sentry.captureMessage('STRIPE_WEBHOOK_SECRET is not configured — webhook rejected', { level: 'error' });
+    return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 503 });
+  }
+
   const stripe = getStripe();
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
   const body = await request.text();
   const signature = request.headers.get('stripe-signature') || '';
 
+  // Verify webhook signature
   let event: Stripe.Event;
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-  } catch {
+  } catch (err) {
+    Sentry.captureException(err, { tags: { context: 'stripe-webhook-signature' } });
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
@@ -37,158 +47,223 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Supabase not configured' }, { status: 503 });
   }
 
-  switch (event.type) {
-    case 'checkout.session.completed': {
-      const session = event.data.object as Stripe.Checkout.Session;
-      const userId = session.metadata?.supabase_user_id;
-      const tier = session.metadata?.tier || 'premium';
-      const billingCycle = session.metadata?.billing_cycle || 'monthly';
+  try {
+    switch (event.type) {
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const userId = session.metadata?.supabase_user_id;
+        const tier = session.metadata?.tier || 'premium';
+        const billingCycle = session.metadata?.billing_cycle || 'monthly';
 
-      if (userId && session.subscription) {
-        const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
-        const role = mapTierToRole(tier);
-        const periodStart = (subscription as any).current_period_start;
-        const periodEnd = (subscription as any).current_period_end;
+        if (userId && session.subscription) {
+          const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
+          const role = mapTierToRole(tier);
+          const periodStart = (subscription as any).current_period_start;
+          const periodEnd = (subscription as any).current_period_end;
 
-        await supabase
-          .from('subscriptions')
-          .upsert(
-            {
-              user_id: userId,
-              tier,
-              status: 'active',
-              stripe_subscription_id: subscription.id,
-              stripe_customer_id: session.customer as string,
-              billing_cycle: billingCycle,
-              current_period_start: periodStart ? new Date(periodStart * 1000).toISOString() : null,
-              current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
-              price_amount: subscription.items.data[0]?.price?.unit_amount || 0,
-            },
-            { onConflict: 'user_id' }
-          );
+          const { error: subError } = await supabase
+            .from('subscriptions')
+            .upsert(
+              {
+                user_id: userId,
+                tier,
+                status: 'active',
+                stripe_subscription_id: subscription.id,
+                stripe_customer_id: session.customer as string,
+                billing_cycle: billingCycle,
+                current_period_start: periodStart ? new Date(periodStart * 1000).toISOString() : null,
+                current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
+                price_amount: subscription.items.data[0]?.price?.unit_amount || 0,
+              },
+              { onConflict: 'user_id' }
+            );
 
-        await supabase
-          .from('user_profiles')
-          .update({
-            role,
-            subscription_status: 'active',
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', userId);
+          if (subError) {
+            Sentry.captureException(subError, {
+              tags: { context: 'stripe-webhook-subscription-upsert' },
+              extra: { userId, eventType: event.type },
+            });
+          }
 
-        await syncMailchimpContact(userId, role, supabase);
-
-        // Send confirmation email
-        const { data: profile } = await supabase
-          .from('user_profiles')
-          .select('email, full_name')
-          .eq('id', userId)
-          .single();
-        if (profile?.email) {
-          const confirmation = stripePaymentConfirmationEmail(profile.full_name || 'Client', billingCycle);
-          await sendTransactionalEmail({ to: profile.email, ...confirmation }).catch(() => {});
-        }
-      }
-      break;
-    }
-
-    case 'customer.subscription.updated': {
-      const subscription = event.data.object as Stripe.Subscription;
-      const userId = subscription.metadata?.supabase_user_id;
-      const tier = subscription.metadata?.tier || 'premium';
-
-      if (userId) {
-        const status = subscription.status === 'active' ? 'active' :
-                       subscription.status === 'past_due' ? 'active' : 'cancelled';
-        const role = status === 'active' ? mapTierToRole(tier) : 'reader';
-        const periodStart = (subscription as any).current_period_start;
-        const periodEnd = (subscription as any).current_period_end;
-
-        await supabase
-          .from('subscriptions')
-          .update({
-            status,
-            current_period_start: periodStart ? new Date(periodStart * 1000).toISOString() : null,
-            current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
-            cancel_at_period_end: subscription.cancel_at_period_end,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('user_id', userId);
-
-        await supabase
-          .from('user_profiles')
-          .update({
-            role,
-            subscription_status: status === 'active' ? 'active' : 'cancelled',
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', userId);
-      }
-      break;
-    }
-
-    case 'customer.subscription.deleted': {
-      const subscription = event.data.object as Stripe.Subscription;
-      const userId = subscription.metadata?.supabase_user_id;
-
-      if (userId) {
-        await supabase
-          .from('subscriptions')
-          .update({
-            status: 'expired',
-            updated_at: new Date().toISOString(),
-          })
-          .eq('user_id', userId);
-
-        await supabase
-          .from('user_profiles')
-          .update({
-            role: 'reader',
-            subscription_status: 'inactive',
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', userId);
-
-        await syncMailchimpContact(userId, 'reader', supabase);
-      }
-      break;
-    }
-
-    case 'invoice.payment_failed': {
-      const invoice = event.data.object as Stripe.Invoice;
-      const sub = (invoice as any).subscription as string | undefined;
-      if (sub) {
-        const subscription = await stripe.subscriptions.retrieve(sub);
-        const userId = subscription.metadata?.supabase_user_id;
-        if (userId) {
-          await supabase
+          const { error: profileError } = await supabase
             .from('user_profiles')
             .update({
-              subscription_status: 'past_due',
+              role,
+              subscription_status: 'active',
               updated_at: new Date().toISOString(),
             })
             .eq('id', userId);
+
+          if (profileError) {
+            Sentry.captureException(profileError, {
+              tags: { context: 'stripe-webhook-profile-update' },
+              extra: { userId, eventType: event.type },
+            });
+          }
+
+          await syncMailchimpContact(userId, role, supabase);
+
+          // Send confirmation email
+          const { data: profile } = await supabase
+            .from('user_profiles')
+            .select('email, full_name')
+            .eq('id', userId)
+            .single();
+          if (profile?.email) {
+            const confirmation = stripePaymentConfirmationEmail(profile.full_name || 'Client', billingCycle);
+            await sendTransactionalEmail({ to: profile.email, ...confirmation }).catch(() => {});
+          }
         }
+        break;
       }
-      break;
+
+      case 'customer.subscription.updated': {
+        const subscription = event.data.object as Stripe.Subscription;
+        const userId = subscription.metadata?.supabase_user_id;
+        const tier = subscription.metadata?.tier || 'premium';
+
+        if (userId) {
+          const status = subscription.status === 'active' ? 'active' :
+                         subscription.status === 'past_due' ? 'active' : 'cancelled';
+          const role = status === 'active' ? mapTierToRole(tier) : 'reader';
+          const periodStart = (subscription as any).current_period_start;
+          const periodEnd = (subscription as any).current_period_end;
+
+          const { error: subUpdateError } = await supabase
+            .from('subscriptions')
+            .update({
+              status,
+              current_period_start: periodStart ? new Date(periodStart * 1000).toISOString() : null,
+              current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
+              cancel_at_period_end: subscription.cancel_at_period_end,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('user_id', userId);
+
+          if (subUpdateError) {
+            Sentry.captureException(subUpdateError, {
+              tags: { context: 'stripe-webhook-sub-update' },
+              extra: { userId, eventType: event.type },
+            });
+          }
+
+          const { error: profileError } = await supabase
+            .from('user_profiles')
+            .update({
+              role,
+              subscription_status: status === 'active' ? 'active' : 'cancelled',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', userId);
+
+          if (profileError) {
+            Sentry.captureException(profileError, {
+              tags: { context: 'stripe-webhook-profile-update' },
+              extra: { userId, eventType: event.type },
+            });
+          }
+        }
+        break;
+      }
+
+      case 'customer.subscription.deleted': {
+        const subscription = event.data.object as Stripe.Subscription;
+        const userId = subscription.metadata?.supabase_user_id;
+
+        if (userId) {
+          const { error: subDeleteError } = await supabase
+            .from('subscriptions')
+            .update({
+              status: 'expired',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('user_id', userId);
+
+          if (subDeleteError) {
+            Sentry.captureException(subDeleteError, {
+              tags: { context: 'stripe-webhook-sub-delete' },
+              extra: { userId, eventType: event.type },
+            });
+          }
+
+          const { error: profileError } = await supabase
+            .from('user_profiles')
+            .update({
+              role: 'reader',
+              subscription_status: 'inactive',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', userId);
+
+          if (profileError) {
+            Sentry.captureException(profileError, {
+              tags: { context: 'stripe-webhook-profile-expire' },
+              extra: { userId, eventType: event.type },
+            });
+          }
+
+          await syncMailchimpContact(userId, 'reader', supabase);
+        }
+        break;
+      }
+
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as Stripe.Invoice;
+        const sub = (invoice as any).subscription as string | undefined;
+        if (sub) {
+          const subscription = await stripe.subscriptions.retrieve(sub);
+          const userId = subscription.metadata?.supabase_user_id;
+          if (userId) {
+            const { error: pastDueError } = await supabase
+              .from('user_profiles')
+              .update({
+                subscription_status: 'past_due',
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', userId);
+
+            if (pastDueError) {
+              Sentry.captureException(pastDueError, {
+                tags: { context: 'stripe-webhook-payment-failed' },
+                extra: { userId, eventType: event.type },
+              });
+            }
+          }
+        }
+        break;
+      }
     }
+  } catch (err) {
+    Sentry.captureException(err, {
+      tags: { context: 'stripe-webhook-handler' },
+      extra: { eventType: event.type },
+    });
+    // Still return 200 to Stripe to prevent retries on application errors
+    // The error is captured in Sentry for investigation
   }
 
   return NextResponse.json({ received: true });
 }
 
 async function syncMailchimpContact(userId: string, role: string, supabase: NonNullable<ReturnType<typeof createServiceClient>>) {
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('email, full_name')
-    .eq('id', userId)
-    .single();
+  try {
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('email, full_name')
+      .eq('id', userId)
+      .single();
 
-  if (!profile?.email) return;
+    if (!profile?.email) return;
 
-  await syncContactToBrevo({
-    email: profile.email,
-    firstName: profile.full_name || '',
-    role,
-  });
+    await syncContactToBrevo({
+      email: profile.email,
+      firstName: profile.full_name || '',
+      role,
+    });
+  } catch (err) {
+    Sentry.captureException(err, {
+      tags: { context: 'stripe-webhook-brevo-sync' },
+      extra: { userId },
+    });
+  }
 }

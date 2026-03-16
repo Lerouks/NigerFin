@@ -7,11 +7,12 @@ import { ArticleContent } from './ArticleContent';
 export const revalidate = 60;
 
 interface ArticlePageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
-  const result = await getArticleBySlug(params.slug);
+  const { slug } = await params;
+  const result = await getArticleBySlug(slug);
   if (!result) return { title: 'Article introuvable' };
 
   const { article } = result;
@@ -55,7 +56,8 @@ export async function generateStaticParams() {
 }
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
-  const result = await getArticleBySlug(params.slug);
+  const { slug } = await params;
+  const result = await getArticleBySlug(slug);
 
   if (!result) {
     notFound();

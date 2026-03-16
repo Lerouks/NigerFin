@@ -1,34 +1,27 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
-
-// Rate limiter for auth log attempts
-const authLogMap = new Map<string, { count: number; resetAt: number }>();
-const AUTH_LOG_LIMIT = 20;
-const AUTH_LOG_WINDOW = 60 * 1000; // 1 minute
-
-function isAuthLogLimited(ip: string): boolean {
-  const now = Date.now();
-  const entry = authLogMap.get(ip);
-  if (!entry || now > entry.resetAt) {
-    authLogMap.set(ip, { count: 1, resetAt: now + AUTH_LOG_WINDOW });
-    return false;
-  }
-  entry.count++;
-  return entry.count > AUTH_LOG_LIMIT;
-}
+import { checkRateLimit, getClientIP, RATE_LIMITS } from '@/lib/rate-limit';
+import { safeParseJSON, isValidEmail } from '@/lib/validation';
 
 export async function POST(request: NextRequest) {
   try {
-    const forwarded = request.headers.get('x-forwarded-for');
-    const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
-    if (isAuthLogLimited(ip)) {
+    const ip = getClientIP(request);
+
+    // Persistent rate limit: 10 per 15 minutes per IP
+    const rl = await checkRateLimit(`auth-log:${ip}`, RATE_LIMITS.auth.limit, RATE_LIMITS.auth.windowMs);
+    if (rl.limited) {
       return NextResponse.json({ ok: true }); // Silently drop
     }
 
-    const { type, email } = await request.json();
+    const body = await safeParseJSON(request);
+    if (!body) {
+      return NextResponse.json({ ok: true }); // Silently drop bad requests
+    }
 
-    if (!type || !email) {
-      return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
+    const { type, email } = body as { type?: string; email?: string };
+
+    if (!type || !email || !isValidEmail(email)) {
+      return NextResponse.json({ error: 'Missing or invalid fields' }, { status: 400 });
     }
 
     const supabase = createServiceClient();

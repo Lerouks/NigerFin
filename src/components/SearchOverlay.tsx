@@ -16,11 +16,12 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    if (!isOpen) return;
     fetch('/api/articles')
       .then((res) => res.json())
       .then(setArticles)
       .catch(() => {});
-  }, []);
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {

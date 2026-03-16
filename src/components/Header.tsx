@@ -37,7 +37,7 @@ export function Header() {
       .then((res) => res.json())
       .then((data) => {
         if (data.navigation?.length) {
-          setNavigation(data.navigation.sort((a: NavItem, b: NavItem) => a.order - b.order));
+          setNavigation(data.navigation.toSorted((a: NavItem, b: NavItem) => a.order - b.order));
         }
       })
       .catch(() => {});

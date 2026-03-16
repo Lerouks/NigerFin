@@ -135,8 +135,13 @@ export function PracticalTools() {
       .then((res) => res.json())
       .then((data: ToolData[]) => {
         if (Array.isArray(data) && data.length > 0) {
-          setFreeTools(data.filter((t) => !t.isPremium));
-          setPremiumTools(data.filter((t) => t.isPremium));
+          const free: ToolData[] = [];
+          const premium: ToolData[] = [];
+          for (const t of data) {
+            (t.isPremium ? premium : free).push(t);
+          }
+          setFreeTools(free);
+          setPremiumTools(premium);
         }
       })
       .catch(() => {});

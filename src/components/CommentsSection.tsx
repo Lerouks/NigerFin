@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { Heart, Send, CornerDownRight } from 'lucide-react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Send, CornerDownRight } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 
@@ -82,10 +82,21 @@ export function CommentsSection({ articleId }: CommentsSectionProps) {
     setSubmitting(false);
   };
 
-  // Organize: top-level + replies
-  const topLevel = comments.filter((c) => !c.parent_comment_id);
-  const replies = comments.filter((c) => c.parent_comment_id);
-  const getReplies = (parentId: string) => replies.filter((r) => r.parent_comment_id === parentId);
+  // Organize: top-level + replies grouped by parent
+  const { topLevel, repliesByParent } = useMemo(() => {
+    const top: CommentData[] = [];
+    const byParent = new Map<string, CommentData[]>();
+    for (const c of comments) {
+      if (!c.parent_comment_id) {
+        top.push(c);
+      } else {
+        const list = byParent.get(c.parent_comment_id);
+        if (list) list.push(c);
+        else byParent.set(c.parent_comment_id, [c]);
+      }
+    }
+    return { topLevel: top, repliesByParent: byParent };
+  }, [comments]);
 
   return (
     <div className="bg-white border border-black/[0.06] rounded-xl overflow-hidden">
@@ -165,7 +176,7 @@ export function CommentsSection({ articleId }: CommentsSectionProps) {
                   </div>
                 )}
                 {/* Replies */}
-                {getReplies(comment.id).map((reply) => (
+                {(repliesByParent.get(comment.id) || []).map((reply) => (
                   <div key={reply.id} className="ml-11 mt-4 pl-4 border-l-2 border-black/[0.04]">
                     <CommentItem comment={reply} isSignedIn={isSignedIn} replyTo={null} setReplyTo={() => {}} isReply />
                   </div>

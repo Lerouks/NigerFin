@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "analyze": "ANALYZE=true next build"
   },
   "dependencies": {
@@ -33,10 +35,10 @@
     "jspdf": "^4.2.0",
     "jspdf-autotable": "^5.0.7",
     "lucide-react": "^0.460.0",
-    "next": "14.2.18",
+    "next": "^15.5.13",
     "posthog-js": "^1.190.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "react-markdown": "^10.1.0",
     "recharts": "^3.7.0",
     "rehype-raw": "^7.0.0",
@@ -47,12 +49,14 @@
   "devDependencies": {
     "@next/bundle-analyzer": "^16.1.6",
     "@types/node": "^22.10.0",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
     "autoprefixer": "^10.4.20",
     "eslint": "^10.0.2",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.16",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.0"
   }
 }

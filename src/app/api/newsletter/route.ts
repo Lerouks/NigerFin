@@ -1,34 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { subscribeToMailchimpNewsletter, sendTransactionalEmail } from '@/lib/email';
 import { newsletterWelcomeEmail } from '@/lib/email-templates';
-
-// Simple in-memory rate limiter (per IP, resets on cold start)
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT = 5; // max requests
-const RATE_WINDOW = 60 * 60 * 1000; // 1 hour
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW });
-    return false;
-  }
-  entry.count++;
-  return entry.count > RATE_LIMIT;
-}
+import { isValidEmail, safeParseJSON } from '@/lib/validation';
+import { checkRateLimit, getClientIP, RATE_LIMITS } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
-    const forwarded = request.headers.get('x-forwarded-for');
-    const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
-    if (isRateLimited(ip)) {
+    const ip = getClientIP(request);
+
+    // Persistent rate limit: 5 per hour per IP
+    const rl = await checkRateLimit(`newsletter:${ip}`, RATE_LIMITS.newsletter.limit, RATE_LIMITS.newsletter.windowMs);
+    if (rl.limited) {
       return NextResponse.json({ error: 'Trop de requêtes. Réessayez plus tard.' }, { status: 429 });
     }
 
-    const { email } = await request.json();
+    const body = await safeParseJSON(request);
+    if (!body) {
+      return NextResponse.json({ error: 'Corps de requête JSON invalide' }, { status: 400 });
+    }
 
-    if (!email || typeof email !== 'string' || !email.includes('@')) {
+    const { email } = body as { email?: string };
+
+    if (!isValidEmail(email)) {
       return NextResponse.json({ error: 'Email invalide' }, { status: 400 });
     }
 

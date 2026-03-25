@@ -33,11 +33,12 @@ const toolsMeta: Record<string, { title: string; description: string; premium: b
 };
 
 interface ToolPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({ params }: ToolPageProps): Promise<Metadata> {
-  const tool = toolsMeta[params.slug];
+  const { slug } = await params;
+  const tool = toolsMeta[slug];
   if (!tool) return { title: 'Outil introuvable' };
   return { title: tool.title, description: tool.description };
 }
@@ -46,13 +47,14 @@ export async function generateStaticParams() {
   return Object.keys(toolsMeta).map((slug) => ({ slug }));
 }
 
-export default function ToolPage({ params }: ToolPageProps) {
-  const tool = toolsMeta[params.slug];
+export default async function ToolPage({ params }: ToolPageProps) {
+  const { slug } = await params;
+  const tool = toolsMeta[slug];
   if (!tool) notFound();
 
   return (
     <ToolContent
-      slug={params.slug}
+      slug={slug}
       title={tool.title}
       description={tool.description}
       isPremium={tool.premium}

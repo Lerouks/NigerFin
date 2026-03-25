@@ -1,9 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { TrendingUp, TrendingDown, BookOpen, ChevronRight } from 'lucide-react';
 import type { MarketData } from '@/types';
+
+const TYPE_LABELS: Record<MarketData['type'], string> = {
+  currency: 'Devises',
+  commodity: 'Matières premières',
+  index: 'Indices',
+  crypto: 'Cryptomonnaies',
+};
+
+const TYPE_DESCRIPTIONS: Record<MarketData['type'], string> = {
+  currency: 'Taux de change des principales devises',
+  commodity: 'Cours des matières premières stratégiques',
+  index: 'Performance des principaux indices boursiers',
+  crypto: 'Cours des principales cryptomonnaies',
+};
 
 interface MarchesContentProps {
   fallbackData: MarketData[];
@@ -22,44 +36,31 @@ export function MarchesContent({ fallbackData }: MarchesContentProps) {
       .catch(() => {});
   }, []);
 
-  const getTypeLabel = (type: MarketData['type']) => {
-    switch (type) {
-      case 'currency': return 'Devises';
-      case 'commodity': return 'Matières premières';
-      case 'index': return 'Indices';
-      case 'crypto': return 'Cryptomonnaies';
+  const { groupedData, lastUpdated } = useMemo(() => {
+    const grouped = data.reduce((acc, item) => {
+      if (!acc[item.type]) acc[item.type] = [];
+      acc[item.type].push(item);
+      return acc;
+    }, {} as Record<string, MarketData[]>);
+
+    let latest: string | null = null;
+    for (const item of data) {
+      if (item.updatedAt && (!latest || item.updatedAt > latest)) {
+        latest = item.updatedAt;
+      }
     }
-  };
 
-  const getTypeDescription = (type: MarketData['type']) => {
-    switch (type) {
-      case 'currency': return 'Taux de change des principales devises';
-      case 'commodity': return 'Cours des matières premières stratégiques';
-      case 'index': return 'Performance des principaux indices boursiers';
-      case 'crypto': return 'Cours des principales cryptomonnaies';
-    }
-  };
-
-  const groupedData = data.reduce((acc, item) => {
-    if (!acc[item.type]) acc[item.type] = [];
-    acc[item.type].push(item);
-    return acc;
-  }, {} as Record<string, MarketData[]>);
-
-  const lastUpdated = data.reduce((latest, item) => {
-    if (!item.updatedAt) return latest;
-    if (!latest) return item.updatedAt;
-    return item.updatedAt > latest ? item.updatedAt : latest;
-  }, null as string | null);
+    return { groupedData: grouped, lastUpdated: latest };
+  }, [data]);
 
   return (
     <div className="space-y-8">
       {Object.entries(groupedData).map(([type, items]) => (
         <div key={type}>
           <div className="mb-4">
-            <h2 className="text-lg font-semibold">{getTypeLabel(type as MarketData['type'])}</h2>
+            <h2 className="text-lg font-semibold">{TYPE_LABELS[type as MarketData['type']]}</h2>
             <p className="text-[13px] text-gray-500 mt-0.5">
-              {getTypeDescription(type as MarketData['type'])}
+              {TYPE_DESCRIPTIONS[type as MarketData['type']]}
             </p>
           </div>
           <div className="bg-white rounded-xl border border-black/[0.06] divide-y divide-black/[0.04] overflow-hidden">

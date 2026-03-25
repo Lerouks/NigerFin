@@ -1,8 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import type { MarketData } from '@/types';
+
+const TYPE_LABELS: Record<MarketData['type'], string> = {
+  currency: 'Devises',
+  commodity: 'Matières premières',
+  index: 'Indices',
+  crypto: 'Cryptomonnaies',
+};
 
 interface MarketDataWidgetProps {
   data: MarketData[];
@@ -20,27 +27,22 @@ export function MarketDataWidget({ data: fallbackData }: MarketDataWidgetProps) 
       .catch(() => {});
   }, []);
 
-  const getTypeLabel = (type: MarketData['type']) => {
-    switch (type) {
-      case 'currency': return 'Devises';
-      case 'commodity': return 'Matières premières';
-      case 'index': return 'Indices';
-      case 'crypto': return 'Cryptomonnaies';
+  const { groupedData, lastUpdated } = useMemo(() => {
+    const grouped = data.reduce((acc, item) => {
+      if (!acc[item.type]) acc[item.type] = [];
+      acc[item.type].push(item);
+      return acc;
+    }, {} as Record<string, MarketData[]>);
+
+    let latest: string | null = null;
+    for (const item of data) {
+      if (item.updatedAt && (!latest || item.updatedAt > latest)) {
+        latest = item.updatedAt;
+      }
     }
-  };
 
-  const groupedData = data.reduce((acc, item) => {
-    if (!acc[item.type]) acc[item.type] = [];
-    acc[item.type].push(item);
-    return acc;
-  }, {} as Record<string, MarketData[]>);
-
-  // Find the most recent updatedAt across all items
-  const lastUpdated = data.reduce((latest, item) => {
-    if (!item.updatedAt) return latest;
-    if (!latest) return item.updatedAt;
-    return item.updatedAt > latest ? item.updatedAt : latest;
-  }, null as string | null);
+    return { groupedData: grouped, lastUpdated: latest };
+  }, [data]);
 
   return (
     <div className="bg-white rounded-xl border border-black/[0.06] sticky top-36 overflow-hidden">
@@ -51,7 +53,7 @@ export function MarketDataWidget({ data: fallbackData }: MarketDataWidgetProps) 
         {Object.entries(groupedData).map(([type, items]) => (
           <div key={type}>
             <h4 className="text-[10px] uppercase tracking-[0.12em] text-gray-400 mb-3">
-              {getTypeLabel(type as MarketData['type'])}
+              {TYPE_LABELS[type as MarketData['type']]}
             </h4>
             <div className="space-y-2.5">
               {items.map((item) => (

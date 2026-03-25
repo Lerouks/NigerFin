@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Zap, ChevronLeft, ChevronRight, X } from 'lucide-react';
 
 interface NewsItem {
@@ -22,8 +22,6 @@ export function BreakingNews() {
   const [dismissed, setDismissed] = useState(false);
   const [ready, setReady] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
   useEffect(() => {
     fetch('/api/flash-banner')
       .then((res) => res.json())
@@ -38,31 +36,20 @@ export function BreakingNews() {
       .catch(() => {});
   }, []);
 
-  const startTimer = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    intervalRef.current = setInterval(() => {
-      if (!isPaused) {
-        setCurrentIndex((prev) => (prev + 1) % items.length);
-      }
-    }, 5000);
-  };
-
   useEffect(() => {
-    startTimer();
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (isPaused || items.length === 0) return;
+    const id = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % items.length);
+    }, 5000);
+    return () => clearInterval(id);
   }, [isPaused, items.length]);
 
   const goNext = () => {
     setCurrentIndex((prev) => (prev + 1) % items.length);
-    startTimer();
   };
 
   const goPrev = () => {
     setCurrentIndex((prev) => (prev - 1 + items.length) % items.length);
-    startTimer();
   };
 
   if (!ready || dismissed || items.length === 0) return null;
@@ -114,10 +101,7 @@ export function BreakingNews() {
               {items.map((_, i) => (
                 <button
                   key={i}
-                  onClick={() => {
-                    setCurrentIndex(i);
-                    startTimer();
-                  }}
+                  onClick={() => setCurrentIndex(i)}
                   className={`rounded-full transition-all duration-300 ${
                     i === currentIndex ? 'w-4 h-1.5' : 'w-1.5 h-1.5 bg-gray-600 hover:bg-gray-500'
                   }`}

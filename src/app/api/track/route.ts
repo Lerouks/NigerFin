@@ -1,31 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
-
-// Simple in-memory rate limiter for tracking endpoint
-const trackRateMap = new Map<string, { count: number; resetAt: number }>();
-const TRACK_LIMIT = 60; // max page views per IP per window
-const TRACK_WINDOW = 60 * 1000; // 1 minute
-
-function isTrackLimited(ip: string): boolean {
-  const now = Date.now();
-  const entry = trackRateMap.get(ip);
-  if (!entry || now > entry.resetAt) {
-    trackRateMap.set(ip, { count: 1, resetAt: now + TRACK_WINDOW });
-    return false;
-  }
-  entry.count++;
-  return entry.count > TRACK_LIMIT;
-}
+import { checkRateLimit, getClientIP, RATE_LIMITS } from '@/lib/rate-limit';
+import { safeParseJSON } from '@/lib/validation';
 
 export async function POST(req: NextRequest) {
   try {
-    const forwarded = req.headers.get('x-forwarded-for');
-    const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
-    if (isTrackLimited(ip)) {
+    const ip = getClientIP(req);
+
+    // Persistent rate limit: 60 per minute per IP
+    const rl = await checkRateLimit(`track:${ip}`, RATE_LIMITS.tracking.limit, RATE_LIMITS.tracking.windowMs);
+    if (rl.limited) {
       return NextResponse.json({ ok: true }); // Silently drop
     }
 
-    const { page_path, article_id, referrer } = await req.json();
+    const body = await safeParseJSON(req);
+    if (!body) {
+      return NextResponse.json({ ok: true }); // Silently drop bad requests
+    }
+
+    const { page_path, article_id, referrer } = body as {
+      page_path?: string;
+      article_id?: string;
+      referrer?: string;
+    };
+
     if (!page_path) {
       return NextResponse.json({ error: 'page_path required' }, { status: 400 });
     }

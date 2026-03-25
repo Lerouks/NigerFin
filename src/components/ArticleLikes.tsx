@@ -28,9 +28,11 @@ export function ArticleLikes({ articleId }: ArticleLikesProps) {
     if (!isSignedIn || loading) return;
     setLoading(true);
 
-    // Optimistic update
-    setIsLiked(!isLiked);
-    setCount(isLiked ? count - 1 : count + 1);
+    // Optimistic update using functional setState to avoid stale closures
+    const wasLiked = isLiked;
+    const prevCount = count;
+    setIsLiked(prev => !prev);
+    setCount(prev => wasLiked ? prev - 1 : prev + 1);
 
     try {
       const res = await fetch('/api/likes', {
@@ -40,12 +42,12 @@ export function ArticleLikes({ articleId }: ArticleLikesProps) {
       });
       if (!res.ok) {
         // Revert
-        setIsLiked(isLiked);
-        setCount(count);
+        setIsLiked(wasLiked);
+        setCount(prevCount);
       }
     } catch {
-      setIsLiked(isLiked);
-      setCount(count);
+      setIsLiked(wasLiked);
+      setCount(prevCount);
     }
     setLoading(false);
   };

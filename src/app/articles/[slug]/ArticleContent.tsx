@@ -63,9 +63,10 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
   const imageUrl = getArticleImageUrl(article);
   const contentType = getContentTypeFromArticle(article);
 
-  const articleUrl = typeof window !== 'undefined'
-    ? window.location.href
-    : `https://nfireport.com/articles/${article.slug.current}`;
+  const getArticleUrl = () =>
+    typeof window !== 'undefined'
+      ? window.location.href
+      : `https://nfireport.com/articles/${article.slug.current}`;
 
   // Fetch paywall config once for configurable limit
   useEffect(() => {
@@ -132,16 +133,19 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
   }, [accessResult, htmlBody, article.slug]);
 
   const handleCopyLink = async () => {
-    await navigator.clipboard.writeText(articleUrl);
+    await navigator.clipboard.writeText(getArticleUrl());
     setLinkCopied(true);
     setTimeout(() => setLinkCopied(false), 2000);
   };
 
-  const shareLinks = {
-    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(articleUrl)}`,
-    twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(articleUrl)}&text=${encodeURIComponent(article.title)}`,
-    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(articleUrl)}`,
-    whatsapp: `https://wa.me/?text=${encodeURIComponent(article.title + ' ' + articleUrl)}`,
+  const getShareLinks = () => {
+    const url = getArticleUrl();
+    return {
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+      twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(article.title)}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
+      whatsapp: `https://wa.me/?text=${encodeURIComponent(article.title + ' ' + url)}`,
+    };
   };
 
   // Show loading skeleton while auth state is being resolved
@@ -223,6 +227,8 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
       </div>
     );
   }
+
+  const shareLinks = getShareLinks();
 
   return (
     <div className="min-h-screen bg-[#fafaf9]">

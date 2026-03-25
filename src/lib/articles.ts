@@ -83,15 +83,29 @@ function bodyToHtml(raw: string): string {
 
 // ─── Data fetching functions ────────────────────────────────────────────────
 
-export async function getAllArticles(): Promise<Article[]> {
+/** Get paginated published articles */
+export async function getAllArticles(page = 1, limit = 20): Promise<{ articles: Article[]; total: number }> {
   const supabase = createServiceClient();
-  if (!supabase) return [];
+  if (!supabase) return { articles: [], total: 0 };
+
+  const offset = (page - 1) * limit;
+
+  const { count } = await supabase
+    .from('articles')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'published');
+
   const { data } = await supabase
     .from('articles')
     .select('*')
     .eq('status', 'published')
-    .order('published_at', { ascending: false });
-  return (data || []).map(toArticle);
+    .order('published_at', { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  return {
+    articles: (data || []).map(toArticle),
+    total: count || 0,
+  };
 }
 
 export async function getArticleBySlug(slug: string): Promise<{ article: Article; htmlBody: string } | null> {
@@ -107,16 +121,30 @@ export async function getArticleBySlug(slug: string): Promise<{ article: Article
   return { article: toArticle(data), htmlBody: bodyToHtml(data.body || '') };
 }
 
-export async function getArticlesByCategory(category: string): Promise<Article[]> {
+export async function getArticlesByCategory(category: string, page = 1, limit = 20): Promise<{ articles: Article[]; total: number }> {
   const supabase = createServiceClient();
-  if (!supabase) return [];
+  if (!supabase) return { articles: [], total: 0 };
+
+  const offset = (page - 1) * limit;
+
+  const { count } = await supabase
+    .from('articles')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'published')
+    .contains('sections', [category]);
+
   const { data } = await supabase
     .from('articles')
     .select('*')
     .eq('status', 'published')
     .contains('sections', [category])
-    .order('published_at', { ascending: false });
-  return (data || []).map(toArticle);
+    .order('published_at', { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  return {
+    articles: (data || []).map(toArticle),
+    total: count || 0,
+  };
 }
 
 export async function getFeaturedArticles(): Promise<Article[]> {

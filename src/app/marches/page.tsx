@@ -8,7 +8,7 @@ export const revalidate = 60;
 export const metadata: Metadata = { title: 'Marchés', description: 'Suivez les cours des marchés en temps réel : matières premières, devises, indices boursiers et actifs financiers africains.' };
 
 export default async function MarchesPage() {
-  const articles = await getArticlesByCategory('marches');
+  const { articles } = await getArticlesByCategory('marches');
   return (
     <div className="min-h-screen bg-[#fafaf9]">
       <section className="bg-[#111] text-white py-16 md:py-20">

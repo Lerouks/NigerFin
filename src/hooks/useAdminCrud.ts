@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-interface UseAdminCrudOptions<T> {
+interface UseAdminCrudOptions {
   endpoint: string;
   /** Optional query params appended to the fetch URL */
   params?: Record<string, string>;
@@ -19,7 +19,7 @@ interface UseAdminCrudReturn<T> {
   remove: (id: string) => Promise<boolean>;
 }
 
-export function useAdminCrud<T>({ endpoint, params }: UseAdminCrudOptions<T>): UseAdminCrudReturn<T> {
+export function useAdminCrud<T>({ endpoint, params }: UseAdminCrudOptions): UseAdminCrudReturn<T> {
   const [items, setItems] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

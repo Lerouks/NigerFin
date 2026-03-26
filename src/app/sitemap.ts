@@ -1,9 +1,8 @@
 import type { MetadataRoute } from 'next';
 import { createServiceClient } from '@/lib/supabase';
+import { SITE_URL } from '@/lib/config';
 
 export const revalidate = 3600;
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://nfireport.com';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const service = createServiceClient();

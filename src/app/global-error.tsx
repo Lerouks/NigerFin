@@ -35,6 +35,7 @@ export default function GlobalError({
               >
                 Réessayer
               </button>
+              {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- global error boundary renders outside Next.js context */}
               <a
                 href="/"
                 style={{ padding: '12px 28px', borderRadius: 9999, border: '1px solid rgba(0,0,0,0.1)', textDecoration: 'none', color: '#111', fontSize: 14, fontWeight: 500 }}

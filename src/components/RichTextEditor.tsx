@@ -15,7 +15,7 @@ import { useCallback, useRef, useState } from 'react';
 import {
   Bold, Italic, Underline as UnderlineIcon, Strikethrough, Highlighter,
   Heading2, Heading3, List, ListOrdered, Quote, Minus, Link as LinkIcon,
-  Image as ImageIcon, Table as TableIcon, Type, Upload, Loader2, X,
+  Image as ImageIcon, Table as TableIcon, Type, Loader2, X,
 } from 'lucide-react';
 
 // ─── Custom Extensions ───────────────────────────────────────────────────────

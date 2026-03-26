@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase';
 import { safeParseJSON } from '@/lib/validation';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { SITE_URL } from '@/lib/config';
 import Stripe from 'stripe';
 
 function getStripe() {
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest) {
         .eq('id', user.id);
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://nfireport.com';
+    const siteUrl = SITE_URL;
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,

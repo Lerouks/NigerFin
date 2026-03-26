@@ -15,6 +15,7 @@ import { ViewTracker } from '@/components/ViewTracker';
 import type { Article, MarketData } from '@/types';
 import { fallbackImageUrl } from '@/data/mock-data';
 import { formatDate } from '@/lib/utils';
+import { SITE_URL } from '@/lib/config';
 import {
   checkArticleAccess,
   getContentTypeFromArticle,
@@ -66,7 +67,7 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
   const getArticleUrl = () =>
     typeof window !== 'undefined'
       ? window.location.href
-      : `https://nfireport.com/articles/${article.slug.current}`;
+      : `${SITE_URL}/articles/${article.slug.current}`;
 
   // Fetch paywall config once for configurable limit
   useEffect(() => {

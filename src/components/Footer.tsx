@@ -173,11 +173,11 @@ export function Footer() {
                 {contactEmail}
               </a>
               <a
-                href="tel:+22798543837"
+                href="tel:+22797769131"
                 className="text-white/40 hover:text-white/70 transition-colors text-[13px] flex items-center gap-2"
               >
                 <Phone className="w-4 h-4" />
-                +227 98 54 38 37
+                +227 97 76 91 31
               </a>
               <p className="text-white/40 text-[13px] flex items-start gap-2">
                 <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />

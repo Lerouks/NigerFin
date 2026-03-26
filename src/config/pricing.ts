@@ -122,7 +122,7 @@ export const PAYMENT_METHODS: Record<PaymentMethodId, PaymentMethod> = {
     shortName: 'Nita',
     logo: '/nita.png',
     instructions: 'Effectuez votre transfert via Nita au numéro ci-dessous, puis saisissez votre numéro de transaction.',
-    recipientNumber: '+227 98 54 38 37',
+    recipientNumber: '+227 97 76 91 31',
     recipientName: 'NFI REPORT',
   },
   amana: {
@@ -131,7 +131,7 @@ export const PAYMENT_METHODS: Record<PaymentMethodId, PaymentMethod> = {
     shortName: 'Amana',
     logo: '/amana.png',
     instructions: 'Effectuez votre transfert via Amana au numéro ci-dessous, puis saisissez votre numéro de transaction.',
-    recipientNumber: '+227 98 54 38 37',
+    recipientNumber: '+227 97 76 91 31',
     recipientName: 'NFI REPORT',
   },
 };

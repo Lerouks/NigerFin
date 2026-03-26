@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getArticleBySlug, getRelatedArticles, getAllArticleSlugs } from '@/lib/articles';
 import { marketData } from '@/data/mock-data';
+import { SITE_URL } from '@/lib/config';
 import { ArticleContent } from './ArticleContent';
 
 export const revalidate = 60;
@@ -16,7 +17,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
   if (!result) return { title: 'Article introuvable' };
 
   const { article } = result;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://nfireport.com';
+  const siteUrl = SITE_URL;
   const articleUrl = `${siteUrl}/articles/${article.slug.current}`;
   const imageUrl = article.mainImage?.url || `${siteUrl}/og-default.jpg`;
 
@@ -75,7 +76,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     article.tags || [],
   );
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://nfireport.com';
+  const siteUrl = SITE_URL;
   const articleUrl = `${siteUrl}/articles/${article.slug.current}`;
 
   const jsonLd = {

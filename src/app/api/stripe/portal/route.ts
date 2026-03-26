@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase';
+import { SITE_URL } from '@/lib/config';
 import Stripe from 'stripe';
 
 function getStripe() {
@@ -33,7 +34,7 @@ export async function POST() {
     return NextResponse.json({ error: 'No Stripe customer found' }, { status: 404 });
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://nfireport.com';
+  const siteUrl = SITE_URL;
 
   const stripe = getStripe();
   const session = await stripe.billingPortal.sessions.create({

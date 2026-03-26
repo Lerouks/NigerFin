@@ -56,10 +56,14 @@ export async function POST(request: NextRequest) {
         const billingCycle = session.metadata?.billing_cycle || 'monthly';
 
         if (userId && session.subscription) {
-          const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
+          const subscription = await stripe.subscriptions.retrieve(
+            session.subscription as string,
+            { expand: ['items.data'] }
+          );
           const role = mapTierToRole(tier);
-          const periodStart = (subscription as any).current_period_start;
-          const periodEnd = (subscription as any).current_period_end;
+          const firstItem = subscription.items.data[0];
+          const periodStart = firstItem?.current_period_start;
+          const periodEnd = firstItem?.current_period_end;
 
           const { error: subError } = await supabase
             .from('subscriptions')
@@ -73,7 +77,7 @@ export async function POST(request: NextRequest) {
                 billing_cycle: billingCycle,
                 current_period_start: periodStart ? new Date(periodStart * 1000).toISOString() : null,
                 current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
-                price_amount: subscription.items.data[0]?.price?.unit_amount || 0,
+                price_amount: firstItem?.price?.unit_amount || 0,
               },
               { onConflict: 'user_id' }
             );
@@ -126,8 +130,9 @@ export async function POST(request: NextRequest) {
           const status = subscription.status === 'active' ? 'active' :
                          subscription.status === 'past_due' ? 'active' : 'cancelled';
           const role = status === 'active' ? mapTierToRole(tier) : 'reader';
-          const periodStart = (subscription as any).current_period_start;
-          const periodEnd = (subscription as any).current_period_end;
+          const firstItem = subscription.items.data[0];
+          const periodStart = firstItem?.current_period_start;
+          const periodEnd = firstItem?.current_period_end;
 
           const { error: subUpdateError } = await supabase
             .from('subscriptions')
@@ -209,9 +214,10 @@ export async function POST(request: NextRequest) {
 
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice;
-        const sub = (invoice as any).subscription as string | undefined;
-        if (sub) {
-          const subscription = await stripe.subscriptions.retrieve(sub);
+        const parentSub = invoice.parent?.subscription_details?.subscription;
+        const subId = typeof parentSub === 'string' ? parentSub : parentSub?.id;
+        if (subId) {
+          const subscription = await stripe.subscriptions.retrieve(subId);
           const userId = subscription.metadata?.supabase_user_id;
           if (userId) {
             const { error: pastDueError } = await supabase

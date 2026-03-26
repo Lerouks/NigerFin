@@ -115,9 +115,7 @@ describe('Stripe Webhook', () => {
   it('handles checkout.session.completed', async () => {
     const fakeSubscription = {
       id: 'sub_123',
-      current_period_start: 1700000000,
-      current_period_end: 1702592000,
-      items: { data: [{ price: { unit_amount: 9900 } }] },
+      items: { data: [{ current_period_start: 1700000000, current_period_end: 1702592000, price: { unit_amount: 9900 } }] },
     };
 
     mockConstructEvent.mockReturnValue({
@@ -163,7 +161,9 @@ describe('Stripe Webhook', () => {
       type: 'invoice.payment_failed',
       data: {
         object: {
-          subscription: 'sub_456',
+          parent: {
+            subscription_details: { subscription: 'sub_456' },
+          },
         },
       },
     });

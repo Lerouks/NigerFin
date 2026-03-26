@@ -3,6 +3,7 @@ import localFont from 'next/font/local';
 import { Providers } from './providers';
 import { MainLayoutShell } from '@/components/MainLayoutShell';
 import { ViewTracker } from '@/components/ViewTracker';
+import { SITE_URL } from '@/lib/config';
 import './globals.css';
 
 const inter = localFont({
@@ -50,7 +51,7 @@ const playfair = localFont({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://nfireport.com'),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: 'NFI Report - Actualités économiques et financières du Niger',
     template: '%s | NFI Report',

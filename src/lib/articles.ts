@@ -160,7 +160,7 @@ export async function getFeaturedArticles(): Promise<Article[]> {
   return (data || []).map(toArticle);
 }
 
-export async function getRelatedArticles(currentSlug: string, category: string, tags: string[]): Promise<Article[]> {
+export async function getRelatedArticles(currentSlug: string, category: string, _tags: string[]): Promise<Article[]> {
   const supabase = createServiceClient();
   if (!supabase) return [];
   const { data } = await supabase

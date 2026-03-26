@@ -34,8 +34,7 @@ export function SimulateurEmprunt() {
 
     // Amortization schedule for chart
     const schedule: { label: string; capitalRestant: number; interetsCumules: number }[] = [];
-    let remaining = numAmount;
-    let cumulInterest = 0;
+    const remaining = numAmount;
     const step = Math.max(1, Math.floor(numDuration / 12));
     for (let m = 0; m <= numDuration; m += step) {
       if (m === 0) {

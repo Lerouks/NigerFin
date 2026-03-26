@@ -10,7 +10,6 @@ import {
   CURRENCY,
   PAYMENT_METHODS,
   PREMIUM_TIER,
-  formatPrice,
   type BillingCycle,
 } from '@/config/pricing';
 

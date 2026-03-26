@@ -509,7 +509,7 @@ export default function SimulateurSalaireNiger() {
                 <span style={S.rowVal}><AnimVal value={c.cnssSal + c.inamSal} /></span>
               </div>
               <div style={{ ...S.row, ...S.rowBg }}>
-                <span style={S.rowLabel}>ITS versé à l'État</span>
+                <span style={S.rowLabel}>ITS versé à l&apos;État</span>
                 <span style={S.rowVal}><AnimVal value={c.its} /></span>
               </div>
               <div style={{ ...S.row, ...S.rowBg }}>
@@ -607,7 +607,7 @@ export default function SimulateurSalaireNiger() {
       {/* ─── Legal footer ─── */}
       {c && (
         <div style={S.footer}>
-          Ces résultats sont fournis à titre purement indicatif sur la base de l'Ordonnance N°2025-44 du 31 décembre 2025 portant loi de finances pour l'année budgétaire 2026 (Art. 150 ITS nouveau). Ils ne constituent pas un avis fiscal, comptable ou juridique et ne sauraient engager la responsabilité de NFI REPORT. Consultez un expert-comptable agréé ou l'administration fiscale nigérienne (DGI) pour toute situation spécifique. CNSS salarié 3,6% / patronal 16,4% · base plafonnée à 500 000 F CFA/mois · INAM salarié 2,5% / patronal 7,5% · sans plafond · Abattement forfaitaire 20% · nfireport.com
+          Ces résultats sont fournis à titre purement indicatif sur la base de l&apos;Ordonnance N°2025-44 du 31 décembre 2025 portant loi de finances pour l&apos;année budgétaire 2026 (Art. 150 ITS nouveau). Ils ne constituent pas un avis fiscal, comptable ou juridique et ne sauraient engager la responsabilité de NFI REPORT. Consultez un expert-comptable agréé ou l&apos;administration fiscale nigérienne (DGI) pour toute situation spécifique. CNSS salarié 3,6% / patronal 16,4% · base plafonnée à 500 000 F CFA/mois · INAM salarié 2,5% / patronal 7,5% · sans plafond · Abattement forfaitaire 20% · nfireport.com
         </div>
       )}
     </div>

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import {
-  ArrowRight, Check, Heart, Clock, TrendingUp, Zap, Crown,
+  ArrowRight, Check, Heart, Clock, TrendingUp, Zap, Crown, Timer,
 } from 'lucide-react';
 import { PREMIUM_TIER, CURRENCY, getBillingCycleLabel } from '@/config/pricing';
 
@@ -37,6 +37,14 @@ interface AccountOverviewTabProps {
 }
 
 export function AccountOverviewTab({ isSubscribed, sub, periodEnd, summary, likedArticles }: AccountOverviewTabProps) {
+  const remainingDays = (() => {
+    const endDate = sub?.current_period_end;
+    if (!endDate) return null;
+    const diffMs = new Date(endDate).getTime() - Date.now();
+    if (diffMs <= 0) return null;
+    return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  })();
+
   return (
     <div className="space-y-6">
       {/* Subscription status card (for subscribers) */}
@@ -70,6 +78,22 @@ export function AccountOverviewTab({ isSubscribed, sub, periodEnd, summary, like
               <div className="bg-white/5 rounded-xl p-4 border border-white/5">
                 <p className="text-[11px] text-white/40 uppercase tracking-wider mb-1">Prochain renouvellement</p>
                 <p className="text-sm font-medium">{periodEnd}</p>
+              </div>
+            )}
+            {remainingDays != null && (
+              <div className="bg-white/5 rounded-xl p-4 border border-white/5">
+                <p className="text-[11px] text-white/40 uppercase tracking-wider mb-1">Temps restant</p>
+                <div className="flex items-center gap-2">
+                  <Timer className="w-4 h-4 text-amber-400" />
+                  <span className={`text-sm font-medium ${
+                    remainingDays <= 3 ? 'text-red-400' : remainingDays <= 7 ? 'text-amber-400' : 'text-white'
+                  }`}>
+                    {remainingDays > 30
+                      ? `${Math.floor(remainingDays / 30)} mois et ${remainingDays % 30}j`
+                      : `${remainingDays} jour${remainingDays !== 1 ? 's' : ''}`
+                    }
+                  </span>
+                </div>
               </div>
             )}
             <div className="bg-white/5 rounded-xl p-4 border border-white/5">

@@ -37,8 +37,9 @@ export function UsersTab({ onStatsRefresh }: UsersTabProps) {
       if (searchQuery) params.set('search', searchQuery);
       if (roleFilter) params.set('role', roleFilter);
       const res = await fetch(`/api/admin/users?${params}`);
-      const data = await res.json();
-      if (Array.isArray(data)) setUsers(data);
+      const json = await res.json();
+      const list = json.data ?? json;
+      if (Array.isArray(list)) setUsers(list);
     } catch { /* ignore */ }
     setLoadingData(false);
   }, [searchQuery, roleFilter]);

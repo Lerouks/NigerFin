@@ -34,8 +34,9 @@ export function PaymentsTab({ onStatsRefresh }: PaymentsTabProps) {
     setPaymentFilter(status);
     try {
       const res = await fetch(`/api/payment/list?status=${status}`);
-      const data = await res.json();
-      if (Array.isArray(data)) setPayments(data);
+      const json = await res.json();
+      const list = json.data ?? json;
+      if (Array.isArray(list)) setPayments(list);
     } catch { /* ignore */ }
     setLoading(false);
   }, []);

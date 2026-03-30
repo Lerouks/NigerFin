@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase';
-import { MANUAL_PAYMENT_METHODS, isValidBillingCycle, getBillingOption } from '@/config/pricing';
+import { PAYMENT_METHODS, isValidBillingCycle, getBillingOption, type PaymentMethodId } from '@/config/pricing';
 import { safeParseJSON } from '@/lib/validation';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
@@ -44,8 +44,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Durée invalide' }, { status: 400 });
     }
 
-    // Validate payment method (only manual transfer methods accepted here)
-    if (!paymentMethod || !(paymentMethod in MANUAL_PAYMENT_METHODS)) {
+    // Validate payment method
+    if (!paymentMethod || !(paymentMethod in PAYMENT_METHODS)) {
       return NextResponse.json({ error: 'Méthode de paiement invalide' }, { status: 400 });
     }
 

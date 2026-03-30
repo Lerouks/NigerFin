@@ -6,12 +6,27 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 
+function getPasswordStrength(password: string): { level: 'weak' | 'medium' | 'strong'; label: string; color: string; bgColor: string; width: string } {
+  let score = 0;
+  if (password.length >= 8) score++;
+  if (password.length >= 12) score++;
+  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
+  if (/\d/.test(password)) score++;
+  if (/[^a-zA-Z0-9]/.test(password)) score++;
+
+  if (score <= 2) return { level: 'weak', label: 'Faible', color: 'text-red-600', bgColor: 'bg-red-500', width: 'w-1/3' };
+  if (score <= 3) return { level: 'medium', label: 'Moyen', color: 'text-amber-600', bgColor: 'bg-amber-500', width: 'w-2/3' };
+  return { level: 'strong', label: 'Fort', color: 'text-emerald-600', bgColor: 'bg-emerald-500', width: 'w-full' };
+}
+
 function InscriptionContent() {
   const searchParams = useSearchParams();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState(searchParams.get('email') || '');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [accountExists, setAccountExists] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -19,13 +34,22 @@ function InscriptionContent() {
   const { signUp } = useAuth();
   const router = useRouter();
 
+  const strength = password ? getPasswordStrength(password) : null;
+  const passwordsMatch = confirmPassword ? password === confirmPassword : true;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    if (password.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caractères.');
+    if (password.length < 8) {
+      setError('Le mot de passe doit contenir au moins 8 caractères.');
+      setLoading(false);
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError('Les mots de passe ne correspondent pas.');
       setLoading(false);
       return;
     }
@@ -155,10 +179,11 @@ function InscriptionContent() {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   required
+                  minLength={8}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full border border-black/[0.08] rounded-lg pl-10 pr-10 py-2.5 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 transition-all text-base"
-                  placeholder="Minimum 6 caractères"
+                  placeholder="Minimum 8 caractères"
                 />
                 <button
                   type="button"
@@ -169,12 +194,54 @@ function InscriptionContent() {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              {password && strength && (
+                <div className="mt-2">
+                  <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div className={`h-full ${strength.bgColor} ${strength.width} rounded-full transition-all duration-300`} />
+                  </div>
+                  <p className={`text-[11px] mt-1 ${strength.color}`}>Force du mot de passe : {strength.label}</p>
+                </div>
+              )}
+              {password && password.length < 8 && (
+                <p className="text-[11px] mt-1 text-red-500">Le mot de passe doit contenir au moins 8 caractères.</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2">Confirmer le mot de passe</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className={`w-full border rounded-lg pl-10 pr-10 py-2.5 bg-[#fafaf9] focus:outline-none focus:ring-1 transition-all text-base ${
+                    confirmPassword && !passwordsMatch
+                      ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
+                      : 'border-black/[0.08] focus:border-black/15 focus:ring-black/5'
+                  }`}
+                  placeholder="Confirmez votre mot de passe"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  aria-label={showConfirmPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                >
+                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {confirmPassword && !passwordsMatch && (
+                <p className="text-[11px] mt-1 text-red-500">Les mots de passe ne correspondent pas.</p>
+              )}
             </div>
 
             <button
               type="submit"
-              disabled={loading}
-              className="w-full bg-[#111] text-white py-3 rounded-lg hover:bg-[#333] transition-colors disabled:opacity-50 text-[14px]"
+              disabled={loading || password.length < 8 || password !== confirmPassword}
+              className="w-full bg-[#111] text-white py-3 rounded-lg hover:bg-[#333] transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-[14px]"
             >
               {loading ? 'Création...' : 'Créer mon compte'}
             </button>

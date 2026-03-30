@@ -15,17 +15,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import {
+  PREMIUM_TIER,
+  PAYMENT_METHODS,
   BILLING_OPTIONS,
   formatPrice,
   getBillingOption,
   getBillingCycleLabel,
   isValidBillingCycle,
-  getActivePaymentMethods,
-  getAllPaymentMethods,
-  isManualPaymentMethod,
   type PaymentMethodId,
-  type PaymentMethod,
-  type ManualPaymentMethod,
   type BillingCycle,
 } from '@/config/pricing';
 
@@ -74,18 +71,12 @@ export function PaymentContent() {
 
   const billingOption = getBillingOption(billingCycle);
   const price = billingOption.price;
-
-  const allMethods = getAllPaymentMethods();
-  const selectedMethodObj: PaymentMethod | null = selectedMethod
-    ? (allMethods.find((m) => m.id === selectedMethod) ?? null)
-    : null;
-  const manualMethod: ManualPaymentMethod | null =
-    selectedMethodObj && isManualPaymentMethod(selectedMethodObj) ? selectedMethodObj : null;
+  const method = selectedMethod ? PAYMENT_METHODS[selectedMethod] : null;
 
   const handleCopyNumber = async () => {
-    if (!manualMethod) return;
+    if (!method) return;
     try {
-      await navigator.clipboard.writeText(manualMethod.recipientNumber.replace(/\s/g, ''));
+      await navigator.clipboard.writeText(method.recipientNumber.replace(/\s/g, ''));
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -197,10 +188,8 @@ export function PaymentContent() {
         {step === 'choose-method' && (
           <div>
             <h2 className="text-lg font-semibold mb-4">Choisissez votre méthode de paiement</h2>
-
-            {/* Active methods */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-              {getActivePaymentMethods().map((m) => (
+              {(Object.values(PAYMENT_METHODS)).map((m) => (
                 <button
                   key={m.id}
                   onClick={() => { setSelectedMethod(m.id); setStep('instructions'); }}
@@ -220,59 +209,19 @@ export function PaymentContent() {
                     />
                     <h3 className="font-bold text-lg">{m.shortName}</h3>
                   </div>
-                  <p className="text-gray-500 text-[13px]">
-                    {isManualPaymentMethod(m) ? m.name : m.description}
-                  </p>
+                  <p className="text-gray-500 text-[13px]">{m.name}</p>
                 </button>
               ))}
             </div>
-
-            {/* Coming soon methods */}
-            {allMethods.some((m) => m.status === 'coming_soon') && (
-              <div>
-                <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-3">
-                  Bientôt disponible
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {allMethods.filter((m) => m.status === 'coming_soon').map((m) => (
-                    <div
-                      key={m.id}
-                      className="p-4 rounded-xl border-2 border-dashed border-black/[0.06] opacity-50 cursor-not-allowed"
-                    >
-                      <div className="flex items-center gap-3 mb-1">
-                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                          <Image
-                            src={m.logo}
-                            alt={m.shortName}
-                            width={28}
-                            height={28}
-                            className="rounded object-contain"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = 'none';
-                            }}
-                          />
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-sm">{m.shortName}</h4>
-                          <span className="text-[10px] uppercase tracking-wider text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">
-                            Bientôt
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         )}
 
-        {/* Step 2: Instructions (manual transfer methods) */}
-        {step === 'instructions' && manualMethod && (
+        {/* Step 2: Instructions */}
+        {step === 'instructions' && method && (
           <div>
-            <h2 className="text-lg font-semibold mb-4">Instructions de paiement via {manualMethod.shortName}</h2>
+            <h2 className="text-lg font-semibold mb-4">Instructions de paiement via {method.shortName}</h2>
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6">
-              <p className="text-amber-800 text-[14px] leading-relaxed">{manualMethod.instructions}</p>
+              <p className="text-amber-800 text-[14px] leading-relaxed">{method.instructions}</p>
             </div>
 
             <div className="bg-white rounded-xl border border-black/[0.06] p-6 mb-6 space-y-4">
@@ -283,7 +232,7 @@ export function PaymentContent() {
               <div>
                 <span className="text-[12px] text-gray-400 uppercase tracking-wider">Numéro du destinataire</span>
                 <div className="flex items-center gap-3 mt-1">
-                  <p className="text-xl font-bold font-mono">{manualMethod.recipientNumber}</p>
+                  <p className="text-xl font-bold font-mono">{method.recipientNumber}</p>
                   <button
                     onClick={handleCopyNumber}
                     className="text-gray-400 hover:text-gray-700 transition-colors"
@@ -295,7 +244,7 @@ export function PaymentContent() {
               </div>
               <div>
                 <span className="text-[12px] text-gray-400 uppercase tracking-wider">Nom du bénéficiaire</span>
-                <p className="text-lg font-semibold mt-1">{manualMethod.recipientName}</p>
+                <p className="text-lg font-semibold mt-1">{method.recipientName}</p>
               </div>
             </div>
 
@@ -317,12 +266,12 @@ export function PaymentContent() {
         )}
 
         {/* Step 3: Confirm with transaction number */}
-        {step === 'confirm' && manualMethod && (
+        {step === 'confirm' && method && (
           <div>
             <h2 className="text-lg font-semibold mb-4">Confirmez votre paiement</h2>
             <div className="bg-white rounded-xl border border-black/[0.06] p-6 mb-6">
               <div className="mb-4">
-                <p className="text-[13px] text-gray-500 mb-1">Méthode : <span className="font-semibold text-black">{manualMethod.name}</span></p>
+                <p className="text-[13px] text-gray-500 mb-1">Méthode : <span className="font-semibold text-black">{method.name}</span></p>
                 <p className="text-[13px] text-gray-500 mb-1">Durée : <span className="font-semibold text-black">{billingOption.durationLabel}</span></p>
                 <p className="text-[13px] text-gray-500">Montant : <span className="font-semibold text-black">{formatPrice(price)}</span></p>
               </div>
@@ -339,7 +288,7 @@ export function PaymentContent() {
                 className="w-full border border-black/[0.08] rounded-lg px-4 py-3 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 transition-all text-[14px] font-mono"
               />
               <p className="text-[12px] text-gray-400 mt-2">
-                Entrez le numéro de transaction reçu après votre transfert {manualMethod.shortName}.
+                Entrez le numéro de transaction reçu après votre transfert {method.shortName}.
               </p>
             </div>
 

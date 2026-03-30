@@ -101,62 +101,23 @@ export function getBillingCycleLabel(cycle: string): string {
   }
 }
 
-// ─── Payment method types ───────────────────────────────────────────────────
+// ─── Payment methods (Nita & Amana) ─────────────────────────────────────────
 
-/**
- * Payment flow mode:
- * - 'manual': User transfers money manually, provides transaction number, admin verifies
- * - 'api': Automated via provider API (initiate → callback → auto-verify)
- */
-export type PaymentMode = 'manual' | 'api';
+export type PaymentMethodId = 'nita' | 'amana';
 
-/**
- * Provider status:
- * - 'active': Available for use now
- * - 'coming_soon': Displayed in UI but not selectable (waiting for API keys)
- */
-export type PaymentMethodStatus = 'active' | 'coming_soon';
-
-export type ManualPaymentMethodId = 'nita' | 'amana';
-export type MobileMoneyProviderId = 'orange_money' | 'moov_money' | 'airtel_money';
-export type PaymentMethodId = ManualPaymentMethodId | MobileMoneyProviderId;
-
-// ─── Payment method interfaces ──────────────────────────────────────────────
-
-interface PaymentMethodBase {
+export interface PaymentMethod {
   id: PaymentMethodId;
   name: string;
   shortName: string;
   logo: string;
-  status: PaymentMethodStatus;
-}
-
-export interface ManualPaymentMethod extends PaymentMethodBase {
-  id: ManualPaymentMethodId;
-  mode: 'manual';
   instructions: string;
   recipientNumber: string;
   recipientName: string;
 }
 
-export interface MobileMoneyPaymentMethod extends PaymentMethodBase {
-  id: MobileMoneyProviderId;
-  mode: 'api';
-  /** Provider identifier used by the payment-providers registry */
-  providerId: MobileMoneyProviderId;
-  /** User-facing description shown before initiating payment */
-  description: string;
-}
-
-export type PaymentMethod = ManualPaymentMethod | MobileMoneyPaymentMethod;
-
-// ─── Payment methods (manual transfer) ──────────────────────────────────────
-
-export const MANUAL_PAYMENT_METHODS: Record<ManualPaymentMethodId, ManualPaymentMethod> = {
+export const PAYMENT_METHODS: Record<PaymentMethodId, PaymentMethod> = {
   nita: {
     id: 'nita',
-    mode: 'manual',
-    status: 'active',
     name: 'Nita Transfert d\'Argent',
     shortName: 'Nita',
     logo: '/nita.png',
@@ -166,8 +127,6 @@ export const MANUAL_PAYMENT_METHODS: Record<ManualPaymentMethodId, ManualPayment
   },
   amana: {
     id: 'amana',
-    mode: 'manual',
-    status: 'active',
     name: 'Amana Transfert d\'Argent',
     shortName: 'Amana',
     logo: '/amana.png',
@@ -176,73 +135,6 @@ export const MANUAL_PAYMENT_METHODS: Record<ManualPaymentMethodId, ManualPayment
     recipientName: 'NFI REPORT',
   },
 };
-
-// ─── Payment methods (mobile money API — coming soon) ───────────────────────
-
-export const MOBILE_MONEY_METHODS: Record<MobileMoneyProviderId, MobileMoneyPaymentMethod> = {
-  orange_money: {
-    id: 'orange_money',
-    mode: 'api',
-    status: 'coming_soon',
-    providerId: 'orange_money',
-    name: 'Orange Money',
-    shortName: 'Orange Money',
-    logo: '/payment-providers/orange-money.svg',
-    description: 'Payez directement depuis votre compte Orange Money. Le paiement est instantané.',
-  },
-  moov_money: {
-    id: 'moov_money',
-    mode: 'api',
-    status: 'coming_soon',
-    providerId: 'moov_money',
-    name: 'Moov Money',
-    shortName: 'Moov Money',
-    logo: '/payment-providers/moov-money.svg',
-    description: 'Payez directement depuis votre compte Moov Money. Le paiement est instantané.',
-  },
-  airtel_money: {
-    id: 'airtel_money',
-    mode: 'api',
-    status: 'coming_soon',
-    providerId: 'airtel_money',
-    name: 'Airtel Money',
-    shortName: 'Airtel Money',
-    logo: '/payment-providers/airtel-money.svg',
-    description: 'Payez directement depuis votre compte Airtel Money. Le paiement est instantané.',
-  },
-};
-
-// ─── Unified payment methods registry ───────────────────────────────────────
-
-export const PAYMENT_METHODS: Record<PaymentMethodId, PaymentMethod> = {
-  ...MANUAL_PAYMENT_METHODS,
-  ...MOBILE_MONEY_METHODS,
-};
-
-/** Only methods currently available for payment */
-export function getActivePaymentMethods(): PaymentMethod[] {
-  return Object.values(PAYMENT_METHODS).filter((m) => m.status === 'active');
-}
-
-/** All methods including coming soon (for UI display) */
-export function getAllPaymentMethods(): PaymentMethod[] {
-  return Object.values(PAYMENT_METHODS);
-}
-
-/** Type guard: is this a manual transfer method? */
-export function isManualPaymentMethod(method: PaymentMethod): method is ManualPaymentMethod {
-  return method.mode === 'manual';
-}
-
-/** Type guard: is this a mobile money API method? */
-export function isMobileMoneyMethod(method: PaymentMethod): method is MobileMoneyPaymentMethod {
-  return method.mode === 'api';
-}
-
-/** Check if a string is a valid payment method ID */
-export function isValidPaymentMethod(id: string): id is PaymentMethodId {
-  return id in PAYMENT_METHODS;
-}
 
 // ─── Payment request status ─────────────────────────────────────────────────
 

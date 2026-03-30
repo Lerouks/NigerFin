@@ -33,6 +33,28 @@ interface AccountSubscriptionTabProps {
   onRefresh: () => void;
 }
 
+function getRemainingTime(periodEndDate: string | null, periodStartDate: string | null): { days: number; label: string; progress: number } | null {
+  if (!periodEndDate) return null;
+  const now = new Date();
+  const end = new Date(periodEndDate);
+  const diffMs = end.getTime() - now.getTime();
+  if (diffMs <= 0) return null;
+  const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  const label = days > 30
+    ? `${Math.floor(days / 30)} mois et ${days % 30} jour${days % 30 !== 1 ? 's' : ''}`
+    : `${days} jour${days !== 1 ? 's' : ''}`;
+
+  let progress = 50;
+  if (periodStartDate) {
+    const start = new Date(periodStartDate);
+    const totalMs = end.getTime() - start.getTime();
+    const elapsedMs = now.getTime() - start.getTime();
+    progress = totalMs > 0 ? Math.min(100, Math.max(0, (elapsedMs / totalMs) * 100)) : 0;
+  }
+
+  return { days, label, progress };
+}
+
 function InfoRow({ label, value, valueColor }: { label: string; value: string; valueColor?: string }) {
   return (
     <div className="flex items-center justify-between py-3 border-b border-black/[0.04] last:border-0">
@@ -88,6 +110,10 @@ export function AccountSubscriptionTab({
       setReactivateLoading(false);
     }
   };
+
+  const rawPeriodEnd = profile?.subscription_end || sub?.current_period_end || null;
+  const rawPeriodStart = sub?.current_period_start || null;
+  const remaining = getRemainingTime(rawPeriodEnd, rawPeriodStart);
 
   return (
     <div className="space-y-6">
@@ -146,6 +172,39 @@ export function AccountSubscriptionTab({
             <InfoRow label={sub?.cancel_at_period_end ? 'Fin d\'accès' : 'Prochain renouvellement'} value={periodEnd} />
           )}
         </div>
+
+        {/* Remaining time indicator */}
+        {isSubscribed && remaining && (
+          <div className="mt-5 p-4 bg-[#fafaf9] rounded-xl border border-black/[0.04]">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-gray-400" />
+                <span className="text-[11px] text-gray-400 uppercase tracking-wider">Temps restant</span>
+              </div>
+              <span className={`text-sm font-semibold ${
+                remaining.days <= 3 ? 'text-red-600' : remaining.days <= 7 ? 'text-amber-600' : 'text-emerald-600'
+              }`}>
+                {remaining.label}
+              </span>
+            </div>
+            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${
+                  remaining.days <= 3 ? 'bg-red-500' : remaining.days <= 7 ? 'bg-amber-500' : 'bg-emerald-500'
+                }`}
+                style={{ width: `${100 - remaining.progress}%` }}
+              />
+            </div>
+            <p className="text-[11px] text-gray-400 mt-1.5">
+              {remaining.days <= 3
+                ? 'Votre abonnement expire très bientôt. Pensez à le renouveler.'
+                : remaining.days <= 7
+                ? 'Votre abonnement expire dans moins d\'une semaine.'
+                : `Votre abonnement est actif jusqu'au ${periodEnd}.`
+              }
+            </p>
+          </div>
+        )}
 
         {sub?.cancel_at_period_end && (
           <div className="mt-5 bg-amber-50 border border-amber-200 rounded-xl px-5 py-4 flex items-start gap-3">

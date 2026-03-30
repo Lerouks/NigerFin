@@ -144,12 +144,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Erreur lors de la mise à jour de l\'abonnement' }, { status: 500 });
     }
 
-    // Update user profile
+    // Update user profile (including subscription dates for cron expiration)
     const { error: profileError } = await serviceClient
       .from('user_profiles')
       .update({
         role,
         subscription_status: 'active',
+        subscription_start: now,
+        subscription_end: expiresAt.toISOString(),
+        subscription_updated_at: now,
+        expiration_warning_sent: false,
         updated_at: now,
       })
       .eq('id', paymentRequest.user_id);

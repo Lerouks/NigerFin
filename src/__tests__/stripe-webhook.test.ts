@@ -35,8 +35,8 @@ vi.mock('@/lib/supabase', () => ({
   createServiceClient: vi.fn(() => mockSupabase),
 }));
 
-vi.mock('@/lib/brevo', () => ({
-  syncContactToBrevo: vi.fn().mockResolvedValue(undefined),
+vi.mock('@/lib/beehiiv', () => ({
+  syncContactToBeehiiv: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock('@/lib/email', () => ({

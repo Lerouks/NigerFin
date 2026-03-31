@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { subscribeToMailchimpNewsletter, sendTransactionalEmail } from '@/lib/email';
+import { sendTransactionalEmail } from '@/lib/email';
+import { subscribeToBeehiiv } from '@/lib/beehiiv';
 import { newsletterWelcomeEmail } from '@/lib/email-templates';
 import { isValidEmail, safeParseJSON } from '@/lib/validation';
 import { checkRateLimit, getClientIP, RATE_LIMITS } from '@/lib/rate-limit';
@@ -25,8 +26,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email invalide' }, { status: 400 });
     }
 
-    // Subscribe to Mailchimp newsletter
-    await subscribeToMailchimpNewsletter(email);
+    // Subscribe to Beehiiv newsletter
+    await subscribeToBeehiiv(email);
 
     // Send branded welcome email
     const welcome = newsletterWelcomeEmail();

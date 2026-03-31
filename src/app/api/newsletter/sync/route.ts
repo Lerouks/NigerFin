@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase';
-import { syncContactToBrevo } from '@/lib/brevo';
+import { syncContactToBeehiiv } from '@/lib/beehiiv';
 
 export async function POST() {
   const supabase = await createServerSupabaseClient();
@@ -23,7 +23,7 @@ export async function POST() {
     return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
   }
 
-  const success = await syncContactToBrevo({
+  const success = await syncContactToBeehiiv({
     email: profile.email,
     firstName: profile.full_name,
     role: profile.role,

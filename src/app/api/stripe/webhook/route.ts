@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
-import { syncContactToBrevo } from '@/lib/brevo';
+import { syncContactToBeehiiv } from '@/lib/beehiiv';
 import { sendTransactionalEmail } from '@/lib/email';
 import { stripePaymentConfirmationEmail } from '@/lib/email-templates';
 import * as Sentry from '@sentry/nextjs';
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
             });
           }
 
-          await syncMailchimpContact(userId, role, supabase);
+          await syncBeehiivContact(userId, role, supabase);
 
           // Send confirmation email
           const { data: profile } = await supabase
@@ -207,7 +207,7 @@ export async function POST(request: NextRequest) {
             });
           }
 
-          await syncMailchimpContact(userId, 'reader', supabase);
+          await syncBeehiivContact(userId, 'reader', supabase);
         }
         break;
       }
@@ -251,7 +251,7 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ received: true });
 }
 
-async function syncMailchimpContact(userId: string, role: string, supabase: NonNullable<ReturnType<typeof createServiceClient>>) {
+async function syncBeehiivContact(userId: string, role: string, supabase: NonNullable<ReturnType<typeof createServiceClient>>) {
   try {
     const { data: profile } = await supabase
       .from('user_profiles')
@@ -261,14 +261,14 @@ async function syncMailchimpContact(userId: string, role: string, supabase: NonN
 
     if (!profile?.email) return;
 
-    await syncContactToBrevo({
+    await syncContactToBeehiiv({
       email: profile.email,
       firstName: profile.full_name || '',
       role,
     });
   } catch (err) {
     Sentry.captureException(err, {
-      tags: { context: 'stripe-webhook-brevo-sync' },
+      tags: { context: 'stripe-webhook-beehiiv-sync' },
       extra: { userId },
     });
   }

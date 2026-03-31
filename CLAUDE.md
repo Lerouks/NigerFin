@@ -19,7 +19,7 @@ Tests live in `src/__tests__/*.test.ts` and match the pattern `src/**/*.test.ts`
 
 ## Architecture
 
-**Stack:** Next.js 15 App Router, React 19, Supabase (auth + DB), Stripe (payments), Tailwind CSS 3, TipTap (rich text editor), Recharts, Sentry, PostHog analytics, Resend/Brevo (email).
+**Stack:** Next.js 15 App Router, React 19, Supabase (auth + DB), Stripe (payments), Tailwind CSS 3, TipTap (rich text editor), Recharts, Sentry, PostHog analytics, Resend (transactional email), Beehiiv (newsletter).
 
 **Routing:** French-language routes under `src/app/` — e.g., `/articles`, `/economie`, `/finance`, `/marches`, `/niger`, `/education`, `/entreprises`, `/outils`, `/compte`, `/paiement`, `/pricing`, `/admin`. Auth routes use a route group `(auth)/` with `/connexion` and `/inscription`.
 

@@ -115,7 +115,9 @@ export async function POST(request: NextRequest) {
             .single();
           if (profile?.email) {
             const confirmation = stripePaymentConfirmationEmail(profile.full_name || 'Client', billingCycle);
-            await sendTransactionalEmail({ to: profile.email, ...confirmation }).catch(() => {});
+            await sendTransactionalEmail({ to: profile.email, ...confirmation }).catch((err) => {
+              Sentry.captureException(err, { tags: { context: 'stripe-payment-confirmation-email' }, extra: { userId } });
+            });
           }
         }
         break;

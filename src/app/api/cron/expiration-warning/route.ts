@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { sendTransactionalEmail } from '@/lib/email';
 import { subscriptionExpirationWarningEmail } from '@/lib/email-templates';
+import * as Sentry from '@sentry/nextjs';
 
 /**
  * Cron endpoint: sends expiration warning emails to users whose subscription
@@ -63,8 +64,8 @@ export async function GET(request: NextRequest) {
         .update({ expiration_warning_sent: true })
         .eq('id', sub.user_id);
       sent++;
-    } catch {
-      // Continue with next user
+    } catch (err) {
+      Sentry.captureException(err, { tags: { context: 'cron-expiration-warning-email' }, extra: { userId: sub.user_id } });
     }
   }
 

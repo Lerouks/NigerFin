@@ -83,7 +83,9 @@ export async function POST(request: NextRequest) {
         .single();
       if (rejectedProfile?.email) {
         const rejection = paymentRejectionEmail(rejectedProfile.full_name || 'Client', rejectionReason);
-        await sendTransactionalEmail({ to: rejectedProfile.email, ...rejection }).catch(() => {});
+        await sendTransactionalEmail({ to: rejectedProfile.email, ...rejection }).catch((err) => {
+          Sentry.captureException(err, { tags: { context: 'payment-rejection-email' }, extra: { userId: paymentRequest.user_id } });
+        });
       }
 
       return NextResponse.json({ success: true, status: 'rejected' });
@@ -185,7 +187,9 @@ export async function POST(request: NextRequest) {
         cycle,
         expiresAt.toISOString(),
       );
-      await sendTransactionalEmail({ to: verifiedProfile.email, ...confirmation }).catch(() => {});
+      await sendTransactionalEmail({ to: verifiedProfile.email, ...confirmation }).catch((err) => {
+        Sentry.captureException(err, { tags: { context: 'payment-confirmation-email' }, extra: { userId: paymentRequest.user_id } });
+      });
     }
 
     return NextResponse.json({

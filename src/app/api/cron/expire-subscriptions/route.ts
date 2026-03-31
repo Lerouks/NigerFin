@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase';
 import { sendTransactionalEmail } from '@/lib/email';
 import { subscriptionExpiredEmail } from '@/lib/email-templates';
 import { logAuditEvent } from '@/lib/audit';
+import * as Sentry from '@sentry/nextjs';
 
 /**
  * Cron endpoint: expires subscriptions that have passed their end date.
@@ -70,8 +71,8 @@ export async function GET(request: NextRequest) {
         user.subscription_end,
       );
       await sendTransactionalEmail({ to: user.email, ...emailData });
-    } catch {
-      // Continue with next user
+    } catch (err) {
+      Sentry.captureException(err, { tags: { context: 'cron-expiration-email' }, extra: { userId: user.id } });
     }
 
     // Audit log (system action)

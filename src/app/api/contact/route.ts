@@ -4,6 +4,7 @@ import { sendTransactionalEmail } from '@/lib/email';
 import { contactConfirmationEmail, contactNotificationEmail } from '@/lib/email-templates';
 import { isValidEmail, safeParseJSON } from '@/lib/validation';
 import { checkRateLimit, getClientIP, RATE_LIMITS } from '@/lib/rate-limit';
+import * as Sentry from '@sentry/nextjs';
 
 export async function POST(request: NextRequest) {
   try {
@@ -72,8 +73,8 @@ export async function POST(request: NextRequest) {
         subject: notification.subject,
         html: notification.html,
       });
-    } catch {
-      // Email notification failure should not block the response
+    } catch (err) {
+      Sentry.captureException(err, { tags: { context: 'contact-notification-email' } });
     }
 
     // Send confirmation to the user (non-blocking)
@@ -84,8 +85,8 @@ export async function POST(request: NextRequest) {
         subject: confirmation.subject,
         html: confirmation.html,
       });
-    } catch {
-      // Email confirmation failure should not block the response
+    } catch (err) {
+      Sentry.captureException(err, { tags: { context: 'contact-confirmation-email' }, extra: { email } });
     }
 
     if (!saved && !serviceClient) {

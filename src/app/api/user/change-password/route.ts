@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr';
 import { createServiceClient } from '@/lib/supabase';
 import { sendTransactionalEmail } from '@/lib/email';
 import { passwordChangedEmail } from '@/lib/email-templates';
+import * as Sentry from '@sentry/nextjs';
 
 export async function POST(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -67,12 +68,12 @@ export async function POST(request: NextRequest) {
 
   // Send confirmation email
   try {
-    const service = createServiceClient();
+    const _service = createServiceClient();
     const fullName = user.user_metadata?.full_name || user.email.split('@')[0];
     const template = passwordChangedEmail(fullName);
     await sendTransactionalEmail({ to: user.email, ...template });
-  } catch {
-    // Email sending failure shouldn't block the password change success
+  } catch (err) {
+    Sentry.captureException(err, { tags: { context: 'password-changed-email' } });
   }
 
   return NextResponse.json({ message: 'Votre mot de passe a été mis à jour avec succès.' });

@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr';
 import { sendTransactionalEmail } from '@/lib/email';
 import { welcomeSignupEmail } from '@/lib/email-templates';
 import { createServiceClient } from '@/lib/supabase';
+import * as Sentry from '@sentry/nextjs';
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -37,7 +38,10 @@ export async function GET(request: NextRequest) {
     if (!error) {
       // Send welcome email for newly confirmed users
       if (data?.user) {
-        sendWelcomeIfNew(data.user.id, data.user.email, data.user.user_metadata?.full_name).catch(() => {});
+        sendWelcomeIfNew(data.user.id, data.user.email, data.user.user_metadata?.full_name).catch((err) => {
+          console.error('[EMAIL] Welcome email failed:', err);
+          Sentry.captureException(err, { tags: { context: 'welcome-email' }, extra: { userId: data.user.id } });
+        });
       }
       return supabaseResponse;
     }

@@ -1,7 +1,17 @@
 import { Resend } from 'resend';
+import * as Sentry from '@sentry/nextjs';
 
-function getResend() {
-  return new Resend(process.env.RESEND_API_KEY!);
+let resendInstance: Resend | null = null;
+
+function getResend(): Resend | null {
+  if (!process.env.RESEND_API_KEY) {
+    console.error('[EMAIL] RESEND_API_KEY is not configured');
+    return null;
+  }
+  if (!resendInstance) {
+    resendInstance = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resendInstance;
 }
 
 export async function sendTransactionalEmail({
@@ -13,65 +23,42 @@ export async function sendTransactionalEmail({
   subject: string;
   html: string;
 }) {
-  return getResend().emails.send({
-    from: 'NFI Report <noreply@nfireport.com>',
-    to,
-    subject,
-    html,
-  });
-}
+  const resend = getResend();
+  if (!resend) {
+    const msg = '[EMAIL] Cannot send email: Resend not configured';
+    console.error(msg, { to, subject });
+    Sentry.captureMessage(msg, { level: 'error', extra: { to, subject } });
+    return null;
+  }
 
-export async function subscribeToMailchimpNewsletter(
-  email: string,
-  tags: string[] = ['newsletter']
-) {
-  const apiKey = process.env.MAILCHIMP_API_KEY || '';
-  const listId = process.env.MAILCHIMP_LIST_ID || '';
-  const serverPrefix = process.env.MAILCHIMP_SERVER_PREFIX || 'us1';
+  try {
+    const result = await resend.emails.send({
+      from: 'NFI Report <noreply@nfireport.com>',
+      to,
+      subject,
+      html,
+    });
 
-  const response = await fetch(
-    `https://${serverPrefix}.api.mailchimp.com/3.0/lists/${listId}/members`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `apikey ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email_address: email,
-        status: 'subscribed',
-        tags: ['nfi-report', ...tags],
-      }),
+    if (result.error) {
+      console.error('[EMAIL] Resend API error:', result.error, { to, subject });
+      Sentry.captureMessage('[EMAIL] Resend API error', {
+        level: 'error',
+        extra: { to, subject, error: result.error },
+      });
+      return null;
     }
-  );
 
-  return response.ok;
+    console.log('[EMAIL] Sent successfully:', { to, subject, id: result.data?.id });
+    return result;
+  } catch (err) {
+    console.error('[EMAIL] Failed to send:', err, { to, subject });
+    Sentry.captureException(err, {
+      tags: { context: 'email-send' },
+      extra: { to, subject },
+    });
+    throw err;
+  }
 }
 
-export async function updateMailchimpTags(email: string, tags: string[]) {
-  const apiKey = process.env.MAILCHIMP_API_KEY || '';
-  const listId = process.env.MAILCHIMP_LIST_ID || '';
-  const serverPrefix = process.env.MAILCHIMP_SERVER_PREFIX || 'us1';
-
-  // Mailchimp uses MD5 hash of lowercased email as subscriber ID
-  const subscriberHash = email.toLowerCase().trim();
-  const encoder = new TextEncoder();
-  const data = encoder.encode(subscriberHash);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-  // Note: Mailchimp actually uses MD5 but we'll use the email directly with PUT
-
-  await fetch(
-    `https://${serverPrefix}.api.mailchimp.com/3.0/lists/${listId}/members/${hashHex}/tags`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `apikey ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        tags: tags.map((t) => ({ name: t, status: 'active' })),
-      }),
-    }
-  );
-}
+// Re-export Beehiiv functions for backward compatibility
+export { subscribeToBeehiiv, syncContactToBeehiiv } from './beehiiv';

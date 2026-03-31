@@ -5,6 +5,7 @@ import { sendTransactionalEmail } from '@/lib/email';
 import { adminPremiumGrantedEmail, adminDowngradeToFreeEmail } from '@/lib/email-templates';
 import { isValidUUID, sanitizeSearchQuery, isOneOf, safeParseJSON } from '@/lib/validation';
 import { parsePagination, paginatedResponse } from '@/lib/pagination';
+import * as Sentry from '@sentry/nextjs';
 
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin();
@@ -210,8 +211,8 @@ export async function PUT(request: NextRequest) {
             endDate.toISOString(),
           );
           await sendTransactionalEmail({ to: targetUser.email, ...emailData });
-        } catch {
-          // Email failure should not block subscription activation
+        } catch (err) {
+          Sentry.captureException(err, { tags: { context: 'admin-premium-granted-email' }, extra: { userId } });
         }
 
         await logAuditEvent(user.id, 'activate_subscription', 'user', userId, {
@@ -251,8 +252,8 @@ export async function PUT(request: NextRequest) {
         try {
           const emailData = adminDowngradeToFreeEmail(targetUser.full_name || 'Client');
           await sendTransactionalEmail({ to: targetUser.email, ...emailData });
-        } catch {
-          // Email failure should not block deactivation
+        } catch (err) {
+          Sentry.captureException(err, { tags: { context: 'admin-downgrade-email' }, extra: { userId } });
         }
 
         await logAuditEvent(user.id, 'deactivate_subscription', 'user', userId, {

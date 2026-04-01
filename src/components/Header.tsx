@@ -102,7 +102,7 @@ export function Header() {
               {!isSignedIn && (
                 <Link
                   href="/pricing"
-                  className="hidden sm:inline-flex items-center px-3.5 py-1.5 bg-[#111] text-white text-[13px] font-medium rounded-full hover:bg-[#333] transition-colors"
+                  className="inline-flex items-center px-3 sm:px-3.5 py-1.5 bg-[#111] text-white text-[12px] sm:text-[13px] font-medium rounded-full hover:bg-[#333] transition-colors"
                 >
                   S&apos;abonner
                 </Link>

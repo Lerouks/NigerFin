@@ -99,6 +99,14 @@ export function Header() {
               >
                 <Search className="w-[18px] h-[18px]" />
               </button>
+              {!isSignedIn && (
+                <Link
+                  href="/pricing"
+                  className="hidden sm:inline-flex items-center px-3.5 py-1.5 bg-[#111] text-white text-[13px] font-medium rounded-full hover:bg-[#333] transition-colors"
+                >
+                  S&apos;abonner
+                </Link>
+              )}
               <div className="relative" ref={userMenuRef}>
                 {isSignedIn ? (
                   <button
@@ -196,6 +204,16 @@ export function Header() {
                 </Link>
               ))}
               <div className="pt-2 mt-2 border-t border-black/5">
+                {!isSignedIn && (
+                  <Link
+                    href="/pricing"
+                    className="flex items-center justify-between py-2.5 px-3 text-[15px] font-medium text-[#111] hover:bg-black/[0.03] rounded-lg transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    S&apos;abonner
+                    <ChevronRight className="w-4 h-4 text-gray-300" />
+                  </Link>
+                )}
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);

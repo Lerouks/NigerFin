@@ -174,6 +174,25 @@ export async function getRelatedArticles(currentSlug: string, category: string, 
   return (data || []).map(toArticle);
 }
 
+/** Search published articles by query string (title, excerpt, category, tags) */
+export async function searchArticles(query: string, limit = 20): Promise<Article[]> {
+  const supabase = createServiceClient();
+  if (!supabase || !query.trim()) return [];
+
+  const q = query.trim().toLowerCase();
+
+  // Use Supabase ilike for flexible partial matching across key fields
+  const { data } = await supabase
+    .from('articles')
+    .select('*')
+    .eq('status', 'published')
+    .or(`title.ilike.%${q}%,excerpt.ilike.%${q}%,category.ilike.%${q}%,author_name.ilike.%${q}%`)
+    .order('published_at', { ascending: false })
+    .limit(limit);
+
+  return (data || []).map(toArticle);
+}
+
 export async function getAllArticleSlugs(): Promise<string[]> {
   const supabase = createServiceClient();
   if (!supabase) return [];

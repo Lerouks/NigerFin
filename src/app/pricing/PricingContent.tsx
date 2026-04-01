@@ -119,11 +119,11 @@ export function PricingContent() {
             <div className="h-1 bg-gradient-to-r from-[#a08a5e] via-[#c4a96a] to-[#a08a5e]" />
 
             <div className="p-8 md:p-10">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between gap-2 mb-6">
                 <p className="text-[11px] tracking-[0.2em] uppercase text-[#a08a5e] font-bold">
-                  Accès annuel — Meilleure offre
+                  Accès annuel
                 </p>
-                <span className="text-[11px] font-bold tracking-wide uppercase bg-[#a08a5e]/10 text-[#a08a5e] px-3 py-1 rounded-full">
+                <span className="text-[11px] font-bold tracking-wide uppercase bg-[#a08a5e]/10 text-[#a08a5e] px-3 py-1 rounded-full whitespace-nowrap">
                   {yearlyOption.savings}
                 </span>
               </div>
@@ -242,7 +242,7 @@ export function PricingContent() {
                     Accès Trimestriel
                   </p>
                   {quarterlyOption.savings && (
-                    <span className="text-[10px] font-bold tracking-wide uppercase bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] font-bold tracking-wide uppercase bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full whitespace-nowrap">
                       {quarterlyOption.savings}
                     </span>
                   )}

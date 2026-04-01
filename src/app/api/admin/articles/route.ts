@@ -4,6 +4,17 @@ import { createServerSupabaseClient } from '@/lib/supabase';
 import { createServiceClient } from '@/lib/supabase';
 import { serverError } from '@/lib/api-error';
 
+/** Revalidate all pages that display article data */
+function revalidateArticlePages(slug?: string) {
+  revalidatePath('/');
+  if (slug) revalidatePath(`/articles/${slug}`);
+  // Category pages that list articles with premium badges
+  for (const cat of ['/economie', '/finance', '/entreprises', '/education', '/marches', '/niger']) {
+    revalidatePath(cat);
+  }
+  revalidatePath('/articles');
+}
+
 async function requireAdmin(req: NextRequest) {
   const supabase = await createServerSupabaseClient();
   if (!supabase) return null;
@@ -93,8 +104,7 @@ export async function POST(req: NextRequest) {
 
   // Revalidate caches so the article appears immediately on the site
   if (data?.status === 'published') {
-    revalidatePath('/');
-    if (data?.slug) revalidatePath(`/articles/${data.slug}`);
+    revalidateArticlePages(data?.slug);
   }
 
   return NextResponse.json(data);
@@ -148,8 +158,7 @@ export async function PUT(req: NextRequest) {
 
   // Revalidate caches when article is published or updated
   if (data?.status === 'published') {
-    revalidatePath('/');
-    if (data?.slug) revalidatePath(`/articles/${data.slug}`);
+    revalidateArticlePages(data?.slug);
   }
 
   return NextResponse.json(data);
@@ -164,7 +173,10 @@ export async function DELETE(req: NextRequest) {
   const id = searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
 
+  // Fetch slug before deleting so we can revalidate the right pages
+  const { data: article } = await auth.service.from('articles').select('slug').eq('id', id).single();
   const { error } = await auth.service.from('articles').delete().eq('id', id);
   if (error) return serverError(error, 'admin-articles');
+  revalidateArticlePages(article?.slug);
   return NextResponse.json({ success: true });
 }

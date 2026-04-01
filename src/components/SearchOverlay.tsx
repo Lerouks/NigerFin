@@ -17,9 +17,9 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
 
   useEffect(() => {
     if (!isOpen) return;
-    fetch('/api/articles')
+    fetch('/api/articles?limit=200')
       .then((res) => res.json())
-      .then(setArticles)
+      .then((json) => setArticles(json.data ?? []))
       .catch(() => {});
   }, [isOpen]);
 

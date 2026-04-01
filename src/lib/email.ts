@@ -14,6 +14,26 @@ function getResend(): Resend | null {
   return resendInstance;
 }
 
+/** Strip HTML tags to produce a plain-text version of the email */
+function htmlToPlainText(html: string): string {
+  return html
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<\/h[1-6]>/gi, '\n\n')
+    .replace(/<\/tr>/gi, '\n')
+    .replace(/<\/li>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '  • ')
+    .replace(/<a[^>]*href="([^"]*)"[^>]*>[^<]*<\/a>/gi, '$1')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&middot;/g, '·')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 export async function sendTransactionalEmail({
   to,
   subject,
@@ -34,9 +54,14 @@ export async function sendTransactionalEmail({
   try {
     const result = await resend.emails.send({
       from: 'NFI Report <noreply@nfireport.com>',
+      replyTo: 'contact@nfireport.com',
       to,
       subject,
       html,
+      text: htmlToPlainText(html),
+      headers: {
+        'List-Unsubscribe': '<mailto:contact@nfireport.com?subject=unsubscribe>',
+      },
     });
 
     if (result.error) {

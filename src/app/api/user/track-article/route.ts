@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase';
+import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
   const supabase = await createServerSupabaseClient();
@@ -15,6 +15,19 @@ export async function POST(request: NextRequest) {
   const { articleId, articleSlug } = await request.json();
   if (!articleId || !articleSlug) {
     return NextResponse.json({ error: 'articleId and articleSlug required' }, { status: 400 });
+  }
+
+  // Verify article is actually premium before tracking
+  const service = createServiceClient();
+  if (service) {
+    const { data: article } = await service
+      .from('articles')
+      .select('content_type')
+      .eq('id', articleId)
+      .single();
+    if (article?.content_type !== 'premium') {
+      return NextResponse.json({ success: true, skipped: true });
+    }
   }
 
   // Insert tracking record (upsert to avoid duplicates)
@@ -33,9 +46,6 @@ export async function POST(request: NextRequest) {
   if (trackError) {
     return NextResponse.json({ error: trackError.message }, { status: 500 });
   }
-
-  // Count is always derived from premium_article_tracking table (dedup'd).
-  // No separate counter increment needed — eliminates double-count bugs.
 
   return NextResponse.json({ success: true });
 }

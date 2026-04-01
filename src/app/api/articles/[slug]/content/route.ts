@@ -23,9 +23,15 @@ export async function GET(
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
+  // Never cache this response — content_type can change at any time
+  const noCacheHeaders = {
+    'Cache-Control': 'no-store, no-cache, must-revalidate',
+    'Pragma': 'no-cache',
+  };
+
   // Free articles: return body directly
   if (article.content_type === 'free') {
-    return NextResponse.json({ body: bodyToHtml(article.body || '') });
+    return NextResponse.json({ body: bodyToHtml(article.body || ''), contentType: 'free' }, { headers: noCacheHeaders });
   }
 
   // Premium articles: require auth
@@ -51,7 +57,7 @@ export async function GET(
 
   // Admins always have access
   if (profile.role === 'admin') {
-    return NextResponse.json({ body: bodyToHtml(article.body || '') });
+    return NextResponse.json({ body: bodyToHtml(article.body || '') }, { headers: noCacheHeaders });
   }
 
   // Premium users: verify subscription is still active
@@ -66,7 +72,7 @@ export async function GET(
       .single();
 
     if (subscription && new Date(subscription.current_period_end) > new Date()) {
-      return NextResponse.json({ body: bodyToHtml(article.body || '') });
+      return NextResponse.json({ body: bodyToHtml(article.body || '') }, { headers: noCacheHeaders });
     }
 
     // Subscription expired — downgrade role to reader
@@ -85,23 +91,35 @@ export async function GET(
     .single();
   const limit = config?.free_articles_count ?? 3;
 
-  // Count from tracking table (dedup'd source of truth) for current month
+  // Count from tracking table for current month — only count articles that are
+  // STILL premium (if an article was changed from premium to free, exclude it)
   const startOfMonth = new Date(Date.UTC(
     new Date().getUTCFullYear(),
     new Date().getUTCMonth(),
     1
   ));
-  const { count } = await service
+  const { data: trackedArticles } = await service
     .from('premium_article_tracking')
-    .select('*', { count: 'exact', head: true })
+    .select('article_id')
     .eq('user_id', user.id)
     .gte('read_at', startOfMonth.toISOString());
 
-  if ((count ?? 0) < limit) {
-    return NextResponse.json({ body: bodyToHtml(article.body || '') });
+  let premiumReadCount = 0;
+  const articleIds = Array.from(new Set((trackedArticles || []).map(t => t.article_id)));
+  if (articleIds.length > 0) {
+    const { count: stillPremiumCount } = await service
+      .from('articles')
+      .select('*', { count: 'exact', head: true })
+      .in('id', articleIds)
+      .eq('content_type', 'premium');
+    premiumReadCount = stillPremiumCount ?? 0;
   }
 
-  return NextResponse.json({ error: 'Premium subscription required' }, { status: 403 });
+  if (premiumReadCount < limit) {
+    return NextResponse.json({ body: bodyToHtml(article.body || '') }, { headers: noCacheHeaders });
+  }
+
+  return NextResponse.json({ error: 'Premium subscription required' }, { status: 403, headers: noCacheHeaders });
 }
 
 function bodyToHtml(raw: string): string {

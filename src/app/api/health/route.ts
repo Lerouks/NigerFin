@@ -22,9 +22,9 @@ export async function GET(request: NextRequest) {
     const total = services.length;
 
     // Get 24h success rate from Supabase
-    let successRate24h: Record<string, number> = {};
-    let lastSuccessful: Record<string, string> = {};
-    let cacheVolume: Record<string, number> = {};
+    const successRate24h: Record<string, number> = {};
+    const lastSuccessful: Record<string, string> = {};
+    const cacheVolume: Record<string, number> = {};
 
     const supabase = createServiceClient();
     if (supabase) {

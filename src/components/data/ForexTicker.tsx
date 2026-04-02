@@ -1,7 +1,7 @@
 'use client';
 
-import { TrendingUp, TrendingDown } from 'lucide-react';
 import type { ForexRate } from '@/lib/services/frankfurter-service';
+import { VariationBadge } from './VariationBadge';
 
 interface ForexTickerProps {
   rates: ForexRate[];
@@ -38,18 +38,8 @@ export function ForexTicker({ rates, source, lastUpdated }: ForexTickerProps) {
                   maximumFractionDigits: 2,
                 })}
               </span>
-              <div
-                className={`flex items-center gap-1 min-w-[70px] justify-end text-[12px] font-medium ${
-                  rate.changePercent >= 0 ? 'text-emerald-600' : 'text-red-500'
-                }`}
-              >
-                {rate.changePercent >= 0 ? (
-                  <TrendingUp className="w-3.5 h-3.5" />
-                ) : (
-                  <TrendingDown className="w-3.5 h-3.5" />
-                )}
-                {rate.changePercent > 0 ? '+' : ''}
-                {rate.changePercent.toFixed(3)}%
+              <div className="min-w-[70px] flex justify-end">
+                <VariationBadge value={rate.changePercent} decimals={3} size="md" pill />
               </div>
             </div>
           </div>

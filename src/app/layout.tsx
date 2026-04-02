@@ -33,22 +33,6 @@ const inter = localFont({
   display: 'swap',
 });
 
-const playfair = localFont({
-  src: [
-    {
-      path: '../fonts/PlayfairDisplay-Regular.woff2',
-      weight: '400',
-      style: 'normal',
-    },
-    {
-      path: '../fonts/PlayfairDisplay-Bold.woff2',
-      weight: '700',
-      style: 'normal',
-    },
-  ],
-  variable: '--font-playfair',
-  display: 'swap',
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -96,7 +80,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr" className={`${inter.variable} ${playfair.variable}`}>
+    <html lang="fr" className={`${inter.variable}`}>
       <body className="min-h-screen flex flex-col">
         <Providers>
           <ViewTracker />

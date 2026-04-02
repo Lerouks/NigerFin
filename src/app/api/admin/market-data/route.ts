@@ -78,20 +78,20 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'Type invalide' }, { status: 400 });
   }
 
-  // Auto-calculate variation when value is provided
+  // Auto-calculate daily variation based on previous_close
   if (updates.value !== undefined) {
     const { data: current } = await serviceClient
       .from('market_data')
-      .select('value')
+      .select('value, previous_close')
       .eq('id', id)
       .single();
 
     if (current) {
-      const oldValue = Number(current.value);
+      const refPrice = Number(current.previous_close) || Number(current.value);
       const newValue = Number(updates.value);
-      updates.change = newValue - oldValue;
-      updates.change_percent = oldValue !== 0
-        ? ((newValue - oldValue) / oldValue) * 100
+      updates.change = newValue - refPrice;
+      updates.change_percent = refPrice !== 0
+        ? ((newValue - refPrice) / refPrice) * 100
         : 0;
     }
   }

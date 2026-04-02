@@ -6,6 +6,7 @@ import { TrendingUp, TrendingDown, BookOpen, ChevronRight } from 'lucide-react';
 import { useForex } from '@/hooks/useForex';
 import { useBRVMIndices } from '@/hooks/useBRVMIndices';
 import { useCommodities } from '@/hooks/useCommodities';
+import { useCrypto } from '@/hooks/useCrypto';
 import { ForexTicker } from '@/components/data/ForexTicker';
 import { CommodityPrice as CommodityPriceComponent } from '@/components/data/CommodityPrice';
 import { DataWidget } from '@/components/data/DataWidget';
@@ -37,6 +38,7 @@ export function MarchesContent({ fallbackData }: MarchesContentProps) {
   const forex = useForex();
   const brvmIndices = useBRVMIndices();
   const commodities = useCommodities();
+  const crypto = useCrypto();
 
   useEffect(() => {
     fetch('/api/market-data')
@@ -98,8 +100,22 @@ export function MarchesContent({ fallbackData }: MarchesContentProps) {
       }
     }
 
+    // Override crypto values
+    if (crypto.data) {
+      for (const coin of crypto.data) {
+        const existing = items.find((i) => i.symbol === coin.symbol);
+        if (existing) {
+          existing.value = coin.price;
+          existing.change = coin.change24h;
+          existing.changePercent = coin.changePercent24h;
+          existing.source = 'CoinGecko';
+          existing.updatedAt = coin.date;
+        }
+      }
+    }
+
     return items;
-  }, [data, forex.data, commodities.data, brvmIndices.data]);
+  }, [data, forex.data, commodities.data, brvmIndices.data, crypto.data]);
 
   const { groupedData, lastUpdated } = useMemo(() => {
     const grouped = mergedData.reduce((acc, item) => {

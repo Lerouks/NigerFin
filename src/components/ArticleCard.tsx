@@ -42,7 +42,7 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
   if (featured) {
     return (
       <Link href={`/articles/${article.slug.current}`} className="group block">
-        <div className="relative overflow-hidden bg-[#111]">
+        <article className="relative overflow-hidden bg-[#111]">
           <Image
             src={imageUrl}
             alt={article.title}
@@ -77,7 +77,7 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
               </div>
             </div>
           </div>
-        </div>
+        </article>
       </Link>
     );
   }

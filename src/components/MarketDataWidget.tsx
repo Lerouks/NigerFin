@@ -6,6 +6,7 @@ import { useForex } from '@/hooks/useForex';
 import { useCommodities } from '@/hooks/useCommodities';
 import { useBRVMIndices } from '@/hooks/useBRVMIndices';
 import { useCrypto } from '@/hooks/useCrypto';
+import { useIndices } from '@/hooks/useIndices';
 import type { MarketData } from '@/types';
 
 const TYPE_LABELS: Record<MarketData['type'], string> = {
@@ -27,6 +28,7 @@ export function MarketDataWidget({ data: fallbackData }: MarketDataWidgetProps) 
   const commodities = useCommodities();
   const brvmIndices = useBRVMIndices();
   const crypto = useCrypto();
+  const indices = useIndices();
 
   useEffect(() => {
     fetch('/api/market-data')
@@ -102,8 +104,22 @@ export function MarketDataWidget({ data: fallbackData }: MarketDataWidgetProps) 
       }
     }
 
+    // Override global indices (Nasdaq, S&P 500, STOXX Europe 600)
+    if (indices.data) {
+      for (const quote of indices.data) {
+        const existing = items.find((i) => i.symbol === quote.symbol);
+        if (existing) {
+          existing.value = quote.price;
+          existing.change = quote.change;
+          existing.changePercent = quote.changePercent;
+          existing.source = 'Yahoo Finance';
+          existing.updatedAt = quote.date;
+        }
+      }
+    }
+
     return items;
-  }, [data, forex.data, commodities.data, brvmIndices.data, crypto.data]);
+  }, [data, forex.data, commodities.data, brvmIndices.data, crypto.data, indices.data]);
 
   const { groupedData, lastUpdated } = useMemo(() => {
     const grouped = mergedData.reduce((acc, item) => {
@@ -172,7 +188,7 @@ export function MarketDataWidget({ data: fallbackData }: MarketDataWidgetProps) 
       </div>
       <div className="border-t border-black/[0.04] px-5 py-3 bg-[#fafaf9] rounded-b-xl space-y-0.5">
         <p className="text-[10px] text-gray-400 text-center">
-          Données en temps réel &middot; Frankfurter, BRVM, ECB, CoinGecko
+          Données en temps réel &middot; Frankfurter, BRVM, ECB, CoinGecko, Yahoo Finance
         </p>
         {lastUpdated && (
           <p className="text-[10px] text-gray-400 text-center">

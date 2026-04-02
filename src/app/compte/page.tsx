@@ -5,6 +5,7 @@ import { AccountDashboard } from './AccountDashboard';
 export const metadata: Metadata = {
   title: 'Mon compte',
   description: 'Gérez votre abonnement, vos préférences et votre profil NFI Report.',
+  robots: { index: false, follow: false },
 };
 
 export default function ComptePage() {

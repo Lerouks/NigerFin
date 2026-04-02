@@ -5,6 +5,7 @@ import { TrendingUp, TrendingDown } from 'lucide-react';
 import { useForex } from '@/hooks/useForex';
 import { useCommodities } from '@/hooks/useCommodities';
 import { useBRVMIndices } from '@/hooks/useBRVMIndices';
+import { useCrypto } from '@/hooks/useCrypto';
 import type { MarketData } from '@/types';
 
 const TYPE_LABELS: Record<MarketData['type'], string> = {
@@ -25,6 +26,7 @@ export function MarketDataWidget({ data: fallbackData }: MarketDataWidgetProps) 
   const forex = useForex();
   const commodities = useCommodities();
   const brvmIndices = useBRVMIndices();
+  const crypto = useCrypto();
 
   useEffect(() => {
     fetch('/api/market-data')
@@ -86,8 +88,22 @@ export function MarketDataWidget({ data: fallbackData }: MarketDataWidgetProps) 
       }
     }
 
+    // Override crypto values
+    if (crypto.data) {
+      for (const coin of crypto.data) {
+        const existing = items.find((i) => i.symbol === coin.symbol);
+        if (existing) {
+          existing.value = coin.price;
+          existing.change = coin.change24h;
+          existing.changePercent = coin.changePercent24h;
+          existing.source = 'CoinGecko';
+          existing.updatedAt = coin.date;
+        }
+      }
+    }
+
     return items;
-  }, [data, forex.data, commodities.data, brvmIndices.data]);
+  }, [data, forex.data, commodities.data, brvmIndices.data, crypto.data]);
 
   const { groupedData, lastUpdated } = useMemo(() => {
     const grouped = mergedData.reduce((acc, item) => {
@@ -156,7 +172,7 @@ export function MarketDataWidget({ data: fallbackData }: MarketDataWidgetProps) 
       </div>
       <div className="border-t border-black/[0.04] px-5 py-3 bg-[#fafaf9] rounded-b-xl space-y-0.5">
         <p className="text-[10px] text-gray-400 text-center">
-          Données en temps réel &middot; Frankfurter, BRVM, ECB
+          Données en temps réel &middot; Frankfurter, BRVM, ECB, CoinGecko
         </p>
         {lastUpdated && (
           <p className="text-[10px] text-gray-400 text-center">

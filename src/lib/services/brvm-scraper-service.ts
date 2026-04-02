@@ -137,10 +137,10 @@ export class BRVMScraperService extends BaseDataService {
 
     // Ensure we always have composite and BRVM 30
     if (!indices.find((i) => i.name.includes('Composite'))) {
-      indices.unshift({ name: 'BRVM Composite', value: 234.56, change: 2.34, changePercent: 1.01, date: new Date().toISOString() });
+      indices.unshift({ name: 'BRVM Composite', value: 417.00, change: 2.18, changePercent: 0.52, date: new Date().toISOString() });
     }
     if (!indices.find((i) => i.name.includes('30'))) {
-      indices.push({ name: 'BRVM 30', value: 118.92, change: 1.15, changePercent: 0.98, date: new Date().toISOString() });
+      indices.push({ name: 'BRVM 30', value: 209.00, change: 1.08, changePercent: 0.52, date: new Date().toISOString() });
     }
 
     return { indices, stocks, date: new Date().toISOString() };
@@ -160,8 +160,8 @@ export class BRVMScraperService extends BaseDataService {
     }));
 
     const indices: BRVMIndex[] = [
-      { name: 'BRVM Composite', value: 234.56, change: 2.34, changePercent: 1.01, date: new Date().toISOString() },
-      { name: 'BRVM 30', value: 118.92, change: 1.15, changePercent: 0.98, date: new Date().toISOString() },
+      { name: 'BRVM Composite', value: 417.00, change: 2.18, changePercent: 0.52, date: new Date().toISOString() },
+      { name: 'BRVM 30', value: 209.00, change: 1.08, changePercent: 0.52, date: new Date().toISOString() },
     ];
 
     return { indices, stocks, date: new Date().toISOString() };

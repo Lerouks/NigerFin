@@ -107,11 +107,11 @@ export class CommoditiesService extends BaseDataService {
         return {
           name: meta.name,
           symbol: meta.symbol,
-          price: 82.45,
+          price: 108.95,
           unit: meta.unit,
           currency: 'USD',
-          change: -0.87,
-          changePercent: -1.04,
+          change: 6.83,
+          changePercent: 6.69,
           source: 'Estimation',
           date: new Date().toISOString(),
         };
@@ -124,10 +124,10 @@ export class CommoditiesService extends BaseDataService {
 
   private getEstimatedPrice(key: string, meta: { name: string; symbol: string; unit: string }): CommodityPrice {
     const estimates: Record<string, { price: number; change: number; changePercent: number }> = {
-      oil: { price: 82.45, change: -0.87, changePercent: -1.04 },
+      oil: { price: 108.95, change: 6.83, changePercent: 6.69 },
       gold: { price: 4676.86, change: 18.50, changePercent: 0.40 },
-      uranium: { price: 89.50, change: 1.25, changePercent: 1.42 },
-      cotton: { price: 0.84, change: -0.01, changePercent: -1.18 },
+      uranium: { price: 84.00, change: 0.50, changePercent: 0.60 },
+      cotton: { price: 0.68, change: -0.02, changePercent: -2.86 },
     };
 
     const est = estimates[key] || { price: 0, change: 0, changePercent: 0 };

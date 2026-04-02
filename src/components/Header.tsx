@@ -76,7 +76,7 @@ export function Header() {
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-black/[0.06]">
         {/* Main header */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-16 relative">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="lg:hidden p-1.5 -ml-1.5 hover:bg-black/5 rounded-lg transition-colors"
@@ -86,7 +86,7 @@ export function Header() {
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
-            <Link href="/" className="flex items-center">
+            <Link href="/" className="flex items-center lg:static absolute left-1/2 -translate-x-1/2 lg:translate-x-0">
               <h1 className="text-[22px] md:text-[26px] tracking-[-0.03em] font-bold">
                 NFI REPORT
               </h1>
@@ -95,7 +95,7 @@ export function Header() {
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setSearchOpen(true)}
-                className="p-2 hover:bg-black/5 rounded-full transition-colors"
+                className="hidden sm:block p-2 hover:bg-black/5 rounded-full transition-colors"
                 aria-label="Rechercher"
               >
                 <Search className="w-[18px] h-[18px]" />
@@ -224,6 +224,17 @@ export function Header() {
               </Link>
             ))}
             <div className="pt-2 mt-2 border-t border-black/5">
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setSearchOpen(true);
+                }}
+                className="sm:hidden flex items-center justify-between w-full py-2.5 px-3 text-[15px] text-gray-700 hover:bg-black/[0.03] rounded-lg transition-colors text-left"
+                tabIndex={mobileMenuOpen ? 0 : -1}
+              >
+                <span className="flex items-center gap-2"><Search className="w-4 h-4" /> Rechercher</span>
+                <ChevronRight className="w-4 h-4 text-gray-300" />
+              </button>
               {!isSignedIn && (
                 <Link
                   href="/pricing"

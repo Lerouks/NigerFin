@@ -3,12 +3,13 @@ import { createServerSupabaseClient } from '@/lib/supabase';
 import { safeParseJSON } from '@/lib/validation';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { SITE_URL } from '@/lib/config';
+import crypto from 'crypto';
 import Stripe from 'stripe';
 
 function getStripe() {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) throw new Error('STRIPE_SECRET_KEY not configured');
-  return new Stripe(key);
+  return new Stripe(key, { timeout: 10000 });
 }
 
 export async function POST(request: NextRequest) {
@@ -60,12 +61,19 @@ export async function POST(request: NextRequest) {
     const stripe = getStripe();
 
     if (!customerId) {
-      const customer = await stripe.customers.create({
-        email: user.email,
-        metadata: {
-          supabase_user_id: user.id,
+      const customerIdempotencyKey = crypto
+        .createHash('sha256')
+        .update(`create-customer:${user.id}`)
+        .digest('hex');
+      const customer = await stripe.customers.create(
+        {
+          email: user.email,
+          metadata: {
+            supabase_user_id: user.id,
+          },
         },
-      });
+        { idempotencyKey: customerIdempotencyKey }
+      );
       customerId = customer.id;
       await supabase
         .from('user_profiles')
@@ -75,25 +83,32 @@ export async function POST(request: NextRequest) {
 
     const siteUrl = SITE_URL;
 
-    const session = await stripe.checkout.sessions.create({
-      customer: customerId,
-      mode: 'subscription',
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${siteUrl}/compte?checkout=success`,
-      cancel_url: `${siteUrl}/pricing?checkout=cancelled`,
-      metadata: {
-        supabase_user_id: user.id,
-        tier,
-        billing_cycle: billingCycle || 'monthly',
-      },
-      subscription_data: {
+    const checkoutIdempotencyKey = crypto
+      .createHash('sha256')
+      .update(`checkout:${user.id}:${priceId}:${Date.now()}`)
+      .digest('hex');
+    const session = await stripe.checkout.sessions.create(
+      {
+        customer: customerId,
+        mode: 'subscription',
+        line_items: [{ price: priceId, quantity: 1 }],
+        success_url: `${siteUrl}/compte?checkout=success`,
+        cancel_url: `${siteUrl}/pricing?checkout=cancelled`,
         metadata: {
           supabase_user_id: user.id,
           tier,
           billing_cycle: billingCycle || 'monthly',
         },
+        subscription_data: {
+          metadata: {
+            supabase_user_id: user.id,
+            tier,
+            billing_cycle: billingCycle || 'monthly',
+          },
+        },
       },
-    });
+      { idempotencyKey: checkoutIdempotencyKey }
+    );
 
     return NextResponse.json({ url: session.url });
   } catch {

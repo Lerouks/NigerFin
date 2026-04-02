@@ -152,17 +152,7 @@ export function Footer() {
                     <Icon className="w-4 h-4" />
                   </a>
                 ))
-              ) : (
-                [Facebook, Twitter, Linkedin, Instagram].map((Icon, i) => (
-                  <span
-                    key={i}
-                    aria-hidden="true"
-                    className="w-9 h-9 bg-white/[0.06] rounded-full flex items-center justify-center hover:bg-white/[0.12] transition-colors cursor-pointer"
-                  >
-                    <Icon className="w-4 h-4" />
-                  </span>
-                ))
-              )}
+              ) : null}
             </div>
             <div className="space-y-2.5">
               <a

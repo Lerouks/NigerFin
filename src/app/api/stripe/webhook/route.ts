@@ -9,7 +9,7 @@ import Stripe from 'stripe';
 function getStripe() {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) throw new Error('STRIPE_SECRET_KEY not configured');
-  return new Stripe(key);
+  return new Stripe(key, { timeout: 10000 });
 }
 
 function mapTierToRole(tier: string): string {
@@ -87,6 +87,7 @@ export async function POST(request: NextRequest) {
               tags: { context: 'stripe-webhook-subscription-upsert' },
               extra: { userId, eventType: event.type },
             });
+            throw new Error(`Subscription upsert failed: ${subError.message}`);
           }
 
           const { error: profileError } = await supabase
@@ -103,6 +104,7 @@ export async function POST(request: NextRequest) {
               tags: { context: 'stripe-webhook-profile-update' },
               extra: { userId, eventType: event.type },
             });
+            throw new Error(`Profile update failed: ${profileError.message}`);
           }
 
           await syncBeehiivContact(userId, role, supabase);
@@ -152,6 +154,7 @@ export async function POST(request: NextRequest) {
               tags: { context: 'stripe-webhook-sub-update' },
               extra: { userId, eventType: event.type },
             });
+            throw new Error(`Subscription update failed: ${subUpdateError.message}`);
           }
 
           const { error: profileError } = await supabase
@@ -168,6 +171,7 @@ export async function POST(request: NextRequest) {
               tags: { context: 'stripe-webhook-profile-update' },
               extra: { userId, eventType: event.type },
             });
+            throw new Error(`Profile update failed: ${profileError.message}`);
           }
         }
         break;
@@ -191,6 +195,7 @@ export async function POST(request: NextRequest) {
               tags: { context: 'stripe-webhook-sub-delete' },
               extra: { userId, eventType: event.type },
             });
+            throw new Error(`Subscription delete update failed: ${subDeleteError.message}`);
           }
 
           const { error: profileError } = await supabase
@@ -207,9 +212,106 @@ export async function POST(request: NextRequest) {
               tags: { context: 'stripe-webhook-profile-expire' },
               extra: { userId, eventType: event.type },
             });
+            throw new Error(`Profile expire update failed: ${profileError.message}`);
           }
 
           await syncBeehiivContact(userId, 'reader', supabase);
+        }
+        break;
+      }
+
+      case 'invoice.paid':
+      case 'invoice.payment_succeeded': {
+        const invoice = event.data.object as Stripe.Invoice;
+        const parentSub = invoice.parent?.subscription_details?.subscription;
+        const subId = typeof parentSub === 'string' ? parentSub : parentSub?.id;
+        if (subId) {
+          const subscription = await stripe.subscriptions.retrieve(subId);
+          const userId = subscription.metadata?.supabase_user_id;
+          const tier = subscription.metadata?.tier || 'premium';
+          if (userId) {
+            const role = mapTierToRole(tier);
+
+            const { error: subActiveError } = await supabase
+              .from('subscriptions')
+              .update({
+                status: 'active',
+                updated_at: new Date().toISOString(),
+              })
+              .eq('user_id', userId);
+
+            if (subActiveError) {
+              Sentry.captureException(subActiveError, {
+                tags: { context: 'stripe-webhook-invoice-paid' },
+                extra: { userId, eventType: event.type },
+              });
+              throw new Error(`Subscription active update failed: ${subActiveError.message}`);
+            }
+
+            const { error: profileError } = await supabase
+              .from('user_profiles')
+              .update({
+                role,
+                subscription_status: 'active',
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', userId);
+
+            if (profileError) {
+              Sentry.captureException(profileError, {
+                tags: { context: 'stripe-webhook-invoice-paid-profile' },
+                extra: { userId, eventType: event.type },
+              });
+              throw new Error(`Profile update on invoice paid failed: ${profileError.message}`);
+            }
+
+            // Log payment in audit_log
+            await supabase.from('audit_log').insert({
+              admin_id: userId,
+              action: 'invoice_payment',
+              entity_type: 'subscription',
+              entity_id: subId,
+              details: {
+                event_type: event.type,
+                invoice_id: invoice.id,
+                amount_paid: invoice.amount_paid,
+                currency: invoice.currency,
+              },
+            });
+          }
+        }
+        break;
+      }
+
+      case 'customer.updated': {
+        const customer = event.data.object as Stripe.Customer;
+        const userId = customer.metadata?.supabase_user_id;
+
+        if (userId) {
+          const updateData: Record<string, string> = {
+            updated_at: new Date().toISOString(),
+          };
+          if (customer.email) {
+            updateData.email = customer.email;
+          }
+          if (customer.name) {
+            updateData.full_name = customer.name;
+          }
+
+          if (customer.email || customer.name) {
+            const { error: syncError } = await supabase
+              .from('user_profiles')
+              .update(updateData)
+              .eq('id', userId);
+
+            if (syncError) {
+              Sentry.captureException(syncError, {
+                tags: { context: 'stripe-webhook-customer-updated' },
+                extra: { userId, eventType: event.type },
+              });
+              throw new Error(`Customer sync failed: ${syncError.message}`);
+            }
+          }
         }
         break;
       }
@@ -235,6 +337,7 @@ export async function POST(request: NextRequest) {
                 tags: { context: 'stripe-webhook-payment-failed' },
                 extra: { userId, eventType: event.type },
               });
+              throw new Error(`Past due update failed: ${pastDueError.message}`);
             }
           }
         }
@@ -246,8 +349,8 @@ export async function POST(request: NextRequest) {
       tags: { context: 'stripe-webhook-handler' },
       extra: { eventType: event.type },
     });
-    // Still return 200 to Stripe to prevent retries on application errors
-    // The error is captured in Sentry for investigation
+    // Return 500 so Stripe retries the webhook for transient failures
+    return NextResponse.json({ error: 'Webhook handler failed' }, { status: 500 });
   }
 
   return NextResponse.json({ received: true });

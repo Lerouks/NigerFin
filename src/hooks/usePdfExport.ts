@@ -55,12 +55,28 @@ export function usePdfExport() {
     const marginR = 20;
     const contentW = pageW - marginL - marginR;
 
-    // -- Helper to add footer on every page --
-    const addFooter = () => {
+    // -- Helper to add header & footer on every page --
+    const addHeaderFooter = () => {
       const pageCount = doc.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
         const pageH = doc.internal.pageSize.getHeight();
+
+        // Header — NFI Report branding on every page (skip page 1, already has full header)
+        if (i > 1) {
+          doc.setFont('Helvetica', 'bold');
+          doc.setFontSize(10);
+          doc.setTextColor(17, 17, 17);
+          doc.text('NFI REPORT', marginL, 12);
+          doc.setFont('Helvetica', 'normal');
+          doc.setFontSize(8);
+          doc.setTextColor(153, 153, 153);
+          doc.text(fmtDate(), pageW - marginR, 12, { align: 'right' });
+          doc.setDrawColor(200, 200, 200);
+          doc.setLineWidth(0.3);
+          doc.line(marginL, 15, pageW - marginR, 15);
+        }
+
         // Footer line
         doc.setDrawColor(200, 200, 200);
         doc.setLineWidth(0.3);
@@ -210,8 +226,8 @@ export function usePdfExport() {
       });
     }
 
-    // -- Footer on all pages --
-    addFooter();
+    // -- Header & footer on all pages --
+    addHeaderFooter();
 
     // -- Save --
     const filename = `nfireport-${slugify(title)}-${isoDate()}.pdf`;

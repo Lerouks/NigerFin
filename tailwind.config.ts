@@ -6,7 +6,6 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        playfair: ['Playfair Display', 'Georgia', 'serif'],
         inter: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
       },
       colors: {
@@ -16,6 +15,11 @@ const config: Config = {
         secondary: '#f5f5f0',
         muted: '#f0efe9',
         gold: '#d4a843',
+        accent: '#d4a843',
+        success: '#22c55e',
+        warning: '#eab308',
+        error: '#ef4444',
+        surface: '#ffffff',
       },
     },
   },

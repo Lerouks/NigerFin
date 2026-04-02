@@ -33,8 +33,12 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Refresh the auth token
-  await supabase.auth.getUser();
+  // Refresh the auth token (ignore errors — stale tokens are acceptable)
+  try {
+    await supabase.auth.getUser();
+  } catch {
+    // Token refresh failure is non-critical — user will be prompted to re-auth
+  }
 
   return supabaseResponse;
 }

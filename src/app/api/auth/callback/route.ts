@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
           getAll() {
             return request.cookies.getAll();
           },
-          setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
+          setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
             cookiesToSet.forEach(({ name, value, options }) =>
               supabaseResponse.cookies.set(name, value, options)
             );
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     );
 
     let exchangeError: Error | null = null;
-    let data: { user: any; session: any } | null = null;
+    let data: { user: { id: string; email?: string; user_metadata?: Record<string, unknown> } | null; session: unknown } | null = null;
 
     try {
       const result = await supabase.auth.exchangeCodeForSession(code);
@@ -49,11 +49,14 @@ export async function GET(request: NextRequest) {
     if (!exchangeError) {
       // Send welcome email for newly confirmed users
       if (data?.user) {
-        sendWelcomeIfNew(data.user.id, data.user.email, data.user.user_metadata?.full_name).catch((err) => {
+        const userId = data.user.id;
+        sendWelcomeIfNew(userId, data.user.email, data.user.user_metadata?.full_name as string | undefined).catch((err) => {
           console.error('[EMAIL] Welcome email failed:', err);
-          Sentry.captureException(err, { tags: { context: 'welcome-email' }, extra: { userId: data.user.id } });
+          Sentry.captureException(err, { tags: { context: 'welcome-email' }, extra: { userId } });
         });
       }
+      // Prevent caching of auth callback responses
+      supabaseResponse.headers.set('Cache-Control', 'no-store, max-age=0');
       return supabaseResponse;
     }
   }

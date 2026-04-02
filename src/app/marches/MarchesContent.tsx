@@ -5,10 +5,8 @@ import Link from 'next/link';
 import { TrendingUp, TrendingDown, BookOpen, ChevronRight } from 'lucide-react';
 import { useForex } from '@/hooks/useForex';
 import { useBRVMIndices } from '@/hooks/useBRVMIndices';
-import { useBRVMStocks } from '@/hooks/useBRVMStocks';
 import { useCommodities } from '@/hooks/useCommodities';
 import { ForexTicker } from '@/components/data/ForexTicker';
-import { BRVMCard } from '@/components/data/BRVMCard';
 import { CommodityPrice as CommodityPriceComponent } from '@/components/data/CommodityPrice';
 import { DataWidget } from '@/components/data/DataWidget';
 import type { MarketData } from '@/types';
@@ -38,7 +36,6 @@ export function MarchesContent({ fallbackData }: MarchesContentProps) {
   // Real-time data hooks
   const forex = useForex();
   const brvmIndices = useBRVMIndices();
-  const brvmStocks = useBRVMStocks();
   const commodities = useCommodities();
 
   useEffect(() => {
@@ -200,23 +197,6 @@ export function MarchesContent({ fallbackData }: MarchesContentProps) {
         </div>
       )}
 
-      {/* BRVM Stocks - BOAN Niger highlighted */}
-      {brvmStocks.data && brvmStocks.data.length > 0 && (
-        <div>
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold">Actions BRVM</h2>
-            <p className="text-[13px] text-gray-500 mt-0.5">Titres cotés avec mise en avant de BOAN Niger</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {brvmStocks.data.slice(0, 10).map((stock) => (
-              <BRVMCard key={stock.ticker} stock={stock} />
-            ))}
-          </div>
-          <p className="text-[10px] text-gray-400 mt-3 text-center">
-            Source : BRVM &middot; Mis à jour : {brvmStocks.lastUpdated ? new Date(brvmStocks.lastUpdated).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
-          </p>
-        </div>
-      )}
 
       {/* Commodities */}
       {commodities.data && commodities.data.length > 0 && (

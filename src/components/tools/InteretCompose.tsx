@@ -85,23 +85,23 @@ export function InteretCompose() {
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <label className="block text-[13px] font-medium text-gray-700 mb-2">Capital initial (FCFA)</label>
-            <input type="number" value={capital} onChange={(e) => setCapital(e.target.value)} placeholder="Ex: 1 000 000"
+            <label htmlFor="ic-capital" className="block text-[13px] font-medium text-gray-700 mb-2">Capital initial (FCFA)</label>
+            <input id="ic-capital" type="number" value={capital} onChange={(e) => setCapital(e.target.value)} placeholder="Ex: 1 000 000"
               className="w-full border border-black/[0.08] px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-[#fafaf9] text-[15px]" />
           </div>
           <div>
-            <label className="block text-[13px] font-medium text-gray-700 mb-2">Taux annuel (%)</label>
-            <input type="number" step="0.1" value={rate} onChange={(e) => setRate(e.target.value)} placeholder="Ex: 7"
+            <label htmlFor="ic-taux" className="block text-[13px] font-medium text-gray-700 mb-2">Taux annuel (%)</label>
+            <input id="ic-taux" type="number" step="0.1" value={rate} onChange={(e) => setRate(e.target.value)} placeholder="Ex: 7"
               className="w-full border border-black/[0.08] px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-[#fafaf9] text-[15px]" />
           </div>
           <div>
-            <label className="block text-[13px] font-medium text-gray-700 mb-2">Durée (années)</label>
-            <input type="number" value={years} onChange={(e) => setYears(e.target.value)} placeholder="Ex: 5"
+            <label htmlFor="ic-duree" className="block text-[13px] font-medium text-gray-700 mb-2">Durée (années)</label>
+            <input id="ic-duree" type="number" value={years} onChange={(e) => setYears(e.target.value)} placeholder="Ex: 5"
               className="w-full border border-black/[0.08] px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-[#fafaf9] text-[15px]" />
           </div>
           <div>
-            <label className="block text-[13px] font-medium text-gray-700 mb-2">Capitalisation</label>
-            <select value={compoundsPerYear} onChange={(e) => setCompoundsPerYear(Number(e.target.value))}
+            <label htmlFor="ic-capitalisation" className="block text-[13px] font-medium text-gray-700 mb-2">Capitalisation</label>
+            <select id="ic-capitalisation" value={compoundsPerYear} onChange={(e) => setCompoundsPerYear(Number(e.target.value))}
               className="w-full border border-black/[0.08] px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-[#fafaf9] text-[15px]">
               {COMPOUNDS.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
             </select>

@@ -112,10 +112,11 @@ export function SimulateurEmprunt() {
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           <div>
-            <label className="block text-[13px] font-medium text-gray-700 mb-2">
+            <label htmlFor="emprunt-montant" className="block text-[13px] font-medium text-gray-700 mb-2">
               Montant (FCFA)
             </label>
             <input
+              id="emprunt-montant"
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
@@ -124,10 +125,11 @@ export function SimulateurEmprunt() {
             />
           </div>
           <div>
-            <label className="block text-[13px] font-medium text-gray-700 mb-2">
+            <label htmlFor="emprunt-taux" className="block text-[13px] font-medium text-gray-700 mb-2">
               Taux annuel (%)
             </label>
             <input
+              id="emprunt-taux"
               type="number"
               step="0.1"
               value={rate}
@@ -137,10 +139,11 @@ export function SimulateurEmprunt() {
             />
           </div>
           <div>
-            <label className="block text-[13px] font-medium text-gray-700 mb-2">
+            <label htmlFor="emprunt-duree" className="block text-[13px] font-medium text-gray-700 mb-2">
               Durée (mois)
             </label>
             <input
+              id="emprunt-duree"
               type="number"
               value={duration}
               onChange={(e) => setDuration(e.target.value)}

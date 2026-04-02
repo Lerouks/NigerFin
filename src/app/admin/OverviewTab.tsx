@@ -1,10 +1,11 @@
 'use client';
 
 import {
-  Users, BarChart3, Loader2, TrendingUp, TrendingDown, DollarSign, Activity,
+  Users, BarChart3, Loader2, TrendingUp, DollarSign, Activity,
   Ban, UserPlus, UserMinus, Repeat, Target, FileBarChart, Crown, Eye, Newspaper, FileText, Clock,
 } from 'lucide-react';
 import { formatPrice } from '@/config/pricing';
+import { VariationBadge } from '@/components/data/VariationBadge';
 
 interface OverviewData {
   mrr: number;
@@ -66,14 +67,8 @@ function KpiCard({ label, value, sub, variation, icon: Icon, color, bg }: {
       <p className={`text-2xl font-bold ${color}`}>{value}</p>
       {variation !== undefined && (
         <div className="flex items-center gap-1 mt-1">
-          {variation >= 0 ? (
-            <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
-          ) : (
-            <TrendingDown className="w-3.5 h-3.5 text-red-500" />
-          )}
-          <span className={`text-[11px] font-medium ${variation >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-            {variation > 0 ? '+' : ''}{variation}% vs mois dernier
-          </span>
+          <VariationBadge value={variation} pill />
+          <span className="text-[10px] text-gray-400 ml-0.5">vs mois dernier</span>
         </div>
       )}
       {sub && !variation && variation !== 0 && (

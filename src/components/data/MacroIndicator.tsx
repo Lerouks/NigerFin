@@ -1,6 +1,6 @@
 'use client';
 
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { VariationBadge } from './VariationBadge';
 
 interface MacroIndicatorProps {
   label: string;
@@ -14,10 +14,6 @@ interface MacroIndicatorProps {
 export function MacroIndicator({ label, value, previousValue, unit, source, lastUpdated }: MacroIndicatorProps) {
   const numValue = typeof value === 'string' ? parseFloat(value) : value;
   const numPrev = previousValue !== undefined ? (typeof previousValue === 'string' ? parseFloat(previousValue) : previousValue) : null;
-
-  const diff = numPrev !== null ? numValue - numPrev : 0;
-  const isUp = diff > 0;
-  const isDown = diff < 0;
 
   const formatValue = (v: number) => {
     if (Math.abs(v) >= 1e9) return `${(v / 1e9).toFixed(1)} Mds`;
@@ -36,16 +32,11 @@ export function MacroIndicator({ label, value, previousValue, unit, source, last
           {unit && <p className="text-[12px] text-gray-400 mt-1">{unit}</p>}
         </div>
         {numPrev !== null && (
-          <div
-            className={`flex items-center gap-1 text-[12px] font-medium ${
-              isUp ? 'text-emerald-600' : isDown ? 'text-red-500' : 'text-gray-400'
-            }`}
-          >
-            {isUp && <TrendingUp className="w-3.5 h-3.5" />}
-            {isDown && <TrendingDown className="w-3.5 h-3.5" />}
-            {!isUp && !isDown && <Minus className="w-3.5 h-3.5" />}
-            <span>{diff === 0 ? '0' : `${isUp ? '+' : ''}${diff.toFixed(1)}`}</span>
-          </div>
+          <VariationBadge
+            value={numPrev !== 0 ? ((numValue - numPrev) / Math.abs(numPrev)) * 100 : 0}
+            size="md"
+            pill
+          />
         )}
       </div>
       {(source || lastUpdated) && (

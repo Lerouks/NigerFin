@@ -241,9 +241,14 @@ function InscriptionContent() {
             <button
               type="submit"
               disabled={loading || password.length < 8 || password !== confirmPassword}
-              className="w-full bg-[#111] text-white py-3 rounded-lg hover:bg-[#333] transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-[14px]"
+              className="w-full bg-[#111] text-white py-3 rounded-lg hover:bg-[#333] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-[14px] active:scale-[0.98]"
             >
-              {loading ? 'Création...' : 'Créer mon compte'}
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Création...
+                </span>
+              ) : 'Créer mon compte'}
             </button>
           </form>
 

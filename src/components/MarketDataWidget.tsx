@@ -57,13 +57,13 @@ export function MarketDataWidget({ data: fallbackData }: MarketDataWidgetProps) 
             </h4>
             <div className="space-y-2.5">
               {items.map((item) => (
-                <div key={item.id} className="flex justify-between items-center py-1">
+                <div key={item.id} className="flex justify-between items-center py-1.5 px-2 -mx-2 rounded-lg hover:bg-[#fafaf9] transition-colors cursor-default">
                   <div className="flex-1">
-                    <div className="text-[13px]">{item.name}</div>
+                    <div className="text-[13px] font-medium">{item.name}</div>
                     <div className="text-[11px] text-gray-400">{item.symbol}</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-[13px] tabular-nums">
+                    <div className="text-[13px] tabular-nums font-medium">
                       {item.value.toLocaleString('fr-FR', {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
@@ -73,7 +73,7 @@ export function MarketDataWidget({ data: fallbackData }: MarketDataWidgetProps) 
                       )}
                     </div>
                     <div
-                      className={`text-[11px] flex items-center justify-end gap-0.5 ${
+                      className={`text-[11px] flex items-center justify-end gap-0.5 font-medium ${
                         item.change >= 0 ? 'text-emerald-600' : 'text-red-500'
                       }`}
                     >

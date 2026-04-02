@@ -81,7 +81,7 @@ export function BreakingNews() {
           </span>
 
           <div className="flex-1 overflow-hidden relative min-w-0">
-            <p className="text-xs truncate text-gray-200">{item.text}</p>
+            <p key={currentIndex} className="text-xs truncate text-gray-200 animate-slide-in-right">{item.text}</p>
           </div>
 
           <div className="hidden sm:flex items-center gap-1 flex-shrink-0 ml-2">

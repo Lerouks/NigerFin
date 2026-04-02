@@ -7,15 +7,17 @@ function emailLayout(content: string): string {
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 </head>
-<body style="margin:0;padding:0;background-color:#f5f5f4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+<body style="margin:0;padding:0;background-color:#f5f5f4;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f4;padding:32px 16px;">
 <tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
 
 <!-- Header -->
 <tr><td style="background-color:#111111;padding:28px 32px;text-align:center;">
-  <span style="color:#ffffff;font-size:20px;font-weight:700;letter-spacing:2px;text-decoration:none;">NFI REPORT</span>
+  <span style="color:#ffffff;font-size:20px;font-weight:700;letter-spacing:2px;text-decoration:none;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;">NFI REPORT</span>
 </td></tr>
+<!-- Gold accent line -->
+<tr><td style="background-color:#d4a843;height:3px;font-size:0;line-height:0;">&nbsp;</td></tr>
 
 <!-- Content -->
 <tr><td style="background-color:#ffffff;padding:40px 32px;">

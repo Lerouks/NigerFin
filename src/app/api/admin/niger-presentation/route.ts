@@ -45,82 +45,90 @@ export async function PUT(req: NextRequest) {
     if (error) return serverError(error, 'admin-niger-presentation');
   }
 
-  // Update facts
+  // Update facts in parallel
   if (Array.isArray(body.facts)) {
-    for (const fact of body.facts) {
-      if (!fact.id) continue;
-      await auth.serviceClient
-        .from('niger_country_facts')
-        .update({
-          label: fact.label,
-          value: fact.value,
-          display_order: fact.display_order,
-          category: fact.category,
-          is_visible: fact.is_visible,
-        })
-        .eq('id', fact.id);
-    }
+    const factUpdates = body.facts
+      .filter((fact: { id?: string }) => fact.id)
+      .map((fact: { id: string; label: string; value: string; display_order: number; category: string; is_visible: boolean }) =>
+        auth.serviceClient
+          .from('niger_country_facts')
+          .update({
+            label: fact.label,
+            value: fact.value,
+            display_order: fact.display_order,
+            category: fact.category,
+            is_visible: fact.is_visible,
+          })
+          .eq('id', fact.id)
+      );
+    await Promise.all(factUpdates);
   }
 
-  // Update indicators
+  // Update indicators in parallel
   if (Array.isArray(body.indicators)) {
-    for (const ind of body.indicators) {
-      if (!ind.id) continue;
-      await auth.serviceClient
-        .from('niger_economic_indicators')
-        .update({
-          label: ind.label,
-          value: ind.value,
-          previous_value: ind.previous_value,
-          unit: ind.unit,
-          category: ind.category,
-          display_order: ind.display_order,
-          is_visible: ind.is_visible,
-        })
-        .eq('id', ind.id);
-    }
+    const indicatorUpdates = body.indicators
+      .filter((ind: { id?: string }) => ind.id)
+      .map((ind: { id: string; label: string; value: string; previous_value: string; unit: string; category: string; display_order: number; is_visible: boolean }) =>
+        auth.serviceClient
+          .from('niger_economic_indicators')
+          .update({
+            label: ind.label,
+            value: ind.value,
+            previous_value: ind.previous_value,
+            unit: ind.unit,
+            category: ind.category,
+            display_order: ind.display_order,
+            is_visible: ind.is_visible,
+          })
+          .eq('id', ind.id)
+      );
+    await Promise.all(indicatorUpdates);
   }
 
-  // Update regions
+  // Update regions in parallel
   if (Array.isArray(body.regions)) {
-    for (const region of body.regions) {
-      if (!region.id) continue;
-      await auth.serviceClient
-        .from('niger_regions')
-        .update({
-          name: region.name,
-          capital: region.capital,
-          population: region.population,
-          area_km2: region.area_km2,
-          economic_activities: region.economic_activities,
-          natural_resources: region.natural_resources,
-          security_level: region.security_level,
-          security_note: region.security_note,
-          is_visible: region.is_visible,
-        })
-        .eq('id', region.id);
-    }
+    const regionUpdates = body.regions
+      .filter((region: { id?: string }) => region.id)
+      .map((region: { id: string; name: string; capital: string; population: number; area_km2: number; economic_activities: string[]; natural_resources: string[]; security_level: string; security_note: string; is_visible: boolean }) =>
+        auth.serviceClient
+          .from('niger_regions')
+          .update({
+            name: region.name,
+            capital: region.capital,
+            population: region.population,
+            area_km2: region.area_km2,
+            economic_activities: region.economic_activities,
+            natural_resources: region.natural_resources,
+            security_level: region.security_level,
+            security_note: region.security_note,
+            is_visible: region.is_visible,
+          })
+          .eq('id', region.id)
+      );
+    await Promise.all(regionUpdates);
   }
 
-  // Update resources
+  // Update resources in parallel
   if (Array.isArray(body.resources)) {
-    for (const res of body.resources) {
-      if (!res.id) continue;
-      await auth.serviceClient
-        .from('niger_resources')
-        .update({
-          name: res.name,
-          type: res.type,
-          location_name: res.location_name,
-          estimated_production: res.estimated_production,
-          production_unit: res.production_unit,
-          operating_companies: res.operating_companies,
-          economic_importance: res.economic_importance,
-          importance_description: res.importance_description,
-          is_visible: res.is_visible,
-        })
-        .eq('id', res.id);
-    }
+    const resourceUpdates = body.resources
+      .filter((res: { id?: string }) => res.id)
+      .map((res: { id: string; name: string; type: string; location_name: string; estimated_production: string; production_unit: string; operating_companies: string[]; economic_importance: string; importance_description: string; is_visible: boolean }) =>
+        auth.serviceClient
+          .from('niger_resources')
+          .update({
+            name: res.name,
+            type: res.type,
+            location_name: res.location_name,
+            estimated_production: res.estimated_production,
+            production_unit: res.production_unit,
+            operating_companies: res.operating_companies,
+            economic_importance: res.economic_importance,
+            importance_description: res.importance_description,
+            is_visible: res.is_visible,
+          })
+          .eq('id', res.id)
+      );
+    await Promise.all(resourceUpdates);
   }
 
   return NextResponse.json({ success: true });

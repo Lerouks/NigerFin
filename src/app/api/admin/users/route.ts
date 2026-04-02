@@ -56,22 +56,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Filtre statut invalide' }, { status: 400 });
   }
 
-  // Count query
-  let countQuery = serviceClient
-    .from('user_profiles')
-    .select('*', { count: 'exact', head: true });
-  if (roleFilter) countQuery = countQuery.eq('role', roleFilter);
-  if (statusFilter) countQuery = countQuery.eq('subscription_status', statusFilter);
-  if (search) {
-    const sanitized = sanitizeSearchQuery(search);
-    countQuery = countQuery.or(`email.ilike.%${sanitized}%,full_name.ilike.%${sanitized}%`);
-  }
-  const { count } = await countQuery;
-
-  // Data query with pagination
+  // Single query for both count and data
   let query = serviceClient
     .from('user_profiles')
-    .select('id, email, full_name, role, subscription_status, blocked, created_at, subscription_start, subscription_end')
+    .select('id, email, full_name, role, subscription_status, blocked, created_at, subscription_start, subscription_end', { count: 'exact', head: false })
     .order('created_at', { ascending: false })
     .range(params.offset, params.offset + params.limit - 1);
 
@@ -82,7 +70,7 @@ export async function GET(request: NextRequest) {
     query = query.or(`email.ilike.%${sanitized}%,full_name.ilike.%${sanitized}%`);
   }
 
-  const { data } = await query;
+  const { data, count } = await query;
   return NextResponse.json(paginatedResponse(data || [], count || 0, params));
 }
 

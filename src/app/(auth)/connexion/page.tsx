@@ -139,6 +139,7 @@ function ConnexionContent() {
                   id="email"
                   type="email"
                   required
+                  autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full border border-black/[0.08] rounded-lg pl-12 pr-4 py-3.5 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 transition-all text-base"
@@ -160,6 +161,7 @@ function ConnexionContent() {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   required
+                  autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full border border-black/[0.08] rounded-lg pl-12 pr-12 py-3.5 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 transition-all text-base"

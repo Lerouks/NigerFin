@@ -112,10 +112,10 @@ export function PricingContent() {
     <div className="min-h-screen bg-[#fafaf9]">
       {/* ── SUBSCRIBER BANNER ── */}
       {isSubscribed && (
-        <div className="bg-[#0d0d0d] text-white border-b border-[#a08a5e]/20">
+        <div className="bg-[#0d0d0d] text-white border-b border-[#d4a843]/20">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#d4a843] to-[#a08a5e] flex items-center justify-center">
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#d4a843] to-[#d4a843] flex items-center justify-center">
                 <Crown className="w-3 h-3 text-white" />
               </div>
               <p className="text-sm text-white/60">
@@ -224,7 +224,7 @@ export function PricingContent() {
             <FadeInSection delay={120}>
               <div className="relative bg-[#0d0d0d] rounded-2xl p-7 md:p-8 flex flex-col shadow-2xl shadow-black/20 ring-1 ring-white/[0.06] md:-my-4">
                 {/* Gold top accent */}
-                <div className="absolute top-0 inset-x-0 h-[2px] rounded-t-2xl bg-gradient-to-r from-[#a08a5e] via-[#d4a843] to-[#a08a5e]" />
+                <div className="absolute top-0 inset-x-0 h-[2px] rounded-t-2xl bg-gradient-to-r from-[#d4a843] via-[#d4a843] to-[#d4a843]" />
 
                 {/* Badge */}
                 <div className="flex items-center justify-between mb-5">
@@ -262,7 +262,7 @@ export function PricingContent() {
                 <button
                   onClick={() => handleSubscribe('yearly')}
                   disabled={loadingPlan || isSubscribed}
-                  className="w-full py-4 rounded-xl text-[15px] font-bold transition-all duration-300 flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#a08a5e] to-[#c4a96a] text-white hover:from-[#8a7550] hover:to-[#a08a5e] active:scale-[0.98] disabled:opacity-40 shadow-lg shadow-[#a08a5e]/25"
+                  className="w-full py-4 rounded-xl text-[15px] font-bold transition-all duration-300 flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#d4a843] to-[#e8c96a] text-white hover:from-[#b8922f] hover:to-[#d4a843] active:scale-[0.98] disabled:opacity-40 shadow-lg shadow-[#d4a843]/25"
                 >
                   {loadingPlan && selectedCycle === 'yearly' ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -369,7 +369,7 @@ export function PricingContent() {
                   <FadeInSection key={feature} delay={i * 80}>
                     <div className="group flex gap-5">
                       <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#f5f0e6] to-[#ede7d9] flex items-center justify-center flex-shrink-0 group-hover:from-[#d4a843]/15 group-hover:to-[#d4a843]/10 transition-all duration-500">
-                        <Icon className="w-5 h-5 text-[#a08a5e] group-hover:text-[#d4a843] transition-colors duration-500" />
+                        <Icon className="w-5 h-5 text-[#d4a843] group-hover:text-[#d4a843] transition-colors duration-500" />
                       </div>
                       <div className="pt-1">
                         <p className="text-[15px] text-[#333] leading-relaxed font-medium">{feature}</p>
@@ -428,7 +428,7 @@ export function PricingContent() {
 
                 <div className="relative">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#d4a843] to-[#a08a5e] flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#d4a843] to-[#d4a843] flex items-center justify-center">
                       <Crown className="w-4 h-4 text-white" />
                     </div>
                     <p className="text-[12px] tracking-[0.2em] uppercase text-[#d4a843] font-bold">
@@ -517,7 +517,7 @@ export function PricingContent() {
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
                     className="w-full px-6 py-5 flex items-center justify-between text-left group"
                   >
-                    <h3 className="font-semibold text-[15px] text-[#222] pr-4 group-hover:text-[#a08a5e] transition-colors duration-300">
+                    <h3 className="font-semibold text-[15px] text-[#222] pr-4 group-hover:text-[#d4a843] transition-colors duration-300">
                       {q}
                     </h3>
                     <div
@@ -563,7 +563,7 @@ export function PricingContent() {
                 <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-[#d4a843]/30 to-transparent" />
 
                 <div className="relative">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#d4a843] to-[#a08a5e] flex items-center justify-center mx-auto mb-7 shadow-lg shadow-[#d4a843]/20">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#d4a843] to-[#d4a843] flex items-center justify-center mx-auto mb-7 shadow-lg shadow-[#d4a843]/20">
                     <Crown className="w-5 h-5 text-white" />
                   </div>
 
@@ -577,7 +577,7 @@ export function PricingContent() {
                   <button
                     onClick={() => handleSubscribe('yearly')}
                     disabled={loadingPlan}
-                    className="w-full py-4 rounded-xl text-[15px] font-bold transition-all duration-300 flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#a08a5e] to-[#c4a96a] text-white hover:from-[#8a7550] hover:to-[#a08a5e] active:scale-[0.98] disabled:opacity-40 shadow-lg shadow-[#a08a5e]/20"
+                    className="w-full py-4 rounded-xl text-[15px] font-bold transition-all duration-300 flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#d4a843] to-[#e8c96a] text-white hover:from-[#b8922f] hover:to-[#d4a843] active:scale-[0.98] disabled:opacity-40 shadow-lg shadow-[#d4a843]/20"
                   >
                     {loadingPlan ? (
                       <Loader2 className="w-4 h-4 animate-spin" />

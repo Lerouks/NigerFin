@@ -6,6 +6,9 @@ import { MapPin, Users, Ruler, Coins, Gem, Factory, Globe, Calendar, TrendingUp,
 import { NigerRegions } from './niger/NigerRegions';
 import { NigerResources } from './niger/NigerResources';
 import { NigerIndicators } from './niger/NigerIndicators';
+import { useNigerCountry } from '@/hooks/useNigerCountry';
+import { useNigerMacro } from '@/hooks/useNigerMacro';
+import { useRegionData } from '@/hooks/useRegionData';
 
 interface Presentation {
   map_image_url: string;
@@ -87,6 +90,11 @@ export function NigerPresentation() {
   const [indicators, setIndicators] = useState<Indicator[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Real-time data hooks
+  const countryData = useNigerCountry();
+  const macroData = useNigerMacro();
+  const regionData = useRegionData();
+
   useEffect(() => {
     fetch('/api/niger-presentation')
       .then((res) => res.json())
@@ -101,6 +109,86 @@ export function NigerPresentation() {
       .finally(() => setLoading(false));
   }, []);
 
+  // Enrich facts with real-time country data
+  const enrichedFacts = facts.map((fact) => {
+    if (!countryData.data) return fact;
+
+    const enrichments: Record<string, string> = {};
+    if (countryData.data.population) {
+      enrichments['population'] = countryData.data.population.toLocaleString('fr-FR');
+    }
+    if (countryData.data.area) {
+      enrichments['superficie'] = `${countryData.data.area.toLocaleString('fr-FR')} km²`;
+    }
+    if (countryData.data.capital?.[0]) {
+      enrichments['capitale'] = countryData.data.capital[0];
+    }
+
+    if (enrichments[fact.fact_key]) {
+      return { ...fact, value: enrichments[fact.fact_key] };
+    }
+    return fact;
+  });
+
+  // Enrich indicators with real-time macro data
+  const enrichedIndicators = indicators.map((ind) => {
+    if (!macroData.data) return ind;
+
+    const wb = macroData.data.worldBank;
+    const imf = macroData.data.imf;
+
+    const latestValue = (arr: { value: number | null; year: number }[]) => {
+      const sorted = [...arr].sort((a, b) => b.year - a.year);
+      return sorted[0] || null;
+    };
+
+    const enrichments: Record<string, { value: string; previous: string; source: string }> = {};
+
+    if (wb.gdpGrowth.length >= 2) {
+      const latest = latestValue(wb.gdpGrowth);
+      const prev = wb.gdpGrowth.sort((a, b) => b.year - a.year)[1];
+      if (latest?.value !== null && prev?.value !== null) {
+        enrichments['croissance_pib'] = {
+          value: `${latest.value.toFixed(1)}%`,
+          previous: `${prev.value.toFixed(1)}%`,
+          source: `Banque mondiale ${latest.year}`,
+        };
+      }
+    }
+
+    if (wb.inflation.length >= 2) {
+      const latest = latestValue(wb.inflation);
+      const prev = wb.inflation.sort((a, b) => b.year - a.year)[1];
+      if (latest?.value !== null && prev?.value !== null) {
+        enrichments['inflation'] = {
+          value: `${latest.value.toFixed(1)}%`,
+          previous: `${prev.value.toFixed(1)}%`,
+          source: `Banque mondiale ${latest.year}`,
+        };
+      }
+    }
+
+    if (imf.realGDPGrowth.length >= 2) {
+      const sorted = [...imf.realGDPGrowth].sort((a, b) => b.year - a.year);
+      if (!enrichments['croissance_pib'] && sorted[0]?.value !== null) {
+        enrichments['croissance_pib'] = {
+          value: `${sorted[0].value.toFixed(1)}%`,
+          previous: sorted[1]?.value !== null ? `${sorted[1].value.toFixed(1)}%` : ind.previous_value,
+          source: `FMI ${sorted[0].year}`,
+        };
+      }
+    }
+
+    if (enrichments[ind.indicator_key]) {
+      return {
+        ...ind,
+        value: enrichments[ind.indicator_key].value,
+        previous_value: enrichments[ind.indicator_key].previous,
+      };
+    }
+    return ind;
+  });
+
   if (loading) {
     return (
       <div className="py-20 flex justify-center">
@@ -113,7 +201,7 @@ export function NigerPresentation() {
 
   // Group facts by category
   const grouped: Record<string, Fact[]> = {};
-  for (const fact of facts) {
+  for (const fact of enrichedFacts) {
     const cat = fact.category || 'general';
     if (!grouped[cat]) grouped[cat] = [];
     grouped[cat].push(fact);
@@ -129,6 +217,9 @@ export function NigerPresentation() {
         <div className="mb-10">
           <span className="text-[11px] tracking-[0.2em] uppercase text-gray-400 block mb-3">Profil pays</span>
           <h2 className="text-2xl md:text-3xl leading-tight">{presentation.intro_title}</h2>
+          {countryData.lastUpdated && (
+            <p className="text-[10px] text-gray-400 mt-2">Source : REST Countries &middot; {new Date(countryData.lastUpdated).toLocaleDateString('fr-FR')}</p>
+          )}
         </div>
 
         {/* Texte d'introduction */}
@@ -197,10 +288,44 @@ export function NigerPresentation() {
             </div>
           ))}
         </div>
+
+        {/* Real-time macro data source */}
+        {macroData.lastUpdated && (
+          <p className="text-[10px] text-gray-400 mt-6 text-center">
+            Données enrichies : Banque mondiale + FMI &middot; {new Date(macroData.lastUpdated).toLocaleDateString('fr-FR')}
+          </p>
+        )}
       </section>
 
+      {/* ECOWAS region summary */}
+      {regionData.data && (
+        <section className="border-t border-black/[0.06] pt-14 md:pt-20">
+          <div className="mb-6">
+            <span className="text-[11px] tracking-[0.2em] uppercase text-gray-400 block mb-3">CEDEAO</span>
+            <h2 className="text-2xl md:text-3xl leading-tight">Contexte régional</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <div className="bg-white rounded-xl border border-black/[0.06] p-5">
+              <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">Pays membres</p>
+              <p className="text-2xl font-semibold">{regionData.data.memberCount}</p>
+            </div>
+            <div className="bg-white rounded-xl border border-black/[0.06] p-5">
+              <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">Population totale</p>
+              <p className="text-2xl font-semibold">{(regionData.data.totalPopulation / 1e6).toFixed(0)} M</p>
+            </div>
+            <div className="bg-white rounded-xl border border-black/[0.06] p-5">
+              <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">Superficie</p>
+              <p className="text-2xl font-semibold">{(regionData.data.totalArea / 1e6).toFixed(1)} M km²</p>
+            </div>
+          </div>
+          <p className="text-[10px] text-gray-400 text-center">
+            Source : REST Countries &middot; {regionData.lastUpdated ? new Date(regionData.lastUpdated).toLocaleDateString('fr-FR') : ''}
+          </p>
+        </section>
+      )}
+
       {/* Indicateurs économiques */}
-      <NigerIndicators indicators={indicators} />
+      <NigerIndicators indicators={enrichedIndicators} />
 
       {/* Régions */}
       <NigerRegions regions={regions} />

@@ -14,9 +14,9 @@ export function EmptyState({
   return (
     <div className="bg-white border border-black/[0.06] rounded-xl p-10 text-center">
       <div className="w-14 h-14 bg-[#f5f5f0] rounded-full flex items-center justify-center mx-auto mb-4">
-        <Icon className="w-6 h-6 text-gray-400" />
+        <Icon className="w-6 h-6 text-gray-400" aria-hidden="true" />
       </div>
-      <p className="text-[14px] text-gray-500 max-w-sm mx-auto leading-relaxed">
+      <p className="text-[14px] text-gray-500 max-w-sm mx-auto leading-relaxed" role="status">
         {message}
       </p>
     </div>

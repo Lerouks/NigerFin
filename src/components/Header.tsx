@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { Menu, Search, User, X, ChevronRight, LogOut } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
@@ -30,6 +30,7 @@ export function Header() {
   const [navigation, setNavigation] = useState<NavItem[]>(defaultNavigation);
   const { isSignedIn, user, userRole, signOut } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -113,6 +114,8 @@ export function Header() {
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
                     className="p-2 hover:bg-black/5 rounded-full transition-colors"
                     aria-label="Mon compte"
+                    aria-haspopup="menu"
+                    aria-expanded={userMenuOpen}
                   >
                     <User className="w-[18px] h-[18px]" />
                   </button>
@@ -126,30 +129,33 @@ export function Header() {
                   </Link>
                 )}
                 {userMenuOpen && isSignedIn && (
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-black/[0.06] py-1 z-50">
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-black/[0.06] py-1 z-50 animate-scale-in origin-top-right" role="menu">
                     <div className="px-4 py-2 border-b border-black/[0.04]">
                       <p className="text-[12px] font-medium truncate">{user?.user_metadata?.full_name || user?.email?.split('@')[0]}</p>
                       <p className="text-[11px] text-gray-400 truncate">{user?.email}</p>
                     </div>
                     <Link
                       href="/compte"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                       onClick={() => setUserMenuOpen(false)}
+                      role="menuitem"
                     >
                       Mon compte
                     </Link>
                     {userRole === 'admin' && (
                       <Link
                         href="/admin"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                         onClick={() => setUserMenuOpen(false)}
+                        role="menuitem"
                       >
                         Administration
                       </Link>
                     )}
                     <button
                       onClick={handleSignOut}
-                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
+                      role="menuitem"
                     >
                       <LogOut className="w-3.5 h-3.5" />
                       Se déconnecter
@@ -166,15 +172,23 @@ export function Header() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="hidden lg:flex items-center justify-between h-11">
               <div className="flex items-center gap-1">
-                {navigation.map((section) => (
-                  <Link
-                    key={section.path}
-                    href={section.path}
-                    className="text-[13px] px-3 py-1 rounded-md hover:bg-white/10 text-white/80 hover:text-white transition-all"
-                  >
-                    {section.label}
-                  </Link>
-                ))}
+                {navigation.map((section) => {
+                  const isActive = pathname === section.path || pathname.startsWith(section.path + '/');
+                  return (
+                    <Link
+                      key={section.path}
+                      href={section.path}
+                      className={`text-[13px] px-3 py-1 rounded-md transition-all relative ${
+                        isActive
+                          ? 'text-white bg-white/10'
+                          : 'text-white/80 hover:bg-white/10 hover:text-white'
+                      }`}
+                      aria-current={isActive ? 'page' : undefined}
+                    >
+                      {section.label}
+                    </Link>
+                  );
+                })}
               </div>
               <div className="flex items-center gap-3">
                 <button
@@ -189,55 +203,63 @@ export function Header() {
         </nav>
 
         {/* Mobile menu */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden bg-white border-t border-black/5">
-            <div className="px-4 py-3 space-y-1">
-              {navigation.map((section) => (
+        <div
+          className={`lg:hidden bg-white border-t border-black/5 overflow-hidden transition-all duration-300 ease-out ${
+            mobileMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+          }`}
+          aria-hidden={!mobileMenuOpen}
+        >
+          <nav className="px-4 py-3 space-y-1" aria-label="Menu mobile">
+            {navigation.map((section, i) => (
+              <Link
+                key={section.path}
+                href={section.path}
+                className="flex items-center justify-between py-2.5 px-3 text-[15px] text-gray-700 hover:bg-black/[0.03] rounded-lg transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+                tabIndex={mobileMenuOpen ? 0 : -1}
+                style={{ animationDelay: mobileMenuOpen ? `${i * 50}ms` : '0ms' }}
+              >
+                {section.label}
+                <ChevronRight className="w-4 h-4 text-gray-300 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            ))}
+            <div className="pt-2 mt-2 border-t border-black/5">
+              {!isSignedIn && (
                 <Link
-                  key={section.path}
-                  href={section.path}
-                  className="flex items-center justify-between py-2.5 px-3 text-[15px] text-gray-700 hover:bg-black/[0.03] rounded-lg transition-colors"
+                  href="/pricing"
+                  className="flex items-center justify-between py-2.5 px-3 text-[15px] font-medium text-[#111] hover:bg-black/[0.03] rounded-lg transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
+                  tabIndex={mobileMenuOpen ? 0 : -1}
                 >
-                  {section.label}
+                  S&apos;abonner
                   <ChevronRight className="w-4 h-4 text-gray-300" />
                 </Link>
-              ))}
-              <div className="pt-2 mt-2 border-t border-black/5">
-                {!isSignedIn && (
-                  <Link
-                    href="/pricing"
-                    className="flex items-center justify-between py-2.5 px-3 text-[15px] font-medium text-[#111] hover:bg-black/[0.03] rounded-lg transition-colors"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    S&apos;abonner
-                    <ChevronRight className="w-4 h-4 text-gray-300" />
-                  </Link>
-                )}
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    handleNewsletterClick();
-                  }}
-                  className="flex items-center justify-between w-full py-2.5 px-3 text-[15px] text-gray-700 hover:bg-black/[0.03] rounded-lg transition-colors text-left"
+              )}
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  handleNewsletterClick();
+                }}
+                className="flex items-center justify-between w-full py-2.5 px-3 text-[15px] text-gray-700 hover:bg-black/[0.03] rounded-lg transition-colors text-left"
+                tabIndex={mobileMenuOpen ? 0 : -1}
+              >
+                Newsletter
+                <ChevronRight className="w-4 h-4 text-gray-300" />
+              </button>
+              {isSignedIn && (
+                <Link
+                  href="/compte"
+                  className="flex items-center justify-between py-2.5 px-3 text-[15px] text-gray-700 hover:bg-black/[0.03] rounded-lg transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                  tabIndex={mobileMenuOpen ? 0 : -1}
                 >
-                  Newsletter
+                  Mon compte
                   <ChevronRight className="w-4 h-4 text-gray-300" />
-                </button>
-                {isSignedIn && (
-                  <Link
-                    href="/compte"
-                    className="flex items-center justify-between py-2.5 px-3 text-[15px] text-gray-700 hover:bg-black/[0.03] rounded-lg transition-colors"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Mon compte
-                    <ChevronRight className="w-4 h-4 text-gray-300" />
-                  </Link>
-                )}
-              </div>
+                </Link>
+              )}
             </div>
-          </div>
-        )}
+          </nav>
+        </div>
       </header>
 
       <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} />

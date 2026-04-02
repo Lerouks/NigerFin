@@ -56,14 +56,15 @@ export function ArticleLikes({ articleId }: ArticleLikesProps) {
     <button
       onClick={handleToggle}
       disabled={!isSignedIn}
-      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] transition-all ${
+      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] transition-all duration-200 ${
         isLiked
-          ? 'bg-red-50 text-red-600 border border-red-200'
+          ? 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100'
           : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-transparent'
-      } ${!isSignedIn ? 'opacity-60 cursor-not-allowed' : ''}`}
+      } ${!isSignedIn ? 'opacity-60 cursor-not-allowed' : 'active:scale-95'}`}
+      aria-label={isLiked ? `Retirer le j'aime (${count})` : `J'aime (${count})`}
     >
-      <Heart className="w-4 h-4" fill={isLiked ? 'currentColor' : 'none'} />
-      <span>{count}</span>
+      <Heart className={`w-4 h-4 transition-transform duration-200 ${isLiked ? 'scale-110' : ''}`} fill={isLiked ? 'currentColor' : 'none'} />
+      <span className="tabular-nums">{count}</span>
     </button>
   );
 }

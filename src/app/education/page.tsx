@@ -9,8 +9,9 @@ export default function EducationPage() {
   return (
     <div className="min-h-screen bg-[#fafaf9]">
       {/* Hero */}
-      <section className="bg-[#111] text-white py-16 md:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="bg-[#111] text-white py-16 md:py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <span className="text-[11px] tracking-[0.2em] uppercase text-white/40 block mb-4">
             Rubrique
           </span>

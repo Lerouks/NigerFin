@@ -59,21 +59,23 @@ export function NewsletterForm() {
       ) : (
         <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
           <input
+            id="newsletter-email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Votre adresse email"
             aria-label="Adresse email pour la newsletter"
+            autoComplete="email"
             className="flex-1 px-4 py-3 rounded-lg bg-white/[0.08] border border-white/[0.08] text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 transition-all text-[14px]"
             required
           />
           <button
             type="submit"
             disabled={loading}
-            className="bg-white text-black px-6 py-3 rounded-lg hover:bg-white/90 transition-colors flex items-center justify-center gap-2 text-[14px] flex-shrink-0 disabled:opacity-50"
+            className="bg-white text-black px-6 py-3 rounded-lg hover:bg-white/90 transition-all duration-200 flex items-center justify-center gap-2 text-[14px] flex-shrink-0 disabled:opacity-50 active:scale-[0.97] font-medium"
           >
             {loading ? 'Envoi...' : 'S\'abonner'}
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />}
           </button>
         </form>
       )}

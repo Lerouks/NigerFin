@@ -515,6 +515,7 @@ export function PricingContent() {
                 >
                   <button
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                    aria-expanded={openFaq === i}
                     className="w-full px-6 py-5 flex items-center justify-between text-left group"
                   >
                     <h3 className="font-semibold text-[15px] text-[#222] pr-4 group-hover:text-[#d4a843] transition-colors duration-300">
@@ -583,7 +584,7 @@ export function PricingContent() {
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
                       <>
-                        S&apos;abonner — {yearlyPrice.toLocaleString('fr-FR')} {CURRENCY}/an
+                        S&apos;abonner | {yearlyPrice.toLocaleString('fr-FR')} {CURRENCY}/an
                         <ArrowRight className="w-4 h-4" />
                       </>
                     )}

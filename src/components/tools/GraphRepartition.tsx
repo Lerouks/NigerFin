@@ -22,7 +22,7 @@ export function GraphRepartition({ capital, interest }: GraphRepartitionProps) {
   const interestPercent = ((interest / total) * 100).toFixed(1);
 
   return (
-    <div className="bg-white border border-black/[0.06] rounded-xl p-6">
+    <div className="bg-white border border-black/[0.06] rounded-xl p-6" aria-label="Graphique de répartition du coût entre capital et intérêts">
       <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
         Répartition du coût
       </h3>

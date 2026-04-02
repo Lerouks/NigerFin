@@ -75,8 +75,8 @@ export function ContactForm() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             <div className="lg:col-span-1 space-y-6">
               <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-[#111] text-white rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="flex items-start gap-4 group">
+                  <div className="w-10 h-10 bg-[#111] text-white rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-gold transition-colors duration-200">
                     <MapPin className="w-4 h-4" />
                   </div>
                   <div>
@@ -84,22 +84,22 @@ export function ContactForm() {
                     <p className="text-gray-600 text-sm">{address.split('\n').map((line, i) => <span key={i}>{i > 0 && <br />}{line}</span>)}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-[#111] text-white rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="flex items-start gap-4 group">
+                  <div className="w-10 h-10 bg-[#111] text-white rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-gold transition-colors duration-200">
                     <Mail className="w-4 h-4" />
                   </div>
                   <div>
                     <h3 className="font-semibold mb-1">Email</h3>
-                    <a href={`mailto:${email}`} className="text-gray-600 text-sm hover:text-black transition-colors block">{email}</a>
+                    <a href={`mailto:${email}`} className="text-gray-600 text-sm hover:text-gold transition-colors block">{email}</a>
                   </div>
                 </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-[#111] text-white rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="flex items-start gap-4 group">
+                  <div className="w-10 h-10 bg-[#111] text-white rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-gold transition-colors duration-200">
                     <Phone className="w-4 h-4" />
                   </div>
                   <div>
                     <h3 className="font-semibold mb-1">Téléphone</h3>
-                    <a href={`tel:${phone.replace(/\s/g, '')}`} className="text-gray-600 text-sm hover:text-black transition-colors block">{phone}</a>
+                    <a href={`tel:${phone.replace(/\s/g, '')}`} className="text-gray-600 text-sm hover:text-gold transition-colors block">{phone}</a>
                   </div>
                 </div>
               </div>
@@ -171,7 +171,7 @@ export function ContactForm() {
                   </div>
 
                   {error && (
-                    <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+                    <div role="alert" className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
                       {error}
                     </div>
                   )}

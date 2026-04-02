@@ -11,8 +11,9 @@ interface LegalPageLayoutProps {
 export function LegalPageLayout({ title, sections }: LegalPageLayoutProps) {
   return (
     <div className="min-h-screen bg-[#fafaf9]">
-      <section className="bg-[#111] text-white py-16 md:py-20">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="bg-[#111] text-white py-16 md:py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent" />
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <h1 className="text-3xl md:text-4xl">{title}</h1>
         </div>
       </section>

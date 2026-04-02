@@ -65,12 +65,15 @@ export function NigerIndicators({ indicators }: { indicators: Indicator[] }) {
                         </p>
                         <p className="text-[12px] text-gray-400 mt-1">{ind.unit}</p>
                       </div>
-                      <div className={`flex items-center gap-1 text-[12px] font-medium ${
-                        isUp ? 'text-emerald-600' : isDown ? 'text-red-500' : 'text-gray-400'
-                      }`}>
-                        {isUp && <TrendingUp className="w-3.5 h-3.5" />}
-                        {isDown && <TrendingDown className="w-3.5 h-3.5" />}
-                        {isStable && <Minus className="w-3.5 h-3.5" />}
+                      <div
+                        className={`flex items-center gap-1 text-[12px] font-medium ${
+                          isUp ? 'text-emerald-600' : isDown ? 'text-red-500' : 'text-gray-400'
+                        }`}
+                        aria-label={isUp ? `Hausse de ${diff.toFixed(1)}` : isDown ? `Baisse de ${Math.abs(diff).toFixed(1)}` : 'Stable'}
+                      >
+                        {isUp && <TrendingUp className="w-3.5 h-3.5" aria-hidden="true" />}
+                        {isDown && <TrendingDown className="w-3.5 h-3.5" aria-hidden="true" />}
+                        {isStable && <Minus className="w-3.5 h-3.5" aria-hidden="true" />}
                         <span>{isStable ? '0' : (isUp ? '+' : '') + diff.toFixed(1)}</span>
                       </div>
                     </div>

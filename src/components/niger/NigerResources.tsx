@@ -51,7 +51,7 @@ export function NigerResources({ resources }: { resources: Resource[] }) {
             >
               <div className="flex items-start justify-between mb-4">
                 <div className={`w-10 h-10 rounded-xl ${config.bg} flex items-center justify-center`}>
-                  <Icon className={`w-5 h-5 ${config.color}`} />
+                  <Icon className={`w-5 h-5 ${config.color}`} aria-hidden="true" />
                 </div>
                 {importance && (
                   <span className={`text-[10px] px-2.5 py-1 rounded-full border font-medium ${importance.style}`}>

@@ -101,9 +101,9 @@ export function AboutContent() {
               <span className="text-[11px] tracking-[0.15em] uppercase text-gray-400 block mb-4">Nos valeurs</span>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 {values.map((v) => (
-                  <div key={v.id} className="bg-white rounded-xl border border-black/[0.06] p-6 text-left">
+                  <div key={v.id} className="bg-white rounded-xl border border-black/[0.06] p-6 text-left hover:border-gold/20 hover:shadow-lg hover:shadow-gold/[0.04] transition-all duration-300">
                     <h3 className="text-xl mb-3 font-semibold">{v.heading}</h3>
-                    <p className="text-gray-600">{v.text}</p>
+                    <p className="text-gray-600 text-[15px] leading-relaxed">{v.text}</p>
                   </div>
                 ))}
               </div>
@@ -116,12 +116,12 @@ export function AboutContent() {
               <h2 className="text-3xl mb-8">Les visionnaires derrière NFI Report</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 {founders.map((f) => (
-                  <div key={f.id} className="bg-white rounded-xl border border-black/[0.06] p-7 text-left">
+                  <div key={f.id} className="bg-white rounded-xl border border-black/[0.06] p-7 text-left hover:shadow-lg transition-all duration-300">
                     <div className="w-16 h-16 bg-[#111] text-white rounded-full flex items-center justify-center text-xl font-semibold mb-4 mx-auto">
                       {getInitials(f.heading)}
                     </div>
                     <h3 className="text-xl font-semibold mb-1 text-center">{getFounderName(f.heading)}</h3>
-                    <p className="text-[13px] text-gray-400 mb-3 text-center">{getFounderRole(f.heading)}</p>
+                    <p className="text-[13px] text-gold mb-3 text-center">{getFounderRole(f.heading)}</p>
                     <p className="text-gray-600 text-[15px] leading-relaxed">{f.text}</p>
                   </div>
                 ))}

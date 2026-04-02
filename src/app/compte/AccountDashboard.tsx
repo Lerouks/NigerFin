@@ -173,10 +173,12 @@ export function AccountDashboard() {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Tab navigation */}
-        <div className="flex gap-1 mb-8 bg-white rounded-xl p-1.5 border border-black/[0.06] shadow-sm">
+        <div className="flex gap-1 mb-8 bg-white rounded-xl p-1.5 border border-black/[0.06] shadow-sm" role="tablist" aria-label="Sections du compte">
           {tabs.map((tab) => (
             <button
               key={tab.id}
+              role="tab"
+              aria-selected={activeTab === tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-[13px] transition-all flex-1 justify-center font-medium ${
                 activeTab === tab.id ? 'bg-[#111] text-white shadow-sm' : 'text-gray-400 hover:text-gray-700 hover:bg-gray-50'
@@ -442,8 +444,14 @@ function ToggleRow({ label, description, checked, onChange, disabled, disabledMe
         <p className="text-[12px] text-gray-500 mt-0.5">{description}</p>
         {disabled && disabledMessage && <span className="text-[11px] text-amber-600 mt-1 inline-block">{disabledMessage}</span>}
       </div>
-      <button onClick={() => !disabled && onChange(!checked)} disabled={disabled}
-        className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ml-4 ${checked ? 'bg-[#111]' : 'bg-gray-200'}`}>
+      <button
+        role="switch"
+        aria-checked={checked}
+        aria-label={label}
+        onClick={() => !disabled && onChange(!checked)}
+        disabled={disabled}
+        className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ml-4 ${checked ? 'bg-[#111]' : 'bg-gray-200'}`}
+      >
         <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
       </button>
     </div>

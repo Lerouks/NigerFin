@@ -5,6 +5,15 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  transpilePackages: [
+    'react-markdown',
+    'rehype-raw',
+    'hast-util-raw',
+    'hast-util-from-parse5',
+    'hast-util-to-parse5',
+    'vfile',
+    'unist-util-visit',
+  ],
   images: {
     formats: ['image/avif', 'image/webp'],
     dangerouslyAllowSVG: true,

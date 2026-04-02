@@ -1,7 +1,7 @@
 'use client';
 
-import { TrendingUp, TrendingDown } from 'lucide-react';
 import type { CommodityPrice as CommodityPriceType } from '@/lib/services/commodities-service';
+import { VariationBadge } from './VariationBadge';
 
 interface CommodityPriceProps {
   commodity: CommodityPriceType;
@@ -9,8 +9,6 @@ interface CommodityPriceProps {
 }
 
 export function CommodityPrice({ commodity, xofRate }: CommodityPriceProps) {
-  const isUp = commodity.changePercent >= 0;
-
   return (
     <div className="group bg-white rounded-xl border border-black/[0.06] p-5 hover:border-black/[0.1] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
       <div className="flex items-start justify-between mb-3">
@@ -37,15 +35,7 @@ export function CommodityPrice({ commodity, xofRate }: CommodityPriceProps) {
             </p>
           )}
         </div>
-        <div
-          className={`flex items-center gap-1 text-[13px] font-medium ${
-            isUp ? 'text-emerald-600' : 'text-red-500'
-          }`}
-        >
-          {isUp ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-          {commodity.changePercent > 0 ? '+' : ''}
-          {commodity.changePercent.toFixed(2)}%
-        </div>
+        <VariationBadge value={commodity.changePercent} size="md" pill />
       </div>
       <div className="mt-3 pt-2 border-t border-black/[0.04] flex items-center justify-between">
         <span className="text-[10px] text-gray-400">Source : {commodity.source}</span>

@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { TrendingUp, TrendingDown } from 'lucide-react';
 import { useForex } from '@/hooks/useForex';
 import { useCommodities } from '@/hooks/useCommodities';
 import { useBRVMIndices } from '@/hooks/useBRVMIndices';
 import { useCrypto } from '@/hooks/useCrypto';
 import { useIndices } from '@/hooks/useIndices';
 import type { MarketData } from '@/types';
+import { VariationBadge } from '@/components/data/VariationBadge';
 
 const TYPE_LABELS: Record<MarketData['type'], string> = {
   currency: 'Devises',
@@ -166,18 +166,8 @@ export function MarketDataWidget({ data: fallbackData }: MarketDataWidgetProps) 
                         <span className="text-[10px] text-gray-400 ml-0.5">{item.unit}</span>
                       )}
                     </div>
-                    <div
-                      className={`text-[11px] flex items-center justify-end gap-0.5 font-medium ${
-                        item.change >= 0 ? 'text-emerald-600' : 'text-red-500'
-                      }`}
-                    >
-                      {item.change >= 0 ? (
-                        <TrendingUp className="w-3 h-3" />
-                      ) : (
-                        <TrendingDown className="w-3 h-3" />
-                      )}
-                      {item.changePercent > 0 ? '+' : ''}
-                      {item.changePercent.toFixed(2)}%
+                    <div className="flex justify-end">
+                      <VariationBadge value={item.changePercent} pill />
                     </div>
                   </div>
                 </div>

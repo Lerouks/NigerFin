@@ -77,18 +77,18 @@ export function InteretSimple() {
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           <div>
-            <label className="block text-[13px] font-medium text-gray-700 mb-2">Capital (FCFA)</label>
-            <input type="number" value={capital} onChange={(e) => setCapital(e.target.value)} placeholder="Ex: 1 000 000"
+            <label htmlFor="is-capital" className="block text-[13px] font-medium text-gray-700 mb-2">Capital (FCFA)</label>
+            <input id="is-capital" type="number" value={capital} onChange={(e) => setCapital(e.target.value)} placeholder="Ex: 1 000 000"
               className="w-full border border-black/[0.08] px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-[#fafaf9] text-[15px]" />
           </div>
           <div>
-            <label className="block text-[13px] font-medium text-gray-700 mb-2">Taux annuel (%)</label>
-            <input type="number" step="0.1" value={rate} onChange={(e) => setRate(e.target.value)} placeholder="Ex: 5"
+            <label htmlFor="is-taux" className="block text-[13px] font-medium text-gray-700 mb-2">Taux annuel (%)</label>
+            <input id="is-taux" type="number" step="0.1" value={rate} onChange={(e) => setRate(e.target.value)} placeholder="Ex: 5"
               className="w-full border border-black/[0.08] px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-[#fafaf9] text-[15px]" />
           </div>
           <div>
-            <label className="block text-[13px] font-medium text-gray-700 mb-2">Durée (années)</label>
-            <input type="number" value={years} onChange={(e) => setYears(e.target.value)} placeholder="Ex: 3"
+            <label htmlFor="is-duree" className="block text-[13px] font-medium text-gray-700 mb-2">Durée (années)</label>
+            <input id="is-duree" type="number" value={years} onChange={(e) => setYears(e.target.value)} placeholder="Ex: 3"
               className="w-full border border-black/[0.08] px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-[#fafaf9] text-[15px]" />
           </div>
         </div>

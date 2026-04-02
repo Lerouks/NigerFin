@@ -80,7 +80,7 @@ export function BreakingNews() {
             {item.tag}
           </span>
 
-          <div className="flex-1 overflow-hidden relative min-w-0">
+          <div className="flex-1 overflow-hidden relative min-w-0" aria-live="polite" aria-atomic="true">
             <p key={currentIndex} className="text-xs truncate text-gray-200 animate-slide-in-right">{item.text}</p>
           </div>
 

@@ -17,6 +17,12 @@
   --surface: #ffffff;
 }
 
+/* Consistent gold focus ring for all interactive elements */
+:focus-visible {
+  outline: 2px solid #d4a843;
+  outline-offset: 2px;
+}
+
 html {
   font-size: var(--font-size);
   scroll-behavior: smooth;

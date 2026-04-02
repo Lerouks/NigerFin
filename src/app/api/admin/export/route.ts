@@ -1,6 +1,58 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { logAuditEvent } from '@/lib/audit';
+import ExcelJS from 'exceljs';
+
+const XLSX_CONTENT_TYPE =
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
+/** Create a workbook with a single styled sheet, auto-sized columns, and bold headers. */
+function createWorkbook(sheetName: string, headers: string[], rows: (string | number | boolean | null)[][]) {
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'NFI Report';
+  workbook.created = new Date();
+
+  const sheet = workbook.addWorksheet(sheetName);
+
+  // Add header row
+  sheet.addRow(headers);
+
+  // Style header row: bold + dark fill
+  const headerRow = sheet.getRow(1);
+  headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+  headerRow.fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FF111111' },
+  };
+  headerRow.alignment = { vertical: 'middle' };
+
+  // Add data rows
+  for (const row of rows) {
+    sheet.addRow(row);
+  }
+
+  // Auto-size columns based on content
+  sheet.columns.forEach((column, colIdx) => {
+    let maxLength = headers[colIdx]?.length ?? 10;
+    rows.forEach((row) => {
+      const cellValue = row[colIdx];
+      const len = cellValue != null ? String(cellValue).length : 0;
+      if (len > maxLength) maxLength = len;
+    });
+    column.width = Math.min(maxLength + 4, 60);
+  });
+
+  return workbook;
+}
+
+/** Format a date string for display in Excel. */
+function fmtDate(val: unknown): string {
+  if (!val) return '';
+  const d = new Date(String(val));
+  if (isNaN(d.getTime())) return String(val);
+  return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
 
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin();
@@ -17,30 +69,33 @@ export async function GET(request: NextRequest) {
 
     if (!data) return NextResponse.json({ error: 'No data' }, { status: 404 });
 
-    const header = 'ID,Utilisateur,Email,Plan,Cycle,Montant,Méthode,N° Transaction,Statut,Date,Vérifié le\n';
+    const headers = ['ID', 'Utilisateur', 'Email', 'Plan', 'Cycle', 'Montant', 'Méthode', 'N° Transaction', 'Statut', 'Date', 'Vérifié le'];
     const rows = data.map((p: Record<string, unknown>) => {
       const profile = p.user_profiles as { email?: string; full_name?: string } | null;
       return [
-        p.id,
+        String(p.id),
         profile?.full_name || '',
         profile?.email || '',
-        p.tier,
-        p.billing_cycle,
-        p.amount,
-        p.payment_method,
-        p.transaction_number,
-        p.status,
-        p.created_at,
-        p.verified_at || '',
-      ].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(',');
-    }).join('\n');
+        String(p.tier ?? ''),
+        String(p.billing_cycle ?? ''),
+        Number(p.amount) || 0,
+        String(p.payment_method ?? ''),
+        String(p.transaction_number ?? ''),
+        String(p.status ?? ''),
+        fmtDate(p.created_at),
+        fmtDate(p.verified_at),
+      ];
+    });
 
-    await logAuditEvent(user.id, 'export_csv', 'payments', undefined, { rowCount: data.length });
+    const workbook = createWorkbook('Paiements', headers, rows);
+    const buffer = await workbook.xlsx.writeBuffer();
 
-    return new NextResponse(header + rows, {
+    await logAuditEvent(user.id, 'export_xlsx', 'payments', undefined, { rowCount: data.length });
+
+    return new NextResponse(buffer as ArrayBuffer, {
       headers: {
-        'Content-Type': 'text/csv; charset=utf-8',
-        'Content-Disposition': `attachment; filename="paiements_${new Date().toISOString().slice(0, 10)}.csv"`,
+        'Content-Type': XLSX_CONTENT_TYPE,
+        'Content-Disposition': `attachment; filename="paiements_${new Date().toISOString().slice(0, 10)}.xlsx"`,
       },
     });
   }
@@ -53,18 +108,27 @@ export async function GET(request: NextRequest) {
 
     if (!data) return NextResponse.json({ error: 'No data' }, { status: 404 });
 
-    const header = 'ID,Nom,Email,Rôle,Statut Abonnement,Cycle,Bloqué,Inscrit le\n';
-    const rows = data.map((u: Record<string, unknown>) =>
-      [u.id, u.full_name || '', u.email, u.role, u.subscription_status, u.billing_cycle || '', u.blocked ? 'Oui' : 'Non', u.created_at]
-        .map((v) => `"${String(v).replace(/"/g, '""')}"`).join(',')
-    ).join('\n');
+    const headers = ['ID', 'Nom', 'Email', 'Rôle', 'Statut Abonnement', 'Cycle', 'Bloqué', 'Inscrit le'];
+    const rows = data.map((u: Record<string, unknown>) => [
+      String(u.id),
+      String(u.full_name || ''),
+      String(u.email ?? ''),
+      String(u.role ?? ''),
+      String(u.subscription_status ?? ''),
+      String(u.billing_cycle || ''),
+      u.blocked ? 'Oui' : 'Non',
+      fmtDate(u.created_at),
+    ]);
 
-    await logAuditEvent(user.id, 'export_csv', 'users', undefined, { rowCount: data.length });
+    const workbook = createWorkbook('Utilisateurs', headers, rows);
+    const buffer = await workbook.xlsx.writeBuffer();
 
-    return new NextResponse(header + rows, {
+    await logAuditEvent(user.id, 'export_xlsx', 'users', undefined, { rowCount: data.length });
+
+    return new NextResponse(buffer as ArrayBuffer, {
       headers: {
-        'Content-Type': 'text/csv; charset=utf-8',
-        'Content-Disposition': `attachment; filename="utilisateurs_${new Date().toISOString().slice(0, 10)}.csv"`,
+        'Content-Type': XLSX_CONTENT_TYPE,
+        'Content-Disposition': `attachment; filename="utilisateurs_${new Date().toISOString().slice(0, 10)}.xlsx"`,
       },
     });
   }
@@ -77,18 +141,30 @@ export async function GET(request: NextRequest) {
 
     if (!data) return NextResponse.json({ error: 'No data' }, { status: 404 });
 
-    const header = 'ID,Titre,Slug,Catégorie,Sections,Statut,Accès,À la une,Auteur,Publié le,Créé le\n';
-    const rows = data.map((a: Record<string, unknown>) =>
-      [a.id, a.title, a.slug, a.category, Array.isArray(a.sections) ? (a.sections as string[]).join(';') : '', a.status, a.content_type, a.is_featured ? 'Oui' : 'Non', a.author_name, a.published_at || '', a.created_at]
-        .map((v) => `"${String(v).replace(/"/g, '""')}"`).join(',')
-    ).join('\n');
+    const headers = ['ID', 'Titre', 'Slug', 'Catégorie', 'Sections', 'Statut', 'Accès', 'À la une', 'Auteur', 'Publié le', 'Créé le'];
+    const rows = data.map((a: Record<string, unknown>) => [
+      String(a.id),
+      String(a.title ?? ''),
+      String(a.slug ?? ''),
+      String(a.category ?? ''),
+      Array.isArray(a.sections) ? (a.sections as string[]).join('; ') : '',
+      String(a.status ?? ''),
+      String(a.content_type ?? ''),
+      a.is_featured ? 'Oui' : 'Non',
+      String(a.author_name ?? ''),
+      fmtDate(a.published_at),
+      fmtDate(a.created_at),
+    ]);
 
-    await logAuditEvent(user.id, 'export_csv', 'articles', undefined, { rowCount: data.length });
+    const workbook = createWorkbook('Articles', headers, rows);
+    const buffer = await workbook.xlsx.writeBuffer();
 
-    return new NextResponse(header + rows, {
+    await logAuditEvent(user.id, 'export_xlsx', 'articles', undefined, { rowCount: data.length });
+
+    return new NextResponse(buffer as ArrayBuffer, {
       headers: {
-        'Content-Type': 'text/csv; charset=utf-8',
-        'Content-Disposition': `attachment; filename="articles_${new Date().toISOString().slice(0, 10)}.csv"`,
+        'Content-Type': XLSX_CONTENT_TYPE,
+        'Content-Disposition': `attachment; filename="articles_${new Date().toISOString().slice(0, 10)}.xlsx"`,
       },
     });
   }
@@ -103,18 +179,23 @@ export async function GET(request: NextRequest) {
 
     if (!data) return NextResponse.json({ error: 'No data' }, { status: 404 });
 
-    const header = 'Page,Article ID,Referrer,Date\n';
-    const rows = data.map((v: Record<string, unknown>) =>
-      [v.page_path, v.article_id || '', v.referrer || '', v.viewed_at]
-        .map((val) => `"${String(val).replace(/"/g, '""')}"`).join(',')
-    ).join('\n');
+    const headers = ['Page', 'Article ID', 'Referrer', 'Date'];
+    const rows = data.map((v: Record<string, unknown>) => [
+      String(v.page_path ?? ''),
+      String(v.article_id || ''),
+      String(v.referrer || ''),
+      fmtDate(v.viewed_at),
+    ]);
 
-    await logAuditEvent(user.id, 'export_csv', 'stats', undefined, { rowCount: data.length });
+    const workbook = createWorkbook('Statistiques', headers, rows);
+    const buffer = await workbook.xlsx.writeBuffer();
 
-    return new NextResponse(header + rows, {
+    await logAuditEvent(user.id, 'export_xlsx', 'stats', undefined, { rowCount: data.length });
+
+    return new NextResponse(buffer as ArrayBuffer, {
       headers: {
-        'Content-Type': 'text/csv; charset=utf-8',
-        'Content-Disposition': `attachment; filename="statistiques_${new Date().toISOString().slice(0, 10)}.csv"`,
+        'Content-Type': XLSX_CONTENT_TYPE,
+        'Content-Disposition': `attachment; filename="statistiques_${new Date().toISOString().slice(0, 10)}.xlsx"`,
       },
     });
   }
@@ -127,18 +208,27 @@ export async function GET(request: NextRequest) {
 
     if (!data) return NextResponse.json({ error: 'No data' }, { status: 404 });
 
-    const header = 'ID,Nom,Email,Sujet,Message,Statut,IP,Date\n';
-    const rows = data.map((m: Record<string, unknown>) =>
-      [m.id, m.full_name, m.email, m.subject, m.message, m.status, m.ip_address, m.created_at]
-        .map((v) => `"${String(v).replace(/"/g, '""')}"`).join(',')
-    ).join('\n');
+    const headers = ['ID', 'Nom', 'Email', 'Sujet', 'Message', 'Statut', 'IP', 'Date'];
+    const rows = data.map((m: Record<string, unknown>) => [
+      String(m.id ?? ''),
+      String(m.full_name ?? ''),
+      String(m.email ?? ''),
+      String(m.subject ?? ''),
+      String(m.message ?? ''),
+      String(m.status ?? ''),
+      String(m.ip_address ?? ''),
+      fmtDate(m.created_at),
+    ]);
 
-    await logAuditEvent(user.id, 'export_csv', 'messages', undefined, { rowCount: data.length });
+    const workbook = createWorkbook('Messages', headers, rows);
+    const buffer = await workbook.xlsx.writeBuffer();
 
-    return new NextResponse(header + rows, {
+    await logAuditEvent(user.id, 'export_xlsx', 'messages', undefined, { rowCount: data.length });
+
+    return new NextResponse(buffer as ArrayBuffer, {
       headers: {
-        'Content-Type': 'text/csv; charset=utf-8',
-        'Content-Disposition': `attachment; filename="messages_contact_${new Date().toISOString().slice(0, 10)}.csv"`,
+        'Content-Type': XLSX_CONTENT_TYPE,
+        'Content-Disposition': `attachment; filename="messages_contact_${new Date().toISOString().slice(0, 10)}.xlsx"`,
       },
     });
   }

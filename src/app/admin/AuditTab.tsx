@@ -79,6 +79,7 @@ function AuditActionBadge({ action }: { action: string }) {
     subscription_expired: 'bg-orange-100 text-orange-700',
     update_price: 'bg-amber-100 text-amber-700',
     export_csv: 'bg-blue-100 text-blue-700',
+    export_xlsx: 'bg-blue-100 text-blue-700',
   };
 
   const labels: Record<string, string> = {
@@ -92,6 +93,7 @@ function AuditActionBadge({ action }: { action: string }) {
     subscription_expired: 'Abo expiré (auto)',
     update_price: 'Prix modifié',
     export_csv: 'Export CSV',
+    export_xlsx: 'Export Excel',
   };
 
   return (

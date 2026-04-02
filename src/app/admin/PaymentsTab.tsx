@@ -89,7 +89,7 @@ export function PaymentsTab({ onStatsRefresh }: PaymentsTabProps) {
         </div>
         <button onClick={handleExport}
           className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] bg-white border border-black/[0.06] hover:bg-gray-50 transition-colors">
-          <Download className="w-3.5 h-3.5" /> CSV
+          <Download className="w-3.5 h-3.5" /> Excel
         </button>
       </div>
 

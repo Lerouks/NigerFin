@@ -41,7 +41,7 @@ export function Header() {
           setNavigation(data.navigation.toSorted((a: NavItem, b: NavItem) => a.order - b.order));
         }
       })
-      .catch(() => {});
+      .catch((err) => console.error('[Header] Failed to load site settings:', err));
   }, []);
 
   useEffect(() => {

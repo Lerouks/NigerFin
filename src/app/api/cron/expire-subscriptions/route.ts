@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
   const nonAdminIds = expiredUserIds.filter((id) => !adminIds.includes(id));
 
   // Batch DB updates in parallel
-  const updatePromises: Promise<unknown>[] = [];
+  const updatePromises: PromiseLike<unknown>[] = [];
 
   if (nonAdminIds.length > 0) {
     updatePromises.push(
@@ -83,6 +83,7 @@ export async function GET(request: NextRequest) {
       .update({ status: 'expired', updated_at: now })
       .in('user_id', expiredUserIds)
       .eq('status', 'active')
+      .then()
   );
 
   await Promise.all(updatePromises);

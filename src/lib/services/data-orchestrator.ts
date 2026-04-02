@@ -7,6 +7,7 @@ import { restCountriesService } from './rest-countries-service';
 import { ecowasService } from './ecowas-service';
 import { brvmScraperService } from './brvm-scraper-service';
 import { commoditiesService } from './commodities-service';
+import { cryptoService } from './crypto-service';
 import type { MacroData } from './world-bank-service';
 import type { IMFData } from './imf-service';
 import type { ForexData } from './frankfurter-service';
@@ -14,6 +15,7 @@ import type { CountryData } from './rest-countries-service';
 import type { ECOWASData } from './ecowas-service';
 import type { BRVMIndex, BRVMStock } from './brvm-scraper-service';
 import type { CommoditiesData } from './commodities-service';
+import type { CryptoData } from './crypto-service';
 
 export interface OrchestratorResult<T> {
   data: T;
@@ -121,6 +123,14 @@ class DataOrchestrator {
   }
 
   /**
+   * Get crypto prices (Bitcoin, Ethereum).
+   */
+  async getCryptoData(): Promise<OrchestratorResult<CryptoData>> {
+    const result = await cryptoService.getCryptoPrices();
+    return { data: result.data, source: result.source, fetchedAt: result.fetchedAt, service: 'coingecko' };
+  }
+
+  /**
    * Health check: test all services and return status.
    */
   async healthCheck(): Promise<Record<string, { status: 'ok' | 'error'; responseTime: number; error?: string }>> {
@@ -133,6 +143,7 @@ class DataOrchestrator {
       { name: 'ecowas', check: () => ecowasService.getRegion() },
       { name: 'brvm', check: () => brvmScraperService.getIndices() },
       { name: 'commodities', check: () => commoditiesService.getCommodities() },
+      { name: 'crypto', check: () => cryptoService.getCryptoPrices() },
     ];
 
     const results: Record<string, { status: 'ok' | 'error'; responseTime: number; error?: string }> = {};

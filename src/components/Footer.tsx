@@ -146,7 +146,7 @@ export function Footer() {
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-9 h-9 bg-white/[0.06] rounded-full flex items-center justify-center hover:bg-white/[0.12] transition-colors"
+                    className="w-9 h-9 bg-white/[0.06] rounded-full flex items-center justify-center hover:bg-gold/20 hover:text-gold transition-all duration-200 hover:scale-110"
                     aria-label={label}
                   >
                     <Icon className="w-4 h-4" />

@@ -70,10 +70,10 @@ export function NewsletterForm() {
           <button
             type="submit"
             disabled={loading}
-            className="bg-white text-black px-6 py-3 rounded-lg hover:bg-white/90 transition-colors flex items-center justify-center gap-2 text-[14px] flex-shrink-0 disabled:opacity-50"
+            className="bg-white text-black px-6 py-3 rounded-lg hover:bg-white/90 transition-all duration-200 flex items-center justify-center gap-2 text-[14px] flex-shrink-0 disabled:opacity-50 active:scale-[0.97] font-medium"
           >
             {loading ? 'Envoi...' : 'S\'abonner'}
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />}
           </button>
         </form>
       )}

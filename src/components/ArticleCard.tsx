@@ -84,7 +84,7 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
 
   return (
     <Link href={`/articles/${article.slug.current}`} className="group block">
-      <article className="bg-white rounded-xl border border-black/[0.06] overflow-hidden hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] hover:border-black/[0.1] transition-all duration-300">
+      <article className="bg-white rounded-xl border border-black/[0.06] overflow-hidden hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] hover:border-black/[0.1] transition-all duration-300 hover:-translate-y-0.5">
         <div className="relative overflow-hidden">
           <Image
             src={imageUrl}
@@ -110,7 +110,7 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
               {article.readTime} min
             </span>
           </div>
-          <h3 className="text-[17px] leading-snug mb-2 line-clamp-2 group-hover:text-gray-500 transition-colors">
+          <h3 className="text-[17px] leading-snug mb-2 line-clamp-2 group-hover:text-gray-600 transition-colors">
             {article.title}
           </h3>
           <p className="text-[13px] text-gray-500 mb-4 line-clamp-2 leading-relaxed">
@@ -118,7 +118,7 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
           </p>
           <div className="flex items-center justify-between text-xs text-gray-400">
             <span>{article.author.name}</span>
-            <ArrowUpRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors" />
+            <ArrowUpRight className="w-4 h-4 text-gray-300 group-hover:text-gold group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200" />
           </div>
         </div>
       </article>

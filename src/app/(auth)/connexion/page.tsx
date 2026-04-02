@@ -179,9 +179,14 @@ function ConnexionContent() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#111] text-white py-3.5 rounded-lg hover:bg-[#333] transition-colors disabled:opacity-50 text-[15px] font-medium"
+              className="w-full bg-[#111] text-white py-3.5 rounded-lg hover:bg-[#333] transition-all duration-200 disabled:opacity-50 text-[15px] font-medium active:scale-[0.98]"
             >
-              {loading ? 'Connexion...' : 'Se connecter'}
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Connexion...
+                </span>
+              ) : 'Se connecter'}
             </button>
           </form>
 

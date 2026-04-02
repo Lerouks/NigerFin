@@ -109,6 +109,20 @@ export async function POST(request: NextRequest) {
 
           await syncBeehiivContact(userId, role, supabase);
 
+          // Log subscription creation to audit trail
+          await supabase.from('audit_log').insert({
+            admin_id: userId,
+            action: 'subscription_created',
+            entity_type: 'subscription',
+            entity_id: subscription.id,
+            details: {
+              event_type: event.type,
+              tier,
+              billing_cycle: billingCycle,
+              stripe_customer_id: session.customer,
+            },
+          });
+
           // Send confirmation email
           const { data: profile } = await supabase
             .from('user_profiles')
@@ -173,6 +187,19 @@ export async function POST(request: NextRequest) {
             });
             throw new Error(`Profile update failed: ${profileError.message}`);
           }
+
+          // Log subscription update to audit trail
+          await supabase.from('audit_log').insert({
+            admin_id: userId,
+            action: 'subscription_updated',
+            entity_type: 'subscription',
+            entity_id: subscription.id,
+            details: {
+              event_type: event.type,
+              status,
+              cancel_at_period_end: subscription.cancel_at_period_end,
+            },
+          });
         }
         break;
       }
@@ -216,6 +243,15 @@ export async function POST(request: NextRequest) {
           }
 
           await syncBeehiivContact(userId, 'reader', supabase);
+
+          // Log subscription deletion to audit trail
+          await supabase.from('audit_log').insert({
+            admin_id: userId,
+            action: 'subscription_deleted',
+            entity_type: 'subscription',
+            entity_id: subscription.id,
+            details: { event_type: event.type },
+          });
         }
         break;
       }
@@ -341,6 +377,46 @@ export async function POST(request: NextRequest) {
             }
           }
         }
+        break;
+      }
+
+      case 'charge.dispute.created': {
+        const dispute = event.data.object as Stripe.Dispute;
+        // Log dispute to audit for admin review
+        await supabase.from('audit_log').insert({
+          admin_id: 'system',
+          action: 'charge_dispute_created',
+          entity_type: 'dispute',
+          entity_id: dispute.id,
+          details: {
+            charge_id: dispute.charge,
+            amount: dispute.amount,
+            currency: dispute.currency,
+            reason: dispute.reason,
+            status: dispute.status,
+          },
+        });
+        Sentry.captureMessage(`Stripe dispute created: ${dispute.id}`, {
+          level: 'warning',
+          extra: { disputeId: dispute.id, amount: dispute.amount, reason: dispute.reason },
+        });
+        break;
+      }
+
+      case 'charge.refunded': {
+        const charge = event.data.object as Stripe.Charge;
+        // Log refund to audit
+        await supabase.from('audit_log').insert({
+          admin_id: 'system',
+          action: 'charge_refunded',
+          entity_type: 'charge',
+          entity_id: charge.id,
+          details: {
+            amount_refunded: charge.amount_refunded,
+            currency: charge.currency,
+            customer: charge.customer,
+          },
+        });
         break;
       }
     }

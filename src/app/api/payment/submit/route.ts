@@ -3,6 +3,7 @@ import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase'
 import { PAYMENT_METHODS, isValidBillingCycle, getBillingOption, type PaymentMethodId } from '@/config/pricing';
 import { safeParseJSON } from '@/lib/validation';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
+import * as Sentry from '@sentry/nextjs';
 
 export async function POST(request: NextRequest) {
   try {
@@ -99,7 +100,8 @@ export async function POST(request: NextRequest) {
       paymentRequestId: data.id,
       message: 'Votre demande de paiement a été soumise. Elle sera vérifiée sous 24h.',
     });
-  } catch {
+  } catch (err) {
+    Sentry.captureException(err, { tags: { context: 'payment-submit' } });
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }

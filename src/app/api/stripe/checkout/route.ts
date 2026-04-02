@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from '@/lib/supabase';
 import { safeParseJSON } from '@/lib/validation';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { SITE_URL } from '@/lib/config';
+import * as Sentry from '@sentry/nextjs';
 import crypto from 'crypto';
 import Stripe from 'stripe';
 
@@ -47,6 +48,17 @@ export async function POST(request: NextRequest) {
 
     if (!priceId || !tier) {
       return NextResponse.json({ error: 'priceId and tier required' }, { status: 400 });
+    }
+
+    // Validate tier
+    if (tier !== 'premium') {
+      return NextResponse.json({ error: 'Plan invalide' }, { status: 400 });
+    }
+
+    // Validate priceId against allowed Stripe price IDs from environment
+    const allowedPriceIds = (process.env.STRIPE_ALLOWED_PRICE_IDS || '').split(',').filter(Boolean);
+    if (allowedPriceIds.length > 0 && !allowedPriceIds.includes(priceId)) {
+      return NextResponse.json({ error: 'ID de prix invalide' }, { status: 400 });
     }
 
     // Get or create Stripe customer
@@ -111,7 +123,8 @@ export async function POST(request: NextRequest) {
     );
 
     return NextResponse.json({ url: session.url });
-  } catch {
+  } catch (err) {
+    Sentry.captureException(err, { tags: { context: 'stripe-checkout' } });
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }

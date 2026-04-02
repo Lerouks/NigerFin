@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase';
 import { SITE_URL } from '@/lib/config';
+import * as Sentry from '@sentry/nextjs';
 import Stripe from 'stripe';
 
 function getStripe() {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) throw new Error('STRIPE_SECRET_KEY not configured');
-  return new Stripe(key);
+  return new Stripe(key, { timeout: 10000 });
 }
 
 export async function POST() {
@@ -34,13 +35,18 @@ export async function POST() {
     return NextResponse.json({ error: 'No Stripe customer found' }, { status: 404 });
   }
 
-  const siteUrl = SITE_URL;
+  try {
+    const siteUrl = SITE_URL;
 
-  const stripe = getStripe();
-  const session = await stripe.billingPortal.sessions.create({
-    customer: profile.stripe_customer_id,
-    return_url: `${siteUrl}/compte`,
-  });
+    const stripe = getStripe();
+    const session = await stripe.billingPortal.sessions.create({
+      customer: profile.stripe_customer_id,
+      return_url: `${siteUrl}/compte`,
+    });
 
-  return NextResponse.json({ url: session.url });
+    return NextResponse.json({ url: session.url });
+  } catch (err) {
+    Sentry.captureException(err, { tags: { context: 'stripe-portal' } });
+    return NextResponse.json({ error: 'Erreur Stripe. Réessayez plus tard.' }, { status: 500 });
+  }
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase';
+import { isValidUUID, safeParseJSON } from '@/lib/validation';
 
 export async function POST(request: NextRequest) {
   const supabase = await createServerSupabaseClient();
@@ -12,9 +13,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
 
-  const { articleId, articleSlug } = await request.json();
-  if (!articleId || !articleSlug) {
-    return NextResponse.json({ error: 'articleId and articleSlug required' }, { status: 400 });
+  const body = await safeParseJSON(request);
+  if (!body) {
+    return NextResponse.json({ error: 'Corps de requête JSON invalide' }, { status: 400 });
+  }
+
+  const { articleId, articleSlug } = body as { articleId?: string; articleSlug?: string };
+
+  if (!articleId || !isValidUUID(articleId)) {
+    return NextResponse.json({ error: 'articleId invalide (UUID requis)' }, { status: 400 });
+  }
+
+  if (!articleSlug || typeof articleSlug !== 'string') {
+    return NextResponse.json({ error: 'articleSlug requis' }, { status: 400 });
   }
 
   // Verify article is actually premium before tracking
@@ -37,14 +48,14 @@ export async function POST(request: NextRequest) {
       {
         user_id: user.id,
         article_id: articleId,
-        article_slug: articleSlug,
+        article_slug: String(articleSlug).slice(0, 200),
         read_at: new Date().toISOString(),
       },
       { onConflict: 'user_id,article_id' }
     );
 
   if (trackError) {
-    return NextResponse.json({ error: trackError.message }, { status: 500 });
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 
   return NextResponse.json({ success: true });

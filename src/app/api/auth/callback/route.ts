@@ -33,9 +33,20 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    const { error, data } = await supabase.auth.exchangeCodeForSession(code);
+    let exchangeError: Error | null = null;
+    let data: { user: any; session: any } | null = null;
 
-    if (!error) {
+    try {
+      const result = await supabase.auth.exchangeCodeForSession(code);
+      exchangeError = result.error;
+      data = result.data;
+    } catch (err) {
+      console.error('[AUTH CALLBACK] Code exchange failed:', err);
+      Sentry.captureException(err, { tags: { context: 'auth-callback-exchange' } });
+      return NextResponse.redirect(`${origin}/connexion?error=auth`);
+    }
+
+    if (!exchangeError) {
       // Send welcome email for newly confirmed users
       if (data?.user) {
         sendWelcomeIfNew(data.user.id, data.user.email, data.user.user_metadata?.full_name).catch((err) => {
@@ -73,7 +84,7 @@ async function sendWelcomeIfNew(userId: string, email?: string, fullName?: strin
   try {
     await service
       .from('user_profiles')
-      .update({ welcome_email_sent: true } as any)
+      .update({ welcome_email_sent: true } as Record<string, unknown>)
       .eq('id', userId);
   } catch {
     // Column may not exist yet

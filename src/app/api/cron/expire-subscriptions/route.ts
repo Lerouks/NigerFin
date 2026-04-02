@@ -41,66 +41,88 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ expired: 0 });
   }
 
-  let expired = 0;
+  // Batch update user_profiles: set all expired users to 'expired' status
+  const expiredUserIds = expiredUsers.map((u) => u.id);
+  const adminIds = expiredUsers.filter((u) => u.role === 'admin').map((u) => u.id);
+  const nonAdminIds = expiredUserIds.filter((id) => !adminIds.includes(id));
 
-  for (const user of expiredUsers) {
-    // Update user profile to expired
-    const newRole = user.role === 'admin' ? 'admin' : 'reader';
+  // Batch DB updates in parallel
+  const updatePromises: Promise<unknown>[] = [];
 
-    await service
-      .from('user_profiles')
-      .update({
-        subscription_status: 'expired',
-        role: newRole,
-        subscription_updated_at: now,
-        updated_at: now,
-      })
-      .eq('id', user.id);
+  if (nonAdminIds.length > 0) {
+    updatePromises.push(
+      service
+        .from('user_profiles')
+        .update({
+          subscription_status: 'expired',
+          role: 'reader',
+          subscription_updated_at: now,
+          updated_at: now,
+        })
+        .in('id', nonAdminIds)
+    );
+  }
 
-    // Update subscriptions table
-    await service
+  if (adminIds.length > 0) {
+    updatePromises.push(
+      service
+        .from('user_profiles')
+        .update({
+          subscription_status: 'expired',
+          subscription_updated_at: now,
+          updated_at: now,
+        })
+        .in('id', adminIds)
+    );
+  }
+
+  // Batch update subscriptions table
+  updatePromises.push(
+    service
       .from('subscriptions')
       .update({ status: 'expired', updated_at: now })
-      .eq('user_id', user.id)
-      .eq('status', 'active');
+      .in('user_id', expiredUserIds)
+      .eq('status', 'active')
+  );
 
-    // Send expiration email
-    try {
+  await Promise.all(updatePromises);
+
+  // Send expiration emails in parallel
+  const emailResults = await Promise.allSettled(
+    expiredUsers.map(async (user) => {
       const emailData = subscriptionExpiredEmail(
         user.full_name || 'Client',
         user.subscription_end,
       );
       await sendTransactionalEmail({ to: user.email, ...emailData });
-    } catch (err) {
-      Sentry.captureException(err, { tags: { context: 'cron-expiration-email' }, extra: { userId: user.id } });
-    }
+    })
+  );
 
-    // Audit log (system action)
-    try {
-      await logAuditEvent('00000000-0000-0000-0000-000000000000', 'subscription_expired', 'user', user.id, {
-        userName: user.full_name,
-        userEmail: user.email,
-        expiredAt: user.subscription_end,
-        action: 'expiration automatique',
-      });
-    } catch {
-      // The audit log FK might fail for the system UUID; use a fallback
-      await service.from('audit_log').insert({
-        admin_id: user.id, // Use user's own ID as fallback
-        action: 'subscription_expired',
-        entity_type: 'user',
-        entity_id: user.id,
-        details: {
-          userName: user.full_name,
-          userEmail: user.email,
-          expiredAt: user.subscription_end,
-          action: 'expiration automatique',
-        },
+  // Log failed emails to Sentry
+  emailResults.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      Sentry.captureException(result.reason, {
+        tags: { context: 'cron-expiration-email' },
+        extra: { userId: expiredUsers[index].id },
       });
     }
+  });
 
-    expired++;
-  }
+  // Batch audit log inserts
+  const auditRows = expiredUsers.map((user) => ({
+    admin_id: user.id,
+    action: 'subscription_expired',
+    entity_type: 'user',
+    entity_id: user.id,
+    details: {
+      userName: user.full_name,
+      userEmail: user.email,
+      expiredAt: user.subscription_end,
+      action: 'expiration automatique',
+    },
+  }));
 
-  return NextResponse.json({ expired, total: expiredUsers.length });
+  await service.from('audit_log').insert(auditRows);
+
+  return NextResponse.json({ expired: expiredUsers.length, total: expiredUsers.length });
 }

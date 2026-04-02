@@ -13,6 +13,7 @@ interface AuthContextType {
   isSignedIn: boolean;
   userRole: UserRole | null;
   premiumArticlesUsed: number;
+  error: string | null;
   signIn: (email: string, password: string) => Promise<{ error: { message: string } | null }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: { message: string } | null; existingUser: boolean }>;
   signOut: () => Promise<void>;
@@ -27,6 +28,7 @@ const AuthContext = createContext<AuthContextType>({
   isSignedIn: false,
   userRole: null,
   premiumArticlesUsed: 0,
+  error: null,
   signIn: async () => ({ error: null }),
   signUp: async () => ({ error: null, existingUser: false }),
   signOut: async () => {},
@@ -39,6 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [premiumArticlesUsed, setPremiumArticlesUsed] = useState(0);
   const [isLoading, setIsLoading] = useState(!isSupabaseConfigured ? false : true);
+  const [error, setError] = useState<string | null>(null);
   const [supabase] = useState<SupabaseClient | null>(() =>
     isSupabaseConfigured ? createBrowserSupabaseClient() : null
   );
@@ -50,7 +53,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const data = await res.json();
         setProfile(data);
       }
-    } catch {}
+    } catch (err) {
+      console.error('[AUTH] Failed to fetch profile:', err);
+      setError('Impossible de charger le profil utilisateur');
+    }
   }, []);
 
   const fetchPremiumCount = useCallback(async () => {
@@ -60,7 +66,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const data = await res.json();
         setPremiumArticlesUsed(data.count || 0);
       }
-    } catch {}
+    } catch (err) {
+      console.error('[AUTH] Failed to fetch premium count:', err);
+      setError('Impossible de charger le compteur premium');
+    }
   }, []);
 
   const refreshProfile = useCallback(async () => {
@@ -137,7 +146,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ type: 'duplicate_signup', email }),
         });
-      } catch {}
+      } catch (err) {
+        console.error('[AUTH] Failed to log duplicate signup attempt:', err);
+      }
     }
 
     return {
@@ -165,6 +176,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isSignedIn: !!session,
         userRole: (profile?.role as UserRole) || null,
         premiumArticlesUsed,
+        error,
         signIn,
         signUp,
         signOut,

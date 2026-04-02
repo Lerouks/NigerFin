@@ -109,6 +109,20 @@ export async function POST(request: NextRequest) {
 
           await syncBeehiivContact(userId, role, supabase);
 
+          // Log subscription creation to audit trail
+          await supabase.from('audit_log').insert({
+            admin_id: userId,
+            action: 'subscription_created',
+            entity_type: 'subscription',
+            entity_id: subscription.id,
+            details: {
+              event_type: event.type,
+              tier,
+              billing_cycle: billingCycle,
+              stripe_customer_id: session.customer,
+            },
+          });
+
           // Send confirmation email
           const { data: profile } = await supabase
             .from('user_profiles')
@@ -173,6 +187,19 @@ export async function POST(request: NextRequest) {
             });
             throw new Error(`Profile update failed: ${profileError.message}`);
           }
+
+          // Log subscription update to audit trail
+          await supabase.from('audit_log').insert({
+            admin_id: userId,
+            action: 'subscription_updated',
+            entity_type: 'subscription',
+            entity_id: subscription.id,
+            details: {
+              event_type: event.type,
+              status,
+              cancel_at_period_end: subscription.cancel_at_period_end,
+            },
+          });
         }
         break;
       }
@@ -216,6 +243,15 @@ export async function POST(request: NextRequest) {
           }
 
           await syncBeehiivContact(userId, 'reader', supabase);
+
+          // Log subscription deletion to audit trail
+          await supabase.from('audit_log').insert({
+            admin_id: userId,
+            action: 'subscription_deleted',
+            entity_type: 'subscription',
+            entity_id: subscription.id,
+            details: { event_type: event.type },
+          });
         }
         break;
       }

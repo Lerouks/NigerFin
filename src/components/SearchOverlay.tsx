@@ -95,11 +95,12 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
             )}
             <input
               ref={inputRef}
-              type="text"
+              type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Rechercher un article, un sujet, une catégorie..."
               aria-label="Rechercher un article"
+              autoComplete="off"
               className="flex-1 text-[16px] bg-transparent border-none outline-none placeholder:text-gray-300"
             />
             <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">

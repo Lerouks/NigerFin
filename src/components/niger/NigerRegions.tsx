@@ -44,6 +44,8 @@ export function NigerRegions({ regions }: { regions: Region[] }) {
             <button
               key={region.id}
               onClick={() => setSelected(isSelected ? null : region.id)}
+              aria-expanded={isSelected}
+              aria-label={`${region.name}, ${(region.population / 1_000_000).toFixed(1)}M habitants`}
               className={`text-left p-4 rounded-xl border transition-all duration-200 ${
                 isSelected
                   ? 'border-black/20 bg-[#111] text-white shadow-lg -translate-y-0.5'

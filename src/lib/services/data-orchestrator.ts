@@ -8,6 +8,7 @@ import { ecowasService } from './ecowas-service';
 import { brvmScraperService } from './brvm-scraper-service';
 import { commoditiesService } from './commodities-service';
 import { cryptoService } from './crypto-service';
+import { indicesService } from './indices-service';
 import type { MacroData } from './world-bank-service';
 import type { IMFData } from './imf-service';
 import type { ForexData } from './frankfurter-service';
@@ -16,6 +17,7 @@ import type { ECOWASData } from './ecowas-service';
 import type { BRVMIndex, BRVMStock } from './brvm-scraper-service';
 import type { CommoditiesData } from './commodities-service';
 import type { CryptoData } from './crypto-service';
+import type { IndicesData } from './indices-service';
 
 export interface OrchestratorResult<T> {
   data: T;
@@ -131,6 +133,14 @@ class DataOrchestrator {
   }
 
   /**
+   * Get global indices (Nasdaq, S&P 500, STOXX Europe 600).
+   */
+  async getIndicesData(): Promise<OrchestratorResult<IndicesData>> {
+    const result = await indicesService.getIndices();
+    return { data: result.data, source: result.source, fetchedAt: result.fetchedAt, service: 'yahoo_finance' };
+  }
+
+  /**
    * Health check: test all services and return status.
    */
   async healthCheck(): Promise<Record<string, { status: 'ok' | 'error'; responseTime: number; error?: string }>> {
@@ -144,6 +154,7 @@ class DataOrchestrator {
       { name: 'brvm', check: () => brvmScraperService.getIndices() },
       { name: 'commodities', check: () => commoditiesService.getCommodities() },
       { name: 'crypto', check: () => cryptoService.getCryptoPrices() },
+      { name: 'indices', check: () => indicesService.getIndices() },
     ];
 
     const results: Record<string, { status: 'ok' | 'error'; responseTime: number; error?: string }> = {};

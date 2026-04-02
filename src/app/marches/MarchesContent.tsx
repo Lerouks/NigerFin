@@ -7,6 +7,7 @@ import { useForex } from '@/hooks/useForex';
 import { useBRVMIndices } from '@/hooks/useBRVMIndices';
 import { useCommodities } from '@/hooks/useCommodities';
 import { useCrypto } from '@/hooks/useCrypto';
+import { useIndices } from '@/hooks/useIndices';
 import { ForexTicker } from '@/components/data/ForexTicker';
 import { CommodityPrice as CommodityPriceComponent } from '@/components/data/CommodityPrice';
 import { DataWidget } from '@/components/data/DataWidget';
@@ -39,6 +40,7 @@ export function MarchesContent({ fallbackData }: MarchesContentProps) {
   const brvmIndices = useBRVMIndices();
   const commodities = useCommodities();
   const crypto = useCrypto();
+  const indices = useIndices();
 
   useEffect(() => {
     fetch('/api/market-data')
@@ -114,8 +116,22 @@ export function MarchesContent({ fallbackData }: MarchesContentProps) {
       }
     }
 
+    // Override global indices (Nasdaq, S&P 500, STOXX Europe 600)
+    if (indices.data) {
+      for (const quote of indices.data) {
+        const existing = items.find((i) => i.symbol === quote.symbol);
+        if (existing) {
+          existing.value = quote.price;
+          existing.change = quote.change;
+          existing.changePercent = quote.changePercent;
+          existing.source = 'Yahoo Finance';
+          existing.updatedAt = quote.date;
+        }
+      }
+    }
+
     return items;
-  }, [data, forex.data, commodities.data, brvmIndices.data, crypto.data]);
+  }, [data, forex.data, commodities.data, brvmIndices.data, crypto.data, indices.data]);
 
   const { groupedData, lastUpdated } = useMemo(() => {
     const grouped = mergedData.reduce((acc, item) => {

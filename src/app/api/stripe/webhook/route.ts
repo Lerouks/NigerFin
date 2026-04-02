@@ -343,6 +343,46 @@ export async function POST(request: NextRequest) {
         }
         break;
       }
+
+      case 'charge.dispute.created': {
+        const dispute = event.data.object as Stripe.Dispute;
+        // Log dispute to audit for admin review
+        await supabase.from('audit_log').insert({
+          admin_id: 'system',
+          action: 'charge_dispute_created',
+          entity_type: 'dispute',
+          entity_id: dispute.id,
+          details: {
+            charge_id: dispute.charge,
+            amount: dispute.amount,
+            currency: dispute.currency,
+            reason: dispute.reason,
+            status: dispute.status,
+          },
+        });
+        Sentry.captureMessage(`Stripe dispute created: ${dispute.id}`, {
+          level: 'warning',
+          extra: { disputeId: dispute.id, amount: dispute.amount, reason: dispute.reason },
+        });
+        break;
+      }
+
+      case 'charge.refunded': {
+        const charge = event.data.object as Stripe.Charge;
+        // Log refund to audit
+        await supabase.from('audit_log').insert({
+          admin_id: 'system',
+          action: 'charge_refunded',
+          entity_type: 'charge',
+          entity_id: charge.id,
+          details: {
+            amount_refunded: charge.amount_refunded,
+            currency: charge.currency,
+            customer: charge.customer,
+          },
+        });
+        break;
+      }
     }
   } catch (err) {
     Sentry.captureException(err, {

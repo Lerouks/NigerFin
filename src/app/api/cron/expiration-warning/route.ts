@@ -40,15 +40,21 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ sent: 0 });
   }
 
+  // Batch fetch all profiles to avoid N+1 queries
+  const userIds = expiring.map((s) => s.user_id);
+  const { data: profiles } = await service
+    .from('user_profiles')
+    .select('id, email, full_name, expiration_warning_sent')
+    .in('id', userIds);
+
+  const profileMap = new Map(
+    (profiles || []).map((p) => [p.id, p])
+  );
+
   let sent = 0;
 
   for (const sub of expiring) {
-    const { data: profile } = await service
-      .from('user_profiles')
-      .select('email, full_name, expiration_warning_sent')
-      .eq('id', sub.user_id)
-      .single();
-
+    const profile = profileMap.get(sub.user_id);
     if (!profile?.email || profile.expiration_warning_sent) continue;
 
     const warning = subscriptionExpirationWarningEmail(

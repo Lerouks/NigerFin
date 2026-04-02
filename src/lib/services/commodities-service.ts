@@ -81,7 +81,7 @@ export class CommoditiesService extends BaseDataService {
 
     if (!res.ok) throw new Error('Gold API failed');
     const data = await res.json();
-    const price = data.rates?.USD || 2625.80;
+    const price = data.rates?.USD || 4676.86;
 
     return {
       name: meta.name,
@@ -125,7 +125,7 @@ export class CommoditiesService extends BaseDataService {
   private getEstimatedPrice(key: string, meta: { name: string; symbol: string; unit: string }): CommodityPrice {
     const estimates: Record<string, { price: number; change: number; changePercent: number }> = {
       oil: { price: 82.45, change: -0.87, changePercent: -1.04 },
-      gold: { price: 2625.80, change: 15.40, changePercent: 0.59 },
+      gold: { price: 4676.86, change: 18.50, changePercent: 0.40 },
       uranium: { price: 89.50, change: 1.25, changePercent: 1.42 },
       cotton: { price: 0.84, change: -0.01, changePercent: -1.18 },
     };

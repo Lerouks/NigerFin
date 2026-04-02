@@ -14,8 +14,8 @@ export default function ArticleLoading() {
         </div>
         <div className="h-[400px] bg-gray-100 rounded-xl animate-pulse mb-10" />
         <div className="space-y-4">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="h-4 bg-gray-100 rounded animate-pulse" style={{ width: `${85 + Math.random() * 15}%` }} />
+          {[90, 100, 95, 88, 97, 92, 86, 99].map((w, i) => (
+            <div key={i} className="h-4 bg-gray-100 rounded animate-pulse" style={{ width: `${w}%` }} />
           ))}
         </div>
       </div>

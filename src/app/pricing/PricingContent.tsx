@@ -584,7 +584,7 @@ export function PricingContent() {
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
                       <>
-                        S&apos;abonner — {yearlyPrice.toLocaleString('fr-FR')} {CURRENCY}/an
+                        S&apos;abonner | {yearlyPrice.toLocaleString('fr-FR')} {CURRENCY}/an
                         <ArrowRight className="w-4 h-4" />
                       </>
                     )}

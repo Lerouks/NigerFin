@@ -50,6 +50,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'priceId and tier required' }, { status: 400 });
     }
 
+    // Validate tier
+    if (tier !== 'premium') {
+      return NextResponse.json({ error: 'Plan invalide' }, { status: 400 });
+    }
+
+    // Validate priceId against allowed Stripe price IDs from environment
+    const allowedPriceIds = (process.env.STRIPE_ALLOWED_PRICE_IDS || '').split(',').filter(Boolean);
+    if (allowedPriceIds.length > 0 && !allowedPriceIds.includes(priceId)) {
+      return NextResponse.json({ error: 'ID de prix invalide' }, { status: 400 });
+    }
+
     // Get or create Stripe customer
     const { data: profile } = await supabase
       .from('user_profiles')

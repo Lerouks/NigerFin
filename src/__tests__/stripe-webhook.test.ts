@@ -10,6 +10,8 @@ const mockSelectSingle = vi.fn().mockResolvedValue({
   data: { email: 'user@test.com', full_name: 'Test User' },
 });
 
+const mockInsert = vi.fn().mockResolvedValue({ error: null });
+
 const mockSupabase = {
   from: vi.fn((table: string) => {
     if (table === 'subscriptions') {
@@ -20,8 +22,14 @@ const mockSupabase = {
         }),
       };
     }
+    if (table === 'audit_log') {
+      return {
+        insert: mockInsert,
+      };
+    }
     return {
       update: mockUpdate,
+      insert: mockInsert,
       select: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
           single: mockSelectSingle,

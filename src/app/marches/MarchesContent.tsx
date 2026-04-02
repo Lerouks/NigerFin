@@ -3,6 +3,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { TrendingUp, TrendingDown, BookOpen, ChevronRight } from 'lucide-react';
+import { useForex } from '@/hooks/useForex';
+import { useBRVMIndices } from '@/hooks/useBRVMIndices';
+import { useBRVMStocks } from '@/hooks/useBRVMStocks';
+import { useCommodities } from '@/hooks/useCommodities';
+import { ForexTicker } from '@/components/data/ForexTicker';
+import { BRVMCard } from '@/components/data/BRVMCard';
+import { CommodityPrice as CommodityPriceComponent } from '@/components/data/CommodityPrice';
+import { DataWidget } from '@/components/data/DataWidget';
 import type { MarketData } from '@/types';
 
 const TYPE_LABELS: Record<MarketData['type'], string> = {
@@ -26,6 +34,12 @@ interface MarchesContentProps {
 export function MarchesContent({ fallbackData }: MarchesContentProps) {
   const [data, setData] = useState<MarketData[]>(fallbackData);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  // Real-time data hooks
+  const forex = useForex();
+  const brvmIndices = useBRVMIndices();
+  const brvmStocks = useBRVMStocks();
+  const commodities = useCommodities();
 
   useEffect(() => {
     fetch('/api/market-data')
@@ -53,8 +67,12 @@ export function MarchesContent({ fallbackData }: MarchesContentProps) {
     return { groupedData: grouped, lastUpdated: latest };
   }, [data]);
 
+  // Find USD/XOF rate for price conversion
+  const usdXofRate = forex.data?.find((r) => r.base === 'USD')?.rateInXOF || null;
+
   return (
     <div className="space-y-8">
+      {/* Existing market data display */}
       {Object.entries(groupedData).map(([type, items]) => (
         <div key={type}>
           <div className="mb-4">
@@ -140,6 +158,80 @@ export function MarchesContent({ fallbackData }: MarchesContentProps) {
           </div>
         </div>
       ))}
+
+      {/* Real-time Forex Rates */}
+      {forex.data && forex.data.length > 0 && (
+        <div>
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold">Taux de change en temps réel</h2>
+            <p className="text-[13px] text-gray-500 mt-0.5">Cours XOF depuis Frankfurter/ECB</p>
+          </div>
+          <ForexTicker rates={forex.data} source={forex.source} lastUpdated={forex.lastUpdated} />
+        </div>
+      )}
+      {forex.isLoading && (
+        <DataWidget title="Taux de change en temps réel" isLoading>
+          <div />
+        </DataWidget>
+      )}
+
+      {/* BRVM Indices */}
+      {brvmIndices.data && brvmIndices.data.length > 0 && (
+        <div>
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold">Indices BRVM</h2>
+            <p className="text-[13px] text-gray-500 mt-0.5">BRVM Composite et BRVM 30</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {brvmIndices.data.map((idx) => (
+              <div key={idx.name} className="bg-white rounded-xl border border-black/[0.06] p-5">
+                <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">{idx.name}</p>
+                <div className="flex items-end justify-between">
+                  <p className="text-2xl font-semibold tabular-nums">{idx.value.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}</p>
+                  <div className={`flex items-center gap-1 text-[13px] font-medium ${idx.changePercent >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                    {idx.changePercent >= 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+                    {idx.changePercent > 0 ? '+' : ''}{idx.changePercent.toFixed(2)}%
+                  </div>
+                </div>
+                <p className="text-[10px] text-gray-400 mt-2">Source : BRVM &middot; {new Date(idx.date).toLocaleDateString('fr-FR')}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* BRVM Stocks - BOAN Niger highlighted */}
+      {brvmStocks.data && brvmStocks.data.length > 0 && (
+        <div>
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold">Actions BRVM</h2>
+            <p className="text-[13px] text-gray-500 mt-0.5">Titres cotés avec mise en avant de BOAN Niger</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {brvmStocks.data.slice(0, 10).map((stock) => (
+              <BRVMCard key={stock.ticker} stock={stock} />
+            ))}
+          </div>
+          <p className="text-[10px] text-gray-400 mt-3 text-center">
+            Source : BRVM &middot; Mis à jour : {brvmStocks.lastUpdated ? new Date(brvmStocks.lastUpdated).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
+          </p>
+        </div>
+      )}
+
+      {/* Commodities */}
+      {commodities.data && commodities.data.length > 0 && (
+        <div>
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold">Matières premières en temps réel</h2>
+            <p className="text-[13px] text-gray-500 mt-0.5">Pétrole, or, uranium, coton</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {commodities.data.map((c) => (
+              <CommodityPriceComponent key={c.symbol} commodity={c} xofRate={usdXofRate} />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <div className="text-center space-y-1 pt-2">

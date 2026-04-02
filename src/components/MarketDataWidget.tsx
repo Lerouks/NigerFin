@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
+import { useForex } from '@/hooks/useForex';
+import { useCommodities } from '@/hooks/useCommodities';
+import { useBRVMIndices } from '@/hooks/useBRVMIndices';
 import type { MarketData } from '@/types';
 
 const TYPE_LABELS: Record<MarketData['type'], string> = {
@@ -18,6 +21,11 @@ interface MarketDataWidgetProps {
 export function MarketDataWidget({ data: fallbackData }: MarketDataWidgetProps) {
   const [data, setData] = useState<MarketData[]>(fallbackData);
 
+  // Real-time hooks
+  const forex = useForex();
+  const commodities = useCommodities();
+  const brvmIndices = useBRVMIndices();
+
   useEffect(() => {
     fetch('/api/market-data')
       .then((res) => res.json())
@@ -27,22 +35,76 @@ export function MarketDataWidget({ data: fallbackData }: MarketDataWidgetProps) 
       .catch(() => {});
   }, []);
 
+  // Merge real-time data with existing data
+  const mergedData = useMemo(() => {
+    const items = [...data];
+
+    // Override currency values from forex API
+    if (forex.data) {
+      for (const rate of forex.data) {
+        const existing = items.find((i) => i.type === 'currency' && i.symbol === `${rate.base}/XOF`);
+        if (existing) {
+          existing.value = rate.rateInXOF;
+          existing.change = rate.change;
+          existing.changePercent = rate.changePercent;
+          existing.source = 'Frankfurter/ECB';
+          existing.updatedAt = rate.date;
+        }
+      }
+    }
+
+    // Override commodity values
+    if (commodities.data) {
+      for (const commodity of commodities.data) {
+        const symbolMap: Record<string, string> = { BRENT: 'BRENT', XAU: 'XAU', U3O8: 'U3O8' };
+        const symbol = symbolMap[commodity.symbol];
+        if (symbol) {
+          const existing = items.find((i) => i.symbol === symbol);
+          if (existing) {
+            existing.value = commodity.price;
+            existing.change = commodity.change;
+            existing.changePercent = commodity.changePercent;
+            existing.source = commodity.source;
+            existing.updatedAt = commodity.date;
+          }
+        }
+      }
+    }
+
+    // Override BRVM index
+    if (brvmIndices.data) {
+      const composite = brvmIndices.data.find((i) => i.name.includes('Composite'));
+      if (composite) {
+        const existing = items.find((i) => i.symbol === 'BRVMC');
+        if (existing) {
+          existing.value = composite.value;
+          existing.change = composite.change;
+          existing.changePercent = composite.changePercent;
+          existing.source = 'BRVM';
+          existing.updatedAt = composite.date;
+        }
+      }
+    }
+
+    return items;
+  }, [data, forex.data, commodities.data, brvmIndices.data]);
+
   const { groupedData, lastUpdated } = useMemo(() => {
-    const grouped = data.reduce((acc, item) => {
+    const grouped = mergedData.reduce((acc, item) => {
       if (!acc[item.type]) acc[item.type] = [];
       acc[item.type].push(item);
       return acc;
     }, {} as Record<string, MarketData[]>);
 
     let latest: string | null = null;
-    for (const item of data) {
+    for (const item of mergedData) {
       if (item.updatedAt && (!latest || item.updatedAt > latest)) {
         latest = item.updatedAt;
       }
     }
 
     return { groupedData: grouped, lastUpdated: latest };
-  }, [data]);
+  }, [mergedData]);
 
   return (
     <div className="bg-white rounded-xl border border-black/[0.06] sticky top-36 overflow-hidden">
@@ -94,7 +156,7 @@ export function MarketDataWidget({ data: fallbackData }: MarketDataWidgetProps) 
       </div>
       <div className="border-t border-black/[0.04] px-5 py-3 bg-[#fafaf9] rounded-b-xl space-y-0.5">
         <p className="text-[10px] text-gray-400 text-center">
-          Variations par rapport à la dernière mise à jour
+          Données en temps réel &middot; Frankfurter, BRVM, ECB
         </p>
         {lastUpdated && (
           <p className="text-[10px] text-gray-400 text-center">

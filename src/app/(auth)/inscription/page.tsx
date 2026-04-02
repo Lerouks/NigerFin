@@ -133,7 +133,7 @@ function InscriptionContent() {
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-lg mb-6">
+            <div role="alert" className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-lg mb-6">
               {error}
             </div>
           )}
@@ -217,6 +217,7 @@ function InscriptionContent() {
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
+                  aria-invalid={confirmPassword && !passwordsMatch ? 'true' : undefined}
                   className={`w-full border rounded-lg pl-10 pr-10 py-2.5 bg-[#fafaf9] focus:outline-none focus:ring-1 transition-all text-base ${
                     confirmPassword && !passwordsMatch
                       ? 'border-red-300 focus:border-red-400 focus:ring-red-100'

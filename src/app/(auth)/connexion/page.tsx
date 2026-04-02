@@ -91,7 +91,7 @@ function ConnexionContent() {
               <h1 className="text-2xl font-bold mb-3">Mot de passe oublié</h1>
               <p className="text-gray-500 text-sm">Entrez votre email pour recevoir un lien de réinitialisation.</p>
             </div>
-            {error && <div className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-lg mb-6">{error}</div>}
+            {error && <div role="alert" className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-lg mb-6">{error}</div>}
             <form onSubmit={handleForgotPassword} className="space-y-6">
               <div>
                 <label htmlFor="reset-email" className="block text-sm font-medium mb-2.5">Email</label>
@@ -125,7 +125,7 @@ function ConnexionContent() {
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-lg mb-6">
+            <div role="alert" className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-lg mb-6">
               {error}
             </div>
           )}

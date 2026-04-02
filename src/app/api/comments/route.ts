@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await supabase
     .from('comments')
-    .select('*')
+    .select('id, article_id, user_id, user_name, content, parent_comment_id, created_at')
     .eq('article_id', articleId)
     .order('created_at', { ascending: false })
     .range(params.offset, params.offset + params.limit - 1);

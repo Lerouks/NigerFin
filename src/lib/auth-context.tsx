@@ -86,6 +86,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await Promise.all([fetchProfile(), fetchPremiumCount()]);
       }
       setIsLoading(false);
+    }).catch((err) => {
+      console.error('[AUTH] Failed to get session:', err);
+      setIsLoading(false);
     });
 
     const {

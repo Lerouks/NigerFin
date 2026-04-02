@@ -29,7 +29,7 @@ export async function GET(
 
   const { data, error } = await supabase
     .from('discussion_comments')
-    .select('*')
+    .select('id, discussion_id, user_id, username, content, created_at')
     .eq('discussion_id', id)
     .order('created_at', { ascending: true })
     .range(pagination.offset, pagination.offset + pagination.limit - 1);

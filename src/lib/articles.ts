@@ -179,7 +179,12 @@ export async function searchArticles(query: string, limit = 20): Promise<Article
   const supabase = createServiceClient();
   if (!supabase || !query.trim()) return [];
 
-  const q = query.trim().toLowerCase();
+  // Sanitize query to escape SQL wildcards (%, _) and backslashes
+  const q = query.trim().toLowerCase()
+    .replace(/\\/g, '\\\\')
+    .replace(/%/g, '\\%')
+    .replace(/_/g, '\\_')
+    .slice(0, 200);
 
   // Use Supabase ilike for flexible partial matching across key fields
   const { data } = await supabase

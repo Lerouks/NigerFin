@@ -114,6 +114,8 @@ export function Header() {
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
                     className="p-2 hover:bg-black/5 rounded-full transition-colors"
                     aria-label="Mon compte"
+                    aria-haspopup="menu"
+                    aria-expanded={userMenuOpen}
                   >
                     <User className="w-[18px] h-[18px]" />
                   </button>

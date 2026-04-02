@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase';
 import { SITE_URL } from '@/lib/config';
+import * as Sentry from '@sentry/nextjs';
 import Stripe from 'stripe';
 
 function getStripe() {
@@ -44,7 +45,8 @@ export async function POST() {
     });
 
     return NextResponse.json({ url: session.url });
-  } catch {
+  } catch (err) {
+    Sentry.captureException(err, { tags: { context: 'stripe-portal' } });
     return NextResponse.json({ error: 'Erreur Stripe. Réessayez plus tard.' }, { status: 500 });
   }
 }

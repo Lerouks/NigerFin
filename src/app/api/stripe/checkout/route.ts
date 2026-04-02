@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from '@/lib/supabase';
 import { safeParseJSON } from '@/lib/validation';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { SITE_URL } from '@/lib/config';
+import * as Sentry from '@sentry/nextjs';
 import crypto from 'crypto';
 import Stripe from 'stripe';
 
@@ -111,7 +112,8 @@ export async function POST(request: NextRequest) {
     );
 
     return NextResponse.json({ url: session.url });
-  } catch {
+  } catch (err) {
+    Sentry.captureException(err, { tags: { context: 'stripe-checkout' } });
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }

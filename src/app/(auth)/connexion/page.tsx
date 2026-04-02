@@ -91,7 +91,7 @@ function ConnexionContent() {
               <h1 className="text-2xl font-bold mb-3">Mot de passe oublié</h1>
               <p className="text-gray-500 text-sm">Entrez votre email pour recevoir un lien de réinitialisation.</p>
             </div>
-            {error && <div className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-lg mb-6">{error}</div>}
+            {error && <div role="alert" className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-lg mb-6">{error}</div>}
             <form onSubmit={handleForgotPassword} className="space-y-6">
               <div>
                 <label htmlFor="reset-email" className="block text-sm font-medium mb-2.5">Email</label>
@@ -125,7 +125,7 @@ function ConnexionContent() {
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-lg mb-6">
+            <div role="alert" className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-lg mb-6">
               {error}
             </div>
           )}
@@ -139,6 +139,7 @@ function ConnexionContent() {
                   id="email"
                   type="email"
                   required
+                  autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full border border-black/[0.08] rounded-lg pl-12 pr-4 py-3.5 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 transition-all text-base"
@@ -160,6 +161,7 @@ function ConnexionContent() {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   required
+                  autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full border border-black/[0.08] rounded-lg pl-12 pr-12 py-3.5 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 transition-all text-base"
@@ -179,9 +181,14 @@ function ConnexionContent() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#111] text-white py-3.5 rounded-lg hover:bg-[#333] transition-colors disabled:opacity-50 text-[15px] font-medium"
+              className="w-full bg-[#111] text-white py-3.5 rounded-lg hover:bg-[#333] transition-all duration-200 disabled:opacity-50 text-[15px] font-medium active:scale-[0.98]"
             >
-              {loading ? 'Connexion...' : 'Se connecter'}
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Connexion...
+                </span>
+              ) : 'Se connecter'}
             </button>
           </form>
 

@@ -236,6 +236,11 @@ export default function SimulateurSalaireNiger() {
         <input
           type="range" min={0} max={MAX_BRUT} step={5000} value={brut}
           onChange={(e) => setGross(Number(e.target.value))}
+          aria-label="Salaire brut mensuel"
+          aria-valuemin={0}
+          aria-valuemax={MAX_BRUT}
+          aria-valuenow={brut}
+          aria-valuetext={`${fmt(brut)} F CFA`}
           style={S.slider}
         />
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#9ca3af', marginTop: 6 }}>

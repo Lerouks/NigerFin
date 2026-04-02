@@ -293,7 +293,7 @@ export function PaymentContent() {
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4 flex items-start gap-3">
+              <div role="alert" className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4 flex items-start gap-3">
                 <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
                 <p className="text-red-700 text-[13px]">{error}</p>
               </div>

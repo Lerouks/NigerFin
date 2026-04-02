@@ -118,10 +118,10 @@ export function CommentsSection({ articleId }: CommentsSectionProps) {
               <button
                 type="submit"
                 disabled={!commentText.trim() || submitting}
-                className="bg-[#111] text-white px-5 py-2 rounded-lg hover:bg-[#333] transition-colors disabled:bg-gray-200 disabled:cursor-not-allowed flex items-center gap-2 text-[13px]"
+                className="bg-[#111] text-white px-5 py-2 rounded-lg hover:bg-[#333] transition-all duration-200 disabled:bg-gray-200 disabled:cursor-not-allowed flex items-center gap-2 text-[13px] active:scale-[0.97]"
               >
                 <Send className="w-4 h-4" />
-                Publier
+                {submitting ? 'Publication...' : 'Publier'}
               </button>
             </div>
           </form>

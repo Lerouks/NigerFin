@@ -16,7 +16,7 @@ interface SocialLinks {
 
 function TikTokIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="currentColor">
+    <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden="true">
       <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 00-.79-.05A6.34 6.34 0 003.15 15.2a6.34 6.34 0 0010.86 4.46V13.2a8.16 8.16 0 005.58 2.18v-3.44a4.85 4.85 0 01-1-.1 4.83 4.83 0 01-3.58-2.72V2.44h3.45a4.83 4.83 0 003.77 4.25v3.44a8.16 8.16 0 01-2.64-.44z" />
     </svg>
   );
@@ -146,7 +146,7 @@ export function Footer() {
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-9 h-9 bg-white/[0.06] rounded-full flex items-center justify-center hover:bg-white/[0.12] transition-colors"
+                    className="w-9 h-9 bg-white/[0.06] rounded-full flex items-center justify-center hover:bg-gold/20 hover:text-gold transition-all duration-200 hover:scale-110"
                     aria-label={label}
                   >
                     <Icon className="w-4 h-4" />

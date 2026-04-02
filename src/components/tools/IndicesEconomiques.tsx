@@ -27,7 +27,7 @@ export function IndicesEconomiques() {
         <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
           Indicateurs clés (Mrd FCFA)
         </h3>
-        <div className="h-52">
+        <div className="h-52" aria-label="Graphique des indicateurs économiques clés du Niger en milliards de FCFA">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />

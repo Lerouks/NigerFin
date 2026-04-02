@@ -133,7 +133,7 @@ function InscriptionContent() {
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-lg mb-6">
+            <div role="alert" className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-lg mb-6">
               {error}
             </div>
           )}
@@ -147,6 +147,7 @@ function InscriptionContent() {
                   id="name"
                   type="text"
                   required
+                  autoComplete="name"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   className="w-full border border-black/[0.08] rounded-lg pl-10 pr-4 py-2.5 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 transition-all text-base"
@@ -163,6 +164,7 @@ function InscriptionContent() {
                   id="email"
                   type="email"
                   required
+                  autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full border border-black/[0.08] rounded-lg pl-10 pr-4 py-2.5 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 transition-all text-base"
@@ -180,6 +182,7 @@ function InscriptionContent() {
                   type={showPassword ? 'text' : 'password'}
                   required
                   minLength={8}
+                  autoComplete="new-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full border border-black/[0.08] rounded-lg pl-10 pr-10 py-2.5 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 transition-all text-base"
@@ -215,8 +218,10 @@ function InscriptionContent() {
                   id="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
                   required
+                  autoComplete="new-password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
+                  aria-invalid={confirmPassword && !passwordsMatch ? 'true' : undefined}
                   className={`w-full border rounded-lg pl-10 pr-10 py-2.5 bg-[#fafaf9] focus:outline-none focus:ring-1 transition-all text-base ${
                     confirmPassword && !passwordsMatch
                       ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
@@ -241,9 +246,14 @@ function InscriptionContent() {
             <button
               type="submit"
               disabled={loading || password.length < 8 || password !== confirmPassword}
-              className="w-full bg-[#111] text-white py-3 rounded-lg hover:bg-[#333] transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-[14px]"
+              className="w-full bg-[#111] text-white py-3 rounded-lg hover:bg-[#333] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-[14px] active:scale-[0.98]"
             >
-              {loading ? 'Création...' : 'Créer mon compte'}
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Création...
+                </span>
+              ) : 'Créer mon compte'}
             </button>
           </form>
 

@@ -16,7 +16,7 @@ export function GraphEvolution({ data }: GraphEvolutionProps) {
   if (data.length === 0) return null;
 
   return (
-    <div className="bg-white border border-black/[0.06] rounded-xl p-6">
+    <div className="bg-white border border-black/[0.06] rounded-xl p-6" aria-label="Graphique d'évolution du remboursement dans le temps">
       <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
         Évolution du remboursement
       </h3>

@@ -42,6 +42,6 @@ Tests live in `src/__tests__/*.test.ts` and match the pattern `src/**/*.test.ts`
 
 **Cron jobs** (configured in `vercel.json`): Daily subscription expiration check (2 AM) and expiration warning emails (8 AM).
 
-**Design tokens:** Custom Tailwind colors (background: `#fafaf9`, foreground: `#1a1a1a`, primary: `#111111`, secondary: `#f5f5f0`, muted: `#f0efe9`, gold: `#d4a843`). Fonts: Playfair Display (serif headings) and Inter (body text), loaded as local fonts.
+**Design tokens:** Custom Tailwind colors (background: `#fafaf9`, foreground: `#1a1a1a`, primary: `#111111`, secondary: `#f5f5f0`, muted: `#f0efe9`, gold: `#d4a843`). Font: Inter (body and headings), loaded as a local font.
 
 **Figma source:** Design originates from Figma file `Lv7u6t8ImmhJDTmgUnHZwa`.

@@ -168,11 +168,11 @@ async function fetchSingleAsset(config: AssetConfig): Promise<FinancialQuote> {
   }
 
   // 3. All providers failed — do NOT return stale data (RULE 2)
-  // But if we have a cached quote that's not absurdly old (< 7 days), return it with a warning
+  // Only use cache if it's less than 48h old (not 7 days — that risks showing very wrong prices)
   if (cached) {
     const cacheAge = Date.now() - new Date(cached.data.fetchedAt).getTime();
-    const sevenDays = 7 * 24 * 3600 * 1000;
-    if (cacheAge < sevenDays) {
+    const maxFallbackAge = 48 * 3600 * 1000; // 48 hours max
+    if (cacheAge < maxFallbackAge) {
       console.warn(
         `[FinancialData] ${config.symbol}: all providers failed, using stale cache (age: ${Math.round(cacheAge / 3600000)}h)`,
       );

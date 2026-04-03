@@ -86,8 +86,8 @@ export function Header() {
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
-            <Link href="/" className="flex items-center lg:static absolute left-1/2 -translate-x-1/2 lg:translate-x-0">
-              <h1 className="text-[22px] md:text-[26px] tracking-[-0.03em] font-bold">
+            <Link href="/" className="flex items-center lg:static absolute left-1/2 -translate-x-1/2 lg:translate-x-0 max-w-[calc(100%-160px)] lg:max-w-none">
+              <h1 className="text-[18px] sm:text-[22px] md:text-[26px] tracking-[-0.03em] font-bold truncate">
                 NFI REPORT
               </h1>
             </Link>
@@ -108,7 +108,7 @@ export function Header() {
                 ) : (
                   <Link
                     href="/connexion"
-                    className="text-[14px] text-[#111] hover:text-black/60 transition-colors whitespace-nowrap"
+                    className="hidden sm:inline text-[14px] text-[#111] hover:text-black/60 transition-colors whitespace-nowrap"
                   >
                     Se connecter
                   </Link>
@@ -153,7 +153,7 @@ export function Header() {
               {!isSignedIn && (
                 <Link
                   href="/pricing"
-                  className="inline-flex items-center justify-center px-4 py-2 bg-[#111] text-white text-[14px] font-medium rounded-[4px] hover:bg-black transition-colors whitespace-nowrap border border-[#111]"
+                  className="inline-flex items-center justify-center px-2.5 sm:px-4 py-1.5 sm:py-2 bg-[#111] text-white text-[12px] sm:text-[14px] font-medium rounded-[4px] hover:bg-black transition-colors whitespace-nowrap border border-[#111]"
                 >
                   S&apos;abonner
                 </Link>
@@ -240,15 +240,26 @@ export function Header() {
                 <ChevronRight className="w-4 h-4 text-gray-300" />
               </button>
               {!isSignedIn && (
-                <Link
-                  href="/pricing"
-                  className="flex items-center justify-between py-2.5 px-3 text-[15px] font-medium text-[#111] hover:bg-black/[0.03] rounded-lg transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                  tabIndex={mobileMenuOpen ? 0 : -1}
-                >
-                  S&apos;abonner
-                  <ChevronRight className="w-4 h-4 text-gray-300" />
-                </Link>
+                <>
+                  <Link
+                    href="/connexion"
+                    className="sm:hidden flex items-center justify-between py-2.5 px-3 text-[15px] text-gray-700 hover:bg-black/[0.03] rounded-lg transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                    tabIndex={mobileMenuOpen ? 0 : -1}
+                  >
+                    Se connecter
+                    <ChevronRight className="w-4 h-4 text-gray-300" />
+                  </Link>
+                  <Link
+                    href="/pricing"
+                    className="flex items-center justify-between py-2.5 px-3 text-[15px] font-medium text-[#111] hover:bg-black/[0.03] rounded-lg transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                    tabIndex={mobileMenuOpen ? 0 : -1}
+                  >
+                    S&apos;abonner
+                    <ChevronRight className="w-4 h-4 text-gray-300" />
+                  </Link>
+                </>
               )}
               <button
                 onClick={() => {

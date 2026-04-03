@@ -19,7 +19,7 @@ export interface CommoditiesData {
 
 // World Bank commodity API indicators
 const COMMODITY_INDICATORS: Record<string, { name: string; symbol: string; unit: string; wbCode: string; yahooTicker?: string }> = {
-  oil: { name: 'Pétrole Brent', symbol: 'BRENT', unit: 'USD/baril', wbCode: 'CRUDE_BRENT', yahooTicker: 'BZ%3DF' },
+  oil: { name: 'Pétrole Brent', symbol: 'ICEEUR:BRN1!', unit: 'USD/baril', wbCode: 'CRUDE_BRENT', yahooTicker: 'BZ%3DF' },
   gold: { name: 'Or', symbol: 'XAU', unit: 'USD/once', wbCode: 'GOLD', yahooTicker: 'GC%3DF' },
   uranium: { name: 'Uranium', symbol: 'U3O8', unit: 'USD/lb', wbCode: 'URANIUM', yahooTicker: 'UX%3DF' },
   cotton: { name: 'Coton', symbol: 'CT', unit: 'USD/lb', wbCode: 'COTTON_A_INDX', yahooTicker: 'CT%3DF' },

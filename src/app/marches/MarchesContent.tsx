@@ -71,7 +71,7 @@ export function MarchesContent({ fallbackData }: MarchesContentProps) {
 
     // Override commodity values
     if (commodities.data) {
-      const symbolMap: Record<string, string> = { BRENT: 'BRENT', XAU: 'XAU', U3O8: 'U3O8', CT: 'CT' };
+      const symbolMap: Record<string, string> = { 'ICEEUR:BRN1!': 'ICEEUR:BRN1!', XAU: 'XAU', U3O8: 'U3O8', CT: 'CT' };
       for (const commodity of commodities.data) {
         const symbol = symbolMap[commodity.symbol];
         if (symbol) {

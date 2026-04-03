@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getArticleBySlug, getRelatedArticles, getAllArticleSlugs } from '@/lib/articles';
-import { marketData } from '@/data/mock-data';
 import { SITE_URL } from '@/lib/config';
 import { ArticleContent } from './ArticleContent';
 
@@ -116,7 +115,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <ArticleContent article={article} htmlBody={safeHtmlBody} marketData={marketData} relatedArticles={related} />
+      <ArticleContent article={article} htmlBody={safeHtmlBody} relatedArticles={related} />
     </>
   );
 }

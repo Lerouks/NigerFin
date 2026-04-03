@@ -60,7 +60,7 @@ export function MarketDataWidget({ data: fallbackData }: MarketDataWidgetProps) 
     // Override commodity values
     if (commodities.data) {
       for (const commodity of commodities.data) {
-        const symbolMap: Record<string, string> = { BRENT: 'BRENT', XAU: 'XAU', U3O8: 'U3O8', CT: 'CT' };
+        const symbolMap: Record<string, string> = { 'ICEEUR:BRN1!': 'ICEEUR:BRN1!', XAU: 'XAU', U3O8: 'U3O8', CT: 'CT' };
         const symbol = symbolMap[commodity.symbol];
         if (symbol) {
           const existing = items.find((i) => i.symbol === symbol);

@@ -118,6 +118,8 @@ export function SimulateurEmprunt() {
             <input
               id="emprunt-montant"
               type="number"
+              step={100000}
+              min={0}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="Ex: 5 000 000"

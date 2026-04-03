@@ -36,7 +36,7 @@ export default async function HomePage() {
 
       {/* Market Ticker Bar */}
       <div className="bg-[#111] border-b border-white/[0.06] overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center gap-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center gap-6 min-w-0">
           <span className="text-[10px] tracking-[0.2em] uppercase text-gold font-bold flex-shrink-0">
             Marchés
           </span>

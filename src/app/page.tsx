@@ -47,8 +47,8 @@ export default async function HomePage() {
                 <span key={`${item.symbol}-${i}`} className="inline-flex items-center gap-2 text-[12px]">
                   <span className="text-white/50 font-medium">{item.symbol}</span>
                   <span className="text-white/80 tabular-nums">{item.value.toLocaleString('fr-FR')}</span>
-                  <span className={`text-[11px] tabular-nums ${item.change >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                    {item.change >= 0 ? '+' : ''}{item.change.toFixed(2)}%
+                  <span className={`text-[11px] tabular-nums ${item.changePercent >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                    {item.changePercent >= 0 ? '+' : ''}{item.changePercent.toFixed(2)}%
                   </span>
                 </span>
               ))}

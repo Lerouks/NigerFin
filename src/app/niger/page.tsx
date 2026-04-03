@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { ArticleCard } from '@/components/ArticleCard';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
 import { NigerPresentation } from '@/components/NigerPresentation';
+import { CategoryHero } from '@/components/CategoryHero';
 import { getArticlesByCategory } from '@/lib/articles';
 import { marketData } from '@/data/mock-data';
 
@@ -20,28 +21,27 @@ export default async function NigerPage() {
   const { articles } = await getArticlesByCategory('niger');
   return (
     <div className="min-h-screen bg-[#fafaf9]">
-      <section className="bg-[#111] text-white py-16 md:py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-gold/[0.03] to-transparent" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <span className="text-[11px] tracking-[0.2em] uppercase text-gold/60 block mb-4">Rubrique</span>
-          <h1 className="text-4xl md:text-5xl">Niger</h1>
-          <p className="text-white/50 mt-3 text-[15px] max-w-xl">
-            Analyses économiques, entreprises, marchés et actualités du Niger.
-          </p>
-        </div>
-      </section>
+      <CategoryHero
+        label="Rubrique"
+        title="Niger"
+        description="Analyses économiques, entreprises, marchés et actualités du Niger."
+        accentGold
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           <div className="lg:col-span-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 stagger-grid">
               {articles.map((article) => (<ArticleCard key={article._id} article={article} />))}
             </div>
             {articles.length === 0 && <p className="text-gray-500 text-center py-20">Aucun article dans cette rubrique pour le moment.</p>}
           </div>
-          <aside className="lg:col-span-4"><MarketDataWidget data={marketData} /></aside>
+          <aside className="lg:col-span-4">
+            <div className="lg:sticky lg:top-24">
+              <MarketDataWidget data={marketData} />
+            </div>
+          </aside>
         </div>
 
-        {/* Présentation du pays */}
         <NigerPresentation />
       </div>
     </div>

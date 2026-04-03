@@ -164,6 +164,54 @@ small, footer, .text-xs, .text-sm {
 .delay-400 { animation-delay: 400ms; }
 .delay-500 { animation-delay: 500ms; }
 
+@keyframes goldLineDraw {
+  from { width: 0; }
+  to { width: 48px; }
+}
+
+@keyframes marqueeScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes subtlePulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+
+.animate-gold-line {
+  animation: goldLineDraw 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-marquee {
+  animation: marqueeScroll 40s linear infinite;
+}
+
+.animate-subtle-pulse {
+  animation: subtlePulse 3s ease-in-out infinite;
+}
+
+/* Hero grid pattern overlay */
+.hero-grid-pattern {
+  background-image:
+    repeating-linear-gradient(90deg, rgba(212, 168, 67, 0.03) 0px, rgba(212, 168, 67, 0.03) 1px, transparent 1px, transparent 80px),
+    repeating-linear-gradient(0deg, rgba(212, 168, 67, 0.03) 0px, rgba(212, 168, 67, 0.03) 1px, transparent 1px, transparent 80px);
+}
+
+/* Staggered article card animations */
+.stagger-grid > * {
+  opacity: 0;
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.stagger-grid > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-grid > *:nth-child(2) { animation-delay: 80ms; }
+.stagger-grid > *:nth-child(3) { animation-delay: 160ms; }
+.stagger-grid > *:nth-child(4) { animation-delay: 240ms; }
+.stagger-grid > *:nth-child(5) { animation-delay: 320ms; }
+.stagger-grid > *:nth-child(6) { animation-delay: 400ms; }
+.stagger-grid > *:nth-child(7) { animation-delay: 480ms; }
+.stagger-grid > *:nth-child(8) { animation-delay: 560ms; }
+
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in-up,
@@ -171,7 +219,11 @@ small, footer, .text-xs, .text-sm {
   .animate-slide-down,
   .animate-slide-in-right,
   .animate-scale-in,
-  .animate-shimmer {
+  .animate-shimmer,
+  .animate-gold-line,
+  .animate-marquee,
+  .animate-subtle-pulse,
+  .stagger-grid > * {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;

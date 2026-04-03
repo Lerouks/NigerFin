@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 import { ArticleCard } from '@/components/ArticleCard';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
 import { NewsletterForm } from '@/components/NewsletterForm';
@@ -24,12 +26,36 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-[#fafaf9]">
       <h1 className="sr-only">NFI Report - Actualités économiques et financières du Niger</h1>
+
       {/* Featured Article */}
       {featuredArticle && (
-        <section>
+        <section className="animate-fade-in">
           <ArticleCard article={featuredArticle} featured />
         </section>
       )}
+
+      {/* Market Ticker Bar */}
+      <div className="bg-[#111] border-b border-white/[0.06] overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center gap-6">
+          <span className="text-[10px] tracking-[0.2em] uppercase text-gold font-bold flex-shrink-0">
+            Marchés
+          </span>
+          <div className="h-3 w-px bg-white/10 flex-shrink-0" />
+          <div className="overflow-hidden flex-1">
+            <div className="flex items-center gap-8 animate-marquee whitespace-nowrap">
+              {[...marketData, ...marketData].map((item, i) => (
+                <span key={`${item.symbol}-${i}`} className="inline-flex items-center gap-2 text-[12px]">
+                  <span className="text-white/50 font-medium">{item.symbol}</span>
+                  <span className="text-white/80 tabular-nums">{item.value.toLocaleString('fr-FR')}</span>
+                  <span className={`text-[11px] tabular-nums ${item.change >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                    {item.change >= 0 ? '+' : ''}{item.change.toFixed(2)}%
+                  </span>
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
@@ -38,13 +64,21 @@ export default async function HomePage() {
           <div className="lg:col-span-8">
             <div className="mb-8">
               <div className="flex items-center gap-4 mb-8">
+                <div className="animate-gold-line h-[2px] bg-gold" />
                 <h2 className="text-2xl">Dernières actualités</h2>
                 <div className="flex-1 h-px bg-black/[0.06]" />
+                <Link
+                  href="/economie"
+                  className="hidden sm:inline-flex items-center gap-1.5 text-[13px] text-gray-400 hover:text-gold transition-colors group"
+                >
+                  Tout voir
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
               </div>
               {articles.length === 0 && (
                 <p className="text-gray-500 text-center py-20">Aucun article pour le moment. Publiez votre premier article depuis l&apos;espace admin.</p>
               )}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 stagger-grid">
                 {otherArticles.map((article) => (
                   <ArticleCard key={article._id} article={article} />
                 ))}
@@ -59,7 +93,9 @@ export default async function HomePage() {
 
           {/* Sidebar */}
           <aside className="lg:col-span-4">
-            <MarketDataWidget data={marketData} />
+            <div className="lg:sticky lg:top-24">
+              <MarketDataWidget data={marketData} />
+            </div>
           </aside>
         </div>
       </div>

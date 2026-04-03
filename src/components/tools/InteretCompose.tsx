@@ -86,7 +86,7 @@ export function InteretCompose() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
             <label htmlFor="ic-capital" className="block text-[13px] font-medium text-gray-700 mb-2">Capital initial (FCFA)</label>
-            <input id="ic-capital" type="number" value={capital} onChange={(e) => setCapital(e.target.value)} placeholder="Ex: 1 000 000"
+            <input id="ic-capital" type="number" step={100000} min={0} value={capital} onChange={(e) => setCapital(e.target.value)} placeholder="Ex: 1 000 000"
               className="w-full border border-black/[0.08] px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-[#fafaf9] text-[15px]" />
           </div>
           <div>

@@ -11,7 +11,7 @@ export function MarketMarquee() {
 
   if (isLoading && quotes.length === 0) {
     return (
-      <div className="overflow-hidden flex-1">
+      <div className="overflow-hidden flex-1 min-w-0">
         <div className="inline-flex items-center gap-8 whitespace-nowrap">
           {[1, 2, 3, 4, 5].map((i) => (
             <span key={i} className="inline-flex items-center gap-2 text-[12px]">
@@ -30,7 +30,7 @@ export function MarketMarquee() {
   const doubled = [...quotes, ...quotes];
 
   return (
-    <div className="overflow-hidden flex-1 relative">
+    <div className="overflow-hidden flex-1 min-w-0 relative">
       <div className="inline-flex items-center gap-8 animate-marquee whitespace-nowrap will-change-transform" style={{ width: 'max-content' }}>
         {doubled.map((item, i) => (
           <span

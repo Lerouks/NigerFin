@@ -12,7 +12,7 @@ import { PremiumOverlay } from '@/components/PremiumOverlay';
 import { ArticleCard } from '@/components/ArticleCard';
 import { ArticleLikes } from '@/components/ArticleLikes';
 import { ViewTracker } from '@/components/ViewTracker';
-import type { Article, MarketData } from '@/types';
+import type { Article } from '@/types';
 import { fallbackImageUrl } from '@/data/mock-data';
 import { formatDate } from '@/lib/utils';
 import { SITE_URL } from '@/lib/config';
@@ -28,7 +28,6 @@ import { SECTION_META } from '@/lib/sections';
 interface ArticleContentProps {
   article: Article;
   htmlBody: string;
-  marketData: MarketData[];
   relatedArticles?: Article[];
 }
 
@@ -53,7 +52,7 @@ function WhatsAppIcon({ className }: { className?: string }) {
   );
 }
 
-export function ArticleContent({ article, htmlBody, marketData, relatedArticles = [] }: ArticleContentProps) {
+export function ArticleContent({ article, htmlBody, relatedArticles = [] }: ArticleContentProps) {
   const { isSignedIn, isLoading, userRole, premiumArticlesUsed, refreshProfile } = useAuth();
   const [accessResult, setAccessResult] = useState<AccessResult | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
@@ -383,7 +382,7 @@ export function ArticleContent({ article, htmlBody, marketData, relatedArticles 
           </div>
 
           <aside className="lg:col-span-4">
-            <MarketDataWidget data={marketData} />
+            <MarketDataWidget />
           </aside>
         </div>
       </div>

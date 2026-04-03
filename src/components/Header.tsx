@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { Menu, Search, User, X, ChevronRight, LogOut } from 'lucide-react';
+import { Menu, Search, X, ChevronRight, LogOut } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { SearchOverlay } from './SearchOverlay';
@@ -92,40 +92,25 @@ export function Header() {
               </h1>
             </Link>
 
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setSearchOpen(true)}
-                className="hidden sm:block p-2 hover:bg-black/5 rounded-full transition-colors"
-                aria-label="Rechercher"
-              >
-                <Search className="w-[18px] h-[18px]" />
-              </button>
-              {!isSignedIn && (
-                <Link
-                  href="/pricing"
-                  className="inline-flex items-center px-3 sm:px-3.5 py-1.5 bg-[#111] text-white text-[12px] sm:text-[13px] font-medium rounded-full hover:bg-[#333] transition-colors"
-                >
-                  S&apos;abonner
-                </Link>
-              )}
+            <div className="flex items-center gap-3">
+              {/* Auth section */}
               <div className="relative" ref={userMenuRef}>
                 {isSignedIn ? (
                   <button
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
-                    className="p-2 hover:bg-black/5 rounded-full transition-colors"
+                    className="text-[14px] text-[#111] hover:text-black/60 transition-colors whitespace-nowrap"
                     aria-label="Mon compte"
                     aria-haspopup="menu"
                     aria-expanded={userMenuOpen}
                   >
-                    <User className="w-[18px] h-[18px]" />
+                    Mon compte
                   </button>
                 ) : (
                   <Link
                     href="/connexion"
-                    className="p-2 hover:bg-black/5 rounded-full transition-colors"
-                    aria-label="Se connecter"
+                    className="text-[14px] text-[#111] hover:text-black/60 transition-colors whitespace-nowrap"
                   >
-                    <User className="w-[18px] h-[18px]" />
+                    Se connecter
                   </Link>
                 )}
                 {userMenuOpen && isSignedIn && (
@@ -163,6 +148,25 @@ export function Header() {
                   </div>
                 )}
               </div>
+
+              {/* Subscribe button */}
+              {!isSignedIn && (
+                <Link
+                  href="/pricing"
+                  className="inline-flex items-center justify-center px-4 py-2 bg-[#111] text-white text-[14px] font-medium rounded-[4px] hover:bg-black transition-colors whitespace-nowrap border border-[#111]"
+                >
+                  S&apos;abonner
+                </Link>
+              )}
+
+              {/* Search icon */}
+              <button
+                onClick={() => setSearchOpen(true)}
+                className="hidden sm:flex items-center justify-center p-1.5 hover:opacity-60 transition-opacity"
+                aria-label="Rechercher"
+              >
+                <Search className="w-[18px] h-[18px] text-[#111]" strokeWidth={2} />
+              </button>
             </div>
           </div>
         </div>

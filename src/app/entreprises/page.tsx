@@ -3,7 +3,6 @@ import { ArticleCard } from '@/components/ArticleCard';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
 import { CategoryHero } from '@/components/CategoryHero';
 import { getArticlesByCategory } from '@/lib/articles';
-import { marketData } from '@/data/mock-data';
 
 export const revalidate = 60;
 export const metadata: Metadata = { title: 'Entreprises', description: 'Actualités des entreprises nigériennes et ouest-africaines : résultats, stratégies, fusions et opportunités d\'investissement.' };
@@ -32,7 +31,7 @@ export default async function EntreprisesPage() {
           </div>
           <aside className="lg:col-span-4">
             <div className="lg:sticky lg:top-24">
-              <MarketDataWidget data={marketData} />
+              <MarketDataWidget />
             </div>
           </aside>
         </div>

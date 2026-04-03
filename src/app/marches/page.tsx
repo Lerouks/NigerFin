@@ -3,7 +3,6 @@ import { MarchesContent } from './MarchesContent';
 import { ArticleCard } from '@/components/ArticleCard';
 import { CategoryHero } from '@/components/CategoryHero';
 import { getArticlesByCategory } from '@/lib/articles';
-import { marketData } from '@/data/mock-data';
 
 export const revalidate = 60;
 export const metadata: Metadata = { title: 'Marchés', description: 'Suivez les cours des marchés en temps réel : matières premières, devises, indices boursiers et actifs financiers africains.' };
@@ -18,7 +17,7 @@ export default async function MarchesPage() {
         description="Suivez les cours en temps réel et apprenez à comprendre chaque actif grâce à nos fiches pédagogiques."
       />
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
-        <MarchesContent fallbackData={marketData} />
+        <MarchesContent />
       </div>
       {articles.length > 0 && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14 md:pb-20">

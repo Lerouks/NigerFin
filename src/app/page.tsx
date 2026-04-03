@@ -3,10 +3,10 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { ArticleCard } from '@/components/ArticleCard';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
+import { MarketMarquee } from '@/components/MarketMarquee';
 import { NewsletterForm } from '@/components/NewsletterForm';
 import { PracticalTools } from '@/components/PracticalTools';
 import { getAllArticles, getFeaturedArticles } from '@/lib/articles';
-import { marketData } from '@/data/mock-data';
 
 export const metadata: Metadata = {
   title: 'NFI Report - Actualités économiques et financières du Niger',
@@ -41,19 +41,7 @@ export default async function HomePage() {
             Marchés
           </span>
           <div className="h-3 w-px bg-white/10 flex-shrink-0" />
-          <div className="overflow-hidden flex-1">
-            <div className="flex items-center gap-8 animate-marquee whitespace-nowrap">
-              {[...marketData, ...marketData].map((item, i) => (
-                <span key={`${item.symbol}-${i}`} className="inline-flex items-center gap-2 text-[12px]">
-                  <span className="text-white/50 font-medium">{item.symbol}</span>
-                  <span className="text-white/80 tabular-nums">{item.value.toLocaleString('fr-FR')}</span>
-                  <span className={`text-[11px] tabular-nums ${item.changePercent >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                    {item.changePercent >= 0 ? '+' : ''}{item.changePercent.toFixed(2)}%
-                  </span>
-                </span>
-              ))}
-            </div>
-          </div>
+          <MarketMarquee />
         </div>
       </div>
 
@@ -94,7 +82,7 @@ export default async function HomePage() {
           {/* Sidebar */}
           <aside className="lg:col-span-4">
             <div className="lg:sticky lg:top-24">
-              <MarketDataWidget data={marketData} />
+              <MarketDataWidget />
             </div>
           </aside>
         </div>

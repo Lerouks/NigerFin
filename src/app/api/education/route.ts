@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const isPremiumUser = userRole === 'premium' || userRole === 'admin' || userRole === 'pro';
+    const isPremiumUser = userRole === 'premium' || userRole === 'admin';
 
     // Strip content from non-free lessons for non-premium users
     const sanitized = (data || []).map((lesson: Record<string, unknown>) => {

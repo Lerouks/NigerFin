@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { requireAdmin } from '@/lib/admin-auth';
 import { serverError } from '@/lib/api-error';
 
@@ -57,5 +58,6 @@ export async function PUT(request: NextRequest) {
     return serverError(error, 'admin-flash-banner');
   }
 
+  revalidatePath('/');
   return NextResponse.json(data);
 }

@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { requireAdmin } from '@/lib/admin-auth';
 import { serverError } from '@/lib/api-error';
+
+function revalidateMarketPages() {
+  revalidatePath('/');
+  revalidatePath('/marches');
+}
 
 // GET: list all market data (admin only)
 export async function GET() {
@@ -58,6 +64,7 @@ export async function POST(request: NextRequest) {
     return serverError(error, 'admin-market-data');
   }
 
+  revalidateMarketPages();
   return NextResponse.json(data);
 }
 
@@ -107,6 +114,7 @@ export async function PUT(request: NextRequest) {
     return serverError(error, 'admin-market-data');
   }
 
+  revalidateMarketPages();
   return NextResponse.json(data);
 }
 
@@ -132,5 +140,6 @@ export async function DELETE(request: NextRequest) {
     return serverError(error, 'admin-market-data');
   }
 
+  revalidateMarketPages();
   return NextResponse.json({ success: true });
 }

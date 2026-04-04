@@ -3,6 +3,8 @@ import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase'
 import { parsePagination, paginatedResponse } from '@/lib/pagination';
 import { isOneOf } from '@/lib/validation';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createServerSupabaseClient();

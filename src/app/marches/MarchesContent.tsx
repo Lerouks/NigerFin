@@ -2,43 +2,43 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { TrendingUp, TrendingDown, BookOpen, ChevronRight, AlertTriangle } from 'lucide-react';
-import { useFinancialData, groupQuotesByType } from '@/hooks/useFinancialData';
-import type { FinancialQuote, AssetType } from '@/lib/financial-data/types';
+import { TrendingUp, TrendingDown, BookOpen, ChevronRight } from 'lucide-react';
+import { useMarketData, groupByType, type MarketDataType } from '@/hooks/useMarketData';
+import type { MarketData } from '@/types';
 
-const TYPE_LABELS: Record<AssetType, string> = {
+const TYPE_LABELS: Record<MarketDataType, string> = {
   currency: 'Devises',
   commodity: 'Matières premières',
   index: 'Indices',
   crypto: 'Cryptomonnaies',
 };
 
-const TYPE_DESCRIPTIONS: Record<AssetType, string> = {
+const TYPE_DESCRIPTIONS: Record<MarketDataType, string> = {
   currency: 'Taux de change des principales devises',
   commodity: 'Cours des matières premières stratégiques',
   index: 'Performance des principaux indices boursiers',
   crypto: 'Cours des principales cryptomonnaies',
 };
 
-const TYPE_ORDER: AssetType[] = ['currency', 'commodity', 'index', 'crypto'];
+const TYPE_ORDER: MarketDataType[] = ['currency', 'commodity', 'index', 'crypto'];
 
 export function MarchesContent() {
-  const { quotes, errors, isLoading, fetchedAt } = useFinancialData();
-  const [expandedSymbol, setExpandedSymbol] = useState<string | null>(null);
+  const { items, isLoading } = useMarketData();
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  const groupedData = useMemo(() => groupQuotesByType(quotes), [quotes]);
+  const groupedData = useMemo(() => groupByType(items), [items]);
 
   const lastUpdated = useMemo(() => {
     let latest: string | null = null;
-    for (const q of quotes) {
-      if (q.marketTime && (!latest || q.marketTime > latest)) {
-        latest = q.marketTime;
+    for (const item of items) {
+      if (item.updatedAt && (!latest || item.updatedAt > latest)) {
+        latest = item.updatedAt;
       }
     }
     return latest;
-  }, [quotes]);
+  }, [items]);
 
-  if (isLoading && quotes.length === 0) {
+  if (isLoading && items.length === 0) {
     return (
       <div className="space-y-8">
         {TYPE_ORDER.map((type) => (
@@ -63,31 +63,10 @@ export function MarchesContent() {
 
   return (
     <div className="space-y-8">
-      {/* Error banner for failed assets */}
-      {errors.length > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl px-5 py-4">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="text-[14px] font-medium text-amber-800">
-                Certaines données sont temporairement indisponibles
-              </p>
-              <ul className="mt-1 space-y-0.5">
-                {errors.map((err) => (
-                  <li key={err.symbol} className="text-[12px] text-amber-600">
-                    {err.name} — {err.reason}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Grouped market data */}
       {TYPE_ORDER.map((type) => {
-        const items = groupedData[type];
-        if (!items || items.length === 0) return null;
+        const group = groupedData[type];
+        if (!group || group.length === 0) return null;
 
         return (
           <div key={type}>
@@ -96,13 +75,13 @@ export function MarchesContent() {
               <p className="text-[13px] text-gray-500 mt-0.5">{TYPE_DESCRIPTIONS[type]}</p>
             </div>
             <div className="bg-white rounded-xl border border-black/[0.06] divide-y divide-black/[0.04] overflow-hidden">
-              {items.map((item) => (
+              {group.map((item) => (
                 <QuoteRow
-                  key={item.symbol}
-                  quote={item}
-                  isExpanded={expandedSymbol === item.symbol}
+                  key={item.id}
+                  item={item}
+                  isExpanded={expandedId === item.id}
                   onToggle={() =>
-                    setExpandedSymbol(expandedSymbol === item.symbol ? null : item.symbol)
+                    setExpandedId(expandedId === item.id ? null : item.id)
                   }
                 />
               ))}
@@ -128,11 +107,9 @@ export function MarchesContent() {
             })}
           </p>
         )}
-        {fetchedAt && (
-          <p className="text-[10px] text-gray-300">
-            Sources : Frankfurter/ECB, Yahoo Finance, CoinGecko, BRVM, TradingEconomics
-          </p>
-        )}
+        <p className="text-[10px] text-gray-300">
+          Données gérées par l&apos;équipe NFI Report
+        </p>
       </div>
 
       {/* Education CTA */}
@@ -160,16 +137,15 @@ export function MarchesContent() {
 // ── Quote row component ────────────────────────────────────────
 
 function QuoteRow({
-  quote,
+  item,
   isExpanded,
   onToggle,
 }: {
-  quote: FinancialQuote;
+  item: MarketData;
   isExpanded: boolean;
   onToggle: () => void;
 }) {
-  const hasEducation = !!(quote.description || quote.educationLink);
-  const isStaleSource = quote.source.includes('(cache)');
+  const hasEducation = !!(item.description || item.educationLink);
 
   return (
     <div>
@@ -181,8 +157,8 @@ function QuoteRow({
       >
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-[15px] font-medium">{quote.name}</span>
-            <span className="text-[11px] text-gray-400 font-mono">{quote.symbol}</span>
+            <span className="text-[15px] font-medium">{item.name}</span>
+            <span className="text-[11px] text-gray-400 font-mono">{item.symbol}</span>
             {hasEducation && (
               <BookOpen
                 className={`w-3.5 h-3.5 transition-colors ${
@@ -190,35 +166,32 @@ function QuoteRow({
                 }`}
               />
             )}
-            {isStaleSource && (
-              <span className="text-[10px] text-amber-500 font-medium">cache</span>
-            )}
           </div>
         </div>
         <div className="flex items-center gap-6 flex-shrink-0">
           <div className="text-right">
             <div className="text-[15px] font-semibold tabular-nums">
-              {quote.price.toLocaleString('fr-FR', {
+              {item.value.toLocaleString('fr-FR', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               })}
-              {quote.unit && (
-                <span className="text-[11px] text-gray-400 font-normal ml-1">{quote.unit}</span>
+              {item.unit && (
+                <span className="text-[11px] text-gray-400 font-normal ml-1">{item.unit}</span>
               )}
             </div>
           </div>
           <div
             className={`flex items-center gap-1 min-w-[80px] justify-end text-[13px] font-medium ${
-              quote.change >= 0 ? 'text-emerald-600' : 'text-red-500'
+              item.change >= 0 ? 'text-emerald-600' : 'text-red-500'
             }`}
           >
-            {quote.change >= 0 ? (
+            {item.change >= 0 ? (
               <TrendingUp className="w-3.5 h-3.5" />
             ) : (
               <TrendingDown className="w-3.5 h-3.5" />
             )}
-            {quote.changePercent > 0 ? '+' : ''}
-            {quote.changePercent.toFixed(2)}%
+            {item.changePercent > 0 ? '+' : ''}
+            {item.changePercent.toFixed(2)}%
           </div>
         </div>
       </div>
@@ -227,12 +200,12 @@ function QuoteRow({
       {isExpanded && hasEducation && (
         <div className="px-5 pb-4 -mt-1">
           <div className="bg-[#fafaf9] rounded-lg border border-black/[0.04] px-4 py-3">
-            {quote.description && (
-              <p className="text-[13px] text-gray-600 leading-relaxed">{quote.description}</p>
+            {item.description && (
+              <p className="text-[13px] text-gray-600 leading-relaxed">{item.description}</p>
             )}
-            {quote.educationLink && (
+            {item.educationLink && (
               <Link
-                href={quote.educationLink}
+                href={item.educationLink}
                 className="inline-flex items-center gap-1.5 mt-2.5 text-[13px] font-medium text-[#111] hover:underline group"
               >
                 Comprendre cet actif

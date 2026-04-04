@@ -80,6 +80,20 @@ export function PaymentContent() {
       .catch(() => {});
   }, []);
 
+  // Load iPayMoney SDK script
+  useEffect(() => {
+    if (!isSignedIn) return;
+    const existing = document.querySelector('script[src="https://i-pay.money/checkout.js"]');
+    if (existing) return;
+    const script = document.createElement('script');
+    script.src = 'https://i-pay.money/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
+    return () => {
+      try { document.body.removeChild(script); } catch { /* already removed */ }
+    };
+  }, [isSignedIn]);
+
   const getPrice = (cycle: BillingCycle) => {
     const opt = BILLING_OPTIONS.find((b) => b.cycle === cycle)!;
     return dynamicPrices[`premium_${cycle}`] ?? opt.price;
@@ -238,20 +252,6 @@ export function PaymentContent() {
       setCardLoading(false);
     }
   };
-
-  // Load iPayMoney SDK script
-  useEffect(() => {
-    if (!isSignedIn) return;
-    const existing = document.querySelector('script[src="https://i-pay.money/checkout.js"]');
-    if (existing) return;
-    const script = document.createElement('script');
-    script.src = 'https://i-pay.money/checkout.js';
-    script.async = true;
-    document.body.appendChild(script);
-    return () => {
-      try { document.body.removeChild(script); } catch { /* already removed */ }
-    };
-  }, [isSignedIn]);
 
   const handleIPayMoneyPayment = async () => {
     setIpaymoneyLoading(true);

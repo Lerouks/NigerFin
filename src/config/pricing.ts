@@ -28,11 +28,11 @@ export const BILLING_OPTIONS: BillingOption[] = [
   },
   {
     cycle: 'quarterly',
-    price: 10_000,
-    label: '10 000 FCFA/3 mois',
+    price: 13_750,
+    label: '13 750 FCFA/3 mois',
     durationLabel: '3 mois',
     durationMonths: 3,
-    savings: 'Économisez 5 000 FCFA',
+    savings: 'Économisez 1 250 FCFA',
   },
   {
     cycle: 'yearly',

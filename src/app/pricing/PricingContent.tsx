@@ -8,7 +8,6 @@ import { useAuth } from '@/lib/auth-context';
 import {
   BILLING_OPTIONS,
   CURRENCY,
-  PAYMENT_METHODS,
   PREMIUM_TIER,
   FREE_TIER_FEATURES,
   type BillingCycle,
@@ -133,18 +132,34 @@ export function PricingContent() {
               {/* Payment methods */}
               <div className="flex items-center gap-3 mt-5">
                 <span className="text-white/25 text-[12px]">Nous acceptons :</span>
-                <div className="flex items-center gap-2">
-                  {Object.values(PAYMENT_METHODS).map((m) => (
-                    <div key={m.id} className="w-8 h-8 rounded-md bg-white/[0.06] flex items-center justify-center">
-                      <Image
-                        src={m.logo}
-                        alt={m.shortName}
-                        width={20}
-                        height={20}
-                        className="rounded object-contain"
-                      />
-                    </div>
-                  ))}
+                <div className="flex items-center gap-2.5">
+                  <div className="h-9 px-2 rounded-md bg-white/[0.06] flex items-center justify-center">
+                    <Image
+                      src="/nita-logo.png"
+                      alt="Nita"
+                      width={24}
+                      height={24}
+                      className="rounded object-contain"
+                    />
+                  </div>
+                  <div className="h-9 px-2 rounded-md bg-white/[0.06] flex items-center justify-center">
+                    <Image
+                      src="/amana-logo.png"
+                      alt="Amana"
+                      width={24}
+                      height={24}
+                      className="rounded object-contain"
+                    />
+                  </div>
+                  <div className="h-9 px-2 rounded-md bg-white/[0.06] flex items-center justify-center">
+                    <Image
+                      src="/card-logos.png"
+                      alt="Visa / Mastercard"
+                      width={48}
+                      height={24}
+                      className="object-contain"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -304,13 +319,7 @@ export function PricingContent() {
       )}
 
       {/* ── FOOTER NOTE ── */}
-      <section className="pb-16">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
-          <p className="text-[12px] text-[#aaa] italic">
-            Le paiement par carte bancaire sera disponible prochainement.
-          </p>
-        </div>
-      </section>
+      <section className="pb-16" />
     </div>
   );
 }

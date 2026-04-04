@@ -80,6 +80,20 @@ export function PaymentContent() {
       .catch(() => {});
   }, []);
 
+  // Load iPayMoney SDK script
+  useEffect(() => {
+    if (!isSignedIn) return;
+    const existing = document.querySelector('script[src="https://i-pay.money/checkout.js"]');
+    if (existing) return;
+    const script = document.createElement('script');
+    script.src = 'https://i-pay.money/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
+    return () => {
+      try { document.body.removeChild(script); } catch { /* already removed */ }
+    };
+  }, [isSignedIn]);
+
   const getPrice = (cycle: BillingCycle) => {
     const opt = BILLING_OPTIONS.find((b) => b.cycle === cycle)!;
     return dynamicPrices[`premium_${cycle}`] ?? opt.price;
@@ -243,6 +257,7 @@ export function PaymentContent() {
     setIpaymoneyLoading(true);
     setPaymentError('');
     try {
+      // 1. Create payment request on our server to get a unique transaction ID
       const res = await fetch('/api/ipaymoney/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -253,13 +268,39 @@ export function PaymentContent() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setPaymentError(data.error || 'Erreur lors de la redirection vers iPayMoney.');
+        setPaymentError(data.error || 'Erreur lors de l\'initialisation du paiement.');
         setIpaymoneyLoading(false);
         return;
       }
-      if (data.url) {
-        window.location.href = data.url;
+
+      // 2. Create a temporary iPayMoney SDK button and trigger checkout
+      const publicKey = process.env.NEXT_PUBLIC_IPAYMONEY_PUBLIC_KEY;
+      if (!publicKey) {
+        setPaymentError('Configuration iPayMoney manquante.');
+        setIpaymoneyLoading(false);
+        return;
       }
+
+      const btn = document.createElement('button');
+      btn.className = 'ipaymoney-button';
+      btn.setAttribute('data-amount', data.amount);
+      btn.setAttribute('data-environement', 'live');
+      btn.setAttribute('data-key', publicKey);
+      btn.setAttribute('data-transaction-id', data.transactionId);
+      btn.setAttribute('data-redirect-url', data.redirectUrl);
+      btn.setAttribute('data-callback-url', data.callbackUrl);
+      btn.style.position = 'fixed';
+      btn.style.opacity = '0';
+      btn.style.pointerEvents = 'none';
+      document.body.appendChild(btn);
+
+      // Give the SDK a moment to bind to the new button, then click
+      setTimeout(() => {
+        btn.click();
+        setTimeout(() => {
+          try { document.body.removeChild(btn); } catch { /* already removed */ }
+        }, 2000);
+      }, 300);
     } catch {
       setPaymentError('Erreur de connexion. Veuillez réessayer.');
       setIpaymoneyLoading(false);

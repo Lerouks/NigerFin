@@ -1,15 +1,15 @@
 'use client';
 
-import { useFinancialData } from '@/hooks/useFinancialData';
+import { useMarketData } from '@/hooks/useMarketData';
 
 /**
  * Scrolling marquee of market prices for the homepage header.
- * Uses the centralized financial data layer (RULE 1).
+ * Reads from admin-managed Supabase market_data table.
  */
 export function MarketMarquee() {
-  const { quotes, isLoading } = useFinancialData();
+  const { items, isLoading } = useMarketData();
 
-  if (isLoading && quotes.length === 0) {
+  if (isLoading && items.length === 0) {
     return (
       <div className="overflow-hidden flex-1 min-w-0">
         <div className="inline-flex items-center gap-8 whitespace-nowrap">
@@ -24,22 +24,22 @@ export function MarketMarquee() {
     );
   }
 
-  if (quotes.length === 0) return null;
+  if (items.length === 0) return null;
 
   // Double the array for seamless looping marquee
-  const doubled = [...quotes, ...quotes];
+  const doubled = [...items, ...items];
 
   return (
     <div className="overflow-hidden flex-1 min-w-0 relative">
       <div className="inline-flex items-center gap-8 animate-marquee whitespace-nowrap will-change-transform" style={{ width: 'max-content' }}>
         {doubled.map((item, i) => (
           <span
-            key={`${item.symbol}-${i}`}
+            key={`${item.id}-${i}`}
             className="inline-flex items-center gap-2 text-[12px] flex-shrink-0"
           >
             <span className="text-white/50 font-medium">{item.symbol}</span>
             <span className="text-white/80 tabular-nums">
-              {item.price.toLocaleString('fr-FR')}
+              {item.value.toLocaleString('fr-FR')}
             </span>
             <span
               className={`text-[11px] tabular-nums ${

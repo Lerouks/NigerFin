@@ -103,7 +103,7 @@ export function getBillingCycleLabel(cycle: string): string {
 
 // ─── Payment methods (Nita & Amana) ─────────────────────────────────────────
 
-export type PaymentMethodId = 'nita' | 'amana';
+export type PaymentMethodId = 'nita' | 'amana' | 'card';
 
 export interface PaymentMethod {
   id: PaymentMethodId;
@@ -134,7 +134,22 @@ export const PAYMENT_METHODS: Record<PaymentMethodId, PaymentMethod> = {
     recipientNumber: '+227 97 76 91 31',
     recipientName: 'NFI REPORT',
   },
+  card: {
+    id: 'card',
+    name: 'Carte bancaire (Visa, Mastercard)',
+    shortName: 'Carte',
+    logo: '/card-logos.png',
+    instructions: 'Vous serez redirigé vers notre plateforme de paiement sécurisée Stripe pour finaliser votre transaction.',
+    recipientNumber: '',
+    recipientName: '',
+  },
 };
+
+/** Mobile money methods only (Nita & Amana) — used for manual payment flow */
+export const MOBILE_PAYMENT_METHODS = {
+  nita: PAYMENT_METHODS.nita,
+  amana: PAYMENT_METHODS.amana,
+} as const;
 
 // ─── Payment request status ─────────────────────────────────────────────────
 

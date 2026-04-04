@@ -36,9 +36,10 @@ export default async function MarchesPage() {
             <div className="mt-10 text-center">
               <Link
                 href="/marches/articles"
-                className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium border border-black/[0.08] rounded-full hover:bg-[#111] hover:text-white transition-all duration-300"
+                className="inline-flex items-center gap-2 px-5 sm:px-6 py-3 text-sm font-medium border border-black/[0.08] rounded-full hover:bg-[#111] hover:text-white transition-all duration-300"
               >
-                Voir tous les articles de la rubrique Marchés
+                <span className="sm:hidden">Voir tous les articles</span>
+                <span className="hidden sm:inline">Voir tous les articles de la rubrique Marchés</span>
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>

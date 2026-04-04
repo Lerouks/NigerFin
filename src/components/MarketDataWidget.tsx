@@ -1,39 +1,38 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useFinancialData, groupQuotesByType } from '@/hooks/useFinancialData';
-import type { AssetType } from '@/lib/financial-data/types';
+import { useMarketData, groupByType, type MarketDataType } from '@/hooks/useMarketData';
 import { VariationBadge } from '@/components/data/VariationBadge';
 
-const TYPE_LABELS: Record<AssetType, string> = {
+const TYPE_LABELS: Record<MarketDataType, string> = {
   currency: 'Devises',
   commodity: 'Matières premières',
   index: 'Indices',
   crypto: 'Cryptomonnaies',
 };
 
-const TYPE_ORDER: AssetType[] = ['currency', 'commodity', 'index', 'crypto'];
+const TYPE_ORDER: MarketDataType[] = ['currency', 'commodity', 'index', 'crypto'];
 
 /**
  * Compact market data sidebar widget.
- * Uses the centralized financial data layer (RULE 1: single source).
+ * Reads from admin-managed Supabase market_data table.
  */
 export function MarketDataWidget() {
-  const { quotes, isLoading } = useFinancialData();
+  const { items, isLoading } = useMarketData();
 
-  const groupedData = useMemo(() => groupQuotesByType(quotes), [quotes]);
+  const groupedData = useMemo(() => groupByType(items), [items]);
 
   const lastUpdated = useMemo(() => {
     let latest: string | null = null;
-    for (const q of quotes) {
-      if (q.marketTime && (!latest || q.marketTime > latest)) {
-        latest = q.marketTime;
+    for (const item of items) {
+      if (item.updatedAt && (!latest || item.updatedAt > latest)) {
+        latest = item.updatedAt;
       }
     }
     return latest;
-  }, [quotes]);
+  }, [items]);
 
-  if (isLoading && quotes.length === 0) {
+  if (isLoading && items.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-black/[0.06] sticky top-36 overflow-hidden">
         <div className="border-b border-black/[0.05] px-5 py-4">
@@ -58,8 +57,8 @@ export function MarketDataWidget() {
       </div>
       <div className="p-5 space-y-5">
         {TYPE_ORDER.map((type) => {
-          const items = groupedData[type];
-          if (!items || items.length === 0) return null;
+          const group = groupedData[type];
+          if (!group || group.length === 0) return null;
 
           return (
             <div key={type}>
@@ -67,9 +66,9 @@ export function MarketDataWidget() {
                 {TYPE_LABELS[type]}
               </h4>
               <div className="space-y-2.5">
-                {items.map((item) => (
+                {group.map((item) => (
                   <div
-                    key={item.symbol}
+                    key={item.id}
                     className="flex justify-between items-center py-1.5 px-2 -mx-2 rounded-lg hover:bg-[#fafaf9] transition-colors cursor-default"
                   >
                     <div className="flex-1">
@@ -78,7 +77,7 @@ export function MarketDataWidget() {
                     </div>
                     <div className="text-right">
                       <div className="text-[13px] tabular-nums font-medium">
-                        {item.price.toLocaleString('fr-FR', {
+                        {item.value.toLocaleString('fr-FR', {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
                         })}
@@ -99,7 +98,7 @@ export function MarketDataWidget() {
       </div>
       <div className="border-t border-black/[0.04] px-5 py-3 bg-[#fafaf9] rounded-b-xl space-y-0.5">
         <p className="text-[10px] text-gray-400 text-center">
-          Données en temps réel &middot; Frankfurter, BRVM, ECB, CoinGecko, Yahoo Finance
+          Données gérées par l&apos;équipe NFI Report
         </p>
         {lastUpdated && (
           <p className="text-[10px] text-gray-400 text-center">

@@ -25,16 +25,16 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await supabase
     .from('comments')
-    .select('id, article_id, user_id, user_name, content, parent_comment_id, created_at')
+    .select('id, article_id, user_id, user_name, content, parent_comment_id, likes, created_at')
     .eq('article_id', articleId)
-    .order('created_at', { ascending: false })
+    .order('created_at', { ascending: true })
     .range(params.offset, params.offset + params.limit - 1);
 
   if (error) {
     return serverError(error, 'comments');
   }
 
-  return NextResponse.json(paginatedResponse(data || [], count || 0, params));
+  return NextResponse.json(data || []);
 }
 
 export async function POST(request: NextRequest) {

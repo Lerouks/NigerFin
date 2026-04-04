@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { requireAdmin } from '@/lib/admin-auth';
 import { serverError } from '@/lib/api-error';
 
@@ -44,6 +45,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) return serverError(error, 'admin-strategic-enterprises');
+  revalidatePath('/entreprises');
   return NextResponse.json(data);
 }
 
@@ -69,6 +71,7 @@ export async function PUT(request: NextRequest) {
     .single();
 
   if (error) return serverError(error, 'admin-strategic-enterprises');
+  revalidatePath('/entreprises');
   return NextResponse.json(data);
 }
 
@@ -90,5 +93,6 @@ export async function DELETE(request: NextRequest) {
     .eq('id', id);
 
   if (error) return serverError(error, 'admin-strategic-enterprises');
+  revalidatePath('/entreprises');
   return NextResponse.json({ success: true });
 }

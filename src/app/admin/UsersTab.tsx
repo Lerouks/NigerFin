@@ -50,7 +50,7 @@ export function UsersTab({ onStatsRefresh }: UsersTabProps) {
     return () => clearTimeout(timeout);
   }, [fetchUsers]);
 
-  const handleUserAction = async (userId: string, action: string, extra?: Record<string, string>) => {
+  const handleUserAction = async (userId: string, action: string, extra?: Record<string, string>): Promise<boolean> => {
     setProcessingUser(userId);
     try {
       const res = await fetch('/api/admin/users', {
@@ -61,9 +61,12 @@ export function UsersTab({ onStatsRefresh }: UsersTabProps) {
       if (res.ok) {
         await fetchUsers();
         onStatsRefresh();
+        setProcessingUser(null);
+        return true;
       }
     } catch { /* ignore */ }
     setProcessingUser(null);
+    return false;
   };
 
   return (
@@ -136,7 +139,7 @@ function UserRow({ user, expanded, processing, onToggle, onAction }: {
   expanded: boolean;
   processing: boolean;
   onToggle: () => void;
-  onAction: (action: string, extra?: Record<string, string>) => void;
+  onAction: (action: string, extra?: Record<string, string>) => Promise<boolean>;
 }) {
   const [durationMonths, setDurationMonths] = useState('1');
   const [customDays, setCustomDays] = useState('');
@@ -159,16 +162,20 @@ function UserRow({ user, expanded, processing, onToggle, onAction }: {
   const handleActivate = async () => {
     const extra: Record<string, string> = { durationMonths };
     if (showCustom && customDays) extra.customDays = customDays;
-    onAction('activateSubscription', extra);
-    setActionSuccess('premium');
-    setTimeout(() => setActionSuccess(null), 3000);
+    const success = await onAction('activateSubscription', extra);
+    if (success) {
+      setActionSuccess('premium');
+      setTimeout(() => setActionSuccess(null), 3000);
+    }
   };
 
-  const handleDeactivate = () => {
+  const handleDeactivate = async () => {
     setShowDowngradeConfirm(false);
-    onAction('deactivateSubscription');
-    setActionSuccess('downgrade');
-    setTimeout(() => setActionSuccess(null), 3000);
+    const success = await onAction('deactivateSubscription');
+    if (success) {
+      setActionSuccess('downgrade');
+      setTimeout(() => setActionSuccess(null), 3000);
+    }
   };
 
   const statusLabel = isActive ? 'Premium actif' : user.subscription_status === 'expired' ? 'Expiré' : 'Lecteur gratuit';

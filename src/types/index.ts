@@ -54,12 +54,10 @@ export interface Comment {
   id: string;
   article_id: string;
   user_id: string;
-  username: string;
+  user_name: string;
   content: string;
   created_at: string;
   parent_comment_id: string | null;
-  likes: number;
-  isLiked?: boolean;
 }
 
 export interface UserProfile {

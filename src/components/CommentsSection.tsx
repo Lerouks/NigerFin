@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Send, CornerDownRight } from 'lucide-react';
+import { Send, CornerDownRight, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 
@@ -13,7 +13,6 @@ interface CommentData {
   content: string;
   created_at: string;
   parent_comment_id: string | null;
-  likes: number;
 }
 
 interface CommentsSectionProps {
@@ -28,15 +27,20 @@ export function CommentsSection({ articleId }: CommentsSectionProps) {
   const [comments, setComments] = useState<CommentData[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchComments = useCallback(async () => {
     try {
       const res = await fetch(`/api/comments?article_id=${encodeURIComponent(articleId)}`);
       if (res.ok) {
-        const data = await res.json();
+        const json = await res.json();
+        // Support both paginated envelope and plain array
+        const data = Array.isArray(json) ? json : json.data;
         if (Array.isArray(data)) setComments(data);
       }
-    } catch {}
+    } catch {
+      setError('Impossible de charger les commentaires.');
+    }
     setLoading(false);
   }, [articleId]);
 
@@ -49,6 +53,7 @@ export function CommentsSection({ articleId }: CommentsSectionProps) {
     if (!commentText.trim() || !user || submitting) return;
 
     setSubmitting(true);
+    setError(null);
     try {
       const res = await fetch('/api/comments', {
         method: 'POST',
@@ -58,8 +63,13 @@ export function CommentsSection({ articleId }: CommentsSectionProps) {
       if (res.ok) {
         setCommentText('');
         await fetchComments();
+      } else {
+        const data = await res.json().catch(() => null);
+        setError(data?.error || 'Erreur lors de la publication du commentaire.');
       }
-    } catch {}
+    } catch {
+      setError('Erreur réseau. Veuillez réessayer.');
+    }
     setSubmitting(false);
   };
 
@@ -67,6 +77,7 @@ export function CommentsSection({ articleId }: CommentsSectionProps) {
     if (!replyText.trim() || !user || submitting) return;
 
     setSubmitting(true);
+    setError(null);
     try {
       const res = await fetch('/api/comments', {
         method: 'POST',
@@ -77,9 +88,31 @@ export function CommentsSection({ articleId }: CommentsSectionProps) {
         setReplyText('');
         setReplyTo(null);
         await fetchComments();
+      } else {
+        const data = await res.json().catch(() => null);
+        setError(data?.error || 'Erreur lors de la publication de la réponse.');
       }
-    } catch {}
+    } catch {
+      setError('Erreur réseau. Veuillez réessayer.');
+    }
     setSubmitting(false);
+  };
+
+  const handleDelete = async (commentId: string) => {
+    setError(null);
+    try {
+      const res = await fetch(`/api/comments?id=${encodeURIComponent(commentId)}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        await fetchComments();
+      } else {
+        const data = await res.json().catch(() => null);
+        setError(data?.error || 'Erreur lors de la suppression.');
+      }
+    } catch {
+      setError('Erreur réseau. Veuillez réessayer.');
+    }
   };
 
   // Organize: top-level + replies grouped by parent
@@ -105,6 +138,12 @@ export function CommentsSection({ articleId }: CommentsSectionProps) {
       </div>
 
       <div className="p-7">
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-[13px]">
+            {error}
+          </div>
+        )}
+
         {isSignedIn ? (
           <form onSubmit={handleSubmit} className="mb-8">
             <textarea
@@ -150,8 +189,10 @@ export function CommentsSection({ articleId }: CommentsSectionProps) {
                 <CommentItem
                   comment={comment}
                   isSignedIn={isSignedIn}
+                  currentUserId={user?.id}
                   replyTo={replyTo}
                   setReplyTo={setReplyTo}
+                  onDelete={handleDelete}
                 />
                 {/* Reply form */}
                 {replyTo === comment.id && isSignedIn && (
@@ -159,7 +200,7 @@ export function CommentsSection({ articleId }: CommentsSectionProps) {
                     <textarea
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
-                      placeholder="Écrire une réponse..."
+                      placeholder="Ecrire une réponse..."
                       className="w-full border border-black/[0.06] rounded-lg p-3 focus:outline-none focus:border-black/15 bg-[#fafaf9] resize-none text-[13px]"
                       rows={2}
                     />
@@ -178,7 +219,15 @@ export function CommentsSection({ articleId }: CommentsSectionProps) {
                 {/* Replies */}
                 {(repliesByParent.get(comment.id) || []).map((reply) => (
                   <div key={reply.id} className="ml-11 mt-4 pl-4 border-l-2 border-black/[0.04]">
-                    <CommentItem comment={reply} isSignedIn={isSignedIn} replyTo={null} setReplyTo={() => {}} isReply />
+                    <CommentItem
+                      comment={reply}
+                      isSignedIn={isSignedIn}
+                      currentUserId={user?.id}
+                      replyTo={null}
+                      setReplyTo={() => {}}
+                      onDelete={handleDelete}
+                      isReply
+                    />
                   </div>
                 ))}
               </div>
@@ -193,16 +242,22 @@ export function CommentsSection({ articleId }: CommentsSectionProps) {
 function CommentItem({
   comment,
   isSignedIn,
+  currentUserId,
   replyTo,
   setReplyTo,
+  onDelete,
   isReply = false,
 }: {
   comment: CommentData;
   isSignedIn: boolean;
+  currentUserId?: string;
   replyTo: string | null;
   setReplyTo: (id: string | null) => void;
+  onDelete: (id: string) => void;
   isReply?: boolean;
 }) {
+  const isOwner = currentUserId === comment.user_id;
+
   return (
     <div className="border-b border-black/[0.04] pb-6 last:border-0 last:pb-0">
       <div className="flex items-start gap-3">
@@ -221,15 +276,26 @@ function CommentItem({
             </span>
           </div>
           <p className="text-sm text-gray-700 mb-3">{comment.content}</p>
-          {!isReply && isSignedIn && (
-            <button
-              onClick={() => setReplyTo(replyTo === comment.id ? null : comment.id)}
-              className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 transition-colors"
-            >
-              <CornerDownRight className="w-3.5 h-3.5" />
-              Répondre
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            {!isReply && isSignedIn && (
+              <button
+                onClick={() => setReplyTo(replyTo === comment.id ? null : comment.id)}
+                className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <CornerDownRight className="w-3.5 h-3.5" />
+                Répondre
+              </button>
+            )}
+            {isOwner && (
+              <button
+                onClick={() => onDelete(comment.id)}
+                className="flex items-center gap-1 text-xs text-gray-400 hover:text-red-600 transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Supprimer
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

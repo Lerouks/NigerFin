@@ -29,7 +29,7 @@ export async function GET(
 
   const { data, error } = await supabase
     .from('discussion_comments')
-    .select('id, discussion_id, user_id, username, content, created_at')
+    .select('id, discussion_id, user_id, username, content, parent_comment_id, created_at')
     .eq('discussion_id', id)
     .order('created_at', { ascending: true })
     .range(pagination.offset, pagination.offset + pagination.limit - 1);
@@ -87,6 +87,22 @@ export async function POST(
       return NextResponse.json({ error: 'parent_comment_id invalide (UUID requis)' }, { status: 400 });
     }
 
+    // Validate parent comment exists and belongs to the same discussion
+    if (parent_comment_id) {
+      const { data: parentComment } = await supabase
+        .from('discussion_comments')
+        .select('id, discussion_id')
+        .eq('id', parent_comment_id)
+        .single();
+
+      if (!parentComment) {
+        return NextResponse.json({ error: 'Commentaire parent introuvable' }, { status: 404 });
+      }
+      if (parentComment.discussion_id !== id) {
+        return NextResponse.json({ error: 'Le commentaire parent n\'appartient pas à cette discussion' }, { status: 400 });
+      }
+    }
+
     const username = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Utilisateur';
 
     const { data, error } = await supabase
@@ -106,6 +122,76 @@ export async function POST(
     }
 
     return NextResponse.json(data, { status: 201 });
+  } catch {
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: 'ID de discussion invalide (UUID requis)' }, { status: 400 });
+    }
+
+    const supabase = await createServerSupabaseClient();
+    if (!supabase) {
+      return NextResponse.json({ error: 'Supabase not configured' }, { status: 503 });
+    }
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
+    }
+
+    const commentId = request.nextUrl.searchParams.get('comment_id');
+    if (!commentId || !isValidUUID(commentId)) {
+      return NextResponse.json({ error: 'comment_id invalide (UUID requis)' }, { status: 400 });
+    }
+
+    // Fetch the comment to verify ownership and discussion membership
+    const { data: comment, error: fetchError } = await supabase
+      .from('discussion_comments')
+      .select('id, user_id, discussion_id')
+      .eq('id', commentId)
+      .single();
+
+    if (fetchError || !comment) {
+      return NextResponse.json({ error: 'Commentaire introuvable' }, { status: 404 });
+    }
+
+    if (comment.discussion_id !== id) {
+      return NextResponse.json({ error: 'Commentaire n\'appartient pas à cette discussion' }, { status: 400 });
+    }
+
+    // Allow deletion by author or admin
+    const isAuthor = comment.user_id === user.id;
+    if (!isAuthor) {
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (profile?.role !== 'admin') {
+        return NextResponse.json({ error: 'Non autorisé' }, { status: 403 });
+      }
+    }
+
+    const { error } = await supabase
+      .from('discussion_comments')
+      .delete()
+      .eq('id', commentId);
+
+    if (error) {
+      return serverError(error, 'discussion-comments');
+    }
+
+    return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }

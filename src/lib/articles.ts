@@ -18,6 +18,7 @@ export interface SupabaseArticle {
   main_image_url: string | null;
   main_image_alt: string | null;
   main_image_caption: string | null;
+  main_image_source: string | null;
   body: string;
   read_time: number | null;
   tags: string[];
@@ -47,7 +48,7 @@ export function toArticle(row: SupabaseArticle): Article {
       avatar: row.author_avatar,
     },
     publishedAt: row.published_at || row.created_at,
-    mainImage: row.main_image_url ? { url: row.main_image_url, alt: row.main_image_alt, caption: row.main_image_caption } : null,
+    mainImage: row.main_image_url ? { url: row.main_image_url, alt: row.main_image_alt, caption: row.main_image_caption, source: row.main_image_source } : null,
     body: row.body ? [{ _type: 'block', children: [{ _type: 'span', text: '' }] }] : [],
     isPremium: row.content_type !== 'free',
     contentType: row.content_type,

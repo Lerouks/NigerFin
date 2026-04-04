@@ -23,6 +23,7 @@ import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import {
   PREMIUM_TIER,
   PAYMENT_METHODS,
+  MOBILE_PAYMENT_METHODS,
   BILLING_OPTIONS,
   formatPrice,
   getBillingOption,
@@ -67,6 +68,7 @@ export function PaymentContent() {
   const [submitting, setSubmitting] = useState(false);
   const [paymentError, setPaymentError] = useState('');
   const [copied, setCopied] = useState(false);
+  const [cardLoading, setCardLoading] = useState(false);
 
   // Dynamic prices
   const [dynamicPrices, setDynamicPrices] = useState<Record<string, number>>({});
@@ -206,6 +208,33 @@ export function PaymentContent() {
       setPaymentError('Erreur de connexion. Veuillez réessayer.');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleCardPayment = async () => {
+    setCardLoading(true);
+    setPaymentError('');
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tier: 'premium',
+          billingCycle,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setPaymentError(data.error || 'Erreur lors de la redirection vers le paiement par carte.');
+        setCardLoading(false);
+        return;
+      }
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch {
+      setPaymentError('Erreur de connexion. Veuillez réessayer.');
+      setCardLoading(false);
     }
   };
 
@@ -566,8 +595,10 @@ export function PaymentContent() {
                       <p className="text-[12px] text-gray-400 uppercase tracking-wider font-semibold mb-3">
                         Méthode de paiement
                       </p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {Object.values(PAYMENT_METHODS).map((m) => (
+
+                      {/* Mobile money methods */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                        {Object.values(MOBILE_PAYMENT_METHODS).map((m) => (
                           <button
                             key={m.id}
                             onClick={() => { setSelectedMethod(m.id); setPaymentStep('instructions'); }}
@@ -587,6 +618,33 @@ export function PaymentContent() {
                           </button>
                         ))}
                       </div>
+
+                      {/* Card payment */}
+                      <button
+                        onClick={handleCardPayment}
+                        disabled={cardLoading}
+                        className="w-full p-4 rounded-xl border-2 border-black/[0.06] hover:border-black/20 text-left transition-all flex items-center gap-3 disabled:opacity-60"
+                      >
+                        <Image
+                          src="/card-logos.png"
+                          alt="Visa / Mastercard"
+                          width={48}
+                          height={30}
+                          className="rounded-lg object-contain"
+                        />
+                        <div className="flex-1">
+                          <h3 className="font-bold text-[15px]">Carte bancaire</h3>
+                          <p className="text-gray-500 text-[12px]">Visa, Mastercard — paiement sécurisé via Stripe</p>
+                        </div>
+                        {cardLoading && <Loader2 className="w-5 h-5 animate-spin text-gray-400" />}
+                      </button>
+
+                      {paymentError && (
+                        <div role="alert" className="bg-red-50 border border-red-200 rounded-lg p-3 mt-3 flex items-start gap-2">
+                          <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                          <p className="text-red-700 text-[13px]">{paymentError}</p>
+                        </div>
+                      )}
                     </div>
                   )}
 

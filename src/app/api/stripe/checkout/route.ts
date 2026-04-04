@@ -40,14 +40,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Corps de requête JSON invalide' }, { status: 400 });
     }
 
-    const { priceId, tier, billingCycle } = body as {
+    const { priceId: explicitPriceId, tier, billingCycle } = body as {
       priceId?: string;
       tier?: string;
       billingCycle?: string;
     };
 
-    if (!priceId || !tier) {
-      return NextResponse.json({ error: 'priceId and tier required' }, { status: 400 });
+    if (!tier) {
+      return NextResponse.json({ error: 'tier required' }, { status: 400 });
+    }
+
+    // Resolve priceId: explicit or from billing cycle env vars
+    const priceIdMap: Record<string, string | undefined> = {
+      monthly: process.env.STRIPE_PRICE_ID_MONTHLY,
+      quarterly: process.env.STRIPE_PRICE_ID_QUARTERLY,
+      yearly: process.env.STRIPE_PRICE_ID_YEARLY,
+    };
+    const priceId = explicitPriceId || (billingCycle ? priceIdMap[billingCycle] : undefined);
+
+    if (!priceId) {
+      return NextResponse.json({ error: 'Impossible de déterminer le prix. Vérifiez la configuration Stripe.' }, { status: 400 });
     }
 
     // Validate tier

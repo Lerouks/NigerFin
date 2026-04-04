@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { ArticleCard } from '@/components/ArticleCard';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
 import { CategoryHero } from '@/components/CategoryHero';
+import { StrategicEnterprisesSection } from '@/components/StrategicEnterprisesSection';
 import { getArticlesByCategory } from '@/lib/articles';
 
 export const revalidate = 60;
@@ -35,6 +36,9 @@ export default async function EntreprisesPage() {
             </div>
           </aside>
         </div>
+
+        {/* Strategic enterprises section */}
+        <StrategicEnterprisesSection />
       </div>
     </div>
   );

@@ -45,6 +45,7 @@ interface ArticleForm {
   main_image_url: string;
   main_image_alt: string;
   main_image_caption: string;
+  main_image_source: string;
   body: string;
   read_time: number;
   tags: string[];
@@ -68,6 +69,7 @@ const EMPTY_FORM: ArticleForm = {
   main_image_url: '',
   main_image_alt: '',
   main_image_caption: '',
+  main_image_source: '',
   body: '',
   read_time: 3,
   tags: [],
@@ -161,6 +163,7 @@ export function ArticlesManager() {
         main_image_url: full.main_image_url || '',
         main_image_alt: full.main_image_alt || '',
         main_image_caption: full.main_image_caption || '',
+        main_image_source: full.main_image_source || '',
         body: full.body || '',
         read_time: full.read_time || 3,
         tags: full.tags || [],
@@ -388,6 +391,11 @@ export function ArticlesManager() {
                 onChange={(e) => setForm((f) => ({ ...f, main_image_caption: e.target.value }))}
                 className="w-full px-3 py-2 border border-black/[0.08] rounded-lg text-[12px] focus:outline-none bg-white mt-2"
                 placeholder="Légende de l'image (optionnel, visible sous l'image)"
+              />
+              <input type="text" value={form.main_image_source}
+                onChange={(e) => setForm((f) => ({ ...f, main_image_source: e.target.value }))}
+                className="w-full px-3 py-2 border border-black/[0.08] rounded-lg text-[12px] focus:outline-none bg-white mt-2"
+                placeholder="Source de l'image (ex: Reuters, AFP, DR)"
               />
             </div>
 

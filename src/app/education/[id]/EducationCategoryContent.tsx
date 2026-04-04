@@ -19,16 +19,14 @@ interface Lesson {
   id: string;
   title: string;
   duration: string;
-  access_level: 'free' | 'standard' | 'premium' | 'pro';
+  access_level: 'free' | 'premium';
   sort_order: number;
   content: string;
 }
 
 const ACCESS_CONFIG: Record<string, { label: string; color: string; requiredRoles: string[] }> = {
   free: { label: 'Gratuit', color: 'bg-emerald-100 text-emerald-700', requiredRoles: ['reader', 'premium', 'admin'] },
-  standard: { label: 'Standard', color: 'bg-amber-100 text-amber-700', requiredRoles: ['premium', 'admin'] },
   premium: { label: 'Premium', color: 'bg-blue-100 text-blue-700', requiredRoles: ['premium', 'admin'] },
-  pro: { label: 'Pro', color: 'bg-purple-100 text-purple-700', requiredRoles: ['premium', 'admin'] },
 };
 
 export function EducationCategoryContent({ slug }: { slug: string }) {

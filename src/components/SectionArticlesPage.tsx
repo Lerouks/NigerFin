@@ -33,7 +33,7 @@ export function SectionArticlesPage({
     <div className="min-h-screen bg-[#fafaf9]">
       <CategoryHero
         label={label}
-        title={`Tous les articles — ${title}`}
+        title={`Tous les articles\u00A0— ${title}`}
         description={description}
         accentGold={accentGold}
       />
@@ -53,7 +53,7 @@ export function SectionArticlesPage({
           <div className="lg:col-span-8">
             {/* Article count */}
             <p className="text-sm text-gray-400 mb-6">
-              {total} article{total !== 1 ? 's' : ''} dans cette rubrique
+              {total}&nbsp;article{total !== 1 ? 's' : ''} dans cette rubrique
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 stagger-grid">
@@ -71,19 +71,23 @@ export function SectionArticlesPage({
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <nav className="flex items-center justify-center gap-2 mt-12">
+              <nav className="flex items-center justify-center gap-2 mt-12" aria-label="Pagination des articles">
                 {page > 1 && (
                   <Link
                     href={`/${sectionSlug}/articles${page - 1 === 1 ? '' : `?page=${page - 1}`}`}
+                    rel="prev"
+                    aria-label="Page précédente"
                     className="px-4 py-2 text-sm border border-black/[0.08] rounded-lg hover:bg-black hover:text-white transition-colors"
                   >
-                    ← Précédent
+                    ←&nbsp;Précédent
                   </Link>
                 )}
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                   <Link
                     key={p}
                     href={`/${sectionSlug}/articles${p === 1 ? '' : `?page=${p}`}`}
+                    aria-label={`Page ${p}`}
+                    aria-current={p === page ? 'page' : undefined}
                     className={`w-10 h-10 flex items-center justify-center text-sm rounded-lg transition-colors ${
                       p === page
                         ? 'bg-[#111] text-white'
@@ -96,9 +100,11 @@ export function SectionArticlesPage({
                 {page < totalPages && (
                   <Link
                     href={`/${sectionSlug}/articles?page=${page + 1}`}
+                    rel="next"
+                    aria-label="Page suivante"
                     className="px-4 py-2 text-sm border border-black/[0.08] rounded-lg hover:bg-black hover:text-white transition-colors"
                   >
-                    Suivant →
+                    Suivant&nbsp;→
                   </Link>
                 )}
               </nav>

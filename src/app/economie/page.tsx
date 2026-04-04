@@ -37,7 +37,7 @@ export default async function EconomiePage() {
                   href="/economie/articles"
                   className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium border border-black/[0.08] rounded-full hover:bg-[#111] hover:text-white transition-all duration-300"
                 >
-                  Voir tous les articles d&apos;Économie
+                  Voir tous les articles de la rubrique Économie
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>

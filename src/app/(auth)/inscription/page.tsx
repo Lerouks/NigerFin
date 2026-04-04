@@ -38,10 +38,20 @@ function InscriptionContent() {
   const strength = password ? getPasswordStrength(password) : null;
   const passwordsMatch = confirmPassword ? password === confirmPassword : true;
 
+  const trimmedName = fullName.trim();
+  const nameParts = trimmedName.split(/\s+/).filter(p => p.length >= 2);
+  const isNameValid = nameParts.length >= 2;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    if (!isNameValid) {
+      setError('Veuillez entrer votre nom et prénom (au moins 2 caractères chacun).');
+      setLoading(false);
+      return;
+    }
 
     if (password.length < 8) {
       setError('Le mot de passe doit contenir au moins 8 caractères.');
@@ -55,7 +65,7 @@ function InscriptionContent() {
       return;
     }
 
-    const { error, existingUser } = await signUp(email, password, fullName);
+    const { error, existingUser } = await signUp(email, password, trimmedName);
 
     if (existingUser) {
       setAccountExists(true);
@@ -151,10 +161,18 @@ function InscriptionContent() {
                 autoComplete="name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full border border-black/[0.08] rounded-xl pl-11 pr-4 py-3 bg-[#fafaf9] focus:outline-none focus:border-gold/30 focus:ring-2 focus:ring-gold/10 transition-all text-base"
-                placeholder="Votre nom complet"
+                aria-invalid={fullName && !isNameValid ? 'true' : undefined}
+                className={`w-full border rounded-xl pl-11 pr-4 py-3 bg-[#fafaf9] focus:outline-none focus:ring-2 transition-all text-base ${
+                  fullName && !isNameValid
+                    ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
+                    : 'border-black/[0.08] focus:border-gold/30 focus:ring-gold/10'
+                }`}
+                placeholder="Prénom et nom"
               />
             </div>
+            {fullName && !isNameValid && (
+              <p className="text-[11px] mt-1 text-red-500">Veuillez entrer votre nom et prénom (au moins 2 caractères chacun).</p>
+            )}
           </div>
 
           <div>
@@ -246,7 +264,7 @@ function InscriptionContent() {
 
           <button
             type="submit"
-            disabled={loading || password.length < 8 || password !== confirmPassword}
+            disabled={loading || !isNameValid || password.length < 8 || password !== confirmPassword}
             className="w-full bg-[#111] text-white py-3.5 rounded-xl hover:bg-[#222] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-[14px] font-medium active:scale-[0.98]"
           >
             {loading ? (

@@ -223,12 +223,14 @@ export function Header() {
 
         {/* Mobile menu */}
         <div
-          className={`lg:hidden bg-white border-t border-black/5 overflow-hidden transition-all duration-300 ease-out ${
-            mobileMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+          className={`lg:hidden bg-white border-t border-black/5 transition-[max-height,opacity] duration-300 ease-out overscroll-contain ${
+            mobileMenuOpen
+              ? 'max-h-[calc(100dvh-4rem)] opacity-100 overflow-y-auto'
+              : 'max-h-0 opacity-0 overflow-hidden'
           }`}
           aria-hidden={!mobileMenuOpen}
         >
-          <nav className="px-4 py-3 space-y-1" aria-label="Menu mobile">
+          <nav className="px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] space-y-1" aria-label="Menu mobile">
             {navigation.map((section, i) => (
               <Link
                 key={section.path}

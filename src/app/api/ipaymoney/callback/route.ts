@@ -6,19 +6,6 @@ import { sendTransactionalEmail } from '@/lib/email';
 import { paymentConfirmationEmail } from '@/lib/email-templates';
 import { SITE_URL } from '@/lib/config';
 import * as Sentry from '@sentry/nextjs';
-import crypto from 'crypto';
-
-/**
- * Verify the iPayMoney webhook signature using HMAC-SHA256.
- * The signature is sent in the `x-ipaymoney-signature` header.
- */
-function verifySignature(payload: string, signature: string, secret: string): boolean {
-  const expected = crypto
-    .createHmac('sha256', secret)
-    .update(payload, 'utf8')
-    .digest('hex');
-  return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
-}
 
 /**
  * Activate subscription for a user after successful iPayMoney payment.
@@ -120,51 +107,49 @@ async function activateSubscription(
 }
 
 /**
- * POST — Server-to-server callback from iPayMoney.
- * Verifies signature, checks payment status, activates subscription.
+ * POST — Callback from iPayMoney SDK / server.
+ * Receives payment status, verifies transaction, activates subscription.
  */
 export async function POST(request: NextRequest) {
   try {
-    const secretKey = process.env.IPAYMONEY_SECRET_KEY;
-    if (!secretKey) {
-      return NextResponse.json({ error: 'iPayMoney non configuré' }, { status: 503 });
-    }
-
-    const rawBody = await request.text();
-    const signature = request.headers.get('x-ipaymoney-signature') || '';
-
-    // Verify webhook signature
-    if (signature && !verifySignature(rawBody, signature, secretKey)) {
-      return NextResponse.json({ error: 'Signature invalide' }, { status: 401 });
-    }
-
-    const payload = JSON.parse(rawBody) as {
-      status?: string;
-      transaction_ref?: string;
-      ipaymoney_ref?: string;
-      amount?: number;
-      metadata?: {
-        user_id?: string;
-        tier?: string;
-        billing_cycle?: string;
-      };
-    };
-
     const serviceClient = createServiceClient();
     if (!serviceClient) {
       return NextResponse.json({ error: 'Service indisponible' }, { status: 503 });
     }
 
-    const transactionRef = payload.transaction_ref;
-    if (!transactionRef) {
-      return NextResponse.json({ error: 'transaction_ref manquant' }, { status: 400 });
+    const rawBody = await request.text();
+    let payload: Record<string, string | number | undefined>;
+
+    // iPayMoney may send form-encoded or JSON data
+    const contentType = request.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      payload = JSON.parse(rawBody);
+    } else {
+      // Parse URL-encoded form data
+      const params = new URLSearchParams(rawBody);
+      payload = Object.fromEntries(params.entries());
+    }
+
+    // iPayMoney SDK sends: transaction_id, status, amount, etc.
+    const transactionId =
+      (payload.transaction_id as string) ||
+      (payload.transaction_ref as string) ||
+      (payload.transactionId as string);
+    const status = payload.status as string | undefined;
+
+    if (!transactionId) {
+      Sentry.captureMessage('iPayMoney callback missing transaction ID', {
+        level: 'warning',
+        extra: { payload },
+      });
+      return NextResponse.json({ error: 'transaction_id manquant' }, { status: 400 });
     }
 
     // Find the matching payment request
     const { data: paymentRequest } = await serviceClient
       .from('payment_requests')
       .select('*')
-      .eq('transaction_number', transactionRef)
+      .eq('transaction_number', transactionId)
       .eq('payment_method', 'ipaymoney')
       .single();
 
@@ -177,42 +162,42 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, message: 'Déjà traité' });
     }
 
-    if (payload.status === 'success' || payload.status === 'completed') {
+    if (status === 'success' || status === 'completed' || status === 'successful') {
       await activateSubscription(
         serviceClient,
         paymentRequest.id,
         paymentRequest.user_id,
         (paymentRequest.billing_cycle || 'monthly') as BillingCycle,
         paymentRequest.amount,
-        payload.ipaymoney_ref || transactionRef,
+        transactionId,
       );
 
       return NextResponse.json({ success: true });
     }
 
-    if (payload.status === 'failed' || payload.status === 'cancelled') {
+    if (status === 'failed' || status === 'cancelled') {
       await serviceClient
         .from('payment_requests')
         .update({
           status: 'rejected',
-          rejection_reason: `iPayMoney: ${payload.status}`,
+          rejection_reason: `iPayMoney: ${status}`,
           updated_at: new Date().toISOString(),
         })
         .eq('id', paymentRequest.id);
 
       await logAuditEvent('system', 'ipaymoney_payment_failed', 'payment', paymentRequest.id, {
         user_id: paymentRequest.user_id,
-        status: payload.status,
-        transaction_ref: transactionRef,
+        status,
+        transaction_id: transactionId,
       });
 
-      return NextResponse.json({ success: true, status: payload.status });
+      return NextResponse.json({ success: true, status });
     }
 
     // Unknown status — log and acknowledge
     Sentry.captureMessage('iPayMoney callback with unknown status', {
       level: 'warning',
-      extra: { status: payload.status, transactionRef },
+      extra: { status, transactionId, payload },
     });
 
     return NextResponse.json({ success: true });
@@ -235,23 +220,10 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const secretKey = process.env.IPAYMONEY_SECRET_KEY;
-    const apiUrl = process.env.IPAYMONEY_API_URL;
     const serviceClient = createServiceClient();
-
-    if (!secretKey || !apiUrl || !serviceClient) {
+    if (!serviceClient) {
       return NextResponse.redirect(`${siteUrl}/pricing?checkout=error`);
     }
-
-    // Verify payment status with iPayMoney API
-    const verifyRes = await fetch(`${apiUrl}/payment/verify/${ref}`, {
-      headers: {
-        'Authorization': `Bearer ${secretKey}`,
-      },
-    });
-
-    const verifyData = await verifyRes.json().catch(() => null);
-    const status = verifyData?.status;
 
     // Find matching payment request
     const { data: paymentRequest } = await serviceClient
@@ -266,25 +238,13 @@ export async function GET(request: NextRequest) {
     }
 
     if (paymentRequest.status === 'verified') {
-      // Already activated (by webhook)
+      // Already activated (by callback)
       return NextResponse.redirect(`${siteUrl}/compte?checkout=success`);
     }
 
-    if (status === 'success' || status === 'completed') {
-      await activateSubscription(
-        serviceClient,
-        paymentRequest.id,
-        paymentRequest.user_id,
-        (paymentRequest.billing_cycle || 'monthly') as BillingCycle,
-        paymentRequest.amount,
-        verifyData?.ipaymoney_ref || ref,
-      );
-
-      return NextResponse.redirect(`${siteUrl}/compte?checkout=success`);
-    }
-
-    // Payment not yet confirmed or failed
-    return NextResponse.redirect(`${siteUrl}/pricing?checkout=cancelled`);
+    // Payment not yet confirmed — show a pending page
+    // The callback POST may arrive shortly after the redirect
+    return NextResponse.redirect(`${siteUrl}/compte?checkout=pending`);
   } catch (err) {
     Sentry.captureException(err, { tags: { context: 'ipaymoney-callback-redirect' } });
     return NextResponse.redirect(`${siteUrl}/pricing?checkout=error`);

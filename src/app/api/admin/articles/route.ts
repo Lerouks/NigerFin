@@ -91,6 +91,7 @@ export async function POST(req: NextRequest) {
     main_image_url: body.main_image_url || null,
     main_image_alt: body.main_image_alt || null,
     main_image_caption: body.main_image_caption || null,
+    main_image_source: body.main_image_source || null,
     body: body.body || '',
     read_time: body.read_time || null,
     tags: body.tags || [],
@@ -122,7 +123,7 @@ export async function PUT(req: NextRequest) {
   const fields = [
     'title', 'subtitle', 'slug', 'excerpt', 'category', 'sections',
     'is_featured', 'featured_order', 'author_name', 'author_avatar',
-    'main_image_url', 'main_image_alt', 'main_image_caption', 'body', 'read_time', 'tags',
+    'main_image_url', 'main_image_alt', 'main_image_caption', 'main_image_source', 'body', 'read_time', 'tags',
     'seo_title', 'seo_description', 'status', 'published_at',
   ];
 

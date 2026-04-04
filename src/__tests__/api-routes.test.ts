@@ -125,6 +125,7 @@ describe('GET /api/comments', () => {
 
     expect(res.status).toBe(200);
     expect(json).toHaveProperty('data');
+    expect(Array.isArray(json.data)).toBe(true);
     expect(json).toHaveProperty('pagination');
   });
 });

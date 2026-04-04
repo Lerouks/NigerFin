@@ -285,9 +285,14 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
                         priority
                       />
                     </div>
-                    {article.mainImage?.caption && (
-                      <figcaption className="text-[12px] text-gray-500 mt-2 text-center px-8 md:px-12">
-                        {article.mainImage.caption}
+                    {(article.mainImage?.caption || article.mainImage?.source) && (
+                      <figcaption className="flex items-start justify-between mt-2 px-8 md:px-12">
+                        {article.mainImage?.caption && (
+                          <span className="text-[12px] text-gray-500">{article.mainImage.caption}</span>
+                        )}
+                        {article.mainImage?.source && (
+                          <span className="text-[11px] text-gray-400 ml-auto whitespace-nowrap">Source : {article.mainImage.source}</span>
+                        )}
                       </figcaption>
                     )}
                   </figure>

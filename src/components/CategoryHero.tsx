@@ -19,7 +19,7 @@ export function CategoryHero({ label, title, description, accentGold = false }: 
             {label}
           </span>
         </div>
-        <h1 className="text-4xl md:text-5xl animate-fade-in-up delay-75">{title}</h1>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl leading-tight animate-fade-in-up delay-75 break-words">{title}</h1>
         <p className="text-white/40 text-[15px] mt-3 max-w-xl animate-fade-in-up delay-150">
           {description}
         </p>

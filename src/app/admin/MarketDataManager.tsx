@@ -48,6 +48,7 @@ export function MarketDataManager() {
   const [form, setForm] = useState(emptyForm);
   const [filterType, setFilterType] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [error, setError] = useState('');
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -65,6 +66,7 @@ export function MarketDataManager() {
 
   const handleSave = async () => {
     setSaving(true);
+    setError('');
     try {
       const method = editId ? 'PUT' : 'POST';
       const body = editId ? { id: editId, ...form } : form;
@@ -78,19 +80,30 @@ export function MarketDataManager() {
         setShowCreate(false);
         setForm(emptyForm);
         fetchData();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || 'Erreur lors de la sauvegarde');
       }
-    } catch { /* ignore */ }
+    } catch {
+      setError('Erreur réseau');
+    }
     setSaving(false);
   };
 
   const handleDelete = async (id: string) => {
+    setError('');
     try {
       const res = await fetch(`/api/admin/market-data?id=${id}`, { method: 'DELETE' });
       if (res.ok) {
         setDeleteConfirm(null);
         fetchData();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || 'Erreur lors de la suppression');
       }
-    } catch { /* ignore */ }
+    } catch {
+      setError('Erreur réseau');
+    }
   };
 
   const startEdit = (entry: MarketEntry) => {
@@ -162,6 +175,13 @@ export function MarketDataManager() {
           Ajouter
         </button>
       </div>
+
+      {/* Error message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-[13px]">
+          {error}
+        </div>
+      )}
 
       {/* Create form */}
       {showCreate && (

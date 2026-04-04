@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { requireAdmin } from '@/lib/admin-auth';
 import { serverError } from '@/lib/api-error';
 
@@ -44,6 +45,8 @@ export async function PUT(req: NextRequest) {
     if (error) return serverError(error, 'admin-legal-sections');
   }
 
+  revalidatePath('/mentions-legales');
+  revalidatePath('/politique-de-confidentialite');
   return NextResponse.json({ success: true });
 }
 
@@ -65,6 +68,8 @@ export async function POST(req: NextRequest) {
 
   if (error) return serverError(error, 'admin-legal-sections');
 
+  revalidatePath('/mentions-legales');
+  revalidatePath('/politique-de-confidentialite');
   return NextResponse.json(data);
 }
 
@@ -83,5 +88,7 @@ export async function DELETE(req: NextRequest) {
 
   if (error) return serverError(error, 'admin-legal-sections');
 
+  revalidatePath('/mentions-legales');
+  revalidatePath('/politique-de-confidentialite');
   return NextResponse.json({ success: true });
 }

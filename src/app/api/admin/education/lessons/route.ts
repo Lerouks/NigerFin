@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { requireAdmin } from '@/lib/admin-auth';
 import { createServerSupabaseClient } from '@/lib/supabase';
 import { serverError } from '@/lib/api-error';
@@ -65,6 +66,7 @@ export async function POST(request: NextRequest) {
     return serverError(error, 'admin-education-lessons');
   }
 
+  revalidatePath('/education');
   return NextResponse.json(data);
 }
 
@@ -98,6 +100,7 @@ export async function PUT(request: NextRequest) {
     return serverError(error, 'admin-education-lessons');
   }
 
+  revalidatePath('/education');
   return NextResponse.json(data);
 }
 
@@ -123,5 +126,6 @@ export async function DELETE(request: NextRequest) {
     return serverError(error, 'admin-education-lessons');
   }
 
+  revalidatePath('/education');
   return NextResponse.json({ success: true });
 }

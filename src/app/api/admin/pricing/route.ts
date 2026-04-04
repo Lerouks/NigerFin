@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { requireAdmin } from '@/lib/admin-auth';
 import { logAuditEvent } from '@/lib/audit';
 import { BILLING_OPTIONS } from '@/config/pricing';
@@ -74,5 +75,7 @@ export async function PUT(request: NextRequest) {
     newAmount: amount,
   });
 
+  revalidatePath('/pricing');
+  revalidatePath('/paiement');
   return NextResponse.json({ success: true });
 }

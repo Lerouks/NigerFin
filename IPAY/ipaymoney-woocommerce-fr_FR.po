@@ -1,0 +1,274 @@
+# Copyright (C) 2019 iPaymoney Developer Team ❤️
+# This file is distributed under the GPLv2.
+msgid ""
+msgstr ""
+"Project-Id-Version: iPaymoney WooCommerce Plugin 1.0.1\n"
+"Report-Msgid-Bugs-To: "
+"https://wordpress.org/support/plugin/ipaymoney-woocommerce-plugin\n"
+"POT-Creation-Date: 2019-02-24 11:06:58+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2019-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"X-Generator: node-wp-i18n 1.2.3\n"
+
+#: admin/ipaymoney-settings.php:11
+msgid "Enable/Disable"
+msgstr "Activer/Desactiver"
+
+#: admin/ipaymoney-settings.php:12
+msgid "Enable Ipaymoney Gateway"
+msgstr "Activer Ipaymoney"
+
+#: admin/ipaymoney-settings.php:19
+msgid "Test Mode"
+msgstr "Mode Test"
+
+#: admin/ipaymoney-settings.php:20
+msgid "Enable Test Mode"
+msgstr "Mettre Ipaymoney en Mode Test"
+
+#: admin/ipaymoney-settings.php:22
+msgid "Sets Ipaymoney into test mode"
+msgstr "Cocher cette option pour mettre Ipaymoney en environnement sandbox"
+
+#: admin/ipaymoney-settings.php:27
+msgid "(Optional) Title"
+msgstr "(Optionnel) Titre"
+
+#: admin/ipaymoney-settings.php:29
+msgid "This controls the title which the user sees during checkout."
+msgstr "Définissez un titre Ipaymoney pour vos utilisateurs"
+
+#: admin/ipaymoney-settings.php:30
+msgid "Pay by Mobile Money and Credit Card (Ipaymoney)"
+msgstr "Payez par Mobile Money et par Carte Bancaire (Ipaymoney)"
+
+#: admin/ipaymoney-settings.php:34
+msgid "(Optional) Description"
+msgstr "(Optionnel) Description"
+
+#: admin/ipaymoney-settings.php:36
+msgid "This controls the description which the user sees during checkout."
+msgstr "Définissez une description de Ipaymoney pour vos utilisateurs"
+
+#: admin/ipaymoney-settings.php:30
+msgid ""
+"Use ipaymoney to pay with your Mobile Money account, credit card or bank "
+"account"
+msgstr ""
+"Utilisez Ipaymoney pour payer avec votre compte mobile money, une carte de "
+"credit ou un compte bancaire"
+
+#: admin/ipaymoney-settings.php:34
+msgid "Public KEY"
+msgstr "Clé publique"
+
+#: admin/ipaymoney-settings.php:37 admin/ipaymoney-settings.php:43
+#: admin/ipaymoney-settings.php:49
+msgid "Get your API keys from your Kipaymoney dashboard"
+msgstr ""
+"Obtenez vos clés d'API sur le dashboard Kipaymoney dans la section "
+"<b>Développeurs</b>"
+
+#: admin/ipaymoney-settings.php:40
+msgid "Private KEY"
+msgstr "Clé Privée"
+
+#: admin/ipaymoney-settings.php:46
+msgid "Secret"
+msgstr "Secret"
+
+#: admin/ipaymoney-settings.php:52
+msgid "(Optional) Widget Position"
+msgstr "(Optionnel) Disposition du Widget Ipaymoney"
+
+#: admin/ipaymoney-settings.php:54
+msgid ""
+"When Ipaymoney payment form is displayed directly on your site, you can choose "
+"the widget displaying position (left side, right side or center). "
+msgstr ""
+"Utilisez cette option pour contrôler l'endroit où la fenêtre Ipaymoney devrait "
+"s'afficher sur votre site"
+
+#: admin/ipaymoney-settings.php:58
+msgid "Right Side"
+msgstr "Du côté droit de la page"
+
+#: admin/ipaymoney-settings.php:59
+msgid "Left Side"
+msgstr "Du côté gauche de la page"
+
+#: admin/ipaymoney-settings.php:60
+msgid "Center"
+msgstr "Au centre de la page"
+
+#: admin/ipaymoney-settings.php:64
+msgid "(Optional) Widget Theme"
+msgstr "(Optionnel) Thème du widget"
+
+#: admin/ipaymoney-settings.php:67
+msgid ""
+"When Ipaymoney payment form is displayed directly on your site, you can choose "
+"the widget color (eg: red) according to your website colors. "
+msgstr ""
+"Paramétrez la couleur de la fenêtre Ipaymoney. Pour une meilleure "
+"harmonisation, utilisez la couleur dominante de votre site ou laissez vide "
+"(Recommandée)."
+
+#: admin/ipaymoney-settings.php:70
+msgid "(Optional) Add link to your shop logo"
+msgstr "(Optionnel) Insérez un lien vers le logo de votre boutique"
+
+#: admin/ipaymoney-settings.php:73
+msgid ""
+"Enter the URL to a 128x128px image of your brand or product. e.g. "
+"<code>https://yoursite.com/wp-content/uploads/2013/09/yourimage.jpg</code>"
+msgstr ""
+"Entrer l'URL d'une image de taille 128x128px de votre produit ou marque, "
+"exemple <code>https://monsite.com/wp-content/uploads/2013/09/monimage.jpg</"
+"code>"
+
+#: includes/class-wc-ipaymoney-gateway.php:21
+msgid ""
+"Use ipaymoney to accept payment from Mobile Money account, credit card or bank "
+"account"
+msgstr ""
+"Utilisez Ipaymoney pour payer avec votre compte mobile money, une carte de "
+"credit ou un compte bancaire"
+
+#: includes/class-wc-ipaymoney-gateway.php:90
+msgid ""
+"Ipaymoney does not support your store currency. Kindly set it to XOF (FCFA)."
+msgstr ""
+"Ipaymoney ne supporte pas la devise de votre boutique. Veuillez choisir le "
+"FCFA (XOF) comme devise"
+
+#: includes/class-wc-ipaymoney-gateway.php:101
+msgid "Ipaymoney Payment Gateway Disabled"
+msgstr "Ipaymoney est désactivé"
+
+#: includes/class-wc-ipaymoney-gateway.php:134
+msgid ""
+"Thank you for your order, please click the <b>Proceed to payment</b> button "
+"below to make payment."
+msgstr ""
+"Merci pour votre commande, Cliquez sur le bouton <b>Procéder au paiement</b>"
+
+#: includes/class-wc-ipaymoney-gateway.php:136
+msgid "Cancel order"
+msgstr "Annuler la Commande"
+
+#: includes/class-wc-ipaymoney-gateway.php:137
+msgid "Proceed to payment"
+msgstr "Procéder au paiement"
+
+#: includes/class-wc-ipaymoney-gateway.php:189
+msgid "Payment was successful on Ipaymoney"
+msgstr "Paiement réussi sur Ipaymoney"
+
+#: includes/class-wc-ipaymoney-gateway.php:191
+#: includes/class-wc-ipaymoney-gateway.php:200
+#: includes/class-wc-ipaymoney-gateway.php:211
+msgid "Thank you for your order.<br>"
+msgstr "Merci pour votre commande. <br>"
+
+#: includes/class-wc-ipaymoney-gateway.php:192
+msgid ""
+"Your payment was successful, we are now <strong>processing</strong> your "
+"order."
+msgstr ""
+"Votre paiement a été effectué. Nous <strong> sommes en train de traiter </ "
+"strong> votre commande."
+
+#: includes/class-wc-ipaymoney-gateway.php:201
+#: includes/class-wc-ipaymoney-gateway.php:212
+msgid ""
+"Your payment has not been confirmed yet, so we have to put your order "
+"<strong>on-hold</strong> "
+msgstr ""
+"Votre paiement n'a pas encore été confirmé! Votre commande est donc en "
+"attente de validation "
+
+#: includes/class-wc-ipaymoney-gateway.php:202
+#: includes/class-wc-ipaymoney-gateway.php:213
+msgid ""
+"If this persists, Please, contact us for information regarding this order."
+msgstr ""
+"Si cela persiste, veuillez nous contacter pour obtenir de l'aide sur cette "
+"commande."
+
+#: includes/class-wc-ipaymoney-gateway.php:214
+msgid ""
+"Attention: New order has been placed on hold because of incorrect payment "
+"amount or currency. Please, look into it. <br>"
+msgstr ""
+"Attention: Une nouvelle commande à été mise en attente suite à un paiement "
+"incorrect"
+
+#: includes/class-wc-ipaymoney-gateway.php:215
+msgid "Amount paid: "
+msgstr "Montant payé:"
+
+#: includes/class-wc-ipaymoney-gateway.php:236
+msgid "The order payment failed on Ipaymoney"
+msgstr "Le paiement de la commande a échoué sur Ipaymoney"
+
+#: includes/class-wc-ipaymoney-gateway.php:237
+msgid "Your payment <strong>failed</strong>. "
+msgstr "Votre <strong> paiement a échoué </ strong>."
+
+#: includes/class-wc-ipaymoney-gateway.php:238
+msgid "Please, try funding your account."
+msgstr "Veuillez essayer de créditer votre compte"
+
+#: includes/class-wc-ipaymoney-gateway.php:252
+#, php-format
+msgid ""
+"<strong>%s</strong> is enabled and WooCommerce is not forcing the SSL "
+"certificate on your checkout page. Please ensure that you have a valid SSL "
+"certificate and that you are <a href=\"%s\">forcing the checkout pages to be "
+"secured.</a>"
+msgstr ""
+"<strong>%s</strong> est activé et WooCommerce ne force pas le certificat SSL "
+"sur votre page de paiement Assurez-vous que vous disposez d'un certificat "
+"SSL valide et que vous <a href=\"%s\"> forcez la sécurisation des pages de "
+"paiement. </a>"
+
+#: ipaymoney-woocommerce-plugin.php:48
+msgid "Settings"
+msgstr "Réglages"
+
+#: ipaymoney-woocommerce-plugin.php:49
+msgid "Docs"
+msgstr "Documentation"
+
+#: ipaymoney-woocommerce-plugin.php:50
+msgid "Support"
+msgstr "Support"
+
+#. Plugin Name of the plugin/theme
+msgid "iPaymoney WooCommerce Plugin"
+msgstr "iPaymoney WooCommerce Plugin"
+
+#. Plugin URI of the plugin/theme
+msgid "https://wordpress.org/plugins/ipaymoney-woocommerce-plugin"
+msgstr "https://wordpress.org/plugins/ipaymoney-woocommerce-plugin"
+
+#. Description of the plugin/theme
+msgid ""
+"iPaymoney allows businesses to safely receive payments by mobile money, credit "
+"card and bank account."
+msgstr ""
+"iPaymoney permet aux entreprises de recevoir des paiements par mobile money, "
+"carte de crédit et compte bancaire en toute sécurité."
+
+#. Author of the plugin/theme
+msgid "iPaymoney Developer Team ❤️"
+msgstr "iPaymoney ❤️"
+
+#. Author URI of the plugin/theme
+msgid "https://i-pay.money/"
+msgstr "https://i-pay.money/"

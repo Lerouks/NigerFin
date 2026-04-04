@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceClient } from '@/lib/supabase';
+import { createServerSupabaseClient } from '@/lib/supabase';
 import { serverError } from '@/lib/api-error';
 
 export async function GET(req: NextRequest) {
   const slug = req.nextUrl.searchParams.get('page');
   if (!slug) return NextResponse.json({ error: 'page parameter required' }, { status: 400 });
 
-  const supabase = createServiceClient();
+  const supabase = await createServerSupabaseClient();
   if (!supabase) return NextResponse.json({ error: 'Service indisponible' }, { status: 503 });
 
   const { data, error } = await supabase

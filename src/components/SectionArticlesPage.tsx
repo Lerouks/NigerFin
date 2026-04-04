@@ -71,13 +71,13 @@ export function SectionArticlesPage({
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <nav className="flex items-center justify-center gap-2 mt-12" aria-label="Pagination des articles">
+              <nav className="flex flex-wrap items-center justify-center gap-2 mt-12" aria-label="Pagination des articles">
                 {page > 1 && (
                   <Link
                     href={`/${sectionSlug}/articles${page - 1 === 1 ? '' : `?page=${page - 1}`}`}
                     rel="prev"
                     aria-label="Page précédente"
-                    className="px-4 py-2 text-sm border border-black/[0.08] rounded-lg hover:bg-black hover:text-white transition-colors"
+                    className="px-4 h-11 inline-flex items-center text-sm border border-black/[0.08] rounded-lg hover:bg-black hover:text-white transition-colors"
                   >
                     ←&nbsp;Précédent
                   </Link>
@@ -88,7 +88,7 @@ export function SectionArticlesPage({
                     href={`/${sectionSlug}/articles${p === 1 ? '' : `?page=${p}`}`}
                     aria-label={`Page ${p}`}
                     aria-current={p === page ? 'page' : undefined}
-                    className={`w-10 h-10 flex items-center justify-center text-sm rounded-lg transition-colors ${
+                    className={`min-w-[44px] h-11 flex items-center justify-center text-sm rounded-lg transition-colors ${
                       p === page
                         ? 'bg-[#111] text-white'
                         : 'border border-black/[0.08] hover:bg-black/[0.04]'
@@ -102,7 +102,7 @@ export function SectionArticlesPage({
                     href={`/${sectionSlug}/articles?page=${page + 1}`}
                     rel="next"
                     aria-label="Page suivante"
-                    className="px-4 py-2 text-sm border border-black/[0.08] rounded-lg hover:bg-black hover:text-white transition-colors"
+                    className="px-4 h-11 inline-flex items-center text-sm border border-black/[0.08] rounded-lg hover:bg-black hover:text-white transition-colors"
                   >
                     Suivant&nbsp;→
                   </Link>

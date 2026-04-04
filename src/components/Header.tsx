@@ -54,15 +54,30 @@ export function Header() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const scrollToNewsletter = () => {
+    const el = document.getElementById('newsletter');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   const handleNewsletterClick = () => {
     if (window.location.pathname === '/') {
+      // Delay scroll to let mobile menu close and layout settle
+      setTimeout(scrollToNewsletter, 300);
+      return;
+    }
+    router.push('/');
+    // After navigation, wait for page to render then scroll
+    const checkAndScroll = () => {
       const el = document.getElementById('newsletter');
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        return;
+      } else {
+        setTimeout(checkAndScroll, 100);
       }
-    }
-    router.push('/#newsletter');
+    };
+    setTimeout(checkAndScroll, 500);
   };
 
   const handleSignOut = async () => {

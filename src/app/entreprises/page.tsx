@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { ArticleCard } from '@/components/ArticleCard';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
 import { CategoryHero } from '@/components/CategoryHero';
@@ -8,8 +9,10 @@ import { getArticlesByCategory } from '@/lib/articles';
 export const revalidate = 60;
 export const metadata: Metadata = { title: 'Entreprises', description: 'Actualités des entreprises nigériennes et ouest-africaines : résultats, stratégies, fusions et opportunités d\'investissement.' };
 
+const PREVIEW_LIMIT = 6;
+
 export default async function EntreprisesPage() {
-  const { articles } = await getArticlesByCategory('entreprises');
+  const { articles, total } = await getArticlesByCategory('entreprises', 1, PREVIEW_LIMIT);
   return (
     <div className="min-h-screen bg-[#fafaf9]">
       <CategoryHero
@@ -27,6 +30,19 @@ export default async function EntreprisesPage() {
               <div className="text-center py-20">
                 <p className="text-gray-400 text-lg mb-2">Aucun article dans cette rubrique</p>
                 <p className="text-gray-300 text-sm">De nouveaux contenus arrivent bientôt.</p>
+              </div>
+            )}
+            {total > PREVIEW_LIMIT && (
+              <div className="mt-10 text-center">
+                <Link
+                  href="/entreprises/articles"
+                  className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium border border-black/[0.08] rounded-full hover:bg-[#111] hover:text-white transition-all duration-300"
+                >
+                  Voir tous les articles d&apos;Entreprises
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </Link>
               </div>
             )}
           </div>

@@ -137,17 +137,19 @@ export function ArticlesManager() {
   const handleEdit = async (article: ArticleRow) => {
     setError('');
     setSuccess('');
-    // Fetch full article data
     try {
-      const res = await fetch('/api/admin/articles');
-      if (!res.ok) return;
-      const all = await res.json();
-      const full = all.find((a: ArticleRow) => a.id === article.id);
-      if (!full) return;
+      // Fetch full article data with body via specific endpoint
+      const res = await fetch(`/api/admin/articles?id=${article.id}`);
+      if (!res.ok) {
+        setError('Erreur lors du chargement de l\'article');
+        return;
+      }
+      const full = await res.json();
+      if (!full) {
+        setError('Article introuvable');
+        return;
+      }
 
-      // We need the full body too - fetch it via a specific call
-      const detailRes = await fetch(`/api/admin/articles?id=${article.id}`);
-      // For now, use what we have
       setForm({
         id: full.id,
         title: full.title || '',
@@ -173,7 +175,9 @@ export function ArticlesManager() {
         published_at: full.published_at ? full.published_at.slice(0, 16) : '',
       });
       setEditing(true);
-    } catch { /* ignore */ }
+    } catch {
+      setError('Erreur réseau lors du chargement');
+    }
   };
 
   const handleSave = async (publishNow = false) => {

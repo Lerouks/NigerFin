@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { requireAdmin } from '@/lib/admin-auth';
 import { serverError } from '@/lib/api-error';
 
@@ -131,5 +132,6 @@ export async function PUT(req: NextRequest) {
     await Promise.all(resourceUpdates);
   }
 
+  revalidatePath('/niger');
   return NextResponse.json({ success: true });
 }

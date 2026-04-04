@@ -18,6 +18,7 @@ export function FlashBannerManager() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [error, setError] = useState('');
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -35,6 +36,7 @@ export function FlashBannerManager() {
 
   const handleToggle = async () => {
     setSaving(true);
+    setError('');
     try {
       const res = await fetch('/api/admin/flash-banner', {
         method: 'PUT',
@@ -43,13 +45,18 @@ export function FlashBannerManager() {
       });
       if (res.ok) {
         setData((prev) => ({ ...prev, enabled: !prev.enabled }));
+      } else {
+        setError('Erreur lors de la mise à jour');
       }
-    } catch { /* ignore */ }
+    } catch {
+      setError('Erreur réseau');
+    }
     setSaving(false);
   };
 
   const handleSave = async () => {
     setSaving(true);
+    setError('');
     try {
       const res = await fetch('/api/admin/flash-banner', {
         method: 'PUT',
@@ -58,8 +65,12 @@ export function FlashBannerManager() {
       });
       if (res.ok) {
         setDirty(false);
+      } else {
+        setError('Erreur lors de la sauvegarde');
       }
-    } catch { /* ignore */ }
+    } catch {
+      setError('Erreur réseau');
+    }
     setSaving(false);
   };
 
@@ -123,6 +134,13 @@ export function FlashBannerManager() {
           {data.enabled ? 'Visible' : 'Masqué'}
         </button>
       </div>
+
+      {/* Error message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-[13px]">
+          {error}
+        </div>
+      )}
 
       {/* Items list */}
       <div className="bg-white rounded-xl border border-black/[0.06] divide-y divide-black/[0.04]">

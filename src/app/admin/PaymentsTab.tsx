@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Loader2, CheckCircle, XCircle, Clock, Download } from 'lucide-react';
 import { formatPrice, getBillingCycleLabel } from '@/config/pricing';
 
@@ -28,24 +28,34 @@ export function PaymentsTab({ onStatsRefresh }: PaymentsTabProps) {
   const [loading, setLoading] = useState(false);
   const [processingPayment, setProcessingPayment] = useState<string | null>(null);
   const [paymentFilter, setPaymentFilter] = useState('pending');
+  const [error, setError] = useState('');
 
   const fetchPayments = useCallback(async (status: string) => {
     setLoading(true);
     setPaymentFilter(status);
+    setError('');
     try {
       const res = await fetch(`/api/payment/list?status=${status}`);
+      if (!res.ok) {
+        setError('Erreur lors du chargement des paiements');
+        setLoading(false);
+        return;
+      }
       const json = await res.json();
       const list = json.data ?? json;
       if (Array.isArray(list)) setPayments(list);
-    } catch { /* ignore */ }
+    } catch {
+      setError('Erreur réseau');
+    }
     setLoading(false);
   }, []);
 
   // Load on mount
-  useState(() => { fetchPayments('pending'); });
+  useEffect(() => { fetchPayments('pending'); }, [fetchPayments]);
 
   const handlePaymentAction = async (paymentId: string, action: 'verify' | 'reject') => {
     setProcessingPayment(paymentId);
+    setError('');
     try {
       const res = await fetch('/api/payment/verify', {
         method: 'POST',
@@ -59,8 +69,13 @@ export function PaymentsTab({ onStatsRefresh }: PaymentsTabProps) {
       if (res.ok) {
         setPayments((prev) => prev.filter((p) => p.id !== paymentId));
         onStatsRefresh();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || `Erreur lors de ${action === 'verify' ? 'la validation' : 'du rejet'}`);
       }
-    } catch { /* ignore */ }
+    } catch {
+      setError('Erreur réseau');
+    }
     setProcessingPayment(null);
   };
 
@@ -92,6 +107,12 @@ export function PaymentsTab({ onStatsRefresh }: PaymentsTabProps) {
           <Download className="w-3.5 h-3.5" /> Excel
         </button>
       </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-[13px]">
+          {error}
+        </div>
+      )}
 
       {loading ? (
         <div className="text-center py-12">

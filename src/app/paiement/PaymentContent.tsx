@@ -69,6 +69,7 @@ export function PaymentContent() {
   const [paymentError, setPaymentError] = useState('');
   const [copied, setCopied] = useState(false);
   const [cardLoading, setCardLoading] = useState(false);
+  const [ipaymoneyLoading, setIpaymoneyLoading] = useState(false);
 
   // Dynamic prices
   const [dynamicPrices, setDynamicPrices] = useState<Record<string, number>>({});
@@ -235,6 +236,33 @@ export function PaymentContent() {
     } catch {
       setPaymentError('Erreur de connexion. Veuillez réessayer.');
       setCardLoading(false);
+    }
+  };
+
+  const handleIPayMoneyPayment = async () => {
+    setIpaymoneyLoading(true);
+    setPaymentError('');
+    try {
+      const res = await fetch('/api/ipaymoney/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tier: 'premium',
+          billingCycle,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setPaymentError(data.error || 'Erreur lors de la redirection vers iPayMoney.');
+        setIpaymoneyLoading(false);
+        return;
+      }
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch {
+      setPaymentError('Erreur de connexion. Veuillez réessayer.');
+      setIpaymoneyLoading(false);
     }
   };
 
@@ -618,6 +646,26 @@ export function PaymentContent() {
                           </button>
                         ))}
                       </div>
+
+                      {/* iPayMoney */}
+                      <button
+                        onClick={handleIPayMoneyPayment}
+                        disabled={ipaymoneyLoading}
+                        className="w-full p-4 rounded-xl border-2 border-black/[0.06] hover:border-black/20 text-left transition-all flex items-center gap-3 disabled:opacity-60"
+                      >
+                        <Image
+                          src="/ipaymoney-logo.png"
+                          alt="iPayMoney"
+                          width={36}
+                          height={36}
+                          className="rounded-lg object-contain"
+                        />
+                        <div className="flex-1">
+                          <h3 className="font-bold text-[15px]">iPayMoney</h3>
+                          <p className="text-gray-500 text-[12px]">Mobile Money (Airtel, Moov, Zamani) & Carte bancaire</p>
+                        </div>
+                        {ipaymoneyLoading && <Loader2 className="w-5 h-5 animate-spin text-gray-400" />}
+                      </button>
 
                       {/* Card payment */}
                       <button

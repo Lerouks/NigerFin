@@ -3,10 +3,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { X, Check } from 'lucide-react';
+import { X, Check, Lock, Crown, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { getReaderPremiumLimit } from '@/lib/access-control';
-import { PREMIUM_TIER } from '@/config/pricing';
+import { PREMIUM_TIER, PREMIUM_MONTHLY_PRICE, CURRENCY } from '@/config/pricing';
 import type { UserRole } from '@/types';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -29,7 +29,10 @@ interface OverlayConfig {
   ctaPrimary: { text: string; href: string };
   ctaSecondary?: { text: string; href: string };
   counterText?: string;
+  counterRemaining?: number;
+  counterTotal?: number;
   showEmailField?: boolean;
+  accent: 'gold' | 'dark';
 }
 
 interface PremiumOverlayProps {
@@ -110,7 +113,7 @@ function getOverlayCase(
 
 // ─── Config per case ─────────────────────────────────────────────────────────
 
-function getOverlayConfig(overlayCase: OverlayCase, remaining: number): OverlayConfig | null {
+function getOverlayConfig(overlayCase: OverlayCase, remaining: number, limit: number): OverlayConfig | null {
   switch (overlayCase) {
     case 'premium':
     case 'admin':
@@ -120,26 +123,30 @@ function getOverlayConfig(overlayCase: OverlayCase, remaining: number): OverlayC
       return {
         isBlocking: true,
         scrollTriggerPercent: 30,
-        title: 'Contenu Premium',
-        message: 'Authentifiez-vous pour accéder à l\'article complet',
+        title: 'Cet article est réservé aux membres',
+        message: 'Connectez-vous ou créez un compte pour continuer votre lecture.',
         showEmailField: true,
+        accent: 'dark',
         benefits: [
           'Accès aux contenus premium',
           'Interaction avec la communauté',
           'Alertes et notifications',
           'Personnalisation de l\'expérience',
         ],
-        ctaPrimary: { text: 'Continuer', href: '/connexion' },
-        ctaSecondary: { text: 'Créer un compte', href: '/inscription' },
+        ctaPrimary: { text: 'Se connecter', href: '/connexion' },
+        ctaSecondary: { text: 'Créer un compte gratuitement', href: '/inscription' },
       };
 
     case 'connected_has_articles':
       return {
         isBlocking: false,
         scrollTriggerPercent: 40,
-        title: 'Contenu Premium',
-        message: 'Vous bénéficiez de 3 articles premium gratuits chaque mois.',
-        counterText: `Il vous reste ${remaining} article${remaining !== 1 ? 's' : ''}.`,
+        title: 'Article Premium',
+        message: 'Vous bénéficiez d\'articles premium gratuits chaque mois.',
+        accent: 'gold',
+        counterText: `${remaining} article${remaining !== 1 ? 's' : ''} restant${remaining !== 1 ? 's' : ''} ce mois`,
+        counterRemaining: remaining,
+        counterTotal: limit,
         ctaPrimary: { text: 'Continuer la lecture', href: '' },
         ctaSecondary: { text: 'Passer en Premium', href: '/pricing' },
       };
@@ -148,19 +155,23 @@ function getOverlayConfig(overlayCase: OverlayCase, remaining: number): OverlayC
       return {
         isBlocking: true,
         scrollTriggerPercent: 30,
-        title: 'Contenu Premium',
-        message: 'Vous avez utilisé vos 3 articles premium gratuits ce mois-ci.',
-        benefits: PREMIUM_TIER.features,
-        ctaPrimary: { text: 'Passer en Premium', href: '/pricing' },
+        title: 'Limite atteinte',
+        message: `Vous avez lu vos ${limit} articles premium gratuits ce mois-ci. Passez en Premium pour un accès illimité.`,
+        accent: 'gold',
+        benefits: PREMIUM_TIER.features.slice(0, 4),
+        ctaPrimary: { text: `Premium — ${PREMIUM_MONTHLY_PRICE.toLocaleString('fr-FR')} ${CURRENCY}/mois`, href: '/pricing' },
       };
 
     case 'reader_has_articles':
       return {
         isBlocking: false,
         scrollTriggerPercent: 40,
-        title: 'Contenu Premium',
-        message: 'Votre formule inclut 3 analyses premium par mois.',
-        counterText: `Il vous reste ${remaining} article${remaining !== 1 ? 's' : ''}.`,
+        title: 'Article Premium',
+        message: 'Votre formule inclut des analyses premium par mois.',
+        accent: 'gold',
+        counterText: `${remaining} article${remaining !== 1 ? 's' : ''} restant${remaining !== 1 ? 's' : ''} ce mois`,
+        counterRemaining: remaining,
+        counterTotal: limit,
         ctaPrimary: { text: 'Continuer la lecture', href: '' },
         ctaSecondary: { text: 'Passer en Premium', href: '/pricing' },
       };
@@ -169,12 +180,30 @@ function getOverlayConfig(overlayCase: OverlayCase, remaining: number): OverlayC
       return {
         isBlocking: true,
         scrollTriggerPercent: 30,
-        title: 'Contenu Premium',
-        message: 'Limite mensuelle atteinte. Passez en Premium pour un accès illimité.',
-        benefits: PREMIUM_TIER.features,
-        ctaPrimary: { text: 'Passer en Premium', href: '/pricing' },
+        title: 'Limite mensuelle atteinte',
+        message: 'Passez en Premium pour un accès illimité à toutes nos analyses.',
+        accent: 'gold',
+        benefits: PREMIUM_TIER.features.slice(0, 4),
+        ctaPrimary: { text: `Premium — ${PREMIUM_MONTHLY_PRICE.toLocaleString('fr-FR')} ${CURRENCY}/mois`, href: '/pricing' },
       };
   }
+}
+
+// ─── Counter dots component ─────────────────────────────────────────────────
+
+function ArticleCounter({ remaining, total }: { remaining: number; total: number }) {
+  return (
+    <div className="flex items-center gap-2">
+      {Array.from({ length: total }).map((_, i) => (
+        <div
+          key={i}
+          className={`w-2.5 h-2.5 rounded-full transition-colors ${
+            i < remaining ? 'bg-[#d4a843]' : 'bg-gray-200'
+          }`}
+        />
+      ))}
+    </div>
+  );
 }
 
 // ─── Main Component ──────────────────────────────────────────────────────────
@@ -206,7 +235,7 @@ export function PremiumOverlay({ articleId, articleTitle, isPremium }: PremiumOv
   const overlayCase = getOverlayCase(isSignedIn, userRole, premiumArticlesUsed, isPremium, configuredLimit);
   const limit = getReaderPremiumLimit(configuredLimit);
   const remaining = Math.max(0, limit - premiumArticlesUsed);
-  const config = getOverlayConfig(overlayCase, remaining);
+  const config = getOverlayConfig(overlayCase, remaining, limit);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -332,7 +361,7 @@ export function PremiumOverlay({ articleId, articleTitle, isPremium }: PremiumOv
 
     setTimeout(() => {
       if (mountedRef.current) setVisible(false);
-    }, 300);
+    }, 350);
   }, [articleId, user?.id, overlayCase]);
 
   const handleContinueReading = useCallback(() => {
@@ -344,7 +373,7 @@ export function PremiumOverlay({ articleId, articleTitle, isPremium }: PremiumOv
 
     setTimeout(() => {
       if (mountedRef.current) setVisible(false);
-    }, 300);
+    }, 350);
   }, [articleId, user?.id, overlayCase]);
 
   const handleCtaClick = useCallback((ctaType: string) => {
@@ -365,18 +394,20 @@ export function PremiumOverlay({ articleId, articleTitle, isPremium }: PremiumOv
   if (!config || !isPremium || isLoading) return null;
   if (!visible) return null;
 
+  const isGold = config.accent === 'gold';
+
   return (
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-[100] motion-safe:transition-all motion-safe:duration-500 ${
-          animateIn ? 'bg-black/80' : 'bg-black/0'
+        className={`fixed inset-0 z-[100] motion-safe:transition-opacity motion-safe:duration-400 ${
+          animateIn ? 'bg-black/70 backdrop-blur-sm' : 'bg-black/0'
         }`}
-        onClick={handleDismiss}
+        onClick={!config.isBlocking ? handleDismiss : undefined}
         aria-hidden="true"
       />
 
-      {/* Dialog */}
+      {/* Dialog container — bottom sheet on mobile, centered on desktop */}
       <div
         ref={dialogRef}
         role="dialog"
@@ -384,25 +415,57 @@ export function PremiumOverlay({ articleId, articleTitle, isPremium }: PremiumOv
         aria-labelledby="premium-overlay-title"
         aria-describedby="premium-overlay-desc"
         tabIndex={-1}
-        className={`fixed inset-0 z-[101] flex items-center justify-center p-4 outline-none motion-safe:transition-all motion-safe:duration-400 ease-out ${
-          animateIn ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
-        }`}
+        className={`fixed inset-x-0 bottom-0 sm:inset-0 z-[101] sm:flex sm:items-center sm:justify-center outline-none`}
       >
-        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-auto relative overflow-hidden">
-          {/* Close button */}
-          <button
-            onClick={handleDismiss}
-            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-700 focus:outline-none transition-colors z-10"
-            aria-label="Fermer"
-          >
-            <X className="w-5 h-5" />
-          </button>
+        {/* Panel — slides up on mobile, scales in on desktop */}
+        <div
+          className={`
+            w-full sm:max-w-[420px] sm:mx-4 bg-white
+            rounded-t-[20px] sm:rounded-2xl
+            shadow-[0_-8px_40px_-12px_rgba(0,0,0,0.25)] sm:shadow-2xl
+            overflow-hidden
+            motion-safe:transition-all motion-safe:duration-400 motion-safe:ease-out
+            ${animateIn
+              ? 'translate-y-0 sm:translate-y-0 sm:scale-100 opacity-100'
+              : 'translate-y-full sm:translate-y-4 sm:scale-95 opacity-0 sm:opacity-0'
+            }
+          `}
+        >
+          {/* Drag handle — mobile only */}
+          <div className="flex justify-center pt-3 pb-1 sm:hidden">
+            <div className="w-10 h-1 rounded-full bg-gray-300" />
+          </div>
 
-          <div className="px-6 pb-8 pt-8 sm:px-8">
+          {/* Top accent bar */}
+          <div className={`h-1 ${isGold ? 'bg-gradient-to-r from-[#d4a843] via-[#e8c36a] to-[#d4a843]' : 'bg-gray-900'} sm:rounded-t-2xl`} />
+
+          {/* Close button */}
+          {!config.isBlocking && (
+            <button
+              onClick={handleDismiss}
+              className="absolute top-4 right-4 sm:top-3 sm:right-3 w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 active:bg-gray-300 focus:outline-none transition-colors z-10"
+              aria-label="Fermer"
+            >
+              <X className="w-4.5 h-4.5" />
+            </button>
+          )}
+
+          <div className="px-5 pb-6 pt-4 sm:px-7 sm:pb-7 sm:pt-5 max-h-[85vh] sm:max-h-[90vh] overflow-y-auto">
+            {/* Icon */}
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${
+              isGold ? 'bg-[#d4a843]/10' : 'bg-gray-100'
+            }`}>
+              {isGold ? (
+                <Crown className="w-6 h-6 text-[#d4a843]" />
+              ) : (
+                <Lock className="w-5 h-5 text-gray-700" />
+              )}
+            </div>
+
             {/* Title */}
             <h2
               id="premium-overlay-title"
-              className="text-[22px] sm:text-[26px] font-bold leading-tight text-gray-900 mb-2"
+              className="text-[20px] sm:text-[22px] font-bold leading-tight text-gray-900 mb-1.5"
             >
               {config.title}
             </h2>
@@ -410,34 +473,33 @@ export function PremiumOverlay({ articleId, articleTitle, isPremium }: PremiumOv
             {/* Message */}
             <p
               id="premium-overlay-desc"
-              className="text-[14px] sm:text-[15px] text-gray-500 leading-relaxed mb-6"
+              className="text-[14px] text-gray-500 leading-relaxed mb-5"
             >
               {config.message}
             </p>
 
-            {/* Article title card */}
-            {articleTitle && (
-              <div className="bg-gray-50 rounded-xl p-4 mb-6">
-                <p className="text-[14px] sm:text-[15px] font-semibold text-gray-900 leading-snug">
-                  {articleTitle}
-                </p>
+            {/* Article counter dots */}
+            {config.counterRemaining !== undefined && config.counterTotal !== undefined && (
+              <div className="flex items-center gap-3 bg-[#faf8f3] rounded-xl p-3.5 mb-5">
+                <ArticleCounter remaining={config.counterRemaining} total={config.counterTotal} />
+                <span className="text-[13px] text-gray-600 font-medium">{config.counterText}</span>
               </div>
             )}
 
-            {/* Counter text */}
-            {config.counterText && (
-              <div className="bg-gray-50 rounded-xl p-4 mb-6">
-                <p className="text-[14px] text-gray-600 font-medium">
-                  {config.counterText}
+            {/* Article title preview */}
+            {articleTitle && config.isBlocking && (
+              <div className="bg-gray-50 rounded-xl p-3.5 mb-5 border border-gray-100">
+                <p className="text-[13px] sm:text-[14px] font-semibold text-gray-900 leading-snug line-clamp-2">
+                  {articleTitle}
                 </p>
               </div>
             )}
 
             {/* Email field for not_connected */}
             {config.showEmailField ? (
-              <form onSubmit={handleEmailSubmit} className="mb-6">
-                <label htmlFor="overlay-email" className="block text-[14px] font-medium text-gray-900 mb-2">
-                  Email
+              <form onSubmit={handleEmailSubmit} className="mb-5">
+                <label htmlFor="overlay-email" className="block text-[13px] font-medium text-gray-700 mb-1.5">
+                  Adresse email
                 </label>
                 <input
                   id="overlay-email"
@@ -445,33 +507,45 @@ export function PremiumOverlay({ articleId, articleTitle, isPremium }: PremiumOv
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="votre@email.com"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[14px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-shadow"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[15px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-shadow"
+                  autoComplete="email"
                 />
 
                 <button
                   type="submit"
-                  className="w-full mt-4 py-3.5 bg-gray-900 text-white rounded-xl text-[14px] sm:text-[15px] font-semibold hover:bg-black active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors"
+                  className="w-full mt-3 py-3.5 bg-gray-900 text-white rounded-xl text-[15px] font-semibold hover:bg-black active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-all flex items-center justify-center gap-2"
                 >
                   {config.ctaPrimary.text}
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </form>
             ) : (
               /* CTA buttons for other cases */
-              <div className="flex flex-col gap-3 mb-6">
+              <div className="flex flex-col gap-2.5 mb-5">
                 {config.ctaPrimary.href === '' ? (
                   <button
                     onClick={handleContinueReading}
-                    className="w-full py-3.5 bg-gray-900 text-white rounded-xl text-[14px] sm:text-[15px] font-semibold hover:bg-black active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors"
+                    className={`w-full py-3.5 rounded-xl text-[15px] font-semibold active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all flex items-center justify-center gap-2 ${
+                      isGold
+                        ? 'bg-[#d4a843] text-white hover:bg-[#c49a3a] focus:ring-[#d4a843]'
+                        : 'bg-gray-900 text-white hover:bg-black focus:ring-gray-900'
+                    }`}
                   >
                     {config.ctaPrimary.text}
+                    <ArrowRight className="w-4 h-4" />
                   </button>
                 ) : (
                   <Link
                     href={config.ctaPrimary.href}
                     onClick={() => handleCtaClick('primary')}
-                    className="w-full py-3.5 bg-gray-900 text-white rounded-xl text-[14px] sm:text-[15px] font-semibold hover:bg-black active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors text-center"
+                    className={`w-full py-3.5 rounded-xl text-[15px] font-semibold active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all flex items-center justify-center gap-2 ${
+                      isGold
+                        ? 'bg-[#d4a843] text-white hover:bg-[#c49a3a] focus:ring-[#d4a843]'
+                        : 'bg-gray-900 text-white hover:bg-black focus:ring-gray-900'
+                    }`}
                   >
                     {config.ctaPrimary.text}
+                    <ArrowRight className="w-4 h-4" />
                   </Link>
                 )}
 
@@ -479,7 +553,7 @@ export function PremiumOverlay({ articleId, articleTitle, isPremium }: PremiumOv
                   <Link
                     href={config.ctaSecondary.href}
                     onClick={() => handleCtaClick('secondary')}
-                    className="w-full py-3 border border-gray-200 text-gray-700 rounded-xl text-[13px] sm:text-[14px] font-medium hover:bg-gray-50 active:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors text-center"
+                    className="w-full py-3 border border-gray-200 text-gray-700 rounded-xl text-[14px] font-medium hover:bg-gray-50 active:bg-gray-100 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-all text-center"
                   >
                     {config.ctaSecondary.text}
                   </Link>
@@ -489,10 +563,10 @@ export function PremiumOverlay({ articleId, articleTitle, isPremium }: PremiumOv
 
             {/* Separator + secondary link for not_connected */}
             {config.showEmailField && config.ctaSecondary && (
-              <>
-                <div className="border-t border-gray-100 mb-6" />
-                <p className="text-center text-[13px] text-gray-500 mb-6">
-                  Nouveau sur la plateforme ?{' '}
+              <div className="text-center mb-5">
+                <div className="border-t border-gray-100 mb-4" />
+                <p className="text-[13px] text-gray-500">
+                  Pas encore de compte ?{' '}
                   <Link
                     href={`${config.ctaSecondary.href}${email ? '?email=' + encodeURIComponent(email) : ''}`}
                     onClick={() => handleCtaClick('secondary')}
@@ -501,26 +575,29 @@ export function PremiumOverlay({ articleId, articleTitle, isPremium }: PremiumOv
                     {config.ctaSecondary.text}
                   </Link>
                 </p>
-              </>
+              </div>
             )}
 
             {/* Benefits */}
             {config.benefits && config.benefits.length > 0 && (
-              <div className="bg-gray-50 rounded-xl p-5">
-                <p className="text-[13px] sm:text-[14px] font-semibold text-gray-900 mb-3">
-                  {overlayCase === 'not_connected' ? 'Accès authentifié :' : 'Avantages Premium :'}
+              <div className={`rounded-xl p-4 ${isGold ? 'bg-[#faf8f3]' : 'bg-gray-50'}`}>
+                <p className="text-[13px] font-semibold text-gray-900 mb-2.5">
+                  {overlayCase === 'not_connected' ? 'En créant un compte :' : 'Avantages Premium :'}
                 </p>
                 <div className="space-y-2">
                   {config.benefits.map((benefit, i) => (
-                    <div key={i} className="flex items-center gap-2.5 text-[13px] text-gray-600">
-                      <Check className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                      <span>{benefit}</span>
+                    <div key={i} className="flex items-start gap-2.5 text-[13px] text-gray-600">
+                      <Check className={`w-4 h-4 flex-shrink-0 mt-0.5 ${isGold ? 'text-[#d4a843]' : 'text-gray-400'}`} />
+                      <span className="leading-snug">{benefit}</span>
                     </div>
                   ))}
                 </div>
               </div>
             )}
           </div>
+
+          {/* Safe area bottom padding for mobile */}
+          <div className="h-[env(safe-area-inset-bottom,0px)] sm:hidden" />
         </div>
       </div>
     </>

@@ -179,43 +179,68 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
   if (!accessResult.allowed) {
     return (
       <div className="min-h-screen bg-[#fafaf9]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-20">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-6 sm:pt-10 pb-20">
           <div className="max-w-3xl mx-auto">
             <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] overflow-hidden">
-              <div className="p-8 md:p-12">
-                <div className="flex flex-wrap items-center gap-2 mb-4">
+              <div className="p-5 sm:p-8 md:p-12">
+                <div className="flex flex-wrap items-center gap-2 mb-3 sm:mb-4">
                   {(article.sections || [article.category]).map((s) => (
                     <Link key={s} href={SECTION_META[s]?.path || `/${s}`} className="text-[11px] tracking-[0.15em] uppercase text-gray-400 hover:text-black transition-colors">
                       {SECTION_META[s]?.label || s}
                     </Link>
                   ))}
+                  <span className="text-[10px] tracking-[0.12em] uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-700">
+                    PREMIUM
+                  </span>
                 </div>
-                <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">{article.title}</h1>
-                {article.excerpt && <p className="text-lg text-gray-600 mb-6">{article.excerpt}</p>}
+                <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 leading-tight">{article.title}</h1>
+                {article.excerpt && <p className="text-base sm:text-lg text-gray-600 mb-4 sm:mb-6">{article.excerpt}</p>}
 
                 {/* Fake content with progressive gradient blur */}
                 <div className="relative select-none" aria-hidden="true">
-                  <div className="space-y-4 opacity-40">
-                    {Array.from({ length: 6 }).map((_, i) => (
-                      <div key={i} className="space-y-2.5">
-                        <div className="h-3.5 bg-gray-200 rounded w-full" />
-                        <div className="h-3.5 bg-gray-200 rounded w-11/12" />
-                        <div className="h-3.5 bg-gray-200 rounded w-9/12" />
+                  <div className="space-y-3 sm:space-y-4 opacity-30">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="space-y-2 sm:space-y-2.5">
+                        <div className="h-3 sm:h-3.5 bg-gray-200 rounded-full w-full" />
+                        <div className="h-3 sm:h-3.5 bg-gray-200 rounded-full w-11/12" />
+                        <div className="h-3 sm:h-3.5 bg-gray-200 rounded-full w-9/12" />
                       </div>
                     ))}
                   </div>
                   {/* White gradient overlay — progressive blur effect */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-white via-white/90 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-white via-white/95 via-60% to-transparent" />
+                </div>
 
-                  {/* CTA button overlaid */}
-                  <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-4">
-                    <Link
-                      href={isSignedIn ? '/pricing' : '/inscription'}
-                      className="bg-[#111] text-white px-8 py-3 rounded-lg text-[14px] font-medium hover:bg-[#333] transition-colors shadow-lg"
-                    >
-                      {isSignedIn ? 'Passer en Premium' : 'S\'inscrire pour lire la suite'}
-                    </Link>
+                {/* CTA section below the blur */}
+                <div className="flex flex-col items-center text-center -mt-6 relative z-10 pt-2">
+                  <div className="w-10 h-10 rounded-xl bg-[#d4a843]/10 flex items-center justify-center mb-3">
+                    <svg className="w-5 h-5 text-[#d4a843]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
                   </div>
+                  <p className="text-[13px] sm:text-[14px] text-gray-500 mb-4 max-w-xs">
+                    {isSignedIn
+                      ? 'Passez en Premium pour lire cet article et bien plus.'
+                      : 'Connectez-vous pour accéder à cet article.'}
+                  </p>
+                  <Link
+                    href={isSignedIn ? '/pricing' : '/connexion'}
+                    className="inline-flex items-center gap-2 bg-[#d4a843] text-white px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl text-[14px] sm:text-[15px] font-semibold hover:bg-[#c49a3a] active:scale-[0.98] transition-all shadow-lg shadow-[#d4a843]/20"
+                  >
+                    {isSignedIn ? 'Passer en Premium' : 'Se connecter'}
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+                    </svg>
+                  </Link>
+                  {!isSignedIn && (
+                    <Link
+                      href="/inscription"
+                      className="mt-2.5 text-[13px] text-gray-500 hover:text-gray-700 font-medium transition-colors"
+                    >
+                      Créer un compte gratuitement
+                    </Link>
+                  )}
                 </div>
               </div>
             </div>

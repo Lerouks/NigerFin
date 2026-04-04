@@ -103,7 +103,7 @@ export function getBillingCycleLabel(cycle: string): string {
 
 // ─── Payment methods (Nita & Amana) ─────────────────────────────────────────
 
-export type PaymentMethodId = 'nita' | 'amana' | 'card';
+export type PaymentMethodId = 'nita' | 'amana' | 'card' | 'ipaymoney';
 
 export interface PaymentMethod {
   id: PaymentMethodId;
@@ -140,6 +140,15 @@ export const PAYMENT_METHODS: Record<PaymentMethodId, PaymentMethod> = {
     shortName: 'Carte',
     logo: '/card-logos.png',
     instructions: 'Vous serez redirigé vers notre plateforme de paiement sécurisée Stripe pour finaliser votre transaction.',
+    recipientNumber: '',
+    recipientName: '',
+  },
+  ipaymoney: {
+    id: 'ipaymoney',
+    name: 'iPayMoney (Mobile Money & Carte)',
+    shortName: 'iPayMoney',
+    logo: '/ipaymoney-logo.png',
+    instructions: 'Vous serez redirigé vers iPayMoney pour payer via Mobile Money (Airtel, Moov, Zamani) ou carte bancaire.',
     recipientNumber: '',
     recipientName: '',
   },

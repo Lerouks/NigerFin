@@ -4,7 +4,7 @@ import { SectionArticlesPage } from '@/components/SectionArticlesPage';
 
 export const revalidate = 60;
 export const metadata: Metadata = {
-  title: 'Tous les articles — Niger',
+  title: 'Tous les articles, Niger',
   description: 'Retrouvez l\'ensemble des articles sur l\'actualité économique et financière du Niger.',
 };
 

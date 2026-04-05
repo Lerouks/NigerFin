@@ -4,7 +4,7 @@ import { SectionArticlesPage } from '@/components/SectionArticlesPage';
 
 export const revalidate = 60;
 export const metadata: Metadata = {
-  title: 'Tous les articles — Entreprises',
+  title: 'Tous les articles, Entreprises',
   description: 'Retrouvez l\'ensemble des articles sur les entreprises nigériennes et ouest-africaines.',
 };
 

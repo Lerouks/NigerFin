@@ -16,7 +16,7 @@ export async function requireAdmin() {
     return { error: NextResponse.json({ error: 'Non authentifié' }, { status: 401 }) };
   }
 
-  // Use service client to read profile — bypasses RLS to avoid false negatives
+  // Use service client to read profile, bypasses RLS to avoid false negatives
   const serviceClient = createServiceClient();
   if (!serviceClient) {
     return { error: NextResponse.json({ error: 'Service indisponible' }, { status: 503 }) };

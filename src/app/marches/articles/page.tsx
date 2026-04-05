@@ -4,7 +4,7 @@ import { SectionArticlesPage } from '@/components/SectionArticlesPage';
 
 export const revalidate = 60;
 export const metadata: Metadata = {
-  title: 'Tous les articles — Marchés',
+  title: 'Tous les articles, Marchés',
   description: 'Retrouvez l\'ensemble des articles sur les marchés financiers, matières premières et devises.',
 };
 

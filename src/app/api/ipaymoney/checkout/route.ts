@@ -8,7 +8,7 @@ import * as Sentry from '@sentry/nextjs';
 import crypto from 'crypto';
 
 /**
- * POST — Create a payment_request record and return transaction details
+ * POST, Create a payment_request record and return transaction details
  * for the iPayMoney JavaScript SDK (client-side checkout.js).
  */
 export async function POST(request: NextRequest) {

@@ -23,7 +23,7 @@ const CRYPTO_IDS: Record<string, { name: string; symbol: string }> = {
 
 export class CryptoService extends BaseDataService {
   protected source = 'crypto';
-  protected defaultTTLSeconds = 300; // 5 min — crypto moves fast
+  protected defaultTTLSeconds = 300; // 5 min, crypto moves fast
 
   async fetch(): Promise<CryptoData> {
     const ids = Object.keys(CRYPTO_IDS).join(',');

@@ -58,7 +58,7 @@ describe('checkArticleAccess', () => {
     });
 
     it('respects custom premium limit', () => {
-      // Custom limit of 5 — 4 read should still be allowed
+      // Custom limit of 5, 4 read should still be allowed
       expect(checkArticleAccess('premium', 'reader', 4, 'slug', 5)).toEqual({ allowed: true });
       // At 5 should be blocked
       expect(checkArticleAccess('premium', 'reader', 5, 'slug', 5)).toEqual({

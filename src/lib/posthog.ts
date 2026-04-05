@@ -5,7 +5,7 @@ let initialized = false;
 
 /**
  * Initialise PostHog **uniquement** si l'utilisateur a donné son
- * consentement RGPD. Peut être rappelée à tout moment — elle est idempotente.
+ * consentement RGPD. Peut être rappelée à tout moment, elle est idempotente.
  */
 export function initPostHog() {
   if (initialized) return;

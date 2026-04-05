@@ -172,7 +172,7 @@ export function ApiStatusDashboard() {
                             ? 'text-amber-500'
                             : 'text-gray-400'
                       }`}>
-                        {service.successRate24h !== null ? `${service.successRate24h}%` : '—'}
+                        {service.successRate24h !== null ? `${service.successRate24h}%` : '-'}
                       </p>
                     </div>
 

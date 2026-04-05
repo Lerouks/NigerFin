@@ -26,7 +26,7 @@ export function BRVMCard({ stock }: BRVMCardProps) {
           <p className="text-2xl font-semibold text-gray-900 leading-none tabular-nums">
             {stock.price > 0
               ? stock.price.toLocaleString('fr-FR', { minimumFractionDigits: 0 })
-              : '—'}
+              : '-'}
           </p>
           <p className="text-[12px] text-gray-400 mt-1">FCFA</p>
         </div>

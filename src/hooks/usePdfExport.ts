@@ -63,7 +63,7 @@ export function usePdfExport() {
         doc.setPage(i);
         const pageH = doc.internal.pageSize.getHeight();
 
-        // Header — NFI Report branding on every page (skip page 1, already has full header)
+        // Header: NFI Report branding on every page (skip page 1, already has full header)
         if (i > 1) {
           doc.setFont('Helvetica', 'bold');
           doc.setFontSize(10);
@@ -90,7 +90,7 @@ export function usePdfExport() {
         doc.text(disclaimerLines, marginL, pageH - 16);
         // Center text
         doc.setFontSize(8);
-        doc.text('NFI REPORT — nfireport.com', pageW / 2, pageH - 8, { align: 'center' });
+        doc.text('NFI REPORT · nfireport.com', pageW / 2, pageH - 8, { align: 'center' });
         // Page number
         doc.text(`Page ${i}/${pageCount}`, pageW - marginR, pageH - 8, { align: 'right' });
       }

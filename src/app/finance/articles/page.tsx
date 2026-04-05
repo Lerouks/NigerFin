@@ -4,7 +4,7 @@ import { SectionArticlesPage } from '@/components/SectionArticlesPage';
 
 export const revalidate = 60;
 export const metadata: Metadata = {
-  title: 'Tous les articles — Finance',
+  title: 'Tous les articles, Finance',
   description: 'Retrouvez l\'ensemble des articles financiers, analyses bancaires et tendances du secteur.',
 };
 

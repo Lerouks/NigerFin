@@ -15,7 +15,7 @@ function fmt(n: number): string {
 /**
  * Benchmarks indicatifs pour un foyer nigérien moyen, calibrés sur les
  * études de l'INS Niger, de la BCEAO et d'observations terrain. Ces
- * fourchettes servent de repère pour les recommandations — elles ne
+ * fourchettes servent de repère pour les recommandations : elles ne
  * constituent pas une norme rigide.
  */
 const BENCHMARKS = {
@@ -98,7 +98,7 @@ export function BudgetFamilial() {
       );
     } else if (tauxEpargne < BENCHMARKS.epargne.min) {
       recs.push(
-        `Vous épargnez seulement ${tauxEpargne.toFixed(1)}% de vos revenus (${fmt(reste)} FCFA). L'objectif raisonnable au Niger est de 10% minimum. Mettez en place un virement automatique de ce montant en début de mois vers un compte d'épargne séparé — on n'épargne pas ce qui reste, on dépense ce qui reste après avoir épargné.`,
+        `Vous épargnez seulement ${tauxEpargne.toFixed(1)}% de vos revenus (${fmt(reste)} FCFA). L'objectif raisonnable au Niger est de 10% minimum. Mettez en place un virement automatique de ce montant en début de mois vers un compte d'épargne séparé. On n'épargne pas ce qui reste, on dépense ce qui reste après avoir épargné.`,
       );
     } else {
       recs.push(
@@ -113,7 +113,7 @@ export function BudgetFamilial() {
       );
     } else if (shares.alimentation < BENCHMARKS.alimentation.min && shares.alimentation > 0) {
       recs.push(
-        `Votre budget alimentation (${shares.alimentation.toFixed(0)}%) semble modéré. Vérifiez que cela ne se fait pas au détriment de la qualité nutritionnelle du foyer — particulièrement en protéines et en légumes frais.`,
+        `Votre budget alimentation (${shares.alimentation.toFixed(0)}%) semble modéré. Vérifiez que cela ne se fait pas au détriment de la qualité nutritionnelle du foyer, particulièrement en protéines et en légumes frais.`,
       );
     }
 
@@ -158,7 +158,7 @@ export function BudgetFamilial() {
 
     // ─── Conseils universels ───
     recs.push(
-      `Principe du "6 enveloppes" adapté au contexte nigérien : divisez vos revenus en 6 enveloppes dès le jour de paiement — nécessités (55%), épargne long terme (10%), éducation/santé (10%), loisirs/famille (10%), imprévus (10%), dons/tontines (5%). Cette discipline simple évite 80% des dépassements.`,
+      `Principe du "6 enveloppes" adapté au contexte nigérien : divisez vos revenus en 6 enveloppes dès le jour de paiement. Nécessités (55%), épargne long terme (10%), éducation/santé (10%), loisirs/famille (10%), imprévus (10%), dons/tontines (5%). Cette discipline simple évite 80% des dépassements.`,
     );
 
     if (numFoyer >= 5) {
@@ -197,10 +197,10 @@ export function BudgetFamilial() {
     return lines;
   }, [calc, numRevenus]);
 
-  // Data for pie chart — use totalDepenses split between top categories
+  // Data for pie chart: use totalDepenses split between top categories
   const pieData = useMemo(() => {
     if (!calc) return null;
-    // GraphRepartition expects (capital, interest) — reuse it for "dépenses" vs "épargne"
+    // GraphRepartition expects (capital, interest): reuse it for "dépenses" vs "épargne"
     return { capital: calc.totalDepenses, interest: Math.max(calc.reste, 0) };
   }, [calc]);
 

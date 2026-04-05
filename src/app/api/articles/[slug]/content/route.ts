@@ -23,7 +23,7 @@ export async function GET(
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
-  // Never cache this response — content_type can change at any time
+  // Never cache this response, content_type can change at any time
   const noCacheHeaders = {
     'Cache-Control': 'no-store, no-cache, must-revalidate',
     'Pragma': 'no-cache',
@@ -75,7 +75,7 @@ export async function GET(
       return NextResponse.json({ body: bodyToHtml(article.body || '') }, { headers: noCacheHeaders });
     }
 
-    // Subscription expired — downgrade role to reader
+    // Subscription expired, downgrade role to reader
     await service
       .from('user_profiles')
       .update({ role: 'reader' })
@@ -91,7 +91,7 @@ export async function GET(
     .single();
   const limit = config?.free_articles_count ?? 3;
 
-  // Count from tracking table for current month — only count articles that are
+  // Count from tracking table for current month, only count articles that are
   // STILL premium (if an article was changed from premium to free, exclude it)
   const startOfMonth = new Date(Date.UTC(
     new Date().getUTCFullYear(),

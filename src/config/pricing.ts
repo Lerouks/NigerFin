@@ -1,6 +1,6 @@
 // ────────────────────────────────────────────────────────────────────────────
 // Single source of truth for ALL pricing, plans, and payment methods.
-// Import from here everywhere — never hardcode prices elsewhere.
+// Import from here everywhere. Never hardcode prices elsewhere.
 // ────────────────────────────────────────────────────────────────────────────
 
 export const CURRENCY = 'FCFA';
@@ -145,7 +145,7 @@ export const PAYMENT_METHODS: Record<PaymentMethodId, PaymentMethod> = {
   },
 };
 
-/** Mobile money methods only (Nita & Amana) — used for manual payment flow */
+/** Mobile money methods only (Nita & Amana) used for manual payment flow */
 export const MOBILE_PAYMENT_METHODS = {
   nita: PAYMENT_METHODS.nita,
   amana: PAYMENT_METHODS.amana,

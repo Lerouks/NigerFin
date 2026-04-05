@@ -181,23 +181,6 @@ ${signature()}
   };
 }
 
-export function stripePaymentConfirmationEmail(name: string, billingCycle: string): { subject: string; html: string } {
-  const cycleLabel = billingCycle === 'annual' ? 'annuel' : 'mensuel';
-
-  return {
-    subject: 'Bienvenue dans NFI Report Premium !',
-    html: emailLayout(`
-${heading('Bienvenue dans Premium')}
-${paragraph(`Bonjour ${name},`)}
-${paragraph(`Votre abonnement <strong>Premium ${cycleLabel}</strong> est maintenant actif. Merci pour votre confiance !`)}
-${paragraph("Vous avez désormais un accès illimité à tous les articles, analyses approfondies, outils premium et newsletters exclusives.")}
-${button('Découvrir le contenu Premium', `${SITE_URL}`)}
-${paragraph('Gérez votre abonnement à tout moment depuis votre espace compte.')}
-${signature()}
-    `),
-  };
-}
-
 // ─── Admin subscription management emails ───
 
 export function adminPremiumGrantedEmail(name: string, startDate: string, endDate: string): { subject: string; html: string } {

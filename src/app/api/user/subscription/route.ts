@@ -1,12 +1,5 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase';
-import Stripe from 'stripe';
-
-function getStripe() {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) throw new Error('STRIPE_SECRET_KEY not configured');
-  return new Stripe(key, { timeout: 10000 });
-}
 
 // Cancel subscription
 export async function DELETE() {
@@ -35,16 +28,6 @@ export async function DELETE() {
   if (!sub || sub.status !== 'active') {
     return NextResponse.json({ error: 'Aucun abonnement actif' }, { status: 400 });
   }
-
-  if (!sub.stripe_subscription_id) {
-    return NextResponse.json({ error: 'Abonnement Stripe introuvable' }, { status: 400 });
-  }
-
-  // Sync cancellation with Stripe
-  const stripe = getStripe();
-  await stripe.subscriptions.update(sub.stripe_subscription_id, {
-    cancel_at_period_end: true,
-  });
 
   const now = new Date().toISOString();
 
@@ -91,18 +74,7 @@ export async function PATCH() {
     return NextResponse.json({ error: 'Aucun abonnement trouvé' }, { status: 400 });
   }
 
-  // Reactivate: undo cancellation
   if (sub.cancel_at_period_end && sub.status === 'active') {
-    if (!sub.stripe_subscription_id) {
-      return NextResponse.json({ error: 'Abonnement Stripe introuvable' }, { status: 400 });
-    }
-
-    // Sync reactivation with Stripe
-    const stripe = getStripe();
-    await stripe.subscriptions.update(sub.stripe_subscription_id, {
-      cancel_at_period_end: false,
-    });
-
     await service
       .from('subscriptions')
       .update({

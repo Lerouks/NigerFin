@@ -68,7 +68,6 @@ export function PaymentContent() {
   const [submitting, setSubmitting] = useState(false);
   const [paymentError, setPaymentError] = useState('');
   const [copied, setCopied] = useState(false);
-  const [cardLoading, setCardLoading] = useState(false);
   const [ipaymoneyLoading, setIpaymoneyLoading] = useState(false);
 
   // Dynamic prices
@@ -223,33 +222,6 @@ export function PaymentContent() {
       setPaymentError('Erreur de connexion. Veuillez réessayer.');
     } finally {
       setSubmitting(false);
-    }
-  };
-
-  const handleCardPayment = async () => {
-    setCardLoading(true);
-    setPaymentError('');
-    try {
-      const res = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tier: 'premium',
-          billingCycle,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setPaymentError(data.error || 'Erreur lors de la redirection vers le paiement par carte.');
-        setCardLoading(false);
-        return;
-      }
-      if (data.url) {
-        window.location.href = data.url;
-      }
-    } catch {
-      setPaymentError('Erreur de connexion. Veuillez réessayer.');
-      setCardLoading(false);
     }
   };
 
@@ -706,26 +678,6 @@ export function PaymentContent() {
                           <p className="text-gray-500 text-[12px]">Mobile Money (Airtel, Moov, Zamani) & Carte bancaire</p>
                         </div>
                         {ipaymoneyLoading && <Loader2 className="w-5 h-5 animate-spin text-gray-400" />}
-                      </button>
-
-                      {/* Card payment */}
-                      <button
-                        onClick={handleCardPayment}
-                        disabled={cardLoading}
-                        className="w-full p-4 rounded-xl border-2 border-black/[0.06] hover:border-black/20 text-left transition-all flex items-center gap-3 disabled:opacity-60"
-                      >
-                        <Image
-                          src="/card-logos.png"
-                          alt="Visa / Mastercard"
-                          width={48}
-                          height={30}
-                          className="rounded-lg object-contain"
-                        />
-                        <div className="flex-1">
-                          <h3 className="font-bold text-[15px]">Carte bancaire</h3>
-                          <p className="text-gray-500 text-[12px]">Visa, Mastercard — paiement sécurisé via Stripe</p>
-                        </div>
-                        {cardLoading && <Loader2 className="w-5 h-5 animate-spin text-gray-400" />}
                       </button>
 
                       {paymentError && (

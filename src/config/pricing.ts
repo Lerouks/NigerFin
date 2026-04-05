@@ -101,9 +101,9 @@ export function getBillingCycleLabel(cycle: string): string {
   }
 }
 
-// ─── Payment methods (Nita & Amana) ─────────────────────────────────────────
+// ─── Payment methods (Nita, Amana, iPayMoney) ───────────────────────────────
 
-export type PaymentMethodId = 'nita' | 'amana' | 'card' | 'ipaymoney';
+export type PaymentMethodId = 'nita' | 'amana' | 'ipaymoney';
 
 export interface PaymentMethod {
   id: PaymentMethodId;
@@ -133,15 +133,6 @@ export const PAYMENT_METHODS: Record<PaymentMethodId, PaymentMethod> = {
     instructions: 'Effectuez votre transfert via Amana au numéro ci-dessous, puis saisissez votre numéro de transaction.',
     recipientNumber: '+227 97 76 91 31',
     recipientName: 'NFI REPORT',
-  },
-  card: {
-    id: 'card',
-    name: 'Carte bancaire (Visa, Mastercard)',
-    shortName: 'Carte',
-    logo: '/card-logos.png',
-    instructions: 'Vous serez redirigé vers notre plateforme de paiement sécurisée Stripe pour finaliser votre transaction.',
-    recipientNumber: '',
-    recipientName: '',
   },
   ipaymoney: {
     id: 'ipaymoney',

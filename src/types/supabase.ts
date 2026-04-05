@@ -66,7 +66,6 @@ export interface Database {
           email: string;
           full_name: string;
           role: string;
-          stripe_customer_id: string | null;
           avatar_url: string | null;
           created_at: string;
           welcome_email_sent: boolean;
@@ -77,7 +76,6 @@ export interface Database {
           email: string;
           full_name?: string;
           role?: string;
-          stripe_customer_id?: string | null;
           avatar_url?: string | null;
           welcome_email_sent?: boolean;
           is_blocked?: boolean;
@@ -86,7 +84,6 @@ export interface Database {
           email: string;
           full_name: string;
           role: string;
-          stripe_customer_id: string | null;
           avatar_url: string | null;
           welcome_email_sent: boolean;
           is_blocked: boolean;

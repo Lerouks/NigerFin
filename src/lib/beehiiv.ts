@@ -58,7 +58,7 @@ export async function subscribeToBeehiiv(
 
 /**
  * Sync a contact to Beehiiv with role-based custom fields.
- * Called on subscription changes (Stripe webhook, admin actions, cron).
+ * Called on subscription changes (iPayMoney callback, admin actions, cron).
  */
 export async function syncContactToBeehiiv(data: ContactData): Promise<boolean> {
   if (!API_KEY || !PUBLICATION_ID) return false;

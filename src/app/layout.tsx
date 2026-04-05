@@ -3,6 +3,7 @@ import localFont from 'next/font/local';
 import { Providers } from './providers';
 import { MainLayoutShell } from '@/components/MainLayoutShell';
 import { ViewTracker } from '@/components/ViewTracker';
+import { CookieBanner } from '@/components/CookieBanner';
 import { SITE_URL } from '@/lib/config';
 import './globals.css';
 
@@ -82,6 +83,45 @@ export const metadata: Metadata = {
   },
 };
 
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'NewsMediaOrganization',
+  name: 'NFI Report',
+  alternateName: 'NFI Report - Actualités économiques et financières du Niger',
+  url: SITE_URL,
+  logo: `${SITE_URL}/icon.png`,
+  description:
+    "Média d'information économique et financière dédié au Niger et à l'Afrique de l'Ouest.",
+  inLanguage: 'fr-FR',
+  areaServed: ['NE', 'Afrique de l\'Ouest'],
+  contactPoint: {
+    '@type': 'ContactPoint',
+    contactType: 'customer support',
+    email: 'contact@nfireport.com',
+    availableLanguage: ['French'],
+  },
+};
+
+const websiteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'NFI Report',
+  url: SITE_URL,
+  inLanguage: 'fr-FR',
+  publisher: {
+    '@type': 'NewsMediaOrganization',
+    name: 'NFI Report',
+  },
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: `${SITE_URL}/articles?search={search_term_string}`,
+    },
+    'query-input': 'required name=search_term_string',
+  },
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -89,10 +129,21 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" className={`${inter.variable}`} suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
+      </head>
       <body className="min-h-screen flex flex-col">
         <Providers>
           <ViewTracker />
           <MainLayoutShell>{children}</MainLayoutShell>
+          <CookieBanner />
         </Providers>
       </body>
     </html>

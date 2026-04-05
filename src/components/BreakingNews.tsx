@@ -47,6 +47,7 @@ export function BreakingNews() {
   if (!ready || dismissed || items.length === 0) return null;
 
   const item = items[currentIndex];
+  if (!item) return null;
 
   return (
     <div

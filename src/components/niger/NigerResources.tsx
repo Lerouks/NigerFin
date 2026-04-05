@@ -14,13 +14,17 @@ interface Resource {
   importance_description: string;
 }
 
-const TYPE_CONFIG: Record<string, { icon: typeof Atom; color: string; bg: string }> = {
+type TypeConfig = { icon: typeof Atom; color: string; bg: string };
+
+const TYPE_CONFIG: Record<string, TypeConfig> = {
   uranium: { icon: Atom, color: 'text-emerald-600', bg: 'bg-emerald-50' },
   petrole: { icon: Droplets, color: 'text-blue-600', bg: 'bg-blue-50' },
   or: { icon: CircleDot, color: 'text-amber-600', bg: 'bg-amber-50' },
   charbon: { icon: Flame, color: 'text-orange-600', bg: 'bg-orange-50' },
   autre: { icon: Factory, color: 'text-gray-600', bg: 'bg-gray-50' },
 };
+
+const DEFAULT_TYPE_CONFIG: TypeConfig = TYPE_CONFIG.autre!;
 
 const IMPORTANCE_LABELS: Record<string, { label: string; style: string }> = {
   critique: { label: 'Critique', style: 'bg-red-50 text-red-700 border-red-100' },
@@ -40,7 +44,7 @@ export function NigerResources({ resources }: { resources: Resource[] }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {resources.map((resource) => {
-          const config = TYPE_CONFIG[resource.type] || TYPE_CONFIG.autre;
+          const config = TYPE_CONFIG[resource.type] ?? DEFAULT_TYPE_CONFIG;
           const Icon = config.icon;
           const importance = IMPORTANCE_LABELS[resource.economic_importance];
 

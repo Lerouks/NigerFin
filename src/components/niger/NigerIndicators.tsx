@@ -44,7 +44,7 @@ export function NigerIndicators({ indicators }: { indicators: Indicator[] }) {
               {CATEGORY_LABELS[cat] || cat}
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {grouped[cat].map((ind) => {
+              {(grouped[cat] ?? []).map((ind) => {
                 const current = parseFloat(ind.value);
                 const previous = parseFloat(ind.previous_value);
                 const diff = current - previous;

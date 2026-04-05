@@ -39,9 +39,9 @@ export async function GET(request: NextRequest) {
       if (healthLogs) {
         const counts: Record<string, { total: number; success: number }> = {};
         for (const log of healthLogs) {
-          if (!counts[log.source]) counts[log.source] = { total: 0, success: 0 };
-          counts[log.source].total++;
-          if (log.status === 'success') counts[log.source].success++;
+          const bucket = counts[log.source] ?? (counts[log.source] = { total: 0, success: 0 });
+          bucket.total++;
+          if (log.status === 'success') bucket.success++;
         }
         for (const [source, c] of Object.entries(counts)) {
           successRate24h[source] = c.total > 0 ? Math.round((c.success / c.total) * 100) : 0;

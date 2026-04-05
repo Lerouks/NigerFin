@@ -124,7 +124,11 @@ export function LegalSectionsManager() {
     const newIndex = index + direction;
     if (newIndex < 0 || newIndex >= sections.length) return;
     const newSections = [...sections];
-    [newSections[index], newSections[newIndex]] = [newSections[newIndex], newSections[index]];
+    const a = newSections[index];
+    const b = newSections[newIndex];
+    if (!a || !b) return;
+    newSections[index] = b;
+    newSections[newIndex] = a;
     setSections(newSections);
   };
 

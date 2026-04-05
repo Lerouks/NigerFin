@@ -147,7 +147,7 @@ export function MessagesManager() {
         <div className="space-y-2">
           {messages.map((msg) => {
             const isOpen = expandedId === msg.id;
-            const config = STATUS_CONFIG[msg.status] || STATUS_CONFIG.unread;
+            const config = STATUS_CONFIG[msg.status] || STATUS_CONFIG.unread!;
             const StatusIcon = config.icon;
             const isProcessing = processingId === msg.id;
 

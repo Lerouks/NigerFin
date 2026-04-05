@@ -10,15 +10,29 @@ interface DataPoint {
 
 interface GraphEvolutionProps {
   data: DataPoint[];
+  /** Titre du bloc. Défaut : contexte emprunt. */
+  title?: string;
+  /** Libellé de la série principale (capital restant pour un prêt, valeur du placement pour une épargne…). */
+  capitalLabel?: string;
+  /** Libellé de la série secondaire (intérêts cumulés dans les deux cas, mais laissé configurable). */
+  interestLabel?: string;
 }
 
-export function GraphEvolution({ data }: GraphEvolutionProps) {
+export function GraphEvolution({
+  data,
+  title = 'Évolution du remboursement',
+  capitalLabel = 'Capital restant',
+  interestLabel = 'Intérêts cumulés',
+}: GraphEvolutionProps) {
   if (data.length === 0) return null;
 
   return (
-    <div className="bg-white border border-black/[0.06] rounded-xl p-6" aria-label="Graphique d'évolution du remboursement dans le temps">
+    <div
+      className="bg-white border border-black/[0.06] rounded-xl p-6"
+      aria-label={`Graphique d'évolution : ${capitalLabel} et ${interestLabel} dans le temps`}
+    >
       <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
-        Évolution du remboursement
+        {title}
       </h3>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
@@ -57,7 +71,7 @@ export function GraphEvolution({ data }: GraphEvolutionProps) {
               }}
               formatter={((value: number, name: string) => [
                 `${value.toLocaleString('fr-FR')} FCFA`,
-                name === 'capitalRestant' ? 'Capital restant' : 'Intérêts cumulés',
+                name === 'capitalRestant' ? capitalLabel : interestLabel,
               ]) as never}
             />
             <Area
@@ -82,11 +96,11 @@ export function GraphEvolution({ data }: GraphEvolutionProps) {
       <div className="flex items-center gap-6 mt-4">
         <div className="flex items-center gap-2">
           <div className="w-3 h-0.5 bg-[#111]" />
-          <span className="text-[12px] text-gray-500">Capital restant</span>
+          <span className="text-[12px] text-gray-500">{capitalLabel}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-0.5 bg-red-500" />
-          <span className="text-[12px] text-gray-500">Intérêts cumulés</span>
+          <span className="text-[12px] text-gray-500">{interestLabel}</span>
         </div>
       </div>
     </div>

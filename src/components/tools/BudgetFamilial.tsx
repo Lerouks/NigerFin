@@ -306,7 +306,13 @@ export function BudgetFamilial() {
 
           {pieData && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <GraphRepartition capital={pieData.capital} interest={pieData.interest} />
+              <GraphRepartition
+                capital={pieData.capital}
+                interest={pieData.interest}
+                title="Dépenses vs épargne"
+                capitalLabel="Dépenses"
+                interestLabel="Reste à épargner"
+              />
               <div className="bg-white border border-black/[0.06] rounded-xl p-6">
                 <h4 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
                   Répartition par poste (% des revenus)

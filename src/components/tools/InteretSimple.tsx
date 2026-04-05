@@ -110,8 +110,19 @@ export function InteretSimple() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <GraphRepartition capital={numCapital} interest={calc.interest} />
-            <GraphEvolution data={calc.schedule} />
+            <GraphRepartition
+              capital={numCapital}
+              interest={calc.interest}
+              title="Composition du montant final"
+              capitalLabel="Capital initial"
+              interestLabel="Intérêts générés"
+            />
+            <GraphEvolution
+              data={calc.schedule}
+              title="Évolution du placement"
+              capitalLabel="Capital initial"
+              interestLabel="Intérêts cumulés"
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

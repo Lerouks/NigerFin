@@ -126,7 +126,7 @@ export async function GET() {
       mrr += billingOption.price / billingOption.durationMonths;
     } else {
       // Default to monthly price
-      mrr += BILLING_OPTIONS[0].price;
+      mrr += BILLING_OPTIONS[0]!.price;
     }
   }
   mrr = Math.round(mrr);

@@ -87,9 +87,10 @@ export function IndicesEconomiques() {
 
     // GDP Growth from IMF
     const latestGrowth = imf.realGDPGrowth.length ? latest(imf.realGDPGrowth) : latest(wb.gdpGrowth);
-    if (latestGrowth?.value !== null && latestGrowth?.value !== undefined) {
+    const gdpIndex = updatedIndices[0];
+    if (gdpIndex && latestGrowth?.value !== null && latestGrowth?.value !== undefined) {
       updatedIndices[0] = {
-        ...updatedIndices[0],
+        ...gdpIndex,
         change: `Croissance : ${latestGrowth.value > 0 ? '+' : ''}${latestGrowth.value.toFixed(1)}%`,
         positive: latestGrowth.value >= 0,
       };

@@ -184,7 +184,7 @@ export function EducationManager() {
 
   const getAccessBadge = (level: string) => {
     const al = ACCESS_LEVELS.find((a) => a.value === level);
-    return al || ACCESS_LEVELS[0];
+    return al || ACCESS_LEVELS[0]!;
   };
 
   if (loading) {

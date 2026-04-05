@@ -77,7 +77,9 @@ export function FlashBannerManager() {
   const updateItem = (index: number, field: keyof FlashItem, value: string) => {
     setData((prev) => {
       const items = [...prev.items];
-      items[index] = { ...items[index], [field]: value };
+      const current = items[index];
+      if (!current) return prev;
+      items[index] = { ...current, [field]: value };
       return { ...prev, items };
     });
     setDirty(true);

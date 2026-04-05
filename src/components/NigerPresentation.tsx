@@ -124,8 +124,9 @@ export function NigerPresentation() {
       enrichments['capitale'] = countryData.data.capital[0];
     }
 
-    if (enrichments[fact.fact_key]) {
-      return { ...fact, value: enrichments[fact.fact_key] };
+    const enriched = enrichments[fact.fact_key];
+    if (enriched) {
+      return { ...fact, value: enriched };
     }
     return fact;
   });
@@ -146,8 +147,8 @@ export function NigerPresentation() {
 
     if (wb.gdpGrowth.length >= 2) {
       const latest = latestValue(wb.gdpGrowth);
-      const prev = wb.gdpGrowth.sort((a, b) => b.year - a.year)[1];
-      if (latest?.value !== null && prev?.value !== null) {
+      const prev = wb.gdpGrowth.slice().sort((a, b) => b.year - a.year)[1];
+      if (latest && latest.value !== null && prev && prev.value !== null) {
         enrichments['croissance_pib'] = {
           value: `${latest.value.toFixed(1)}%`,
           previous: `${prev.value.toFixed(1)}%`,
@@ -158,8 +159,8 @@ export function NigerPresentation() {
 
     if (wb.inflation.length >= 2) {
       const latest = latestValue(wb.inflation);
-      const prev = wb.inflation.sort((a, b) => b.year - a.year)[1];
-      if (latest?.value !== null && prev?.value !== null) {
+      const prev = wb.inflation.slice().sort((a, b) => b.year - a.year)[1];
+      if (latest && latest.value !== null && prev && prev.value !== null) {
         enrichments['inflation'] = {
           value: `${latest.value.toFixed(1)}%`,
           previous: `${prev.value.toFixed(1)}%`,
@@ -170,20 +171,23 @@ export function NigerPresentation() {
 
     if (imf.realGDPGrowth.length >= 2) {
       const sorted = [...imf.realGDPGrowth].sort((a, b) => b.year - a.year);
-      if (!enrichments['croissance_pib'] && sorted[0]?.value !== null) {
+      const first = sorted[0];
+      const second = sorted[1];
+      if (!enrichments['croissance_pib'] && first && first.value !== null) {
         enrichments['croissance_pib'] = {
-          value: `${sorted[0].value.toFixed(1)}%`,
-          previous: sorted[1]?.value !== null ? `${sorted[1].value.toFixed(1)}%` : ind.previous_value,
-          source: `FMI ${sorted[0].year}`,
+          value: `${first.value.toFixed(1)}%`,
+          previous: second && second.value !== null ? `${second.value.toFixed(1)}%` : ind.previous_value,
+          source: `FMI ${first.year}`,
         };
       }
     }
 
-    if (enrichments[ind.indicator_key]) {
+    const indEnrichment = enrichments[ind.indicator_key];
+    if (indEnrichment) {
       return {
         ...ind,
-        value: enrichments[ind.indicator_key].value,
-        previous_value: enrichments[ind.indicator_key].previous,
+        value: indEnrichment.value,
+        previous_value: indEnrichment.previous,
       };
     }
     return ind;
@@ -203,8 +207,8 @@ export function NigerPresentation() {
   const grouped: Record<string, Fact[]> = {};
   for (const fact of enrichedFacts) {
     const cat = fact.category || 'general';
-    if (!grouped[cat]) grouped[cat] = [];
-    grouped[cat].push(fact);
+    const bucket = grouped[cat] ?? (grouped[cat] = []);
+    bucket.push(fact);
   }
 
   const categoryOrder = ['general', 'economie', 'demographie', 'geographie'];
@@ -267,7 +271,7 @@ export function NigerPresentation() {
                 {CATEGORY_LABELS[cat] || cat}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {grouped[cat].map((fact) => {
+                {(grouped[cat] ?? []).map((fact) => {
                   const Icon = FACT_ICONS[fact.fact_key] || Factory;
                   return (
                     <div

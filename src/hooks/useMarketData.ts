@@ -41,8 +41,8 @@ export function groupByType(
 ): Record<MarketDataType, MarketData[]> {
   const groups: Record<string, MarketData[]> = {};
   for (const item of items) {
-    if (!groups[item.type]) groups[item.type] = [];
-    groups[item.type].push(item);
+    const bucket = groups[item.type] ?? (groups[item.type] = []);
+    bucket.push(item);
   }
   return groups as Record<MarketDataType, MarketData[]>;
 }

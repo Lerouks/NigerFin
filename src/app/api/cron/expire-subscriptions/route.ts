@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
     if (result.status === 'rejected') {
       Sentry.captureException(result.reason, {
         tags: { context: 'cron-expiration-email' },
-        extra: { userId: expiredUsers[index].id },
+        extra: { userId: expiredUsers[index]?.id },
       });
     }
   });

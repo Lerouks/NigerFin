@@ -85,7 +85,7 @@ export function formatPrice(amount: number): string {
 }
 
 export function getBillingOption(cycle: BillingCycle): BillingOption {
-  return BILLING_OPTIONS.find((b) => b.cycle === cycle) || BILLING_OPTIONS[0];
+  return BILLING_OPTIONS.find((b) => b.cycle === cycle) || BILLING_OPTIONS[0]!;
 }
 
 export function isValidBillingCycle(cycle: string): cycle is BillingCycle {

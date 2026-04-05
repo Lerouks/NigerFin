@@ -71,12 +71,15 @@ export function NigerRegions({ regions }: { regions: Region[] }) {
               <h3 className="text-xl font-medium">{selectedRegion.name}</h3>
               <p className="text-[13px] text-gray-400 mt-1">Capitale : {selectedRegion.capital}</p>
             </div>
-            {SECURITY_STYLES[selectedRegion.security_level] && (
-              <span className={`text-[11px] px-3 py-1 rounded-full font-medium ${SECURITY_STYLES[selectedRegion.security_level].bg} ${SECURITY_STYLES[selectedRegion.security_level].text}`}>
-                <Shield className="w-3 h-3 inline mr-1" />
-                {SECURITY_STYLES[selectedRegion.security_level].label}
-              </span>
-            )}
+            {(() => {
+              const secStyle = SECURITY_STYLES[selectedRegion.security_level];
+              return secStyle ? (
+                <span className={`text-[11px] px-3 py-1 rounded-full font-medium ${secStyle.bg} ${secStyle.text}`}>
+                  <Shield className="w-3 h-3 inline mr-1" />
+                  {secStyle.label}
+                </span>
+              ) : null;
+            })()}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">

@@ -120,7 +120,7 @@ export function EducationCategoryContent({ slug }: { slug: string }) {
           {lessons.map((lesson, i) => {
             const accessible = canAccess(lesson.access_level);
             const isOpen = openLesson === lesson.id;
-            const config = ACCESS_CONFIG[lesson.access_level] || ACCESS_CONFIG.free;
+            const config = ACCESS_CONFIG[lesson.access_level] || ACCESS_CONFIG.free!;
 
             const handleLessonClick = () => {
               if (accessible && lesson.content) {

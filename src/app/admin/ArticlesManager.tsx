@@ -268,7 +268,7 @@ export function ArticlesManager() {
     setFeaturedWarning('');
     try {
       if (article.is_featured) {
-        // Trying to unfeature — server will block if it's the only one
+        // Trying to unfeature, server will block if it's the only one
         const res = await fetch(`/api/admin/articles/featured?articleId=${article.id}`, { method: 'DELETE' });
         const data = await res.json();
         if (!res.ok) {
@@ -277,7 +277,7 @@ export function ArticlesManager() {
           return;
         }
       } else {
-        // Set as featured — atomic: unfeaturing all others first
+        // Set as featured, atomic: unfeaturing all others first
         const res = await fetch('/api/admin/articles/featured', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

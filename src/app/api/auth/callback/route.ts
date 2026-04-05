@@ -77,7 +77,7 @@ async function sendWelcomeIfNew(userId: string, email?: string, fullName?: strin
     .eq('id', userId)
     .single();
 
-  // Only send once — skip if already sent or column doesn't exist
+  // Only send once, skip if already sent or column doesn't exist
   if (profile?.welcome_email_sent) return;
 
   const welcome = welcomeSignupEmail(fullName || 'Client');

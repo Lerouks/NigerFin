@@ -13,7 +13,7 @@ export async function GET() {
   }
 
   // Count premium articles read this month (UTC for consistency)
-  // Only count articles that are STILL premium — if an article was changed
+  // Only count articles that are STILL premium, if an article was changed
   // from premium to free after reading, it should not count against the limit
   const now = new Date();
   const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));

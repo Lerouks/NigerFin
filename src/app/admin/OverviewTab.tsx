@@ -91,7 +91,7 @@ export function OverviewTab({ overview, stats }: OverviewTabProps) {
               <DollarSign className="w-4 h-4 text-emerald-600" />
             </div>
           </div>
-          <p className="text-4xl font-bold text-emerald-600">{overview ? formatPrice(overview.mrr) : '—'}</p>
+          <p className="text-4xl font-bold text-emerald-600">{overview ? formatPrice(overview.mrr) : '-'}</p>
           <p className="text-[11px] text-gray-400 mt-1">Monthly Recurring Revenue</p>
         </div>
         <div className="bg-white rounded-xl border border-black/[0.06] p-6">
@@ -101,7 +101,7 @@ export function OverviewTab({ overview, stats }: OverviewTabProps) {
               <Crown className="w-4 h-4 text-blue-600" />
             </div>
           </div>
-          <p className="text-4xl font-bold text-blue-600">{overview ? overview.premiumActive : '—'}</p>
+          <p className="text-4xl font-bold text-blue-600">{overview ? overview.premiumActive : '-'}</p>
           {overview && overview.newPremiumThisMonth > 0 && (
             <div className="flex items-center gap-1 mt-1">
               <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
@@ -117,7 +117,7 @@ export function OverviewTab({ overview, stats }: OverviewTabProps) {
             </div>
           </div>
           <p className={`text-4xl font-bold ${overview && overview.churnRate > 5 ? 'text-red-600' : overview && overview.churnRate > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
-            {overview ? `${overview.churnRate}%` : '—'}
+            {overview ? `${overview.churnRate}%` : '-'}
           </p>
           <p className="text-[11px] text-gray-400 mt-1">
             {overview ? `${overview.expiredThisMonth} résiliation(s) ce mois` : ''}
@@ -131,10 +131,10 @@ export function OverviewTab({ overview, stats }: OverviewTabProps) {
           <DollarSign className="w-4 h-4" /> Revenus
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <KpiCard label="ARR" value={overview ? formatPrice(overview.arr) : '—'} sub="Annual Recurring Revenue" icon={BarChart3} color="text-emerald-600" bg="bg-emerald-50" />
-          <KpiCard label="Revenus ce mois" value={overview ? formatPrice(overview.thisMonthRevenue) : '—'} variation={overview?.revenueGrowthPercent} icon={TrendingUp} color="text-blue-600" bg="bg-blue-50" />
-          <KpiCard label="Revenus cumulés" value={overview ? formatPrice(overview.totalRevenue) : '—'} sub="Depuis le lancement" icon={DollarSign} color="text-gray-700" bg="bg-gray-100" />
-          <KpiCard label="LTV" value={overview ? (overview.ltv > 0 ? formatPrice(overview.ltv) : 'Données insuffisantes') : '—'} sub="Lifetime Value moyen" icon={Target} color="text-purple-600" bg="bg-purple-50" />
+          <KpiCard label="ARR" value={overview ? formatPrice(overview.arr) : '-'} sub="Annual Recurring Revenue" icon={BarChart3} color="text-emerald-600" bg="bg-emerald-50" />
+          <KpiCard label="Revenus ce mois" value={overview ? formatPrice(overview.thisMonthRevenue) : '-'} variation={overview?.revenueGrowthPercent} icon={TrendingUp} color="text-blue-600" bg="bg-blue-50" />
+          <KpiCard label="Revenus cumulés" value={overview ? formatPrice(overview.totalRevenue) : '-'} sub="Depuis le lancement" icon={DollarSign} color="text-gray-700" bg="bg-gray-100" />
+          <KpiCard label="LTV" value={overview ? (overview.ltv > 0 ? formatPrice(overview.ltv) : 'Données insuffisantes') : '-'} sub="Lifetime Value moyen" icon={Target} color="text-purple-600" bg="bg-purple-50" />
         </div>
       </div>
 
@@ -144,9 +144,9 @@ export function OverviewTab({ overview, stats }: OverviewTabProps) {
           <Users className="w-4 h-4" /> Abonnés
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <KpiCard label="Nouveaux abonnés" value={overview ? overview.newPremiumThisMonth.toString() : '—'} sub="Ce mois" icon={UserPlus} color="text-emerald-600" bg="bg-emerald-50" />
-          <KpiCard label="Abonnements expirés" value={overview ? overview.expiredThisMonth.toString() : '—'} sub="Ce mois" icon={UserMinus} color="text-red-600" bg="bg-red-50" />
-          <KpiCard label="Taux de conversion" value={overview ? `${overview.conversionRate}%` : '—'} sub="Inscription → Premium" icon={Repeat} color="text-amber-600" bg="bg-amber-50" />
+          <KpiCard label="Nouveaux abonnés" value={overview ? overview.newPremiumThisMonth.toString() : '-'} sub="Ce mois" icon={UserPlus} color="text-emerald-600" bg="bg-emerald-50" />
+          <KpiCard label="Abonnements expirés" value={overview ? overview.expiredThisMonth.toString() : '-'} sub="Ce mois" icon={UserMinus} color="text-red-600" bg="bg-red-50" />
+          <KpiCard label="Taux de conversion" value={overview ? `${overview.conversionRate}%` : '-'} sub="Inscription → Premium" icon={Repeat} color="text-amber-600" bg="bg-amber-50" />
           <KpiCard label="Paiements en attente" value={stats.pendingPayments.toString()} icon={Clock} color="text-amber-600" bg="bg-amber-50" />
         </div>
       </div>
@@ -157,8 +157,8 @@ export function OverviewTab({ overview, stats }: OverviewTabProps) {
           <UserPlus className="w-4 h-4" /> Acquisition
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <KpiCard label="Total inscrits" value={overview ? overview.totalUsers.toString() : '—'} sub="Gratuits + Premium" icon={Users} color="text-blue-600" bg="bg-blue-50" />
-          <KpiCard label="Nouveaux inscrits" value={overview ? overview.newUsersThisMonth.toString() : '—'} sub="Ce mois" variation={overview?.newUsersGrowthPercent} icon={UserPlus} color="text-emerald-600" bg="bg-emerald-50" />
+          <KpiCard label="Total inscrits" value={overview ? overview.totalUsers.toString() : '-'} sub="Gratuits + Premium" icon={Users} color="text-blue-600" bg="bg-blue-50" />
+          <KpiCard label="Nouveaux inscrits" value={overview ? overview.newUsersThisMonth.toString() : '-'} sub="Ce mois" variation={overview?.newUsersGrowthPercent} icon={UserPlus} color="text-emerald-600" bg="bg-emerald-50" />
           <KpiCard label="Utilisateurs bloqués" value={stats.blockedUsers.toString()} icon={Ban} color="text-red-600" bg="bg-red-50" />
         </div>
       </div>
@@ -224,10 +224,10 @@ export function OverviewTab({ overview, stats }: OverviewTabProps) {
           <FileBarChart className="w-4 h-4" /> Contenu & Engagement
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <KpiCard label="Total articles" value={overview ? overview.totalArticles.toString() : '—'} sub="Publiés" icon={Newspaper} color="text-gray-700" bg="bg-gray-100" />
-          <KpiCard label="Articles ce mois" value={overview ? overview.articlesThisMonth.toString() : '—'} icon={FileText} color="text-blue-600" bg="bg-blue-50" />
-          <KpiCard label="Vues ce mois" value={overview ? overview.viewsThisMonth.toLocaleString('fr-FR') : '—'} variation={overview?.viewsGrowthPercent} icon={Eye} color="text-purple-600" bg="bg-purple-50" />
-          <KpiCard label="Vues mois précédent" value={overview ? overview.viewsLastMonth.toLocaleString('fr-FR') : '—'} icon={Eye} color="text-gray-500" bg="bg-gray-100" />
+          <KpiCard label="Total articles" value={overview ? overview.totalArticles.toString() : '-'} sub="Publiés" icon={Newspaper} color="text-gray-700" bg="bg-gray-100" />
+          <KpiCard label="Articles ce mois" value={overview ? overview.articlesThisMonth.toString() : '-'} icon={FileText} color="text-blue-600" bg="bg-blue-50" />
+          <KpiCard label="Vues ce mois" value={overview ? overview.viewsThisMonth.toLocaleString('fr-FR') : '-'} variation={overview?.viewsGrowthPercent} icon={Eye} color="text-purple-600" bg="bg-purple-50" />
+          <KpiCard label="Vues mois précédent" value={overview ? overview.viewsLastMonth.toLocaleString('fr-FR') : '-'} icon={Eye} color="text-gray-500" bg="bg-gray-100" />
         </div>
 
         {overview?.topArticle && (

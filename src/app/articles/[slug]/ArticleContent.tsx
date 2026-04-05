@@ -207,7 +207,7 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
                       </div>
                     ))}
                   </div>
-                  {/* White gradient overlay — progressive blur effect */}
+                  {/* White gradient overlay, progressive blur effect */}
                   <div className="absolute inset-0 bg-gradient-to-t from-white via-white/95 via-60% to-transparent" />
                 </div>
 
@@ -296,7 +296,7 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
                   </div>
                 </div>
 
-                {/* Cover image — after title & metadata */}
+                {/* Cover image, after title & metadata */}
                 {imageUrl && (
                   <figure className="-mx-8 md:-mx-12 mb-8">
                     <div className="relative aspect-video w-full overflow-hidden">

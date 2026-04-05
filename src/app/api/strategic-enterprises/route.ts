@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { serverError } from '@/lib/api-error';
 
-// Public read-only endpoint — returns visible enterprises ordered by display_order
+// Public read-only endpoint, returns visible enterprises ordered by display_order
 export async function GET() {
   const service = createServiceClient();
   if (!service) {

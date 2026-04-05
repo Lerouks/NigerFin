@@ -17,7 +17,7 @@ export function isValidEmail(value: unknown): value is string {
   return typeof value === 'string' && value.length <= 254 && EMAIL_REGEX.test(value);
 }
 
-/** Sanitize a string for use in Supabase ilike/text filters — escapes SQL wildcards and special chars */
+/** Sanitize a string for use in Supabase ilike/text filters, escapes SQL wildcards and special chars */
 export function sanitizeSearchQuery(value: string): string {
   return value
     .replace(/\\/g, '\\\\')

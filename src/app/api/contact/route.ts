@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     const safeSubject = esc(String(subject));
     const safeMessage = esc(String(message)).replace(/\n/g, '<br/>');
 
-    // Send notification to the team (non-blocking — don't fail if email fails)
+    // Send notification to the team (non-blocking, don't fail if email fails)
     try {
       const notification = contactNotificationEmail(safeName, safeEmail, safeSubject, safeMessage);
       await sendTransactionalEmail({

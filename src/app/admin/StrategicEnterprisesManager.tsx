@@ -264,7 +264,7 @@ export function StrategicEnterprisesManager() {
           <div>
             <h2 className="text-lg font-bold text-gray-900">Entreprises stratégiques</h2>
             <p className="text-[13px] text-gray-500">
-              {items.length} entreprise{items.length !== 1 ? 's' : ''} — affichées sur la page Entreprises
+              {items.length} entreprise{items.length !== 1 ? 's' : ''}, affichées sur la page Entreprises
             </p>
           </div>
         </div>

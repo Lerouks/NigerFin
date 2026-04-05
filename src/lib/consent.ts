@@ -27,7 +27,7 @@ export function setConsent(value: ConsentValue): void {
     window.localStorage.setItem(CONSENT_STORAGE_KEY, value);
     window.dispatchEvent(new CustomEvent(CONSENT_EVENT, { detail: value }));
   } catch {
-    // ignore — storage may be blocked
+    // ignore: storage may be blocked
   }
 }
 

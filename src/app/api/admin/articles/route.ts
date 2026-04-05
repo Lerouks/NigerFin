@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const slug = body.slug || slugify(body.title);
 
-  // Validate content_type — must be 'free' or 'premium'
+  // Validate content_type, must be 'free' or 'premium'
   const contentType = body.content_type === 'premium' ? 'premium' : 'free';
 
   const sections = Array.isArray(body.sections) && body.sections.length > 0 ? body.sections : [body.category || 'economie'];
@@ -138,7 +138,7 @@ export async function PUT(req: NextRequest) {
     updateData.category = body.sections[0];
   }
 
-  // Validate content_type separately — must be 'free' or 'premium'
+  // Validate content_type separately, must be 'free' or 'premium'
   if (body.content_type !== undefined) {
     updateData.content_type = body.content_type === 'premium' ? 'premium' : 'free';
   }

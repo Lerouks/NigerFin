@@ -159,7 +159,7 @@ function getOverlayConfig(overlayCase: OverlayCase, remaining: number, limit: nu
         message: `Vous avez lu vos ${limit} articles premium gratuits ce mois-ci. Passez en Premium pour un accès illimité.`,
         accent: 'gold',
         benefits: PREMIUM_TIER.features.slice(0, 4),
-        ctaPrimary: { text: `Premium — ${PREMIUM_MONTHLY_PRICE.toLocaleString('fr-FR')} ${CURRENCY}/mois`, href: '/pricing' },
+        ctaPrimary: { text: `Premium, ${PREMIUM_MONTHLY_PRICE.toLocaleString('fr-FR')} ${CURRENCY}/mois`, href: '/pricing' },
       };
 
     case 'reader_has_articles':
@@ -184,7 +184,7 @@ function getOverlayConfig(overlayCase: OverlayCase, remaining: number, limit: nu
         message: 'Passez en Premium pour un accès illimité à toutes nos analyses.',
         accent: 'gold',
         benefits: PREMIUM_TIER.features.slice(0, 4),
-        ctaPrimary: { text: `Premium — ${PREMIUM_MONTHLY_PRICE.toLocaleString('fr-FR')} ${CURRENCY}/mois`, href: '/pricing' },
+        ctaPrimary: { text: `Premium, ${PREMIUM_MONTHLY_PRICE.toLocaleString('fr-FR')} ${CURRENCY}/mois`, href: '/pricing' },
       };
   }
 }
@@ -408,7 +408,7 @@ export function PremiumOverlay({ articleId, articleTitle, isPremium }: PremiumOv
         aria-hidden="true"
       />
 
-      {/* Dialog container — bottom sheet on mobile, centered on desktop */}
+      {/* Dialog container, bottom sheet on mobile, centered on desktop */}
       <div
         ref={dialogRef}
         role="dialog"
@@ -418,7 +418,7 @@ export function PremiumOverlay({ articleId, articleTitle, isPremium }: PremiumOv
         tabIndex={-1}
         className={`fixed inset-x-0 bottom-0 sm:inset-0 z-[101] sm:flex sm:items-center sm:justify-center outline-none`}
       >
-        {/* Panel — slides up on mobile, scales in on desktop */}
+        {/* Panel, slides up on mobile, scales in on desktop */}
         <div
           className={`
             w-full sm:max-w-[420px] sm:mx-4 bg-white
@@ -432,7 +432,7 @@ export function PremiumOverlay({ articleId, articleTitle, isPremium }: PremiumOv
             }
           `}
         >
-          {/* Drag handle — mobile only */}
+          {/* Drag handle, mobile only */}
           <div className="flex justify-center pt-3 pb-1 sm:hidden">
             <div className="w-10 h-1 rounded-full bg-gray-300" />
           </div>

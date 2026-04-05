@@ -32,7 +32,7 @@ export function CookieBanner() {
     setConsent('accepted');
     setVisible(false);
     initPostHog();
-    // Sentry est initialisé au chargement de la page — on force un rechargement
+    // Sentry est initialisé au chargement de la page. On force un rechargement
     // léger pour que sentry.client.config.ts s'exécute avec consent = true.
     if (typeof window !== 'undefined') {
       window.location.reload();

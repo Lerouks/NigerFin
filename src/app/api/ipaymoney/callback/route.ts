@@ -107,7 +107,7 @@ async function activateSubscription(
 }
 
 /**
- * POST — Callback from iPayMoney SDK / server.
+ * POST, Callback from iPayMoney SDK / server.
  * Receives payment status, verifies transaction, activates subscription.
  */
 export async function POST(request: NextRequest) {
@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (paymentRequest.status === 'verified') {
-      // Already processed — idempotent
+      // Already processed, idempotent
       return NextResponse.json({ success: true, message: 'Déjà traité' });
     }
 
@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, status });
     }
 
-    // Unknown status — log and acknowledge
+    // Unknown status, log and acknowledge
     Sentry.captureMessage('iPayMoney callback with unknown status', {
       level: 'warning',
       extra: { status, transactionId, payload },
@@ -208,7 +208,7 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * GET — User redirect after payment on iPayMoney.
+ * GET, User redirect after payment on iPayMoney.
  * Checks payment status and redirects to success or failure page.
  */
 export async function GET(request: NextRequest) {
@@ -242,7 +242,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${siteUrl}/compte?checkout=success`);
     }
 
-    // Payment not yet confirmed — show a pending page
+    // Payment not yet confirmed, show a pending page
     // The callback POST may arrive shortly after the redirect
     return NextResponse.redirect(`${siteUrl}/compte?checkout=pending`);
   } catch (err) {

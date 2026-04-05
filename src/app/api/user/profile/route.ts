@@ -24,7 +24,7 @@ export async function GET() {
     .single();
 
   if (!profile) {
-    // Auto-create profile if missing — use service client to bypass RLS
+    // Auto-create profile if missing, use service client to bypass RLS
     const serviceClient = createServiceClient();
     if (!serviceClient) {
       return NextResponse.json({ error: 'Service indisponible' }, { status: 503 });

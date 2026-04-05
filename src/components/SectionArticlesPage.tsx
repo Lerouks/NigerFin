@@ -33,7 +33,7 @@ export function SectionArticlesPage({
     <div className="min-h-screen bg-[#fafaf9]">
       <CategoryHero
         label={label}
-        title={`Tous les articles\u00A0— ${title}`}
+        title={`Tous les articles : ${title}`}
         description={description}
         accentGold={accentGold}
       />

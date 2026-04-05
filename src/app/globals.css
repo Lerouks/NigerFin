@@ -90,7 +90,7 @@ small, footer, .text-xs, .text-sm {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   ANIMATIONS — Reusable fade/slide animations
+   ANIMATIONS : Reusable fade/slide animations
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 @keyframes fadeInUp {
@@ -252,7 +252,7 @@ small, footer, .text-xs, .text-sm {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   TIPTAP RICH TEXT EDITOR — Admin styles
+   TIPTAP RICH TEXT EDITOR : Admin styles
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 .rich-editor-wrapper .tiptap {
@@ -407,7 +407,7 @@ small, footer, .text-xs, .text-sm {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   ARTICLE CONTENT — Professional editorial rendering (Bloomberg / FT style)
+   ARTICLE CONTENT : Professional editorial rendering (Bloomberg / FT style)
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 .article-content {
@@ -688,7 +688,7 @@ small, footer, .text-xs, .text-sm {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   EDUCATION LESSONS — Table styling for courses
+   EDUCATION LESSONS : Table styling for courses
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 .prose table {

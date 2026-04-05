@@ -119,7 +119,7 @@ export function InteretCompose() {
         `Vos versements ${freqLabel}s de ${fmt(numContrib)} FCFA totalisent ${fmt(calc.totalContributions)} FCFA sur la période, pour un investissement cumulé de ${fmt(calc.totalInvested)} FCFA (capital initial + versements).`,
       );
       lines.push(
-        `Les intérêts générés (${fmt(calc.interest)} FCFA) représentent ${((calc.interest / calc.totalInvested) * 100).toFixed(1)}% de votre effort d'épargne — c'est la puissance des versements réguliers combinés à la capitalisation.`,
+        `Les intérêts générés (${fmt(calc.interest)} FCFA) représentent ${((calc.interest / calc.totalInvested) * 100).toFixed(1)}% de votre effort d'épargne. C'est la puissance des versements réguliers combinés à la capitalisation.`,
       );
     } else {
       lines.push(

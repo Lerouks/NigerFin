@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase';
 import { marketData as fallbackData } from '@/data/mock-data';
 
-// No static cache — data must propagate instantly after admin updates
+// No static cache, data must propagate instantly after admin updates
 export const dynamic = 'force-dynamic';
 
 export async function GET() {

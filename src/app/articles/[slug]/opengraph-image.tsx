@@ -4,7 +4,7 @@ import { getArticleBySlug } from '@/lib/articles';
 export const runtime = 'nodejs';
 export const revalidate = 3600;
 
-export const alt = 'NFI Report — Article';
+export const alt = 'NFI Report · Article';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -17,7 +17,7 @@ export default async function ArticleOgImage({
 
   const title =
     result?.article.title ||
-    'NFI Report — Actualités économiques et financières du Niger';
+    'NFI Report · Actualités économiques et financières du Niger';
   const category = result?.article.category || 'NFI REPORT';
   const excerpt = result?.article.excerpt || '';
 

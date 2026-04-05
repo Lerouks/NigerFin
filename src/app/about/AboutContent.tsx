@@ -49,13 +49,22 @@ export function AboutContent() {
         'Commerce et international', 'Éducation financière et économique', 'Outils pratiques de gestion',
       ];
 
-  const getInitials = (heading: string) => {
-    const namePart = heading.split('—')[0]?.trim() || heading;
-    return namePart.split(/\s+/).map((w) => w[0]).filter(Boolean).join('').toUpperCase().slice(0, 2);
+  // Split convention : "Name · Role" (le séparateur est le middle dot U+00B7)
+  const splitFounder = (heading: string) => {
+    const parts = heading.split(' · ');
+    return {
+      name: parts[0]?.trim() || heading,
+      role: parts[1]?.trim() || 'Co-fondateur',
+    };
   };
 
-  const getFounderName = (heading: string) => heading.split('—')[0]?.trim() || heading;
-  const getFounderRole = (heading: string) => heading.split('—')[1]?.trim() || 'Co-fondateur';
+  const getInitials = (heading: string) => {
+    const { name } = splitFounder(heading);
+    return name.split(/\s+/).map((w) => w[0]).filter(Boolean).join('').toUpperCase().slice(0, 2);
+  };
+
+  const getFounderName = (heading: string) => splitFounder(heading).name;
+  const getFounderRole = (heading: string) => splitFounder(heading).role;
 
   return (
     <div className="min-h-screen bg-[#fafaf9]">

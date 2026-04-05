@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, status: 'rejected' });
     }
 
-    // action === 'verify' — duration depends on billing cycle
+    // action === 'verify', duration depends on billing cycle
     const cycle = (paymentRequest.billing_cycle || 'monthly') as BillingCycle;
     const billingOption = getBillingOption(cycle);
     const expiresAt = new Date();

@@ -237,8 +237,19 @@ export function InteretCompose() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <GraphRepartition capital={calc.totalInvested} interest={calc.interest} />
-            <GraphEvolution data={calc.schedule} />
+            <GraphRepartition
+              capital={calc.totalInvested}
+              interest={calc.interest}
+              title="Composition du montant final"
+              capitalLabel={hasContrib ? 'Capital + versements' : 'Capital investi'}
+              interestLabel="Intérêts générés"
+            />
+            <GraphEvolution
+              data={calc.schedule}
+              title="Évolution du placement"
+              capitalLabel="Valeur du placement"
+              interestLabel="Intérêts cumulés"
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

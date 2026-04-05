@@ -5,26 +5,41 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 interface GraphRepartitionProps {
   capital: number;
   interest: number;
+  /** Titre du bloc. Défaut : "Répartition du coût" (contexte emprunt). */
+  title?: string;
+  /** Libellé de la part principale (capital pour un emprunt, capital investi pour une épargne, dépenses pour un budget…). */
+  capitalLabel?: string;
+  /** Libellé de la part secondaire (intérêts pour un prêt/placement, épargne pour un budget…). */
+  interestLabel?: string;
 }
 
 const COLORS = ['#111111', '#d4d4d4'];
 
-export function GraphRepartition({ capital, interest }: GraphRepartitionProps) {
+export function GraphRepartition({
+  capital,
+  interest,
+  title = 'Répartition du coût',
+  capitalLabel = 'Capital',
+  interestLabel = 'Intérêts',
+}: GraphRepartitionProps) {
   const total = capital + interest;
   if (total <= 0) return null;
 
   const data = [
-    { name: 'Capital', value: capital, color: '#111111' },
-    { name: 'Intérêts', value: interest, color: '#d4d4d4' },
+    { name: capitalLabel, value: capital, color: '#111111' },
+    { name: interestLabel, value: interest, color: '#d4d4d4' },
   ];
 
   const capitalPercent = ((capital / total) * 100).toFixed(1);
   const interestPercent = ((interest / total) * 100).toFixed(1);
 
   return (
-    <div className="bg-white border border-black/[0.06] rounded-xl p-6" aria-label="Graphique de répartition du coût entre capital et intérêts">
+    <div
+      className="bg-white border border-black/[0.06] rounded-xl p-6"
+      aria-label={`Graphique de répartition : ${capitalLabel} vs ${interestLabel}`}
+    >
       <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
-        Répartition du coût
+        {title}
       </h3>
       <div className="flex items-center gap-6">
         <div className="w-40 h-40 flex-shrink-0">
@@ -62,14 +77,14 @@ export function GraphRepartition({ capital, interest }: GraphRepartitionProps) {
           <div className="flex items-center gap-3">
             <div className="w-3 h-3 rounded-full bg-[#111]" />
             <div>
-              <p className="text-[13px] text-gray-500">Capital</p>
+              <p className="text-[13px] text-gray-500">{capitalLabel}</p>
               <p className="text-[15px] font-semibold">{capitalPercent}%</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <div className="w-3 h-3 rounded-full bg-[#d4d4d4]" />
             <div>
-              <p className="text-[13px] text-gray-500">Intérêts</p>
+              <p className="text-[13px] text-gray-500">{interestLabel}</p>
               <p className="text-[15px] font-semibold">{interestPercent}%</p>
             </div>
           </div>

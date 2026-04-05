@@ -1,162 +1,322 @@
 'use client';
 
 import { useMemo } from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { useNigerMacro } from '@/hooks/useNigerMacro';
 
-const FALLBACK_INDICES = [
-  { name: 'PIB Niger (2025)', value: '10 250 Mrd FCFA', change: '+6,2%', positive: true, numValue: 10250 },
-  { name: 'Inflation (IPC)', value: '3,8%', change: '+0,4 pts', positive: false, numValue: 3.8 },
-  { name: 'Taux directeur BCEAO', value: '3,50%', change: '0,00', positive: true, numValue: 3.5 },
-  { name: 'Dette publique / PIB', value: '42,3%', change: '-1,2 pts', positive: true, numValue: 42.3 },
-  { name: 'Réserves de change', value: '4,8 mois', change: '+0,3', positive: true, numValue: 4.8 },
-  { name: 'Taux de chômage', value: '15,2%', change: '-0,8 pts', positive: true, numValue: 15.2 },
-  { name: 'Balance commerciale', value: '-380 Mrd FCFA', change: '+45 Mrd', positive: true, numValue: -380 },
-  { name: 'IDE entrants', value: '620 Mrd FCFA', change: '+12%', positive: true, numValue: 620 },
-];
+/**
+ * Affiche exclusivement les indicateurs réellement récupérés depuis les
+ * APIs publiques (Banque mondiale, FMI). Aucune valeur n'est hardcodée :
+ * si l'API ne renvoie pas un indicateur, la carte correspondante n'est
+ * pas affichée. Cela évite d'induire l'utilisateur en erreur avec des
+ * chiffres figés.
+ */
 
-const FALLBACK_CHART = [
-  { name: 'PIB', value: 10250, unit: 'Mrd' },
-  { name: 'IDE', value: 620, unit: 'Mrd' },
-  { name: 'Balance', value: -380, unit: 'Mrd' },
-];
+type Trend = 'up' | 'down' | 'flat';
+
+interface Indicator {
+  key: string;
+  name: string;
+  value: string;
+  change: string | null;
+  trend: Trend;
+  /** Positive = vert, negative = rouge. Dépend de l'indicateur : une
+   *  inflation en baisse est "positive", une dette en baisse aussi,
+   *  un PIB en hausse est positif, etc. */
+  positive: boolean | null;
+}
+
+function fmtFCFA(n: number): string {
+  return Math.round(n).toLocaleString('fr-FR');
+}
+
+/** Dernier point non-null d'une série year/value. */
+function latestValue<T extends { year: number; value: number | null }>(arr: T[]): T | null {
+  const sorted = [...arr].filter((x) => x.value !== null).sort((a, b) => b.year - a.year);
+  return sorted[0] ?? null;
+}
+
+function prevValue<T extends { year: number; value: number | null }>(arr: T[]): T | null {
+  const sorted = [...arr].filter((x) => x.value !== null).sort((a, b) => b.year - a.year);
+  return sorted[1] ?? null;
+}
+
+function diffTrend(current: number, previous: number | null): { change: string; trend: Trend } {
+  if (previous === null || previous === undefined) {
+    return { change: '', trend: 'flat' };
+  }
+  const delta = current - previous;
+  if (Math.abs(delta) < 0.05) return { change: '= stable', trend: 'flat' };
+  const sign = delta > 0 ? '+' : '';
+  return {
+    change: `${sign}${delta.toFixed(1)} pts`,
+    trend: delta > 0 ? 'up' : 'down',
+  };
+}
 
 export function IndicesEconomiques() {
   const { data: macroData, isLoading, lastUpdated, source } = useNigerMacro();
 
-  const { indices, chartData } = useMemo(() => {
-    if (!macroData) return { indices: FALLBACK_INDICES, chartData: FALLBACK_CHART };
+  const { indicators, gdpSeries } = useMemo(() => {
+    if (!macroData) return { indicators: [] as Indicator[], gdpSeries: [] as { label: string; capitalRestant: number; interetsCumules: number }[] };
 
     const wb = macroData.worldBank;
     const imf = macroData.imf;
+    const list: Indicator[] = [];
 
-    const latest = <T extends { year: number; value: number | null }>(arr: T[]) => {
-      const sorted = [...arr].sort((a, b) => b.year - a.year);
-      return sorted[0] ?? null;
-    };
-
-    const prev = <T extends { year: number; value: number | null }>(arr: T[]) => {
-      const sorted = [...arr].sort((a, b) => b.year - a.year);
-      return sorted[1] ?? null;
-    };
-
-    const updatedIndices = [...FALLBACK_INDICES];
-
-    // PIB
-    const latestGDP = latest(wb.gdp);
-    if (latestGDP?.value) {
-      const gdpBillionFCFA = Math.round(latestGDP.value / 1e9 * 655.957);
-      const prevGDP = prev(wb.gdp);
-      const change = prevGDP?.value ? (((latestGDP.value - prevGDP.value) / prevGDP.value) * 100) : 0;
-      updatedIndices[0] = {
+    // ── PIB (USD converti en FCFA, 1 USD ≈ 655.957 XOF parité fixe) ──
+    const latestGDP = latestValue(wb.gdp);
+    if (latestGDP && latestGDP.value !== null) {
+      const gdpBillionFCFA = Math.round((latestGDP.value * 655.957) / 1e9);
+      const prevGDP = prevValue(wb.gdp);
+      const pctChange = prevGDP && prevGDP.value ? ((latestGDP.value - prevGDP.value) / prevGDP.value) * 100 : null;
+      list.push({
+        key: 'gdp',
         name: `PIB Niger (${latestGDP.year})`,
-        value: `${gdpBillionFCFA.toLocaleString('fr-FR')} Mrd FCFA`,
-        change: `${change > 0 ? '+' : ''}${change.toFixed(1)}%`,
-        positive: change >= 0,
-        numValue: gdpBillionFCFA,
-      };
+        value: `${fmtFCFA(gdpBillionFCFA)} Mrd FCFA`,
+        change: pctChange !== null ? `${pctChange > 0 ? '+' : ''}${pctChange.toFixed(1)}%` : null,
+        trend: pctChange === null ? 'flat' : pctChange > 0 ? 'up' : pctChange < 0 ? 'down' : 'flat',
+        positive: pctChange === null ? null : pctChange >= 0,
+      });
     }
 
-    // Inflation
-    const latestInflation = latest(wb.inflation) || (imf.inflationRate.length ? latest(imf.inflationRate) : null);
-    const prevInflation = prev(wb.inflation) || (imf.inflationRate.length ? prev(imf.inflationRate) : null);
-    if (latestInflation?.value !== null && latestInflation?.value !== undefined) {
-      const diff = prevInflation?.value !== null && prevInflation?.value !== undefined ? latestInflation.value - prevInflation.value : 0;
-      updatedIndices[1] = {
-        name: `Inflation (${latestInflation.year})`,
+    // ── Croissance du PIB (IMF prioritaire, fallback WB) ──
+    const latestGrowth = latestValue(imf.realGDPGrowth) || latestValue(wb.gdpGrowth);
+    const prevGrowth = prevValue(imf.realGDPGrowth) || prevValue(wb.gdpGrowth);
+    if (latestGrowth && latestGrowth.value !== null) {
+      const { change, trend } = diffTrend(latestGrowth.value, prevGrowth?.value ?? null);
+      list.push({
+        key: 'growth',
+        name: `Croissance réelle (${latestGrowth.year})`,
+        value: `${latestGrowth.value.toFixed(1)}%`,
+        change: change || null,
+        trend,
+        positive: latestGrowth.value >= 0,
+      });
+    }
+
+    // ── Inflation ──
+    const latestInflation = latestValue(wb.inflation) || latestValue(imf.inflationRate);
+    const prevInflation = prevValue(wb.inflation) || prevValue(imf.inflationRate);
+    if (latestInflation && latestInflation.value !== null) {
+      const { change, trend } = diffTrend(latestInflation.value, prevInflation?.value ?? null);
+      list.push({
+        key: 'inflation',
+        name: `Inflation IPC (${latestInflation.year})`,
         value: `${latestInflation.value.toFixed(1)}%`,
-        change: `${diff > 0 ? '+' : ''}${diff.toFixed(1)} pts`,
-        positive: diff <= 0,
-        numValue: latestInflation.value,
-      };
+        change: change || null,
+        trend,
+        // Pour l'inflation, une baisse est positive
+        positive: trend === 'flat' ? null : trend === 'down',
+      });
     }
 
-    // Debt
-    const latestDebt = latest(wb.debt);
-    const prevDebt = prev(wb.debt);
-    if (latestDebt?.value !== null && latestDebt?.value !== undefined) {
-      const diff = prevDebt?.value !== null && prevDebt?.value !== undefined ? latestDebt.value - prevDebt.value : 0;
-      updatedIndices[3] = {
+    // ── Dette publique / PIB ──
+    const latestDebt = latestValue(wb.debt);
+    const prevDebt = prevValue(wb.debt);
+    if (latestDebt && latestDebt.value !== null) {
+      const { change, trend } = diffTrend(latestDebt.value, prevDebt?.value ?? null);
+      list.push({
+        key: 'debt',
         name: `Dette publique / PIB (${latestDebt.year})`,
         value: `${latestDebt.value.toFixed(1)}%`,
-        change: `${diff > 0 ? '+' : ''}${diff.toFixed(1)} pts`,
-        positive: diff <= 0,
-        numValue: latestDebt.value,
-      };
+        change: change || null,
+        trend,
+        // Une dette qui baisse est positive
+        positive: trend === 'flat' ? null : trend === 'down',
+      });
     }
 
-    // GDP Growth from IMF
-    const latestGrowth = imf.realGDPGrowth.length ? latest(imf.realGDPGrowth) : latest(wb.gdpGrowth);
-    const gdpIndex = updatedIndices[0];
-    if (gdpIndex && latestGrowth?.value !== null && latestGrowth?.value !== undefined) {
-      updatedIndices[0] = {
-        ...gdpIndex,
-        change: `Croissance : ${latestGrowth.value > 0 ? '+' : ''}${latestGrowth.value.toFixed(1)}%`,
-        positive: latestGrowth.value >= 0,
-      };
+    // ── PIB par habitant ──
+    const latestGDPPC = latestValue(wb.gdpPerCapita);
+    const prevGDPPC = prevValue(wb.gdpPerCapita);
+    if (latestGDPPC && latestGDPPC.value !== null) {
+      const pcFCFA = Math.round(latestGDPPC.value * 655.957);
+      const pctChange = prevGDPPC && prevGDPPC.value
+        ? ((latestGDPPC.value - prevGDPPC.value) / prevGDPPC.value) * 100
+        : null;
+      list.push({
+        key: 'gdpPerCapita',
+        name: `PIB / habitant (${latestGDPPC.year})`,
+        value: `${fmtFCFA(pcFCFA)} FCFA`,
+        change: pctChange !== null ? `${pctChange > 0 ? '+' : ''}${pctChange.toFixed(1)}%` : null,
+        trend: pctChange === null ? 'flat' : pctChange > 0 ? 'up' : 'down',
+        positive: pctChange === null ? null : pctChange >= 0,
+      });
     }
 
-    // Chart data
-    const gdpChart = latestGDP?.value ? Math.round(latestGDP.value / 1e9 * 655.957) : 10250;
-    const updatedChart = [
-      { name: 'PIB', value: gdpChart, unit: 'Mrd' },
-      { name: 'IDE', value: 620, unit: 'Mrd' },
-      { name: 'Balance', value: -380, unit: 'Mrd' },
-    ];
+    // ── Population ──
+    const latestPop = latestValue(wb.population);
+    const prevPop = prevValue(wb.population);
+    if (latestPop && latestPop.value !== null) {
+      const popM = (latestPop.value / 1e6).toFixed(1);
+      const pctChange = prevPop && prevPop.value
+        ? ((latestPop.value - prevPop.value) / prevPop.value) * 100
+        : null;
+      list.push({
+        key: 'population',
+        name: `Population (${latestPop.year})`,
+        value: `${popM} M hab.`,
+        change: pctChange !== null ? `${pctChange > 0 ? '+' : ''}${pctChange.toFixed(2)}%` : null,
+        trend: 'up',
+        positive: true,
+      });
+    }
 
-    return { indices: updatedIndices, chartData: updatedChart };
+    // ── Balance courante (% PIB, FMI) ──
+    const latestCA = latestValue(imf.currentAccountBalance);
+    const prevCA = prevValue(imf.currentAccountBalance);
+    if (latestCA && latestCA.value !== null) {
+      const { change, trend } = diffTrend(latestCA.value, prevCA?.value ?? null);
+      list.push({
+        key: 'currentAccount',
+        name: `Balance courante / PIB (${latestCA.year})`,
+        value: `${latestCA.value > 0 ? '+' : ''}${latestCA.value.toFixed(1)}%`,
+        change: change || null,
+        trend,
+        positive: latestCA.value >= 0,
+      });
+    }
+
+    // ── Recettes publiques / PIB (FMI) ──
+    const latestRev = latestValue(imf.governmentRevenue);
+    const prevRev = prevValue(imf.governmentRevenue);
+    if (latestRev && latestRev.value !== null) {
+      const { change, trend } = diffTrend(latestRev.value, prevRev?.value ?? null);
+      list.push({
+        key: 'revenue',
+        name: `Recettes publiques / PIB (${latestRev.year})`,
+        value: `${latestRev.value.toFixed(1)}%`,
+        change: change || null,
+        trend,
+        positive: trend === 'flat' ? null : trend === 'up',
+      });
+    }
+
+    // ── Série PIB pour le graphique d'évolution ──
+    const gdpByYear = [...wb.gdp]
+      .filter((x) => x.value !== null)
+      .sort((a, b) => a.year - b.year);
+
+    const gdpGrowthMap = new Map<number, number>();
+    for (const g of wb.gdpGrowth) {
+      if (g.value !== null) gdpGrowthMap.set(g.year, g.value);
+    }
+
+    const series = gdpByYear.map((point) => ({
+      label: String(point.year),
+      capitalRestant: Math.round(((point.value ?? 0) * 655.957) / 1e9),
+      interetsCumules: Math.round(((gdpGrowthMap.get(point.year) ?? 0) * 100)) / 100,
+    }));
+
+    return { indicators: list, gdpSeries: series };
   }, [macroData]);
+
+  const trendIcon = (trend: Trend) => {
+    if (trend === 'up') return <TrendingUp className="w-4 h-4" aria-hidden="true" />;
+    if (trend === 'down') return <TrendingDown className="w-4 h-4" aria-hidden="true" />;
+    return <Minus className="w-4 h-4" aria-hidden="true" />;
+  };
 
   return (
     <div className="space-y-8">
-      {/* Chart */}
+      {/* Graphique d'évolution du PIB */}
       <div className="bg-white border border-black/[0.06] rounded-xl p-6">
         <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
-          Indicateurs clés (Mrd FCFA)
+          Évolution du PIB du Niger (Mrd FCFA)
         </h3>
         {isLoading ? (
-          <div className="h-52 flex items-center justify-center">
+          <div className="h-64 flex items-center justify-center">
             <div className="w-5 h-5 border-2 border-gray-200 border-t-gray-600 rounded-full animate-spin" />
           </div>
-        ) : (
-          <div className="h-52" aria-label="Graphique des indicateurs économiques clés du Niger en milliards de FCFA">
+        ) : gdpSeries.length > 0 ? (
+          <div className="h-64" aria-label="Évolution annuelle du PIB du Niger en milliards de FCFA">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
+              <AreaChart data={gdpSeries} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
+                <defs>
+                  <linearGradient id="colorGDP" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#111111" stopOpacity={0.18} />
+                    <stop offset="95%" stopColor="#111111" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#9ca3af' }} axisLine={{ stroke: '#e5e5e5' }} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={{ stroke: '#e5e5e5' }} tickLine={false} />
+                <YAxis
+                  tick={{ fontSize: 11, fill: '#9ca3af' }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(1)}k` : `${v}`}
+                />
                 <Tooltip
                   contentStyle={{ background: '#111', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '12px', padding: '8px 12px' }}
-                  formatter={((value: number) => [`${value.toLocaleString('fr-FR')} Mrd FCFA`]) as never}
+                  formatter={((value: number, name: string) => [
+                    name === 'capitalRestant' ? `${value.toLocaleString('fr-FR')} Mrd FCFA` : `${value.toFixed(1)}%`,
+                    name === 'capitalRestant' ? 'PIB' : 'Croissance réelle',
+                  ]) as never}
                 />
-                <Bar dataKey="value" fill="#111" radius={[4, 4, 0, 0]} />
-              </BarChart>
+                <Area
+                  type="monotone"
+                  dataKey="capitalRestant"
+                  stroke="#111111"
+                  strokeWidth={2}
+                  fill="url(#colorGDP)"
+                  dot={{ r: 3, fill: '#111' }}
+                />
+              </AreaChart>
             </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="h-64 flex items-center justify-center text-[13px] text-gray-400">
+            Données indisponibles
           </div>
         )}
       </div>
 
-      {/* Indices grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {indices.map((idx) => (
-          <div key={idx.name} className="flex items-center justify-between p-5 bg-white border border-black/[0.06] rounded-xl hover:border-black/[0.12] transition-colors">
-            <div>
-              <p className="text-[13px] text-gray-500">{idx.name}</p>
-              <p className="text-xl font-bold mt-0.5">{idx.value}</p>
+      {/* Grille d'indicateurs */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-24 bg-white border border-black/[0.06] rounded-xl animate-pulse" />
+          ))}
+        </div>
+      ) : indicators.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {indicators.map((idx) => (
+            <div
+              key={idx.key}
+              className="flex items-center justify-between p-5 bg-white border border-black/[0.06] rounded-xl hover:border-black/[0.12] transition-colors"
+            >
+              <div>
+                <p className="text-[13px] text-gray-500">{idx.name}</p>
+                <p className="text-xl font-bold mt-0.5">{idx.value}</p>
+              </div>
+              {idx.change && (
+                <span
+                  className={`text-[13px] font-semibold px-2.5 py-1 rounded-full inline-flex items-center gap-1 ${
+                    idx.positive === true
+                      ? 'bg-emerald-50 text-emerald-600'
+                      : idx.positive === false
+                        ? 'bg-red-50 text-red-600'
+                        : 'bg-gray-100 text-gray-500'
+                  }`}
+                >
+                  {trendIcon(idx.trend)}
+                  {idx.change}
+                </span>
+              )}
             </div>
-            <span className={`text-[13px] font-semibold px-2.5 py-1 rounded-full ${
-              idx.positive ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'
-            }`}>
-              {idx.change}
-            </span>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className="p-8 text-center bg-white border border-black/[0.06] rounded-xl text-[14px] text-gray-500">
+          Aucun indicateur disponible pour le moment. Les APIs publiques (Banque mondiale, FMI) sont temporairement indisponibles.
+        </div>
+      )}
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <p className="text-[12px] text-gray-400">
-          Sources : Banque mondiale, FMI, BCEAO, INS Niger
-          {source && ` (${source})`}
+          Sources : Banque mondiale, FMI{source ? ` (${source})` : ''}. Parité XOF/USD fixe à 655,957.
         </p>
         {lastUpdated && (
           <p className="text-[10px] text-gray-400">

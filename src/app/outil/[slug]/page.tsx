@@ -23,7 +23,7 @@ const toolsMeta: Record<string, { title: string; description: string; premium: b
   'indices-economiques': {
     title: 'Indices Économiques',
     description: 'Consultez les principaux indicateurs économiques du Niger et de la zone UEMOA.',
-    premium: true,
+    premium: false,
   },
   'interet-compose': {
     title: 'Intérêt Composé',

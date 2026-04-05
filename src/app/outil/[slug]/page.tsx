@@ -30,6 +30,11 @@ const toolsMeta: Record<string, { title: string; description: string; premium: b
     description: 'Simulez la croissance de votre capital avec les intérêts composés.',
     premium: true,
   },
+  'budget-familial': {
+    title: 'Simulation de Budget Familial',
+    description: "Analysez votre budget familial, obtenez des conseils adaptés au Niger et exportez un récapitulatif PDF.",
+    premium: true,
+  },
 };
 
 interface ToolPageProps {

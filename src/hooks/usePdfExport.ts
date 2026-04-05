@@ -44,11 +44,12 @@ export interface PdfExportOptions {
   params: { label: string; value: string }[];
   results: { label: string; value: string }[];
   table?: { head: string[]; body: (string | number)[][] };
+  recommendations?: string[];
 }
 
 export function usePdfExport() {
   const generate = useCallback((opts: PdfExportOptions) => {
-    const { title, params, results, table } = opts;
+    const { title, params, results, table, recommendations } = opts;
     const doc = new jsPDF('p', 'mm', 'a4');
     const pageW = doc.internal.pageSize.getWidth();
     const marginL = 20;
@@ -223,6 +224,42 @@ export function usePdfExport() {
           cellPadding: 3,
           lineWidth: 0,
         },
+      });
+    }
+
+    // -- Recommendations (bulleted list) --
+    if (recommendations && recommendations.length > 0) {
+      y = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
+      const pageH = doc.internal.pageSize.getHeight();
+
+      // Page break if too close to the bottom
+      if (y > pageH - 60) {
+        doc.addPage();
+        y = 25;
+      }
+
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(17, 17, 17);
+      doc.text('Recommandations', marginL, y);
+      y += 6;
+
+      doc.setFont('Helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(51, 51, 51);
+
+      recommendations.forEach((rec) => {
+        const lines = doc.splitTextToSize(sanitize(rec), contentW - 6);
+        // Page break if this bullet does not fit
+        if (y + lines.length * 5 > pageH - 30) {
+          doc.addPage();
+          y = 25;
+        }
+        doc.setFont('Helvetica', 'bold');
+        doc.text('•', marginL, y);
+        doc.setFont('Helvetica', 'normal');
+        doc.text(lines, marginL + 5, y);
+        y += lines.length * 5 + 2;
       });
     }
 

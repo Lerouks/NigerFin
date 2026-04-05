@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Calculator, TrendingUp, Percent, DollarSign, BarChart3, ArrowRight, Lock, Wrench } from 'lucide-react';
+import { Calculator, TrendingUp, Percent, DollarSign, BarChart3, Wallet, ArrowRight, Lock, Wrench } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
 interface ToolData {
@@ -19,6 +19,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Percent,
   DollarSign,
   BarChart3,
+  Wallet,
   Wrench,
 };
 
@@ -122,6 +123,7 @@ const defaultFreeTools: ToolData[] = [
 const defaultPremiumTools: ToolData[] = [
   { _id: 'f3', name: 'Simulateur Salaire', slug: 'simulateur-salaire', icon: 'DollarSign', isPremium: true },
   { _id: 'f5', name: 'Intérêt Composé', slug: 'interet-compose', icon: 'TrendingUp', isPremium: true },
+  { _id: 'f6', name: 'Budget Familial', slug: 'budget-familial', icon: 'Wallet', isPremium: true },
 ];
 
 export function PracticalTools() {

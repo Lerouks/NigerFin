@@ -8,6 +8,7 @@ const tools = [
   { _id: 'f3', name: 'Simulateur Salaire', slug: 'simulateur-salaire', icon: 'DollarSign', isPremium: true },
   { _id: 'f4', name: 'Indices Économiques', slug: 'indices-economiques', icon: 'BarChart3', isPremium: false },
   { _id: 'f5', name: 'Intérêt Composé', slug: 'interet-compose', icon: 'TrendingUp', isPremium: true },
+  { _id: 'f6', name: 'Budget Familial', slug: 'budget-familial', icon: 'Wallet', isPremium: true },
 ];
 
 export async function GET() {

@@ -19,11 +19,11 @@ Tests live in `src/__tests__/*.test.ts` and match the pattern `src/**/*.test.ts`
 
 ## Architecture
 
-**Stack:** Next.js 15 App Router, React 19, Supabase (auth + DB), Stripe (payments), Tailwind CSS 3, TipTap (rich text editor), Recharts, Sentry, PostHog analytics, Resend (transactional email), Beehiiv (newsletter).
+**Stack:** Next.js 15 App Router, React 19, Supabase (auth + DB), iPayMoney (payments Mobile Money & carte), Tailwind CSS 3, TipTap (rich text editor), Recharts, Sentry, PostHog analytics, Resend (transactional email), Beehiiv (newsletter).
 
 **Routing:** French-language routes under `src/app/` — e.g., `/articles`, `/economie`, `/finance`, `/marches`, `/niger`, `/education`, `/entreprises`, `/outils`, `/compte`, `/paiement`, `/pricing`, `/admin`. Auth routes use a route group `(auth)/` with `/connexion` and `/inscription`.
 
-**API Routes:** Extensive API at `src/app/api/` covering: articles, auth, comments, contact, cron jobs, discussions, education, flash-banner, legal-sections, likes, market-data, newsletter, payment, paywall, prices, site-settings, stripe, tools, user profile, and admin operations.
+**API Routes:** Extensive API at `src/app/api/` covering: articles, auth, comments, contact, cron jobs, discussions, education, flash-banner, ipaymoney, legal-sections, likes, market-data, newsletter, payment, paywall, prices, site-settings, tools, user profile, and admin operations.
 
 **Supabase clients** (`src/lib/supabase.ts`):
 - `createServerSupabaseClient()` — Server components/API routes (uses cookies)
@@ -75,7 +75,7 @@ Lors de chaque modification, ne pas se limiter à la demande stricte. Vérifier 
 - La cohérence des traductions/textes français
 
 ### 4. Suggestions proactives
-Si, dans le cadre d'un projet de ce type (site d'actualité économique Next.js + Supabase + Stripe), Claude identifie un élément manquant, incomplet, ou améliorable que l'utilisateur n'a pas mentionné (SEO, métadonnées, sitemap, robots.txt, loading states, error boundaries, fallbacks, validation de formulaires, rate limiting, RGPD, etc.), il doit :
+Si, dans le cadre d'un projet de ce type (site d'actualité économique Next.js + Supabase + iPayMoney), Claude identifie un élément manquant, incomplet, ou améliorable que l'utilisateur n'a pas mentionné (SEO, métadonnées, sitemap, robots.txt, loading states, error boundaries, fallbacks, validation de formulaires, rate limiting, RGPD, etc.), il doit :
 1. **Le signaler clairement** à l'utilisateur avec une explication courte du pourquoi
 2. **Attendre l'accord explicite** de l'utilisateur
 3. **Exécuter la modification** uniquement après accord

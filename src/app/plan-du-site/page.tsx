@@ -30,6 +30,7 @@ const sections = [
       { label: 'Intérêt composé', href: '/outil/interet-compose' },
       { label: 'Simulateur de salaire', href: '/outil/simulateur-salaire' },
       { label: 'Indices économiques', href: '/outil/indices-economiques' },
+      { label: 'Budget familial', href: '/outil/budget-familial' },
     ],
   },
   {

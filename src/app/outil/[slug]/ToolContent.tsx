@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { ArrowLeft, Calculator, Percent, DollarSign, BarChart3, TrendingUp, Lock, Loader2 } from 'lucide-react';
+import { ArrowLeft, Calculator, Percent, DollarSign, BarChart3, TrendingUp, Wallet, Lock, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
 const Spinner = () => <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>;
@@ -12,6 +12,7 @@ const InteretSimple = dynamic(() => import('@/components/tools/InteretSimple').t
 const SimulateurSalaire = dynamic(() => import('@/components/tools/SimulateurSalaire').then(m => ({ default: m.SimulateurSalaire })), { loading: Spinner });
 const IndicesEconomiques = dynamic(() => import('@/components/tools/IndicesEconomiques').then(m => ({ default: m.IndicesEconomiques })), { loading: Spinner });
 const InteretCompose = dynamic(() => import('@/components/tools/InteretCompose').then(m => ({ default: m.InteretCompose })), { loading: Spinner });
+const BudgetFamilial = dynamic(() => import('@/components/tools/BudgetFamilial').then(m => ({ default: m.BudgetFamilial })), { loading: Spinner });
 
 interface ToolContentProps {
   slug: string;
@@ -26,6 +27,7 @@ const toolComponents: Record<string, React.ComponentType> = {
   'simulateur-salaire': SimulateurSalaire,
   'indices-economiques': IndicesEconomiques,
   'interet-compose': InteretCompose,
+  'budget-familial': BudgetFamilial,
 };
 
 const toolIcons: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -34,6 +36,7 @@ const toolIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   'simulateur-salaire': DollarSign,
   'indices-economiques': BarChart3,
   'interet-compose': TrendingUp,
+  'budget-familial': Wallet,
 };
 
 export function ToolContent({ slug, title, description, isPremium }: ToolContentProps) {

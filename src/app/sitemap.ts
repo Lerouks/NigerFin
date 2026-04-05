@@ -65,6 +65,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'interet-compose',
     'simulateur-salaire',
     'indices-economiques',
+    'budget-familial',
   ].map((slug) => ({
     url: `${SITE_URL}/outil/${slug}`,
     lastModified: new Date(),

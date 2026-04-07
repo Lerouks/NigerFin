@@ -5,10 +5,7 @@ import { useEffect, useState } from 'react';
 import { MapPin, Users, Ruler, Coins, Gem, Factory, Globe, Calendar, TrendingUp, BarChart3 } from 'lucide-react';
 import { NigerRegions } from './niger/NigerRegions';
 import { NigerResources } from './niger/NigerResources';
-import { NigerIndicators } from './niger/NigerIndicators';
 import { useNigerCountry } from '@/hooks/useNigerCountry';
-import { useNigerMacro } from '@/hooks/useNigerMacro';
-import { useRegionData } from '@/hooks/useRegionData';
 
 interface Presentation {
   map_image_url: string;
@@ -50,16 +47,6 @@ interface Resource {
   importance_description: string;
 }
 
-interface Indicator {
-  id: string;
-  indicator_key: string;
-  label: string;
-  value: string;
-  previous_value: string;
-  unit: string;
-  category: string;
-}
-
 const FACT_ICONS: Record<string, typeof MapPin> = {
   capitale: MapPin,
   population: Users,
@@ -87,13 +74,10 @@ export function NigerPresentation() {
   const [facts, setFacts] = useState<Fact[]>([]);
   const [regions, setRegions] = useState<Region[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
-  const [indicators, setIndicators] = useState<Indicator[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Real-time data hooks
   const countryData = useNigerCountry();
-  const macroData = useNigerMacro();
-  const regionData = useRegionData();
 
   useEffect(() => {
     fetch('/api/niger-presentation')
@@ -103,7 +87,6 @@ export function NigerPresentation() {
         setFacts(data.facts || []);
         setRegions(data.regions || []);
         setResources(data.resources || []);
-        setIndicators(data.indicators || []);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -129,68 +112,6 @@ export function NigerPresentation() {
       return { ...fact, value: enriched };
     }
     return fact;
-  });
-
-  // Enrich indicators with real-time macro data
-  const enrichedIndicators = indicators.map((ind) => {
-    if (!macroData.data) return ind;
-
-    const wb = macroData.data.worldBank;
-    const imf = macroData.data.imf;
-
-    const latestValue = (arr: { value: number | null; year: number }[]) => {
-      const sorted = [...arr].sort((a, b) => b.year - a.year);
-      return sorted[0] || null;
-    };
-
-    const enrichments: Record<string, { value: string; previous: string; source: string }> = {};
-
-    if (wb.gdpGrowth.length >= 2) {
-      const latest = latestValue(wb.gdpGrowth);
-      const prev = wb.gdpGrowth.slice().sort((a, b) => b.year - a.year)[1];
-      if (latest && latest.value !== null && prev && prev.value !== null) {
-        enrichments['croissance_pib'] = {
-          value: `${latest.value.toFixed(1)}%`,
-          previous: `${prev.value.toFixed(1)}%`,
-          source: `Banque mondiale ${latest.year}`,
-        };
-      }
-    }
-
-    if (wb.inflation.length >= 2) {
-      const latest = latestValue(wb.inflation);
-      const prev = wb.inflation.slice().sort((a, b) => b.year - a.year)[1];
-      if (latest && latest.value !== null && prev && prev.value !== null) {
-        enrichments['inflation'] = {
-          value: `${latest.value.toFixed(1)}%`,
-          previous: `${prev.value.toFixed(1)}%`,
-          source: `Banque mondiale ${latest.year}`,
-        };
-      }
-    }
-
-    if (imf.realGDPGrowth.length >= 2) {
-      const sorted = [...imf.realGDPGrowth].sort((a, b) => b.year - a.year);
-      const first = sorted[0];
-      const second = sorted[1];
-      if (!enrichments['croissance_pib'] && first && first.value !== null) {
-        enrichments['croissance_pib'] = {
-          value: `${first.value.toFixed(1)}%`,
-          previous: second && second.value !== null ? `${second.value.toFixed(1)}%` : ind.previous_value,
-          source: `FMI ${first.year}`,
-        };
-      }
-    }
-
-    const indEnrichment = enrichments[ind.indicator_key];
-    if (indEnrichment) {
-      return {
-        ...ind,
-        value: indEnrichment.value,
-        previous_value: indEnrichment.previous,
-      };
-    }
-    return ind;
   });
 
   if (loading) {
@@ -293,43 +214,7 @@ export function NigerPresentation() {
           ))}
         </div>
 
-        {/* Real-time macro data source */}
-        {macroData.lastUpdated && (
-          <p className="text-[10px] text-gray-400 mt-6 text-center">
-            Données enrichies : Banque mondiale + FMI &middot; {new Date(macroData.lastUpdated).toLocaleDateString('fr-FR')}
-          </p>
-        )}
       </section>
-
-      {/* ECOWAS region summary */}
-      {regionData.data && (
-        <section className="border-t border-black/[0.06] pt-14 md:pt-20">
-          <div className="mb-6">
-            <span className="text-[11px] tracking-[0.2em] uppercase text-gray-400 block mb-3">CEDEAO</span>
-            <h2 className="text-2xl md:text-3xl leading-tight">Contexte régional</h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-            <div className="bg-white rounded-xl border border-black/[0.06] p-5">
-              <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">Pays membres</p>
-              <p className="text-2xl font-semibold">{regionData.data.memberCount}</p>
-            </div>
-            <div className="bg-white rounded-xl border border-black/[0.06] p-5">
-              <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">Population totale</p>
-              <p className="text-2xl font-semibold">{(regionData.data.totalPopulation / 1e6).toFixed(0)} M</p>
-            </div>
-            <div className="bg-white rounded-xl border border-black/[0.06] p-5">
-              <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">Superficie</p>
-              <p className="text-2xl font-semibold">{(regionData.data.totalArea / 1e6).toFixed(1)} M km²</p>
-            </div>
-          </div>
-          <p className="text-[10px] text-gray-400 text-center">
-            Source : REST Countries &middot; {regionData.lastUpdated ? new Date(regionData.lastUpdated).toLocaleDateString('fr-FR') : ''}
-          </p>
-        </section>
-      )}
-
-      {/* Indicateurs économiques */}
-      <NigerIndicators indicators={enrichedIndicators} />
 
       {/* Régions */}
       <NigerRegions regions={regions} />

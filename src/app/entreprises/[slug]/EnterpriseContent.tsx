@@ -25,6 +25,7 @@ interface Enterprise {
   logo_url: string | null;
   image_url: string | null;
   key_facts: { label: string; value: string }[] | null;
+  brand_color: string | null;
 }
 
 interface EnterpriseContentProps {
@@ -32,11 +33,14 @@ interface EnterpriseContentProps {
   relatedArticles: Article[];
 }
 
-function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
+function InfoRow({ icon: Icon, label, value, color }: { icon: React.ElementType; label: string; value: string; color?: string }) {
   return (
     <div className="flex items-start gap-3 py-3">
-      <div className="w-8 h-8 rounded-lg bg-[#f5f5f0] flex items-center justify-center flex-shrink-0 mt-0.5">
-        <Icon className="w-4 h-4 text-gray-500" />
+      <div
+        className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+        style={{ backgroundColor: color ? `${color}10` : '#f5f5f0' }}
+      >
+        <Icon className="w-4 h-4" style={{ color: color || '#6b7280' }} />
       </div>
       <div className="min-w-0">
         <p className="text-[11px] uppercase tracking-[0.1em] text-gray-400">{label}</p>
@@ -49,12 +53,23 @@ function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType; label:
 export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseContentProps) {
   const hasInfo = enterprise.full_name || enterprise.founded_year || enterprise.headquarters
     || enterprise.ownership || enterprise.employees || enterprise.revenue || enterprise.website;
+  const color = enterprise.brand_color || '#d4a843';
 
   return (
     <div className="min-h-screen bg-[#fafaf9]">
       {/* Header */}
-      <div className="bg-[#111] text-white">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
+      <div className="relative bg-[#111] text-white overflow-hidden">
+        {/* Brand color ambient glow */}
+        <div
+          className="absolute top-0 right-0 w-96 h-96 rounded-full blur-[120px] opacity-15 pointer-events-none"
+          style={{ backgroundColor: color }}
+        />
+        <div
+          className="absolute bottom-0 left-1/4 w-64 h-64 rounded-full blur-[100px] opacity-10 pointer-events-none"
+          style={{ backgroundColor: color }}
+        />
+
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
           <Link
             href="/entreprises"
             className="inline-flex items-center gap-1.5 text-[13px] text-white/50 hover:text-white/80 transition-colors mb-6"
@@ -64,16 +79,16 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
           </Link>
 
           <div className="flex items-start gap-5">
-            {/* Logo */}
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/[0.08] border border-white/[0.1] flex items-center justify-center flex-shrink-0">
+            {/* Logo - white background for clarity */}
+            <div className="w-[4.5rem] h-[4.5rem] sm:w-24 sm:h-24 rounded-2xl bg-white flex items-center justify-center flex-shrink-0 shadow-xl p-2.5 sm:p-3">
               {enterprise.logo_url ? (
                 <img
                   src={enterprise.logo_url}
                   alt={`Logo ${enterprise.name}`}
-                  className="w-12 h-12 sm:w-14 sm:h-14 object-contain"
+                  className="w-full h-full object-contain"
                 />
               ) : (
-                <span className="text-2xl sm:text-3xl font-bold text-white/20">
+                <span className="text-2xl sm:text-3xl font-bold" style={{ color }}>
                   {enterprise.name.charAt(0)}
                 </span>
               )}
@@ -85,7 +100,14 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
                 <p className="text-[14px] sm:text-[16px] text-white/50 mt-1">{enterprise.full_name}</p>
               )}
               <div className="flex flex-wrap items-center gap-2 mt-3">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-medium rounded-full bg-[#d4a843]/20 text-[#d4a843] ring-1 ring-inset ring-[#d4a843]/30">
+                <span
+                  className="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-medium rounded-full"
+                  style={{
+                    backgroundColor: `${color}20`,
+                    color,
+                    boxShadow: `inset 0 0 0 1px ${color}30`,
+                  }}
+                >
                   <Building2 className="w-3 h-3" />
                   {enterprise.sector}
                 </span>
@@ -105,6 +127,9 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
             </div>
           </div>
         </div>
+
+        {/* Brand color bottom bar */}
+        <div className="h-1" style={{ backgroundColor: color }} />
       </div>
 
       {/* Content */}
@@ -126,8 +151,8 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
                 <h2 className="text-[12px] uppercase tracking-[0.15em] text-gray-400 mb-4">Points cles</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {enterprise.key_facts.map((fact, i) => (
-                    <div key={i} className="p-4 rounded-lg bg-[#f5f5f0] border border-black/[0.04]">
-                      <p className="text-[11px] uppercase tracking-[0.1em] text-gray-400 mb-1">{fact.label}</p>
+                    <div key={i} className="p-4 rounded-lg border border-black/[0.04]" style={{ backgroundColor: `${color}08` }}>
+                      <p className="text-[11px] uppercase tracking-[0.1em] mb-1" style={{ color }}>{fact.label}</p>
                       <p className="text-[14px] font-medium text-gray-800">{fact.value}</p>
                     </div>
                   ))}
@@ -159,22 +184,22 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
                   <h2 className="text-[12px] uppercase tracking-[0.15em] text-gray-400 mb-3">Fiche d&apos;identite</h2>
                   <div className="divide-y divide-black/[0.04]">
                     {enterprise.full_name && (
-                      <InfoRow icon={Building2} label="Nom complet" value={enterprise.full_name} />
+                      <InfoRow icon={Building2} label="Nom complet" value={enterprise.full_name} color={color} />
                     )}
                     {enterprise.headquarters && (
-                      <InfoRow icon={MapPin} label="Siege" value={enterprise.headquarters} />
+                      <InfoRow icon={MapPin} label="Siege" value={enterprise.headquarters} color={color} />
                     )}
                     {enterprise.founded_year && (
-                      <InfoRow icon={Calendar} label="Fondation" value={String(enterprise.founded_year)} />
+                      <InfoRow icon={Calendar} label="Fondation" value={String(enterprise.founded_year)} color={color} />
                     )}
                     {enterprise.ownership && (
-                      <InfoRow icon={Landmark} label="Actionnariat" value={enterprise.ownership} />
+                      <InfoRow icon={Landmark} label="Actionnariat" value={enterprise.ownership} color={color} />
                     )}
                     {enterprise.employees && (
-                      <InfoRow icon={Users} label="Employes" value={enterprise.employees} />
+                      <InfoRow icon={Users} label="Employes" value={enterprise.employees} color={color} />
                     )}
                     {enterprise.revenue && (
-                      <InfoRow icon={DollarSign} label="Chiffre d'affaires" value={enterprise.revenue} />
+                      <InfoRow icon={DollarSign} label="Chiffre d'affaires" value={enterprise.revenue} color={color} />
                     )}
                     {enterprise.website && (
                       <div className="py-3">
@@ -182,7 +207,8 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
                           href={enterprise.website}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 text-[13px] text-[#d4a843] hover:text-[#c49a3a] font-medium transition-colors"
+                          className="inline-flex items-center gap-2 text-[13px] font-medium transition-colors hover:opacity-80"
+                          style={{ color }}
                         >
                           <Globe className="w-4 h-4" />
                           Site officiel

@@ -24,6 +24,7 @@ interface Enterprise {
   description: string;
   logo_url: string | null;
   image_url: string | null;
+  brand_color: string | null;
 }
 
 /* ── Sector configuration ─────────────────────────────────────── */
@@ -255,10 +256,11 @@ export function StrategicEnterprisesSection() {
           {filtered.map((enterprise, index) => {
             const config = getSectorConfig(enterprise.sector);
             const Icon = config.icon;
+            const color = enterprise.brand_color || config.accent;
 
             const cardContent = (
               <article
-                className={`group relative rounded-2xl overflow-hidden border border-white/[0.06] bg-white/[0.02] backdrop-blur-sm transition-all duration-500 hover:border-white/[0.12] hover:bg-white/[0.04] hover:shadow-2xl hover:-translate-y-1 ${config.glow} ${
+                className={`group relative rounded-2xl overflow-hidden border border-white/[0.06] bg-white/[0.02] backdrop-blur-sm transition-all duration-500 hover:border-white/[0.15] hover:bg-white/[0.04] hover:shadow-2xl hover:-translate-y-1 ${
                   visible
                     ? 'opacity-100 translate-y-0'
                     : 'opacity-0 translate-y-4'
@@ -267,9 +269,10 @@ export function StrategicEnterprisesSection() {
                   transitionDelay: visible ? `${index * 60}ms` : '0ms',
                 }}
               >
-                {/* Top gradient accent */}
+                {/* Top gradient accent - uses brand color */}
                 <div
-                  className={`absolute top-0 left-0 right-0 h-32 bg-gradient-to-b ${config.gradient} pointer-events-none`}
+                  className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b to-transparent pointer-events-none opacity-15"
+                  style={{ background: `linear-gradient(to bottom, ${color}30, transparent)` }}
                 />
 
                 {/* Image banner */}
@@ -288,16 +291,16 @@ export function StrategicEnterprisesSection() {
                   {/* Logo + Name row */}
                   <div className="flex items-start gap-4 mb-4">
                     <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 border border-white/[0.08] bg-white/[0.04] backdrop-blur-sm"
+                      className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 border border-white/[0.1] bg-white p-1.5 shadow-lg"
                     >
                       {enterprise.logo_url ? (
                         <img
                           src={enterprise.logo_url}
                           alt={`Logo ${enterprise.name}`}
-                          className="w-8 h-8 object-contain"
+                          className="w-full h-full object-contain"
                         />
                       ) : (
-                        <span className="text-[18px] font-bold text-white/30">
+                        <span className="text-[20px] font-bold" style={{ color }}>
                           {enterprise.name.charAt(0)}
                         </span>
                       )}
@@ -307,7 +310,11 @@ export function StrategicEnterprisesSection() {
                         {enterprise.name}
                       </h3>
                       <span
-                        className={`inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 text-[10px] font-medium rounded-full ring-1 ring-inset ${config.badge}`}
+                        className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 text-[10px] font-medium rounded-full"
+                        style={{
+                          color,
+                          boxShadow: `inset 0 0 0 1px ${color}40`,
+                        }}
                       >
                         <Icon className="w-3 h-3" />
                         {enterprise.sector}
@@ -320,19 +327,32 @@ export function StrategicEnterprisesSection() {
                     {enterprise.description}
                   </p>
 
-                  {/* Bottom action hint */}
+                  {/* Bottom action hint - uses brand color on hover */}
                   <div className="mt-5 pt-4 border-t border-white/[0.04] flex items-center justify-between">
-                    <span className="text-[11px] text-white/20 group-hover:text-white/40 transition-colors">
-                      En savoir plus
+                    <span
+                      className="text-[11px] text-white/20 group-hover:transition-colors duration-300"
+                      style={{ ['--tw-group-hover-color' as string]: color }}
+                    >
+                      <span className="group-hover:hidden">En savoir plus</span>
+                      <span className="hidden group-hover:inline" style={{ color }}>En savoir plus</span>
                     </span>
-                    <ChevronRight className="w-4 h-4 text-white/10 group-hover:text-white/40 group-hover:translate-x-0.5 transition-all duration-300" />
+                    <ChevronRight
+                      className="w-4 h-4 text-white/10 group-hover:translate-x-0.5 transition-all duration-300"
+                      style={{ color: 'inherit' }}
+                    />
                   </div>
                 </div>
 
-                {/* Hover glow effect */}
+                {/* Hover glow effect - uses brand color */}
                 <div
                   className="absolute -bottom-20 -right-20 w-40 h-40 rounded-full opacity-0 group-hover:opacity-100 blur-[60px] transition-opacity duration-700 pointer-events-none"
-                  style={{ backgroundColor: config.accent }}
+                  style={{ backgroundColor: color }}
+                />
+
+                {/* Top border glow on hover */}
+                <div
+                  className="absolute top-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  style={{ backgroundColor: color }}
                 />
               </article>
             );

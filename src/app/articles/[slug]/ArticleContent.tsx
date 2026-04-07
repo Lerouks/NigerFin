@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import DOMPurify from 'isomorphic-dompurify';
+import DOMPurify from 'dompurify';
 import { Clock, Calendar, User, Facebook, Linkedin, Link2, Check, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { CommentsSection } from '@/components/CommentsSection';

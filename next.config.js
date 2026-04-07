@@ -13,7 +13,7 @@ const nextConfig = {
     'hast-util-to-parse5',
     'vfile',
     'unist-util-visit',
-    'isomorphic-dompurify',
+    'dompurify',
   ],
   images: {
     formats: ['image/avif', 'image/webp'],

@@ -108,12 +108,34 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    // Super admin: only the owner can manage other admins
+    const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || 'raoufbark@gmail.com';
+    const isSelf = userId === user.id;
+    const isSuperAdmin = user.email === SUPER_ADMIN_EMAIL;
+    const targetIsAdmin = targetUser.role === 'admin';
+
     switch (action) {
       case 'changeRole': {
         const { role } = body as { role?: string };
         const validRoles = ['reader', 'premium', 'admin'] as const;
         if (!role || !isOneOf(role, validRoles)) {
           return NextResponse.json({ error: 'Invalid role' }, { status: 400 });
+        }
+        // Nobody can remove their own admin role
+        if (isSelf && role !== 'admin') {
+          return NextResponse.json({ error: 'Impossible de retirer votre propre role admin' }, { status: 400 });
+        }
+        // Only super admin can change role of another admin
+        if (targetIsAdmin && !isSuperAdmin) {
+          return NextResponse.json({ error: 'Seul l\'administrateur principal peut modifier le role d\'un autre admin' }, { status: 400 });
+        }
+        // Only super admin can promote to admin
+        if (role === 'admin' && !isSuperAdmin) {
+          return NextResponse.json({ error: 'Seul l\'administrateur principal peut nommer un admin' }, { status: 400 });
+        }
+        // Nobody can demote the super admin
+        if (targetUser.email === SUPER_ADMIN_EMAIL && role !== 'admin') {
+          return NextResponse.json({ error: 'Impossible de modifier le role de l\'administrateur principal' }, { status: 400 });
         }
         await serviceClient
           .from('user_profiles')
@@ -125,6 +147,17 @@ export async function PUT(request: NextRequest) {
       }
 
       case 'block': {
+        if (isSelf) {
+          return NextResponse.json({ error: 'Impossible de vous bloquer vous-même' }, { status: 400 });
+        }
+        // Only super admin can block another admin
+        if (targetIsAdmin && !isSuperAdmin) {
+          return NextResponse.json({ error: 'Seul l\'administrateur principal peut bloquer un admin' }, { status: 400 });
+        }
+        // Nobody can block the super admin
+        if (targetUser.email === SUPER_ADMIN_EMAIL) {
+          return NextResponse.json({ error: 'Impossible de bloquer l\'administrateur principal' }, { status: 400 });
+        }
         await serviceClient
           .from('user_profiles')
           .update({ blocked: true, updated_at: now })

@@ -9,12 +9,21 @@ import {
 interface Enterprise {
   id: string;
   name: string;
+  slug: string | null;
   sector: string;
   description: string;
   logo_url: string | null;
   image_url: string | null;
   display_order: number;
   is_visible: boolean;
+  full_name: string | null;
+  founded_year: number | null;
+  headquarters: string | null;
+  employees: string | null;
+  revenue: string | null;
+  ownership: string | null;
+  website: string | null;
+  detailed_description: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -39,12 +48,21 @@ const SECTORS = [
 
 const emptyForm: FormData = {
   name: '',
+  slug: null,
   sector: '',
   description: '',
   logo_url: null,
   image_url: null,
   display_order: 0,
   is_visible: true,
+  full_name: null,
+  founded_year: null,
+  headquarters: null,
+  employees: null,
+  revenue: null,
+  ownership: null,
+  website: null,
+  detailed_description: null,
 };
 
 export function StrategicEnterprisesManager() {
@@ -131,12 +149,21 @@ export function StrategicEnterprisesManager() {
     setShowCreate(false);
     setForm({
       name: item.name,
+      slug: item.slug,
       sector: item.sector,
       description: item.description,
       logo_url: item.logo_url,
       image_url: item.image_url,
       display_order: item.display_order,
       is_visible: item.is_visible,
+      full_name: item.full_name,
+      founded_year: item.founded_year,
+      headquarters: item.headquarters,
+      employees: item.employees,
+      revenue: item.revenue,
+      ownership: item.ownership,
+      website: item.website,
+      detailed_description: item.detailed_description,
     });
   };
 
@@ -176,18 +203,118 @@ export function StrategicEnterprisesManager() {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-[13px] font-medium text-gray-700 mb-1">Nom complet</label>
+          <input
+            type="text"
+            value={form.full_name || ''}
+            onChange={(e) => setForm({ ...form, full_name: e.target.value || null })}
+            placeholder="Ex : Societe des Mines de l'Air"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900"
+          />
+        </div>
+        <div>
+          <label className="block text-[13px] font-medium text-gray-700 mb-1">Slug (URL)</label>
+          <input
+            type="text"
+            value={form.slug || ''}
+            onChange={(e) => setForm({ ...form, slug: e.target.value || null })}
+            placeholder="Auto-genere si vide"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900"
+          />
+        </div>
+      </div>
+
       <div>
-        <label className="block text-[13px] font-medium text-gray-700 mb-1">Description</label>
+        <label className="block text-[13px] font-medium text-gray-700 mb-1">Description courte</label>
         <textarea
           value={form.description}
           onChange={(e) => setForm({ ...form, description: e.target.value })}
-          rows={3}
-          placeholder="Décrivez l'entreprise, son rôle stratégique, ses activités principales..."
+          rows={2}
+          placeholder="Resume court affiche dans la liste..."
           className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900 resize-none"
         />
       </div>
 
+      <div>
+        <label className="block text-[13px] font-medium text-gray-700 mb-1">Description detaillee</label>
+        <textarea
+          value={form.detailed_description || ''}
+          onChange={(e) => setForm({ ...form, detailed_description: e.target.value || null })}
+          rows={4}
+          placeholder="Description complete affichee sur la page de l'entreprise..."
+          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900 resize-none"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label className="block text-[13px] font-medium text-gray-700 mb-1">Siege social</label>
+          <input
+            type="text"
+            value={form.headquarters || ''}
+            onChange={(e) => setForm({ ...form, headquarters: e.target.value || null })}
+            placeholder="Ex : Niamey, Niger"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900"
+          />
+        </div>
+        <div>
+          <label className="block text-[13px] font-medium text-gray-700 mb-1">Annee de fondation</label>
+          <input
+            type="number"
+            value={form.founded_year || ''}
+            onChange={(e) => setForm({ ...form, founded_year: parseInt(e.target.value) || null })}
+            placeholder="Ex : 1968"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900"
+          />
+        </div>
+        <div>
+          <label className="block text-[13px] font-medium text-gray-700 mb-1">Employes</label>
+          <input
+            type="text"
+            value={form.employees || ''}
+            onChange={(e) => setForm({ ...form, employees: e.target.value || null })}
+            placeholder="Ex : ~1 500"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900"
+          />
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-[13px] font-medium text-gray-700 mb-1">Actionnariat</label>
+          <input
+            type="text"
+            value={form.ownership || ''}
+            onChange={(e) => setForm({ ...form, ownership: e.target.value || null })}
+            placeholder="Ex : Etat du Niger 100%"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900"
+          />
+        </div>
+        <div>
+          <label className="block text-[13px] font-medium text-gray-700 mb-1">Chiffre d&apos;affaires</label>
+          <input
+            type="text"
+            value={form.revenue || ''}
+            onChange={(e) => setForm({ ...form, revenue: e.target.value || null })}
+            placeholder="Ex : 150 milliards FCFA"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-[13px] font-medium text-gray-700 mb-1">Site web</label>
+          <input
+            type="url"
+            value={form.website || ''}
+            onChange={(e) => setForm({ ...form, website: e.target.value || null })}
+            placeholder="https://..."
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900"
+          />
+        </div>
         <div>
           <label className="block text-[13px] font-medium text-gray-700 mb-1">URL du logo</label>
           <input
@@ -198,8 +325,11 @@ export function StrategicEnterprisesManager() {
             className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900"
           />
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[13px] font-medium text-gray-700 mb-1">URL de l&apos;image</label>
+          <label className="block text-[13px] font-medium text-gray-700 mb-1">URL de l&apos;image (banniere)</label>
           <input
             type="url"
             value={form.image_url || ''}

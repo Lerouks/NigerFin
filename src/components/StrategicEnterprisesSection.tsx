@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import {
   Building2,
   Pickaxe,
@@ -18,6 +19,7 @@ import {
 interface Enterprise {
   id: string;
   name: string;
+  slug: string | null;
   sector: string;
   description: string;
   logo_url: string | null;
@@ -254,9 +256,8 @@ export function StrategicEnterprisesSection() {
             const config = getSectorConfig(enterprise.sector);
             const Icon = config.icon;
 
-            return (
+            const cardContent = (
               <article
-                key={enterprise.id}
                 className={`group relative rounded-2xl overflow-hidden border border-white/[0.06] bg-white/[0.02] backdrop-blur-sm transition-all duration-500 hover:border-white/[0.12] hover:bg-white/[0.04] hover:shadow-2xl hover:-translate-y-1 ${config.glow} ${
                   visible
                     ? 'opacity-100 translate-y-0'
@@ -334,6 +335,14 @@ export function StrategicEnterprisesSection() {
                   style={{ backgroundColor: config.accent }}
                 />
               </article>
+            );
+
+            return enterprise.slug ? (
+              <Link key={enterprise.id} href={`/entreprises/${enterprise.slug}`} className="block">
+                {cardContent}
+              </Link>
+            ) : (
+              <div key={enterprise.id}>{cardContent}</div>
             );
           })}
         </div>

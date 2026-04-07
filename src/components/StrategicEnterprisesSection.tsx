@@ -323,7 +323,7 @@ export function StrategicEnterprisesSection() {
                   </div>
 
                   {/* Description */}
-                  <p className="text-[13px] leading-relaxed text-white/35 group-hover:text-white/50 transition-colors duration-300 line-clamp-3">
+                  <p className="text-[13px] leading-relaxed text-white/35 group-hover:text-white/50 transition-colors duration-300">
                     {enterprise.description}
                   </p>
 

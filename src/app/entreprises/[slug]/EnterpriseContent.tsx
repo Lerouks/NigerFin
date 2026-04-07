@@ -139,7 +139,7 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
           <div className="lg:col-span-2 space-y-8">
             {/* Description */}
             <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] p-6 sm:p-8">
-              <h2 className="text-[12px] uppercase tracking-[0.15em] text-gray-400 mb-4">Presentation</h2>
+              <h2 className="text-[12px] uppercase tracking-[0.15em] text-gray-400 mb-4">Présentation</h2>
               <p className="text-[15px] leading-relaxed text-gray-700">
                 {enterprise.detailed_description || enterprise.description}
               </p>
@@ -148,7 +148,7 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
             {/* Key facts */}
             {enterprise.key_facts && enterprise.key_facts.length > 0 && (
               <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] p-6 sm:p-8">
-                <h2 className="text-[12px] uppercase tracking-[0.15em] text-gray-400 mb-4">Points cles</h2>
+                <h2 className="text-[12px] uppercase tracking-[0.15em] text-gray-400 mb-4">Points clés</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {enterprise.key_facts.map((fact, i) => (
                     <div key={i} className="p-4 rounded-lg border border-black/[0.04]" style={{ backgroundColor: `${color}08` }}>
@@ -164,7 +164,7 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
             {relatedArticles.length > 0 && (
               <div>
                 <div className="flex items-center gap-4 mb-6">
-                  <h2 className="text-lg font-semibold">Articles lies</h2>
+                  <h2 className="text-lg font-semibold">Articles liés</h2>
                   <div className="flex-1 h-px bg-black/[0.06]" />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -181,13 +181,13 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
             <div className="lg:sticky lg:top-24 space-y-6">
               {hasInfo && (
                 <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] p-6">
-                  <h2 className="text-[12px] uppercase tracking-[0.15em] text-gray-400 mb-3">Fiche d&apos;identite</h2>
+                  <h2 className="text-[12px] uppercase tracking-[0.15em] text-gray-400 mb-3">Fiche d&apos;identité</h2>
                   <div className="divide-y divide-black/[0.04]">
                     {enterprise.full_name && (
                       <InfoRow icon={Building2} label="Nom complet" value={enterprise.full_name} color={color} />
                     )}
                     {enterprise.headquarters && (
-                      <InfoRow icon={MapPin} label="Siege" value={enterprise.headquarters} color={color} />
+                      <InfoRow icon={MapPin} label="Siège" value={enterprise.headquarters} color={color} />
                     )}
                     {enterprise.founded_year && (
                       <InfoRow icon={Calendar} label="Fondation" value={String(enterprise.founded_year)} color={color} />
@@ -196,7 +196,7 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
                       <InfoRow icon={Landmark} label="Actionnariat" value={enterprise.ownership} color={color} />
                     )}
                     {enterprise.employees && (
-                      <InfoRow icon={Users} label="Employes" value={enterprise.employees} color={color} />
+                      <InfoRow icon={Users} label="Employés" value={enterprise.employees} color={color} />
                     )}
                     {enterprise.revenue && (
                       <InfoRow icon={DollarSign} label="Chiffre d'affaires" value={enterprise.revenue} color={color} />
@@ -223,7 +223,7 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
               {/* CTA */}
               <div className="bg-[#111] text-white rounded-xl p-6">
                 <p className="text-[13px] text-white/60 mb-3">
-                  Vous souhaitez suivre l&apos;actualite de cette entreprise ?
+                  Vous souhaitez suivre l&apos;actualité de cette entreprise ?
                 </p>
                 <Link
                   href="/entreprises"

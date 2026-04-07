@@ -11,7 +11,7 @@ export async function GET() {
 
   const { data, error } = await service
     .from('strategic_enterprises')
-    .select('id, name, sector, description, logo_url, image_url')
+    .select('id, name, slug, sector, description, logo_url, image_url')
     .eq('is_visible', true)
     .order('display_order')
     .order('name');

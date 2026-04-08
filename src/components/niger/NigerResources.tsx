@@ -33,7 +33,7 @@ const IMPORTANCE_LABELS: Record<string, { label: string; style: string }> = {
   moderee: { label: 'Modérée', style: 'bg-blue-50 text-blue-700 border-blue-100' },
 };
 
-// Map company names to enterprise page slugs
+// Map company names to enterprise page slugs (only existing pages)
 const COMPANY_SLUGS: Record<string, string> = {
   'SOMAÏR': 'somair',
   'SOMAIR': 'somair',
@@ -44,8 +44,6 @@ const COMPANY_SLUGS: Record<string, string> = {
   'BAGRI': 'bagri',
   'SOPAMIN': 'sopamin',
   'Niger Telecoms': 'niger-telecoms',
-  'SONICHAR': 'sonichar',
-  'IMOURAREN SA': 'imouraren',
 };
 
 export function NigerResources({ resources }: { resources: Resource[] }) {

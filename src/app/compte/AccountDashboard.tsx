@@ -61,8 +61,18 @@ export function AccountDashboard() {
 
   // Profile edit state
   const [editingProfile, setEditingProfile] = useState(false);
-  const [fullName, setFullName] = useState('');
+  const [civility, setCivility] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName2, setLastName2] = useState('');
   const [phone, setPhone] = useState('');
+  const [birthDay, setBirthDay] = useState('');
+  const [birthMonth, setBirthMonth] = useState('');
+  const [birthYear, setBirthYear] = useState('');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+  const [country, setCountry] = useState('Niger');
+  const [profession, setProfession] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileMessage, setProfileMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -98,8 +108,19 @@ export function AccountDashboard() {
   // Sync profile edit fields
   useEffect(() => {
     if (profile) {
-      setFullName(profile.full_name || '');
-      setPhone(((profile as unknown as Record<string, unknown>)?.phone as string) || '');
+      const p = profile as unknown as Record<string, unknown>;
+      setCivility((p.civility as string) || '');
+      setFirstName((p.first_name as string) || '');
+      setLastName2((p.last_name as string) || '');
+      setPhone((p.phone as string) || '');
+      setBirthDay(p.birth_day ? String(p.birth_day) : '');
+      setBirthMonth(p.birth_month ? String(p.birth_month) : '');
+      setBirthYear(p.birth_year ? String(p.birth_year) : '');
+      setAddress((p.address as string) || '');
+      setCity((p.city as string) || '');
+      setPostalCode((p.postal_code as string) || '');
+      setCountry((p.country as string) || 'Niger');
+      setProfession((p.profession as string) || '');
     }
   }, [profile]);
 
@@ -126,18 +147,38 @@ export function AccountDashboard() {
     return diff > 0 ? Math.ceil(diff / 86400000) : null;
   })();
 
-  // Extract first/last name for greeting
-  const nameParts = (profile?.full_name || '').trim().split(/\s+/);
-  const lastName = (nameParts.length > 1 ? nameParts[nameParts.length - 1] : nameParts[0]) || user?.email?.split('@')[0] || '';
+  // Extract name for greeting
+  const p = profile as unknown as Record<string, unknown>;
+  const greetCivility = (p?.civility as string) || '';
+  const greetLastName = (p?.last_name as string) || profile?.full_name?.split(' ').pop() || user?.email?.split('@')[0] || '';
+  const greetName = greetCivility ? `${greetCivility} ${greetLastName}` : greetLastName;
 
   const handleSaveProfile = async () => {
+    // Client-side validation
+    if (!firstName.trim() || !lastName2.trim()) {
+      setProfileMessage({ type: 'error', text: 'Le prénom et le nom sont obligatoires.' });
+      return;
+    }
     setSavingProfile(true);
     setProfileMessage(null);
     try {
       const res = await fetch('/api/user/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ full_name: fullName, phone }),
+        body: JSON.stringify({
+          civility: civility || null,
+          first_name: firstName,
+          last_name: lastName2,
+          phone: phone || null,
+          birth_day: birthDay ? parseInt(birthDay) : null,
+          birth_month: birthMonth ? parseInt(birthMonth) : null,
+          birth_year: birthYear ? parseInt(birthYear) : null,
+          address: address || null,
+          city: city || null,
+          postal_code: postalCode || null,
+          country: country || null,
+          profession: profession || null,
+        }),
       });
       if (res.ok) {
         setProfileMessage({ type: 'success', text: 'Profil mis à jour avec succès.' });
@@ -181,10 +222,10 @@ export function AccountDashboard() {
       <section className="bg-[#111] text-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14 text-center">
           <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center text-2xl font-bold">
-            {lastName.charAt(0).toUpperCase()}
+            {greetLastName.charAt(0).toUpperCase()}
           </div>
           <h1 className="text-2xl md:text-3xl font-bold mb-2">
-            Bonjour{lastName ? ` ${lastName}` : ''}
+            Bonjour{greetName ? ` ${greetName}` : ''}
           </h1>
           <p className="text-white/40 text-[14px] mb-3">
             Merci de suivre l&apos;actualité à nos côtés{memberSince ? ` depuis le ${memberSince}` : ''}.
@@ -400,85 +441,125 @@ export function AccountDashboard() {
                   </div>
                 )}
 
+                {/* Coordonnées */}
                 <div className="bg-white rounded-2xl border border-black/[0.06] p-6 sm:p-8">
                   <h3 className="text-lg font-semibold mb-6">Vos coordonnées</h3>
-                  <div className="space-y-5 max-w-md">
+                  <div className="space-y-5">
+                    {/* Civilité */}
                     <div>
-                      <label className="block text-[13px] font-medium text-gray-700 mb-1.5">Nom complet</label>
-                      <input
-                        type="text"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        disabled={!editingProfile}
-                        className="w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black/10 disabled:text-gray-500"
-                        placeholder="Votre nom complet"
-                      />
+                      <label className="block text-[13px] font-medium text-gray-700 mb-2">Civilité</label>
+                      <div className="flex gap-4">
+                        {['M.', 'Mme'].map((opt) => (
+                          <label key={opt} className={`flex items-center gap-2 cursor-pointer ${!editingProfile ? 'pointer-events-none' : ''}`}>
+                            <input type="radio" name="civility" value={opt} checked={civility === opt} onChange={() => setCivility(opt)} disabled={!editingProfile} className="w-4 h-4 accent-[#111]" />
+                            <span className="text-[14px]">{opt}</span>
+                          </label>
+                        ))}
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-[13px] font-medium text-gray-700 mb-1.5">Téléphone</label>
-                      <input
-                        type="tel"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        disabled={!editingProfile}
-                        className="w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black/10 disabled:text-gray-500"
-                        placeholder="+227 XX XX XX XX"
-                      />
+
+                    {/* Prénom / Nom */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <ProfileField label="Prénom" value={firstName} onChange={setFirstName} disabled={!editingProfile} required placeholder="Votre prénom" />
+                      <ProfileField label="Nom" value={lastName2} onChange={setLastName2} disabled={!editingProfile} required placeholder="Votre nom" />
                     </div>
+
+                    {/* Boutons */}
                     {editingProfile ? (
-                      <div className="flex gap-2">
-                        <button
-                          onClick={handleSaveProfile}
-                          disabled={savingProfile}
-                          className="flex items-center gap-2 bg-[#111] text-white px-6 py-2.5 rounded-xl text-[13px] font-medium hover:bg-[#333] transition-colors disabled:opacity-50"
-                        >
-                          {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                          Enregistrer
+                      <div className="flex gap-2 pt-2">
+                        <button onClick={handleSaveProfile} disabled={savingProfile || !firstName.trim() || !lastName2.trim()} className="flex items-center gap-2 bg-[#111] text-white px-6 py-2.5 rounded-xl text-[13px] font-medium hover:bg-[#333] transition-colors disabled:opacity-50">
+                          {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Enregistrer
                         </button>
-                        <button
-                          onClick={() => {
-                            setEditingProfile(false);
-                            setFullName(profile?.full_name || '');
-                            setPhone(((profile as unknown as Record<string, unknown>)?.phone as string) || '');
-                          }}
-                          className="px-4 py-2.5 rounded-xl text-[13px] text-gray-500 hover:bg-gray-50 transition-colors"
-                        >
-                          Annuler
-                        </button>
+                        <button onClick={() => { setEditingProfile(false); /* fields reset on next profile sync */ }} className="px-4 py-2.5 rounded-xl text-[13px] text-gray-500 hover:bg-gray-50 transition-colors">Annuler</button>
                       </div>
                     ) : (
-                      <button
-                        onClick={() => setEditingProfile(true)}
-                        className="flex items-center gap-2 bg-[#111] text-white px-6 py-2.5 rounded-xl text-[13px] font-medium hover:bg-[#333] transition-colors"
-                      >
-                        Modifier
-                      </button>
+                      <button onClick={() => setEditingProfile(true)} className="flex items-center gap-2 bg-[#111] text-white px-6 py-2.5 rounded-xl text-[13px] font-medium hover:bg-[#333] transition-colors">Modifier</button>
                     )}
                   </div>
                 </div>
 
+                {/* Identifiants */}
                 <div className="bg-white rounded-2xl border border-black/[0.06] p-6 sm:p-8">
                   <h3 className="text-lg font-semibold mb-6">Vos identifiants</h3>
-                  <div className="space-y-5 max-w-md">
+                  <div className="space-y-5">
                     <div>
                       <label className="block text-[13px] font-medium text-gray-700 mb-1.5">E-mail</label>
-                      <input
-                        type="email"
-                        value={user?.email || ''}
-                        disabled
-                        className="w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-[#fafaf9] text-gray-500"
-                      />
-                      <p className="text-[11px] text-gray-400 mt-1.5">
-                        Pour changer votre e-mail, <Link href="/contact" className="underline hover:text-gray-600">contactez-nous</Link>.
-                      </p>
+                      <input type="email" value={user?.email || ''} disabled className="w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-[#fafaf9] text-gray-500" />
+                      <p className="text-[11px] text-gray-400 mt-1.5">Pour changer votre e-mail, <Link href="/contact" className="underline hover:text-gray-600">contactez-nous</Link>.</p>
                     </div>
-                    <button
-                      onClick={() => setActiveSection('securite')}
-                      className="flex items-center gap-2 border border-black/[0.08] px-4 py-2.5 rounded-xl text-[13px] font-medium text-gray-700 hover:bg-[#f5f5f0] transition-colors"
-                    >
-                      <Lock className="w-4 h-4" />
-                      Changer le mot de passe
+                    <button onClick={() => setActiveSection('securite')} className="flex items-center gap-2 border border-black/[0.08] px-4 py-2.5 rounded-xl text-[13px] font-medium text-gray-700 hover:bg-[#f5f5f0] transition-colors">
+                      <Lock className="w-4 h-4" /> Changer le mot de passe
                     </button>
+                  </div>
+                </div>
+
+                {/* Compléter votre profil */}
+                <div className="bg-white rounded-2xl border border-black/[0.06] p-6 sm:p-8">
+                  <h3 className="text-lg font-semibold mb-6">Compléter votre profil</h3>
+                  <div className="space-y-5">
+                    {/* Date de naissance */}
+                    <div>
+                      <label className="block text-[13px] font-medium text-gray-700 mb-1.5">Date de naissance</label>
+                      <div className="grid grid-cols-3 gap-3">
+                        <select value={birthDay} onChange={(e) => setBirthDay(e.target.value)} disabled={!editingProfile} className="border border-black/[0.08] rounded-lg px-3 py-3 text-[14px] bg-[#fafaf9] disabled:text-gray-500">
+                          <option value="">Jour</option>
+                          {Array.from({ length: 31 }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}</option>)}
+                        </select>
+                        <select value={birthMonth} onChange={(e) => setBirthMonth(e.target.value)} disabled={!editingProfile} className="border border-black/[0.08] rounded-lg px-3 py-3 text-[14px] bg-[#fafaf9] disabled:text-gray-500">
+                          <option value="">Mois</option>
+                          {['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'].map((m, i) => <option key={i + 1} value={i + 1}>{m}</option>)}
+                        </select>
+                        <select value={birthYear} onChange={(e) => setBirthYear(e.target.value)} disabled={!editingProfile} className="border border-black/[0.08] rounded-lg px-3 py-3 text-[14px] bg-[#fafaf9] disabled:text-gray-500">
+                          <option value="">Année</option>
+                          {Array.from({ length: 80 }, (_, i) => new Date().getFullYear() - 13 - i).map((y) => <option key={y} value={y}>{y}</option>)}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Téléphone */}
+                    <ProfileField label="Téléphone" value={phone} onChange={setPhone} disabled={!editingProfile} placeholder="+227 XX XX XX XX" type="tel" />
+
+                    {/* Adresse */}
+                    <ProfileField label="Adresse" value={address} onChange={setAddress} disabled={!editingProfile} placeholder="Votre adresse" />
+
+                    {/* Ville / Code postal */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <ProfileField label="Ville" value={city} onChange={setCity} disabled={!editingProfile} placeholder="Votre ville" />
+                      <ProfileField label="Code postal" value={postalCode} onChange={setPostalCode} disabled={!editingProfile} placeholder="Code postal" />
+                    </div>
+
+                    {/* Pays */}
+                    <div>
+                      <label className="block text-[13px] font-medium text-gray-700 mb-1.5">Pays</label>
+                      <select value={country} onChange={(e) => setCountry(e.target.value)} disabled={!editingProfile} className="w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-[#fafaf9] disabled:text-gray-500">
+                        <optgroup label="Afrique de l'Ouest">
+                          {WEST_AFRICA_COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                        </optgroup>
+                        <optgroup label="Autres pays">
+                          {OTHER_COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                        </optgroup>
+                      </select>
+                    </div>
+
+                    {/* Profession */}
+                    <div>
+                      <label className="block text-[13px] font-medium text-gray-700 mb-1.5">Profession</label>
+                      <select value={profession} onChange={(e) => setProfession(e.target.value)} disabled={!editingProfile} className="w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-[#fafaf9] disabled:text-gray-500">
+                        <option value="">Sélectionner</option>
+                        {PROFESSIONS.map((p2) => <option key={p2} value={p2}>{p2}</option>)}
+                      </select>
+                    </div>
+
+                    {editingProfile && (
+                      <div className="flex gap-2 pt-2">
+                        <button onClick={handleSaveProfile} disabled={savingProfile || !firstName.trim() || !lastName2.trim()} className="flex items-center gap-2 bg-[#111] text-white px-6 py-2.5 rounded-xl text-[13px] font-medium hover:bg-[#333] transition-colors disabled:opacity-50">
+                          {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Enregistrer
+                        </button>
+                        <button onClick={() => setEditingProfile(false)} className="px-4 py-2.5 rounded-xl text-[13px] text-gray-500 hover:bg-gray-50 transition-colors">Annuler</button>
+                      </div>
+                    )}
+
+                    <p className="text-[11px] text-gray-400">Les champs avec * sont obligatoires</p>
                   </div>
                 </div>
               </>
@@ -512,6 +593,62 @@ export function AccountDashboard() {
 }
 
 // ─── Sub-components ─────────────────────────────────────────────────────────
+
+// ─── Data ────────────────────────────────────────────────────────────────────
+
+const WEST_AFRICA_COUNTRIES = [
+  'Niger', 'Nigeria', 'Bénin', 'Burkina Faso', 'Côte d\'Ivoire', 'Ghana',
+  'Guinée', 'Guinée-Bissau', 'Liberia', 'Mali', 'Mauritanie', 'Sénégal',
+  'Sierra Leone', 'Togo', 'Cap-Vert', 'Gambie',
+];
+
+const OTHER_COUNTRIES = [
+  'Algérie', 'Cameroun', 'Canada', 'Centrafrique', 'Comores', 'Congo',
+  'Djibouti', 'Égypte', 'Éthiopie', 'France', 'Gabon', 'Kenya',
+  'Madagascar', 'Maroc', 'RD Congo', 'Rwanda', 'Tchad', 'Tunisie',
+  'Belgique', 'Suisse', 'États-Unis', 'Royaume-Uni', 'Allemagne',
+  'Arabie Saoudite', 'Émirats arabes unis', 'Chine', 'Inde', 'Autre',
+];
+
+const PROFESSIONS = [
+  'Entrepreneur',
+  'Fonctionnaire',
+  'Cadre d\'entreprise',
+  'Commerçant',
+  'Agriculteur',
+  'Enseignant / Chercheur',
+  'Étudiant',
+  'Journaliste / Média',
+  'Banquier / Finance',
+  'Ingénieur / Technicien',
+  'Médecin / Santé',
+  'Avocat / Juriste',
+  'Consultant',
+  'Artisan',
+  'Retraité',
+  'Sans emploi',
+  'Autre',
+];
+
+function ProfileField({ label, value, onChange, disabled, required, placeholder, type }: {
+  label: string; value: string; onChange: (v: string) => void; disabled?: boolean; required?: boolean; placeholder?: string; type?: string;
+}) {
+  return (
+    <div>
+      <label className="block text-[13px] font-medium text-gray-700 mb-1.5">
+        {label}{required && <span className="text-red-400 ml-0.5">*</span>}
+      </label>
+      <input
+        type={type || 'text'}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        disabled={disabled}
+        className="w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black/10 disabled:text-gray-500 transition-colors"
+        placeholder={placeholder}
+      />
+    </div>
+  );
+}
 
 function PasswordChangeSection({ isReset = false }: { isReset?: boolean }) {
   const [currentPassword, setCurrentPassword] = useState('');

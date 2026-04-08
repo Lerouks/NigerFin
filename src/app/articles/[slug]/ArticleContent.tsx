@@ -262,7 +262,7 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           <div className="lg:col-span-8">
-            <article className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] overflow-hidden">
+            <article id="article-main" className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] overflow-hidden">
               <div className="p-8 md:p-12">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="flex flex-wrap items-center gap-2">

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { NigerPageContent } from './NigerPageContent';
 
 export const revalidate = 300;
@@ -13,5 +14,9 @@ export const metadata: Metadata = {
 };
 
 export default function NigerPage() {
-  return <NigerPageContent />;
+  return (
+    <Suspense>
+      <NigerPageContent />
+    </Suspense>
+  );
 }

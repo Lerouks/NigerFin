@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { ChartTooltip } from './ChartTooltip';
 import { useNigerMacro } from '@/hooks/useNigerMacro';
 
 /**
@@ -249,11 +250,12 @@ export function IndicesEconomiques() {
                   tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(1)}k` : `${v}`}
                 />
                 <Tooltip
-                  contentStyle={{ background: '#111', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '12px', padding: '8px 12px' }}
-                  formatter={((value: number, name: string) => [
-                    `${value.toLocaleString('fr-FR')} Mrd FCFA`,
-                    name === 'pib' ? 'PIB' : name,
-                  ]) as never}
+                  content={<ChartTooltip
+                    formatValue={(v) => `${v.toLocaleString('fr-FR')} Mrd FCFA`}
+                    formatName={(n) => n === 'pib' ? 'PIB' : n}
+                  />}
+                  isAnimationActive={false}
+                  cursor={{ stroke: '#d4a843', strokeWidth: 1, strokeDasharray: '4 4' }}
                 />
                 <Area
                   type="monotone"

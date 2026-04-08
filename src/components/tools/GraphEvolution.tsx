@@ -1,6 +1,7 @@
 'use client';
 
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { ChartTooltip } from './ChartTooltip';
 
 interface DataPoint {
   label: string;
@@ -61,18 +62,12 @@ export function GraphEvolution({
               tickFormatter={(v) => v >= 1000000 ? `${(v / 1000000).toFixed(1)}M` : v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`}
             />
             <Tooltip
-              contentStyle={{
-                background: '#111',
-                border: 'none',
-                borderRadius: '8px',
-                color: '#fff',
-                fontSize: '12px',
-                padding: '8px 12px',
-              }}
-              formatter={((value: number, name: string) => [
-                `${value.toLocaleString('fr-FR')} FCFA`,
-                name === 'capitalRestant' ? capitalLabel : interestLabel,
-              ]) as never}
+              content={<ChartTooltip
+                formatValue={(v) => `${v.toLocaleString('fr-FR')} FCFA`}
+                formatName={(n) => n === 'capitalRestant' ? capitalLabel : interestLabel}
+              />}
+              isAnimationActive={false}
+              cursor={{ stroke: '#d4d4d4', strokeWidth: 1 }}
             />
             <Area
               type="monotone"

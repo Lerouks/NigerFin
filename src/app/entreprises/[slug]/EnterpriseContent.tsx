@@ -71,11 +71,11 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
 
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
           <Link
-            href="/niger"
+            href="/niger/entreprises-strategiques"
             className="inline-flex items-center gap-1.5 text-[13px] text-white/50 hover:text-white/80 transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
-            Niger
+            Entreprises stratégiques
           </Link>
 
           <div className="flex items-start gap-5">
@@ -226,7 +226,7 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
                   Vous souhaitez suivre l&apos;actualité de cette entreprise ?
                 </p>
                 <Link
-                  href="/niger"
+                  href="/niger/entreprises-strategiques"
                   className="inline-flex items-center gap-2 text-[13px] font-medium text-[#d4a843] hover:text-[#e5b854] transition-colors"
                 >
                   Voir toutes les entreprises

@@ -209,27 +209,35 @@ export function SectionArticlesFiltered({
         )}
       </button>
 
-      {/* Mobile: filter drawer */}
+      {/* Mobile: filter bottom sheet */}
       {mobileFiltersOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setMobileFiltersOpen(false)} />
-          <div className="absolute left-0 top-0 bottom-0 w-[300px] bg-white shadow-2xl p-6 overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-[16px] font-semibold">Filtres</h3>
+          <div className="absolute inset-x-0 bottom-0 max-h-[85vh] bg-white rounded-t-2xl shadow-2xl overflow-y-auto overscroll-contain animate-slide-up">
+            {/* Drag handle */}
+            <div className="sticky top-0 bg-white pt-3 pb-2 px-6 border-b border-black/[0.04] z-10">
+              <div className="w-10 h-1 rounded-full bg-gray-200 mx-auto mb-3" />
+              <div className="flex items-center justify-between">
+                <h3 className="text-[16px] font-semibold">Filtres</h3>
+                <button
+                  onClick={() => setMobileFiltersOpen(false)}
+                  className="w-8 h-8 rounded-lg bg-[#f5f5f0] flex items-center justify-center hover:bg-[#eee] transition-colors"
+                >
+                  <X className="w-4 h-4 text-gray-500" />
+                </button>
+              </div>
+            </div>
+            <div className="p-6">
+              {filtersContent}
+            </div>
+            <div className="sticky bottom-0 bg-white border-t border-black/[0.04] p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
               <button
                 onClick={() => setMobileFiltersOpen(false)}
-                className="w-8 h-8 rounded-lg bg-[#f5f5f0] flex items-center justify-center hover:bg-[#eee] transition-colors"
+                className="w-full py-3.5 bg-[#111] text-white rounded-xl text-[14px] font-medium hover:bg-[#333] transition-colors"
               >
-                <X className="w-4 h-4 text-gray-500" />
+                Voir les résultats ({filtered.length})
               </button>
             </div>
-            {filtersContent}
-            <button
-              onClick={() => setMobileFiltersOpen(false)}
-              className="mt-8 w-full py-3 bg-[#111] text-white rounded-xl text-[14px] font-medium hover:bg-[#333] transition-colors"
-            >
-              Voir les résultats ({filtered.length})
-            </button>
           </div>
         </div>
       )}

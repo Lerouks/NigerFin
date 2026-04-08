@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { ArrowRight, RefreshCw } from 'lucide-react';
 import * as Sentry from '@sentry/nextjs';
@@ -12,7 +12,22 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const reloadedRef = useRef(false);
+
   useEffect(() => {
+    // ChunkLoadError: stale JS after a deploy. Auto-reload once.
+    if (
+      error.name === 'ChunkLoadError' ||
+      error.message?.includes('Loading chunk') ||
+      error.message?.includes('Failed to fetch dynamically imported module')
+    ) {
+      if (!reloadedRef.current) {
+        reloadedRef.current = true;
+        window.location.reload();
+        return;
+      }
+    }
+
     Sentry.captureException(error);
   }, [error]);
 

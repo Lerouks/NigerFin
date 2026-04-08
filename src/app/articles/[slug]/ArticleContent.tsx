@@ -5,11 +5,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import DOMPurify from 'dompurify';
 import { ReadingProgressBar } from '@/components/ReadingProgressBar';
-import { Clock, Calendar, User, Facebook, Linkedin, Link2, Check, Loader2 } from 'lucide-react';
+import { Clock, Calendar, User, Facebook, Linkedin, Link2, Check } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { CommentsSection } from '@/components/CommentsSection';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
-import { PremiumOverlay } from '@/components/PremiumOverlay';
+import { PremiumPaywall } from '@/components/PremiumPaywall';
+import { NewsletterPopup } from '@/components/NewsletterPopup';
 import { ArticleCard } from '@/components/ArticleCard';
 import { ArticleLikes } from '@/components/ArticleLikes';
 import { ViewTracker } from '@/components/ViewTracker';
@@ -171,6 +172,7 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
           <div className="max-w-3xl mx-auto">
             <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] overflow-hidden">
               <div className="p-5 sm:p-8 md:p-12">
+                {/* Article header */}
                 <div className="flex flex-wrap items-center gap-2 mb-3 sm:mb-4">
                   {(article.sections || [article.category]).map((s) => (
                     <Link key={s} href={SECTION_META[s]?.path || `/${s}`} className="text-[11px] tracking-[0.15em] uppercase text-gray-400 hover:text-black transition-colors">
@@ -184,59 +186,36 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
                 <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 leading-tight">{article.title}</h1>
                 {article.excerpt && <p className="text-base sm:text-lg text-gray-600 mb-4 sm:mb-6">{article.excerpt}</p>}
 
-                {/* Fake content with progressive gradient blur */}
-                <div className="relative select-none" aria-hidden="true">
-                  <div className="space-y-3 sm:space-y-4 opacity-30">
-                    {Array.from({ length: 4 }).map((_, i) => (
-                      <div key={i} className="space-y-2 sm:space-y-2.5">
-                        <div className="h-3 sm:h-3.5 bg-gray-200 rounded-full w-full" />
-                        <div className="h-3 sm:h-3.5 bg-gray-200 rounded-full w-11/12" />
-                        <div className="h-3 sm:h-3.5 bg-gray-200 rounded-full w-9/12" />
-                      </div>
-                    ))}
+                {/* Cover image */}
+                {imageUrl && (
+                  <div className="relative aspect-video w-full overflow-hidden rounded-lg mb-6">
+                    <Image
+                      src={imageUrl}
+                      alt={article.mainImage?.alt || article.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 900px"
+                      quality={90}
+                      className="object-cover"
+                      priority
+                    />
                   </div>
-                  {/* White gradient overlay, progressive blur effect */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-white via-white/95 via-60% to-transparent" />
+                )}
+
+                {/* Fake text that fades out */}
+                <div className="relative select-none" aria-hidden="true">
+                  <div className="space-y-4 text-[15px] sm:text-[16px] text-gray-700 leading-relaxed">
+                    <p className="opacity-80">{article.excerpt || 'Cet article analyse en profondeur les dernières évolutions économiques et financières de la région, avec des données exclusives et des perspectives d\'experts.'}</p>
+                    <p className="opacity-50">Les indicateurs récents montrent une dynamique significative dans les secteurs clés de l&apos;économie. Notre analyse complète détaille les implications pour les investisseurs et les décideurs...</p>
+                    <p className="opacity-25">Les experts interrogés soulignent l&apos;importance de ces évolutions pour le contexte régional et international...</p>
+                  </div>
                 </div>
 
-                {/* CTA section below the blur */}
-                <div className="flex flex-col items-center text-center -mt-6 relative z-10 pt-2">
-                  <div className="w-10 h-10 rounded-xl bg-[#d4a843]/10 flex items-center justify-center mb-3">
-                    <svg className="w-5 h-5 text-[#d4a843]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                    </svg>
-                  </div>
-                  <p className="text-[13px] sm:text-[14px] text-gray-500 mb-4 max-w-xs">
-                    {isSignedIn
-                      ? 'Passez en Premium pour lire cet article et bien plus.'
-                      : 'Connectez-vous pour accéder à cet article.'}
-                  </p>
-                  <Link
-                    href={isSignedIn ? '/pricing' : '/connexion'}
-                    className="inline-flex items-center gap-2 bg-[#d4a843] text-white px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl text-[14px] sm:text-[15px] font-semibold hover:bg-[#c49a3a] active:scale-[0.98] transition-all shadow-lg shadow-[#d4a843]/20"
-                  >
-                    {isSignedIn ? 'Passer en Premium' : 'Se connecter'}
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-                    </svg>
-                  </Link>
-                  {!isSignedIn && (
-                    <Link
-                      href="/inscription"
-                      className="mt-2.5 text-[13px] text-gray-500 hover:text-gray-700 font-medium transition-colors"
-                    >
-                      Créer un compte gratuitement
-                    </Link>
-                  )}
-                </div>
+                {/* Paywall block with gradient, slogan, mockup, CTA */}
+                <PremiumPaywall articleTitle={article.title} />
               </div>
             </div>
           </div>
         </div>
-
-        {/* Unified premium overlay - handles all blocked states */}
-        <PremiumOverlay articleId={article._id} articleTitle={article.title} isPremium={contentType === 'premium'} />
       </div>
     );
   }
@@ -410,8 +389,8 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
         </div>
       </div>
 
-      {/* Unified premium overlay - adapts to user status */}
-      <PremiumOverlay articleId={article._id} articleTitle={article.title} isPremium={contentType === 'premium'} />
+      {/* Newsletter popup — shows once per session after scroll/time */}
+      <NewsletterPopup />
     </div>
   );
 }

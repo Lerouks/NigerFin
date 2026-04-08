@@ -312,8 +312,23 @@ export function AccountDashboard() {
             {/* ─── ABONNEMENT ─────────────────────────────────── */}
             {activeSection === 'abonnement' && (
               <>
-                {/* Subscription status */}
-                {isSubscribed && sub ? (
+                {/* Subscription status - skeleton while loading */}
+                {summaryLoading ? (
+                  <div className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden animate-pulse">
+                    <div className="bg-[#111] p-6 sm:p-8">
+                      <div className="h-4 w-32 bg-white/10 rounded mb-4" />
+                      <div className="h-7 w-64 bg-white/10 rounded mb-2" />
+                      <div className="h-4 w-80 bg-white/5 rounded" />
+                    </div>
+                    <div className="p-6 sm:p-8">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        <div className="h-14 bg-gray-100 rounded-lg" />
+                        <div className="h-14 bg-gray-100 rounded-lg" />
+                        <div className="h-14 bg-gray-100 rounded-lg hidden sm:block" />
+                      </div>
+                    </div>
+                  </div>
+                ) : isSubscribed && sub ? (
                   <div className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden">
                     <div className="bg-gradient-to-r from-[#111] to-[#1a1a1a] text-white p-6 sm:p-8">
                       <div className="flex items-center gap-2 mb-3">

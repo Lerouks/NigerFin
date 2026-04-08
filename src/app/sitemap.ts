@@ -97,13 +97,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  // Niger sub-section: entreprises stratégiques
-  const nigerEntreprisesPage: MetadataRoute.Sitemap = [{
-    url: `${SITE_URL}/niger?section=entreprises`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly',
-    priority: 0.8,
-  }];
+  // Niger sub-sections
+  const nigerSubPages: MetadataRoute.Sitemap = [
+    { url: `${SITE_URL}/niger/presentation`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.8 },
+    { url: `${SITE_URL}/niger/entreprises-strategiques`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.8 },
+  ];
 
   // Individual enterprise pages
   const enterprisePages: MetadataRoute.Sitemap = enterpriseRows
@@ -115,5 +113,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
 
-  return [...staticPages, ...nigerEntreprisesPage, ...toolPages, ...articlePages, ...enterprisePages, ...educationPages];
+  return [...staticPages, ...nigerSubPages, ...toolPages, ...articlePages, ...enterprisePages, ...educationPages];
 }

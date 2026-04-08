@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { getRoleLabel } from '@/lib/user-profile';
+import { PhoneField, validatePhone } from '@/components/PhoneField';
 import { PREMIUM_TIER, CURRENCY, getBillingCycleLabel } from '@/config/pricing';
 import type { NewsletterPreferences } from '@/types';
 
@@ -157,6 +158,11 @@ export function AccountDashboard() {
     // Client-side validation
     if (!firstName.trim() || !lastName2.trim()) {
       setProfileMessage({ type: 'error', text: 'Le prénom et le nom sont obligatoires.' });
+      return;
+    }
+    const phoneErr = validatePhone(phone);
+    if (phoneErr) {
+      setProfileMessage({ type: 'error', text: phoneErr });
       return;
     }
     setSavingProfile(true);
@@ -532,7 +538,7 @@ export function AccountDashboard() {
                     </div>
 
                     {/* Téléphone */}
-                    <ProfileField label="Téléphone" value={phone} onChange={setPhone} disabled={!editingProfile} placeholder="+227 XX XX XX XX" type="tel" />
+                    <PhoneField value={phone} onChange={setPhone} disabled={!editingProfile} />
 
                     {/* Adresse */}
                     <ProfileField label="Adresse" value={address} onChange={setAddress} disabled={!editingProfile} placeholder="Votre adresse" />

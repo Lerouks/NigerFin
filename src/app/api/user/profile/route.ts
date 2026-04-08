@@ -36,14 +36,23 @@ export async function GET() {
     const serviceClient = createServiceClient();
     if (!serviceClient) return NextResponse.json({ error: 'Service indisponible' }, { status: 503 });
 
+    // Split full_name into first/last for new profiles
+    const rawName = (user.user_metadata?.full_name || '').trim();
+    const nameParts = rawName.split(/\s+/);
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
     const { data: newProfile } = await serviceClient
       .from('user_profiles')
       .insert({
         id: user.id,
         email: user.email || '',
-        full_name: user.user_metadata?.full_name || '',
+        full_name: rawName,
+        first_name: firstName,
+        last_name: lastName,
         role: 'reader',
         subscription_status: 'inactive',
+        profile_completed: false,
       })
       .select()
       .single();
@@ -70,10 +79,16 @@ export async function PUT(request: NextRequest) {
     civility, first_name, last_name, phone,
     birth_day, birth_month, birth_year,
     address, city, postal_code, country, profession,
+    profile_completed,
   } = body as Record<string, unknown>;
 
   const errors: string[] = [];
   const updates: Record<string, unknown> = {};
+
+  // Profile completed flag
+  if (profile_completed !== undefined) {
+    updates.profile_completed = !!profile_completed;
+  }
 
   /** Safely convert to string, treating null/undefined/"null" as empty */
   const toStr = (v: unknown): string => {

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import {
   Loader2, Save, MapPin, Upload, Eye, EyeOff, ChevronDown, ChevronUp,
-  BarChart3, Globe, Pickaxe, Pencil,
+  Globe, Pickaxe,
 } from 'lucide-react';
 
 interface Presentation {
@@ -19,18 +19,6 @@ interface Fact {
   fact_key: string;
   label: string;
   value: string;
-  category: string;
-  display_order: number;
-  is_visible: boolean;
-}
-
-interface Indicator {
-  id: string;
-  indicator_key: string;
-  label: string;
-  value: string;
-  previous_value: string;
-  unit: string;
   category: string;
   display_order: number;
   is_visible: boolean;
@@ -62,12 +50,11 @@ interface Resource {
   is_visible: boolean;
 }
 
-type SubTab = 'presentation' | 'facts' | 'indicators' | 'regions' | 'resources';
+type SubTab = 'presentation' | 'facts' | 'regions' | 'resources';
 
 const SUB_TABS: { id: SubTab; label: string; icon: typeof MapPin }[] = [
   { id: 'presentation', label: 'Présentation', icon: MapPin },
   { id: 'facts', label: 'Données clés', icon: Globe },
-  { id: 'indicators', label: 'Indicateurs', icon: BarChart3 },
   { id: 'regions', label: 'Régions', icon: MapPin },
   { id: 'resources', label: 'Ressources', icon: Pickaxe },
 ];
@@ -81,7 +68,6 @@ export function NigerPresentationManager() {
     intro_text: '',
   });
   const [facts, setFacts] = useState<Fact[]>([]);
-  const [indicators, setIndicators] = useState<Indicator[]>([]);
   const [regions, setRegions] = useState<Region[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,7 +81,6 @@ export function NigerPresentationManager() {
       .then((data) => {
         if (data.presentation) setPresentation(data.presentation);
         if (data.facts) setFacts(data.facts);
-        if (data.indicators) setIndicators(data.indicators);
         if (data.regions) setRegions(data.regions);
         if (data.resources) setResources(data.resources);
       })
@@ -110,7 +95,7 @@ export function NigerPresentationManager() {
       const res = await fetch('/api/admin/niger-presentation', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ presentation, facts, indicators, regions, resources }),
+        body: JSON.stringify({ presentation, facts, regions, resources }),
       });
       if (res.ok) {
         setMessage('Sauvegarde réussie');
@@ -150,7 +135,6 @@ export function NigerPresentationManager() {
 
   const visibleCounts = {
     facts: facts.filter((f) => f.is_visible).length,
-    indicators: indicators.filter((i) => i.is_visible).length,
     regions: regions.filter((r) => r.is_visible).length,
     resources: resources.filter((r) => r.is_visible).length,
   };
@@ -196,7 +180,6 @@ export function NigerPresentationManager() {
                 <span className={`text-[10px] ml-1 ${subTab === tab.id ? 'text-white/60' : 'text-gray-400'}`}>
                   {visibleCounts[tab.id as keyof typeof visibleCounts]}/{
                     tab.id === 'facts' ? facts.length :
-                    tab.id === 'indicators' ? indicators.length :
                     tab.id === 'regions' ? regions.length :
                     resources.length
                   }
@@ -220,11 +203,6 @@ export function NigerPresentationManager() {
       {/* Facts tab */}
       {subTab === 'facts' && (
         <FactsEditor facts={facts} setFacts={setFacts} />
-      )}
-
-      {/* Indicators tab */}
-      {subTab === 'indicators' && (
-        <IndicatorsEditor indicators={indicators} setIndicators={setIndicators} />
       )}
 
       {/* Regions tab */}
@@ -419,150 +397,6 @@ function FactsEditor({ facts, setFacts }: { facts: Fact[]; setFacts: (f: Fact[])
             </div>
           </div>
         ))}
-      </div>
-    </div>
-  );
-}
-
-/* ─── Indicators Editor ──────────────────────────────────────────────── */
-
-function IndicatorsEditor({ indicators, setIndicators }: { indicators: Indicator[]; setIndicators: (i: Indicator[]) => void }) {
-  const [editId, setEditId] = useState<string | null>(null);
-
-  const update = (id: string, field: string, value: string | number | boolean) => {
-    setIndicators(indicators.map((i) => (i.id === id ? { ...i, [field]: value } : i)));
-  };
-
-  const toggleAll = (visible: boolean) => {
-    setIndicators(indicators.map((i) => ({ ...i, is_visible: visible })));
-  };
-
-  const CATS: Record<string, string> = { macro: 'Macro', prix: 'Prix', change: 'Change' };
-
-  return (
-    <div className="bg-white rounded-xl border border-black/[0.06] p-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-sm font-semibold">Indicateurs économiques</h3>
-          <p className="text-[12px] text-gray-400 mt-0.5">Éditez les valeurs et contrôlez la visibilité de chaque indicateur.</p>
-        </div>
-        <div className="flex gap-2">
-          <button onClick={() => toggleAll(true)} className="text-[11px] px-2 py-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
-            Tout afficher
-          </button>
-          <button onClick={() => toggleAll(false)} className="text-[11px] px-2 py-1 rounded bg-red-50 text-red-500 hover:bg-red-100">
-            Tout masquer
-          </button>
-        </div>
-      </div>
-
-      <div className="overflow-hidden rounded-lg border border-black/[0.06]">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-black/[0.04] bg-[#fafaf9]">
-              <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-2.5">Visibilité</th>
-              <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-2.5">Label</th>
-              <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-2.5">Catégorie</th>
-              <th className="text-right text-[11px] uppercase tracking-wider text-gray-400 px-4 py-2.5">Valeur</th>
-              <th className="text-right text-[11px] uppercase tracking-wider text-gray-400 px-4 py-2.5">Précédent</th>
-              <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-2.5">Unité</th>
-              <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-2.5">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {indicators.map((ind) => {
-              const isEditing = editId === ind.id;
-              return (
-                <tr
-                  key={ind.id}
-                  className={`border-b border-black/[0.03] last:border-0 transition-colors ${
-                    !ind.is_visible ? 'bg-red-50/30' : isEditing ? 'bg-blue-50/40' : 'hover:bg-gray-50/50'
-                  }`}
-                >
-                  <td className="px-4 py-3">
-                    <VisibilityToggle visible={ind.is_visible} onToggle={() => update(ind.id, 'is_visible', !ind.is_visible)} />
-                  </td>
-                  <td className="px-4 py-3">
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={ind.label}
-                        onChange={(e) => update(ind.id, 'label', e.target.value)}
-                        className="w-full border border-black/[0.08] rounded px-2 py-1 text-[13px] bg-white focus:outline-none"
-                      />
-                    ) : (
-                      <span className="text-[13px]">{ind.label}</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    {isEditing ? (
-                      <select
-                        value={ind.category}
-                        onChange={(e) => update(ind.id, 'category', e.target.value)}
-                        className="border border-black/[0.08] rounded px-2 py-1 text-[12px] bg-white focus:outline-none"
-                      >
-                        <option value="macro">Macro</option>
-                        <option value="prix">Prix</option>
-                        <option value="change">Change</option>
-                      </select>
-                    ) : (
-                      <span className="text-[11px] px-2 py-1 rounded bg-gray-100 text-gray-600">{CATS[ind.category] || ind.category}</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={ind.value}
-                        onChange={(e) => update(ind.id, 'value', e.target.value)}
-                        className="w-20 border border-black/[0.08] rounded px-2 py-1 text-[13px] bg-white focus:outline-none text-right"
-                      />
-                    ) : (
-                      <span className="text-[13px] font-medium tabular-nums">{ind.value}</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={ind.previous_value}
-                        onChange={(e) => update(ind.id, 'previous_value', e.target.value)}
-                        className="w-20 border border-black/[0.08] rounded px-2 py-1 text-[13px] bg-white focus:outline-none text-right"
-                      />
-                    ) : (
-                      <span className="text-[13px] text-gray-400 tabular-nums">{ind.previous_value}</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={ind.unit}
-                        onChange={(e) => update(ind.id, 'unit', e.target.value)}
-                        className="w-20 border border-black/[0.08] rounded px-2 py-1 text-[13px] bg-white focus:outline-none"
-                      />
-                    ) : (
-                      <span className="text-[12px] text-gray-400">{ind.unit}</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <button
-                      onClick={() => setEditId(isEditing ? null : ind.id)}
-                      className={`p-1.5 rounded transition-colors ${
-                        isEditing ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100 text-gray-400 hover:text-gray-700'
-                      }`}
-                    >
-                      <Pencil className="w-3.5 h-3.5" />
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        {indicators.length === 0 && (
-          <p className="text-center py-8 text-sm text-gray-400">Aucun indicateur</p>
-        )}
       </div>
     </div>
   );

@@ -62,20 +62,20 @@ export function DynamicLegalPage({ slug, title, fallbackSections }: DynamicLegal
                 <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
               </div>
             ) : useFallback && fallbackSections ? (
-              <div className="space-y-10">
+              <div className="space-y-10 max-w-prose">
                 {fallbackSections.map((section, index) => (
                   <div key={index}>
                     <h2 className="text-xl font-bold mb-3">{section.heading}</h2>
-                    <p className="text-gray-600 leading-relaxed">{section.text}</p>
+                    <div className="text-gray-600 text-[15px] leading-[1.8] whitespace-pre-line" style={{ hyphens: 'auto', textWrap: 'pretty' } as React.CSSProperties}>{section.text}</div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="space-y-10">
+              <div className="space-y-10 max-w-prose">
                 {sections.map((section) => (
                   <div key={section.id}>
                     <h2 className="text-xl font-bold mb-3">{section.heading}</h2>
-                    <p className="text-gray-600 leading-relaxed">{section.text}</p>
+                    <div className="text-gray-600 text-[15px] leading-[1.8] whitespace-pre-line" style={{ hyphens: 'auto', textWrap: 'pretty' } as React.CSSProperties}>{section.text}</div>
                   </div>
                 ))}
               </div>

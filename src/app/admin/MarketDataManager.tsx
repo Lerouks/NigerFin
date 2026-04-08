@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Loader2, Plus, Pencil, Trash2, Check, X, TrendingUp, TrendingDown,
+  Loader2, Plus, Pencil, Trash2, Check, X, TrendingUp, TrendingDown, RefreshCw,
 } from 'lucide-react';
 
 interface MarketEntry {
@@ -49,6 +49,28 @@ export function MarketDataManager() {
   const [filterType, setFilterType] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<{ updated: number; errors: number } | null>(null);
+
+  const handleSync = async () => {
+    setSyncing(true);
+    setSyncResult(null);
+    setError('');
+    try {
+      const res = await fetch('/api/admin/sync-market-data', { method: 'POST' });
+      if (res.ok) {
+        const data = await res.json();
+        setSyncResult(data.summary);
+        fetchData();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || 'Erreur lors de la synchronisation');
+      }
+    } catch {
+      setError('Erreur réseau');
+    }
+    setSyncing(false);
+  };
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -167,14 +189,34 @@ export function MarketDataManager() {
             );
           })}
         </div>
-        <button
-          onClick={startCreate}
-          className="flex items-center gap-1.5 px-4 py-2.5 bg-[#111] text-white rounded-lg text-[13px] hover:bg-[#333] transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Ajouter
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleSync}
+            disabled={syncing}
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-[13px] hover:bg-emerald-700 transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+            {syncing ? 'Synchronisation...' : 'Actualiser les cours'}
+          </button>
+          <button
+            onClick={startCreate}
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-[#111] text-white rounded-lg text-[13px] hover:bg-[#333] transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Ajouter
+          </button>
+        </div>
       </div>
+
+      {/* Sync result */}
+      {syncResult && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-lg text-[13px] flex items-center justify-between">
+          <span>{syncResult.updated} cours mis à jour{syncResult.errors > 0 ? `, ${syncResult.errors} erreur(s)` : ''}</span>
+          <button onClick={() => setSyncResult(null)} className="text-emerald-400 hover:text-emerald-600">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Error message */}
       {error && (

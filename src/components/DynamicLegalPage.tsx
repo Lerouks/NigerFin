@@ -29,7 +29,10 @@ export function DynamicLegalPage({ slug, title, fallbackSections }: DynamicLegal
 
   useEffect(() => {
     fetch(`/api/legal-sections?page=${slug}`)
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
           setSections(data);
@@ -42,7 +45,12 @@ export function DynamicLegalPage({ slug, title, fallbackSections }: DynamicLegal
   }, [slug]);
 
   const lastUpdated = sections.length > 0
-    ? new Date(Math.max(...sections.map((s) => new Date(s.updated_at).getTime())))
+    ? (() => {
+        try {
+          const timestamps = sections.map((s) => new Date(s.updated_at).getTime()).filter((t) => !isNaN(t));
+          return timestamps.length > 0 ? new Date(Math.max(...timestamps)) : null;
+        } catch { return null; }
+      })()
     : null;
 
   return (
@@ -66,7 +74,7 @@ export function DynamicLegalPage({ slug, title, fallbackSections }: DynamicLegal
                 {fallbackSections.map((section, index) => (
                   <div key={index}>
                     <h2 className="text-xl font-bold mb-3">{section.heading}</h2>
-                    <div className="text-gray-600 text-[15px] leading-[1.8] whitespace-pre-line" style={{ hyphens: 'auto', textWrap: 'pretty' } as React.CSSProperties}>{section.text}</div>
+                    <div className="text-gray-600 text-[15px] leading-[1.8] whitespace-pre-line" style={{ hyphens: 'auto' }}>{section.text}</div>
                   </div>
                 ))}
               </div>
@@ -75,7 +83,7 @@ export function DynamicLegalPage({ slug, title, fallbackSections }: DynamicLegal
                 {sections.map((section) => (
                   <div key={section.id}>
                     <h2 className="text-xl font-bold mb-3">{section.heading}</h2>
-                    <div className="text-gray-600 text-[15px] leading-[1.8] whitespace-pre-line" style={{ hyphens: 'auto', textWrap: 'pretty' } as React.CSSProperties}>{section.text}</div>
+                    <div className="text-gray-600 text-[15px] leading-[1.8] whitespace-pre-line" style={{ hyphens: 'auto' }}>{section.text}</div>
                   </div>
                 ))}
               </div>

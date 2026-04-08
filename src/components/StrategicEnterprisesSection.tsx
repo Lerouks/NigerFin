@@ -161,7 +161,7 @@ export function StrategicEnterprisesSection() {
 
           const cardContent = (
             <article
-              className={`group relative bg-white rounded-2xl overflow-hidden border border-black/[0.06] transition-all duration-400 hover:border-black/[0.12] hover:shadow-xl hover:-translate-y-1 ${
+              className={`group relative bg-white rounded-2xl overflow-hidden border border-black/[0.06] transition-all duration-400 hover:shadow-xl hover:-translate-y-1 ${
                 visible
                   ? 'opacity-100 translate-y-0'
                   : 'opacity-0 translate-y-4'
@@ -171,17 +171,18 @@ export function StrategicEnterprisesSection() {
               }}
             >
               {/* Top accent bar - brand color */}
+              <div className="h-1 w-full" style={{ backgroundColor: color }} />
+
+              {/* Brand color subtle gradient behind card */}
               <div
-                className="h-1 w-full"
-                style={{ backgroundColor: color }}
+                className="absolute top-0 left-0 right-0 h-40 pointer-events-none opacity-[0.06]"
+                style={{ background: `linear-gradient(to bottom, ${color}, transparent)` }}
               />
 
-              <div className="p-6">
+              <div className="relative p-6">
                 {/* Logo + Name */}
                 <div className="flex items-start gap-4 mb-4">
-                  <div
-                    className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 bg-[#fafaf9] border border-black/[0.06] p-1.5 group-hover:shadow-md transition-shadow duration-300"
-                  >
+                  <div className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 bg-white border border-black/[0.06] p-1.5 shadow-sm group-hover:shadow-md transition-shadow duration-300">
                     {enterprise.logo_url ? (
                       <img
                         src={enterprise.logo_url}
@@ -195,7 +196,7 @@ export function StrategicEnterprisesSection() {
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-[16px] font-semibold text-[#1a1a1a] leading-tight group-hover:text-[#111] transition-colors">
+                    <h3 className="text-[16px] font-semibold text-[#1a1a1a] leading-tight">
                       {enterprise.name}
                     </h3>
                     <span
@@ -219,18 +220,21 @@ export function StrategicEnterprisesSection() {
 
                 {/* Bottom action */}
                 <div className="mt-5 pt-4 border-t border-black/[0.04] flex items-center justify-between">
-                  <span
-                    className="text-[12px] font-medium transition-colors duration-300"
-                    style={{ color: `${color}90` }}
-                  >
+                  <span className="text-[12px] font-medium" style={{ color }}>
                     En savoir plus
                   </span>
                   <ChevronRight
-                    className="w-4 h-4 group-hover:translate-x-0.5 transition-all duration-300"
-                    style={{ color: `${color}60` }}
+                    className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300"
+                    style={{ color }}
                   />
                 </div>
               </div>
+
+              {/* Hover glow - brand color */}
+              <div
+                className="absolute -bottom-16 -right-16 w-32 h-32 rounded-full opacity-0 group-hover:opacity-20 blur-[50px] transition-opacity duration-700 pointer-events-none"
+                style={{ backgroundColor: color }}
+              />
             </article>
           );
 

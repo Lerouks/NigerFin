@@ -15,6 +15,10 @@
     {
       "path": "/api/cron/reset-market-close",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/update-market-data",
+      "schedule": "0 7-23 * * *"
     }
   ]
 }

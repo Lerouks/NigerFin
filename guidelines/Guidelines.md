@@ -1,61 +1,67 @@
-**Add your own guidelines here**
-<!--
+# NigerFin — Design Guidelines
 
-System Guidelines
+## Design Tokens
 
-Use this file to provide the AI with rules and guidelines you want it to follow.
-This template outlines a few examples of things you can add. You can add your own sections and format it to suit your needs
+### Couleurs
+| Token | Valeur | Usage |
+|-------|--------|-------|
+| background | `#fafaf9` | Fond de page principal |
+| foreground | `#1a1a1a` | Texte principal |
+| primary | `#111111` | Boutons, liens, titres |
+| secondary | `#f5f5f0` | Fonds secondaires, cartes |
+| muted | `#f0efe9` | Fonds atténués, bordures |
+| gold | `#d4a843` | Accent premium, badges, highlights |
 
-TIP: More context isn't always better. It can confuse the LLM. Try and add the most important rules you need
+### Typographie
+- **Police** : Inter (chargée en local, body et headings)
+- **Hiérarchie** : titres en gras, sous-titres en medium, corps en regular
+- **Lisibilité** : line-height généreux pour le contenu éditorial
 
-# General guidelines
+## Layout
 
-Any general rules you want the AI to follow.
-For example:
+### Mobile-first
+- Concevoir d'abord pour mobile (< 768px), puis enrichir pour tablette et desktop
+- Breakpoints Tailwind : `sm:` (640px), `md:` (768px), `lg:` (1024px), `xl:` (1280px)
 
-* Only use absolute positioning when necessary. Opt for responsive and well structured layouts that use flexbox and grid by default
-* Refactor code as you go to keep code clean
-* Keep file sizes small and put helper functions and components in their own files.
+### Principes
+- Flexbox et Grid par défaut — éviter le positionnement absolu sauf nécessité
+- Whitespace généreux pour la lisibilité (site éditorial/presse)
+- Largeur max de contenu cohérente avec les pages existantes
+- Pas de scroll horizontal — tester sur toutes les tailles d'écran
 
---------------
+## Composants
 
-# Design system guidelines
-Rules for how the AI should make generations look like your company's design system
+### Patterns existants à réutiliser
+- `ArticleCard` — carte d'article avec image, titre, extrait
+- `PremiumOverlay` — overlay pour le contenu premium/paywall
+- `MarketDataWidget` — widget données de marché
+- `RichTextEditor` — éditeur TipTap pour l'admin
+- `SearchOverlay` — recherche globale
+- `Header` / `Footer` — navigation et pied de page
 
-Additionally, if you select a design system to use in the prompt box, you can reference
-your design system's components, tokens, variables and components.
-For example:
+### Conventions
+- Fichiers composants en PascalCase dans `src/components/`
+- Server Components par défaut, `'use client'` uniquement si nécessaire
+- Props typées explicitement avec TypeScript
 
-* Use a base font-size of 14px
-* Date formats should always be in the format “Jun 10”
-* The bottom toolbar should only ever have a maximum of 4 items
-* Never use the floating action button with the bottom toolbar
-* Chips should always come in sets of 3 or more
-* Don't use a dropdown if there are 2 or fewer options
+## Esthétique éditoriale
 
-You can also create sub sections and add more specific details
-For example:
+- **Ton visuel** : professionnel, sobre, inspirant confiance (presse économique)
+- **Éviter** : gradients flashy, coins trop arrondis, animations excessives, esthétique "template générique"
+- **Privilégier** : hiérarchie claire de l'information, espaces de respiration, contrastes nets
+- **Images** : optimisées via next/image, ratio cohérent, alt text en français
 
+## Accessibilité (a11y)
 
-## Button
-The Button component is a fundamental interactive element in our design system, designed to trigger actions or navigate
-users through the application. It provides visual feedback and clear affordances to enhance user experience.
+- Alt text sur toutes les images
+- Attributs aria sur les éléments interactifs (menus, modales, overlays)
+- Navigation au clavier fonctionnelle
+- Contraste suffisant — attention au gold `#d4a843` sur fond clair
+- Focus visible sur les éléments interactifs
 
-### Usage
-Buttons should be used for important actions that users need to take, such as form submissions, confirming choices,
-or initiating processes. They communicate interactivity and should have clear, action-oriented labels.
+## Contenu
 
-### Variants
-* Primary Button
-  * Purpose : Used for the main action in a section or page
-  * Visual Style : Bold, filled with the primary brand color
-  * Usage : One primary button per section to guide users toward the most important action
-* Secondary Button
-  * Purpose : Used for alternative or supporting actions
-  * Visual Style : Outlined with the primary color, transparent background
-  * Usage : Can appear alongside a primary button for less important actions
-* Tertiary Button
-  * Purpose : Used for the least important actions
-  * Visual Style : Text-only with no border, using primary color
-  * Usage : For actions that should be available but not emphasized
--->
+- Tout le texte utilisateur en **français**
+- Dates au format français (ex: 8 avril 2026)
+- Devises : FCFA pour les prix locaux, USD/EUR si contexte international
+- Ton éditorial : factuel, professionnel, accessible

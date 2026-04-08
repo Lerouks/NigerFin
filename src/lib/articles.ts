@@ -161,18 +161,83 @@ export async function getFeaturedArticles(): Promise<Article[]> {
   return (data || []).map(toArticle);
 }
 
-export async function getRelatedArticles(currentSlug: string, category: string, _tags: string[]): Promise<Article[]> {
+/**
+ * Get exactly 3 related articles using a multi-level priority algorithm:
+ * 1. Same section + shared tags (sorted by tag overlap desc, then date desc)
+ * 2. Same section, most recent
+ * 3. Shared tags any section, most recent
+ * 4. Fallback: latest articles
+ */
+export async function getRelatedArticles(currentSlug: string, category: string, tags: string[]): Promise<Article[]> {
   const supabase = createServiceClient();
   if (!supabase) return [];
-  const { data } = await supabase
+  const TARGET = 3;
+
+  // Fetch candidates: same section OR overlapping tags, max 20
+  const { data: candidates } = await supabase
     .from('articles')
     .select('*')
     .eq('status', 'published')
-    .contains('sections', [category])
     .neq('slug', currentSlug)
+    .or(`sections.cs.{${category}}${tags.length > 0 ? `,tags.ov.{${tags.join(',')}}` : ''}`)
     .order('published_at', { ascending: false })
-    .limit(3);
-  return (data || []).map(toArticle);
+    .limit(20);
+
+  const pool = (candidates || []).map(toArticle);
+  const result: Article[] = [];
+  const usedIds = new Set<string>();
+
+  const add = (article: Article) => {
+    if (usedIds.has(article._id) || result.length >= TARGET) return;
+    usedIds.add(article._id);
+    result.push(article);
+  };
+
+  // Level 1: same section + shared tags, sorted by tag overlap
+  if (tags.length > 0) {
+    const level1 = pool
+      .filter((a) => a.sections.includes(category) && a.tags.some((t) => tags.includes(t)))
+      .sort((a, b) => {
+        const overlapA = a.tags.filter((t) => tags.includes(t)).length;
+        const overlapB = b.tags.filter((t) => tags.includes(t)).length;
+        if (overlapB !== overlapA) return overlapB - overlapA;
+        return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+      });
+    for (const a of level1) add(a);
+  }
+
+  // Level 2: same section, most recent
+  if (result.length < TARGET) {
+    const level2 = pool.filter((a) => a.sections.includes(category));
+    for (const a of level2) add(a);
+  }
+
+  // Level 3: shared tags any section
+  if (result.length < TARGET && tags.length > 0) {
+    const level3 = pool.filter((a) => a.tags.some((t) => tags.includes(t)));
+    for (const a of level3) add(a);
+  }
+
+  // Level 4: fallback - any remaining from pool
+  if (result.length < TARGET) {
+    for (const a of pool) add(a);
+  }
+
+  // Level 5: if still not enough (very few articles), fetch latest
+  if (result.length < TARGET) {
+    const { data: latest } = await supabase
+      .from('articles')
+      .select('*')
+      .eq('status', 'published')
+      .neq('slug', currentSlug)
+      .order('published_at', { ascending: false })
+      .limit(TARGET);
+    for (const row of (latest || [])) {
+      add(toArticle(row));
+    }
+  }
+
+  return result.slice(0, TARGET);
 }
 
 /** Search published articles by query string (title, excerpt, category, tags) */

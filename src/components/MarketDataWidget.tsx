@@ -86,7 +86,11 @@ export function MarketDataWidget() {
                         )}
                       </div>
                       <div className="flex justify-end">
-                        <VariationBadge value={item.changePercent} pill />
+                        {item.symbol === 'EUR/XOF' ? (
+                          <span className="text-[10px] text-gray-400">Taux fixe</span>
+                        ) : (
+                          <VariationBadge value={item.changePercent} pill />
+                        )}
                       </div>
                     </div>
                   </div>

@@ -41,14 +41,18 @@ export function MarketMarquee() {
             <span className="text-white/80 tabular-nums">
               {item.value.toLocaleString('fr-FR')}
             </span>
-            <span
-              className={`text-[11px] tabular-nums ${
-                item.changePercent >= 0 ? 'text-emerald-400' : 'text-red-400'
-              }`}
-            >
-              {item.changePercent >= 0 ? '+' : ''}
-              {item.changePercent.toFixed(2)}%
-            </span>
+            {item.symbol === 'EUR/XOF' ? (
+              <span className="text-[11px] text-white/30">fixe</span>
+            ) : (
+              <span
+                className={`text-[11px] tabular-nums ${
+                  item.changePercent >= 0 ? 'text-emerald-400' : 'text-red-400'
+                }`}
+              >
+                {item.changePercent >= 0 ? '+' : ''}
+                {item.changePercent.toFixed(2)}%
+              </span>
+            )}
           </span>
         ))}
       </div>

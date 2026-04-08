@@ -24,15 +24,22 @@ export async function GET(request: NextRequest) {
 
     // Check user subscription to decide whether to strip premium content
     const { data: { user } } = await supabase.auth.getUser();
-    let userRole: string | null = null;
+    let userRole: 'reader' | 'premium' | 'admin' | null = null;
     if (user) {
       const { data: profile } = await supabase
         .from('user_profiles')
         .select('role, subscription_status')
         .eq('id', user.id)
         .single();
-      if (profile && profile.subscription_status === 'active') {
-        userRole = profile.role;
+      if (profile) {
+        // Admin always has access regardless of subscription status
+        if (profile.role === 'admin') {
+          userRole = 'admin';
+        } else if (profile.role === 'premium' && profile.subscription_status === 'active') {
+          userRole = 'premium';
+        } else {
+          userRole = 'reader';
+        }
       }
     }
 

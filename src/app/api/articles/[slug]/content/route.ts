@@ -62,24 +62,21 @@ export async function GET(
 
   // Premium users: verify subscription is still active
   if (profile.role === 'premium') {
-    const { data: subscription } = await service
-      .from('subscriptions')
-      .select('current_period_end, status')
-      .eq('user_id', user.id)
-      .in('status', ['active', 'trialing'])
-      .order('current_period_end', { ascending: false })
-      .limit(1)
+    // Check user_profiles.subscription_end first (canonical source)
+    const { data: profileFull } = await service
+      .from('user_profiles')
+      .select('subscription_end, subscription_status')
+      .eq('id', user.id)
       .single();
 
-    if (subscription && new Date(subscription.current_period_end) > new Date()) {
+    const subEnd = profileFull?.subscription_end;
+    const isActive = profileFull?.subscription_status === 'active' && subEnd && new Date(subEnd) > new Date();
+
+    if (isActive) {
       return NextResponse.json({ body: bodyToHtml(article.body || '') }, { headers: noCacheHeaders });
     }
 
-    // Subscription expired, downgrade role to reader
-    await service
-      .from('user_profiles')
-      .update({ role: 'reader' })
-      .eq('id', user.id);
+    // Subscription expired or missing - do NOT downgrade here (cron handles that)
     // Fall through to monthly free article limit check
   }
 

@@ -1,30 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
-import { createServerSupabaseClient } from '@/lib/supabase';
-import { createServiceClient } from '@/lib/supabase';
+import { requireAdmin as requireAdminShared } from '@/lib/admin-auth';
 import { serverError } from '@/lib/api-error';
 
 /** Revalidate all pages that display article data */
 function revalidateArticlePages(slug?: string) {
   revalidatePath('/');
   if (slug) revalidatePath(`/articles/${slug}`);
-  // Category pages that list articles with premium badges
   for (const cat of ['/economie', '/finance', '/entreprises', '/education', '/marches', '/niger']) {
     revalidatePath(cat);
   }
   revalidatePath('/articles');
 }
 
-async function requireAdmin(req: NextRequest) {
-  const supabase = await createServerSupabaseClient();
-  if (!supabase) return null;
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-  const service = createServiceClient();
-  if (!service) return null;
-  const { data: profile } = await service.from('user_profiles').select('role').eq('id', user.id).single();
-  if (profile?.role !== 'admin') return null;
-  return { user, service };
+async function requireAdmin(_req: NextRequest) {
+  const auth = await requireAdminShared();
+  if ('error' in auth) return null;
+  return { user: auth.user, service: auth.serviceClient };
 }
 
 function slugify(text: string): string {

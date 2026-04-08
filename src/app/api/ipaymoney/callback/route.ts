@@ -24,7 +24,7 @@ async function activateSubscription(
   const now = new Date().toISOString();
 
   // Update payment request to verified
-  await serviceClient
+  const { error: payErr } = await serviceClient
     .from('payment_requests')
     .update({
       status: 'verified',
@@ -33,6 +33,10 @@ async function activateSubscription(
       updated_at: now,
     })
     .eq('id', paymentRequestId);
+
+  if (payErr) {
+    Sentry.captureException(payErr, { tags: { context: 'ipaymoney-payment-update' } });
+  }
 
   // Preserve admin role
   const { data: targetProfile } = await serviceClient
@@ -44,7 +48,7 @@ async function activateSubscription(
   const role = targetProfile?.role === 'admin' ? 'admin' : 'premium';
 
   // Upsert subscription
-  await serviceClient
+  const { error: subErr } = await serviceClient
     .from('subscriptions')
     .upsert(
       {
@@ -59,8 +63,12 @@ async function activateSubscription(
       { onConflict: 'user_id' }
     );
 
+  if (subErr) {
+    Sentry.captureException(subErr, { tags: { context: 'ipaymoney-subscription-upsert' } });
+  }
+
   // Update user profile
-  await serviceClient
+  const { error: profileErr } = await serviceClient
     .from('user_profiles')
     .update({
       role,
@@ -72,6 +80,16 @@ async function activateSubscription(
       updated_at: now,
     })
     .eq('id', userId);
+
+  if (profileErr) {
+    Sentry.captureException(profileErr, { tags: { context: 'ipaymoney-profile-update' } });
+    // Critical: retry profile update once
+    await serviceClient.from('user_profiles').update({
+      role, subscription_status: 'active', subscription_start: now,
+      subscription_end: expiresAt.toISOString(), subscription_updated_at: now,
+      expiration_warning_sent: false, updated_at: now,
+    }).eq('id', userId);
+  }
 
   // Audit log
   await logAuditEvent('system', 'ipaymoney_payment_verified', 'payment', paymentRequestId, {

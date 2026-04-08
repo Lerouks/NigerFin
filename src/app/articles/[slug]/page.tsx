@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation';
 import { getArticleBySlug, getRelatedArticles, getAllArticleSlugs } from '@/lib/articles';
 import { SITE_URL } from '@/lib/config';
 import { ArticleContent } from './ArticleContent';
-import { ReadingProgressBar } from '@/components/ReadingProgressBar';
 
 export const revalidate = 60;
 
@@ -116,7 +115,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <ReadingProgressBar />
       <ArticleContent article={article} htmlBody={safeHtmlBody} relatedArticles={related} />
     </>
   );

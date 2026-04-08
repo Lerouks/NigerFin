@@ -59,7 +59,7 @@ export function IndicesEconomiques() {
   const { data: macroData, isLoading, lastUpdated, source } = useNigerMacro();
 
   const { indicators, gdpSeries } = useMemo(() => {
-    if (!macroData) return { indicators: [] as Indicator[], gdpSeries: [] as { label: string; capitalRestant: number; interetsCumules: number }[] };
+    if (!macroData) return { indicators: [] as Indicator[], gdpSeries: [] as { year: string; pib: number; croissance: number }[] };
 
     const wb = macroData.worldBank;
     const imf = macroData.imf;
@@ -205,9 +205,9 @@ export function IndicesEconomiques() {
     }
 
     const series = gdpByYear.map((point) => ({
-      label: String(point.year),
-      capitalRestant: Math.round(((point.value ?? 0) * 655.957) / 1e9),
-      interetsCumules: Math.round(((gdpGrowthMap.get(point.year) ?? 0) * 100)) / 100,
+      year: String(point.year),
+      pib: Math.round(((point.value ?? 0) * 655.957) / 1e9),
+      croissance: Math.round(((gdpGrowthMap.get(point.year) ?? 0) * 100)) / 100,
     }));
 
     return { indicators: list, gdpSeries: series };
@@ -236,12 +236,12 @@ export function IndicesEconomiques() {
               <AreaChart data={gdpSeries} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
                 <defs>
                   <linearGradient id="colorGDP" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#111111" stopOpacity={0.18} />
-                    <stop offset="95%" stopColor="#111111" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#d4a843" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#d4a843" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={{ stroke: '#e5e5e5' }} tickLine={false} />
+                <XAxis dataKey="year" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={{ stroke: '#e5e5e5' }} tickLine={false} />
                 <YAxis
                   tick={{ fontSize: 11, fill: '#9ca3af' }}
                   axisLine={false}
@@ -251,17 +251,18 @@ export function IndicesEconomiques() {
                 <Tooltip
                   contentStyle={{ background: '#111', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '12px', padding: '8px 12px' }}
                   formatter={((value: number, name: string) => [
-                    name === 'capitalRestant' ? `${value.toLocaleString('fr-FR')} Mrd FCFA` : `${value.toFixed(1)}%`,
-                    name === 'capitalRestant' ? 'PIB' : 'Croissance réelle',
+                    `${value.toLocaleString('fr-FR')} Mrd FCFA`,
+                    name === 'pib' ? 'PIB' : name,
                   ]) as never}
                 />
                 <Area
                   type="monotone"
-                  dataKey="capitalRestant"
-                  stroke="#111111"
+                  dataKey="pib"
+                  stroke="#d4a843"
                   strokeWidth={2}
                   fill="url(#colorGDP)"
-                  dot={{ r: 3, fill: '#111' }}
+                  dot={{ r: 3, fill: '#d4a843' }}
+                  name="PIB"
                 />
               </AreaChart>
             </ResponsiveContainer>

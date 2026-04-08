@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation';
 import {
   BarChart3, Shield, Loader2, Download, Building2,
   DollarSign, FileText, Newspaper, LineChart, Zap, BookOpen,
-  SlidersHorizontal, Mail, CreditCard, Users, Activity,
+  SlidersHorizontal, Mail, CreditCard, Users, Activity, MessageSquare,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { ArticlesManager } from './ArticlesManager';
+import { CommentsManager } from './CommentsManager';
 import { MarketDataManager } from './MarketDataManager';
 import { FlashBannerManager } from './FlashBannerManager';
 import { EducationManager } from './EducationManager';
@@ -62,7 +63,7 @@ interface OverviewData {
   monthlyUsers_chart: { month: string; users: number }[];
 }
 
-type TabId = 'overview' | 'articles' | 'market' | 'flash' | 'education' | 'niger' | 'enterprises' | 'legal' | 'paywall' | 'users' | 'payments' | 'pricing' | 'stats' | 'audit' | 'messages';
+type TabId = 'overview' | 'articles' | 'comments' | 'market' | 'flash' | 'education' | 'niger' | 'enterprises' | 'legal' | 'paywall' | 'users' | 'payments' | 'pricing' | 'stats' | 'audit' | 'messages';
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -132,6 +133,7 @@ export function AdminDashboard() {
   const tabs: { id: TabId; label: string; icon: typeof BarChart3; badge?: number }[] = [
     { id: 'overview', label: 'Vue d\'ensemble', icon: BarChart3 },
     { id: 'articles', label: 'Articles', icon: Newspaper },
+    { id: 'comments', label: 'Commentaires', icon: MessageSquare },
     { id: 'market', label: 'Marchés', icon: LineChart },
     { id: 'flash', label: 'Flash Info', icon: Zap },
     { id: 'education', label: 'Éducation', icon: BookOpen },
@@ -203,6 +205,7 @@ export function AdminDashboard() {
         {/* Tab content */}
         {activeTab === 'overview' && <OverviewTab overview={overview} stats={stats} />}
         {activeTab === 'articles' && <ArticlesManager />}
+        {activeTab === 'comments' && <CommentsManager />}
         {activeTab === 'market' && <MarketDataManager />}
         {activeTab === 'flash' && <FlashBannerManager />}
         {activeTab === 'education' && <EducationManager />}

@@ -6,7 +6,7 @@ import { MarketDataWidget } from '@/components/MarketDataWidget';
 import { MarketMarquee } from '@/components/MarketMarquee';
 import { NewsletterForm } from '@/components/NewsletterForm';
 import { PracticalTools } from '@/components/PracticalTools';
-import { getFeaturedArticles, getLatestBySection } from '@/lib/articles';
+import { getAllArticles, getFeaturedArticles, getLatestBySection } from '@/lib/articles';
 import { SECTION_META } from '@/lib/sections';
 
 export const metadata: Metadata = {
@@ -18,16 +18,21 @@ export const revalidate = 60;
 
 // Sections displayed on homepage (in order)
 const HOME_SECTIONS = ['economie', 'finance', 'marches', 'entreprises'] as const;
+const LATEST_COUNT = 6;
 const ARTICLES_PER_SECTION = 4;
 
 export default async function HomePage() {
-  const [featured, sectionArticles] = await Promise.all([
+  const [featured, { articles: latestArticles }, sectionArticles] = await Promise.all([
     getFeaturedArticles(),
+    getAllArticles(1, LATEST_COUNT),
     getLatestBySection([...HOME_SECTIONS], ARTICLES_PER_SECTION),
   ]);
 
   const featuredArticle = featured[0] ?? null;
   const featuredId = featuredArticle?._id;
+
+  // Latest articles excluding the featured one
+  const latestFiltered = latestArticles.filter((a) => a._id !== featuredId);
 
   return (
     <div className="min-h-screen bg-[#fafaf9]">
@@ -54,16 +59,30 @@ export default async function HomePage() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* Articles by Section */}
           <div className="lg:col-span-8 space-y-14">
+
+            {/* Latest articles (all sections) */}
+            {latestFiltered.length > 0 && (
+              <section>
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="animate-gold-line h-[2px] bg-gold" />
+                  <h2 className="text-xl sm:text-2xl font-semibold whitespace-nowrap">Dernières actualités</h2>
+                  <div className="flex-1 h-px bg-black/[0.06]" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 stagger-grid">
+                  {latestFiltered.map((article) => (
+                    <ArticleCard key={article._id} article={article} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Articles by section */}
             {HOME_SECTIONS.map((sectionKey) => {
               const meta = SECTION_META[sectionKey];
               if (!meta) return null;
 
-              // Filter out the featured article to avoid duplication
-              const articles = (sectionArticles[sectionKey] || [])
-                .filter((a) => a._id !== featuredId);
-
+              const articles = sectionArticles[sectionKey] || [];
               if (articles.length === 0) return null;
 
               return (
@@ -96,7 +115,7 @@ export default async function HomePage() {
               );
             })}
 
-            {/* Newsletter Section */}
+            {/* Newsletter */}
             <div className="mt-14">
               <NewsletterForm />
             </div>

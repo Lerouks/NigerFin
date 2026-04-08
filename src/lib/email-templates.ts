@@ -82,12 +82,16 @@ ${signature()}
 
 export function newsletterWelcomeEmail(): { subject: string; html: string } {
   return {
-    subject: 'Bienvenue dans la newsletter NFI Report',
+    subject: 'Bienvenue sur NFI Report',
     html: emailLayout(`
-${heading('Merci pour votre inscription')}
-${paragraph("Vous êtes désormais inscrit à la newsletter NFI Report. Vous recevrez régulièrement nos analyses économiques et financières du Niger et de l'Afrique de l'Ouest.")}
-${paragraph('Chaque semaine, retrouvez dans votre boîte mail le briefing du lundi et le bilan du vendredi.')}
+${heading('Bienvenue sur NFI Report')}
+${paragraph("Vous êtes désormais inscrit. Vous recevrez nos briefings économiques sur le Niger et l'Afrique de l'Ouest : analyses, données de marché et décryptages.")}
 ${button('Lire les derniers articles', `${SITE_URL}`)}
+<div style="background-color:#fafaf9;border-radius:8px;padding:20px 24px;margin:24px 0;">
+  <p style="margin:0 0 8px;font-size:14px;font-weight:600;color:#111;">Envie d'aller plus loin ?</p>
+  <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#404040;">Les abonnés Premium reçoivent 2 analyses exclusives par semaine, des alertes en temps réel et l'accès à tous nos outils financiers.</p>
+  <a href="${SITE_URL}/pricing" style="color:#d4a843;font-size:14px;font-weight:600;text-decoration:underline;">Découvrir l'offre Premium →</a>
+</div>
 ${signature()}
     `),
   };

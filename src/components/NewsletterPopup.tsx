@@ -3,11 +3,13 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { X, ArrowRight, Check, Loader2 } from 'lucide-react';
+import { useAuth } from '@/lib/auth-context';
 
 const DISMISS_KEY = 'nfi_newsletter_popup_dismissed';
+const SUBSCRIBED_KEY = 'nfi_newsletter_subscribed';
 const COOLDOWN_DAYS = 7;
-const SCROLL_TRIGGER = 0.45; // 45% scroll
-const TIME_TRIGGER_MS = 30_000; // 30 seconds
+const SCROLL_TRIGGER = 0.45;
+const TIME_TRIGGER_MS = 30_000;
 
 function wasDismissedRecently(): boolean {
   if (typeof window === 'undefined') return false;
@@ -22,13 +24,24 @@ function markDismissed(): void {
   }
 }
 
+export function isNewsletterSubscribed(): boolean {
+  if (typeof window === 'undefined') return false;
+  return localStorage.getItem(SUBSCRIBED_KEY) === 'true';
+}
+
+export function markNewsletterSubscribed(): void {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(SUBSCRIBED_KEY, 'true');
+  }
+}
+
 /**
  * Newsletter signup popup.
  * Shows once per session after 45% scroll OR 30 seconds.
- * Dismissed for 7 days.
- * Bottom sheet on mobile, centered modal on desktop.
+ * Does NOT show for: premium/admin, already subscribed, dismissed recently, homepage.
  */
 export function NewsletterPopup() {
+  const { isLoading, userRole } = useAuth();
   const [visible, setVisible] = useState(false);
   const [animateIn, setAnimateIn] = useState(false);
   const [email, setEmail] = useState('');
@@ -38,13 +51,19 @@ export function NewsletterPopup() {
   const hasTriggered = useRef(false);
   const dialogRef = useRef<HTMLDivElement>(null);
 
-  // Check if popup should show
   useEffect(() => {
+    // Wait for auth to resolve
+    if (isLoading) return;
+
+    // Don't show for premium/admin (already in newsletter)
+    if (userRole === 'premium' || userRole === 'admin') return;
+
+    // Don't show if already subscribed or dismissed recently
+    if (isNewsletterSubscribed()) return;
     if (wasDismissedRecently()) return;
-    if (typeof window === 'undefined') return;
 
     // Don't show on homepage (newsletter form already visible)
-    if (window.location.pathname === '/') return;
+    if (typeof window !== 'undefined' && window.location.pathname === '/') return;
 
     let ticking = false;
 
@@ -57,7 +76,6 @@ export function NewsletterPopup() {
       });
     };
 
-    // Scroll trigger
     const handleScroll = () => {
       if (hasTriggered.current || ticking) return;
       ticking = true;
@@ -71,15 +89,13 @@ export function NewsletterPopup() {
       });
     };
 
-    // Time trigger
     const timer = setTimeout(trigger, TIME_TRIGGER_MS);
-
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
       window.removeEventListener('scroll', handleScroll);
       clearTimeout(timer);
     };
-  }, []);
+  }, [isLoading, userRole]);
 
   const handleClose = () => {
     setAnimateIn(false);
@@ -101,6 +117,7 @@ export function NewsletterPopup() {
       });
       if (!res.ok) throw new Error();
       setSuccess(true);
+      markNewsletterSubscribed();
       markDismissed();
       setTimeout(() => {
         setAnimateIn(false);
@@ -113,7 +130,6 @@ export function NewsletterPopup() {
     }
   };
 
-  // Keyboard: Escape to close
   useEffect(() => {
     if (!visible) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -136,7 +152,7 @@ export function NewsletterPopup() {
         aria-hidden="true"
       />
 
-      {/* Dialog — bottom sheet on mobile, centered on desktop */}
+      {/* Dialog */}
       <div
         ref={dialogRef}
         role="dialog"
@@ -161,7 +177,7 @@ export function NewsletterPopup() {
             <div className="w-10 h-1 rounded-full bg-gray-300" />
           </div>
 
-          {/* Close button */}
+          {/* Close */}
           <button
             onClick={handleClose}
             className="absolute top-3 right-3 sm:top-4 sm:right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors z-10"
@@ -186,10 +202,10 @@ export function NewsletterPopup() {
 
             {/* Content */}
             <h3 className="text-[18px] sm:text-[20px] font-bold text-center text-[#111] mb-1.5">
-              Restez informé
+              Ne manquez rien de l&apos;actualité économique
             </h3>
             <p className="text-[13px] sm:text-[14px] text-gray-500 text-center mb-5 leading-relaxed">
-              Recevez chaque jour l&apos;essentiel de l&apos;actualité économique du Niger et de l&apos;Afrique de l&apos;Ouest.
+              Briefings, analyses et données de marché. Recevez le meilleur de NFI Report dans votre boîte mail.
             </p>
 
             {/* Form */}
@@ -223,7 +239,7 @@ export function NewsletterPopup() {
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <>
-                      S&apos;inscrire gratuitement
+                      S&apos;inscrire
                       <ArrowRight className="w-4 h-4" />
                     </>
                   )}

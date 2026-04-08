@@ -9,51 +9,76 @@ import { initPostHog } from '@/lib/posthog';
 /**
  * Bannière de consentement RGPD/CNIL.
  *
- * S'affiche tant que l'utilisateur n'a ni accepté ni refusé les cookies
- * de mesure d'audience et de suivi. Tant qu'aucun choix n'est fait,
- * PostHog et Sentry restent désactivés (cf. src/lib/posthog.ts et
- * sentry.client.config.ts).
+ * S'affiche après 1.5s si l'utilisateur n'a ni accepté ni refusé.
+ * Tant qu'aucun choix n'est fait, les outils d'analyse et de suivi
+ * d'erreurs restent désactivés.
  */
 export function CookieBanner() {
-  const [visible, setVisible] = useState(false);
+  const [shouldShow, setShouldShow] = useState(false);
+  const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
-    // Affiche la bannière uniquement si aucun choix n'a été fait.
     const consent = getConsent();
     if (consent === null) {
-      setVisible(true);
+      // Show after 1.5s delay
+      const timer = setTimeout(() => {
+        setShouldShow(true);
+        // Block scroll while banner is visible
+        document.body.style.overflow = 'hidden';
+        // Trigger animation on next frame
+        requestAnimationFrame(() => setAnimate(true));
+      }, 1500);
+      return () => clearTimeout(timer);
     } else if (consent === 'accepted') {
-      // Si l'utilisateur avait déjà accepté, on (ré)initialise les trackers.
       initPostHog();
     }
   }, []);
 
+  const dismiss = () => {
+    setAnimate(false);
+    // Restore scroll immediately
+    document.body.style.overflow = '';
+    // Wait for exit animation then hide
+    setTimeout(() => setShouldShow(false), 300);
+  };
+
   const handleAccept = () => {
     setConsent('accepted');
-    setVisible(false);
+    dismiss();
     initPostHog();
-    // Sentry est initialisé au chargement de la page. On force un rechargement
-    // léger pour que sentry.client.config.ts s'exécute avec consent = true.
     if (typeof window !== 'undefined') {
-      window.location.reload();
+      setTimeout(() => window.location.reload(), 400);
     }
   };
 
   const handleReject = () => {
     setConsent('rejected');
-    setVisible(false);
+    dismiss();
   };
 
-  if (!visible) return null;
+  if (!shouldShow) return null;
 
   return (
     <div
       role="dialog"
       aria-live="polite"
       aria-label="Consentement aux cookies"
-      className="fixed inset-x-0 bottom-0 z-[100] p-4 sm:p-6"
+      className="fixed inset-0 z-[100] flex items-end justify-center"
     >
-      <div className="mx-auto max-w-4xl bg-white border border-black/[0.08] rounded-2xl shadow-2xl p-5 sm:p-6">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/30 transition-opacity duration-400"
+        style={{ opacity: animate ? 1 : 0 }}
+      />
+
+      {/* Banner */}
+      <div
+        className="relative w-full sm:max-w-4xl sm:mx-4 sm:mb-4 bg-white sm:rounded-2xl shadow-2xl border-t sm:border border-black/[0.08] p-5 sm:p-6 transition-all duration-400 ease-out"
+        style={{
+          transform: animate ? 'translateY(0)' : 'translateY(100%)',
+          opacity: animate ? 1 : 0,
+        }}
+      >
         <div className="flex items-start gap-4">
           <div className="hidden sm:flex w-10 h-10 rounded-xl bg-[#fafaf9] items-center justify-center flex-shrink-0">
             <Cookie className="w-5 h-5 text-gold" aria-hidden="true" />
@@ -63,8 +88,8 @@ export function CookieBanner() {
               Nous respectons votre vie privée
             </h2>
             <p className="text-[13px] text-gray-600 leading-relaxed">
-              NFI Report utilise des cookies de mesure d&rsquo;audience (PostHog) et de suivi
-              d&rsquo;erreurs (Sentry) pour améliorer votre expérience. Ces outils sont
+              NFI Report utilise des cookies de mesure d&rsquo;audience et de suivi
+              d&rsquo;erreurs techniques pour améliorer votre expérience. Ces outils sont
               désactivés tant que vous n&rsquo;avez pas donné votre accord. Les cookies
               strictement nécessaires au fonctionnement du site (authentification)
               restent actifs. Pour en savoir plus, consultez notre{' '}

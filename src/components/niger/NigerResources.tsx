@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Atom, Droplets, CircleDot, Flame, Factory } from 'lucide-react';
 
 interface Resource {
@@ -30,6 +31,21 @@ const IMPORTANCE_LABELS: Record<string, { label: string; style: string }> = {
   critique: { label: 'Critique', style: 'bg-red-50 text-red-700 border-red-100' },
   majeure: { label: 'Majeure', style: 'bg-amber-50 text-amber-700 border-amber-100' },
   moderee: { label: 'Modérée', style: 'bg-blue-50 text-blue-700 border-blue-100' },
+};
+
+// Map company names to enterprise page slugs
+const COMPANY_SLUGS: Record<string, string> = {
+  'SOMAÏR': 'somair',
+  'SOMAIR': 'somair',
+  'COMINAK': 'cominak',
+  'SONIDEP': 'sonidep',
+  'NIGELEC': 'nigelec',
+  'SONIBANK': 'sonibank',
+  'BAGRI': 'bagri',
+  'SOPAMIN': 'sopamin',
+  'Niger Telecoms': 'niger-telecoms',
+  'SONICHAR': 'sonichar',
+  'IMOURAREN SA': 'imouraren',
 };
 
 export function NigerResources({ resources }: { resources: Resource[] }) {
@@ -77,9 +93,23 @@ export function NigerResources({ resources }: { resources: Resource[] }) {
               <p className="text-[13px] text-gray-500 leading-relaxed mb-3">{resource.importance_description}</p>
 
               <div className="flex flex-wrap gap-1.5">
-                {resource.operating_companies.map((company) => (
-                  <span key={company} className="text-[11px] px-2 py-0.5 rounded bg-gray-100 text-gray-500">{company}</span>
-                ))}
+                {resource.operating_companies.map((company) => {
+                  const slug = COMPANY_SLUGS[company];
+                  if (slug) {
+                    return (
+                      <Link
+                        key={company}
+                        href={`/entreprises/${slug}`}
+                        className="text-[11px] px-2.5 py-1 rounded-full bg-[#111] text-white font-medium hover:bg-[#333] transition-colors"
+                      >
+                        {company} →
+                      </Link>
+                    );
+                  }
+                  return (
+                    <span key={company} className="text-[11px] px-2 py-0.5 rounded bg-gray-100 text-gray-500">{company}</span>
+                  );
+                })}
               </div>
             </div>
           );

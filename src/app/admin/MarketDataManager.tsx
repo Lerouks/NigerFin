@@ -21,6 +21,20 @@ interface MarketEntry {
   created_at: string;
 }
 
+interface SyncItemResult {
+  symbol: string;
+  status: 'updated' | 'skipped' | 'error';
+  value?: number;
+  error?: string;
+}
+
+interface FailedItem {
+  symbol: string;
+  name: string;
+  unit: string;
+  manualValue: string;
+}
+
 const TYPES = [
   { value: 'currency', label: 'Devise' },
   { value: 'commodity', label: 'Matière première' },
@@ -51,10 +65,14 @@ export function MarketDataManager() {
   const [error, setError] = useState('');
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<{ updated: number; errors: number } | null>(null);
+  const [failedItems, setFailedItems] = useState<FailedItem[]>([]);
+  const [showFailedPopup, setShowFailedPopup] = useState(false);
+  const [savingManual, setSavingManual] = useState(false);
 
   const handleSync = async () => {
     setSyncing(true);
     setSyncResult(null);
+    setFailedItems([]);
     setError('');
     try {
       const res = await fetch('/api/admin/sync-market-data', { method: 'POST' });
@@ -62,6 +80,24 @@ export function MarketDataManager() {
         const data = await res.json();
         setSyncResult(data.summary);
         fetchData();
+
+        // Identifier les échecs pour le popup
+        const failed: FailedItem[] = (data.results as SyncItemResult[])
+          .filter((r: SyncItemResult) => r.status === 'error' || r.status === 'skipped')
+          .map((r: SyncItemResult) => {
+            const entry = entries.find((e) => e.symbol === r.symbol);
+            return {
+              symbol: r.symbol,
+              name: entry?.name || r.symbol,
+              unit: entry?.unit || '',
+              manualValue: '',
+            };
+          });
+
+        if (failed.length > 0) {
+          setFailedItems(failed);
+          setShowFailedPopup(true);
+        }
       } else {
         const data = await res.json().catch(() => ({}));
         setError(data.error || 'Erreur lors de la synchronisation');
@@ -70,6 +106,47 @@ export function MarketDataManager() {
       setError('Erreur réseau');
     }
     setSyncing(false);
+  };
+
+  const handleManualUpdate = (symbol: string, value: string) => {
+    setFailedItems((prev) =>
+      prev.map((item) => item.symbol === symbol ? { ...item, manualValue: value } : item)
+    );
+  };
+
+  const submitManualValues = async () => {
+    const toUpdate = failedItems.filter((item) => item.manualValue.trim() !== '');
+    if (toUpdate.length === 0) {
+      setShowFailedPopup(false);
+      return;
+    }
+
+    setSavingManual(true);
+    let updatedCount = 0;
+
+    for (const item of toUpdate) {
+      const entry = entries.find((e) => e.symbol === item.symbol);
+      if (!entry) continue;
+
+      const res = await fetch('/api/admin/market-data', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: entry.id, value: parseFloat(item.manualValue) }),
+      });
+      if (res.ok) updatedCount++;
+    }
+
+    setSavingManual(false);
+    setShowFailedPopup(false);
+    setFailedItems([]);
+    if (updatedCount > 0) {
+      setSyncResult((prev) => prev ? {
+        ...prev,
+        updated: prev.updated + updatedCount,
+        errors: Math.max(0, prev.errors - updatedCount),
+      } : { updated: updatedCount, errors: 0 });
+      fetchData();
+    }
   };
 
   const fetchData = useCallback(async () => {
@@ -361,6 +438,68 @@ export function MarketDataManager() {
           {filtered.length === 0 && (
             <p className="text-center py-8 text-sm text-gray-400">Aucune donnée de marché</p>
           )}
+        </div>
+      )}
+
+      {/* Popup saisie manuelle pour les données en échec */}
+      {showFailedPopup && failedItems.length > 0 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShowFailedPopup(false)} />
+          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+            <div className="px-6 py-4 border-b border-black/[0.06]">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-semibold">Données non récupérées</h3>
+                  <p className="text-[12px] text-gray-400 mt-0.5">Entrez les valeurs manuellement</p>
+                </div>
+                <button
+                  onClick={() => setShowFailedPopup(false)}
+                  className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            <div className="px-6 py-4 space-y-3 max-h-[60vh] overflow-y-auto">
+              {failedItems.map((item) => (
+                <div key={item.symbol} className="flex items-center gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{item.name}</p>
+                    <p className="text-[11px] text-gray-400">{item.symbol}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={item.manualValue}
+                      onChange={(e) => handleManualUpdate(item.symbol, e.target.value)}
+                      placeholder="Valeur"
+                      className="w-32 border border-black/[0.08] rounded-lg px-3 py-2 text-sm text-right bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black tabular-nums"
+                    />
+                    {item.unit && (
+                      <span className="text-[11px] text-gray-400 w-10">{item.unit}</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="px-6 py-4 border-t border-black/[0.06] flex gap-2 justify-end">
+              <button
+                onClick={() => setShowFailedPopup(false)}
+                className="px-4 py-2.5 text-[13px] text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                Ignorer
+              </button>
+              <button
+                onClick={submitManualValues}
+                disabled={savingManual || failedItems.every((i) => !i.manualValue.trim())}
+                className="flex items-center gap-1.5 px-4 py-2.5 bg-[#111] text-white rounded-lg text-[13px] hover:bg-[#333] transition-colors disabled:opacity-30"
+              >
+                {savingManual ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                Valider
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

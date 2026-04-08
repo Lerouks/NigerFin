@@ -9,17 +9,21 @@ import { StrategicEnterprisesSection } from '@/components/StrategicEnterprisesSe
 
 type SectionId = 'presentation' | 'entreprises';
 
-function getSectionFromParams(params: URLSearchParams): SectionId {
-  return params.get('section') === 'entreprises' ? 'entreprises' : 'presentation';
+function getSectionFromURL(): SectionId {
+  if (typeof window !== 'undefined') {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('section') === 'entreprises') return 'entreprises';
+  }
+  return 'presentation';
 }
 
 export function NigerPageContent() {
   const searchParams = useSearchParams();
-  const [activeSection, setActiveSection] = useState<SectionId>(getSectionFromParams(searchParams));
+  const [activeSection, setActiveSection] = useState<SectionId>('presentation');
 
-  // Sync state when URL changes (direct navigation, back/forward)
+  // Read URL on mount and when searchParams change
   useEffect(() => {
-    setActiveSection(getSectionFromParams(searchParams));
+    setActiveSection(getSectionFromURL());
   }, [searchParams]);
 
   const handleSwitch = useCallback((id: SectionId) => {

@@ -180,19 +180,25 @@ function QuoteRow({
               )}
             </div>
           </div>
-          <div
-            className={`flex items-center gap-1 min-w-[80px] justify-end text-[13px] font-medium ${
-              item.change >= 0 ? 'text-emerald-600' : 'text-red-500'
-            }`}
-          >
-            {item.change >= 0 ? (
-              <TrendingUp className="w-3.5 h-3.5" />
-            ) : (
-              <TrendingDown className="w-3.5 h-3.5" />
-            )}
-            {item.changePercent > 0 ? '+' : ''}
-            {item.changePercent.toFixed(2)}%
-          </div>
+          {item.symbol === 'EUR/XOF' ? (
+            <div className="flex items-center gap-1 min-w-[80px] justify-end text-[13px] font-medium text-gray-400">
+              Taux fixe
+            </div>
+          ) : (
+            <div
+              className={`flex items-center gap-1 min-w-[80px] justify-end text-[13px] font-medium ${
+                item.change >= 0 ? 'text-emerald-600' : 'text-red-500'
+              }`}
+            >
+              {item.change >= 0 ? (
+                <TrendingUp className="w-3.5 h-3.5" />
+              ) : (
+                <TrendingDown className="w-3.5 h-3.5" />
+              )}
+              {item.changePercent > 0 ? '+' : ''}
+              {item.changePercent.toFixed(2)}%
+            </div>
+          )}
         </div>
       </div>
 

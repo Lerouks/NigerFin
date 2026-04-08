@@ -5,7 +5,10 @@ import { sendTransactionalEmail } from '@/lib/email';
 import { adminPremiumGrantedEmail, adminDowngradeToFreeEmail } from '@/lib/email-templates';
 import { isValidUUID, sanitizeSearchQuery, isOneOf, safeParseJSON } from '@/lib/validation';
 import { parsePagination, paginatedResponse } from '@/lib/pagination';
+import { deleteUserCompletely } from '@/lib/delete-user';
 import * as Sentry from '@sentry/nextjs';
+
+const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || 'raoufbark@gmail.com';
 
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin();
@@ -109,7 +112,6 @@ export async function PUT(request: NextRequest) {
     }
 
     // Super admin: only the owner can manage other admins
-    const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || 'raoufbark@gmail.com';
     const isSelf = userId === user.id;
     const isSuperAdmin = user.email === SUPER_ADMIN_EMAIL;
     const targetIsAdmin = targetUser.role === 'admin';
@@ -329,4 +331,47 @@ export async function PUT(request: NextRequest) {
   } catch {
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
+}
+
+// DELETE: admin deletes a user account
+export async function DELETE(request: NextRequest) {
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
+
+  const { user, serviceClient } = auth;
+  const userId = request.nextUrl.searchParams.get('userId');
+
+  if (!userId || !isValidUUID(userId)) {
+    return NextResponse.json({ error: 'userId invalide (UUID requis)' }, { status: 400 });
+  }
+
+  // Fetch target user
+  const { data: targetUser } = await serviceClient
+    .from('user_profiles')
+    .select('email, full_name')
+    .eq('id', userId)
+    .single();
+
+  if (!targetUser) {
+    return NextResponse.json({ error: 'Utilisateur introuvable' }, { status: 404 });
+  }
+
+  // Cannot delete super admin
+  if (targetUser.email === SUPER_ADMIN_EMAIL) {
+    return NextResponse.json({ error: 'Impossible de supprimer l\'administrateur principal' }, { status: 400 });
+  }
+
+  try {
+    await deleteUserCompletely(
+      serviceClient,
+      userId,
+      targetUser.email,
+      targetUser.full_name || '',
+      user.id,
+    );
+  } catch (err) {
+    return NextResponse.json({ error: (err as Error).message || 'Erreur lors de la suppression' }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true });
 }

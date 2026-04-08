@@ -588,7 +588,10 @@ export function AccountDashboard() {
 
             {/* ─── SECURITE ───────────────────────────────────── */}
             {activeSection === 'securite' && (
-              <PasswordChangeSection isReset={isPasswordReset} />
+              <>
+                <PasswordChangeSection isReset={isPasswordReset} />
+                <DeleteAccountSection />
+              </>
             )}
 
             {/* ─── NEWSLETTER ─────────────────────────────────── */}
@@ -797,6 +800,99 @@ function PasswordField({ id, label, value, onChange, show, onToggle, placeholder
         </button>
       </div>
     </div>
+  );
+}
+
+function DeleteAccountSection() {
+  const [showModal, setShowModal] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState('');
+  const router = useRouter();
+  const { signOut } = useAuth();
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    setError('');
+    try {
+      const res = await fetch('/api/user/delete-account', { method: 'DELETE' });
+      if (res.ok) {
+        await signOut();
+        router.push('/');
+      } else {
+        const data = await res.json();
+        setError(data.error || 'Erreur lors de la suppression.');
+      }
+    } catch {
+      setError('Erreur réseau.');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="bg-white rounded-2xl border border-red-100 p-6 sm:p-8 mt-6">
+        <h3 className="text-lg font-semibold text-red-600 mb-2">Zone de danger</h3>
+        <p className="text-[13px] text-gray-500 mb-4">
+          La suppression de votre compte est définitive et irréversible.
+        </p>
+        <button
+          onClick={() => setShowModal(true)}
+          className="flex items-center gap-2 px-5 py-2.5 bg-red-50 text-red-600 border border-red-200 rounded-xl text-[13px] font-medium hover:bg-red-100 transition-colors"
+        >
+          <XCircle className="w-4 h-4" />
+          Supprimer mon compte
+        </button>
+      </div>
+
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => !deleting && setShowModal(false)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full animate-fade-in-up">
+            <h3 className="text-lg font-bold text-red-600 mb-3">Supprimer définitivement mon compte</h3>
+            <p className="text-[13px] text-gray-600 mb-4 leading-relaxed">
+              Cette action est irréversible. Toutes vos données seront supprimées immédiatement : profil, abonnement, commentaires, likes, historique de lecture, préférences newsletter.
+            </p>
+            <div className="mb-4">
+              <label className="block text-[13px] font-medium text-gray-700 mb-1.5">
+                Tapez <strong className="text-red-600">SUPPRIMER</strong> pour confirmer
+              </label>
+              <input
+                type="text"
+                value={confirmText}
+                onChange={(e) => setConfirmText(e.target.value)}
+                placeholder="SUPPRIMER"
+                className="w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-red-200"
+                autoComplete="off"
+              />
+            </div>
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 text-[13px] px-4 py-3 rounded-lg mb-4">
+                {error}
+              </div>
+            )}
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={handleDelete}
+                disabled={confirmText !== 'SUPPRIMER' || deleting}
+                className="w-full flex items-center justify-center gap-2 bg-red-600 text-white py-3 rounded-xl text-[14px] font-medium hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+                Supprimer définitivement
+              </button>
+              <button
+                onClick={() => { setShowModal(false); setConfirmText(''); setError(''); }}
+                disabled={deleting}
+                className="w-full text-center text-[13px] text-gray-500 hover:text-gray-700 py-2 transition-colors"
+              >
+                Annuler
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 

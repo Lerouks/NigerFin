@@ -79,7 +79,7 @@ export function CookieBanner() {
           opacity: animate ? 1 : 0,
         }}
       >
-        <div className="flex items-start gap-4">
+        <div className="text-center sm:text-left sm:flex sm:items-start sm:gap-4">
           <div className="hidden sm:flex w-10 h-10 rounded-xl bg-[#fafaf9] items-center justify-center flex-shrink-0">
             <Cookie className="w-5 h-5 text-gold" aria-hidden="true" />
           </div>
@@ -106,14 +106,14 @@ export function CookieBanner() {
               <button
                 type="button"
                 onClick={handleAccept}
-                className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-[#111] text-white text-[13px] font-medium hover:bg-black transition-colors"
+                className="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-[#111] text-white text-[13px] font-medium hover:bg-black transition-colors"
               >
                 Accepter et continuer
               </button>
               <button
                 type="button"
                 onClick={handleReject}
-                className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg border border-black/[0.1] text-gray-700 text-[13px] font-medium hover:bg-gray-50 transition-colors"
+                className="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 rounded-lg border border-black/[0.1] text-gray-700 text-[13px] font-medium hover:bg-gray-50 transition-colors"
               >
                 Refuser
               </button>
@@ -123,7 +123,7 @@ export function CookieBanner() {
             type="button"
             onClick={handleReject}
             aria-label="Fermer et refuser les cookies non essentiels"
-            className="flex-shrink-0 p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
+            className="hidden sm:block flex-shrink-0 p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>

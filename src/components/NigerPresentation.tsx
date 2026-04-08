@@ -6,6 +6,7 @@ import { MapPin, Users, Ruler, Coins, Gem, Factory, Globe, Calendar, TrendingUp,
 import { NigerRegions } from './niger/NigerRegions';
 import { NigerResources } from './niger/NigerResources';
 import { useNigerCountry } from '@/hooks/useNigerCountry';
+import { useNigerMacro } from '@/hooks/useNigerMacro';
 
 interface Presentation {
   map_image_url: string;
@@ -78,6 +79,7 @@ export function NigerPresentation() {
 
   // Real-time data hooks
   const countryData = useNigerCountry();
+  const macroData = useNigerMacro();
 
   useEffect(() => {
     fetch('/api/niger-presentation')
@@ -92,19 +94,45 @@ export function NigerPresentation() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Enrich facts with real-time country data
+  // Enrich facts with real-time data (REST Countries + World Bank)
   const enrichedFacts = facts.map((fact) => {
-    if (!countryData.data) return fact;
-
     const enrichments: Record<string, string> = {};
-    if (countryData.data.population) {
-      enrichments['population'] = countryData.data.population.toLocaleString('fr-FR');
+
+    // REST Countries data (population, area, capital)
+    if (countryData.data) {
+      if (countryData.data.population) {
+        enrichments['population'] = countryData.data.population.toLocaleString('fr-FR');
+      }
+      if (countryData.data.area) {
+        enrichments['superficie'] = `${countryData.data.area.toLocaleString('fr-FR')} km²`;
+      }
+      if (countryData.data.capital?.[0]) {
+        enrichments['capitale'] = countryData.data.capital[0];
+      }
     }
-    if (countryData.data.area) {
-      enrichments['superficie'] = `${countryData.data.area.toLocaleString('fr-FR')} km²`;
-    }
-    if (countryData.data.capital?.[0]) {
-      enrichments['capitale'] = countryData.data.capital[0];
+
+    // World Bank data (PIB, PIB/habitant, population) - same source as Indices Economiques
+    if (macroData.data) {
+      const wb = macroData.data.worldBank;
+      const latest = (arr: { value: number | null; year: number }[]) =>
+        [...arr].sort((a, b) => b.year - a.year).find((d) => d.value !== null);
+
+      const latestGdp = latest(wb.gdp);
+      const latestGdpPc = latest(wb.gdpPerCapita);
+      const latestPop = latest(wb.population);
+
+      if (latestGdp?.value) {
+        const gdpFcfa = latestGdp.value * 655.957;
+        enrichments['pib'] = `${(gdpFcfa / 1e9).toFixed(0)} Mrd FCFA (${latestGdp.year})`;
+      }
+      if (latestGdpPc?.value) {
+        const pcFcfa = latestGdpPc.value * 655.957;
+        enrichments['pib_habitant'] = `${Math.round(pcFcfa).toLocaleString('fr-FR')} FCFA (${latestGdpPc.year})`;
+      }
+      // Use World Bank population (more reliable for economic context)
+      if (latestPop?.value) {
+        enrichments['population'] = `${(latestPop.value / 1e6).toFixed(1)} millions (${latestPop.year})`;
+      }
     }
 
     const enriched = enrichments[fact.fact_key];

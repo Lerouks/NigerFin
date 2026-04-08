@@ -6,7 +6,8 @@ import { MarketDataWidget } from '@/components/MarketDataWidget';
 import { MarketMarquee } from '@/components/MarketMarquee';
 import { NewsletterForm } from '@/components/NewsletterForm';
 import { PracticalTools } from '@/components/PracticalTools';
-import { getAllArticles, getFeaturedArticles } from '@/lib/articles';
+import { getFeaturedArticles, getLatestBySection } from '@/lib/articles';
+import { SECTION_META } from '@/lib/sections';
 
 export const metadata: Metadata = {
   title: 'NFI Report - Actualités économiques et financières du Niger',
@@ -15,13 +16,18 @@ export const metadata: Metadata = {
 
 export const revalidate = 60;
 
+// Sections displayed on homepage (in order)
+const HOME_SECTIONS = ['economie', 'finance', 'marches', 'entreprises'] as const;
+const ARTICLES_PER_SECTION = 4;
+
 export default async function HomePage() {
-  const [featured, { articles }] = await Promise.all([
+  const [featured, sectionArticles] = await Promise.all([
     getFeaturedArticles(),
-    getAllArticles(),
+    getLatestBySection([...HOME_SECTIONS], ARTICLES_PER_SECTION),
   ]);
-  const featuredArticle = featured[0] ?? articles[0] ?? null;
-  const otherArticles = articles.filter((a) => a._id !== featuredArticle?._id);
+
+  const featuredArticle = featured[0] ?? null;
+  const featuredId = featuredArticle?._id;
 
   return (
     <div className="min-h-screen bg-[#fafaf9]">
@@ -48,30 +54,47 @@ export default async function HomePage() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* Articles Grid */}
-          <div className="lg:col-span-8">
-            <div className="mb-8">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="animate-gold-line h-[2px] bg-gold" />
-                <h2 className="text-2xl">Dernières actualités</h2>
-                <div className="flex-1 h-px bg-black/[0.06]" />
-                <Link
-                  href="/economie"
-                  className="hidden sm:inline-flex items-center gap-1.5 text-[13px] text-gray-400 hover:text-gold transition-colors group"
-                >
-                  Tout voir
-                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
-              </div>
-              {articles.length === 0 && (
-                <p className="text-gray-500 text-center py-20">Aucun article pour le moment. Publiez votre premier article depuis l&apos;espace admin.</p>
-              )}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 stagger-grid">
-                {otherArticles.map((article) => (
-                  <ArticleCard key={article._id} article={article} />
-                ))}
-              </div>
-            </div>
+          {/* Articles by Section */}
+          <div className="lg:col-span-8 space-y-14">
+            {HOME_SECTIONS.map((sectionKey) => {
+              const meta = SECTION_META[sectionKey];
+              if (!meta) return null;
+
+              // Filter out the featured article to avoid duplication
+              const articles = (sectionArticles[sectionKey] || [])
+                .filter((a) => a._id !== featuredId);
+
+              if (articles.length === 0) return null;
+
+              return (
+                <section key={sectionKey}>
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="animate-gold-line h-[2px] bg-gold" />
+                    <h2 className="text-xl sm:text-2xl font-semibold whitespace-nowrap">{meta.label}</h2>
+                    <div className="flex-1 h-px bg-black/[0.06]" />
+                    <Link
+                      href={meta.path}
+                      className="hidden sm:inline-flex items-center gap-1.5 text-[13px] text-gray-400 hover:text-gold transition-colors group whitespace-nowrap"
+                    >
+                      Voir tous les articles
+                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                    </Link>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 stagger-grid">
+                    {articles.map((article) => (
+                      <ArticleCard key={article._id} article={article} />
+                    ))}
+                  </div>
+                  <Link
+                    href={meta.path}
+                    className="sm:hidden inline-flex items-center gap-1.5 mt-6 text-[13px] text-gray-400 hover:text-gold transition-colors group"
+                  >
+                    Voir les articles {meta.label.toLowerCase()}
+                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                  </Link>
+                </section>
+              );
+            })}
 
             {/* Newsletter Section */}
             <div className="mt-14">

@@ -199,6 +199,30 @@ export async function searchArticles(query: string, limit = 20): Promise<Article
   return (data || []).map(toArticle);
 }
 
+/** Get the latest N articles for each section in parallel (homepage) */
+export async function getLatestBySection(
+  sections: string[],
+  limit = 4,
+): Promise<Record<string, Article[]>> {
+  const supabase = createServiceClient();
+  if (!supabase) return Object.fromEntries(sections.map((s) => [s, []]));
+
+  const results = await Promise.all(
+    sections.map(async (section) => {
+      const { data } = await supabase
+        .from('articles')
+        .select('*')
+        .eq('status', 'published')
+        .contains('sections', [section])
+        .order('published_at', { ascending: false })
+        .limit(limit);
+      return [section, (data || []).map(toArticle)] as const;
+    }),
+  );
+
+  return Object.fromEntries(results);
+}
+
 export async function getAllArticleSlugs(): Promise<string[]> {
   const supabase = createServiceClient();
   if (!supabase) return [];

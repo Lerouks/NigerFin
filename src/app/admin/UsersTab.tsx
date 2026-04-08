@@ -30,6 +30,7 @@ export function UsersTab({ onStatsRefresh }: UsersTabProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [expandedUser, setExpandedUser] = useState<string | null>(null);
+  const [deleteConfirmUser, setDeleteConfirmUser] = useState<string | null>(null);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -49,6 +50,20 @@ export function UsersTab({ onStatsRefresh }: UsersTabProps) {
     const timeout = setTimeout(fetchUsers, 300);
     return () => clearTimeout(timeout);
   }, [fetchUsers]);
+
+  const handleDeleteUser = async (userId: string) => {
+    setProcessingUser(userId);
+    try {
+      const res = await fetch(`/api/admin/users?userId=${userId}`, { method: 'DELETE' });
+      if (res.ok) {
+        setDeleteConfirmUser(null);
+        setExpandedUser(null);
+        await fetchUsers();
+        onStatsRefresh();
+      }
+    } catch { /* ignore */ }
+    setProcessingUser(null);
+  };
 
   const handleUserAction = async (userId: string, action: string, extra?: Record<string, string>): Promise<boolean> => {
     setProcessingUser(userId);
@@ -121,6 +136,9 @@ export function UsersTab({ onStatsRefresh }: UsersTabProps) {
                   processing={processingUser === u.id}
                   onToggle={() => setExpandedUser(expandedUser === u.id ? null : u.id)}
                   onAction={(action, extra) => handleUserAction(u.id, action, extra)}
+                  deleteConfirmUser={deleteConfirmUser}
+                  setDeleteConfirmUser={setDeleteConfirmUser}
+                  handleDeleteUser={handleDeleteUser}
                 />
               ))}
             </tbody>
@@ -134,12 +152,15 @@ export function UsersTab({ onStatsRefresh }: UsersTabProps) {
   );
 }
 
-function UserRow({ user, expanded, processing, onToggle, onAction }: {
+function UserRow({ user, expanded, processing, onToggle, onAction, deleteConfirmUser, setDeleteConfirmUser, handleDeleteUser }: {
   user: UserEntry;
   expanded: boolean;
   processing: boolean;
   onToggle: () => void;
   onAction: (action: string, extra?: Record<string, string>) => Promise<boolean>;
+  deleteConfirmUser: string | null;
+  setDeleteConfirmUser: (id: string | null) => void;
+  handleDeleteUser: (id: string) => void;
 }) {
   const [durationMonths, setDurationMonths] = useState('1');
   const [customDays, setCustomDays] = useState('');
@@ -388,6 +409,28 @@ function UserRow({ user, expanded, processing, onToggle, onAction }: {
                 <Loader2 className="w-4 h-4 animate-spin" /> Traitement en cours...
               </div>
             )}
+
+            {/* Delete account */}
+            <div className="mt-4 pt-4 border-t border-red-100">
+              {deleteConfirmUser === user.id ? (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                  <p className="text-[12px] text-red-700 mb-1 font-medium">Supprimer définitivement {user.full_name || user.email} ?</p>
+                  <p className="text-[11px] text-red-600 mb-3">Cette action supprimera définitivement toutes les données de cet utilisateur.</p>
+                  <div className="flex gap-2">
+                    <button onClick={() => setDeleteConfirmUser(null)} className="flex-1 text-[12px] px-3 py-1.5 rounded bg-white border border-gray-200 text-gray-600 hover:bg-gray-50">Annuler</button>
+                    <button onClick={() => handleDeleteUser(user.id)} disabled={processing}
+                      className="flex-1 text-[12px] px-3 py-1.5 rounded bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50">
+                      {processing ? <Loader2 className="w-3 h-3 animate-spin inline" /> : 'Supprimer définitivement'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button onClick={() => setDeleteConfirmUser(user.id)} disabled={processing}
+                  className="text-[12px] text-red-500 hover:text-red-700 transition-colors flex items-center gap-1">
+                  <Ban className="w-3 h-3" /> Supprimer le compte
+                </button>
+              )}
+            </div>
           </td>
         </tr>
       )}

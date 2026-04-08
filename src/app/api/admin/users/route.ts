@@ -137,21 +137,38 @@ export async function PUT(request: NextRequest) {
         if (targetUser.email === SUPER_ADMIN_EMAIL && role !== 'admin') {
           return NextResponse.json({ error: 'Impossible de modifier le role de l\'administrateur principal' }, { status: 400 });
         }
-        // Sync subscription_status with role to avoid desync
+        // Sync subscription_status + subscriptions table with role
         const roleUpdates: Record<string, unknown> = { role, updated_at: now };
         if (role === 'reader' && targetUser.subscription_status === 'active') {
           roleUpdates.subscription_status = 'inactive';
+          // Also update subscriptions table
+          await serviceClient.from('subscriptions').update({ status: 'cancelled', updated_at: now }).eq('user_id', userId);
         } else if (role === 'premium' && targetUser.subscription_status !== 'active') {
+          const endDate = new Date();
+          endDate.setMonth(endDate.getMonth() + 1);
           roleUpdates.subscription_status = 'active';
-          if (!targetUser.subscription_start) {
-            roleUpdates.subscription_start = now;
-          }
+          roleUpdates.subscription_start = roleUpdates.subscription_start || now;
+          roleUpdates.subscription_end = endDate.toISOString();
+          roleUpdates.subscription_granted_by = user.id;
+          // Also create/update subscriptions table row
+          await serviceClient.from('subscriptions').upsert({
+            user_id: userId,
+            tier: 'premium',
+            status: 'active',
+            billing_cycle: 'monthly',
+            current_period_start: now,
+            current_period_end: endDate.toISOString(),
+          }, { onConflict: 'user_id' });
         }
 
-        await serviceClient
+        const { error: updateErr } = await serviceClient
           .from('user_profiles')
           .update(roleUpdates)
           .eq('id', userId);
+
+        if (updateErr) {
+          return NextResponse.json({ error: 'Erreur lors de la mise à jour du rôle' }, { status: 500 });
+        }
 
         await logAuditEvent(user.id, 'change_role', 'user', userId, { newRole: role });
         return NextResponse.json({ success: true });
@@ -204,7 +221,27 @@ export async function PUT(request: NextRequest) {
         const billingCycle = months === 1 ? 'monthly' : months === 3 ? 'quarterly' : 'yearly';
         const newRole = targetUser.role === 'admin' ? 'admin' : 'premium';
 
-        await serviceClient
+        // Upsert subscription FIRST to avoid race condition
+        const { error: subErr } = await serviceClient
+          .from('subscriptions')
+          .upsert(
+            {
+              user_id: userId,
+              tier: 'premium',
+              status: 'active',
+              billing_cycle: billingCycle,
+              current_period_start: startDate.toISOString(),
+              current_period_end: endDate.toISOString(),
+            },
+            { onConflict: 'user_id' }
+          );
+
+        if (subErr) {
+          return NextResponse.json({ error: 'Erreur lors de la création de l\'abonnement' }, { status: 500 });
+        }
+
+        // Then update profile
+        const { error: profErr } = await serviceClient
           .from('user_profiles')
           .update({
             role: newRole,
@@ -218,19 +255,9 @@ export async function PUT(request: NextRequest) {
           })
           .eq('id', userId);
 
-        await serviceClient
-          .from('subscriptions')
-          .upsert(
-            {
-              user_id: userId,
-              tier: 'premium',
-              status: 'active',
-              billing_cycle: billingCycle,
-              current_period_start: startDate.toISOString(),
-              current_period_end: endDate.toISOString(),
-            },
-            { onConflict: 'user_id' }
-          );
+        if (profErr) {
+          return NextResponse.json({ error: 'Erreur lors de la mise à jour du profil' }, { status: 500 });
+        }
 
         const durationLabel = customDays
           ? `${customDays} jours`

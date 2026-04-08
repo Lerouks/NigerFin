@@ -3,7 +3,25 @@ import { createServerClient } from '@supabase/ssr';
 import { createServiceClient } from '@/lib/supabase';
 import { sendTransactionalEmail } from '@/lib/email';
 import { passwordChangedEmail } from '@/lib/email-templates';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
+import { logAuditEvent } from '@/lib/audit';
 import * as Sentry from '@sentry/nextjs';
+
+// Password strength rules
+const PASSWORD_MIN = 8;
+const PASSWORD_MAX = 128;
+const HAS_UPPERCASE = /[A-Z]/;
+const HAS_DIGIT = /\d/;
+const HAS_SPECIAL = /[!@#$%^&*]/;
+
+function validatePasswordStrength(password: string): string | null {
+  if (password.length < PASSWORD_MIN) return `Le mot de passe doit contenir au moins ${PASSWORD_MIN} caractères.`;
+  if (password.length > PASSWORD_MAX) return `Le mot de passe ne doit pas dépasser ${PASSWORD_MAX} caractères.`;
+  if (!HAS_UPPERCASE.test(password)) return 'Le mot de passe doit contenir au moins une majuscule.';
+  if (!HAS_DIGIT.test(password)) return 'Le mot de passe doit contenir au moins un chiffre.';
+  if (!HAS_SPECIAL.test(password)) return 'Le mot de passe doit contenir au moins un caractère spécial (!@#$%^&*).';
+  return null;
+}
 
 export async function POST(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -13,15 +31,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Configuration manquante.' }, { status: 500 });
   }
 
-  // Create a server Supabase client with the user's cookies
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
-      getAll() {
-        return request.cookies.getAll();
-      },
-      setAll() {
-        // We don't need to set cookies on this API route
-      },
+      getAll() { return request.cookies.getAll(); },
+      setAll() {},
     },
   });
 
@@ -30,7 +43,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Non authentifié.' }, { status: 401 });
   }
 
-  let body: { currentPassword: string; newPassword: string };
+  // Rate limiting: 5 attempts per 15 minutes
+  const rl = await checkRateLimit(
+    `change-password:${user.id}`,
+    5,
+    15 * 60 * 1000,
+  );
+  if (rl.limited) {
+    await logAuditEvent(user.id, 'password_change_rate_limited', 'user', user.id);
+    return NextResponse.json({
+      error: 'Trop de tentatives. Réessayez dans 15 minutes.',
+    }, { status: 429 });
+  }
+
+  let body: { currentPassword?: string; newPassword?: string };
   try {
     body = await request.json();
   } catch {
@@ -43,32 +69,43 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Tous les champs sont requis.' }, { status: 400 });
   }
 
-  if (newPassword.length < 8) {
-    return NextResponse.json({ error: 'Le mot de passe doit contenir au moins 8 caractères.' }, { status: 400 });
+  // Server-side password strength validation
+  const strengthErr = validatePasswordStrength(newPassword);
+  if (strengthErr) {
+    return NextResponse.json({ error: strengthErr }, { status: 400 });
   }
 
-  // Verify current password by attempting to sign in
+  // Check new password is different from current
+  if (currentPassword === newPassword) {
+    return NextResponse.json({ error: 'Le nouveau mot de passe doit être différent de l\'ancien.' }, { status: 400 });
+  }
+
+  // Verify current password
   const { error: signInError } = await supabase.auth.signInWithPassword({
     email: user.email,
     password: currentPassword,
   });
 
   if (signInError) {
+    await logAuditEvent(user.id, 'password_change_wrong_current', 'user', user.id);
     return NextResponse.json({ error: 'Le mot de passe actuel est incorrect.' }, { status: 400 });
   }
 
-  // Update the password
+  // Update password
   const { error: updateError } = await supabase.auth.updateUser({
     password: newPassword,
   });
 
   if (updateError) {
-    return NextResponse.json({ error: 'Erreur lors de la mise à jour du mot de passe. Veuillez réessayer.' }, { status: 500 });
+    await logAuditEvent(user.id, 'password_change_failed', 'user', user.id, { error: updateError.message });
+    return NextResponse.json({ error: 'Erreur lors de la mise à jour. Veuillez réessayer.' }, { status: 500 });
   }
+
+  // Audit log success
+  await logAuditEvent(user.id, 'password_changed', 'user', user.id);
 
   // Send confirmation email
   try {
-    const _service = createServiceClient();
     const fullName = user.user_metadata?.full_name || user.email.split('@')[0];
     const template = passwordChangedEmail(fullName);
     await sendTransactionalEmail({ to: user.email, ...template });

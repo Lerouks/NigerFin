@@ -1,13 +1,30 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowRight, Check, Loader2 } from 'lucide-react';
+import { useAuth } from '@/lib/auth-context';
+import { isNewsletterSubscribed, markNewsletterSubscribed } from '@/components/NewsletterPopup';
 
 export function NewsletterForm() {
+  const { userRole, isLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [alreadySubscribed, setAlreadySubscribed] = useState(false);
+
+  // Check if already subscribed (localStorage or premium/admin)
+  useEffect(() => {
+    if (isNewsletterSubscribed()) {
+      setAlreadySubscribed(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isLoading && (userRole === 'premium' || userRole === 'admin')) {
+      setAlreadySubscribed(true);
+    }
+  }, [isLoading, userRole]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,9 +39,10 @@ export function NewsletterForm() {
       });
       if (!res.ok) throw new Error();
       setSubscribed(true);
+      markNewsletterSubscribed();
       setTimeout(() => {
         setEmail('');
-        setSubscribed(false);
+        setAlreadySubscribed(true);
       }, 3000);
     } catch {
       setEmail('');
@@ -39,13 +57,20 @@ export function NewsletterForm() {
     <div id="newsletter" className="relative overflow-hidden rounded-xl bg-[#111] p-8 md:p-10 scroll-mt-[180px]">
       <div className="absolute top-0 right-0 w-64 h-64 bg-white/[0.02] rounded-full -translate-y-1/2 translate-x-1/2" />
       <h3 className="text-[22px] md:text-[26px] text-white mb-2 leading-tight font-semibold">
-        Restez informé
+        Ne manquez rien de l&apos;actualité économique
       </h3>
       <p className="text-[14px] text-white/45 mb-7 max-w-md">
-        Recevez les analyses économiques et financières du Niger et de l&apos;Afrique de l&apos;Ouest.
+        Briefings, analyses et données de marché. Recevez le meilleur de NFI Report dans votre boîte mail.
       </p>
 
-      {error ? (
+      {alreadySubscribed ? (
+        <div className="flex items-center gap-3 bg-white/10 rounded-lg px-5 py-4">
+          <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+            <Check className="w-4 h-4 text-emerald-400" />
+          </div>
+          <p className="text-[14px] text-white/80">Vous êtes déjà inscrit à la newsletter</p>
+        </div>
+      ) : error ? (
         <div className="flex items-center gap-3 bg-red-500/10 rounded-lg px-5 py-4">
           <p className="text-[14px] text-red-400">Une erreur est survenue. Veuillez réessayer.</p>
         </div>
@@ -74,8 +99,8 @@ export function NewsletterForm() {
             disabled={loading}
             className="bg-white text-black px-6 py-3 rounded-lg hover:bg-white/90 transition-all duration-200 flex items-center justify-center gap-2 text-[14px] flex-shrink-0 disabled:opacity-50 active:scale-[0.97] font-medium"
           >
-            {loading ? 'Envoi...' : 'S\'abonner'}
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />}
+            {loading ? 'Envoi...' : 'S\'inscrire'}
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
           </button>
         </form>
       )}

@@ -30,7 +30,6 @@ interface Enterprise {
 /* ── Sector icons ────────────────────────────────────────────── */
 
 const SECTOR_ICONS: Record<string, LucideIcon> = {
-  'Mines & Uranium': Pickaxe,
   'Mines & Ressources': Pickaxe,
   'Pétrole & Énergie': Fuel,
   'Électricité & Énergie': Zap,

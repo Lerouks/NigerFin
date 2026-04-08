@@ -31,7 +31,6 @@ interface Enterprise {
 type FormData = Omit<Enterprise, 'id' | 'created_at' | 'updated_at'>;
 
 const SECTORS = [
-  'Mines & Uranium',
   'Mines & Ressources',
   'Pétrole & Énergie',
   'Électricité & Énergie',

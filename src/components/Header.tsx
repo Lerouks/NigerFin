@@ -28,7 +28,7 @@ export function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [navigation, setNavigation] = useState<NavItem[]>(defaultNavigation);
-  const { isSignedIn, user, userRole, signOut } = useAuth();
+  const { isSignedIn, isLoading: isAuthLoading, user, userRole, signOut } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -110,7 +110,9 @@ export function Header() {
             <div className="flex items-center gap-3">
               {/* Auth section */}
               <div className="relative" ref={userMenuRef}>
-                {isSignedIn ? (
+                {isAuthLoading ? (
+                  <span className="inline-block w-20 h-5" />
+                ) : isSignedIn ? (
                   <button
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
                     className="text-[14px] text-[#111] hover:text-black/60 transition-colors whitespace-nowrap"
@@ -165,7 +167,7 @@ export function Header() {
               </div>
 
               {/* Subscribe button */}
-              {!isSignedIn && (
+              {!isAuthLoading && !isSignedIn && (
                 <Link
                   href="/pricing"
                   className="inline-flex items-center justify-center px-2.5 sm:px-4 py-1.5 sm:py-2 bg-[#111] text-white text-[12px] sm:text-[14px] font-medium rounded-[4px] hover:bg-black transition-colors whitespace-nowrap border border-[#111]"
@@ -256,7 +258,7 @@ export function Header() {
                 <span className="flex items-center gap-2"><Search className="w-4 h-4" /> Rechercher</span>
                 <ChevronRight className="w-4 h-4 text-gray-300" />
               </button>
-              {!isSignedIn && (
+              {!isAuthLoading && !isSignedIn && (
                 <>
                   <Link
                     href="/connexion"
@@ -289,7 +291,7 @@ export function Header() {
                 Newsletter
                 <ChevronRight className="w-4 h-4 text-gray-300" />
               </button>
-              {isSignedIn && (
+              {!isAuthLoading && isSignedIn && (
                 <Link
                   href="/compte"
                   className="flex items-center justify-between py-2.5 px-3 text-[15px] text-gray-700 hover:bg-black/[0.03] rounded-lg transition-colors"

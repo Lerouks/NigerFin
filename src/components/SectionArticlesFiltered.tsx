@@ -34,19 +34,25 @@ function FilterOption({
   onClick,
   icon: Icon,
   label,
+  golden,
 }: {
   active: boolean;
   onClick: () => void;
   icon?: React.ElementType;
   label: string;
+  golden?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
       className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 text-left ${
         active
-          ? 'bg-[#111] text-white shadow-sm'
-          : 'text-gray-500 hover:bg-[#f5f5f0] hover:text-gray-700'
+          ? golden
+            ? 'bg-[#d4a843] text-white shadow-sm'
+            : 'bg-[#111] text-white shadow-sm'
+          : golden
+            ? 'text-[#d4a843] hover:bg-[#d4a843]/10'
+            : 'text-gray-500 hover:bg-[#f5f5f0] hover:text-gray-700'
       }`}
     >
       {Icon && <Icon className="w-3.5 h-3.5 flex-shrink-0" />}
@@ -163,7 +169,7 @@ export function SectionArticlesFiltered({
       <FilterGroup label="Type d'article">
         <FilterOption active={contentFilter === 'all'} onClick={() => applyFilter(setContentFilter, 'all')} label="Tous les articles" />
         <FilterOption active={contentFilter === 'free'} onClick={() => applyFilter(setContentFilter, 'free')} icon={Unlock} label="Gratuit" />
-        <FilterOption active={contentFilter === 'premium'} onClick={() => applyFilter(setContentFilter, 'premium')} icon={Crown} label="Premium" />
+        <FilterOption active={contentFilter === 'premium'} onClick={() => applyFilter(setContentFilter, 'premium')} icon={Crown} label="Premium" golden />
       </FilterGroup>
 
       <div className="h-px bg-black/[0.06]" />

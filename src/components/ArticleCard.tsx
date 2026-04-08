@@ -96,7 +96,7 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
             className="w-full h-40 md:h-48 object-cover group-hover:scale-[1.03] transition-transform duration-500"
           />
           {article.isPremium && (
-            <div className="absolute top-3 left-3 bg-black/80 backdrop-blur-sm text-white text-[10px] tracking-[0.1em] uppercase px-2.5 py-1 rounded-full">
+            <div className="absolute top-3 left-3 bg-[#d4a843]/90 backdrop-blur-sm text-white text-[10px] font-semibold tracking-[0.12em] uppercase px-2.5 py-1 rounded-full shadow-sm">
               Premium
             </div>
           )}

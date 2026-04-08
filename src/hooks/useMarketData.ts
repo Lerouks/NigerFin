@@ -21,8 +21,9 @@ export function useMarketData() {
     '/api/market-data',
     fetcher,
     {
-      revalidateOnFocus: false,
-      dedupingInterval: 300_000, // 5 min
+      revalidateOnFocus: true,
+      dedupingInterval: 30_000, // 30 sec
+      refreshInterval: 60_000, // auto-refresh toutes les 60 sec
       errorRetryCount: 2,
       keepPreviousData: true,
     },

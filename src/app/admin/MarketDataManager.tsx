@@ -210,9 +210,14 @@ export function MarketDataManager() {
 
       {/* Sync result */}
       {syncResult && (
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-lg text-[13px] flex items-center justify-between">
-          <span>{syncResult.updated} cours mis à jour{syncResult.errors > 0 ? `, ${syncResult.errors} erreur(s)` : ''}</span>
-          <button onClick={() => setSyncResult(null)} className="text-emerald-400 hover:text-emerald-600">
+        <div className={`${syncResult.errors > 0 && syncResult.updated === 0 ? 'bg-red-50 border-red-200 text-red-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'} border px-4 py-3 rounded-lg text-[13px] flex items-center justify-between`}>
+          <span>
+            {syncResult.updated > 0 && `${syncResult.updated} cours mis à jour`}
+            {syncResult.updated > 0 && syncResult.errors > 0 && ' · '}
+            {syncResult.errors > 0 && `${syncResult.errors} erreur(s)`}
+            {syncResult.updated === 0 && syncResult.errors === 0 && 'Aucune donnée mise à jour'}
+          </span>
+          <button onClick={() => setSyncResult(null)} className="opacity-50 hover:opacity-100">
             <X className="w-4 h-4" />
           </button>
         </div>

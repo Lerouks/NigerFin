@@ -7,10 +7,8 @@ import { getArticlesByCategory } from '@/lib/articles';
 export const revalidate = 60;
 export const metadata: Metadata = { title: 'Marchés', description: 'Suivez les cours des marchés en temps réel : matières premières, devises, indices boursiers et actifs financiers africains.' };
 
-const PREVIEW_LIMIT = 12;
-
 export default async function MarchesPage() {
-  const { articles, total } = await getArticlesByCategory('marches', 1, PREVIEW_LIMIT);
+  const { articles, total } = await getArticlesByCategory('marches', 1, 500);
   return (
     <div className="min-h-screen bg-[#fafaf9]">
       <CategoryHero
@@ -28,7 +26,7 @@ export default async function MarchesPage() {
             <h2 className="text-2xl font-bold">Articles Marchés</h2>
             <div className="flex-1 h-px bg-black/[0.06]" />
           </div>
-          <SectionArticlesFiltered articles={articles} total={total} sectionLabel="Marchés" sectionPath="/marches" allArticlesPath="/marches/articles" />
+          <SectionArticlesFiltered articles={articles} total={total} sectionLabel="Marchés" sectionPath="/marches" />
         </div>
       )}
     </div>

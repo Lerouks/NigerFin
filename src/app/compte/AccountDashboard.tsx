@@ -684,13 +684,17 @@ function PasswordChangeSection({ isReset = false }: { isReset?: boolean }) {
 
   const strength = newPassword ? getPasswordStrength(newPassword) : null;
   const passwordsMatch = confirmPassword ? newPassword === confirmPassword : true;
-  const canSubmit = (isReset || currentPassword) && newPassword.length >= 8 && newPassword === confirmPassword && !loading;
+  const meetsRequirements = strength ? strength.checks.length && strength.checks.uppercase && strength.checks.digit && strength.checks.special : false;
+  const sameAsOld = !isReset && currentPassword && newPassword && currentPassword === newPassword;
+  const canSubmit = (isReset || currentPassword) && meetsRequirements && newPassword === confirmPassword && !sameAsOld && newPassword.length <= 128 && !loading;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage(null);
-    if (newPassword.length < 8) { setMessage({ type: 'error', text: 'Le mot de passe doit contenir au moins 8 caractères.' }); return; }
+    if (!meetsRequirements) { setMessage({ type: 'error', text: 'Le mot de passe ne respecte pas les critères de sécurité.' }); return; }
+    if (newPassword.length > 128) { setMessage({ type: 'error', text: 'Le mot de passe ne doit pas dépasser 128 caractères.' }); return; }
     if (newPassword !== confirmPassword) { setMessage({ type: 'error', text: 'Les mots de passe ne correspondent pas.' }); return; }
+    if (sameAsOld) { setMessage({ type: 'error', text: 'Le nouveau mot de passe doit être différent de l\'ancien.' }); return; }
     setLoading(true);
 
     if (isReset) {
@@ -733,16 +737,23 @@ function PasswordChangeSection({ isReset = false }: { isReset?: boolean }) {
       <form onSubmit={handleSubmit} className="space-y-5 max-w-md">
         {!isReset && <PasswordField id="current-password" label="Mot de passe actuel" value={currentPassword} onChange={setCurrentPassword} show={showCurrent} onToggle={() => setShowCurrent(!showCurrent)} placeholder="Mot de passe actuel" required />}
         <div>
-          <PasswordField id="new-password" label="Nouveau mot de passe" value={newPassword} onChange={setNewPassword} show={showNew} onToggle={() => setShowNew(!showNew)} placeholder="Minimum 8 caractères" required minLength={8} />
-          {strength && (
-            <div className="mt-2">
+          <PasswordField id="new-password" label="Nouveau mot de passe" value={newPassword} onChange={(v) => setNewPassword(v.slice(0, 128))} show={showNew} onToggle={() => setShowNew(!showNew)} placeholder="Min. 8 car., 1 majuscule, 1 chiffre, 1 spécial" required minLength={8} />
+          {newPassword && strength && (
+            <div className="mt-2 space-y-2">
               <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden"><div className={`h-full ${strength.bgColor} ${strength.width} rounded-full transition-all`} /></div>
-              <p className={`text-[11px] mt-1 ${strength.color}`}>Force : {strength.label}</p>
+              <p className={`text-[11px] ${strength.color}`}>Force : {strength.label}</p>
+              <div className="grid grid-cols-2 gap-1">
+                <p className={`text-[11px] ${strength.checks.length ? 'text-emerald-600' : 'text-gray-400'}`}>{strength.checks.length ? '✓' : '○'} 8 caractères min.</p>
+                <p className={`text-[11px] ${strength.checks.uppercase ? 'text-emerald-600' : 'text-gray-400'}`}>{strength.checks.uppercase ? '✓' : '○'} 1 majuscule</p>
+                <p className={`text-[11px] ${strength.checks.digit ? 'text-emerald-600' : 'text-gray-400'}`}>{strength.checks.digit ? '✓' : '○'} 1 chiffre</p>
+                <p className={`text-[11px] ${strength.checks.special ? 'text-emerald-600' : 'text-gray-400'}`}>{strength.checks.special ? '✓' : '○'} 1 spécial (!@#$%^&*)</p>
+              </div>
             </div>
           )}
+          {sameAsOld && <p className="text-[11px] mt-1 text-red-500">Le nouveau mot de passe doit être différent de l&apos;ancien.</p>}
         </div>
         <div>
-          <PasswordField id="confirm-password" label="Confirmer" value={confirmPassword} onChange={setConfirmPassword} show={showConfirm} onToggle={() => setShowConfirm(!showConfirm)} placeholder="Confirmez le mot de passe" required className={confirmPassword && !passwordsMatch ? 'border-red-300' : undefined} />
+          <PasswordField id="confirm-password" label="Confirmer le nouveau mot de passe" value={confirmPassword} onChange={setConfirmPassword} show={showConfirm} onToggle={() => setShowConfirm(!showConfirm)} placeholder="Confirmez le mot de passe" required className={confirmPassword && !passwordsMatch ? 'border-red-300' : undefined} />
           {confirmPassword && !passwordsMatch && <p className="text-[11px] mt-1 text-red-500">Les mots de passe ne correspondent pas.</p>}
         </div>
         <button type="submit" disabled={!canSubmit} className="flex items-center gap-2 bg-[#111] text-white px-6 py-2.5 rounded-xl text-[13px] font-medium hover:bg-[#333] disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
@@ -754,15 +765,22 @@ function PasswordChangeSection({ isReset = false }: { isReset?: boolean }) {
 }
 
 function getPasswordStrength(password: string) {
-  let score = 0;
-  if (password.length >= 8) score++;
-  if (password.length >= 12) score++;
-  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
-  if (/\d/.test(password)) score++;
-  if (/[^a-zA-Z0-9]/.test(password)) score++;
-  if (score <= 2) return { level: 'weak', label: 'Faible', color: 'text-red-600', bgColor: 'bg-red-500', width: 'w-1/3' };
-  if (score <= 3) return { level: 'medium', label: 'Moyen', color: 'text-amber-600', bgColor: 'bg-amber-500', width: 'w-2/3' };
-  return { level: 'strong', label: 'Fort', color: 'text-emerald-600', bgColor: 'bg-emerald-500', width: 'w-full' };
+  const checks = {
+    length: password.length >= 8,
+    uppercase: /[A-Z]/.test(password),
+    digit: /\d/.test(password),
+    special: /[!@#$%^&*]/.test(password),
+    long: password.length >= 12,
+  };
+
+  const passed = Object.values(checks).filter(Boolean).length;
+
+  // All 3 required rules must pass for medium
+  const requiredPassed = checks.length && checks.uppercase && checks.digit && checks.special;
+
+  if (!requiredPassed || passed <= 2) return { level: 'weak' as const, label: 'Faible', color: 'text-red-600', bgColor: 'bg-red-500', width: 'w-1/3', checks };
+  if (passed <= 3) return { level: 'medium' as const, label: 'Moyen', color: 'text-amber-600', bgColor: 'bg-amber-500', width: 'w-2/3', checks };
+  return { level: 'strong' as const, label: 'Fort', color: 'text-emerald-600', bgColor: 'bg-emerald-500', width: 'w-full', checks };
 }
 
 function PasswordField({ id, label, value, onChange, show, onToggle, placeholder, required, minLength, className }: {

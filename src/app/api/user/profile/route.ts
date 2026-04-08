@@ -100,11 +100,15 @@ export async function PUT(request: NextRequest) {
 
   // Phone
   if (phone !== undefined) {
-    const p = String(phone).trim().replace(/\s+/g, '');
-    if (p && (p.length < 8 || p.length > 20)) {
-      errors.push('Numéro de téléphone invalide.');
+    if (phone === null || phone === '') {
+      updates.phone = null;
     } else {
-      updates.phone = p || null;
+      const p = String(phone).trim().replace(/\s+/g, '');
+      if (p && (p.length < 8 || p.length > 20)) {
+        errors.push('Numéro de téléphone invalide.');
+      } else {
+        updates.phone = p || null;
+      }
     }
   }
 

@@ -108,13 +108,16 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
     }
   }, [contentType, userRole, premiumArticlesUsed, article, isSignedIn, isLoading, hasTracked, refreshProfile, premiumLimit]);
 
-  // Fetch body: use prop for free articles, fetch securely for premium
+  // Fetch body: use prop for free articles immediately, fetch securely for premium after auth
   useEffect(() => {
-    if (!accessResult?.allowed) return;
-    if (htmlBody) {
+    // Free articles: set body immediately from server prop (no auth needed)
+    if (htmlBody && !resolvedBody) {
       setResolvedBody(htmlBody);
       return;
     }
+    // Premium articles: wait for auth to resolve access
+    if (!accessResult?.allowed) return;
+    if (resolvedBody) return; // Already set
     let cancelled = false;
     setBodyError(false);
     fetch(`/api/articles/${article.slug.current}/content`, { credentials: 'include' })
@@ -153,36 +156,14 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
   // Reading progress bar - always rendered, hidden when ref is null
   const progressBar = <ReadingProgressBar articleRef={articleRef} />;
 
-  // Show loading skeleton while auth state is being resolved
-  if (accessResult === null) {
-    return (
-      <div className="min-h-screen bg-[#fafaf9]">
-        {progressBar}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-20">
-          <div className="max-w-3xl mx-auto">
-            <article className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] overflow-hidden">
-              <div className="p-8 md:p-12">
-                <div className="flex flex-wrap items-center gap-2 mb-4">
-                  {(article.sections || [article.category]).map((s) => (
-                    <Link key={s} href={SECTION_META[s]?.path || `/${s}`} className="text-[11px] tracking-[0.15em] uppercase text-gray-400 hover:text-black transition-colors">
-                      {SECTION_META[s]?.label || s}
-                    </Link>
-                  ))}
-                </div>
-                <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">{article.title}</h1>
-                {article.excerpt && <p className="text-lg text-gray-600 mb-6">{article.excerpt}</p>}
-                <div className="flex items-center justify-center py-16">
-                  <Loader2 className="w-8 h-8 animate-spin text-gray-300" />
-                </div>
-              </div>
-            </article>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // For free articles: show content immediately without waiting for auth
+  // For premium articles while auth loading: show title/image/excerpt (no spinner)
+  // accessResult === null means auth is still loading
+  const isPremiumContent = contentType === 'premium';
+  const authResolved = accessResult !== null;
+  const showPaywall = authResolved && !accessResult.allowed && isPremiumContent;
 
-  if (!accessResult.allowed) {
+  if (showPaywall) {
     return (
       <div className="min-h-screen bg-[#fafaf9]">
         {progressBar}
@@ -281,7 +262,7 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
                     ))}
                   </div>
                   {contentType !== 'free' && (
-                    <span className="text-[10px] tracking-[0.12em] uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-700">
+                    <span className="text-[10px] font-semibold tracking-[0.12em] uppercase px-2.5 py-0.5 rounded-full bg-[#d4a843]/10 text-[#d4a843] ring-1 ring-inset ring-[#d4a843]/20">
                       PREMIUM
                     </span>
                   )}
@@ -356,8 +337,12 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
                     </button>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center py-16">
-                    <Loader2 className="w-8 h-8 animate-spin text-gray-300" />
+                  <div className="animate-pulse space-y-4 py-8">
+                    <div className="h-4 bg-gray-100 rounded w-full" />
+                    <div className="h-4 bg-gray-100 rounded w-11/12" />
+                    <div className="h-4 bg-gray-100 rounded w-9/12" />
+                    <div className="h-4 bg-gray-100 rounded w-full" />
+                    <div className="h-4 bg-gray-100 rounded w-10/12" />
                   </div>
                 )}
 

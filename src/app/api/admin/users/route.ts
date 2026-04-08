@@ -100,7 +100,7 @@ export async function PUT(request: NextRequest) {
     // Fetch target user for email and role checks
     const { data: targetUser } = await serviceClient
       .from('user_profiles')
-      .select('email, full_name, role, subscription_status')
+      .select('email, full_name, role, subscription_status, subscription_start')
       .eq('id', userId)
       .single();
 
@@ -137,9 +137,20 @@ export async function PUT(request: NextRequest) {
         if (targetUser.email === SUPER_ADMIN_EMAIL && role !== 'admin') {
           return NextResponse.json({ error: 'Impossible de modifier le role de l\'administrateur principal' }, { status: 400 });
         }
+        // Sync subscription_status with role to avoid desync
+        const roleUpdates: Record<string, unknown> = { role, updated_at: now };
+        if (role === 'reader' && targetUser.subscription_status === 'active') {
+          roleUpdates.subscription_status = 'inactive';
+        } else if (role === 'premium' && targetUser.subscription_status !== 'active') {
+          roleUpdates.subscription_status = 'active';
+          if (!targetUser.subscription_start) {
+            roleUpdates.subscription_start = now;
+          }
+        }
+
         await serviceClient
           .from('user_profiles')
-          .update({ role, updated_at: now })
+          .update(roleUpdates)
           .eq('id', userId);
 
         await logAuditEvent(user.id, 'change_role', 'user', userId, { newRole: role });

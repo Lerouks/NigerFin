@@ -46,9 +46,6 @@ export function CookieBanner() {
     setConsent('accepted');
     dismiss();
     initPostHog();
-    if (typeof window !== 'undefined') {
-      setTimeout(() => window.location.reload(), 400);
-    }
   };
 
   const handleReject = () => {

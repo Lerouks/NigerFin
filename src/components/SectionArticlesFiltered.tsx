@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Filter, Clock, Crown, Unlock, ArrowUpDown } from 'lucide-react';
+import { Filter, Clock, Crown, Unlock, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ArticleCard } from '@/components/ArticleCard';
 import type { Article } from '@/types';
 
@@ -10,12 +10,13 @@ type ContentFilter = 'all' | 'free' | 'premium';
 type SortOrder = 'recent' | 'oldest';
 type ReadTimeFilter = 'all' | 'short' | 'medium' | 'long';
 
+const PER_PAGE = 20;
+
 interface SectionArticlesFilteredProps {
   articles: Article[];
   total: number;
   sectionLabel: string;
   sectionPath: string;
-  allArticlesPath: string;
 }
 
 export function SectionArticlesFiltered({
@@ -23,23 +24,21 @@ export function SectionArticlesFiltered({
   total,
   sectionLabel,
   sectionPath,
-  allArticlesPath,
 }: SectionArticlesFilteredProps) {
   const [contentFilter, setContentFilter] = useState<ContentFilter>('all');
   const [sortOrder, setSortOrder] = useState<SortOrder>('recent');
   const [readTimeFilter, setReadTimeFilter] = useState<ReadTimeFilter>('all');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const filtered = useMemo(() => {
     let result = [...articles];
 
-    // Content type filter
     if (contentFilter === 'free') {
       result = result.filter((a) => !a.isPremium);
     } else if (contentFilter === 'premium') {
       result = result.filter((a) => a.isPremium);
     }
 
-    // Read time filter
     if (readTimeFilter === 'short') {
       result = result.filter((a) => a.readTime < 5);
     } else if (readTimeFilter === 'medium') {
@@ -48,7 +47,6 @@ export function SectionArticlesFiltered({
       result = result.filter((a) => a.readTime > 10);
     }
 
-    // Sort
     result.sort((a, b) => {
       const dateA = new Date(a.publishedAt).getTime();
       const dateB = new Date(b.publishedAt).getTime();
@@ -58,12 +56,40 @@ export function SectionArticlesFiltered({
     return result;
   }, [articles, contentFilter, sortOrder, readTimeFilter]);
 
+  // Pagination
+  const totalPages = Math.ceil(filtered.length / PER_PAGE);
+  const safePage = Math.min(currentPage, Math.max(1, totalPages));
+  const paginatedArticles = filtered.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE);
+
   const hasActiveFilters = contentFilter !== 'all' || sortOrder !== 'recent' || readTimeFilter !== 'all';
 
   const resetFilters = () => {
     setContentFilter('all');
     setSortOrder('recent');
     setReadTimeFilter('all');
+    setCurrentPage(1);
+  };
+
+  const goToPage = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Generate page numbers with ellipsis for large page counts
+  const getPageNumbers = (): (number | 'ellipsis')[] => {
+    if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
+
+    const pages: (number | 'ellipsis')[] = [1];
+    if (safePage > 3) pages.push('ellipsis');
+
+    const start = Math.max(2, safePage - 1);
+    const end = Math.min(totalPages - 1, safePage + 1);
+    for (let i = start; i <= end; i++) pages.push(i);
+
+    if (safePage < totalPages - 2) pages.push('ellipsis');
+    pages.push(totalPages);
+
+    return pages;
   };
 
   return (
@@ -94,7 +120,7 @@ export function SectionArticlesFiltered({
             ]).map((opt) => (
               <button
                 key={opt.value}
-                onClick={() => setContentFilter(opt.value)}
+                onClick={() => { setContentFilter(opt.value); setCurrentPage(1); }}
                 className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] font-medium transition-all duration-200 ${
                   contentFilter === opt.value
                     ? 'bg-[#111] text-white'
@@ -116,7 +142,7 @@ export function SectionArticlesFiltered({
             ]).map((opt) => (
               <button
                 key={opt.value}
-                onClick={() => setSortOrder(opt.value)}
+                onClick={() => { setSortOrder(opt.value); setCurrentPage(1); }}
                 className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] font-medium transition-all duration-200 ${
                   sortOrder === opt.value
                     ? 'bg-[#111] text-white'
@@ -140,7 +166,7 @@ export function SectionArticlesFiltered({
             ]).map((opt) => (
               <button
                 key={opt.value}
-                onClick={() => setReadTimeFilter(opt.value)}
+                onClick={() => { setReadTimeFilter(opt.value); setCurrentPage(1); }}
                 className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] font-medium transition-all duration-200 ${
                   readTimeFilter === opt.value
                     ? 'bg-[#111] text-white'
@@ -159,16 +185,17 @@ export function SectionArticlesFiltered({
       <p className="text-[13px] text-gray-400 mb-6">
         {filtered.length} article{filtered.length !== 1 ? 's' : ''}
         {hasActiveFilters ? ' (filtré)' : ''}
+        {totalPages > 1 && ` · Page ${safePage} sur ${totalPages}`}
       </p>
 
       {/* Articles grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 stagger-grid">
-        {filtered.map((article) => (
+        {paginatedArticles.map((article) => (
           <ArticleCard key={article._id} article={article} />
         ))}
       </div>
 
-      {/* Empty state */}
+      {/* Empty state (filters active) */}
       {filtered.length === 0 && articles.length > 0 && (
         <div className="text-center py-16">
           <p className="text-gray-400 text-lg mb-2">Aucun article ne correspond aux filtres</p>
@@ -181,6 +208,7 @@ export function SectionArticlesFiltered({
         </div>
       )}
 
+      {/* Empty state (no articles at all) */}
       {articles.length === 0 && (
         <div className="text-center py-20">
           <p className="text-gray-400 text-lg mb-2">Aucun article dans cette rubrique</p>
@@ -188,20 +216,54 @@ export function SectionArticlesFiltered({
         </div>
       )}
 
-      {/* See all link */}
-      {total > articles.length && (
-        <div className="mt-10 text-center">
-          <Link
-            href={allArticlesPath}
-            className="inline-flex items-center gap-2 px-5 sm:px-6 py-3 text-sm font-medium border border-black/[0.08] rounded-full hover:bg-[#111] hover:text-white transition-all duration-300"
-          >
-            <span className="sm:hidden">Voir tous les articles</span>
-            <span className="hidden sm:inline">Voir tous les articles de la rubrique {sectionLabel}</span>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </Link>
-        </div>
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <nav className="mt-10 flex items-center justify-center" aria-label="Pagination">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {/* Previous */}
+            <button
+              onClick={() => goToPage(safePage - 1)}
+              disabled={safePage <= 1}
+              aria-label="Page précédente"
+              className="flex items-center gap-1 px-3 py-2 rounded-lg text-[13px] font-medium text-gray-500 hover:bg-[#111] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-500 transition-all min-w-[44px] min-h-[44px] justify-center"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">Précédent</span>
+            </button>
+
+            {/* Page numbers */}
+            {getPageNumbers().map((page, i) =>
+              page === 'ellipsis' ? (
+                <span key={`ellipsis-${i}`} className="px-2 text-gray-300 text-[13px]">...</span>
+              ) : (
+                <button
+                  key={page}
+                  onClick={() => goToPage(page)}
+                  aria-label={`Page ${page}`}
+                  aria-current={page === safePage ? 'page' : undefined}
+                  className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-[13px] font-medium transition-all ${
+                    page === safePage
+                      ? 'bg-[#111] text-white'
+                      : 'text-gray-500 hover:bg-[#f5f5f0] hover:text-gray-700'
+                  }`}
+                >
+                  {page}
+                </button>
+              ),
+            )}
+
+            {/* Next */}
+            <button
+              onClick={() => goToPage(safePage + 1)}
+              disabled={safePage >= totalPages}
+              aria-label="Page suivante"
+              className="flex items-center gap-1 px-3 py-2 rounded-lg text-[13px] font-medium text-gray-500 hover:bg-[#111] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-500 transition-all min-w-[44px] min-h-[44px] justify-center"
+            >
+              <span className="hidden sm:inline">Suivant</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </nav>
       )}
     </div>
   );

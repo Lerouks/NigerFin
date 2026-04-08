@@ -180,7 +180,7 @@ export function NigerPresentation() {
             </div>
           )}
           <p className="text-[11px] text-gray-400 mt-3 text-center">
-            Carte administrative du Niger &mdash; Source : Ministère des Affaires étrangères / NFI Report
+            Carte administrative du Niger &mdash; Source : Ministère des Affaires étrangères
           </p>
         </div>
 

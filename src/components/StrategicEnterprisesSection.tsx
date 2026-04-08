@@ -287,32 +287,6 @@ export function StrategicEnterprisesSection() {
           })}
         </div>
 
-        {/* Bottom stats */}
-        <div className="mt-12 pt-8 border-t border-white/[0.04]">
-          <div className="flex flex-wrap gap-6 md:gap-10">
-            {sectors.map((sector) => {
-              const Icon = getSectorIcon(sector);
-              const count = enterprises.filter((e) => e.sector === sector).length;
-              return (
-                <button
-                  key={sector}
-                  onClick={() => handleSectorClick(sector)}
-                  className="flex items-center gap-3 group/stat cursor-pointer"
-                >
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center border border-white/[0.06] bg-white/[0.03] group-hover/stat:bg-white/[0.06] transition-colors">
-                    <Icon className="w-4 h-4 text-white/30 group-hover/stat:text-white/60 transition-colors" />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-[18px] font-bold text-white/80">{count}</p>
-                    <p className="text-[10px] text-white/25 leading-tight">
-                      {sector.split(' & ')[0]}
-                    </p>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
       </div>
     </section>
   );

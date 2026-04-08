@@ -52,8 +52,8 @@ function PlanCard({ title, badge, tools, isPremium = false, isSubscribed = false
         className={`px-6 pt-6 pb-5 ${isPremium ? 'border-b border-white/[0.06]' : 'border-b border-black/[0.05]'}`}
       >
         <span
-          className={`inline-block text-[10px] tracking-[0.15em] uppercase mb-3 ${
-            isPremium ? 'text-white/40' : 'text-gray-400'
+          className={`inline-block text-[10px] font-semibold tracking-[0.15em] uppercase mb-3 px-2.5 py-0.5 rounded-full ${
+            isPremium ? 'bg-[#d4a843]/20 text-[#d4a843]' : 'text-gray-400'
           }`}
         >
           {badge}

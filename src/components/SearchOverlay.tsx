@@ -158,8 +158,8 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                               {article.category}
                             </span>
                             {article.isPremium && (
-                              <span className="text-[10px] bg-black text-white px-2 py-0.5 rounded-full">
-                                PREMIUM
+                              <span className="text-[10px] font-semibold bg-[#d4a843]/10 text-[#d4a843] px-2 py-0.5 rounded-full ring-1 ring-inset ring-[#d4a843]/20">
+                                Premium
                               </span>
                             )}
                           </div>

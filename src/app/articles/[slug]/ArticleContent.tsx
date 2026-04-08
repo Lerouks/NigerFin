@@ -189,8 +189,8 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
                       {SECTION_META[s]?.label || s}
                     </Link>
                   ))}
-                  <span className="text-[10px] tracking-[0.12em] uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-700">
-                    PREMIUM
+                  <span className="text-[10px] font-semibold tracking-[0.12em] uppercase px-2.5 py-0.5 rounded-full bg-[#d4a843]/10 text-[#d4a843] ring-1 ring-inset ring-[#d4a843]/20">
+                    Premium
                   </span>
                 </div>
                 <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 leading-tight">{article.title}</h1>

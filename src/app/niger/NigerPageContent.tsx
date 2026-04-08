@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { MapPin, Building2 } from 'lucide-react';
 import { CategoryHero } from '@/components/CategoryHero';
 import { NigerPresentation } from '@/components/NigerPresentation';
@@ -9,20 +9,25 @@ import { StrategicEnterprisesSection } from '@/components/StrategicEnterprisesSe
 
 type SectionId = 'presentation' | 'entreprises';
 
+function getSectionFromParams(params: URLSearchParams): SectionId {
+  return params.get('section') === 'entreprises' ? 'entreprises' : 'presentation';
+}
+
 export function NigerPageContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const initialSection = searchParams.get('section') === 'entreprises' ? 'entreprises' : 'presentation';
-  const [activeSection, setActiveSection] = useState<SectionId>(initialSection);
+  const [activeSection, setActiveSection] = useState<SectionId>(getSectionFromParams(searchParams));
 
-  // Sync URL when section changes
+  // Sync state when URL changes (direct navigation, back/forward)
   useEffect(() => {
-    const current = searchParams.get('section') === 'entreprises' ? 'entreprises' : 'presentation';
-    if (current !== activeSection) {
-      const url = activeSection === 'entreprises' ? '/niger?section=entreprises' : '/niger';
-      router.replace(url, { scroll: false });
-    }
-  }, [activeSection, searchParams, router]);
+    setActiveSection(getSectionFromParams(searchParams));
+  }, [searchParams]);
+
+  const handleSwitch = useCallback((id: SectionId) => {
+    setActiveSection(id);
+    // Update URL without full navigation
+    const url = id === 'entreprises' ? '/niger?section=entreprises' : '/niger';
+    window.history.replaceState(null, '', url);
+  }, []);
 
   const sections: { id: SectionId; label: string; icon: React.ElementType; description: string }[] = [
     { id: 'presentation', label: 'Présentation', icon: MapPin, description: 'Profil, chiffres clés et ressources' },
@@ -48,7 +53,7 @@ export function NigerPageContent() {
               return (
                 <button
                   key={section.id}
-                  onClick={() => setActiveSection(section.id)}
+                  onClick={() => handleSwitch(section.id)}
                   className={`
                     relative flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-300
                     ${isActive

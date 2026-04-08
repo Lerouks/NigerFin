@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Filter, Clock, Crown, Unlock, ArrowUpDown, ChevronLeft, ChevronRight, SlidersHorizontal, X } from 'lucide-react';
+import { Filter, Clock, Crown, Unlock, ArrowUpDown, ChevronLeft, ChevronRight, SlidersHorizontal, X, TrendingUp } from 'lucide-react';
 import { ArticleCard } from '@/components/ArticleCard';
 import type { Article } from '@/types';
 
 type ContentFilter = 'all' | 'free' | 'premium';
-type SortOrder = 'recent' | 'oldest';
+type SortOrder = 'recent' | 'oldest' | 'popular';
 type ReadTimeFilter = 'all' | 'short' | 'medium' | 'long';
 
 const PER_PAGE = 20;
@@ -16,6 +16,8 @@ interface SectionArticlesFilteredProps {
   total: number;
   sectionLabel: string;
   sectionPath: string;
+  /** Article IDs ordered by view count (most viewed first). Never exposed to user. */
+  viewRanking?: string[];
 }
 
 function FilterGroup({ label, children }: { label: string; children: React.ReactNode }) {
@@ -57,6 +59,7 @@ export function SectionArticlesFiltered({
   articles,
   total,
   sectionLabel,
+  viewRanking = [],
 }: SectionArticlesFilteredProps) {
   const [contentFilter, setContentFilter] = useState<ContentFilter>('all');
   const [sortOrder, setSortOrder] = useState<SortOrder>('recent');
@@ -81,14 +84,19 @@ export function SectionArticlesFiltered({
       result = result.filter((a) => a.readTime > 10);
     }
 
-    result.sort((a, b) => {
-      const dateA = new Date(a.publishedAt).getTime();
-      const dateB = new Date(b.publishedAt).getTime();
-      return sortOrder === 'recent' ? dateB - dateA : dateA - dateB;
-    });
+    if (sortOrder === 'popular' && viewRanking.length > 0) {
+      const rankMap = new Map(viewRanking.map((id, i) => [id, i]));
+      result.sort((a, b) => (rankMap.get(a._id) ?? Infinity) - (rankMap.get(b._id) ?? Infinity));
+    } else {
+      result.sort((a, b) => {
+        const dateA = new Date(a.publishedAt).getTime();
+        const dateB = new Date(b.publishedAt).getTime();
+        return sortOrder === 'oldest' ? dateA - dateB : dateB - dateA;
+      });
+    }
 
     return result;
-  }, [articles, contentFilter, sortOrder, readTimeFilter]);
+  }, [articles, contentFilter, sortOrder, readTimeFilter, viewRanking]);
 
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
   const safePage = Math.min(currentPage, Math.max(1, totalPages));
@@ -164,6 +172,7 @@ export function SectionArticlesFiltered({
       <FilterGroup label="Trier par">
         <FilterOption active={sortOrder === 'recent'} onClick={() => applyFilter(setSortOrder, 'recent')} icon={ArrowUpDown} label="Plus récents" />
         <FilterOption active={sortOrder === 'oldest'} onClick={() => applyFilter(setSortOrder, 'oldest')} icon={ArrowUpDown} label="Plus anciens" />
+        <FilterOption active={sortOrder === 'popular'} onClick={() => applyFilter(setSortOrder, 'popular')} icon={TrendingUp} label="Les plus lus" />
       </FilterGroup>
 
       <div className="h-px bg-black/[0.06]" />

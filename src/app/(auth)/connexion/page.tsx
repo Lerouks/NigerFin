@@ -34,9 +34,9 @@ function ConnexionContent() {
         : 'Une erreur est survenue. Veuillez réessayer.');
       setLoading(false);
     } else {
+      // Redirect immediately - profile loads in background via auth-context
       const redirect = searchParams.get('redirect');
       router.push(redirect || '/');
-      router.refresh();
     }
   };
 

@@ -46,26 +46,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isSupabaseConfigured ? createBrowserSupabaseClient() : null
   );
 
-  const fetchProfile = useCallback(async () => {
+  const fetchProfile = useCallback(async (retryCount = 0) => {
     try {
       const res = await fetch('/api/user/profile');
       if (res.ok) {
-        const data = await res.json();
-        setProfile(data);
+        setProfile(await res.json());
+      } else if (res.status === 401 && retryCount < 3) {
+        // Cookies may not be synced yet - retry with progressive delay
+        const delay = retryCount === 0 ? 100 : retryCount === 1 ? 500 : 1500;
+        setTimeout(() => fetchProfile(retryCount + 1), delay);
       } else if (res.status === 401) {
-        // Not authenticated - clear stale profile
         setProfile(null);
-      } else {
+      } else if (retryCount < 2) {
         // Server error - retry once after 2s
-        setTimeout(async () => {
-          try {
-            const retry = await fetch('/api/user/profile');
-            if (retry.ok) setProfile(await retry.json());
-          } catch {}
-        }, 2000);
+        setTimeout(() => fetchProfile(retryCount + 1), 2000);
       }
-    } catch (err) {
-      console.error('[AUTH] Failed to fetch profile:', err);
+    } catch {
+      if (retryCount < 2) {
+        setTimeout(() => fetchProfile(retryCount + 1), 2000);
+      }
     }
   }, []);
 
@@ -106,15 +105,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
+      setIsLoading(false);
       if (session?.user) {
-        // Small delay to ensure cookies are synced before fetching profile
-        await new Promise((r) => setTimeout(r, 300));
-        await Promise.all([fetchProfile(), fetchPremiumCount()]);
+        // Fetch immediately - retry logic handles cookie sync delays
+        Promise.all([fetchProfile(0), fetchPremiumCount()]);
       } else {
         setProfile(null);
         setPremiumArticlesUsed(0);
       }
-      setIsLoading(false);
     });
 
     return () => subscription.unsubscribe();

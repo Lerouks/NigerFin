@@ -2,13 +2,16 @@ import type { Metadata } from 'next';
 import { MarchesContent } from './MarchesContent';
 import { CategoryHero } from '@/components/CategoryHero';
 import { SectionArticlesFiltered } from '@/components/SectionArticlesFiltered';
-import { getArticlesByCategory } from '@/lib/articles';
+import { getArticlesByCategory, getArticleViewRanking } from '@/lib/articles';
 
 export const revalidate = 60;
 export const metadata: Metadata = { title: 'Marchés', description: 'Suivez les cours des marchés en temps réel : matières premières, devises, indices boursiers et actifs financiers africains.' };
 
 export default async function MarchesPage() {
-  const { articles, total } = await getArticlesByCategory('marches', 1, 500);
+  const [{ articles, total }, viewRanking] = await Promise.all([
+    getArticlesByCategory('marches', 1, 500),
+    getArticleViewRanking(),
+  ]);
   return (
     <div className="min-h-screen bg-[#fafaf9]">
       <CategoryHero
@@ -26,7 +29,7 @@ export default async function MarchesPage() {
             <h2 className="text-2xl font-bold">Articles Marchés</h2>
             <div className="flex-1 h-px bg-black/[0.06]" />
           </div>
-          <SectionArticlesFiltered articles={articles} total={total} sectionLabel="Marchés" sectionPath="/marches" />
+          <SectionArticlesFiltered articles={articles} total={total} sectionLabel="Marchés" sectionPath="/marches" viewRanking={viewRanking} />
         </div>
       )}
     </div>

@@ -223,6 +223,40 @@ export async function getLatestBySection(
   return Object.fromEntries(results);
 }
 
+/** Get article IDs ranked by view count (most viewed first). Used for "most read" filter. */
+export async function getArticleViewRanking(): Promise<string[]> {
+  const supabase = createServiceClient();
+  if (!supabase) return [];
+
+  // Count views per article_id from page_views, ordered by count desc
+  const { data } = await supabase
+    .rpc('get_article_view_ranking');
+
+  // Fallback: if the RPC doesn't exist, query directly
+  if (!data) {
+    const { data: views } = await supabase
+      .from('page_views')
+      .select('article_id')
+      .not('article_id', 'is', null);
+
+    if (!views) return [];
+
+    // Count views per article manually
+    const counts = new Map<string, number>();
+    for (const v of views) {
+      if (v.article_id) {
+        counts.set(v.article_id, (counts.get(v.article_id) || 0) + 1);
+      }
+    }
+
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([id]) => id);
+  }
+
+  return (data as { article_id: string }[]).map((r) => r.article_id);
+}
+
 export async function getAllArticleSlugs(): Promise<string[]> {
   const supabase = createServiceClient();
   if (!supabase) return [];

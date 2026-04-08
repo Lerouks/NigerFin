@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
       name,
       symbol,
       type,
-      value: value ?? 0,
+      value: typeof value === 'string' ? parseFloat(value.replace(',', '.')) || 0 : Number(value) || 0,
       change: 0,
       change_percent: 0,
       unit: unit || '',
@@ -85,8 +85,15 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'Type invalide' }, { status: 400 });
   }
 
-  // Auto-calculate daily variation based on previous_close
+  // Normalize value: accept comma as decimal separator
   if (updates.value !== undefined) {
+    updates.value = typeof updates.value === 'string'
+      ? parseFloat(updates.value.replace(',', '.'))
+      : Number(updates.value);
+  }
+
+  // Auto-calculate daily variation based on previous_close
+  if (updates.value !== undefined && !isNaN(updates.value)) {
     const { data: current } = await serviceClient
       .from('market_data')
       .select('value, previous_close')

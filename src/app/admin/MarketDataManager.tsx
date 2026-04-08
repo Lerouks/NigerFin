@@ -46,12 +46,25 @@ const emptyForm = {
   name: '',
   symbol: '',
   type: 'currency' as 'currency' | 'commodity' | 'index' | 'crypto',
-  value: 0,
+  value: '',
   unit: '',
   source: '',
   description: '',
   education_link: '',
 };
+
+/** Parse a user-entered number string: accept both comma and dot as decimal separator. */
+function parseUserNumber(input: string): number {
+  const normalized = input.replace(',', '.');
+  const parsed = parseFloat(normalized);
+  return isNaN(parsed) ? 0 : parsed;
+}
+
+/** Check if a string is a valid number (allowing partial input like "1," or "1."). */
+function isValidNumberInput(input: string): boolean {
+  if (input === '' || input === '-') return true;
+  return /^-?\d*[.,]?\d*$/.test(input);
+}
 
 export function MarketDataManager() {
   const [entries, setEntries] = useState<MarketEntry[]>([]);
@@ -131,7 +144,7 @@ export function MarketDataManager() {
       const res = await fetch('/api/admin/market-data', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: entry.id, value: parseFloat(item.manualValue) }),
+        body: JSON.stringify({ id: entry.id, value: parseUserNumber(item.manualValue) }),
       });
       if (res.ok) updatedCount++;
     }
@@ -168,7 +181,8 @@ export function MarketDataManager() {
     setError('');
     try {
       const method = editId ? 'PUT' : 'POST';
-      const body = editId ? { id: editId, ...form } : form;
+      const payload = { ...form, value: parseUserNumber(form.value) };
+      const body = editId ? { id: editId, ...payload } : payload;
       const res = await fetch('/api/admin/market-data', {
         method,
         headers: { 'Content-Type': 'application/json' },
@@ -212,7 +226,7 @@ export function MarketDataManager() {
       name: entry.name,
       symbol: entry.symbol,
       type: entry.type,
-      value: entry.value,
+      value: String(entry.value),
       unit: entry.unit || '',
       source: entry.source || '',
       description: entry.description || '',
@@ -469,10 +483,12 @@ export function MarketDataManager() {
                   </div>
                   <div className="flex items-center gap-2">
                     <input
-                      type="number"
-                      step="0.01"
+                      type="text"
+                      inputMode="decimal"
                       value={item.manualValue}
-                      onChange={(e) => handleManualUpdate(item.symbol, e.target.value)}
+                      onChange={(e) => {
+                        if (isValidNumberInput(e.target.value)) handleManualUpdate(item.symbol, e.target.value);
+                      }}
                       placeholder="Valeur"
                       className="w-32 border border-black/[0.08] rounded-lg px-3 py-2 text-sm text-right bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black tabular-nums"
                     />
@@ -557,13 +573,16 @@ function MarketForm({ form, setForm, onSave, onCancel, saving }: {
         <div>
           <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Valeur</label>
           <input
-            type="number"
-            step="0.01"
+            type="text"
+            inputMode="decimal"
             value={form.value}
-            onChange={(e) => update('value', parseFloat(e.target.value) || 0)}
-            className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
+            onChange={(e) => {
+              if (isValidNumberInput(e.target.value)) update('value', e.target.value);
+            }}
+            placeholder="Ex: 655,96"
+            className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black tabular-nums"
           />
-          <p className="text-[10px] text-gray-400 mt-1">La variation sera calculée automatiquement</p>
+          <p className="text-[10px] text-gray-400 mt-1">La variation sera calculée automatiquement (virgule ou point accepté)</p>
         </div>
         <div>
           <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Unité</label>

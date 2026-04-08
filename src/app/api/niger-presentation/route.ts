@@ -17,5 +17,7 @@ export async function GET() {
     facts: factsRes.data || [],
     regions: regionsRes.data || [],
     resources: resourcesRes.data || [],
+  }, {
+    headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200' },
   });
 }

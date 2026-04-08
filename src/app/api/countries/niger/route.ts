@@ -13,6 +13,8 @@ export async function GET() {
       source: result.source,
       service: result.service,
       fetchedAt: result.fetchedAt,
+    }, {
+      headers: { 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800' },
     });
   } catch (err) {
     Sentry.captureException(err, { tags: { route: '/api/countries/niger' } });

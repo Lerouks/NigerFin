@@ -52,10 +52,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (res.ok) {
         const data = await res.json();
         setProfile(data);
+      } else if (res.status === 401) {
+        // Not authenticated - clear stale profile
+        setProfile(null);
+      } else {
+        // Server error - retry once after 2s
+        setTimeout(async () => {
+          try {
+            const retry = await fetch('/api/user/profile');
+            if (retry.ok) setProfile(await retry.json());
+          } catch {}
+        }, 2000);
       }
     } catch (err) {
       console.error('[AUTH] Failed to fetch profile:', err);
-      setError('Impossible de charger le profil utilisateur');
     }
   }, []);
 
@@ -97,6 +107,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
+        // Small delay to ensure cookies are synced before fetching profile
+        await new Promise((r) => setTimeout(r, 300));
         await Promise.all([fetchProfile(), fetchPremiumCount()]);
       } else {
         setProfile(null);

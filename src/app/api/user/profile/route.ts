@@ -75,40 +75,56 @@ export async function PUT(request: NextRequest) {
   const errors: string[] = [];
   const updates: Record<string, unknown> = {};
 
+  /** Safely convert to string, treating null/undefined/"null" as empty */
+  const toStr = (v: unknown): string => {
+    if (v === null || v === undefined) return '';
+    const s = String(v);
+    return s === 'null' || s === 'undefined' ? '' : s;
+  };
+
   // Civility
   if (civility !== undefined) {
-    if (civility !== 'M.' && civility !== 'Mme') {
+    const cv = toStr(civility);
+    if (cv && cv !== 'M.' && cv !== 'Mme') {
       errors.push('Civilité invalide (M. ou Mme).');
     } else {
-      updates.civility = civility;
+      updates.civility = cv || null;
     }
   }
 
   // First name (required if provided)
   if (first_name !== undefined) {
-    const err = validateName(String(first_name), 'Le prénom');
-    if (err) errors.push(err);
-    else updates.first_name = String(first_name).trim();
+    const fn = toStr(first_name);
+    if (fn) {
+      const err = validateName(fn, 'Le prénom');
+      if (err) errors.push(err);
+      else updates.first_name = fn.trim();
+    } else {
+      updates.first_name = null;
+    }
   }
 
   // Last name (required if provided)
   if (last_name !== undefined) {
-    const err = validateName(String(last_name), 'Le nom');
-    if (err) errors.push(err);
-    else updates.last_name = String(last_name).trim();
+    const ln = toStr(last_name);
+    if (ln) {
+      const err = validateName(ln, 'Le nom');
+      if (err) errors.push(err);
+      else updates.last_name = ln.trim();
+    } else {
+      updates.last_name = null;
+    }
   }
 
   // Phone
   if (phone !== undefined) {
-    if (phone === null || phone === '') {
+    const ph = toStr(phone).replace(/\s+/g, '');
+    if (!ph) {
       updates.phone = null;
+    } else if (ph.length < 8 || ph.length > 20) {
+      errors.push('Numéro de téléphone invalide.');
     } else {
-      const p = String(phone).trim().replace(/\s+/g, '');
-      if (p && (p.length < 8 || p.length > 20)) {
-        errors.push('Numéro de téléphone invalide.');
-      } else {
-        updates.phone = p || null;
-      }
+      updates.phone = ph;
     }
   }
 
@@ -124,7 +140,6 @@ export async function PUT(request: NextRequest) {
       if (y < 1920 || y > new Date().getFullYear() - 13) errors.push('Année de naissance invalide.');
 
       if (errors.length === 0) {
-        // Validate actual date
         const testDate = new Date(y, m - 1, d);
         if (testDate.getDate() !== d || testDate.getMonth() !== m - 1) {
           errors.push('Date de naissance invalide.');
@@ -138,31 +153,27 @@ export async function PUT(request: NextRequest) {
   }
 
   // Address
-  if (address !== undefined) updates.address = String(address).trim().slice(0, 300) || null;
+  if (address !== undefined) { const v = toStr(address).trim(); updates.address = v.slice(0, 300) || null; }
 
   // City
   if (city !== undefined) {
-    const c = String(city).trim();
+    const c = toStr(city).trim();
     if (c && !NAME_REGEX.test(c)) errors.push('Nom de ville invalide.');
     else updates.city = c.slice(0, 100) || null;
   }
 
   // Postal code
   if (postal_code !== undefined) {
-    const pc = String(postal_code).trim();
+    const pc = toStr(postal_code).trim();
     if (pc && !POSTAL_REGEX.test(pc)) errors.push('Code postal invalide.');
     else updates.postal_code = pc.slice(0, 20) || null;
   }
 
   // Country
-  if (country !== undefined) {
-    updates.country = String(country).trim().slice(0, 100) || null;
-  }
+  if (country !== undefined) { const v = toStr(country).trim(); updates.country = v.slice(0, 100) || null; }
 
   // Profession
-  if (profession !== undefined) {
-    updates.profession = String(profession).trim().slice(0, 100) || null;
-  }
+  if (profession !== undefined) { const v = toStr(profession).trim(); updates.profession = v.slice(0, 100) || null; }
 
   if (errors.length > 0) {
     return NextResponse.json({ error: errors[0] }, { status: 400 });

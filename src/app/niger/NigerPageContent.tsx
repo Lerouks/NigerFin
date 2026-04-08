@@ -1,51 +1,32 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { MapPin, Building2 } from 'lucide-react';
 import { CategoryHero } from '@/components/CategoryHero';
 import { NigerPresentation } from '@/components/NigerPresentation';
 import { StrategicEnterprisesSection } from '@/components/StrategicEnterprisesSection';
 
-type TabId = 'presentation' | 'entreprises';
+type SectionId = 'presentation' | 'entreprises';
 
 export function NigerPageContent() {
-  const [activeTab, setActiveTab] = useState<TabId>('presentation');
-  const presentationRef = useRef<HTMLDivElement>(null);
-  const entreprisesRef = useRef<HTMLDivElement>(null);
-  const navRef = useRef<HTMLDivElement>(null);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const initialSection = searchParams.get('section') === 'entreprises' ? 'entreprises' : 'presentation';
+  const [activeSection, setActiveSection] = useState<SectionId>(initialSection);
 
+  // Sync URL when section changes
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            const id = entry.target.getAttribute('data-section');
-            if (id === 'presentation' || id === 'entreprises') {
-              setActiveTab(id);
-            }
-          }
-        }
-      },
-      { rootMargin: '-120px 0px -60% 0px', threshold: 0 },
-    );
-
-    const sections = [presentationRef.current, entreprisesRef.current];
-    sections.forEach((el) => { if (el) observer.observe(el); });
-    return () => observer.disconnect();
-  }, []);
-
-  const scrollTo = (id: TabId) => {
-    const ref = id === 'presentation' ? presentationRef : entreprisesRef;
-    if (ref.current) {
-      const navHeight = navRef.current?.offsetHeight || 64;
-      const y = ref.current.getBoundingClientRect().top + window.scrollY - navHeight - 24;
-      window.scrollTo({ top: y, behavior: 'smooth' });
+    const current = searchParams.get('section') === 'entreprises' ? 'entreprises' : 'presentation';
+    if (current !== activeSection) {
+      const url = activeSection === 'entreprises' ? '/niger?section=entreprises' : '/niger';
+      router.replace(url, { scroll: false });
     }
-  };
+  }, [activeSection, searchParams, router]);
 
-  const tabs: { id: TabId; label: string; icon: React.ElementType }[] = [
-    { id: 'presentation', label: 'Présentation', icon: MapPin },
-    { id: 'entreprises', label: 'Entreprises stratégiques', icon: Building2 },
+  const sections: { id: SectionId; label: string; icon: React.ElementType; description: string }[] = [
+    { id: 'presentation', label: 'Présentation', icon: MapPin, description: 'Profil, chiffres clés et ressources' },
+    { id: 'entreprises', label: 'Entreprises stratégiques', icon: Building2, description: 'Les 8 piliers de l\'économie' },
   ];
 
   return (
@@ -57,49 +38,56 @@ export function NigerPageContent() {
         accentGold
       />
 
-      {/* Sticky sub-navigation */}
-      <div
-        ref={navRef}
-        className="sticky top-[64px] z-30 bg-[#fafaf9]/95 backdrop-blur-sm border-b border-black/[0.06]"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex gap-1" aria-label="Sections">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
+      {/* Section selector */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 sm:-mt-8 relative z-10">
+        <div className="bg-white rounded-2xl shadow-[0_8px_40px_-12px_rgba(0,0,0,0.12)] border border-black/[0.06] p-2">
+          <div className="grid grid-cols-2 gap-2">
+            {sections.map((section) => {
+              const Icon = section.icon;
+              const isActive = activeSection === section.id;
               return (
                 <button
-                  key={tab.id}
-                  onClick={() => scrollTo(tab.id)}
+                  key={section.id}
+                  onClick={() => setActiveSection(section.id)}
                   className={`
-                    relative flex items-center gap-2 px-4 sm:px-5 py-3.5 text-[13px] sm:text-[14px] font-medium transition-colors duration-200
+                    relative flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-300
                     ${isActive
-                      ? 'text-[#111]'
-                      : 'text-gray-400 hover:text-gray-600'
+                      ? 'bg-[#111] text-white shadow-lg'
+                      : 'bg-transparent text-gray-400 hover:bg-[#f5f5f0] hover:text-gray-600'
                     }
                   `}
                 >
-                  <Icon className="w-4 h-4" />
-                  {tab.label}
+                  <div
+                    className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors duration-300 ${
+                      isActive
+                        ? 'bg-[#d4a843]/20'
+                        : 'bg-black/[0.04]'
+                    }`}
+                  >
+                    <Icon className={`w-5 h-5 sm:w-6 sm:h-6 transition-colors duration-300 ${isActive ? 'text-[#d4a843]' : 'text-gray-400'}`} />
+                  </div>
+                  <div className="text-left min-w-0">
+                    <p className={`text-[14px] sm:text-[16px] font-semibold leading-tight ${isActive ? 'text-white' : 'text-gray-700'}`}>
+                      {section.label}
+                    </p>
+                    <p className={`text-[11px] sm:text-[12px] mt-0.5 hidden sm:block ${isActive ? 'text-white/50' : 'text-gray-400'}`}>
+                      {section.description}
+                    </p>
+                  </div>
                   {isActive && (
-                    <span className="absolute bottom-0 left-4 right-4 h-[2px] bg-[#d4a843] rounded-full" />
+                    <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#d4a843]" />
                   )}
                 </button>
               );
             })}
-          </nav>
+          </div>
         </div>
       </div>
 
-      {/* Sections */}
+      {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16">
-        <div ref={presentationRef} data-section="presentation">
-          <NigerPresentation />
-        </div>
-
-        <div ref={entreprisesRef} data-section="entreprises" className="mt-16 md:mt-24 pt-14 md:pt-20 border-t border-black/[0.06]">
-          <StrategicEnterprisesSection />
-        </div>
+        {activeSection === 'presentation' && <NigerPresentation />}
+        {activeSection === 'entreprises' && <StrategicEnterprisesSection />}
       </div>
     </div>
   );

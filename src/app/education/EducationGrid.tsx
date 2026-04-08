@@ -1,11 +1,8 @@
-'use client';
-
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import {
   BookOpen, TrendingUp, BarChart3, Landmark, Banknote, PiggyBank,
   LineChart, Wallet, Scale, ShieldCheck, Globe, Briefcase,
-  Building2, Coins, Clock, Loader2, type LucideIcon,
+  Building2, Coins, Clock, type LucideIcon,
 } from 'lucide-react';
 
 const iconMap: Record<string, LucideIcon> = {
@@ -25,28 +22,7 @@ interface Category {
   lesson_count: number;
 }
 
-export function EducationGrid() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/education')
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) setCategories(data);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="text-center py-16">
-        <Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto" />
-      </div>
-    );
-  }
-
+export function EducationGrid({ categories }: { categories: Category[] }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
       {categories.map((cat) => {

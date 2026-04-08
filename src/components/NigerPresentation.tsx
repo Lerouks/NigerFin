@@ -70,18 +70,29 @@ const CATEGORY_LABELS: Record<string, string> = {
   geographie: 'Géographie',
 };
 
-export function NigerPresentation() {
-  const [presentation, setPresentation] = useState<Presentation | null>(null);
-  const [facts, setFacts] = useState<Fact[]>([]);
-  const [regions, setRegions] = useState<Region[]>([]);
-  const [resources, setResources] = useState<Resource[]>([]);
-  const [loading, setLoading] = useState(true);
+interface NigerPresentationProps {
+  initialData?: {
+    presentation: Presentation | null;
+    facts: Fact[];
+    regions: Region[];
+    resources: Resource[];
+  } | null;
+}
 
-  // Real-time data hooks
+export function NigerPresentation({ initialData }: NigerPresentationProps = {}) {
+  const [presentation, setPresentation] = useState<Presentation | null>(initialData?.presentation || null);
+  const [facts, setFacts] = useState<Fact[]>(initialData?.facts || []);
+  const [regions, setRegions] = useState<Region[]>(initialData?.regions || []);
+  const [resources, setResources] = useState<Resource[]>(initialData?.resources || []);
+  const [loading, setLoading] = useState(!initialData);
+
+  // Real-time data hooks (these use SWR with deduping, lightweight)
   const countryData = useNigerCountry();
   const macroData = useNigerMacro();
 
+  // Only fetch client-side if no initial data was provided
   useEffect(() => {
+    if (initialData) return;
     fetch('/api/niger-presentation')
       .then((res) => res.json())
       .then((data) => {
@@ -92,7 +103,7 @@ export function NigerPresentation() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [initialData]);
 
   // Enrich facts with real-time data (REST Countries + World Bank)
   const enrichedFacts = facts.map((fact) => {

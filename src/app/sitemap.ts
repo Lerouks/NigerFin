@@ -16,6 +16,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .order('published_at', { ascending: false })
     : Promise.resolve({ data: [] as { slug: string; published_at: string; updated_at: string | null }[] });
 
+  // Fetch enterprise slugs
+  const enterprisesPromise = service
+    ? service
+        .from('strategic_enterprises')
+        .select('slug, updated_at')
+        .eq('is_visible', true)
+    : Promise.resolve({ data: [] as { slug: string; updated_at: string | null }[] });
+
   // Fetch education categories
   const categoriesPromise = service
     ? service
@@ -24,12 +32,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .eq('available', true)
     : Promise.resolve({ data: [] as { slug: string; updated_at: string | null }[] });
 
-  const [articlesResult, categoriesResult] = await Promise.all([
+  const [articlesResult, enterprisesResult, categoriesResult] = await Promise.all([
     articlesPromise,
+    enterprisesPromise,
     categoriesPromise,
   ]);
 
   const articles = ('data' in articlesResult ? articlesResult.data : articlesResult) || [];
+  const enterpriseRows = ('data' in enterprisesResult ? enterprisesResult.data : enterprisesResult) || [];
   const categories = ('data' in categoriesResult ? categoriesResult.data : categoriesResult) || [];
 
   const staticPages: MetadataRoute.Sitemap = [
@@ -87,5 +97,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...toolPages, ...articlePages, ...educationPages];
+  // Niger sub-section: entreprises stratégiques
+  const nigerEntreprisesPage: MetadataRoute.Sitemap = [{
+    url: `${SITE_URL}/niger?section=entreprises`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly',
+    priority: 0.8,
+  }];
+
+  // Individual enterprise pages
+  const enterprisePages: MetadataRoute.Sitemap = enterpriseRows
+    .filter((e: { slug: string }) => e.slug)
+    .map((e: { slug: string; updated_at: string | null }) => ({
+      url: `${SITE_URL}/entreprises/${e.slug}`,
+      lastModified: e.updated_at ? new Date(e.updated_at) : new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    }));
+
+  return [...staticPages, ...nigerEntreprisesPage, ...toolPages, ...articlePages, ...enterprisePages, ...educationPages];
 }

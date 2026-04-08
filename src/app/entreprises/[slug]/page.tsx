@@ -59,6 +59,7 @@ export async function generateMetadata({ params }: EnterprisePageProps): Promise
   return {
     title,
     description,
+    keywords: [enterprise.name, enterprise.sector, 'Niger', 'entreprise', enterprise.full_name || ''].filter(Boolean),
     alternates: { canonical: `${SITE_URL}/entreprises/${slug}` },
     openGraph: {
       title,
@@ -70,6 +71,11 @@ export async function generateMetadata({ params }: EnterprisePageProps): Promise
       ...(enterprise.logo_url && {
         images: [{ url: enterprise.logo_url, width: 200, height: 200, alt: enterprise.name }],
       }),
+    },
+    twitter: {
+      card: 'summary',
+      title,
+      description,
     },
   };
 }

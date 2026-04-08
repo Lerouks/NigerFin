@@ -252,7 +252,7 @@ export function AccountDashboard() {
       </section>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-8">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           {/* Sidebar navigation - desktop */}
           <aside className="hidden lg:block w-[200px] flex-shrink-0">
             <nav className="sticky top-24 space-y-1">
@@ -500,16 +500,16 @@ export function AccountDashboard() {
                     {/* Date de naissance */}
                     <div>
                       <label className="block text-[13px] font-medium text-gray-700 mb-1.5">Date de naissance</label>
-                      <div className="grid grid-cols-3 gap-3">
-                        <select value={birthDay} onChange={(e) => setBirthDay(e.target.value)} disabled={!editingProfile} className="border border-black/[0.08] rounded-lg px-3 py-3 text-[14px] bg-[#fafaf9] disabled:text-gray-500">
+                      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                        <select value={birthDay} onChange={(e) => setBirthDay(e.target.value)} disabled={!editingProfile} className="border border-black/[0.08] rounded-lg px-2 sm:px-3 py-3 text-[13px] sm:text-[14px] bg-[#fafaf9] disabled:text-gray-500 w-full min-w-0">
                           <option value="">Jour</option>
                           {Array.from({ length: 31 }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}</option>)}
                         </select>
-                        <select value={birthMonth} onChange={(e) => setBirthMonth(e.target.value)} disabled={!editingProfile} className="border border-black/[0.08] rounded-lg px-3 py-3 text-[14px] bg-[#fafaf9] disabled:text-gray-500">
+                        <select value={birthMonth} onChange={(e) => setBirthMonth(e.target.value)} disabled={!editingProfile} className="border border-black/[0.08] rounded-lg px-2 sm:px-3 py-3 text-[13px] sm:text-[14px] bg-[#fafaf9] disabled:text-gray-500 w-full min-w-0">
                           <option value="">Mois</option>
-                          {['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'].map((m, i) => <option key={i + 1} value={i + 1}>{m}</option>)}
+                          {['Jan.','Fév.','Mars','Avr.','Mai','Juin','Juil.','Août','Sep.','Oct.','Nov.','Déc.'].map((m, i) => <option key={i + 1} value={i + 1}>{m}</option>)}
                         </select>
-                        <select value={birthYear} onChange={(e) => setBirthYear(e.target.value)} disabled={!editingProfile} className="border border-black/[0.08] rounded-lg px-3 py-3 text-[14px] bg-[#fafaf9] disabled:text-gray-500">
+                        <select value={birthYear} onChange={(e) => setBirthYear(e.target.value)} disabled={!editingProfile} className="border border-black/[0.08] rounded-lg px-2 sm:px-3 py-3 text-[13px] sm:text-[14px] bg-[#fafaf9] disabled:text-gray-500 w-full min-w-0">
                           <option value="">Année</option>
                           {Array.from({ length: 80 }, (_, i) => new Date().getFullYear() - 13 - i).map((y) => <option key={y} value={y}>{y}</option>)}
                         </select>

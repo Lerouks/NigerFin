@@ -24,9 +24,32 @@ interface Lesson {
   content: string;
 }
 
+/* ─── Sous-sections pour les catégories fusionnées ─── */
+const SUBSECTIONS: Record<string, { title: string; from: number; to: number }[]> = {
+  'bourse-investissement': [
+    { title: 'Les fondamentaux de la bourse', from: 1, to: 4 },
+    { title: 'Analyse technique', from: 5, to: 9 },
+    { title: 'Analyse fondamentale', from: 10, to: 13 },
+    { title: 'Psychologie de l\u2019investisseur', from: 14, to: 18 },
+  ],
+  'economie-niger': [
+    { title: 'Macroéconomie', from: 1, to: 3 },
+    { title: 'BRVM & intégration UEMOA', from: 4, to: 7 },
+    { title: 'Matières premières stratégiques', from: 8, to: 11 },
+  ],
+  'bases-finance': [
+    { title: 'Comprendre la finance', from: 1, to: 5 },
+    { title: 'Épargne & investissement', from: 6, to: 9 },
+  ],
+  'budget-banque': [
+    { title: 'Gestion de budget', from: 1, to: 4 },
+    { title: 'Services bancaires & financiers', from: 5, to: 8 },
+  ],
+};
+
 const ACCESS_CONFIG: Record<string, { label: string; color: string; bg: string; requiredRoles: string[] }> = {
   free: { label: 'Gratuit', color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-100', requiredRoles: ['reader', 'premium', 'admin'] },
-  premium: { label: 'Premium', color: 'text-blue-700', bg: 'bg-blue-50 border-blue-100', requiredRoles: ['premium', 'admin'] },
+  premium: { label: 'Premium', color: 'text-[#92400e]', bg: 'bg-[#fffbeb] border-[#fde68a]', requiredRoles: ['premium', 'admin'] },
 };
 
 /* ─── Skeleton de chargement ─── */
@@ -55,6 +78,138 @@ function LessonsSkeleton() {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ─── Lesson row component ─── */
+function LessonRow({
+  lesson, index, accessible, isOpen, onToggle,
+}: {
+  lesson: Lesson; index: number; accessible: boolean; isOpen: boolean;
+  onToggle: () => void;
+}) {
+  const config = ACCESS_CONFIG[lesson.access_level] || ACCESS_CONFIG.free!;
+
+  return (
+    <div className="group">
+      <button
+        onClick={onToggle}
+        className={`w-full text-left flex items-center gap-4 p-5 rounded-xl border transition-all duration-200 ${
+          isOpen
+            ? 'bg-white border-black/[0.12] shadow-sm rounded-b-none'
+            : accessible
+              ? 'bg-white border-black/[0.06] hover:border-black/[0.12] hover:shadow-sm'
+              : 'bg-white/60 border-black/[0.04] hover:border-black/[0.08]'
+        }`}
+      >
+        <span className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-[13px] font-semibold ${
+          isOpen ? 'bg-[#111] text-white' : 'bg-[#f5f5f0] text-gray-500'
+        } transition-colors`}>
+          {index}
+        </span>
+        <div className="flex-1 min-w-0">
+          <p className={`text-[15px] font-medium truncate ${accessible ? 'text-[#111]' : 'text-gray-400'}`}>
+            {lesson.title}
+          </p>
+          <div className="flex items-center gap-3 mt-1">
+            <span className="text-[12px] text-gray-400 flex items-center gap-1">
+              <Clock className="w-3 h-3" />{lesson.duration}
+            </span>
+            <span className={`text-[11px] px-2 py-0.5 rounded-full border ${config.bg} ${config.color}`}>
+              {config.label}
+            </span>
+          </div>
+        </div>
+        {!accessible ? (
+          <Lock className="w-4 h-4 text-gray-300 shrink-0" />
+        ) : lesson.content ? (
+          <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        ) : (
+          <CheckCircle2 className="w-4 h-4 text-gray-200 shrink-0" />
+        )}
+      </button>
+      {isOpen && accessible && lesson.content && (
+        <div className="px-6 py-6 bg-white border-x border-b border-black/[0.12] rounded-b-xl">
+          <div className="prose prose-sm max-w-none text-gray-700 prose-headings:text-[#111] prose-h2:text-lg prose-h2:mt-0 prose-h3:text-base prose-strong:text-gray-800 prose-a:text-blue-600 prose-table:text-sm prose-img:rounded-lg">
+            <ReactMarkdown rehypePlugins={[rehypeRaw]}>{lesson.content}</ReactMarkdown>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── Render lessons with optional subsections ─── */
+function renderLessons(
+  slug: string,
+  lessons: Lesson[],
+  canAccess: (level: string) => boolean,
+  openLesson: string | null,
+  setOpenLesson: (id: string | null) => void,
+  router: ReturnType<typeof useRouter>,
+) {
+  const subs = SUBSECTIONS[slug];
+
+  const handleToggle = (lesson: Lesson, accessible: boolean, isOpen: boolean) => {
+    if (accessible && lesson.content) {
+      setOpenLesson(isOpen ? null : lesson.id);
+    } else if (!accessible) {
+      router.push('/pricing');
+    }
+  };
+
+  // No subsections → flat list
+  if (!subs) {
+    return (
+      <div className="space-y-3">
+        {lessons.map((lesson, i) => (
+          <LessonRow
+            key={lesson.id}
+            lesson={lesson}
+            index={i + 1}
+            accessible={canAccess(lesson.access_level)}
+            isOpen={openLesson === lesson.id}
+            onToggle={() => handleToggle(lesson, canAccess(lesson.access_level), openLesson === lesson.id)}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  // With subsections
+  let globalIndex = 0;
+  return (
+    <div className="space-y-10">
+      {subs.map((sub) => {
+        const subLessons = lessons.filter((l) => l.sort_order >= sub.from && l.sort_order <= sub.to);
+        if (subLessons.length === 0) return null;
+
+        return (
+          <div key={sub.title}>
+            <div className="flex items-center gap-3 mb-4">
+              <h3 className="text-[14px] font-semibold text-[#111]">{sub.title}</h3>
+              <div className="flex-1 h-px bg-black/[0.06]" />
+              <span className="text-[11px] text-gray-400">{subLessons.length} leçon{subLessons.length !== 1 ? 's' : ''}</span>
+            </div>
+            <div className="space-y-3">
+              {subLessons.map((lesson) => {
+                globalIndex++;
+                return (
+                  <LessonRow
+                    key={lesson.id}
+                    lesson={lesson}
+                    index={globalIndex}
+                    accessible={canAccess(lesson.access_level)}
+                    isOpen={openLesson === lesson.id}
+                    onToggle={() => handleToggle(lesson, canAccess(lesson.access_level), openLesson === lesson.id)}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -145,7 +300,7 @@ export function EducationCategoryContent({ slug }: { slug: string }) {
               </span>
             )}
             {premiumLessons > 0 && (
-              <span className="text-[12px] bg-blue-500/20 text-blue-300 px-3 py-1.5 rounded-full flex items-center gap-1">
+              <span className="text-[12px] bg-gold/20 text-gold px-3 py-1.5 rounded-full flex items-center gap-1">
                 <Crown className="w-3 h-3" />{premiumLessons} premium
               </span>
             )}
@@ -162,77 +317,8 @@ export function EducationCategoryContent({ slug }: { slug: string }) {
           <span className="text-[12px] text-gray-400">{lessons.length} leçon{lessons.length !== 1 ? 's' : ''}</span>
         </div>
 
-        {/* Lesson list */}
-        <div className="space-y-3">
-          {lessons.map((lesson, i) => {
-            const accessible = canAccess(lesson.access_level);
-            const isOpen = openLesson === lesson.id;
-            const config = ACCESS_CONFIG[lesson.access_level] || ACCESS_CONFIG.free!;
-
-            const handleClick = () => {
-              if (accessible && lesson.content) {
-                setOpenLesson(isOpen ? null : lesson.id);
-              } else if (!accessible) {
-                router.push('/pricing');
-              }
-            };
-
-            return (
-              <div key={lesson.id} className="group">
-                <button
-                  onClick={handleClick}
-                  className={`w-full text-left flex items-center gap-4 p-5 rounded-xl border transition-all duration-200 ${
-                    isOpen
-                      ? 'bg-white border-black/[0.12] shadow-sm rounded-b-none'
-                      : accessible
-                        ? 'bg-white border-black/[0.06] hover:border-black/[0.12] hover:shadow-sm'
-                        : 'bg-white/60 border-black/[0.04] hover:border-black/[0.08]'
-                  }`}
-                >
-                  {/* Number */}
-                  <span className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-[13px] font-semibold ${
-                    isOpen ? 'bg-[#111] text-white' : 'bg-[#f5f5f0] text-gray-500'
-                  } transition-colors`}>
-                    {i + 1}
-                  </span>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-[15px] font-medium truncate ${accessible ? 'text-[#111]' : 'text-gray-400'}`}>
-                      {lesson.title}
-                    </p>
-                    <div className="flex items-center gap-3 mt-1">
-                      <span className="text-[12px] text-gray-400 flex items-center gap-1">
-                        <Clock className="w-3 h-3" />{lesson.duration}
-                      </span>
-                      <span className={`text-[11px] px-2 py-0.5 rounded-full border ${config.bg} ${config.color}`}>
-                        {config.label}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Right action */}
-                  {!accessible ? (
-                    <Lock className="w-4 h-4 text-gray-300 shrink-0" />
-                  ) : lesson.content ? (
-                    <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
-                  ) : (
-                    <CheckCircle2 className="w-4 h-4 text-gray-200 shrink-0" />
-                  )}
-                </button>
-
-                {/* Expanded content */}
-                {isOpen && accessible && lesson.content && (
-                  <div className="px-6 py-6 bg-white border-x border-b border-black/[0.12] rounded-b-xl">
-                    <div className="prose prose-sm max-w-none text-gray-700 prose-headings:text-[#111] prose-h2:text-lg prose-h2:mt-0 prose-h3:text-base prose-strong:text-gray-800 prose-a:text-blue-600 prose-table:text-sm prose-img:rounded-lg">
-                      <ReactMarkdown rehypePlugins={[rehypeRaw]}>{lesson.content}</ReactMarkdown>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+        {/* Lesson list (with optional subsections) */}
+        {renderLessons(slug, lessons, canAccess, openLesson, setOpenLesson, router)}
 
         {/* Empty state */}
         {lessons.length === 0 && (

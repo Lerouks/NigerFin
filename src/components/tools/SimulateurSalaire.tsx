@@ -25,6 +25,18 @@ const ABATTEMENT_RATE = 0.20;
 const MAX_BRUT = 3000000;
 const SHORTCUTS = [50000, 100000, 200000, 300000, 500000, 750000, 1000000, 2000000];
 
+/* ─── Abattement charges de famille (LF 2026, Ord. N°2025-44) ─── */
+const CHARGES_FAMILLE: { label: string; rate: number }[] = [
+  { label: '0 charge', rate: 0 },
+  { label: '1 charge', rate: 0.07 },
+  { label: '2 charges', rate: 0.12 },
+  { label: '3 charges', rate: 0.17 },
+  { label: '4 charges', rate: 0.22 },
+  { label: '5 charges', rate: 0.25 },
+  { label: '6 charges', rate: 0.27 },
+  { label: '7 charges', rate: 0.30 },
+];
+
 function fmt(n: number): string {
   return Math.round(n).toLocaleString('fr-FR');
 }
@@ -50,7 +62,7 @@ function computeITS(baseITS: number) {
   return { total, details };
 }
 
-function compute(brut: number) {
+function compute(brut: number, charges: number) {
   const baseCNSS = Math.min(brut, CNSS_CEIL);
   const cnssSal = baseCNSS * CNSS_SAL_RATE;
   const inamSal = brut * INAM_SAL_RATE;
@@ -58,8 +70,14 @@ function compute(brut: number) {
   const abattement = netRetenues * ABATTEMENT_RATE;
   const baseITS = netRetenues - abattement;
   const its = computeITS(baseITS);
-  const salaireNet = brut - cnssSal - inamSal - its.total;
-  const tauxEffectif = brut > 0 ? ((cnssSal + inamSal + its.total) / brut) * 100 : 0;
+
+  /* Abattement charges de famille appliqué sur l'ITS brut */
+  const tauxCharges = CHARGES_FAMILLE[charges]?.rate ?? 0;
+  const abattementCharges = its.total * tauxCharges;
+  const itsNet = its.total - abattementCharges;
+
+  const salaireNet = brut - cnssSal - inamSal - itsNet;
+  const tauxEffectif = brut > 0 ? ((cnssSal + inamSal + itsNet) / brut) * 100 : 0;
 
   const cnssPat = baseCNSS * CNSS_PAT_RATE;
   const inamPat = brut * INAM_PAT_RATE;
@@ -72,7 +90,8 @@ function compute(brut: number) {
 
   return {
     brut, baseCNSS, cnssSal, inamSal, netRetenues, abattement, baseITS,
-    its: its.total, itsDetails: its.details, salaireNet, tauxEffectif,
+    itsBrut: its.total, abattementCharges, tauxCharges, charges,
+    its: itsNet, itsDetails: its.details, salaireNet, tauxEffectif,
     cnssPat, inamPat, chargesPat, coutTotal, surcout,
     cnssVerser, inamVerser,
   };
@@ -167,15 +186,18 @@ function salaryPhrase(c: ReturnType<typeof compute>) {
   const inam = fmt(c.inamSal);
   const tx = c.tauxEffectif.toFixed(1);
   const totalRet = fmt(c.cnssSal + c.inamSal + c.its);
+  const chargesInfo = c.charges > 0
+    ? ` Grâce à vos ${c.charges} charge${c.charges > 1 ? 's' : ''} de famille, votre ITS est réduit de ${(c.tauxCharges * 100).toFixed(0)}% (économie de ${fmt(c.abattementCharges)} F CFA/mois).`
+    : '';
 
   if (c.tauxEffectif < 10) {
-    return `Avec un salaire brut de ${b} F CFA, vos prélèvements restent faibles. Vous percevez ${n} F CFA nets par mois, soit seulement ${tx}% de retenues au total.`;
+    return `Avec un salaire brut de ${b} F CFA, vos prélèvements restent faibles. Vous percevez ${n} F CFA nets par mois, soit seulement ${tx}% de retenues au total.${chargesInfo}`;
   } else if (c.tauxEffectif < 20) {
-    return `Pour un brut de ${b} F CFA, l'État et les organismes sociaux retiennent ${totalRet} F CFA au total, dont ${i} F CFA d'ITS. Vous touchez ${n} F CFA nets chaque mois.`;
+    return `Pour un brut de ${b} F CFA, l'État et les organismes sociaux retiennent ${totalRet} F CFA au total, dont ${i} F CFA d'ITS. Vous touchez ${n} F CFA nets chaque mois.${chargesInfo}`;
   } else if (c.tauxEffectif < 30) {
-    return `Sur ${b} F CFA bruts, plus d'un quart est prélevé entre l'ITS (${i} F CFA), la CNSS (${cn} F CFA) et l'INAM (${inam} F CFA). Votre salaire net est de ${n} F CFA.`;
+    return `Sur ${b} F CFA bruts, plus d'un quart est prélevé entre l'ITS (${i} F CFA), la CNSS (${cn} F CFA) et l'INAM (${inam} F CFA). Votre salaire net est de ${n} F CFA.${chargesInfo}`;
   }
-  return `À ce niveau de salaire, les prélèvements représentent plus de 30% du brut. Sur ${b} F CFA, vous percevez ${n} F CFA nets après ${i} F CFA d'ITS, ${cn} F CFA de CNSS et ${inam} F CFA d'INAM.`;
+  return `À ce niveau de salaire, les prélèvements représentent plus de 30% du brut. Sur ${b} F CFA, vous percevez ${n} F CFA nets après ${i} F CFA d'ITS, ${cn} F CFA de CNSS et ${inam} F CFA d'INAM.${chargesInfo}`;
 }
 
 function employerPhrase(c: ReturnType<typeof compute>) {
@@ -201,6 +223,7 @@ export default function SimulateurSalaireNiger() {
   const [inputVal, setInputVal] = useState('');
   const [mode, setMode] = useState<'salarie' | 'employeur'>('salarie');
   const [itsOpen, setItsOpen] = useState(false);
+  const [charges, setCharges] = useState(0);
 
   const setGross = (v: number) => {
     const clamped = Math.max(0, Math.min(MAX_BRUT, v));
@@ -208,7 +231,7 @@ export default function SimulateurSalaireNiger() {
     setInputVal(clamped > 0 ? String(clamped) : '');
   };
 
-  const c = useMemo(() => brut > 0 ? compute(brut) : null, [brut]);
+  const c = useMemo(() => brut > 0 ? compute(brut, charges) : null, [brut, charges]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -254,6 +277,34 @@ export default function SimulateurSalaireNiger() {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* ─── Charges de famille ─── */}
+      <div style={S.card}>
+        <div style={S.sectionTitle}>Charges de famille</div>
+        <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 12, lineHeight: 1.5 }}>
+          Nombre de personnes à charge (conjoint sans revenu + enfants, max 7). Réduit l&apos;ITS selon la LF 2026.
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          {CHARGES_FAMILLE.map((cf, i) => (
+            <button
+              key={i}
+              onClick={() => setCharges(i)}
+              style={{
+                ...S.shortcut,
+                ...(charges === i ? S.shortcutActive : {}),
+                minWidth: 44, textAlign: 'center' as const,
+              }}
+            >
+              {i}
+            </button>
+          ))}
+        </div>
+        {charges > 0 && (
+          <div style={{ marginTop: 12, fontSize: 13, color: '#374151', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '10px 14px' }}>
+            Abattement de <strong>{((CHARGES_FAMILLE[charges]?.rate ?? 0) * 100).toFixed(0)}%</strong> sur l&apos;ITS pour {charges} charge{charges > 1 ? 's' : ''} de famille.
+          </div>
+        )}
       </div>
 
       {/* ─── Toggle ─── */}
@@ -359,7 +410,17 @@ export default function SimulateurSalaireNiger() {
                 <span style={S.rowVal}><AnimVal value={c.baseITS} /></span>
               </div>
               <div style={{ ...S.row, ...S.rowBg }}>
-                <span style={S.rowLabel}>- ITS (Art. 150 · Ord. N°2025-44)</span>
+                <span style={S.rowLabel}>- ITS brut (Art. 150 · Ord. N°2025-44)</span>
+                <span style={S.rowVal}><AnimVal value={c.itsBrut} /></span>
+              </div>
+              {c.charges > 0 && (
+                <div style={{ ...S.row, background: '#f0fdf4' }}>
+                  <span style={{ ...S.rowLabel, color: '#15803d' }}>- Abattement charges de famille ({(c.tauxCharges * 100).toFixed(0)}% · {c.charges} charge{c.charges > 1 ? 's' : ''})</span>
+                  <span style={{ ...S.rowVal, color: '#15803d' }}>- <AnimVal value={c.abattementCharges} /></span>
+                </div>
+              )}
+              <div style={{ ...S.row, background: '#f3f4f6' }}>
+                <span style={{ ...S.rowLabel, fontWeight: 600, color: '#374151' }}>= ITS net retenu</span>
                 <span style={S.rowVal}><AnimVal value={c.its} /></span>
               </div>
               <div style={{ ...S.row, ...S.rowDark }}>
@@ -572,12 +633,15 @@ export default function SimulateurSalaireNiger() {
             title: 'Simulateur Salaire Niger',
             params: [
               { label: 'Salaire brut mensuel', value: `${fmt(c.brut)} F CFA` },
+              { label: 'Charges de famille', value: `${c.charges} (abattement ${(c.tauxCharges * 100).toFixed(0)}%)` },
               { label: 'Mode', value: mode === 'salarie' ? 'Salarié' : 'Employeur' },
             ],
             results: mode === 'salarie'
               ? [
                   { label: 'Salaire NET perçu', value: `${fmt(c.salaireNet)} F CFA` },
-                  { label: 'ITS du mois', value: `${fmt(c.its)} F CFA` },
+                  { label: 'ITS brut', value: `${fmt(c.itsBrut)} F CFA` },
+                  ...(c.charges > 0 ? [{ label: `Abattement charges (${(c.tauxCharges * 100).toFixed(0)}%)`, value: `- ${fmt(c.abattementCharges)} F CFA` }] : []),
+                  { label: 'ITS net retenu', value: `${fmt(c.its)} F CFA` },
                   { label: 'CNSS salarié', value: `${fmt(c.cnssSal)} F CFA` },
                   { label: 'INAM salarié', value: `${fmt(c.inamSal)} F CFA` },
                   { label: 'Taux effectif', value: `${c.tauxEffectif.toFixed(2)}%` },
@@ -612,7 +676,7 @@ export default function SimulateurSalaireNiger() {
       {/* ─── Legal footer ─── */}
       {c && (
         <div style={S.footer}>
-          Ces résultats sont fournis à titre purement indicatif sur la base de l&apos;Ordonnance N°2025-44 du 31 décembre 2025 portant loi de finances pour l&apos;année budgétaire 2026 (Art. 150 ITS nouveau). Ils ne constituent pas un avis fiscal, comptable ou juridique et ne sauraient engager la responsabilité de NFI REPORT. Consultez un expert-comptable agréé ou l&apos;administration fiscale nigérienne (DGI) pour toute situation spécifique. CNSS salarié 3,6% / patronal 16,4% · base plafonnée à 500 000 F CFA/mois · INAM salarié 2,5% / patronal 7,5% · sans plafond · Abattement forfaitaire 20% · nfireport.com
+          Ces résultats sont fournis à titre purement indicatif sur la base de l&apos;Ordonnance N°2025-44 du 31 décembre 2025 portant loi de finances pour l&apos;année budgétaire 2026 (Art. 150 ITS nouveau, abattement charges de famille LF 2026). Ils ne constituent pas un avis fiscal, comptable ou juridique et ne sauraient engager la responsabilité de NFI REPORT. Consultez un expert-comptable agréé ou l&apos;administration fiscale nigérienne (DGI) pour toute situation spécifique. CNSS salarié 3,6% / patronal 16,4% · base plafonnée à 500 000 F CFA/mois · INAM salarié 2,5% / patronal 7,5% · sans plafond · Abattement forfaitaire 20% · Charges de famille : 0→0%, 1→7%, 2→12%, 3→17%, 4→22%, 5→25%, 6→27%, 7→30% · nfireport.com
         </div>
       )}
     </div>

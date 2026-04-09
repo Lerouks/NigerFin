@@ -6,14 +6,14 @@ import { useAuth } from '@/lib/auth-context';
 import { isNewsletterSubscribed, markNewsletterSubscribed } from '@/components/NewsletterPopup';
 
 export function NewsletterForm() {
-  const { userRole, isLoading } = useAuth();
+  const { userRole, profile, isLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [alreadySubscribed, setAlreadySubscribed] = useState(false);
 
-  // Check if already subscribed (localStorage or premium/admin)
+  // Check if already subscribed (profile DB, localStorage, or premium/admin)
   useEffect(() => {
     if (isNewsletterSubscribed()) {
       setAlreadySubscribed(true);
@@ -21,10 +21,12 @@ export function NewsletterForm() {
   }, []);
 
   useEffect(() => {
-    if (!isLoading && (userRole === 'premium' || userRole === 'admin')) {
-      setAlreadySubscribed(true);
+    if (!isLoading) {
+      if (userRole === 'premium' || userRole === 'admin' || profile?.newsletter_subscribed) {
+        setAlreadySubscribed(true);
+      }
     }
-  }, [isLoading, userRole]);
+  }, [isLoading, userRole, profile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

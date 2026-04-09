@@ -41,7 +41,7 @@ export function markNewsletterSubscribed(): void {
  * Does NOT show for: premium/admin, already subscribed, dismissed recently, homepage.
  */
 export function NewsletterPopup() {
-  const { isLoading, userRole } = useAuth();
+  const { isLoading, userRole, profile } = useAuth();
   const [visible, setVisible] = useState(false);
   const [animateIn, setAnimateIn] = useState(false);
   const [email, setEmail] = useState('');
@@ -58,7 +58,8 @@ export function NewsletterPopup() {
     // Don't show for premium/admin (already in newsletter)
     if (userRole === 'premium' || userRole === 'admin') return;
 
-    // Don't show if already subscribed or dismissed recently
+    // Don't show if already subscribed (profile DB or localStorage)
+    if (profile?.newsletter_subscribed) return;
     if (isNewsletterSubscribed()) return;
     if (wasDismissedRecently()) return;
 

@@ -158,11 +158,12 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
   const progressBar = <ReadingProgressBar articleRef={articleRef} />;
 
   // For free articles: show content immediately without waiting for auth
-  // For premium articles while auth loading: show title/image/excerpt (no spinner)
-  // accessResult === null means auth is still loading
+  // For premium articles: show paywall until access is confirmed
   const isPremiumContent = contentType === 'premium';
   const authResolved = accessResult !== null;
-  const showPaywall = authResolved && !accessResult.allowed && isPremiumContent;
+  const accessAllowed = authResolved && accessResult.allowed;
+  // Show paywall if: premium article AND (auth not yet resolved OR access denied)
+  const showPaywall = isPremiumContent && !accessAllowed;
 
   if (showPaywall) {
     return (

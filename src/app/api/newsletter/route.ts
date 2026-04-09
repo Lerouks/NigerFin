@@ -4,6 +4,7 @@ import { subscribeToBeehiiv } from '@/lib/beehiiv';
 import { newsletterWelcomeEmail } from '@/lib/email-templates';
 import { isValidEmail, safeParseJSON } from '@/lib/validation';
 import { checkRateLimit, getClientIP, RATE_LIMITS } from '@/lib/rate-limit';
+import { createServerSupabaseClient } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,6 +37,22 @@ export async function POST(request: NextRequest) {
       subject: welcome.subject,
       html: welcome.html,
     });
+
+    // If user is logged in, mark newsletter_subscribed in their profile
+    try {
+      const supabase = await createServerSupabaseClient();
+      if (supabase) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await supabase
+            .from('user_profiles')
+            .update({ newsletter_subscribed: true, updated_at: new Date().toISOString() })
+            .eq('id', user.id);
+        }
+      }
+    } catch {
+      // Non-blocking: profile update failure shouldn't break newsletter signup
+    }
 
     return NextResponse.json({ success: true });
   } catch {

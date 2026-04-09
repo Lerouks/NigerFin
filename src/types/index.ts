@@ -72,6 +72,7 @@ export interface UserProfile {
   subscription_end: string | null;
   subscription_granted_by: string | null;
   subscription_updated_at: string | null;
+  newsletter_subscribed: boolean;
   created_at: string;
   updated_at: string;
 }

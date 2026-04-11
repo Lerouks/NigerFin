@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, BookOpen, Clock, Lock, Crown, Loader2, CheckCircle2, ChevronDown } from 'lucide-react';
+import { ArrowLeft, BookOpen, Clock, Lock, Crown, CheckCircle2, ChevronDown } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import { useAuth } from '@/lib/auth-context';
@@ -140,6 +140,16 @@ function LessonRow({
   );
 }
 
+/* ─── Tri : gratuits d'abord, premium ensuite (sort_order comme tri secondaire) ─── */
+function sortByAccessLevel(lessons: Lesson[]): Lesson[] {
+  const accessRank: Record<Lesson['access_level'], number> = { free: 0, premium: 1 };
+  return [...lessons].sort((a, b) => {
+    const rankDiff = accessRank[a.access_level] - accessRank[b.access_level];
+    if (rankDiff !== 0) return rankDiff;
+    return a.sort_order - b.sort_order;
+  });
+}
+
 /* ─── Render lessons with optional subsections ─── */
 function renderLessons(
   slug: string,
@@ -161,9 +171,10 @@ function renderLessons(
 
   // No subsections → flat list
   if (!subs) {
+    const sortedLessons = sortByAccessLevel(lessons);
     return (
       <div className="space-y-3">
-        {lessons.map((lesson, i) => (
+        {sortedLessons.map((lesson, i) => (
           <LessonRow
             key={lesson.id}
             lesson={lesson}
@@ -182,7 +193,9 @@ function renderLessons(
   return (
     <div className="space-y-10">
       {subs.map((sub) => {
-        const subLessons = lessons.filter((l) => l.sort_order >= sub.from && l.sort_order <= sub.to);
+        const subLessons = sortByAccessLevel(
+          lessons.filter((l) => l.sort_order >= sub.from && l.sort_order <= sub.to),
+        );
         if (subLessons.length === 0) return null;
 
         return (

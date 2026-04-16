@@ -34,3 +34,10 @@ next-env.d.ts
 
 # sentry
 .sentryclirc
+
+# supabase CLI cache
+/supabase/.temp
+
+# playwright
+/test-results
+/playwright-report

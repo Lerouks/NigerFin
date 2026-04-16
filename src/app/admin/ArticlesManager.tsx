@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Plus, Edit3, Trash2, Eye, Loader2, ArrowLeft, Save, Upload, Star, StarOff,
   Image as ImageIcon, X, Globe, Lock,
@@ -108,7 +108,6 @@ export function ArticlesManager() {
   const [tagInput, setTagInput] = useState('');
   const [togglingFeatured, setTogglingFeatured] = useState<string | null>(null);
   const [featuredWarning, setFeaturedWarning] = useState('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchArticles = useCallback(async () => {
     setLoading(true);

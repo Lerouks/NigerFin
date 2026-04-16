@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import {
   Plus, Pencil, Trash2, Save, X, Loader2, GripVertical,
   Eye, EyeOff, Building2, ImageIcon,
@@ -442,7 +443,7 @@ export function StrategicEnterprisesManager() {
               {/* Logo or placeholder */}
               <div className="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
                 {item.logo_url ? (
-                  <img src={item.logo_url} alt={item.name} className="w-full h-full object-contain p-1" />
+                  <Image src={item.logo_url} alt={item.name} width={48} height={48} className="w-full h-full object-contain p-1" />
                 ) : (
                   <Building2 className="w-6 h-6 text-gray-300" />
                 )}

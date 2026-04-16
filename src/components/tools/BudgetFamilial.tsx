@@ -53,14 +53,14 @@ export function BudgetFamilial() {
 
   const numRevenus = Number(revenus) || 0;
   const numFoyer = Number(foyerSize) || 0;
-  const numExpenses = {
+  const numExpenses = useMemo(() => ({
     alimentation: Number(expenses.alimentation) || 0,
     logement: Number(expenses.logement) || 0,
     transport: Number(expenses.transport) || 0,
     scolarite: Number(expenses.scolarite) || 0,
     sante: Number(expenses.sante) || 0,
     autres: Number(expenses.autres) || 0,
-  };
+  }), [expenses]);
 
   const hasInput = numRevenus > 0 && Object.values(numExpenses).some((v) => v > 0);
 
@@ -84,7 +84,7 @@ export function BudgetFamilial() {
     const perPersonDaily = numFoyer > 0 ? totalDepenses / numFoyer / 30 : null;
 
     return { totalDepenses, reste, tauxEpargne, shares, perPersonDaily };
-  }, [hasInput, numRevenus, numFoyer, numExpenses.alimentation, numExpenses.logement, numExpenses.transport, numExpenses.scolarite, numExpenses.sante, numExpenses.autres]);
+  }, [hasInput, numRevenus, numFoyer, numExpenses]);
 
   const recommendations = useMemo(() => {
     if (!calc) return [];

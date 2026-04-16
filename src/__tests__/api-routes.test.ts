@@ -17,7 +17,7 @@ vi.mock('@/lib/supabase', () => ({
 }));
 
 vi.mock('@/lib/api-error', () => ({
-  serverError: vi.fn((err: unknown) => {
+  serverError: vi.fn((_err: unknown) => {
     return new Response(JSON.stringify({ error: 'Erreur serveur' }), { status: 500 });
   }),
 }));

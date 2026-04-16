@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase';
-import { PAYMENT_METHODS, isValidBillingCycle, getBillingOption, type PaymentMethodId } from '@/config/pricing';
+import { PAYMENT_METHODS, isValidBillingCycle, getBillingOption } from '@/config/pricing';
 import { safeParseJSON } from '@/lib/validation';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import * as Sentry from '@sentry/nextjs';

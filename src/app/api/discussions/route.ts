@@ -3,7 +3,7 @@ import { createServerSupabaseClient } from '@/lib/supabase';
 import { serverError } from '@/lib/api-error';
 import { parsePagination, paginatedResponse } from '@/lib/pagination';
 import { safeParseJSON } from '@/lib/validation';
-import { checkRateLimit, getClientIP, RATE_LIMITS } from '@/lib/rate-limit';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
 export async function GET(request: NextRequest) {
   const category = request.nextUrl.searchParams.get('category');

@@ -35,6 +35,20 @@ const nextConfig = {
     ],
   },
   async headers() {
+    const isDev = process.env.NODE_ENV === 'development';
+    const csp = [
+      "default-src 'self'",
+      `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co",
+      "font-src 'self'",
+      `connect-src 'self' https://*.supabase.co https://*.sentry.io https://*.posthog.com${isDev ? ' ws://localhost:* http://localhost:*' : ''}`,
+      "frame-src 'none'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join('; ');
+
     return [
       {
         source: '/(.*)',
@@ -65,7 +79,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co; font-src 'self'; connect-src 'self' https://*.supabase.co https://*.sentry.io https://*.posthog.com; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'",
+            value: csp,
           },
         ],
       },

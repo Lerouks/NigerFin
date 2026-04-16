@@ -136,7 +136,7 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
       })
       .catch(() => { if (!cancelled) setBodyError(true); });
     return () => { cancelled = true; };
-  }, [accessResult, htmlBody, article.slug]);
+  }, [accessResult, htmlBody, article.slug, resolvedBody]);
 
   const handleCopyLink = async () => {
     await navigator.clipboard.writeText(getArticleUrl());

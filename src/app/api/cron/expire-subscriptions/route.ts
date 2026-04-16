@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { sendTransactionalEmail } from '@/lib/email';
 import { subscriptionExpiredEmail } from '@/lib/email-templates';
-import { logAuditEvent } from '@/lib/audit';
 import * as Sentry from '@sentry/nextjs';
 
 /**

@@ -96,7 +96,7 @@ export function NewsletterPopup() {
       window.removeEventListener('scroll', handleScroll);
       clearTimeout(timer);
     };
-  }, [isLoading, userRole]);
+  }, [isLoading, userRole, profile?.newsletter_subscribed]);
 
   const handleClose = () => {
     setAnimateIn(false);
@@ -138,7 +138,7 @@ export function NewsletterPopup() {
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [visible]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [visible]);
 
   if (!visible) return null;
 

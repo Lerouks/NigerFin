@@ -51,7 +51,6 @@ export function VariationBadge({
 }: VariationBadgeProps) {
   const intensity = getIntensity(value);
   const isUp = value > 0;
-  const isDown = value < 0;
   const isNeutral = intensity === 'neutral';
 
   const styles = isNeutral

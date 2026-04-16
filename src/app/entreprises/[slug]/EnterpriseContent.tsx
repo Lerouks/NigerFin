@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import {
   ArrowLeft, Building2, MapPin, Calendar, Users, Globe, DollarSign,
@@ -82,9 +83,11 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
             {/* Logo - white background for clarity */}
             <div className="w-[4.5rem] h-[4.5rem] sm:w-24 sm:h-24 rounded-2xl bg-white flex items-center justify-center flex-shrink-0 shadow-xl p-2.5 sm:p-3">
               {enterprise.logo_url ? (
-                <img
+                <Image
                   src={enterprise.logo_url}
                   alt={`Logo ${enterprise.name}`}
+                  width={96}
+                  height={96}
                   className="w-full h-full object-contain"
                 />
               ) : (

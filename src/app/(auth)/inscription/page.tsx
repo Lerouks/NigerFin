@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import { AuthLayout } from '@/components/AuthLayout';
@@ -33,7 +33,6 @@ function InscriptionContent() {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
-  const router = useRouter();
 
   const strength = password ? getPasswordStrength(password) : null;
   const passwordsMatch = confirmPassword ? password === confirmPassword : true;

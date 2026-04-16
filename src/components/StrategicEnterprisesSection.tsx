@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import {
   Building2,
@@ -211,9 +212,11 @@ export function StrategicEnterprisesSection() {
                   <div className="flex items-start gap-4 mb-4">
                     <div className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 border border-white/[0.1] bg-white p-1.5 shadow-lg group-hover:shadow-xl transition-shadow duration-300">
                       {enterprise.logo_url ? (
-                        <img
+                        <Image
                           src={enterprise.logo_url}
                           alt={`Logo ${enterprise.name}`}
+                          width={48}
+                          height={48}
                           className="w-full h-full object-contain"
                         />
                       ) : (

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Loader2, Plus, Pencil, Trash2, Check, X, ChevronLeft, Eye, EyeOff,
-  BookOpen, Lock, Unlock, Crown,
+  BookOpen,
 } from 'lucide-react';
 
 interface Category {

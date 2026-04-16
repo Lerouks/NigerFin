@@ -5,13 +5,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Loader2, Lock, Eye, EyeOff, XCircle, LogOut, Check,
-  CreditCard, User, Shield, Mail, Bell, Crown, Zap, ArrowRight,
-  BookOpen, Wrench, BarChart3, Newspaper, Timer, Heart,
+  CreditCard, User, Shield, Mail, Crown, Zap, ArrowRight,
+  Wrench, BarChart3, Newspaper, Timer, Heart,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { getRoleLabel } from '@/lib/user-profile';
 import { PhoneField, validatePhone } from '@/components/PhoneField';
-import { PREMIUM_TIER, CURRENCY, getBillingCycleLabel } from '@/config/pricing';
+import { CURRENCY, getBillingCycleLabel } from '@/config/pricing';
 import type { NewsletterPreferences } from '@/types';
 
 // ─── Types ───────────────────────────────────────────────────────────────────

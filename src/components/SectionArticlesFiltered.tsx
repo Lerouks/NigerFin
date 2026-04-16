@@ -63,8 +63,8 @@ function FilterOption({
 
 export function SectionArticlesFiltered({
   articles,
-  total,
-  sectionLabel,
+  total: _total,
+  sectionLabel: _sectionLabel,
   viewRanking = [],
 }: SectionArticlesFilteredProps) {
   const [contentFilter, setContentFilter] = useState<ContentFilter>('all');

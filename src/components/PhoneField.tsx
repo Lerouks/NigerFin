@@ -64,10 +64,6 @@ function formatNumber(raw: string): string {
   return digits.replace(/(\d{2})(?=\d)/g, '$1 ').trim();
 }
 
-function stripNumber(formatted: string): string {
-  return formatted.replace(/\D/g, '');
-}
-
 // ─── Component ───────────────────────────────────────────────────────────────
 
 interface PhoneFieldProps {

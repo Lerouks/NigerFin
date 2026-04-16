@@ -1,7 +1,7 @@
 'use client';
 
 import {
-  Users, BarChart3, Loader2, TrendingUp, DollarSign, Activity,
+  Users, BarChart3, TrendingUp, DollarSign, Activity,
   Ban, UserPlus, UserMinus, Repeat, Target, FileBarChart, Crown, Eye, Newspaper, FileText, Clock,
 } from 'lucide-react';
 import { formatPrice } from '@/config/pricing';

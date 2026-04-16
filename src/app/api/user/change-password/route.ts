@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
-import { createServiceClient } from '@/lib/supabase';
 import { sendTransactionalEmail } from '@/lib/email';
 import { passwordChangedEmail } from '@/lib/email-templates';
-import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
+import { checkRateLimit } from '@/lib/rate-limit';
 import { logAuditEvent } from '@/lib/audit';
 import * as Sentry from '@sentry/nextjs';
 

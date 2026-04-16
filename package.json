@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
     "analyze": "ANALYZE=true next build",
@@ -50,7 +50,6 @@
     "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.5",
     "@next/bundle-analyzer": "^16.1.6",
     "@playwright/test": "^1.58.2",
     "@types/node": "^22.10.0",

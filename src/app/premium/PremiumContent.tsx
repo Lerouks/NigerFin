@@ -512,8 +512,9 @@ function FinalCta() {
   return (
     <section className="bg-[#1a1a1a] py-24 sm:py-32">
       <FadeUp className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-        <h2 className="text-3xl font-bold tracking-tight text-white sm:text-5xl">
-          Investis dans ce que personne ne peut te prendre :{' '}
+        <h2 className="text-balance text-3xl font-bold leading-[1.15] tracking-tight text-white sm:text-5xl">
+          Investis dans ce que personne ne peut te prendre :
+          <br />
           <span className="text-gold">ta connaissance.</span>
         </h2>
         <p className="mx-auto mt-6 max-w-xl text-[16px] leading-relaxed text-gray-300">

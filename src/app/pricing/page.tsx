@@ -4,12 +4,25 @@ import { PricingContent } from './PricingContent';
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: 'S\u2019abonner - NFI Report',
-  description: 'Accédez à une analyse économique complète. Abonnement Premium pour un accès illimité aux articles, analyses et outils.',
+  title: 'Tarifs Premium - NFI Report',
+  description:
+    'Tarifs NFI Report Premium: mensuel 5 000 FCFA, trimestriel 13 750 FCFA, annuel 50 000 FCFA. Paiement Mobile Money ou carte. Résiliable en ligne à tout moment.',
+  keywords: [
+    'tarifs NFI Report',
+    'prix abonnement NFI Report',
+    's\u2019abonner NFI Report',
+    'Premium FCFA',
+    'paiement Mobile Money',
+  ],
+  alternates: {
+    canonical: '/pricing',
+  },
   openGraph: {
-    title: 'S\u2019abonner - NFI Report',
-    description: 'Accédez à une analyse économique complète. Abonnement Premium pour un accès illimité aux articles, analyses et outils.',
+    title: 'Tarifs Premium - NFI Report',
+    description:
+      'Choisis le rythme qui te convient. À partir de 5 000 FCFA/mois. Mobile Money ou carte bancaire. Résiliable à tout moment.',
     type: 'website',
+    url: '/pricing',
   },
 };
 

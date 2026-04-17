@@ -99,12 +99,12 @@ function IPhoneMockup({
 }) {
   return (
     <div
-      className={`relative aspect-[9/19] w-full max-w-[280px] sm:max-w-[320px] rounded-[2.2rem] bg-black p-[10px] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.4)] ring-1 ring-black/10 ${className}`}
+      className={`relative h-[600px] w-[280px] flex-shrink-0 rounded-[2.5rem] bg-black p-[10px] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.4)] ring-1 ring-black/10 sm:h-[680px] sm:w-[320px] ${className}`}
     >
       {/* Notch / Dynamic Island */}
       <div className="absolute left-1/2 top-3 z-10 h-5 w-20 -translate-x-1/2 rounded-full bg-black" />
       {/* Screen */}
-      <div className="relative h-full w-full overflow-hidden rounded-[1.7rem] bg-white">
+      <div className="relative h-full w-full overflow-hidden rounded-[1.9rem] bg-white">
         <Image
           src={src}
           alt={alt}

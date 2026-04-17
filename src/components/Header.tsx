@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { Menu, Search, X, ChevronRight, LogOut } from 'lucide-react';
+import { Menu, Search, X, ChevronRight, LogOut, Sparkles } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { SearchOverlay } from './SearchOverlay';
@@ -53,32 +53,6 @@ export function Header() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const scrollToNewsletter = () => {
-    const el = document.getElementById('newsletter');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
-  const handleNewsletterClick = () => {
-    if (window.location.pathname === '/') {
-      // Delay scroll to let mobile menu close and layout settle
-      setTimeout(scrollToNewsletter, 300);
-      return;
-    }
-    router.push('/');
-    // After navigation, wait for page to render then scroll
-    const checkAndScroll = () => {
-      const el = document.getElementById('newsletter');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } else {
-        setTimeout(checkAndScroll, 100);
-      }
-    };
-    setTimeout(checkAndScroll, 500);
-  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -212,12 +186,13 @@ export function Header() {
                 })}
               </div>
               <div className="flex items-center gap-3">
-                <button
-                  onClick={handleNewsletterClick}
-                  className="text-[13px] text-white/60 hover:text-white transition-colors"
+                <Link
+                  href="/premium"
+                  className="inline-flex items-center gap-1.5 text-[13px] text-white hover:text-gold transition-colors font-medium"
                 >
-                  Newsletter
-                </button>
+                  <Sparkles className="w-3.5 h-3.5 text-gold" />
+                  Premium
+                </Link>
               </div>
             </div>
           </div>
@@ -280,17 +255,18 @@ export function Header() {
                   </Link>
                 </>
               )}
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  handleNewsletterClick();
-                }}
-                className="flex items-center justify-between w-full py-2.5 px-3 text-[15px] text-gray-700 hover:bg-black/[0.03] rounded-lg transition-colors text-left"
+              <Link
+                href="/premium"
+                className="flex items-center justify-between py-2.5 px-3 text-[15px] font-medium text-[#111] hover:bg-black/[0.03] rounded-lg transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
                 tabIndex={mobileMenuOpen ? 0 : -1}
               >
-                Newsletter
+                <span className="inline-flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-gold" />
+                  Premium
+                </span>
                 <ChevronRight className="w-4 h-4 text-gray-300" />
-              </button>
+              </Link>
               {!isAuthLoading && isSignedIn && (
                 <Link
                   href="/compte"

@@ -49,24 +49,6 @@ const BENEFITS = [
   },
 ];
 
-const PERSONAS = [
-  {
-    emoji: '🎓',
-    title: 'Étudiants en finance',
-    desc: 'Tu veux relier ce que tu apprends à la réalité ouest-africaine ? Le terrain change tout.',
-  },
-  {
-    emoji: '💼',
-    title: 'Jeunes actifs ambitieux',
-    desc: 'Tu veux passer du salaire au capital. Comprendre où placer, comment épargner, quand agir.',
-  },
-  {
-    emoji: '🌍',
-    title: 'Diaspora & curieux',
-    desc: 'Tu vis ailleurs mais l\u2019Afrique te passionne. Reste connecté à l\u2019\u00e9co réelle, pas aux clichés.',
-  },
-];
-
 const FAQ = [
   {
     q: 'Comment je paie ?',
@@ -234,33 +216,20 @@ function BenefitsSection() {
   );
 }
 
-// ─── For who? section ─────────────────────────────────────────────────────────
+// ─── Manifesto banner ─────────────────────────────────────────────────────────
 
-function PersonasSection() {
+function ManifestoBanner() {
   return (
     <section className="bg-[#f5f5f0] py-20 sm:py-28">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="text-[12px] font-semibold uppercase tracking-wider text-gold">
-            Pour qui ?
-          </p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#1a1a1a] sm:text-4xl">
-            Conçu pour ceux qui veulent passer à l&rsquo;action.
-          </h2>
-        </div>
-
-        <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
-          {PERSONAS.map((p) => (
-            <div
-              key={p.title}
-              className="rounded-2xl border border-black/[0.06] bg-white p-8 shadow-sm transition hover:shadow-md"
-            >
-              <div className="text-4xl">{p.emoji}</div>
-              <h3 className="mt-4 text-[18px] font-semibold text-[#1a1a1a]">{p.title}</h3>
-              <p className="mt-2 text-[14.5px] leading-relaxed text-gray-600">{p.desc}</p>
-            </div>
-          ))}
-        </div>
+      <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+        <p className="text-[12px] font-semibold uppercase tracking-wider text-gold">
+          Notre raison d&rsquo;être
+        </p>
+        <h2 className="mt-4 text-3xl font-bold leading-tight tracking-tight text-[#1a1a1a] sm:text-4xl md:text-5xl">
+          Pour les jeunes qui veulent
+          <br className="hidden sm:block" />
+          <span className="text-gold"> savoir, agir et investir.</span>
+        </h2>
       </div>
     </section>
   );
@@ -480,7 +449,7 @@ export function PremiumContent() {
     <main className="bg-[#fafaf9]">
       <HeroSection />
       <BenefitsSection />
-      <PersonasSection />
+      <ManifestoBanner />
       <PreviewSection />
       <PricingTeaser />
       <FaqSection />

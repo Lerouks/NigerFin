@@ -1,38 +1,16 @@
 {
   "permissions": {
+    "defaultMode": "bypassPermissions",
     "allow": [
-      "Bash(npm run build)",
-      "Bash(npm run lint)",
-      "Bash(npm run test)",
-      "Bash(npm run dev)",
-      "Bash(npm run test:watch)",
-      "Bash(npm run analyze)",
-      "Bash(vercel ls)",
-      "Bash(vercel ls *)",
-      "Bash(vercel logs *)",
-      "Bash(vercel whoami)",
-      "Bash(vercel inspect *)",
-      "Bash(npx vercel ls)",
-      "Bash(npx vercel logs *)",
-      "Bash(npx vercel whoami)",
-      "Bash(supabase projects list)",
-      "Bash(supabase gen types *)",
-      "Bash(supabase db dump *)",
-      "Bash(supabase migration list)",
-      "Bash(supabase --version)",
-      "Bash(pdftotext *)",
-      "Bash(mdfind *)",
-      "Bash(sips -g *)",
-      "mcp__claude_ai_Vercel__list_deployments",
-      "mcp__claude_ai_Vercel__get_runtime_logs",
-      "mcp__claude_ai_Vercel__list_teams",
-      "mcp__claude_ai_Vercel__list_projects",
-      "mcp__claude_ai_Supabase__list_projects",
-      "mcp__claude_ai_Supabase__list_tables",
-      "mcp__claude_ai_Supabase__list_migrations",
-      "mcp__claude_ai_Supabase__get_project",
-      "mcp__claude_ai_Supabase__get_logs",
-      "mcp__claude_ai_Supabase__get_advisors"
+      "Bash(*)",
+      "mcp__claude_ai_Vercel__*",
+      "mcp__claude_ai_Supabase__*",
+      "mcp__claude_ai_Gmail__*",
+      "mcp__claude_ai_Google_Calendar__*",
+      "mcp__claude_ai_Canva__*",
+      "mcp__claude_ai_Figma__*",
+      "mcp__claude_ai_PostHog__*",
+      "mcp__plugin_vercel_vercel__*"
     ]
   }
 }

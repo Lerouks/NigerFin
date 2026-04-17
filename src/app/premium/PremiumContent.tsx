@@ -1,0 +1,490 @@
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
+import {
+  Check, Mail, FileText, Wrench, GraduationCap, Bell, Download,
+  ArrowRight, Sparkles,
+} from 'lucide-react';
+import { BILLING_OPTIONS, formatPrice, PREMIUM_MONTHLY_PRICE } from '@/config/pricing';
+
+const SCREENSHOTS = [
+  { src: '/premium/marches.jpeg', alt: 'Page Marchés - cours BRVM, devises, mati\u00e8res premi\u00e8res' },
+  { src: '/premium/article-premium.jpeg', alt: 'Article Premium - Banques nig\u00e9riennes sous pression' },
+  { src: '/premium/outil-budget.jpeg', alt: 'Outil Budget - taux d\u2019\u00e9pargne, r\u00e9partition des d\u00e9penses' },
+];
+
+const BENEFITS = [
+  {
+    icon: Mail,
+    title: '2 newsletters Premium / semaine',
+    desc: 'Briefing du lundi pour cadrer la semaine, bilan du vendredi pour comprendre ce qui a bougé.',
+  },
+  {
+    icon: FileText,
+    title: 'Articles & analyses illimités',
+    desc: 'Toute la rubrique Premium débloquée. Décryptages bancaires, géopolitique, marchés africains.',
+  },
+  {
+    icon: Wrench,
+    title: 'Outils Premium avancés',
+    desc: 'Simulateurs salaire FCFA, budget familial, emprunt — avec analyses détaillées personnalisées.',
+  },
+  {
+    icon: Download,
+    title: 'Téléchargement PDF des analyses',
+    desc: 'Emporte tes analyses budget, salaire et investissement en PDF, prêtes à imprimer ou partager.',
+  },
+  {
+    icon: GraduationCap,
+    title: 'Cours d\u2019éducation financière',
+    desc: 'Modules complets : épargne, investissement, BRVM, crypto, devises. Apprends à ton rythme.',
+  },
+  {
+    icon: Bell,
+    title: 'Alertes temps réel',
+    desc: 'Notifications sur les actus économiques majeures qui impactent ton portefeuille.',
+  },
+];
+
+const PERSONAS = [
+  {
+    emoji: '🎓',
+    title: 'Étudiants en finance',
+    desc: 'Tu veux relier ce que tu apprends à la réalité ouest-africaine ? Le terrain change tout.',
+  },
+  {
+    emoji: '💼',
+    title: 'Jeunes actifs ambitieux',
+    desc: 'Tu veux passer du salaire au capital. Comprendre où placer, comment épargner, quand agir.',
+  },
+  {
+    emoji: '🌍',
+    title: 'Diaspora & curieux',
+    desc: 'Tu vis ailleurs mais l\u2019Afrique te passionne. Reste connecté à l\u2019\u00e9co réelle, pas aux clichés.',
+  },
+];
+
+const FAQ = [
+  {
+    q: 'Comment je paie ?',
+    a: 'Mobile Money (Airtel, Moov, Zamani) ou carte bancaire via iPayMoney. Paiement sécurisé, en quelques secondes.',
+  },
+  {
+    q: 'Je peux annuler quand ?',
+    a: 'Quand tu veux, en 1 clic depuis ton compte. Tu gardes l\u2019accès jusqu\u2019\u00e0 la fin de la période payée.',
+  },
+  {
+    q: 'Y a-t-il un essai gratuit ?',
+    a: 'Pas pour le moment. Mais tu peux lire 3 articles Premium par mois gratuitement pour tester la qualité.',
+  },
+  {
+    q: 'Que recouvre exactement Premium ?',
+    a: 'Tout : 2 newsletters/semaine, articles & analyses illimités, outils Premium avec PDF, cours d\u2019\u00e9ducation financière, alertes.',
+  },
+];
+
+// ─── iPhone mockup component ──────────────────────────────────────────────────
+
+function IPhoneMockup({
+  src,
+  alt,
+  className = '',
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`relative aspect-[9/19] w-full max-w-[280px] sm:max-w-[320px] rounded-[2.2rem] bg-black p-[10px] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.4)] ring-1 ring-black/10 ${className}`}
+    >
+      {/* Notch / Dynamic Island */}
+      <div className="absolute left-1/2 top-3 z-10 h-5 w-20 -translate-x-1/2 rounded-full bg-black" />
+      {/* Screen */}
+      <div className="relative h-full w-full overflow-hidden rounded-[1.7rem] bg-white">
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          sizes="(max-width: 640px) 280px, 320px"
+          className="object-cover object-top"
+          priority
+        />
+      </div>
+    </div>
+  );
+}
+
+// ─── Hero with scroll-driven phone ────────────────────────────────────────────
+
+function HeroSection() {
+  const ref = useRef<HTMLDivElement>(null);
+  const prefersReduced = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start start', 'end start'],
+  });
+
+  // Smooth scroll-driven transforms (disabled if user prefers reduced motion)
+  const rotate = useTransform(scrollYProgress, [0, 1], prefersReduced ? [0, 0] : [-8, 12]);
+  const scale = useTransform(scrollYProgress, [0, 1], prefersReduced ? [1, 1] : [1, 0.85]);
+  const y = useTransform(scrollYProgress, [0, 1], prefersReduced ? [0, 0] : [0, 80]);
+  const opacity = useTransform(scrollYProgress, [0, 0.7, 1], [1, 0.9, 0.5]);
+
+  return (
+    <section ref={ref} className="relative overflow-hidden bg-[#fafaf9] pb-20 pt-10 sm:pt-16 lg:pt-20">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 sm:px-6 lg:grid-cols-12 lg:gap-8 lg:px-8">
+        {/* Text column */}
+        <div className="lg:col-span-7 lg:pr-8">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-gold/10 px-3 py-1.5 text-[12px] font-medium text-gold ring-1 ring-gold/20">
+            <Sparkles className="h-3.5 w-3.5" />
+            Membres Premium NFI Report
+          </div>
+
+          <h1 className="text-[2.5rem] font-bold leading-[1.05] tracking-tight text-[#1a1a1a] sm:text-[3.5rem] lg:text-[4.5rem]">
+            La connaissance,
+            <br />
+            <span className="text-gold">votre meilleur capital.</span>
+          </h1>
+
+          <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-gray-600 sm:text-[19px]">
+            Pour les jeunes qui veulent savoir, agir et investir en Afrique de l&rsquo;Ouest.
+            Newsletters, analyses, outils et téléchargements PDF — tout est dans Premium.
+          </p>
+
+          <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+            <Link
+              href="/pricing"
+              className="group inline-flex items-center gap-2 rounded-full bg-[#1a1a1a] px-7 py-4 text-[15px] font-semibold text-white shadow-lg transition hover:bg-black hover:shadow-xl"
+            >
+              Devenir Premium
+              <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+            </Link>
+            <div className="text-[13px] text-gray-500">
+              À partir de <span className="font-semibold text-gray-700">{formatPrice(PREMIUM_MONTHLY_PRICE)}/mois</span> — moins de 167 FCFA/jour
+            </div>
+          </div>
+
+          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px] text-gray-500">
+            <span className="inline-flex items-center gap-1.5">
+              <Check className="h-3.5 w-3.5 text-gold" />
+              Mobile Money &amp; carte
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Check className="h-3.5 w-3.5 text-gold" />
+              Annulation 1 clic
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Check className="h-3.5 w-3.5 text-gold" />
+              Sans engagement
+            </span>
+          </div>
+        </div>
+
+        {/* iPhone column */}
+        <div className="flex justify-center lg:col-span-5 lg:justify-end">
+          <motion.div
+            style={{ rotate, scale, y, opacity }}
+            className="relative will-change-transform"
+          >
+            {/* Soft golden glow behind */}
+            <div className="absolute inset-0 -z-10 rounded-full bg-gold/20 blur-3xl" />
+            <IPhoneMockup src={SCREENSHOTS[0]!.src} alt={SCREENSHOTS[0]!.alt} />
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Benefits section ─────────────────────────────────────────────────────────
+
+function BenefitsSection() {
+  return (
+    <section className="bg-white py-20 sm:py-28">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-[12px] font-semibold uppercase tracking-wider text-gold">
+            Ce que tu débloques
+          </p>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#1a1a1a] sm:text-4xl">
+            Tout ce qu&rsquo;il te faut pour comprendre, décider et agir.
+          </h2>
+        </div>
+
+        <div className="mt-16 grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+          {BENEFITS.map((b) => {
+            const Icon = b.icon;
+            return (
+              <div key={b.title} className="group">
+                <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gold/10 text-gold transition group-hover:bg-gold group-hover:text-white">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <h3 className="text-[17px] font-semibold text-[#1a1a1a]">{b.title}</h3>
+                <p className="mt-2 text-[14.5px] leading-relaxed text-gray-600">{b.desc}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── For who? section ─────────────────────────────────────────────────────────
+
+function PersonasSection() {
+  return (
+    <section className="bg-[#f5f5f0] py-20 sm:py-28">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-[12px] font-semibold uppercase tracking-wider text-gold">
+            Pour qui ?
+          </p>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#1a1a1a] sm:text-4xl">
+            Conçu pour ceux qui veulent passer à l&rsquo;action.
+          </h2>
+        </div>
+
+        <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
+          {PERSONAS.map((p) => (
+            <div
+              key={p.title}
+              className="rounded-2xl border border-black/[0.06] bg-white p-8 shadow-sm transition hover:shadow-md"
+            >
+              <div className="text-4xl">{p.emoji}</div>
+              <h3 className="mt-4 text-[18px] font-semibold text-[#1a1a1a]">{p.title}</h3>
+              <p className="mt-2 text-[14.5px] leading-relaxed text-gray-600">{p.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Preview section: cycling iPhone ──────────────────────────────────────────
+
+function PreviewSection() {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setIndex((i) => (i + 1) % SCREENSHOTS.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const labels = ['Cours marchés', 'Article Premium', 'Outil Budget'];
+  const current = SCREENSHOTS[index]!;
+
+  return (
+    <section className="bg-white py-20 sm:py-28">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 px-4 sm:px-6 lg:grid-cols-12 lg:gap-12 lg:px-8">
+        <div className="lg:col-span-6">
+          <p className="text-[12px] font-semibold uppercase tracking-wider text-gold">
+            Aperçu en direct
+          </p>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#1a1a1a] sm:text-4xl">
+            Ce que tu reçois, dès ton inscription.
+          </h2>
+          <p className="mt-5 text-[16px] leading-relaxed text-gray-600">
+            Pas de promesse en l&rsquo;air. Voici exactement ce que les membres Premium consultent en ce moment.
+          </p>
+
+          <div className="mt-8 space-y-3">
+            {labels.map((label, i) => (
+              <button
+                key={label}
+                type="button"
+                onClick={() => setIndex(i)}
+                className={`flex w-full items-center gap-3 rounded-xl border px-5 py-4 text-left transition ${
+                  i === index
+                    ? 'border-gold bg-gold/5 shadow-sm'
+                    : 'border-black/[0.08] bg-white hover:border-black/20'
+                }`}
+              >
+                <span
+                  className={`flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-semibold ${
+                    i === index ? 'bg-gold text-white' : 'bg-gray-100 text-gray-500'
+                  }`}
+                >
+                  {i + 1}
+                </span>
+                <span
+                  className={`text-[15px] ${
+                    i === index ? 'font-semibold text-[#1a1a1a]' : 'text-gray-700'
+                  }`}
+                >
+                  {label}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex justify-center lg:col-span-6 lg:justify-end">
+          <motion.div
+            key={current.src}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+            className="relative"
+          >
+            <div className="absolute inset-0 -z-10 rounded-full bg-gold/15 blur-3xl" />
+            <IPhoneMockup src={current.src} alt={current.alt} />
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Pricing teaser ───────────────────────────────────────────────────────────
+
+function PricingTeaser() {
+  return (
+    <section className="bg-[#f5f5f0] py-20 sm:py-28">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div className="text-center">
+          <p className="text-[12px] font-semibold uppercase tracking-wider text-gold">
+            Tarifs
+          </p>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#1a1a1a] sm:text-4xl">
+            Choisis le rythme qui te convient.
+          </h2>
+        </div>
+
+        <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
+          {BILLING_OPTIONS.map((opt) => {
+            const isYearly = opt.cycle === 'yearly';
+            return (
+              <div
+                key={opt.cycle}
+                className={`relative rounded-2xl border bg-white p-7 shadow-sm transition hover:shadow-md ${
+                  isYearly ? 'border-gold ring-2 ring-gold/20' : 'border-black/[0.08]'
+                }`}
+              >
+                {isYearly && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gold px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white">
+                    Meilleur deal
+                  </div>
+                )}
+                <p className="text-[13px] font-medium uppercase tracking-wider text-gray-500">
+                  {opt.durationLabel}
+                </p>
+                <p className="mt-3 text-3xl font-bold text-[#1a1a1a]">
+                  {formatPrice(opt.price)}
+                </p>
+                {opt.savings && (
+                  <p className="mt-1 text-[13px] text-gold">{opt.savings}</p>
+                )}
+                <p className="mt-4 text-[13px] text-gray-500">
+                  Soit {formatPrice(Math.round(opt.price / opt.durationMonths))} / mois
+                </p>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-10 flex flex-col items-center gap-4">
+          <Link
+            href="/pricing"
+            className="group inline-flex items-center gap-2 rounded-full bg-[#1a1a1a] px-7 py-4 text-[15px] font-semibold text-white shadow-lg transition hover:bg-black hover:shadow-xl"
+          >
+            Voir tous les détails et s&rsquo;abonner
+            <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+          </Link>
+          <p className="text-[12.5px] text-gray-500">
+            Paiement sécurisé Mobile Money (Airtel, Moov, Zamani) ou carte bancaire
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── FAQ ──────────────────────────────────────────────────────────────────────
+
+function FaqSection() {
+  return (
+    <section className="bg-white py-20 sm:py-28">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+        <div className="text-center">
+          <p className="text-[12px] font-semibold uppercase tracking-wider text-gold">
+            Questions fréquentes
+          </p>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#1a1a1a] sm:text-4xl">
+            On a la réponse.
+          </h2>
+        </div>
+
+        <div className="mt-12 divide-y divide-black/[0.08]">
+          {FAQ.map((item) => (
+            <details key={item.q} className="group py-6">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[16px] font-semibold text-[#1a1a1a]">
+                {item.q}
+                <span className="text-gold transition group-open:rotate-45">
+                  <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z" />
+                  </svg>
+                </span>
+              </summary>
+              <p className="mt-3 text-[15px] leading-relaxed text-gray-600">{item.a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Final CTA ────────────────────────────────────────────────────────────────
+
+function FinalCta() {
+  return (
+    <section className="bg-[#1a1a1a] py-24 sm:py-32">
+      <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+        <h2 className="text-3xl font-bold tracking-tight text-white sm:text-5xl">
+          Investis dans ce que personne ne peut te prendre :{' '}
+          <span className="text-gold">ta connaissance.</span>
+        </h2>
+        <p className="mx-auto mt-6 max-w-xl text-[16px] leading-relaxed text-gray-300">
+          Rejoins les membres Premium de NFI Report et reçois dès aujourd&rsquo;hui
+          ton premier briefing économique ouest-africain.
+        </p>
+        <div className="mt-10 flex flex-col items-center gap-4">
+          <Link
+            href="/pricing"
+            className="group inline-flex items-center gap-2 rounded-full bg-gold px-8 py-4 text-[16px] font-semibold text-[#1a1a1a] shadow-2xl transition hover:bg-[#c79a3b] hover:shadow-gold/30"
+          >
+            Devenir Premium maintenant
+            <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+          </Link>
+          <p className="text-[12.5px] text-gray-400">
+            5 000 FCFA/mois · Annulation à tout moment
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Main export ──────────────────────────────────────────────────────────────
+
+export function PremiumContent() {
+  return (
+    <main className="bg-[#fafaf9]">
+      <HeroSection />
+      <BenefitsSection />
+      <PersonasSection />
+      <PreviewSection />
+      <PricingTeaser />
+      <FaqSection />
+      <FinalCta />
+    </main>
+  );
+}

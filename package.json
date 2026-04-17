@@ -34,6 +34,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "exceljs": "^4.4.0",
+    "framer-motion": "^12.38.0",
     "isomorphic-dompurify": "^3.0.0",
     "jspdf": "^4.2.0",
     "jspdf-autotable": "^5.0.7",

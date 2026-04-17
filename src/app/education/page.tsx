@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { CategoryHero } from '@/components/CategoryHero';
 import { EducationGrid } from './EducationGrid';
+import { LearningPathsSection } from '@/components/LearningPathsSection';
 import { createServiceClient } from '@/lib/supabase';
 
 export const revalidate = 3600;
@@ -40,6 +41,15 @@ export default async function EducationPage() {
         description="Apprenez la finance, l'économie et les marchés à votre rythme. Choisissez une catégorie pour commencer."
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
+        <LearningPathsSection />
+        <div className="flex items-end justify-between mb-6">
+          <div>
+            <h2 className="text-xl md:text-2xl font-bold leading-tight">Toutes les catégories</h2>
+            <p className="text-[13px] text-gray-500 mt-1">
+              Explore librement par thème, au rythme qui te convient.
+            </p>
+          </div>
+        </div>
         <EducationGrid categories={categories} />
       </div>
     </div>

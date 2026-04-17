@@ -7,8 +7,14 @@
 /coverage
 
 # next.js
+/.next
 /.next/
+/.next.nosync/
 /out/
+
+# local reference documents (not part of the app)
+/*.pdf
+/docs/*.pdf
 
 # production
 /build

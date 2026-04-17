@@ -136,10 +136,10 @@ export const PAYMENT_METHODS: Record<PaymentMethodId, PaymentMethod> = {
   },
   ipaymoney: {
     id: 'ipaymoney',
-    name: 'iPayMoney (Mobile Money & Carte)',
+    name: 'iPayMoney (Mobile Money, Visa, Mastercard, Amex)',
     shortName: 'iPayMoney',
     logo: '/ipaymoney-logo.png',
-    instructions: 'Vous serez redirigé vers iPayMoney pour payer via Mobile Money (Airtel, Moov, Zamani) ou carte bancaire.',
+    instructions: 'Vous serez redirigé vers iPayMoney pour payer via Mobile Money (Airtel, Moov) ou par Visa, Mastercard ou American Express.',
     recipientNumber: '',
     recipientName: '',
   },

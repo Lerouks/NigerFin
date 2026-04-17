@@ -224,7 +224,7 @@ function HeroSection() {
               <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
             </Link>
             <div className="text-[13px] text-gray-500">
-              À partir de <span className="font-semibold text-gray-700">{formatPrice(PREMIUM_MONTHLY_PRICE)}/mois</span>, soit moins de 167 FCFA/jour
+              À partir de <span className="font-semibold text-gray-700">{formatPrice(PREMIUM_MONTHLY_PRICE)}/mois</span>
             </div>
           </div>
 

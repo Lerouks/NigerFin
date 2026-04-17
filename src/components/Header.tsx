@@ -140,11 +140,11 @@ export function Header() {
                 )}
               </div>
 
-              {/* Subscribe button */}
+              {/* Subscribe CTA (desktop) */}
               {!isAuthLoading && !isSignedIn && (
                 <Link
-                  href="/pricing"
-                  className="inline-flex items-center justify-center px-2.5 sm:px-4 py-1.5 sm:py-2 bg-[#111] text-white text-[12px] sm:text-[14px] font-medium rounded-[4px] hover:bg-black transition-colors whitespace-nowrap border border-[#111]"
+                  href="/premium"
+                  className="hidden sm:inline-flex items-center justify-center px-4 py-2 bg-[#111] text-white text-[14px] font-medium rounded-[4px] hover:bg-black transition-colors whitespace-nowrap border border-[#111]"
                 >
                   S&apos;abonner
                 </Link>
@@ -165,7 +165,7 @@ export function Header() {
         {/* Navigation */}
         <nav className="bg-[#111] text-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="hidden lg:flex items-center justify-between h-11">
+            <div className="hidden lg:flex items-center h-11">
               <div className="flex items-center gap-1">
                 {navigation.map((section) => {
                   const isActive = pathname === section.path || pathname.startsWith(section.path + '/');
@@ -184,14 +184,6 @@ export function Header() {
                     </Link>
                   );
                 })}
-              </div>
-              <div className="flex items-center">
-                <Link
-                  href="/premium"
-                  className="inline-flex items-center rounded-full bg-gold px-4 py-1.5 text-[13px] font-semibold text-[#1a1a1a] transition-colors hover:bg-[#c49a3a]"
-                >
-                  Premium
-                </Link>
               </div>
             </div>
           </div>
@@ -233,36 +225,27 @@ export function Header() {
                 <ChevronRight className="w-4 h-4 text-gray-300" />
               </button>
               {!isAuthLoading && !isSignedIn && (
-                <>
-                  <Link
-                    href="/connexion"
-                    className="sm:hidden flex items-center justify-between py-2.5 px-3 text-[15px] text-gray-700 hover:bg-black/[0.03] rounded-lg transition-colors"
-                    onClick={() => setMobileMenuOpen(false)}
-                    tabIndex={mobileMenuOpen ? 0 : -1}
-                  >
-                    Se connecter
-                    <ChevronRight className="w-4 h-4 text-gray-300" />
-                  </Link>
-                  <Link
-                    href="/pricing"
-                    className="flex items-center justify-between py-2.5 px-3 text-[15px] font-medium text-[#111] hover:bg-black/[0.03] rounded-lg transition-colors"
-                    onClick={() => setMobileMenuOpen(false)}
-                    tabIndex={mobileMenuOpen ? 0 : -1}
-                  >
-                    S&apos;abonner
-                    <ChevronRight className="w-4 h-4 text-gray-300" />
-                  </Link>
-                </>
+                <Link
+                  href="/connexion"
+                  className="sm:hidden flex items-center justify-between py-2.5 px-3 text-[15px] text-gray-700 hover:bg-black/[0.03] rounded-lg transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                  tabIndex={mobileMenuOpen ? 0 : -1}
+                >
+                  Se connecter
+                  <ChevronRight className="w-4 h-4 text-gray-300" />
+                </Link>
               )}
-              <Link
-                href="/premium"
-                className="flex items-center justify-between py-2.5 px-3 text-[15px] font-semibold text-[#1a1a1a] bg-gold/15 hover:bg-gold/25 rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-                tabIndex={mobileMenuOpen ? 0 : -1}
-              >
-                Premium
-                <ChevronRight className="w-4 h-4 text-[#1a1a1a]/50" />
-              </Link>
+              {!isAuthLoading && !isSignedIn && (
+                <Link
+                  href="/premium"
+                  className="flex items-center justify-between py-2.5 px-3 text-[15px] font-semibold text-[#1a1a1a] bg-gold/15 hover:bg-gold/25 rounded-lg transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                  tabIndex={mobileMenuOpen ? 0 : -1}
+                >
+                  S&apos;abonner
+                  <ChevronRight className="w-4 h-4 text-[#1a1a1a]/50" />
+                </Link>
+              )}
               {!isAuthLoading && isSignedIn && (
                 <Link
                   href="/compte"

@@ -157,8 +157,11 @@ function HeroSection() {
     offset: ['start start', 'end start'],
   });
 
-  // Smooth scroll-driven transforms (disabled if user prefers reduced motion)
-  const rotate = useTransform(scrollYProgress, [0, 1], prefersReduced ? [0, 0] : [-8, 12]);
+  // Smooth scroll-driven transforms (disabled if user prefers reduced motion).
+  // Start rotate at 0 so the phone is pixel-sharp on load: CSS transforms
+  // rasterize the compositor layer and non-identity rotation at low DPR blurs
+  // the iPhone content. Rotation kicks in as the user scrolls.
+  const rotate = useTransform(scrollYProgress, [0, 1], prefersReduced ? [0, 0] : [0, 10]);
   const scale = useTransform(scrollYProgress, [0, 1], prefersReduced ? [1, 1] : [1, 0.85]);
   const y = useTransform(scrollYProgress, [0, 1], prefersReduced ? [0, 0] : [0, 80]);
   const opacity = useTransform(scrollYProgress, [0, 0.7, 1], [1, 0.9, 0.5]);
@@ -216,12 +219,28 @@ function HeroSection() {
         {/* iPhone column */}
         <div className="flex justify-center lg:col-span-5 lg:justify-end">
           <motion.div
-            style={{ rotate, scale, y, opacity }}
-            className="relative will-change-transform"
+            style={{
+              rotate,
+              scale,
+              y,
+              opacity,
+              transformStyle: 'preserve-3d',
+              willChange: 'transform',
+            }}
+            className="relative"
           >
             {/* Soft golden glow behind */}
             <div className="absolute inset-0 -z-10 rounded-full bg-gold/20 blur-3xl" />
-            <IPhoneMockup src={SCREENSHOTS[0]!.src} alt={SCREENSHOTS[0]!.alt} />
+            <div
+              style={{
+                transform: 'translateZ(0)',
+                backfaceVisibility: 'hidden',
+                WebkitBackfaceVisibility: 'hidden',
+                WebkitFontSmoothing: 'antialiased',
+              }}
+            >
+              <IPhoneMockup src={SCREENSHOTS[0]!.src} alt={SCREENSHOTS[0]!.alt} />
+            </div>
           </motion.div>
         </div>
       </div>

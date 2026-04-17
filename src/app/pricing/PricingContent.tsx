@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2, ArrowRight, Check, Crown, ArrowLeft } from 'lucide-react';
+import { Loader2, ArrowRight, Check, Crown, ArrowLeft, ShieldCheck, RefreshCw, XCircle } from 'lucide-react';
+import { motion, useReducedMotion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
@@ -12,6 +13,32 @@ import {
   PREMIUM_MONTHLY_PRICE,
   type BillingCycle,
 } from '@/config/pricing';
+
+// ─── FadeUp helper (respects prefers-reduced-motion) ─────────────────────────
+
+function FadeUp({
+  children,
+  delay = 0,
+  className = '',
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  className?: string;
+}) {
+  const prefersReduced = useReducedMotion();
+  if (prefersReduced) return <div className={className}>{children}</div>;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.55, ease: 'easeOut', delay }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 const PRICING_HIGHLIGHTS = [
   'Articles et analyses Premium illimités',
@@ -111,6 +138,8 @@ function PlanCard({
 }: PlanCardProps) {
   const isYearly = cycle === 'yearly';
   const monthlyEquivalent = Math.round(price / durationMonths);
+  const fullPrice = PREMIUM_MONTHLY_PRICE * durationMonths;
+  const savedPercent = price < fullPrice ? Math.round((1 - price / fullPrice) * 100) : 0;
   return (
     <div
       className={`relative rounded-2xl bg-white p-7 shadow-sm transition hover:shadow-md ${
@@ -128,7 +157,12 @@ function PlanCard({
       <p className="mt-4 text-[2.25rem] font-bold leading-none text-[#1a1a1a]">
         {formatPrice(price)}
       </p>
-      {savings && <p className="mt-2 text-[13px] font-medium text-gold">{savings}</p>}
+      {savings && (
+        <p className="mt-2 text-[13px] font-medium text-gold">
+          {savings}
+          {savedPercent > 0 && <span className="ml-1.5 text-gray-500">· -{savedPercent}%</span>}
+        </p>
+      )}
       <p className="mt-3 text-[13px] text-gray-500">
         Soit {formatPrice(monthlyEquivalent)} / mois
       </p>
@@ -160,28 +194,98 @@ interface PricingPlansProps {
   onSubscribe: (cycle: BillingCycle) => void;
 }
 
+function TrustStrip() {
+  const items = [
+    { icon: XCircle, label: 'Annulable en 1 clic' },
+    { icon: RefreshCw, label: 'Sans engagement' },
+    { icon: ShieldCheck, label: 'Paiement sécurisé iPayMoney' },
+  ];
+  return (
+    <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[12.5px] text-gray-500">
+      {items.map(({ icon: Icon, label }) => (
+        <span key={label} className="inline-flex items-center gap-1.5">
+          <Icon className="h-3.5 w-3.5 text-gold" strokeWidth={2} />
+          {label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function PricingPlans({ getPrice, loadingPlan, onSubscribe }: PricingPlansProps) {
   return (
     <section className="pb-20">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-          {BILLING_OPTIONS.map((opt) => (
-            <PlanCard
-              key={opt.cycle}
-              cycle={opt.cycle}
-              price={getPrice(opt.cycle)}
-              durationLabel={opt.durationLabel}
-              durationMonths={opt.durationMonths}
-              savings={opt.savings}
-              isLoading={loadingPlan === opt.cycle}
-              isDisabled={!!loadingPlan}
-              onSubscribe={onSubscribe}
-            />
+          {BILLING_OPTIONS.map((opt, i) => (
+            <FadeUp key={opt.cycle} delay={i * 0.08}>
+              <PlanCard
+                cycle={opt.cycle}
+                price={getPrice(opt.cycle)}
+                durationLabel={opt.durationLabel}
+                durationMonths={opt.durationMonths}
+                savings={opt.savings}
+                isLoading={loadingPlan === opt.cycle}
+                isDisabled={!!loadingPlan}
+                onSubscribe={onSubscribe}
+              />
+            </FadeUp>
           ))}
         </div>
-        <p className="mt-10 text-center text-[12.5px] text-gray-500">
-          Résiliable en ligne avant renouvellement. Paiement sécurisé.
-        </p>
+        <TrustStrip />
+      </div>
+    </section>
+  );
+}
+
+// ─── Compact FAQ ──────────────────────────────────────────────────────────────
+
+const PRICING_FAQ = [
+  {
+    q: 'Comment je paie ?',
+    a: 'Mobile Money (Airtel, Moov) ou par carte Visa, Mastercard, American Express via iPayMoney. Le paiement est sécurisé et prend quelques secondes.',
+  },
+  {
+    q: 'Je peux annuler quand ?',
+    a: 'À tout moment, en 1 clic depuis ton compte. Tu conserves l\u2019accès Premium jusqu\u2019à la fin de la période déjà payée.',
+  },
+  {
+    q: 'Puis-je changer de formule plus tard ?',
+    a: 'Oui. Tu peux passer d\u2019une formule mensuelle à trimestrielle ou annuelle depuis ton compte. Le changement s\u2019applique au prochain renouvellement.',
+  },
+  {
+    q: 'Que se passe-t-il à la fin de ma période ?',
+    a: 'Ton abonnement se renouvelle automatiquement, sauf si tu l\u2019as annulé avant. Tu reçois toujours un rappel par email quelques jours avant.',
+  },
+];
+
+function PricingFaq() {
+  return (
+    <section className="border-t border-black/[0.05] py-16 sm:py-20">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+        <FadeUp className="mb-10 text-center">
+          <p className="text-[12px] font-semibold uppercase tracking-wider text-gold">
+            Questions fréquentes
+          </p>
+          <h2 className="mt-3 text-2xl font-bold tracking-tight text-[#1a1a1a] sm:text-3xl">
+            On lève les doutes.
+          </h2>
+        </FadeUp>
+        <FadeUp className="divide-y divide-black/[0.08]" delay={0.1}>
+          {PRICING_FAQ.map((item) => (
+            <details key={item.q} className="group py-5">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[15.5px] font-semibold text-[#1a1a1a]">
+                {item.q}
+                <span className="text-gold transition group-open:rotate-45">
+                  <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                    <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z" />
+                  </svg>
+                </span>
+              </summary>
+              <p className="mt-3 text-[14.5px] leading-relaxed text-gray-600">{item.a}</p>
+            </details>
+          ))}
+        </FadeUp>
       </div>
     </section>
   );
@@ -193,33 +297,35 @@ function HighlightsCompact() {
   return (
     <section className="border-t border-black/[0.05] bg-white py-16 sm:py-20">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-10 text-center">
+        <FadeUp className="mb-10 text-center">
           <p className="text-[12px] font-semibold uppercase tracking-wider text-gold">
             Ce que tu obtiens
           </p>
           <h2 className="mt-3 text-2xl font-bold tracking-tight text-[#1a1a1a] sm:text-3xl">
             L&apos;essentiel en un coup d&apos;&oelig;il.
           </h2>
-        </div>
-        <ul className="mx-auto grid max-w-2xl grid-cols-1 gap-4 sm:grid-cols-2">
-          {PRICING_HIGHLIGHTS.map((hl) => (
-            <li key={hl} className="flex items-start gap-3">
-              <div className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-gold/15">
-                <Check className="h-3 w-3 stroke-[2.5] text-gold" />
-              </div>
-              <span className="text-[14.5px] leading-snug text-gray-700">{hl}</span>
-            </li>
-          ))}
-        </ul>
-        <div className="mt-10 text-center">
-          <Link
-            href="/premium"
-            className="inline-flex items-center gap-2 text-[14px] font-medium text-gray-600 transition-colors hover:text-gold"
-          >
-            Voir tous les détails
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
-        </div>
+        </FadeUp>
+        <FadeUp delay={0.1}>
+          <ul className="mx-auto grid max-w-2xl grid-cols-1 gap-4 sm:grid-cols-2">
+            {PRICING_HIGHLIGHTS.map((hl) => (
+              <li key={hl} className="flex items-start gap-3">
+                <div className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-gold/15">
+                  <Check className="h-3 w-3 stroke-[2.5] text-gold" />
+                </div>
+                <span className="text-[14.5px] leading-snug text-gray-700">{hl}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-10 text-center">
+            <Link
+              href="/premium"
+              className="inline-flex items-center gap-2 text-[14px] font-medium text-gray-600 transition-colors hover:text-gold"
+            >
+              Voir tous les détails
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+        </FadeUp>
       </div>
     </section>
   );
@@ -346,6 +452,7 @@ export function PricingContent() {
         />
       )}
       {!isSubscribed && <HighlightsCompact />}
+      {!isSubscribed && <PricingFaq />}
       <PaymentMethods />
       {!isSubscribed && <FreePlanCard isSignedIn={isSignedIn} />}
     </main>

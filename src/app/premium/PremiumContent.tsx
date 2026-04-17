@@ -11,9 +11,9 @@ import {
 import { BILLING_OPTIONS, formatPrice, PREMIUM_MONTHLY_PRICE } from '@/config/pricing';
 
 const SCREENSHOTS = [
-  { src: '/premium/marches.jpeg', alt: 'Page Marchés - cours BRVM, devises, mati\u00e8res premi\u00e8res' },
-  { src: '/premium/article-premium.jpeg', alt: 'Article Premium - Banques nig\u00e9riennes sous pression' },
-  { src: '/premium/outil-budget.jpeg', alt: 'Outil Budget - taux d\u2019\u00e9pargne, r\u00e9partition des d\u00e9penses' },
+  { src: '/premium/marches.png', alt: 'Page Marchés - cours BRVM, devises, mati\u00e8res premi\u00e8res' },
+  { src: '/premium/article-premium.png', alt: 'Article Premium - Banques nig\u00e9riennes sous pression' },
+  { src: '/premium/outil-budget.png', alt: 'Outil Budget - taux d\u2019\u00e9pargne, r\u00e9partition des d\u00e9penses' },
 ];
 
 const BENEFITS = [
@@ -81,7 +81,7 @@ function IPhoneMockup({
 }) {
   return (
     <div
-      className={`relative h-[560px] w-[260px] flex-shrink-0 sm:h-[620px] sm:w-[290px] ${className}`}
+      className={`relative h-[600px] w-[280px] flex-shrink-0 sm:h-[680px] sm:w-[320px] ${className}`}
     >
       {/* Outer titanium frame (iPhone 16 Pro style) */}
       <div
@@ -104,8 +104,9 @@ function IPhoneMockup({
               src={src}
               alt={alt}
               fill
-              sizes="(max-width: 640px) 260px, 290px"
+              sizes="(max-width: 640px) 280px, 320px"
               quality={100}
+              unoptimized
               className="object-cover object-top"
               priority
             />

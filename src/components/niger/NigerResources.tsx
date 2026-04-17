@@ -20,7 +20,7 @@ type TypeConfig = { icon: typeof Atom; color: string; bg: string };
 const TYPE_CONFIG: Record<string, TypeConfig> = {
   uranium: { icon: Atom, color: 'text-emerald-600', bg: 'bg-emerald-50' },
   petrole: { icon: Droplets, color: 'text-blue-600', bg: 'bg-blue-50' },
-  or: { icon: CircleDot, color: 'text-amber-600', bg: 'bg-amber-50' },
+  or: { icon: CircleDot, color: 'text-gold', bg: 'bg-gold/10' },
   charbon: { icon: Flame, color: 'text-orange-600', bg: 'bg-orange-50' },
   autre: { icon: Factory, color: 'text-gray-600', bg: 'bg-gray-50' },
 };

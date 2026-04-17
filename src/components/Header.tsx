@@ -188,7 +188,7 @@ export function Header() {
               <div className="flex items-center">
                 <Link
                   href="/premium"
-                  className="inline-flex items-center rounded-full bg-gold/95 px-3.5 py-1 text-[12.5px] font-semibold text-[#1a1a1a] transition-colors hover:bg-gold"
+                  className="inline-flex items-center rounded-full bg-gold px-4 py-1.5 text-[13px] font-semibold text-[#1a1a1a] transition-colors hover:bg-[#c49a3a]"
                 >
                   Premium
                 </Link>

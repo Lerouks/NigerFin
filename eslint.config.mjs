@@ -21,6 +21,7 @@ export default [
   {
     ignores: [
       '.next/',
+      '.next.nosync/',
       'node_modules/',
       'out/',
       'coverage/',

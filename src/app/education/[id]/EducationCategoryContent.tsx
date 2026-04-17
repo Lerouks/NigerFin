@@ -1,12 +1,26 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, BookOpen, Clock, Lock, Crown, CheckCircle2, ChevronDown } from 'lucide-react';
+import useSWR from 'swr';
+import { ArrowLeft, BookOpen, Clock, Lock, Crown, CheckCircle2, ChevronDown, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import { useAuth } from '@/lib/auth-context';
+
+interface ProgressEntry {
+  lesson_id: string;
+  completed_at: string | null;
+  last_viewed_at: string;
+  quiz_score: number | null;
+}
+
+const progressFetcher = (url: string): Promise<ProgressEntry[]> =>
+  fetch(url).then((res) => {
+    if (!res.ok) return [];
+    return res.json();
+  });
 
 interface Category {
   id: string;
@@ -36,6 +50,7 @@ const SUBSECTIONS: Record<string, { title: string; from: number; to: number }[]>
     { title: 'Macroéconomie', from: 1, to: 3 },
     { title: 'BRVM & intégration UEMOA', from: 4, to: 7 },
     { title: 'Matières premières stratégiques', from: 8, to: 11 },
+    { title: 'Investir en pratique depuis le Niger', from: 12, to: 99 },
   ],
   'bases-finance': [
     { title: 'Comprendre la finance', from: 1, to: 5 },
@@ -84,29 +99,37 @@ function LessonsSkeleton() {
 
 /* ─── Lesson row component ─── */
 function LessonRow({
-  lesson, index, accessible, isOpen, onToggle,
+  lesson, index, accessible, isOpen, onToggle, isSignedIn, isCompleted, isPending, onToggleComplete,
 }: {
   lesson: Lesson; index: number; accessible: boolean; isOpen: boolean;
   onToggle: () => void;
+  isSignedIn: boolean;
+  isCompleted: boolean;
+  isPending: boolean;
+  onToggleComplete: () => void;
 }) {
   const config = ACCESS_CONFIG[lesson.access_level] || ACCESS_CONFIG.free!;
 
   return (
-    <div className="group">
+    <div id={`lesson-${lesson.id}`} className="group scroll-mt-24">
       <button
         onClick={onToggle}
         className={`w-full text-left flex items-center gap-4 p-5 rounded-xl border transition-all duration-200 ${
           isOpen
             ? 'bg-white border-black/[0.12] shadow-sm rounded-b-none'
-            : accessible
-              ? 'bg-white border-black/[0.06] hover:border-black/[0.12] hover:shadow-sm'
-              : 'bg-white/60 border-black/[0.04] hover:border-black/[0.08]'
+            : isCompleted && accessible
+              ? 'bg-emerald-50/60 border-emerald-100 hover:border-emerald-200'
+              : accessible
+                ? 'bg-white border-black/[0.06] hover:border-black/[0.12] hover:shadow-sm'
+                : 'bg-white/60 border-black/[0.04] hover:border-black/[0.08]'
         }`}
       >
-        <span className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-[13px] font-semibold ${
-          isOpen ? 'bg-[#111] text-white' : 'bg-[#f5f5f0] text-gray-500'
-        } transition-colors`}>
-          {index}
+        <span className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-[13px] font-semibold transition-colors ${
+          isCompleted && accessible
+            ? 'bg-emerald-500 text-white'
+            : isOpen ? 'bg-[#111] text-white' : 'bg-[#f5f5f0] text-gray-500'
+        }`}>
+          {isCompleted && accessible ? <CheckCircle2 className="w-4 h-4" /> : index}
         </span>
         <div className="flex-1 min-w-0">
           <p className={`text-[15px] font-medium truncate ${accessible ? 'text-[#111]' : 'text-gray-400'}`}>
@@ -119,6 +142,9 @@ function LessonRow({
             <span className={`text-[11px] px-2 py-0.5 rounded-full border ${config.bg} ${config.color}`}>
               {config.label}
             </span>
+            {isCompleted && accessible && (
+              <span className="text-[11px] text-emerald-700 font-medium">Terminée</span>
+            )}
           </div>
         </div>
         {!accessible ? (
@@ -133,6 +159,34 @@ function LessonRow({
         <div className="px-6 py-6 bg-white border-x border-b border-black/[0.12] rounded-b-xl">
           <div className="prose prose-sm max-w-none text-gray-700 prose-headings:text-[#111] prose-h2:text-lg prose-h2:mt-0 prose-h3:text-base prose-strong:text-gray-800 prose-a:text-blue-600 prose-table:text-sm prose-img:rounded-lg">
             <ReactMarkdown rehypePlugins={[rehypeRaw]}>{lesson.content}</ReactMarkdown>
+          </div>
+          <div className="mt-6 pt-5 border-t border-black/[0.06] flex items-center justify-between gap-4 flex-wrap">
+            {isSignedIn ? (
+              <button
+                onClick={onToggleComplete}
+                disabled={isPending}
+                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-[13px] font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
+                  isCompleted
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
+                    : 'bg-[#111] text-white hover:bg-[#222]'
+                }`}
+              >
+                {isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : isCompleted ? (
+                  <CheckCircle2 className="w-4 h-4" />
+                ) : null}
+                {isCompleted ? 'Marquer comme non terminée' : 'Marquer comme terminée'}
+              </button>
+            ) : (
+              <Link
+                href="/inscription"
+                className="inline-flex items-center gap-2 text-[13px] font-medium text-[#111] hover:underline"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                Crée un compte pour suivre ton avancement
+              </Link>
+            )}
           </div>
         </div>
       )}
@@ -158,6 +212,10 @@ function renderLessons(
   openLesson: string | null,
   setOpenLesson: (id: string | null) => void,
   router: ReturnType<typeof useRouter>,
+  isSignedIn: boolean,
+  completedIds: Set<string>,
+  pendingIds: Set<string>,
+  onToggleComplete: (lessonId: string) => void,
 ) {
   const subs = SUBSECTIONS[slug];
 
@@ -181,6 +239,10 @@ function renderLessons(
             index={i + 1}
             accessible={canAccess(lesson.access_level)}
             isOpen={openLesson === lesson.id}
+            isSignedIn={isSignedIn}
+            isCompleted={completedIds.has(lesson.id)}
+            isPending={pendingIds.has(lesson.id)}
+            onToggleComplete={() => onToggleComplete(lesson.id)}
             onToggle={() => handleToggle(lesson, canAccess(lesson.access_level), openLesson === lesson.id)}
           />
         ))}
@@ -215,6 +277,10 @@ function renderLessons(
                     index={globalIndex}
                     accessible={canAccess(lesson.access_level)}
                     isOpen={openLesson === lesson.id}
+                    isSignedIn={isSignedIn}
+                    isCompleted={completedIds.has(lesson.id)}
+                    isPending={pendingIds.has(lesson.id)}
+                    onToggleComplete={() => onToggleComplete(lesson.id)}
                     onToggle={() => handleToggle(lesson, canAccess(lesson.access_level), openLesson === lesson.id)}
                   />
                 );
@@ -233,8 +299,43 @@ export function EducationCategoryContent({ slug }: { slug: string }) {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [openLesson, setOpenLesson] = useState<string | null>(null);
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
   const { isSignedIn, userRole } = useAuth();
   const router = useRouter();
+
+  const { data: progressData, mutate: mutateProgress } = useSWR<ProgressEntry[]>(
+    isSignedIn ? '/api/education/progress' : null,
+    progressFetcher,
+    { revalidateOnFocus: false, dedupingInterval: 30_000 },
+  );
+
+  const completedIds = useMemo(
+    () => new Set((progressData ?? []).filter((p) => p.completed_at).map((p) => p.lesson_id)),
+    [progressData],
+  );
+
+  const toggleComplete = useCallback(
+    async (lessonId: string) => {
+      if (!isSignedIn) return;
+      const wasCompleted = completedIds.has(lessonId);
+      setPendingIds((prev) => new Set(prev).add(lessonId));
+      try {
+        const res = await fetch('/api/education/progress', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lesson_id: lessonId, completed: !wasCompleted }),
+        });
+        if (res.ok) await mutateProgress();
+      } finally {
+        setPendingIds((prev) => {
+          const next = new Set(prev);
+          next.delete(lessonId);
+          return next;
+        });
+      }
+    },
+    [isSignedIn, completedIds, mutateProgress],
+  );
 
   useEffect(() => {
     (async () => {
@@ -251,6 +352,18 @@ export function EducationCategoryContent({ slug }: { slug: string }) {
       setLoading(false);
     })();
   }, [slug]);
+
+  useEffect(() => {
+    if (loading || typeof window === 'undefined') return;
+    if (!window.location.hash.startsWith('#lesson-')) return;
+    const lessonId = window.location.hash.replace('#lesson-', '');
+    const target = lessons.find((l) => l.id === lessonId);
+    if (!target) return;
+    setOpenLesson(lessonId);
+    setTimeout(() => {
+      document.getElementById(`lesson-${lessonId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 300);
+  }, [loading, lessons]);
 
   const canAccess = (level: string) => {
     if (level === 'free') return true;
@@ -331,7 +444,7 @@ export function EducationCategoryContent({ slug }: { slug: string }) {
         </div>
 
         {/* Lesson list (with optional subsections) */}
-        {renderLessons(slug, lessons, canAccess, openLesson, setOpenLesson, router)}
+        {renderLessons(slug, lessons, canAccess, openLesson, setOpenLesson, router, isSignedIn, completedIds, pendingIds, toggleComplete)}
 
         {/* Empty state */}
         {lessons.length === 0 && (

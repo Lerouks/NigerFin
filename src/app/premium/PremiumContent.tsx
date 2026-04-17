@@ -68,6 +68,34 @@ const FAQ = [
   },
 ];
 
+// ─── FadeUp helper (respects prefers-reduced-motion) ─────────────────────────
+
+function FadeUp({
+  children,
+  delay = 0,
+  className = '',
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  className?: string;
+}) {
+  const prefersReduced = useReducedMotion();
+  if (prefersReduced) {
+    return <div className={className}>{children}</div>;
+  }
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.6, ease: 'easeOut', delay }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 // ─── iPhone mockup component ──────────────────────────────────────────────────
 
 function IPhoneMockup({
@@ -254,26 +282,26 @@ function BenefitsSection() {
   return (
     <section className="bg-white py-20 sm:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
+        <FadeUp className="mx-auto max-w-2xl text-center">
           <p className="text-[12px] font-semibold uppercase tracking-wider text-gold">
             Ce que tu débloques
           </p>
           <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#1a1a1a] sm:text-4xl">
             Tout ce qu&rsquo;il te faut pour comprendre, décider et agir.
           </h2>
-        </div>
+        </FadeUp>
 
         <div className="mt-16 grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-          {BENEFITS.map((b) => {
+          {BENEFITS.map((b, i) => {
             const Icon = b.icon;
             return (
-              <div key={b.title} className="group">
+              <FadeUp key={b.title} delay={i * 0.08} className="group">
                 <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gold/10 text-gold transition group-hover:bg-gold group-hover:text-white">
                   <Icon className="h-5 w-5" />
                 </div>
                 <h3 className="text-[17px] font-semibold text-[#1a1a1a]">{b.title}</h3>
                 <p className="mt-2 text-[14.5px] leading-relaxed text-gray-600">{b.desc}</p>
-              </div>
+              </FadeUp>
             );
           })}
         </div>
@@ -287,7 +315,7 @@ function BenefitsSection() {
 function ManifestoBanner() {
   return (
     <section className="bg-[#f5f5f0] py-20 sm:py-28">
-      <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+      <FadeUp className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
         <p className="text-[12px] font-semibold uppercase tracking-wider text-gold">
           Notre raison d&rsquo;être
         </p>
@@ -296,7 +324,7 @@ function ManifestoBanner() {
           <br className="hidden sm:block" />
           <span className="text-gold"> savoir, agir et investir.</span>
         </h2>
-      </div>
+      </FadeUp>
     </section>
   );
 }
@@ -319,7 +347,7 @@ function PreviewSection() {
   return (
     <section className="bg-white py-20 sm:py-28">
       <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 px-4 sm:px-6 lg:grid-cols-12 lg:gap-12 lg:px-8">
-        <div className="lg:col-span-6">
+        <FadeUp className="lg:col-span-6">
           <p className="text-[12px] font-semibold uppercase tracking-wider text-gold">
             Aperçu en direct
           </p>
@@ -359,7 +387,7 @@ function PreviewSection() {
               </button>
             ))}
           </div>
-        </div>
+        </FadeUp>
 
         <div className="flex justify-center lg:col-span-6 lg:justify-end">
           <motion.div
@@ -384,21 +412,22 @@ function PricingTeaser() {
   return (
     <section className="bg-[#f5f5f0] py-20 sm:py-28">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
+        <FadeUp className="text-center">
           <p className="text-[12px] font-semibold uppercase tracking-wider text-gold">
             Tarifs
           </p>
           <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#1a1a1a] sm:text-4xl">
             Choisis le rythme qui te convient.
           </h2>
-        </div>
+        </FadeUp>
 
         <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
-          {BILLING_OPTIONS.map((opt) => {
+          {BILLING_OPTIONS.map((opt, i) => {
             const isYearly = opt.cycle === 'yearly';
             return (
-              <div
+              <FadeUp
                 key={opt.cycle}
+                delay={i * 0.1}
                 className={`relative rounded-2xl border bg-white p-7 shadow-sm transition hover:shadow-md ${
                   isYearly ? 'border-gold ring-2 ring-gold/20' : 'border-black/[0.08]'
                 }`}
@@ -420,12 +449,12 @@ function PricingTeaser() {
                 <p className="mt-4 text-[13px] text-gray-500">
                   Soit {formatPrice(Math.round(opt.price / opt.durationMonths))} / mois
                 </p>
-              </div>
+              </FadeUp>
             );
           })}
         </div>
 
-        <div className="mt-10 flex flex-col items-center gap-4">
+        <FadeUp className="mt-10 flex flex-col items-center gap-4">
           <Link
             href="/pricing"
             className="group inline-flex items-center gap-2 rounded-full bg-[#1a1a1a] px-7 py-4 text-[15px] font-semibold text-white shadow-lg transition hover:bg-black hover:shadow-xl"
@@ -436,7 +465,7 @@ function PricingTeaser() {
           <p className="text-[12.5px] text-gray-500">
             Paiement sécurisé Mobile Money (Airtel, Moov, Zamani) ou carte bancaire
           </p>
-        </div>
+        </FadeUp>
       </div>
     </section>
   );
@@ -448,16 +477,16 @@ function FaqSection() {
   return (
     <section className="bg-white py-20 sm:py-28">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
+        <FadeUp className="text-center">
           <p className="text-[12px] font-semibold uppercase tracking-wider text-gold">
             Questions fréquentes
           </p>
           <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#1a1a1a] sm:text-4xl">
             On a la réponse.
           </h2>
-        </div>
+        </FadeUp>
 
-        <div className="mt-12 divide-y divide-black/[0.08]">
+        <FadeUp className="mt-12 divide-y divide-black/[0.08]" delay={0.15}>
           {FAQ.map((item) => (
             <details key={item.q} className="group py-6">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[16px] font-semibold text-[#1a1a1a]">
@@ -471,7 +500,7 @@ function FaqSection() {
               <p className="mt-3 text-[15px] leading-relaxed text-gray-600">{item.a}</p>
             </details>
           ))}
-        </div>
+        </FadeUp>
       </div>
     </section>
   );
@@ -482,7 +511,7 @@ function FaqSection() {
 function FinalCta() {
   return (
     <section className="bg-[#1a1a1a] py-24 sm:py-32">
-      <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+      <FadeUp className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
         <h2 className="text-3xl font-bold tracking-tight text-white sm:text-5xl">
           Investis dans ce que personne ne peut te prendre :{' '}
           <span className="text-gold">ta connaissance.</span>
@@ -503,7 +532,7 @@ function FinalCta() {
             5 000 FCFA/mois · Annulation à tout moment
           </p>
         </div>
-      </div>
+      </FadeUp>
     </section>
   );
 }

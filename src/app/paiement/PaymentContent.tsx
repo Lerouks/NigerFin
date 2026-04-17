@@ -675,7 +675,7 @@ export function PaymentContent() {
                         />
                         <div className="flex-1">
                           <h3 className="font-bold text-[15px]">iPayMoney</h3>
-                          <p className="text-gray-500 text-[12px]">Mobile Money (Airtel, Moov, Zamani) & Carte bancaire</p>
+                          <p className="text-gray-500 text-[12px]">Mobile Money (Airtel, Moov) · Visa, Mastercard, Amex</p>
                         </div>
                         {ipaymoneyLoading && <Loader2 className="w-5 h-5 animate-spin text-gray-400" />}
                       </button>

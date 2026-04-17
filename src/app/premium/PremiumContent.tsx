@@ -52,7 +52,7 @@ const BENEFITS = [
 const FAQ = [
   {
     q: 'Comment je paie ?',
-    a: 'Mobile Money (Airtel, Moov, Zamani) ou carte bancaire via iPayMoney. Paiement sécurisé, en quelques secondes.',
+    a: 'Mobile Money (Airtel, Moov) ou Visa, Mastercard, American Express via iPayMoney. Paiement sécurisé, en quelques secondes.',
   },
   {
     q: 'Je peux annuler quand ?',
@@ -231,7 +231,7 @@ function HeroSection() {
           <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px] text-gray-500">
             <span className="inline-flex items-center gap-1.5">
               <Check className="h-3.5 w-3.5 text-gold" />
-              Mobile Money &amp; carte
+              Mobile Money, Visa &amp; Mastercard
             </span>
             <span className="inline-flex items-center gap-1.5">
               <Check className="h-3.5 w-3.5 text-gold" />
@@ -463,7 +463,7 @@ function PricingTeaser() {
             <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
           </Link>
           <p className="text-[12.5px] text-gray-500">
-            Paiement sécurisé Mobile Money (Airtel, Moov, Zamani) ou carte bancaire
+            Paiement sécurisé Mobile Money (Airtel, Moov) ou Visa, Mastercard, American Express
           </p>
         </FadeUp>
       </div>

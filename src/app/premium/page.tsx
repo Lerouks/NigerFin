@@ -7,11 +7,22 @@ export const metadata: Metadata = {
   title: 'Devenir Premium - NFI Report',
   description:
     'La connaissance, votre meilleur capital. Pour les jeunes qui veulent savoir, agir et investir en Afrique de l\u2019Ouest. Newsletters, articles, outils et analyses Premium.',
+  keywords: [
+    'NFI Report Premium',
+    'abonnement NFI Report',
+    'newsletter économique Afrique',
+    'analyses financières Niger',
+    'éducation financière Afrique de l\u2019Ouest',
+  ],
+  alternates: {
+    canonical: '/premium',
+  },
   openGraph: {
     title: 'NFI Report Premium - La connaissance, votre meilleur capital',
     description:
-      'Newsletters exclusives, articles Premium illimités, outils financiers avancés et téléchargement PDF des analyses. \u00c0 partir de 5 000 FCFA/mois.',
+      'Newsletters exclusives, articles Premium illimités, outils financiers avancés et téléchargement PDF des analyses. À partir de 5 000 FCFA/mois.',
     type: 'website',
+    url: '/premium',
   },
 };
 

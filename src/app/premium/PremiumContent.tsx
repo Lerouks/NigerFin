@@ -30,7 +30,7 @@ const BENEFITS = [
   {
     icon: Wrench,
     title: 'Outils Premium avancés',
-    desc: 'Simulateurs salaire FCFA, budget familial, emprunt — avec analyses détaillées personnalisées.',
+    desc: 'Simulateurs salaire FCFA, budget familial, emprunt, avec analyses détaillées personnalisées.',
   },
   {
     icon: Download,
@@ -81,21 +81,67 @@ function IPhoneMockup({
 }) {
   return (
     <div
-      className={`relative h-[600px] w-[280px] flex-shrink-0 rounded-[2.5rem] bg-black p-[10px] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.4)] ring-1 ring-black/10 sm:h-[680px] sm:w-[320px] ${className}`}
+      className={`relative h-[560px] w-[260px] flex-shrink-0 sm:h-[620px] sm:w-[290px] ${className}`}
     >
-      {/* Notch / Dynamic Island */}
-      <div className="absolute left-1/2 top-3 z-10 h-5 w-20 -translate-x-1/2 rounded-full bg-black" />
-      {/* Screen */}
-      <div className="relative h-full w-full overflow-hidden rounded-[1.9rem] bg-white">
-        <Image
-          src={src}
-          alt={alt}
-          fill
-          sizes="(max-width: 640px) 280px, 320px"
-          className="object-cover object-top"
-          priority
-        />
+      {/* Outer titanium frame (iPhone 16 Pro style) */}
+      <div
+        className="relative h-full w-full rounded-[3rem] p-[3px] shadow-[0_45px_90px_-25px_rgba(0,0,0,0.55),0_15px_35px_-10px_rgba(0,0,0,0.25)]"
+        style={{
+          background:
+            'linear-gradient(135deg, #4a4a4a 0%, #1a1a1a 40%, #2a2a2a 100%)',
+        }}
+      >
+        {/* Inner bezel */}
+        <div className="relative h-full w-full overflow-hidden rounded-[2.85rem] bg-black p-[6px]">
+          {/* Screen */}
+          <div className="relative h-full w-full overflow-hidden rounded-[2.4rem] bg-white">
+            {/* Dynamic Island */}
+            <div className="absolute left-1/2 top-2 z-20 flex h-[26px] w-[100px] -translate-x-1/2 items-center justify-end rounded-full bg-black pr-2.5">
+              <div className="h-2 w-2 rounded-full bg-[#1a1a1a] ring-[1px] ring-[#3a3a3a]/60" />
+            </div>
+            {/* Screenshot */}
+            <Image
+              src={src}
+              alt={alt}
+              fill
+              sizes="(max-width: 640px) 260px, 290px"
+              quality={100}
+              className="object-cover object-top"
+              priority
+            />
+            {/* Subtle screen reflection */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 z-10 rounded-[2.4rem]"
+              style={{
+                background:
+                  'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 35%, rgba(255,255,255,0) 65%, rgba(255,255,255,0.04) 100%)',
+              }}
+            />
+          </div>
+        </div>
       </div>
+
+      {/* Power button (right) */}
+      <div
+        className="absolute right-[-3px] top-[140px] h-[60px] w-[3px] rounded-r-sm"
+        style={{ background: 'linear-gradient(to right, #1a1a1a, #2c2c2c)' }}
+      />
+      {/* Action button (left) */}
+      <div
+        className="absolute left-[-3px] top-[90px] h-[24px] w-[3px] rounded-l-sm"
+        style={{ background: 'linear-gradient(to left, #1a1a1a, #2c2c2c)' }}
+      />
+      {/* Volume up (left) */}
+      <div
+        className="absolute left-[-3px] top-[130px] h-[44px] w-[3px] rounded-l-sm"
+        style={{ background: 'linear-gradient(to left, #1a1a1a, #2c2c2c)' }}
+      />
+      {/* Volume down (left) */}
+      <div
+        className="absolute left-[-3px] top-[185px] h-[44px] w-[3px] rounded-l-sm"
+        style={{ background: 'linear-gradient(to left, #1a1a1a, #2c2c2c)' }}
+      />
     </div>
   );
 }
@@ -134,7 +180,7 @@ function HeroSection() {
 
           <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-gray-600 sm:text-[19px]">
             Pour les jeunes qui veulent savoir, agir et investir en Afrique de l&rsquo;Ouest.
-            Newsletters, analyses, outils et téléchargements PDF — tout est dans Premium.
+            Newsletters, analyses, outils et téléchargements PDF. Tout est dans Premium.
           </p>
 
           <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
@@ -146,7 +192,7 @@ function HeroSection() {
               <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
             </Link>
             <div className="text-[13px] text-gray-500">
-              À partir de <span className="font-semibold text-gray-700">{formatPrice(PREMIUM_MONTHLY_PRICE)}/mois</span> — moins de 167 FCFA/jour
+              À partir de <span className="font-semibold text-gray-700">{formatPrice(PREMIUM_MONTHLY_PRICE)}/mois</span>, soit moins de 167 FCFA/jour
             </div>
           </div>
 

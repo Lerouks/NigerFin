@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { Menu, Search, X, ChevronRight, LogOut, Sparkles } from 'lucide-react';
+import { Menu, Search, X, ChevronRight, LogOut } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { SearchOverlay } from './SearchOverlay';
@@ -185,12 +185,11 @@ export function Header() {
                   );
                 })}
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center">
                 <Link
                   href="/premium"
-                  className="inline-flex items-center gap-1.5 text-[13px] text-white hover:text-gold transition-colors font-medium"
+                  className="inline-flex items-center rounded-full bg-gold/95 px-3.5 py-1 text-[12.5px] font-semibold text-[#1a1a1a] transition-colors hover:bg-gold"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-gold" />
                   Premium
                 </Link>
               </div>
@@ -257,15 +256,12 @@ export function Header() {
               )}
               <Link
                 href="/premium"
-                className="flex items-center justify-between py-2.5 px-3 text-[15px] font-medium text-[#111] hover:bg-black/[0.03] rounded-lg transition-colors"
+                className="flex items-center justify-between py-2.5 px-3 text-[15px] font-semibold text-[#1a1a1a] bg-gold/15 hover:bg-gold/25 rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
                 tabIndex={mobileMenuOpen ? 0 : -1}
               >
-                <span className="inline-flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-gold" />
-                  Premium
-                </span>
-                <ChevronRight className="w-4 h-4 text-gray-300" />
+                Premium
+                <ChevronRight className="w-4 h-4 text-[#1a1a1a]/50" />
               </Link>
               {!isAuthLoading && isSignedIn && (
                 <Link

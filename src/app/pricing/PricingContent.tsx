@@ -1,22 +1,316 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2, ArrowRight, Check, Crown, Shield } from 'lucide-react';
+import { Loader2, ArrowRight, Check, Crown, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import {
   BILLING_OPTIONS,
   CURRENCY,
-  PREMIUM_TIER,
-  FREE_TIER_FEATURES,
+  formatPrice,
+  PREMIUM_MONTHLY_PRICE,
   type BillingCycle,
 } from '@/config/pricing';
+
+const PRICING_HIGHLIGHTS = [
+  'Articles et analyses Premium illimités',
+  '2 newsletters exclusives par semaine',
+  'Outils avancés avec téléchargements PDF',
+  "Cours complets d'éducation financière",
+];
+
+// ─── Breadcrumb ───────────────────────────────────────────────────────────────
+
+function Breadcrumb() {
+  return (
+    <div className="border-b border-black/[0.06]">
+      <div className="mx-auto max-w-6xl px-4 py-3 sm:px-6 lg:px-8">
+        <Link
+          href="/premium"
+          className="inline-flex items-center gap-2 text-[13px] text-gray-500 transition-colors hover:text-gray-700"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Tout savoir sur Premium
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+// ─── Subscribed banner ────────────────────────────────────────────────────────
+
+function SubscribedBanner() {
+  return (
+    <div className="bg-white border-b border-black/[0.06]">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3.5 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-3">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gold">
+            <Crown className="h-3 w-3 text-white" />
+          </div>
+          <p className="text-sm text-gray-700">
+            Vous êtes abonné <span className="font-semibold text-gold">Premium</span>
+          </p>
+        </div>
+        <Link
+          href="/compte"
+          className="text-sm font-medium text-gold transition-colors hover:text-[#b8922f]"
+        >
+          Mon compte &rarr;
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+// ─── Hero ─────────────────────────────────────────────────────────────────────
+
+function PricingHero() {
+  return (
+    <section className="pt-16 pb-10 sm:pt-20 sm:pb-14">
+      <div className="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+        <p className="mb-3 text-[12px] font-semibold uppercase tracking-wider text-gold">
+          Tarifs
+        </p>
+        <h1 className="text-[2.25rem] font-bold leading-[1.1] tracking-tight text-[#1a1a1a] sm:text-[3rem]">
+          Choisis le rythme
+          <br />
+          <span className="text-gold">qui te convient.</span>
+        </h1>
+        <p className="mx-auto mt-5 max-w-xl text-[16px] leading-relaxed text-gray-600 sm:text-[17px]">
+          À partir de {formatPrice(PREMIUM_MONTHLY_PRICE)}/mois. Résiliable en ligne à
+          tout moment, sans engagement.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+// ─── Plans ────────────────────────────────────────────────────────────────────
+
+interface PlanCardProps {
+  cycle: BillingCycle;
+  price: number;
+  durationLabel: string;
+  durationMonths: number;
+  savings?: string;
+  isLoading: boolean;
+  isDisabled: boolean;
+  onSubscribe: (cycle: BillingCycle) => void;
+}
+
+function PlanCard({
+  cycle,
+  price,
+  durationLabel,
+  durationMonths,
+  savings,
+  isLoading,
+  isDisabled,
+  onSubscribe,
+}: PlanCardProps) {
+  const isYearly = cycle === 'yearly';
+  const monthlyEquivalent = Math.round(price / durationMonths);
+  return (
+    <div
+      className={`relative rounded-2xl bg-white p-7 shadow-sm transition hover:shadow-md ${
+        isYearly ? 'border-2 border-gold ring-4 ring-gold/10' : 'border border-black/[0.08]'
+      }`}
+    >
+      {isYearly && (
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gold px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white">
+          Meilleur deal
+        </div>
+      )}
+      <p className="text-[13px] font-medium uppercase tracking-wider text-gray-500">
+        {durationLabel}
+      </p>
+      <p className="mt-4 text-[2.25rem] font-bold leading-none text-[#1a1a1a]">
+        {formatPrice(price)}
+      </p>
+      {savings && <p className="mt-2 text-[13px] font-medium text-gold">{savings}</p>}
+      <p className="mt-3 text-[13px] text-gray-500">
+        Soit {formatPrice(monthlyEquivalent)} / mois
+      </p>
+      <button
+        onClick={() => onSubscribe(cycle)}
+        disabled={isDisabled}
+        className={`mt-7 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-[14px] font-semibold transition-all duration-300 disabled:opacity-40 ${
+          isYearly
+            ? 'bg-gold text-white shadow-lg shadow-gold/25 hover:bg-[#b8922f]'
+            : 'border border-black/[0.12] text-[#333] hover:border-[#111] hover:bg-[#111] hover:text-white'
+        }`}
+      >
+        {isLoading ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <>
+            Choisir {durationLabel.toLowerCase()}
+            <ArrowRight className="h-4 w-4" />
+          </>
+        )}
+      </button>
+    </div>
+  );
+}
+
+interface PricingPlansProps {
+  getPrice: (cycle: BillingCycle) => number;
+  loadingPlan: BillingCycle | null;
+  onSubscribe: (cycle: BillingCycle) => void;
+}
+
+function PricingPlans({ getPrice, loadingPlan, onSubscribe }: PricingPlansProps) {
+  return (
+    <section className="pb-20">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+          {BILLING_OPTIONS.map((opt) => (
+            <PlanCard
+              key={opt.cycle}
+              cycle={opt.cycle}
+              price={getPrice(opt.cycle)}
+              durationLabel={opt.durationLabel}
+              durationMonths={opt.durationMonths}
+              savings={opt.savings}
+              isLoading={loadingPlan === opt.cycle}
+              isDisabled={!!loadingPlan}
+              onSubscribe={onSubscribe}
+            />
+          ))}
+        </div>
+        <p className="mt-10 text-center text-[12.5px] text-gray-500">
+          Résiliable en ligne avant renouvellement. Paiement sécurisé.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+// ─── Highlights compact ───────────────────────────────────────────────────────
+
+function HighlightsCompact() {
+  return (
+    <section className="border-t border-black/[0.05] bg-white py-16 sm:py-20">
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-10 text-center">
+          <p className="text-[12px] font-semibold uppercase tracking-wider text-gold">
+            Ce que tu obtiens
+          </p>
+          <h2 className="mt-3 text-2xl font-bold tracking-tight text-[#1a1a1a] sm:text-3xl">
+            L&apos;essentiel en un coup d&apos;&oelig;il.
+          </h2>
+        </div>
+        <ul className="mx-auto grid max-w-2xl grid-cols-1 gap-4 sm:grid-cols-2">
+          {PRICING_HIGHLIGHTS.map((hl) => (
+            <li key={hl} className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-gold/15">
+                <Check className="h-3 w-3 stroke-[2.5] text-gold" />
+              </div>
+              <span className="text-[14.5px] leading-snug text-gray-700">{hl}</span>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-10 text-center">
+          <Link
+            href="/premium"
+            className="inline-flex items-center gap-2 text-[14px] font-medium text-gray-600 transition-colors hover:text-gold"
+          >
+            Voir tous les détails
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Payment methods ──────────────────────────────────────────────────────────
+
+function PaymentMethods() {
+  return (
+    <section className="py-12 sm:py-16">
+      <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+        <p className="mb-5 text-[12px] font-semibold uppercase tracking-wider text-gray-400">
+          Moyens de paiement acceptés
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-4">
+          <div className="flex h-10 items-center gap-2 rounded-md border border-black/[0.06] bg-white px-3">
+            <Image
+              src="/nita-logo.png"
+              alt="Nita"
+              width={20}
+              height={20}
+              className="rounded object-contain"
+            />
+            <span className="text-[13px] font-medium text-gray-700">Nita</span>
+          </div>
+          <div className="flex h-10 items-center gap-2 rounded-md border border-black/[0.06] bg-white px-3">
+            <Image
+              src="/amana-logo.png"
+              alt="Amana"
+              width={20}
+              height={20}
+              className="rounded object-contain"
+            />
+            <span className="text-[13px] font-medium text-gray-700">Amana</span>
+          </div>
+          <div className="flex h-10 items-center rounded-md border border-black/[0.06] bg-white px-3">
+            <Image
+              src="/card-logos.png"
+              alt="Visa / Mastercard"
+              width={48}
+              height={24}
+              className="object-contain"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Free plan (reléguée) ─────────────────────────────────────────────────────
+
+function FreePlanCard({ isSignedIn }: { isSignedIn: boolean }) {
+  return (
+    <section className="pb-20">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+        <div className="rounded-2xl border border-black/[0.06] bg-white p-6 sm:p-8">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="mb-1 text-[12px] font-medium uppercase tracking-wider text-gray-500">
+                Plan gratuit
+              </p>
+              <h3 className="mb-2 text-[18px] font-bold text-[#1a1a1a]">
+                Accès limité, 0 {CURRENCY}
+              </h3>
+              <p className="max-w-md text-[13.5px] text-gray-600">
+                3 articles Premium par mois, newsletter mensuelle, outils de base.
+              </p>
+            </div>
+            <Link
+              href={isSignedIn ? '/' : '/inscription'}
+              className="inline-flex flex-shrink-0 items-center justify-center rounded-xl border border-black/[0.12] px-5 py-2.5 text-[13.5px] font-semibold text-[#333] transition-all hover:border-[#111] hover:bg-[#111] hover:text-white"
+            >
+              {isSignedIn ? 'Accueil' : 'Créer un compte'}
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Main export ──────────────────────────────────────────────────────────────
 
 export function PricingContent() {
   const { isSignedIn, userRole, refreshProfile } = useAuth();
 
-  useEffect(() => { refreshProfile(); }, [refreshProfile]);
+  useEffect(() => {
+    refreshProfile();
+  }, [refreshProfile]);
+
   const isSubscribed = userRole === 'premium' || userRole === 'admin';
 
   const [dynamicPrices, setDynamicPrices] = useState<Record<string, number>>({});
@@ -29,297 +323,31 @@ export function PricingContent() {
       .catch(() => {});
   }, []);
 
-  const getPrice = (cycle: BillingCycle) => {
+  const getPrice = (cycle: BillingCycle): number => {
     const opt = BILLING_OPTIONS.find((b) => b.cycle === cycle)!;
     return dynamicPrices[`premium_${cycle}`] ?? opt.price;
   };
 
-  const yearlyPrice = getPrice('yearly');
-  const monthlyPrice = getPrice('monthly');
-  const quarterlyPrice = getPrice('quarterly');
-
-  const handleSubscribe = (cycle: BillingCycle) => {
+  const handleSubscribe = (cycle: BillingCycle): void => {
     setLoadingPlan(cycle);
     window.location.href = `/paiement?tier=premium&cycle=${cycle}`;
   };
 
   return (
-    <div className="min-h-screen bg-[#fafaf9]">
-      {/* ── SUBSCRIBER BANNER ── */}
-      {isSubscribed && (
-        <div className="bg-[#0d0d0d] text-white border-b border-[#d4a843]/20">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#d4a843] to-[#d4a843] flex items-center justify-center">
-                <Crown className="w-3 h-3 text-white" />
-              </div>
-              <p className="text-sm text-white/60">
-                Vous êtes abonné <span className="font-semibold text-[#d4a843]">Premium</span>
-              </p>
-            </div>
-            <Link href="/compte" className="text-sm text-[#d4a843] hover:text-[#e6bc5a] transition-colors font-medium">
-              Mon compte &rarr;
-            </Link>
-          </div>
-        </div>
-      )}
-
-      {/* ── HERO SECTION ── */}
-      <section className="bg-[#0d0d0d] relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.02]"
-          style={{
-            backgroundImage: `repeating-linear-gradient(90deg, #d4a843 0px, #d4a843 1px, transparent 1px, transparent 80px),
-                              repeating-linear-gradient(0deg, #d4a843 0px, #d4a843 1px, transparent 1px, transparent 80px)`,
-          }}
-        />
-        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#d4a843]/40 to-transparent" />
-
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left: Text + CTA */}
-            <div>
-              <div className="inline-flex items-center gap-2.5 mb-6">
-                <div className="h-[1px] w-8 bg-[#d4a843]/50" />
-                <p className="text-[#d4a843] text-[13px] font-semibold tracking-[0.25em] uppercase">
-                  NFI Report Premium
-                </p>
-              </div>
-
-              <h1 className="text-[2rem] sm:text-[2.5rem] md:text-[3rem] font-bold leading-[1.1] tracking-[-0.02em] text-white mb-5 font-serif">
-                L&apos;information financière qui fait la différence
-              </h1>
-
-              <p className="text-[17px] text-white/40 max-w-md leading-relaxed mb-8">
-                Analyses approfondies, données exclusives et outils financiers pour prendre les meilleures décisions.
-              </p>
-
-              {/* Featured plan: Annual */}
-              <div className="mb-6">
-                <p className="text-white/50 text-sm mb-2">Accès Numérique Annuel</p>
-                <div className="flex items-baseline gap-3 mb-1">
-                  <span className="text-[#d4a843] text-lg line-through opacity-60">
-                    {(monthlyPrice * 12).toLocaleString('fr-FR')}
-                  </span>
-                  <span className="text-[#d4a843] text-2xl font-bold">
-                    {yearlyPrice.toLocaleString('fr-FR')} {CURRENCY}
-                  </span>
-                  <span className="text-white/40 text-sm">votre première année</span>
-                </div>
-                <p className="text-white/30 text-[13px] leading-relaxed">
-                  Renouvellement automatique à {yearlyPrice.toLocaleString('fr-FR')} {CURRENCY}/an.
-                  <br />
-                  Résiliable en ligne à tout moment avant le renouvellement.
-                </p>
-              </div>
-
-              <button
-                onClick={() => handleSubscribe('yearly')}
-                disabled={!!loadingPlan || isSubscribed}
-                className="w-full sm:w-auto px-10 py-4 rounded-xl text-[15px] font-bold transition-all duration-300 flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#d4a843] to-[#e8c96a] text-white hover:from-[#b8922f] hover:to-[#d4a843] active:scale-[0.98] disabled:opacity-40 shadow-lg shadow-[#d4a843]/25"
-              >
-                {loadingPlan === 'yearly' ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : isSubscribed ? (
-                  'Abonnement actif'
-                ) : (
-                  <>
-                    Continuer
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-
-              {/* Payment methods */}
-              <div className="flex items-center gap-3 mt-5">
-                <span className="text-white/25 text-[12px]">Nous acceptons :</span>
-                <div className="flex items-center gap-2.5">
-                  <div className="h-9 px-2 rounded-md bg-white/[0.06] flex items-center justify-center">
-                    <Image
-                      src="/nita-logo.png"
-                      alt="Nita"
-                      width={24}
-                      height={24}
-                      className="rounded object-contain"
-                    />
-                  </div>
-                  <div className="h-9 px-2 rounded-md bg-white/[0.06] flex items-center justify-center">
-                    <Image
-                      src="/amana-logo.png"
-                      alt="Amana"
-                      width={24}
-                      height={24}
-                      className="rounded object-contain"
-                    />
-                  </div>
-                  <div className="h-9 px-2 rounded-md bg-white/[0.06] flex items-center justify-center">
-                    <Image
-                      src="/card-logos.png"
-                      alt="Visa / Mastercard"
-                      width={48}
-                      height={24}
-                      className="object-contain"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Trust indicators */}
-              <div className="mt-6 flex items-center gap-4 text-white/20 text-[11px] tracking-wide uppercase">
-                <span className="flex items-center gap-1.5">
-                  <Shield className="w-3 h-3" /> Résiliable à tout moment
-                </span>
-                <span className="text-white/10">|</span>
-                <span className="flex items-center gap-1.5">
-                  Accès instantané
-                </span>
-              </div>
-            </div>
-
-            {/* Right: What you get */}
-            <div className="bg-white/[0.04] border border-white/[0.06] rounded-2xl p-8 md:p-10">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-white font-bold text-lg">Accès Annuel</h2>
-                <span className="text-[#d4a843] font-bold text-lg">
-                  {yearlyPrice.toLocaleString('fr-FR')} {CURRENCY}
-                </span>
-              </div>
-
-              <p className="text-white/30 text-[13px] leading-relaxed mb-6">
-                Renouvellement automatique à {yearlyPrice.toLocaleString('fr-FR')} {CURRENCY}/an.{' '}
-                <span className="font-medium text-white/50">
-                  Résiliable en ligne avant le renouvellement.
-                </span>
-              </p>
-
-              <div className="border-t border-white/[0.06] pt-6">
-                <h3 className="text-white/60 text-[13px] font-semibold uppercase tracking-wider mb-5">
-                  Ce que vous obtenez :
-                </h3>
-                <ul className="space-y-3.5">
-                  {PREMIUM_TIER.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-3">
-                      <div className="w-5 h-5 rounded-full bg-[#d4a843]/15 flex items-center justify-center mt-0.5 flex-shrink-0">
-                        <Check className="w-3 h-3 text-[#d4a843] stroke-[2.5]" />
-                      </div>
-                      <span className="text-[14px] text-white/60 leading-snug">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── OTHER PLAN OPTIONS ── */}
+    <main className="min-h-screen bg-[#fafaf9]">
+      <Breadcrumb />
+      {isSubscribed && <SubscribedBanner />}
+      <PricingHero />
       {!isSubscribed && (
-        <section className="py-16 md:py-24">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mb-10">
-              <h2 className="text-[12px] tracking-[0.2em] uppercase text-[#888] font-bold mb-2">
-                Autres options d&apos;abonnement
-              </h2>
-              <p className="text-[14px] text-[#aaa]">
-                Résiliable à tout moment avant la date de renouvellement.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {/* Monthly */}
-              <div className="bg-white rounded-2xl border border-black/[0.06] p-7 flex flex-col">
-                <h3 className="text-[16px] font-bold text-[#111] mb-4 text-center">
-                  Accès Mensuel
-                </h3>
-                <p className="text-center text-2xl font-bold text-[#111] mb-1">
-                  {monthlyPrice.toLocaleString('fr-FR')} {CURRENCY}
-                </p>
-                <p className="text-center text-[13px] text-[#999] mb-2">
-                  votre premier mois
-                </p>
-                <p className="text-center text-[12px] text-[#aaa] mb-6">
-                  Renouvellement à {monthlyPrice.toLocaleString('fr-FR')} {CURRENCY}/mois
-                </p>
-
-                <button
-                  onClick={() => handleSubscribe('monthly')}
-                  disabled={!!loadingPlan}
-                  className="mt-auto w-full py-3 rounded-xl text-[14px] font-semibold border border-black/[0.12] text-[#333] hover:bg-[#111] hover:text-white hover:border-[#111] transition-all duration-300 disabled:opacity-40 flex items-center justify-center gap-2"
-                >
-                  {loadingPlan === 'monthly' ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    'Choisir Mensuel'
-                  )}
-                </button>
-              </div>
-
-              {/* Quarterly */}
-              <div className="bg-white rounded-2xl border border-black/[0.06] p-7 flex flex-col">
-                <h3 className="text-[16px] font-bold text-[#111] mb-4 text-center">
-                  Accès Trimestriel
-                </h3>
-                <p className="text-center text-2xl font-bold text-[#111] mb-1">
-                  {quarterlyPrice.toLocaleString('fr-FR')} {CURRENCY}
-                </p>
-                <p className="text-center text-[13px] text-[#999] mb-2">
-                  votre premier trimestre
-                </p>
-                <p className="text-center text-[12px] text-[#aaa] mb-2">
-                  Renouvellement à {quarterlyPrice.toLocaleString('fr-FR')} {CURRENCY}/trimestre
-                </p>
-                {BILLING_OPTIONS.find(b => b.cycle === 'quarterly')?.savings && (
-                  <p className="text-center text-[12px] text-emerald-600 font-medium mb-6">
-                    {BILLING_OPTIONS.find(b => b.cycle === 'quarterly')!.savings}
-                  </p>
-                )}
-
-                <button
-                  onClick={() => handleSubscribe('quarterly')}
-                  disabled={!!loadingPlan}
-                  className="mt-auto w-full py-3 rounded-xl text-[14px] font-semibold border border-black/[0.12] text-[#333] hover:bg-[#111] hover:text-white hover:border-[#111] transition-all duration-300 disabled:opacity-40 flex items-center justify-center gap-2"
-                >
-                  {loadingPlan === 'quarterly' ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    'Choisir Trimestriel'
-                  )}
-                </button>
-              </div>
-
-              {/* Free */}
-              <div className="bg-white rounded-2xl border border-black/[0.06] p-7 flex flex-col">
-                <h3 className="text-[16px] font-bold text-[#111] mb-4 text-center">
-                  Accès Gratuit
-                </h3>
-                <p className="text-center text-2xl font-bold text-[#111] mb-1">
-                  0 {CURRENCY}
-                </p>
-                <p className="text-center text-[13px] text-[#999] mb-6">
-                  accès limité
-                </p>
-                <ul className="space-y-2.5 mb-6 flex-1">
-                  {FREE_TIER_FEATURES.map((f) => (
-                    <li key={f} className="flex items-start gap-2.5">
-                      <Check className="w-4 h-4 text-[#bbb] mt-0.5 flex-shrink-0 stroke-[2.5]" />
-                      <span className="text-[13px] text-[#666] leading-snug">{f}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <Link
-                  href={isSignedIn ? '/' : '/inscription'}
-                  className="mt-auto w-full py-3 rounded-xl text-[14px] font-semibold border border-black/[0.12] text-[#333] hover:bg-[#111] hover:text-white hover:border-[#111] transition-all duration-300 flex items-center justify-center gap-2 text-center"
-                >
-                  {isSignedIn ? 'Accueil' : 'Créer un compte'}
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
+        <PricingPlans
+          getPrice={getPrice}
+          loadingPlan={loadingPlan}
+          onSubscribe={handleSubscribe}
+        />
       )}
-
-      {/* ── FOOTER NOTE ── */}
-      <section className="pb-16" />
-    </div>
+      {!isSubscribed && <HighlightsCompact />}
+      <PaymentMethods />
+      {!isSubscribed && <FreePlanCard isSignedIn={isSignedIn} />}
+    </main>
   );
 }

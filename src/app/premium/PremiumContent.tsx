@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import {
   Check, Mail, FileText, Wrench, GraduationCap, Bell, Download,
   ArrowRight, Sparkles,
@@ -11,9 +11,24 @@ import {
 import { BILLING_OPTIONS, formatPrice, PREMIUM_MONTHLY_PRICE } from '@/config/pricing';
 
 const SCREENSHOTS = [
-  { src: '/premium/marches.png', alt: 'Page Marchés - cours BRVM, devises, mati\u00e8res premi\u00e8res' },
-  { src: '/premium/article-premium.png', alt: 'Article Premium - Banques nig\u00e9riennes sous pression' },
-  { src: '/premium/outil-budget.png', alt: 'Outil Budget - taux d\u2019\u00e9pargne, r\u00e9partition des d\u00e9penses' },
+  {
+    src: '/premium/marches.png',
+    alt: 'Page Marchés - cours BRVM, devises, mati\u00e8res premi\u00e8res',
+    label: 'Cours marchés',
+    desc: 'Cours BRVM, devises FCFA / EUR / USD et mati\u00e8res premi\u00e8res (or, p\u00e9trole, uranium) mis \u00e0 jour plusieurs fois par jour. Les chiffres qui p\u00e8sent r\u00e9ellement sur ton pouvoir d\u2019achat et tes placements.',
+  },
+  {
+    src: '/premium/article-premium.png',
+    alt: 'Article Premium - Banques nig\u00e9riennes sous pression',
+    label: 'Article Premium',
+    desc: 'Analyses in\u00e9dites : banques nig\u00e9riennes, g\u00e9opolitique sah\u00e9lienne, strat\u00e9gies d\u2019investissement en Afrique de l\u2019Ouest. \u00c9crites pour \u00eatre lues en 5 minutes, pas pour remplir un site.',
+  },
+  {
+    src: '/premium/outil-budget.png',
+    alt: 'Outil Budget - taux d\u2019\u00e9pargne, r\u00e9partition des d\u00e9penses',
+    label: 'Outil Budget',
+    desc: 'Entre tes revenus et d\u00e9penses. Obtiens ton taux d\u2019\u00e9pargne, ta r\u00e9partition par poste et des recommandations concr\u00e8tes pour passer \u00e0 15\u201320 % d\u2019\u00e9pargne. Export PDF inclus.',
+  },
 ];
 
 const BENEFITS = [
@@ -341,7 +356,6 @@ function PreviewSection() {
     return () => clearInterval(timer);
   }, []);
 
-  const labels = ['Cours marchés', 'Article Premium', 'Outil Budget'];
   const current = SCREENSHOTS[index]!;
 
   return (
@@ -359,33 +373,52 @@ function PreviewSection() {
           </p>
 
           <div className="mt-8 space-y-3">
-            {labels.map((label, i) => (
-              <button
-                key={label}
-                type="button"
-                onClick={() => setIndex(i)}
-                className={`flex w-full items-center gap-3 rounded-xl border px-5 py-4 text-left transition ${
-                  i === index
-                    ? 'border-gold bg-gold/5 shadow-sm'
-                    : 'border-black/[0.08] bg-white hover:border-black/20'
-                }`}
-              >
-                <span
-                  className={`flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-semibold ${
-                    i === index ? 'bg-gold text-white' : 'bg-gray-100 text-gray-500'
+            {SCREENSHOTS.map((item, i) => {
+              const active = i === index;
+              return (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={() => setIndex(i)}
+                  className={`flex w-full items-start gap-3 rounded-xl border px-5 py-4 text-left transition ${
+                    active
+                      ? 'border-gold bg-gold/5 shadow-sm'
+                      : 'border-black/[0.08] bg-white hover:border-black/20'
                   }`}
                 >
-                  {i + 1}
-                </span>
-                <span
-                  className={`text-[15px] ${
-                    i === index ? 'font-semibold text-[#1a1a1a]' : 'text-gray-700'
-                  }`}
-                >
-                  {label}
-                </span>
-              </button>
-            ))}
+                  <span
+                    className={`mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-[13px] font-semibold transition ${
+                      active ? 'bg-gold text-white' : 'bg-gray-100 text-gray-500'
+                    }`}
+                  >
+                    {i + 1}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <span
+                      className={`block text-[15px] transition ${
+                        active ? 'font-semibold text-[#1a1a1a]' : 'text-gray-700'
+                      }`}
+                    >
+                      {item.label}
+                    </span>
+                    <AnimatePresence initial={false}>
+                      {active && (
+                        <motion.p
+                          key={item.label}
+                          initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                          animate={{ opacity: 1, height: 'auto', marginTop: 8 }}
+                          exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                          transition={{ duration: 0.28, ease: 'easeOut' }}
+                          className="overflow-hidden text-[13.5px] leading-relaxed text-gray-600"
+                        >
+                          {item.desc}
+                        </motion.p>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </FadeUp>
 

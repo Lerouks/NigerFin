@@ -82,8 +82,8 @@ function InscriptionContent() {
     return (
       <AuthLayout>
         <div className="bg-white rounded-2xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] p-10 text-center animate-fade-in-up">
-          <div className="w-14 h-14 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-5">
-            <User className="w-7 h-7 text-amber-500" />
+          <div className="w-14 h-14 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-5">
+            <User className="w-7 h-7 text-gold" />
           </div>
           <h1 className="text-2xl font-bold mb-3">Compte existant</h1>
           <p className="text-gray-600 text-sm mb-6">

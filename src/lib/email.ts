@@ -73,7 +73,10 @@ export async function sendTransactionalEmail({
       return null;
     }
 
-    console.log('[EMAIL] Sent successfully:', { to, subject, id: result.data?.id });
+    Sentry.captureMessage('[EMAIL] Sent successfully', {
+      level: 'info',
+      extra: { subject, id: result.data?.id },
+    });
     return result;
   } catch (err) {
     console.error('[EMAIL] Failed to send:', err, { to, subject });

@@ -57,11 +57,11 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
           <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 text-white">
             <div className="max-w-7xl mx-auto">
               <SectionBadges sections={article.sections} category={article.category} variant="dark" />
-              <h2 className="text-3xl md:text-4xl lg:text-5xl mb-3 mt-3 line-clamp-2 group-hover:text-gray-200 transition-colors leading-[1.1]">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl mb-3 mt-3 line-clamp-3 group-hover:text-gray-200 transition-colors leading-[1.1]">
                 {article.title}
               </h2>
               {article.subtitle && (
-                <p className="text-base md:text-lg text-white/60 mb-5 line-clamp-2 max-w-2xl">
+                <p className="text-base md:text-lg text-white/60 mb-5 line-clamp-3 max-w-2xl">
                   {article.subtitle}
                 </p>
               )}

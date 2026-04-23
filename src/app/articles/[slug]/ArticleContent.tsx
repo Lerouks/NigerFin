@@ -10,6 +10,7 @@ import { useAuth } from '@/lib/auth-context';
 import { CommentsSection } from '@/components/CommentsSection';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
 import { PremiumPaywall } from '@/components/PremiumPaywall';
+import { ProtectedArticleBody } from '@/components/ProtectedArticleBody';
 import { NewsletterPopup } from '@/components/NewsletterPopup';
 import { ArticleCard } from '@/components/ArticleCard';
 import { ArticleLikes } from '@/components/ArticleLikes';
@@ -56,7 +57,7 @@ function WhatsAppIcon({ className }: { className?: string }) {
 
 export function ArticleContent({ article, htmlBody, relatedArticles = [] }: ArticleContentProps) {
   const articleRef = useRef<HTMLElement>(null);
-  const { isSignedIn, isLoading, userRole, premiumArticlesUsed, refreshProfile } = useAuth();
+  const { user, isSignedIn, isLoading, userRole, premiumArticlesUsed, refreshProfile } = useAuth();
   const [accessResult, setAccessResult] = useState<AccessResult | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
   const [hasTracked, setHasTracked] = useState(false);
@@ -294,13 +295,20 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
 
                 {/* Render HTML body (fetched securely for premium, sanitized) */}
                 {resolvedBody ? (
-                  <div
-                    className="article-content"
-                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(resolvedBody, {
-                      ADD_TAGS: ['figure', 'figcaption'],
-                      ADD_ATTR: ['data-type', 'data-value', 'data-label', 'target', 'rel'],
-                    }) }}
-                  />
+                  isPremiumContent ? (
+                    <ProtectedArticleBody
+                      html={resolvedBody}
+                      watermarkLabel={user?.email ?? user?.id ?? 'Abonné NFI'}
+                    />
+                  ) : (
+                    <div
+                      className="article-content"
+                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(resolvedBody, {
+                        ADD_TAGS: ['figure', 'figcaption'],
+                        ADD_ATTR: ['data-type', 'data-value', 'data-label', 'target', 'rel'],
+                      }) }}
+                    />
+                  )
                 ) : bodyError ? (
                   <div className="text-center py-16">
                     <p className="text-gray-500 mb-4">Impossible de charger le contenu de cet article.</p>

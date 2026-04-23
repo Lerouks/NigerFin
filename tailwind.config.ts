@@ -6,7 +6,10 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        inter: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        inter: ['var(--font-inter)', 'Inter', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        sans: ['var(--font-inter)', 'Inter', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        display: ['var(--font-fraunces)', 'Fraunces', 'Georgia', 'serif'],
+        serif: ['var(--font-fraunces)', 'Fraunces', 'Georgia', 'serif'],
       },
       colors: {
         background: '#fafaf9',

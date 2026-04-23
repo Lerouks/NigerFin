@@ -749,3 +749,79 @@ small, footer, .text-xs, .text-sm {
     padding: 0.5rem 0.625rem;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   PROTECTION CONTENU PREMIUM (Niveau 3) : anti-copie + watermark email
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.article-content--protected {
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.article-content--protected .article-content__watermark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background-repeat: repeat;
+  background-position: 0 0;
+}
+
+.article-content--protected .article-content__body {
+  position: relative;
+  z-index: 2;
+}
+
+.article-content--protected img {
+  -webkit-user-drag: none;
+  user-select: none;
+  pointer-events: none;
+}
+
+.article-content--protected .article-content__hint {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  background: #111;
+  color: #fff;
+  padding: 0.625rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  animation: nfi-protect-hint 1.5s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes nfi-protect-hint {
+  0% { opacity: 0; transform: translateY(8px); }
+  15% { opacity: 1; transform: translateY(0); }
+  85% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-4px); }
+}
+
+@media print {
+  .article-content--protected .article-content__body,
+  .article-content--protected .article-content__watermark {
+    display: none !important;
+  }
+  .article-content--protected::before {
+    content: "Impression désactivée pour ce contenu premium NFI Report.";
+    display: block;
+    padding: 2rem;
+    text-align: center;
+    font-size: 1rem;
+    color: #555;
+  }
+}
+
+html.nfi-printing-blocked .article-content--protected .article-content__body {
+  display: none;
+}

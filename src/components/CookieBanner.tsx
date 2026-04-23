@@ -9,6 +9,7 @@ import { initPostHog } from '@/lib/posthog';
 /**
  * Bannière de consentement RGPD/CNIL.
  *
+ * Toast discret en bas à droite (mobile : pleine largeur en bas).
  * S'affiche après 1.5s si l'utilisateur n'a ni accepté ni refusé.
  * Tant qu'aucun choix n'est fait, les outils d'analyse et de suivi
  * d'erreurs restent désactivés.
@@ -20,12 +21,8 @@ export function CookieBanner() {
   useEffect(() => {
     const consent = getConsent();
     if (consent === null) {
-      // Show after 1.5s delay
       const timer = setTimeout(() => {
         setShouldShow(true);
-        // Block scroll while banner is visible
-        document.body.style.overflow = 'hidden';
-        // Trigger animation on next frame
         requestAnimationFrame(() => setAnimate(true));
       }, 1500);
       return () => clearTimeout(timer);
@@ -36,9 +33,6 @@ export function CookieBanner() {
 
   const dismiss = () => {
     setAnimate(false);
-    // Restore scroll immediately
-    document.body.style.overflow = '';
-    // Wait for exit animation then hide
     setTimeout(() => setShouldShow(false), 300);
   };
 
@@ -60,57 +54,42 @@ export function CookieBanner() {
       role="dialog"
       aria-live="polite"
       aria-label="Consentement aux cookies"
-      className="fixed inset-0 z-[100] flex items-end justify-center"
+      className="fixed z-[100] inset-x-0 bottom-0 sm:inset-x-auto sm:bottom-4 sm:right-4 sm:max-w-sm pointer-events-none"
     >
-      {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/30 transition-opacity duration-400"
-        style={{ opacity: animate ? 1 : 0 }}
-      />
-
-      {/* Banner */}
-      <div
-        className="relative w-full sm:max-w-4xl sm:mx-4 sm:mb-4 bg-white sm:rounded-2xl shadow-2xl border-t sm:border border-black/[0.08] p-5 sm:p-6 transition-all duration-400 ease-out"
+        className="pointer-events-auto bg-white border-t sm:border border-black/[0.08] sm:rounded-xl shadow-2xl p-4 sm:p-5 transition-all duration-300 ease-out"
         style={{
-          transform: animate ? 'translateY(0)' : 'translateY(100%)',
+          transform: animate ? 'translateY(0)' : 'translateY(20px)',
           opacity: animate ? 1 : 0,
         }}
       >
-        <div className="text-center sm:text-left sm:flex sm:items-start sm:gap-4">
-          <div className="hidden sm:flex w-10 h-10 rounded-xl bg-[#fafaf9] items-center justify-center flex-shrink-0">
-            <Cookie className="w-5 h-5 text-gold" aria-hidden="true" />
+        <div className="flex items-start gap-3">
+          <div className="hidden sm:flex w-8 h-8 rounded-lg bg-[#fafaf9] items-center justify-center flex-shrink-0">
+            <Cookie className="w-4 h-4 text-gold" aria-hidden="true" />
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-[15px] font-semibold text-gray-900 mb-1">
-              Nous respectons votre vie privée
+            <h2 className="text-[14px] font-semibold text-gray-900 mb-1">
+              Cookies
             </h2>
-            <p className="text-[13px] text-gray-600 leading-relaxed">
-              NFI Report utilise des cookies de mesure d&rsquo;audience et de suivi
-              d&rsquo;erreurs techniques pour améliorer votre expérience. Ces outils sont
-              désactivés tant que vous n&rsquo;avez pas donné votre accord. Les cookies
-              strictement nécessaires au fonctionnement du site (authentification)
-              restent actifs. Pour en savoir plus, consultez notre{' '}
+            <p className="text-[12px] text-gray-600 leading-relaxed mb-3">
+              On utilise des cookies pour mesurer l&rsquo;audience.{' '}
               <Link href="/cookies" className="underline hover:text-gray-900">
-                politique cookies
-              </Link>{' '}
-              et notre{' '}
-              <Link href="/confidentialite" className="underline hover:text-gray-900">
-                politique de confidentialité
+                En savoir plus
               </Link>
               .
             </p>
-            <div className="mt-4 flex flex-col sm:flex-row gap-2">
+            <div className="flex gap-2">
               <button
                 type="button"
                 onClick={handleAccept}
-                className="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-[#111] text-white text-[13px] font-medium hover:bg-black transition-colors"
+                className="inline-flex items-center justify-center min-h-[36px] px-3 py-1.5 rounded-md bg-[#111] text-white text-[12px] font-medium hover:bg-black transition-colors"
               >
-                Accepter et continuer
+                Accepter
               </button>
               <button
                 type="button"
                 onClick={handleReject}
-                className="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 rounded-lg border border-black/[0.1] text-gray-700 text-[13px] font-medium hover:bg-gray-50 transition-colors"
+                className="inline-flex items-center justify-center min-h-[36px] px-3 py-1.5 rounded-md border border-black/[0.1] text-gray-700 text-[12px] font-medium hover:bg-gray-50 transition-colors"
               >
                 Refuser
               </button>
@@ -120,7 +99,7 @@ export function CookieBanner() {
             type="button"
             onClick={handleReject}
             aria-label="Fermer et refuser les cookies non essentiels"
-            className="hidden sm:block flex-shrink-0 p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
+            className="flex-shrink-0 inline-flex items-center justify-center w-7 h-7 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>

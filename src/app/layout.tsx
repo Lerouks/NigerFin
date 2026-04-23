@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
+import { Fraunces } from 'next/font/google';
 import { Providers } from './providers';
 import { MainLayoutShell } from '@/components/MainLayoutShell';
 import { ViewTracker } from '@/components/ViewTracker';
@@ -31,6 +32,13 @@ const inter = localFont({
     },
   ],
   variable: '--font-inter',
+  display: 'swap',
+});
+
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  variable: '--font-fraunces',
   display: 'swap',
 });
 
@@ -133,7 +141,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr" className={`${inter.variable}`} suppressHydrationWarning>
+    <html lang="fr" className={`${inter.variable} ${fraunces.variable}`} suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"

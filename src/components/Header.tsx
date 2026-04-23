@@ -68,17 +68,17 @@ export function Header() {
           <div className="flex justify-between items-center h-16 relative">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-1.5 -ml-1.5 hover:bg-black/5 rounded-lg transition-colors"
+              className="lg:hidden -ml-2 inline-flex items-center justify-center min-w-[44px] min-h-[44px] hover:bg-black/5 rounded-lg transition-colors"
               aria-expanded={mobileMenuOpen}
               aria-label={mobileMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
-            <Link href="/" className="flex items-center lg:static absolute left-1/2 -translate-x-1/2 lg:translate-x-0 max-w-[calc(100%-160px)] lg:max-w-none">
-              <h1 className="text-[18px] sm:text-[22px] md:text-[26px] tracking-[-0.03em] font-bold truncate">
+            <Link href="/" className="flex items-center lg:static absolute left-1/2 -translate-x-1/2 lg:translate-x-0 max-w-[calc(100%-160px)] lg:max-w-none" aria-label="NFI Report, accueil">
+              <span className="text-[18px] sm:text-[22px] md:text-[26px] tracking-[-0.03em] font-bold truncate">
                 NFI REPORT
-              </h1>
+              </span>
             </Link>
 
             <div className="flex items-center gap-3">
@@ -153,7 +153,7 @@ export function Header() {
               {/* Search icon */}
               <button
                 onClick={() => setSearchOpen(true)}
-                className="hidden sm:flex items-center justify-center p-1.5 hover:opacity-60 transition-opacity"
+                className="hidden sm:inline-flex items-center justify-center min-w-[44px] min-h-[44px] -mr-2 hover:opacity-60 transition-opacity"
                 aria-label="Rechercher"
               >
                 <Search className="w-[18px] h-[18px] text-[#111]" strokeWidth={2} />
@@ -173,7 +173,7 @@ export function Header() {
                     <Link
                       key={section.path}
                       href={section.path}
-                      className={`text-[13px] px-3 py-1 rounded-md transition-all relative ${
+                      className={`text-[13px] px-3 inline-flex items-center h-11 rounded-md transition-all relative ${
                         isActive
                           ? 'text-white bg-white/10'
                           : 'text-white/80 hover:bg-white/10 hover:text-white'
@@ -203,7 +203,7 @@ export function Header() {
               <Link
                 key={section.path}
                 href={section.path}
-                className="flex items-center justify-between py-2.5 px-3 text-[15px] text-gray-700 hover:bg-black/[0.03] rounded-lg transition-colors"
+                className="flex items-center justify-between min-h-[44px] py-3 px-3 text-[15px] text-gray-700 hover:bg-black/[0.03] rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
                 tabIndex={mobileMenuOpen ? 0 : -1}
                 style={{ animationDelay: mobileMenuOpen ? `${i * 50}ms` : '0ms' }}

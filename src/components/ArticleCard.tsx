@@ -57,7 +57,7 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
           <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 text-white">
             <div className="max-w-7xl mx-auto">
               <SectionBadges sections={article.sections} category={article.category} variant="dark" />
-              <h2 className="font-display text-3xl md:text-4xl lg:text-5xl mb-3 mt-3 line-clamp-3 group-hover:text-gray-200 transition-colors leading-[1.1] tracking-[-0.01em]">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl mb-3 mt-3 line-clamp-3 group-hover:text-gray-200 transition-colors leading-[1.1]">
                 {article.title}
               </h2>
               {article.subtitle && (
@@ -110,7 +110,7 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
               {article.readTime} min
             </span>
           </div>
-          <h3 className="font-display text-[18px] leading-snug mb-2 line-clamp-2 group-hover:text-gray-600 transition-colors tracking-[-0.005em]">
+          <h3 className="text-[17px] leading-snug mb-2 line-clamp-2 group-hover:text-gray-600 transition-colors">
             {article.title}
           </h3>
           <p className="text-[13px] text-gray-500 mb-4 line-clamp-2 leading-relaxed">

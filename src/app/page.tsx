@@ -66,7 +66,7 @@ export default async function HomePage() {
               <section>
                 <div className="flex items-center gap-4 mb-8">
                   <div className="animate-gold-line h-[2px] bg-gold" />
-                  <h2 className="font-display text-xl sm:text-2xl font-semibold whitespace-nowrap tracking-[-0.01em]">Dernières actualités</h2>
+                  <h2 className="text-xl sm:text-2xl font-semibold whitespace-nowrap">Dernières actualités</h2>
                   <div className="flex-1 h-px bg-black/[0.06]" />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 stagger-grid">
@@ -89,7 +89,7 @@ export default async function HomePage() {
                 <section key={sectionKey}>
                   <div className="flex items-center gap-4 mb-8">
                     <div className="animate-gold-line h-[2px] bg-gold" />
-                    <h2 className="font-display text-xl sm:text-2xl font-semibold whitespace-nowrap tracking-[-0.01em]">{meta.label}</h2>
+                    <h2 className="text-xl sm:text-2xl font-semibold whitespace-nowrap">{meta.label}</h2>
                     <div className="flex-1 h-px bg-black/[0.06]" />
                     <Link
                       href={meta.path}

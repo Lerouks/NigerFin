@@ -34,7 +34,7 @@ export interface SupabaseArticle {
 
 import type { Article } from '@/types';
 
-export function toArticle(row: SupabaseArticle): Article {
+function toArticle(row: SupabaseArticle): Article {
   return {
     _id: row.id,
     slug: { current: row.slug },

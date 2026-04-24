@@ -20,5 +20,3 @@ export function initPostHog() {
   });
   initialized = true;
 }
-
-export { posthog };

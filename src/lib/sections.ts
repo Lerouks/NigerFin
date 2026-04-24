@@ -6,11 +6,3 @@ export const SECTION_META: Record<string, { label: string; path: string }> = {
   niger: { label: 'Niger', path: '/niger' },
   education: { label: 'Éducation', path: '/education' },
 };
-
-export function getSectionLabel(slug: string): string {
-  return SECTION_META[slug]?.label || slug;
-}
-
-export function getSectionPath(slug: string): string {
-  return SECTION_META[slug]?.path || `/${slug}`;
-}

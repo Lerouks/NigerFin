@@ -37,11 +37,7 @@ function getNextMonthReset(): string {
   return d.toISOString();
 }
 
-export function getVisitorArticlesRead(): number {
-  return getVisitorData().slugs.length;
-}
-
-export function canVisitorReadArticle(slug: string): boolean {
+function canVisitorReadArticle(slug: string): boolean {
   const data = getVisitorData();
   if (data.slugs.includes(slug)) return true; // Already read this one
   return data.slugs.length < VISITOR_ARTICLE_LIMIT;
@@ -54,10 +50,6 @@ export function trackVisitorArticle(slug: string): void {
     data.slugs.push(slug);
     localStorage.setItem(VISITOR_STORAGE_KEY, JSON.stringify(data));
   }
-}
-
-export function getVisitorLimit(): number {
-  return VISITOR_ARTICLE_LIMIT;
 }
 
 // ─── Content access rules ────────────────────────────────────────────────────

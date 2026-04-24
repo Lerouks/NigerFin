@@ -71,13 +71,6 @@ export const PREMIUM_TIER: PremiumTier = {
   ],
 };
 
-export const FREE_TIER_FEATURES = [
-  'Articles gratuits illimités',
-  '3 articles premium par mois',
-  'Newsletter mensuelle',
-  'Outils de base',
-];
-
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 export function formatPrice(amount: number): string {

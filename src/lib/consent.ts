@@ -8,8 +8,8 @@
 
 export type ConsentValue = 'accepted' | 'rejected';
 
-export const CONSENT_STORAGE_KEY = 'nfi_cookie_consent';
-export const CONSENT_EVENT = 'nfi:consent-changed';
+const CONSENT_STORAGE_KEY = 'nfi_cookie_consent';
+const CONSENT_EVENT = 'nfi:consent-changed';
 
 export function getConsent(): ConsentValue | null {
   if (typeof window === 'undefined') return null;

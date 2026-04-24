@@ -2,9 +2,6 @@ import { createClient } from '@supabase/supabase-js';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
-// Re-export browser client for convenience
-export { createBrowserSupabaseClient } from './supabase-browser';
-
 // Server client (for server components and API routes)
 export async function createServerSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

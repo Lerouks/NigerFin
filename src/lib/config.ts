@@ -5,7 +5,3 @@
 
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || 'https://nfireport.com';
-
-export const SITE_NAME = 'NFI Report';
-
-export const CONTACT_EMAIL = 'contact@nfireport.com';

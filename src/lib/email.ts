@@ -87,6 +87,3 @@ export async function sendTransactionalEmail({
     throw err;
   }
 }
-
-// Re-export Beehiiv functions for backward compatibility
-export { subscribeToBeehiiv, syncContactToBeehiiv } from './beehiiv';

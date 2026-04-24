@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import DOMPurify from 'dompurify';
+import DOMPurify from 'isomorphic-dompurify';
 import { buildWatermarkSvgDataUrl, isBlockedShortcut } from './ProtectedArticleBody.helpers';
 
 interface ProtectedArticleBodyProps {

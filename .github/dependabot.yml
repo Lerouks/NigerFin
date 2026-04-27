@@ -1,0 +1,71 @@
+version: 2
+
+# Dependabot config NFI Report
+# - Met à jour les actions GitHub chaque semaine pour suivre les patches de sécurité
+# - Met à jour les deps npm chaque semaine, groupées pour limiter le bruit
+# - PRs auto-créées sur main, review manuelle avant merge
+
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Africa/Niamey
+    commit-message:
+      prefix: chore
+      prefix-development: chore
+      include: scope
+    labels:
+      - ci
+      - dependencies
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Africa/Niamey
+    commit-message:
+      prefix: chore(deps)
+      prefix-development: chore(deps-dev)
+      include: scope
+    labels:
+      - dependencies
+    open-pull-requests-limit: 10
+    groups:
+      next-ecosystem:
+        patterns:
+          - "next"
+          - "@next/*"
+          - "react"
+          - "react-dom"
+      sentry:
+        patterns:
+          - "@sentry/*"
+      tiptap:
+        patterns:
+          - "@tiptap/*"
+      supabase:
+        patterns:
+          - "@supabase/*"
+      tailwind:
+        patterns:
+          - "tailwindcss"
+          - "@tailwindcss/*"
+          - "postcss"
+          - "autoprefixer"
+      testing:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+          - "@playwright/*"
+          - "playwright"
+      eslint:
+        patterns:
+          - "eslint"
+          - "eslint-config-*"
+          - "eslint-plugin-*"

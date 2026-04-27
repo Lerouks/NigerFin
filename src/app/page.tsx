@@ -14,7 +14,10 @@ export const metadata: Metadata = {
   description: "Votre source d'informations économiques et financières pour le Niger et l'Afrique de l'Ouest. Articles, analyses, outils financiers et données de marché.",
 };
 
-export const revalidate = 60;
+// ISR: page régénérée toutes les heures. Articles n'évoluent pas à la minute,
+// 1h offre un bon compromis fraîcheur/cache hit. Auparavant 60s = trop de cache
+// misses, perçu comme lent par les utilisateurs (skeletons visibles 5s+).
+export const revalidate = 3600;
 
 // Sections displayed on homepage (in order)
 const HOME_SECTIONS = ['economie', 'finance', 'marches', 'entreprises'] as const;

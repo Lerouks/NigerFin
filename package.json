@@ -52,12 +52,12 @@
     "@types/node": "^22.10.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "autoprefixer": "^10.4.20",
+    "autoprefixer": "^10.5.0",
     "eslint": "^9.39.4",
     "eslint-config-next": "^15.5.14",
     "knip": "^6.6.2",
     "postcss": "^8.4.49",
-    "tailwindcss": "^3.4.16",
+    "tailwindcss": "^4.2.4",
     "typescript": "^5.7.2",
     "vitest": "^4.1.0"
   }

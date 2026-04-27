@@ -74,7 +74,18 @@ Lors de chaque modification, ne pas se limiter à la demande stricte. Vérifier 
 - Les liens cassés, les routes manquantes, les imports non utilisés
 - La cohérence des traductions/textes français
 
-### 4. Suggestions proactives
+### 4. Rotation des secrets (durcissement /cso 2026-04-27)
+
+**Rotation périodique** :
+- `SUPABASE_SERVICE_ROLE_KEY` : tous les 6 mois (prochaine rotation **2026-10-27**). Procédure dans `TODOS-SECURITY.md`.
+- `RESEND_API_KEY`, `BEEHIIV_API_KEY` : tous les 12 mois.
+- `CRON_SECRET`, `REVALIDATE_SECRET` : tous les 12 mois ou immédiatement après tout soupçon de fuite.
+
+**Stockage local** : ne jamais commiter `.env.local`, vérifier régulièrement avec `git ls-files | grep .env` (sortie vide attendue, sauf `.env.local.example`).
+
+**Disque dev** : FileVault doit être actif sur le Mac dev. Vérifier dans Système → Confidentialité et sécurité → FileVault.
+
+### 5. Suggestions proactives
 Si, dans le cadre d'un projet de ce type (site d'actualité économique Next.js + Supabase + iPayMoney), Claude identifie un élément manquant, incomplet, ou améliorable que l'utilisateur n'a pas mentionné (SEO, métadonnées, sitemap, robots.txt, loading states, error boundaries, fallbacks, validation de formulaires, rate limiting, RGPD, etc.), il doit :
 1. **Le signaler clairement** à l'utilisateur avec une explication courte du pourquoi
 2. **Attendre l'accord explicite** de l'utilisateur

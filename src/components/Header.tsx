@@ -99,7 +99,7 @@ export function Header() {
                 ) : (
                   <Link
                     href="/connexion"
-                    className="hidden sm:inline text-[14px] text-[#111] hover:text-black/60 transition-colors whitespace-nowrap"
+                    className="hidden sm:inline-flex items-center min-h-[44px] px-2 -mx-2 text-[14px] text-[#111] hover:text-black/60 transition-colors whitespace-nowrap"
                   >
                     Se connecter
                   </Link>
@@ -144,7 +144,7 @@ export function Header() {
               {!isAuthLoading && !isSignedIn && (
                 <Link
                   href="/premium"
-                  className="inline-flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 bg-[#111] text-white text-[13px] sm:text-[14px] font-medium rounded-[4px] hover:bg-black transition-colors whitespace-nowrap border border-[#111]"
+                  className="inline-flex items-center justify-center min-h-[44px] px-4 sm:px-5 bg-[#111] text-white text-[13px] sm:text-[14px] font-medium rounded-[4px] hover:bg-black transition-colors whitespace-nowrap border border-[#111]"
                 >
                   S&apos;abonner
                 </Link>

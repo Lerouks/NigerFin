@@ -1,0 +1,101 @@
+# Gitleaks config NFI Report
+# Bloquer les commits contenant des secrets (clés API, JWT, mots de passe, etc.)
+# Référence : https://github.com/gitleaks/gitleaks
+#
+# Usage local :
+#   brew install gitleaks
+#   gitleaks protect --staged   # avant commit
+#   gitleaks detect             # scan du repo entier
+#
+# CI : géré par GitHub Actions secret scanning par défaut (déjà actif sur ce repo).
+
+title = "NFI Report Gitleaks Config"
+
+[[rules]]
+id = "supabase-jwt"
+description = "Supabase JWT (anon key OK car publique, service role key DOIT JAMAIS fuir)"
+regex = '''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[A-Za-z0-9_-]{40,}\.[A-Za-z0-9_-]{40,}'''
+tags = ["jwt", "supabase"]
+
+[[rules]]
+id = "resend-api-key"
+description = "Resend API key"
+regex = '''re_[a-zA-Z0-9_]{20,}'''
+tags = ["api-key", "resend"]
+
+[[rules]]
+id = "ipaymoney-secret"
+description = "iPayMoney secret key (à venir, format à confirmer)"
+regex = '''ipm_(live|test)_[a-zA-Z0-9]{20,}'''
+tags = ["api-key", "ipaymoney"]
+
+[[rules]]
+id = "beehiiv-api-key"
+description = "Beehiiv API key"
+regex = '''bee_(live|test)_[a-zA-Z0-9]{20,}'''
+tags = ["api-key", "beehiiv"]
+
+[[rules]]
+id = "aws-access-key"
+description = "AWS Access Key"
+regex = '''AKIA[0-9A-Z]{16}'''
+tags = ["aws"]
+
+[[rules]]
+id = "stripe-live-key"
+description = "Stripe live key (ne devrait pas être présent, NFI utilise iPayMoney)"
+regex = '''sk_live_[a-zA-Z0-9]{24,}'''
+tags = ["stripe"]
+
+[[rules]]
+id = "github-pat"
+description = "GitHub Personal Access Token"
+regex = '''ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9_]{80,}'''
+tags = ["github"]
+
+[[rules]]
+id = "anthropic-key"
+description = "Anthropic API key"
+regex = '''sk-ant-(api|admin)[a-zA-Z0-9_-]{60,}'''
+tags = ["anthropic"]
+
+[[rules]]
+id = "openai-key"
+description = "OpenAI API key"
+regex = '''sk-proj-[a-zA-Z0-9_-]{40,}|sk-[a-zA-Z0-9]{48}'''
+tags = ["openai"]
+
+[[rules]]
+id = "generic-api-key"
+description = "Generic high-entropy API key (longue chaîne aléatoire dans variable secret/api/key/token)"
+regex = '''(?i)(secret|api[_-]?key|access[_-]?token|auth[_-]?token)["\s:=]+['"]?([a-zA-Z0-9_-]{32,})['"]?'''
+tags = ["generic"]
+
+# Allowlist : exclure les chemins et patterns connus pour ne PAS faire de bruit
+[allowlist]
+description = "Faux positifs autorisés"
+
+paths = [
+  '''node_modules/''',
+  '''\.next/''',
+  '''dist/''',
+  '''package-lock\.json$''',
+  '''bun\.lockb$''',
+  '''yarn\.lock$''',
+  '''\.env\.local\.example$''',  # Template avec placeholders
+  '''_Project Knowledge''',       # Faux positifs sur exemples docs
+  '''\.gstack/''',                # Rapports gstack (security audits)
+  '''CHANGELOG\.md$''',
+  '''docs/.*\.md$''',
+]
+
+regexes = [
+  '''your[_-]?[a-z_]+[_-]?(key|token|secret)''',  # placeholders type "your_api_key"
+  '''placeholder''',
+  '''example[_-]?(key|token)''',
+  '''xxxxxxxx''',
+  '''YOUR_[A-Z_]+''',
+  '''CHANGEME''',
+  '''dummy[_-]?(key|token)''',
+  '''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[a-zA-Z0-9._-]{0,40}placeholder''',  # JWT placeholder
+]

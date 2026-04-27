@@ -96,7 +96,7 @@ export default async function HomePage() {
                     <div className="flex-1 h-px bg-black/[0.06]" />
                     <Link
                       href={meta.path}
-                      className="hidden sm:inline-flex items-center gap-1.5 text-[13px] text-gray-400 hover:text-gold transition-colors group whitespace-nowrap"
+                      className="hidden sm:inline-flex items-center gap-1.5 min-h-[44px] px-2 -mx-2 text-[13px] text-gray-400 hover:text-gold transition-colors group whitespace-nowrap"
                     >
                       Voir tous les articles
                       <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
@@ -109,7 +109,7 @@ export default async function HomePage() {
                   </div>
                   <Link
                     href={meta.path}
-                    className="sm:hidden inline-flex items-center gap-1.5 mt-6 text-[13px] text-gray-400 hover:text-gold transition-colors group"
+                    className="sm:hidden inline-flex items-center gap-1.5 mt-6 min-h-[44px] px-2 -mx-2 text-[13px] text-gray-400 hover:text-gold transition-colors group"
                   >
                     Voir les articles {meta.label.toLowerCase()}
                     <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />

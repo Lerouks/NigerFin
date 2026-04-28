@@ -249,6 +249,16 @@ function HeroSection() {
             </div>
           </div>
 
+          <p className="mt-4 text-[13px] text-gray-500">
+            Déjà abonné ?{' '}
+            <Link
+              href="/connexion"
+              className="font-medium text-gray-700 underline underline-offset-2 transition-colors hover:text-gold"
+            >
+              Se connecter
+            </Link>
+          </p>
+
           <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px] text-gray-500">
             <span className="inline-flex items-center gap-1.5">
               <Check className="h-3.5 w-3.5 text-gold" />

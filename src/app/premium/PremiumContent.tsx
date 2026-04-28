@@ -113,16 +113,20 @@ function FadeUp({
   );
 }
 
-// ─── iPhone mockup component ──────────────────────────────────────────────────
+// iPhone mockup component
+// Next.js Image optim active (WebP/AVIF auto-served selon le navigateur).
+// Avant : 4.7 MB de PNG sur /premium. Apres : ~1 MB d'AVIF/WebP servis par le CDN.
 
 function IPhoneMockup({
   src,
   alt,
   className = '',
+  priority = false,
 }: {
   src: string;
   alt: string;
   className?: string;
+  priority?: boolean;
 }) {
   return (
     <div
@@ -150,10 +154,10 @@ function IPhoneMockup({
               alt={alt}
               fill
               sizes="(max-width: 640px) 280px, 320px"
-              quality={100}
-              unoptimized
+              quality={85}
               className="object-cover object-top"
-              priority
+              priority={priority}
+              loading={priority ? undefined : 'lazy'}
             />
             {/* Subtle screen reflection */}
             <div
@@ -284,7 +288,7 @@ function HeroSection() {
                 WebkitFontSmoothing: 'antialiased',
               }}
             >
-              <IPhoneMockup src={SCREENSHOTS[0]!.src} alt={SCREENSHOTS[0]!.alt} />
+              <IPhoneMockup src={SCREENSHOTS[0]!.src} alt={SCREENSHOTS[0]!.alt} priority />
             </div>
           </motion.div>
         </div>

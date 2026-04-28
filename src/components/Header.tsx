@@ -99,7 +99,7 @@ export function Header() {
                 ) : (
                   <Link
                     href="/connexion"
-                    className="inline-flex items-center min-h-[44px] px-2 -mx-2 text-[13px] sm:text-[14px] text-[#111] hover:text-black/60 transition-colors whitespace-nowrap"
+                    className="hidden sm:inline-flex items-center min-h-[44px] px-2 -mx-2 text-[14px] text-[#111] hover:text-black/60 transition-colors whitespace-nowrap"
                   >
                     Se connecter
                   </Link>
@@ -224,6 +224,17 @@ export function Header() {
                 <span className="flex items-center gap-2"><Search className="w-4 h-4" /> Rechercher</span>
                 <ChevronRight className="w-4 h-4 text-gray-300" />
               </button>
+              {!isAuthLoading && !isSignedIn && (
+                <Link
+                  href="/connexion"
+                  className="sm:hidden flex items-center justify-between py-2.5 px-3 text-[15px] text-gray-700 hover:bg-black/[0.03] rounded-lg transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                  tabIndex={mobileMenuOpen ? 0 : -1}
+                >
+                  Se connecter
+                  <ChevronRight className="w-4 h-4 text-gray-300" />
+                </Link>
+              )}
               {!isAuthLoading && !isSignedIn && (
                 <Link
                   href="/premium"

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Section, Link, Text } from '@react-email/components';
-import { colors, fonts, fontSizes, letterSpacing, lineHeights } from './tokens';
+import { colors, fonts, fontSizes, lineHeights } from './tokens';
 
 export interface RadarItem {
   title: string;
@@ -9,79 +9,105 @@ export interface RadarItem {
 }
 
 export interface RadarProps {
+  sectionNumeral?: string;
+  eyebrow?: string;
   title?: string;
   items: RadarItem[];
 }
 
-export function Radar({ title = 'Sur notre radar', items }: RadarProps) {
+export function Radar({ sectionNumeral, eyebrow = 'À retenir', title = 'Sur notre radar', items }: RadarProps) {
   return (
-    <Section style={{ padding: '24px 32px' }}>
-      <Text
-        style={{
-          margin: '0 0 4px',
-          color: colors.gold,
-          fontFamily: fonts.sans,
-          fontSize: fontSizes.tiny,
-          fontWeight: 700,
-          letterSpacing: letterSpacing.caps,
-          textTransform: 'uppercase',
-        }}
-      >
-        À retenir
-      </Text>
-      <Text
-        style={{
-          margin: '0 0 18px',
-          color: colors.ink,
-          fontFamily: fonts.sans,
-          fontSize: fontSizes.h2,
-          fontWeight: 700,
-          letterSpacing: '-0.3px',
-          lineHeight: lineHeights.tight,
-        }}
-      >
-        {title}
-      </Text>
+    <Section style={{ padding: '32px 32px 36px' }}>
+      <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ borderCollapse: 'collapse', marginBottom: '20px' }}>
+        <tr>
+          {sectionNumeral ? (
+            <td width={64} style={{ verticalAlign: 'top', paddingRight: '16px' }}>
+              <Text
+                style={{
+                  margin: 0,
+                  color: colors.gold,
+                  fontFamily: fonts.sans,
+                  fontSize: '46px',
+                  fontWeight: 900,
+                  letterSpacing: '-1px',
+                  lineHeight: 0.9,
+                }}
+              >
+                {sectionNumeral}
+              </Text>
+            </td>
+          ) : null}
+          <td style={{ verticalAlign: 'top' }}>
+            <Text
+              style={{
+                margin: '0 0 6px',
+                color: colors.gold,
+                fontFamily: fonts.sans,
+                fontSize: '11px',
+                fontWeight: 700,
+                letterSpacing: '4px',
+                textTransform: 'uppercase',
+              }}
+            >
+              {eyebrow}
+            </Text>
+            <Text
+              style={{
+                margin: 0,
+                color: colors.ink,
+                fontFamily: fonts.sans,
+                fontSize: '24px',
+                fontWeight: 800,
+                letterSpacing: '-0.4px',
+                lineHeight: 1.2,
+              }}
+            >
+              {title}
+            </Text>
+          </td>
+        </tr>
+      </table>
       <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ borderCollapse: 'collapse' }}>
         <tbody>
           {items.map((item, idx) => (
             <tr key={idx}>
               <td
-                width={32}
+                width={42}
                 style={{
-                  paddingTop: '2px',
-                  paddingRight: '12px',
+                  paddingTop: '4px',
+                  paddingRight: '14px',
                   verticalAlign: 'top',
-                  width: '32px',
                 }}
               >
                 <span
                   style={{
                     display: 'inline-block',
-                    width: '26px',
-                    height: '26px',
-                    lineHeight: '26px',
+                    width: '32px',
+                    height: '32px',
+                    lineHeight: '32px',
                     textAlign: 'center',
                     backgroundColor: colors.gold,
                     color: colors.primary,
                     fontFamily: fonts.sans,
-                    fontSize: '12px',
-                    fontWeight: 800,
+                    fontSize: '13px',
+                    fontWeight: 900,
                     borderRadius: '50%',
+                    letterSpacing: 0,
                   }}
                 >
                   {idx + 1}
                 </span>
               </td>
-              <td style={{ paddingTop: '2px', paddingBottom: '14px', verticalAlign: 'top' }}>
+              <td style={{ paddingTop: '4px', paddingBottom: '18px', verticalAlign: 'top' }}>
                 <Text
                   style={{
                     margin: '0 0 4px',
                     color: colors.ink,
                     fontFamily: fonts.sans,
-                    fontSize: fontSizes.body,
-                    fontWeight: 600,
-                    lineHeight: lineHeights.normal,
+                    fontSize: fontSizes.h3,
+                    fontWeight: 700,
+                    lineHeight: lineHeights.tight,
+                    letterSpacing: '-0.1px',
                   }}
                 >
                   {item.url ? (
@@ -99,7 +125,7 @@ export function Radar({ title = 'Sur notre radar', items }: RadarProps) {
                       color: colors.inkMuted,
                       fontFamily: fonts.sans,
                       fontSize: fontSizes.small,
-                      lineHeight: lineHeights.normal,
+                      lineHeight: lineHeights.relaxed,
                     }}
                   >
                     {item.hint}
@@ -113,3 +139,4 @@ export function Radar({ title = 'Sur notre radar', items }: RadarProps) {
     </Section>
   );
 }
+

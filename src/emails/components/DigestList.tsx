@@ -10,45 +10,70 @@ export interface DigestItem {
 }
 
 export interface DigestListProps {
+  sectionNumeral?: string;
+  eyebrow?: string;
   title?: string;
   items: DigestItem[];
 }
 
-export function DigestList({ title = 'Le digest', items }: DigestListProps) {
+export function DigestList({ sectionNumeral, eyebrow = 'En bref', title = 'Le digest', items }: DigestListProps) {
   return (
-    <Section style={{ padding: '24px 32px' }}>
-      <Text
-        style={{
-          margin: '0 0 4px',
-          color: colors.gold,
-          fontFamily: fonts.sans,
-          fontSize: fontSizes.tiny,
-          fontWeight: 700,
-          letterSpacing: letterSpacing.caps,
-          textTransform: 'uppercase',
-        }}
-      >
-        En bref
-      </Text>
-      <Text
-        style={{
-          margin: '0 0 18px',
-          color: colors.ink,
-          fontFamily: fonts.sans,
-          fontSize: fontSizes.h2,
-          fontWeight: 700,
-          letterSpacing: '-0.3px',
-          lineHeight: lineHeights.tight,
-        }}
-      >
-        {title}
-      </Text>
+    <Section style={{ padding: '32px 32px' }}>
+      <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ borderCollapse: 'collapse', marginBottom: '20px' }}>
+        <tr>
+          {sectionNumeral ? (
+            <td width={64} style={{ verticalAlign: 'top', paddingRight: '16px' }}>
+              <Text
+                style={{
+                  margin: 0,
+                  color: colors.gold,
+                  fontFamily: fonts.sans,
+                  fontSize: '46px',
+                  fontWeight: 900,
+                  letterSpacing: '-1px',
+                  lineHeight: 0.9,
+                }}
+              >
+                {sectionNumeral}
+              </Text>
+            </td>
+          ) : null}
+          <td style={{ verticalAlign: 'top' }}>
+            <Text
+              style={{
+                margin: '0 0 6px',
+                color: colors.gold,
+                fontFamily: fonts.sans,
+                fontSize: '11px',
+                fontWeight: 700,
+                letterSpacing: '4px',
+                textTransform: 'uppercase',
+              }}
+            >
+              {eyebrow}
+            </Text>
+            <Text
+              style={{
+                margin: 0,
+                color: colors.ink,
+                fontFamily: fonts.sans,
+                fontSize: '24px',
+                fontWeight: 800,
+                letterSpacing: '-0.4px',
+                lineHeight: 1.2,
+              }}
+            >
+              {title}
+            </Text>
+          </td>
+        </tr>
+      </table>
       {items.map((item, idx) => {
         const isLast = idx === items.length - 1;
         const titleNode = (
           <Text
             style={{
-              margin: '0 0 4px',
+              margin: '0 0 6px',
               color: colors.ink,
               fontFamily: fonts.sans,
               fontSize: fontSizes.h3,
@@ -81,6 +106,20 @@ export function DigestList({ title = 'Le digest', items }: DigestListProps) {
             }}
           >
             <tr>
+              <td width={36} style={{ verticalAlign: 'top', paddingTop: '16px', paddingRight: '12px' }}>
+                <Text
+                  style={{
+                    margin: 0,
+                    color: colors.gold,
+                    fontFamily: fonts.sans,
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    letterSpacing: letterSpacing.caps,
+                  }}
+                >
+                  {String(idx + 1).padStart(2, '0')}
+                </Text>
+              </td>
               <td style={{ padding: '14px 0' }}>
                 {titleNode}
                 <Text
@@ -89,7 +128,7 @@ export function DigestList({ title = 'Le digest', items }: DigestListProps) {
                     color: colors.inkSoft,
                     fontFamily: fonts.sans,
                     fontSize: fontSizes.body,
-                    lineHeight: lineHeights.normal,
+                    lineHeight: lineHeights.relaxed,
                   }}
                 >
                   {item.body}

@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { Body, Container, Head, Html, Preview, Section, Text, Hr } from '@react-email/components';
-import { colors, fonts, fontSizes, letterSpacing, lineHeights, sizes } from './components/tokens';
+import { colors, fonts, lineHeights, sizes } from './components/tokens';
 import { Header } from './components/Header';
 import { MarketTable } from './components/MarketTable';
+import { NigerKpiBlock } from './components/NigerKpiBlock';
 import { HeadlineCard } from './components/HeadlineCard';
 import { ChartBlock } from './components/ChartBlock';
 import { QuoteBlock } from './components/QuoteBlock';
@@ -18,6 +19,143 @@ export interface PremiumBriefingProps {
   managePreferencesUrl?: string;
   unsubscribeUrl?: string;
   socials?: { instagram?: string; facebook?: string; linkedin?: string; tiktok?: string };
+}
+
+function IntroBlock({ issue }: { issue: NewsletterIssue }) {
+  // Lettrine sur la première lettre alphabétique du paragraphe.
+  const match = issue.intro.paragraph.match(/^(\s*)([\p{L}])/u);
+  const firstChar = match?.[2] ?? '';
+  const remainder = match ? issue.intro.paragraph.slice((match[1]?.length ?? 0) + (match[2]?.length ?? 0)) : issue.intro.paragraph;
+
+  return (
+    <Section style={{ padding: '40px 32px 8px' }}>
+      {issue.intro.eyebrow ? (
+        <Text
+          style={{
+            margin: '0 0 14px',
+            color: colors.gold,
+            fontFamily: fonts.sans,
+            fontSize: '11px',
+            fontWeight: 700,
+            letterSpacing: '4px',
+            textTransform: 'uppercase',
+          }}
+        >
+          {issue.intro.eyebrow}
+        </Text>
+      ) : null}
+      <Text
+        style={{
+          margin: '0 0 22px',
+          color: colors.ink,
+          fontFamily: 'Georgia, "Times New Roman", serif',
+          fontSize: '30px',
+          fontWeight: 700,
+          letterSpacing: '-0.7px',
+          lineHeight: 1.18,
+        }}
+      >
+        {issue.intro.heading}
+      </Text>
+      <Text
+        style={{
+          margin: '0 0 28px',
+          color: colors.inkSoft,
+          fontFamily: fonts.sans,
+          fontSize: '16px',
+          lineHeight: lineHeights.relaxed,
+        }}
+      >
+        {firstChar ? (
+          <span
+            style={{
+              display: 'inline-block',
+              float: 'left',
+              color: colors.gold,
+              fontFamily: 'Georgia, "Times New Roman", serif',
+              fontSize: '64px',
+              fontWeight: 700,
+              letterSpacing: '-2px',
+              lineHeight: 0.85,
+              marginRight: '12px',
+              marginTop: '4px',
+            }}
+          >
+            {firstChar}
+          </span>
+        ) : null}
+        {remainder}
+      </Text>
+
+      {issue.intro.summary && issue.intro.summary.length > 0 ? (
+        <table
+          role="presentation"
+          cellPadding={0}
+          cellSpacing={0}
+          border={0}
+          width="100%"
+          style={{ borderCollapse: 'collapse', borderTop: `1px solid ${colors.divider}`, borderBottom: `1px solid ${colors.divider}`, margin: '8px 0 4px' }}
+        >
+          <tr>
+            <td style={{ padding: '14px 0' }}>
+              <Text
+                style={{
+                  margin: '0 0 12px',
+                  color: colors.gold,
+                  fontFamily: fonts.sans,
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  letterSpacing: '4px',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Au sommaire
+              </Text>
+              {issue.intro.summary.map((item, idx) => {
+                const isLast = idx === issue.intro.summary!.length - 1;
+                return (
+                  <table key={idx} role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ borderCollapse: 'collapse' }}>
+                    <tr>
+                      <td width={56} style={{ verticalAlign: 'middle', paddingRight: '14px' }}>
+                        <Text
+                          style={{
+                            margin: 0,
+                            color: colors.gold,
+                            fontFamily: fonts.sans,
+                            fontSize: '20px',
+                            fontWeight: 900,
+                            letterSpacing: '0.5px',
+                            lineHeight: 1,
+                          }}
+                        >
+                          {item.number}
+                        </Text>
+                      </td>
+                      <td style={{ verticalAlign: 'middle', padding: isLast ? '10px 0 0' : '10px 0', borderTop: idx === 0 ? 'none' : `1px dashed ${colors.divider}` }}>
+                        <Text
+                          style={{
+                            margin: 0,
+                            color: colors.ink,
+                            fontFamily: fonts.sans,
+                            fontSize: '15px',
+                            fontWeight: 600,
+                            lineHeight: lineHeights.normal,
+                            letterSpacing: '-0.1px',
+                          }}
+                        >
+                          {item.label}
+                        </Text>
+                      </td>
+                    </tr>
+                  </table>
+                );
+              })}
+            </td>
+          </tr>
+        </table>
+      ) : null}
+    </Section>
+  );
 }
 
 export function PremiumBriefing({
@@ -65,83 +203,7 @@ export function PremiumBriefing({
             webViewUrl={issue.webViewUrl}
           />
 
-          {/* Intro éditoriale */}
-          <Section style={{ padding: '36px 32px 12px' }}>
-            {issue.intro.eyebrow ? (
-              <Text
-                style={{
-                  margin: '0 0 8px',
-                  color: colors.gold,
-                  fontFamily: fonts.sans,
-                  fontSize: fontSizes.tiny,
-                  fontWeight: 700,
-                  letterSpacing: letterSpacing.caps,
-                  textTransform: 'uppercase',
-                }}
-              >
-                {issue.intro.eyebrow}
-              </Text>
-            ) : null}
-            <Text
-              style={{
-                margin: '0 0 14px',
-                color: colors.ink,
-                fontFamily: fonts.sans,
-                fontSize: '24px',
-                fontWeight: 800,
-                letterSpacing: '-0.5px',
-                lineHeight: '1.2',
-              }}
-            >
-              {issue.intro.heading}
-            </Text>
-            <Text
-              style={{
-                margin: '0 0 20px',
-                color: colors.inkSoft,
-                fontFamily: fonts.sans,
-                fontSize: fontSizes.body,
-                lineHeight: lineHeights.relaxed,
-              }}
-            >
-              {issue.intro.paragraph}
-            </Text>
-            {issue.intro.teasers && issue.intro.teasers.length > 0 ? (
-              <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ borderCollapse: 'collapse', backgroundColor: colors.muted, borderRadius: '8px' }}>
-                <tr>
-                  <td style={{ padding: '14px 18px' }}>
-                    <Text
-                      style={{
-                        margin: '0 0 8px',
-                        color: colors.gold,
-                        fontFamily: fonts.sans,
-                        fontSize: fontSizes.tiny,
-                        fontWeight: 700,
-                        letterSpacing: letterSpacing.caps,
-                        textTransform: 'uppercase',
-                      }}
-                    >
-                      Au programme
-                    </Text>
-                    {issue.intro.teasers.map((teaser, idx) => (
-                      <Text
-                        key={idx}
-                        style={{
-                          margin: '6px 0',
-                          color: colors.inkSoft,
-                          fontFamily: fonts.sans,
-                          fontSize: fontSizes.small,
-                          lineHeight: lineHeights.normal,
-                        }}
-                      >
-                        {teaser}
-                      </Text>
-                    ))}
-                  </td>
-                </tr>
-              </table>
-            ) : null}
-          </Section>
+          <IntroBlock issue={issue} />
 
           <MarketTable
             title={issue.market.title}
@@ -150,27 +212,51 @@ export function PremiumBriefing({
             source={issue.market.source}
           />
 
-          <Hr style={{ borderColor: colors.divider, margin: '12px 32px' }} />
+          {issue.nigerKpi ? (
+            <NigerKpiBlock
+              eyebrow={issue.nigerKpi.eyebrow}
+              title={issue.nigerKpi.title}
+              caption={issue.nigerKpi.caption}
+              items={issue.nigerKpi.items}
+            />
+          ) : (
+            <Hr style={{ borderColor: colors.divider, margin: '8px 32px' }} />
+          )}
 
-          {headlines[0] ? <HeadlineCard {...headlines[0]} /> : null}
+          {headlines[0] ? <HeadlineCard {...headlines[0]} sectionNumeral={headlines[0].sectionNumeral ?? 'III'} dropCap /> : null}
 
           {issue.chart ? <ChartBlock {...issue.chart} /> : null}
 
           {issue.sponsor ? <Sponsor {...issue.sponsor} /> : null}
 
-          {headlines[1] ? <HeadlineCard {...headlines[1]} /> : null}
-
-          {issue.digest ? <DigestList title={issue.digest.title} items={issue.digest.items} /> : null}
+          {headlines[1] ? <HeadlineCard {...headlines[1]} sectionNumeral={headlines[1].sectionNumeral ?? 'IV'} /> : null}
 
           {issue.quote ? <QuoteBlock {...issue.quote} /> : null}
 
-          {issue.radar ? <Radar title={issue.radar.title} items={issue.radar.items} /> : null}
+          {issue.digest ? (
+            <DigestList
+              sectionNumeral={issue.digest.sectionNumeral ?? 'V'}
+              eyebrow={issue.digest.eyebrow}
+              title={issue.digest.title}
+              items={issue.digest.items}
+            />
+          ) : null}
+
+          {issue.radar ? (
+            <Radar
+              sectionNumeral={issue.radar.sectionNumeral ?? 'VI'}
+              eyebrow={issue.radar.eyebrow}
+              title={issue.radar.title}
+              items={issue.radar.items}
+            />
+          ) : null}
 
           <Footer
             siteUrl={siteUrl}
             managePreferencesUrl={managePreferencesUrl}
             unsubscribeUrl={unsubscribeUrl}
             socials={socials}
+            nextIssueLabel={issue.nextIssueLabel}
           />
         </Container>
 

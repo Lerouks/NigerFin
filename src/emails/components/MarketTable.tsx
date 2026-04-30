@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Section, Text } from '@react-email/components';
 import { colors, fonts, fontSizes, letterSpacing, lineHeights } from './tokens';
+import { Sparkline } from './Sparkline';
 
 export interface MarketRow {
   label: string;
@@ -8,6 +9,8 @@ export interface MarketRow {
   changePercent: number; // signé : -1.23 = -1.23%
   unit?: string;
   asOf?: string;
+  /** Série 7 jours pour sparkline. Optionnelle ; si absente, pas de sparkline. */
+  spark?: number[];
 }
 
 export interface MarketTableProps {
@@ -24,9 +27,9 @@ function formatPct(pct: number): string {
 
 function MarketCell({ row }: { row: MarketRow }) {
   const isUp = row.changePercent >= 0;
-  const pillBg = isUp ? colors.positiveBg : colors.negativeBg;
-  const pillColor = isUp ? colors.positive : colors.negative;
-  const arrow = isUp ? '▲' : '▼';
+  const isFlat = row.changePercent === 0;
+  const trendColor = isFlat ? colors.inkMuted : isUp ? colors.positive : colors.negative;
+  const arrow = isFlat ? '◆' : isUp ? '▲' : '▼';
   return (
     <table
       role="presentation"
@@ -37,38 +40,59 @@ function MarketCell({ row }: { row: MarketRow }) {
       style={{ borderCollapse: 'collapse' }}
     >
       <tr>
-        <td style={{ padding: '14px 16px' }}>
-          <Text
-            style={{
-              margin: 0,
-              color: colors.inkMuted,
-              fontFamily: fonts.sans,
-              fontSize: fontSizes.tiny,
-              fontWeight: 600,
-              letterSpacing: letterSpacing.caps,
-              textTransform: 'uppercase',
-              lineHeight: lineHeights.tight,
-            }}
-          >
-            {row.label}
-          </Text>
+        <td style={{ padding: '14px 16px 12px' }}>
+          {/* label + sparkline en bandeau */}
+          <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ borderCollapse: 'collapse' }}>
+            <tr>
+              <td style={{ verticalAlign: 'middle' }}>
+                <Text
+                  style={{
+                    margin: 0,
+                    color: colors.inkMuted,
+                    fontFamily: fonts.sans,
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    letterSpacing: letterSpacing.caps,
+                    textTransform: 'uppercase',
+                    lineHeight: lineHeights.tight,
+                  }}
+                >
+                  {row.label}
+                </Text>
+              </td>
+              {row.spark && row.spark.length >= 2 ? (
+                <td align="right" style={{ verticalAlign: 'middle' }}>
+                  <Sparkline
+                    values={row.spark}
+                    strokeColor={trendColor}
+                    fillColor={trendColor}
+                    width={64}
+                    height={18}
+                    ariaLabel={`${row.label} sur 7 jours`}
+                  />
+                </td>
+              ) : null}
+            </tr>
+          </table>
+
+          {/* valeur + trend pill */}
           <table
             role="presentation"
             cellPadding={0}
             cellSpacing={0}
             border={0}
-            style={{ marginTop: '6px', borderCollapse: 'collapse' }}
+            style={{ marginTop: '8px', borderCollapse: 'collapse' }}
           >
             <tr>
-              <td style={{ paddingRight: '8px', verticalAlign: 'baseline' }}>
+              <td style={{ paddingRight: '10px', verticalAlign: 'baseline' }}>
                 <Text
                   style={{
                     margin: 0,
                     color: colors.ink,
                     fontFamily: fonts.sans,
-                    fontSize: '18px',
-                    fontWeight: 700,
-                    letterSpacing: '-0.2px',
+                    fontSize: '20px',
+                    fontWeight: 800,
+                    letterSpacing: '-0.4px',
                     lineHeight: lineHeights.tight,
                   }}
                 >
@@ -79,7 +103,7 @@ function MarketCell({ row }: { row: MarketRow }) {
                         color: colors.inkMuted,
                         fontWeight: 500,
                         fontSize: fontSizes.tiny,
-                        marginLeft: '4px',
+                        marginLeft: '5px',
                       }}
                     >
                       {row.unit}
@@ -90,14 +114,11 @@ function MarketCell({ row }: { row: MarketRow }) {
               <td style={{ verticalAlign: 'baseline' }}>
                 <span
                   style={{
-                    backgroundColor: pillBg,
-                    color: pillColor,
+                    color: trendColor,
                     fontFamily: fonts.sans,
-                    fontSize: '11px',
-                    fontWeight: 700,
+                    fontSize: '12px',
+                    fontWeight: 800,
                     letterSpacing: '0.2px',
-                    padding: '2px 7px',
-                    borderRadius: '999px',
                     display: 'inline-block',
                   }}
                 >
@@ -113,7 +134,7 @@ function MarketCell({ row }: { row: MarketRow }) {
 }
 
 export function MarketTable({ title = 'Marchés au dernier point', caption, rows, source }: MarketTableProps) {
-  // Pair the rows two-by-two for a 2-column grid (mobile clients will stack via media queries)
+  // Pair the rows two-by-two for a 2-column grid
   const pairs: [MarketRow, MarketRow | null][] = [];
   for (let i = 0; i < rows.length; i += 2) {
     const left = rows[i];
@@ -123,37 +144,43 @@ export function MarketTable({ title = 'Marchés au dernier point', caption, rows
   }
 
   return (
-    <Section style={{ padding: '36px 32px 8px' }}>
-      <Text
-        style={{
-          margin: '0 0 4px',
-          color: colors.gold,
-          fontFamily: fonts.sans,
-          fontSize: fontSizes.tiny,
-          fontWeight: 700,
-          letterSpacing: letterSpacing.caps,
-          textTransform: 'uppercase',
-        }}
-      >
-        Tableau de bord
-      </Text>
-      <Text
-        style={{
-          margin: '0 0 18px',
-          color: colors.ink,
-          fontFamily: fonts.sans,
-          fontSize: fontSizes.h2,
-          fontWeight: 700,
-          letterSpacing: '-0.3px',
-          lineHeight: lineHeights.tight,
-        }}
-      >
-        {title}
-      </Text>
+    <Section style={{ padding: '40px 32px 12px' }}>
+      <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ borderCollapse: 'collapse', marginBottom: '20px' }}>
+        <tr>
+          <td>
+            <Text
+              style={{
+                margin: '0 0 6px',
+                color: colors.gold,
+                fontFamily: fonts.sans,
+                fontSize: '11px',
+                fontWeight: 700,
+                letterSpacing: '4px',
+                textTransform: 'uppercase',
+              }}
+            >
+              I · Tableau de bord
+            </Text>
+            <Text
+              style={{
+                margin: 0,
+                color: colors.ink,
+                fontFamily: fonts.sans,
+                fontSize: fontSizes.h1,
+                fontWeight: 800,
+                letterSpacing: '-0.6px',
+                lineHeight: 1.15,
+              }}
+            >
+              {title}
+            </Text>
+          </td>
+        </tr>
+      </table>
       {caption ? (
         <Text
           style={{
-            margin: '0 0 16px',
+            margin: '0 0 18px',
             color: colors.inkMuted,
             fontFamily: fonts.sans,
             fontSize: fontSizes.small,
@@ -180,7 +207,7 @@ export function MarketTable({ title = 'Marchés au dernier point', caption, rows
                 style={{
                   backgroundColor: colors.surface,
                   border: `1px solid ${colors.divider}`,
-                  borderRadius: '10px',
+                  borderRadius: '12px',
                   verticalAlign: 'top',
                 }}
               >
@@ -191,7 +218,7 @@ export function MarketTable({ title = 'Marchés au dernier point', caption, rows
                 style={{
                   backgroundColor: pair[1] ? colors.surface : 'transparent',
                   border: pair[1] ? `1px solid ${colors.divider}` : 'none',
-                  borderRadius: '10px',
+                  borderRadius: '12px',
                   verticalAlign: 'top',
                 }}
               >
@@ -205,7 +232,7 @@ export function MarketTable({ title = 'Marchés au dernier point', caption, rows
       {source ? (
         <Text
           style={{
-            margin: '12px 0 0',
+            margin: '14px 0 0',
             color: colors.inkFaint,
             fontFamily: fonts.sans,
             fontSize: '11px',
@@ -219,4 +246,3 @@ export function MarketTable({ title = 'Marchés au dernier point', caption, rows
     </Section>
   );
 }
-

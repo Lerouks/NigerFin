@@ -5,6 +5,7 @@ import type { QuoteBlockProps } from './components/QuoteBlock';
 import type { DigestItem } from './components/DigestList';
 import type { RadarItem } from './components/Radar';
 import type { SponsorProps } from './components/Sponsor';
+import type { NigerKpiItem } from './components/NigerKpiBlock';
 
 /**
  * Forme typée d'un numéro de Premium Briefing.
@@ -23,7 +24,8 @@ export interface NewsletterIssue {
     eyebrow?: string;
     heading: string;
     paragraph: string;
-    teasers?: string[];
+    /** Sommaire visuel numéroté (3 items max idéalement). */
+    summary?: { number: string; label: string }[];
   };
 
   market: {
@@ -33,15 +35,26 @@ export interface NewsletterIssue {
     source?: string;
   };
 
+  /** Bloc "Niger en chiffres" : 3 KPI clés. */
+  nigerKpi?: {
+    eyebrow?: string;
+    title?: string;
+    caption?: string;
+    items: NigerKpiItem[];
+  };
+
   headlines: HeadlineCardProps[];
 
   chart?: ChartBlockProps;
 
   sponsor?: SponsorProps;
 
-  digest?: { title?: string; items: DigestItem[] };
+  digest?: { sectionNumeral?: string; eyebrow?: string; title?: string; items: DigestItem[] };
 
   quote?: QuoteBlockProps;
 
-  radar?: { title?: string; items: RadarItem[] };
+  radar?: { sectionNumeral?: string; eyebrow?: string; title?: string; items: RadarItem[] };
+
+  /** Date du prochain envoi en clair (footer). */
+  nextIssueLabel?: string;
 }

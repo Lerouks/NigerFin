@@ -27,19 +27,28 @@ export function renderPremiumBriefingText(issue: NewsletterIssue, siteUrl: strin
   lines.push('— ' + issue.intro.heading.toUpperCase() + ' —');
   lines.push('');
   lines.push(issue.intro.paragraph);
-  if (issue.intro.teasers?.length) {
+  if (issue.intro.summary?.length) {
     lines.push('');
-    lines.push('AU PROGRAMME');
-    issue.intro.teasers.forEach((t) => lines.push(`  • ${stripHtml(t)}`));
+    lines.push('AU SOMMAIRE');
+    issue.intro.summary.forEach((t) => lines.push(`  ${t.number}  ${stripHtml(t.label)}`));
   }
   lines.push('');
-  lines.push('TABLEAU DE BORD');
+  lines.push('I · TABLEAU DE BORD');
   issue.market.rows.forEach((r) => {
     const sign = r.changePercent >= 0 ? '+' : '';
     lines.push(`  ${r.label.padEnd(18)} ${r.value}${r.unit ? ' ' + r.unit : ''}   ${sign}${r.changePercent.toFixed(2)}%`);
   });
   if (issue.market.source) lines.push(`Source : ${issue.market.source}`);
   lines.push('');
+
+  if (issue.nigerKpi?.items?.length) {
+    lines.push('—————————————————');
+    lines.push(`II · NIGER EN CHIFFRES — ${issue.nigerKpi.title ?? ''}`);
+    issue.nigerKpi.items.forEach((k) => {
+      lines.push(`  ${k.label.padEnd(28)} ${k.value}${k.unit ? ' ' + k.unit : ''}${k.delta ? '   (' + k.delta + ')' : ''}`);
+    });
+    lines.push('');
+  }
 
   issue.headlines.forEach((h, idx) => {
     lines.push('—————————————————');

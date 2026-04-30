@@ -2,12 +2,12 @@ import type { NewsletterIssue } from '@/emails/types';
 import { SITE_URL } from '@/lib/config';
 
 /**
- * Édition n°01 — DÉMONSTRATION
+ * Édition n°01, DÉMONSTRATION
  *
- * ⚠️ Cette édition est un GABARIT DE DÉMONSTRATION. Les données financières
+ * Cette édition est un GABARIT DE DÉMONSTRATION. Les données financières
  * et faits cités illustrent le rendu visuel et ne doivent pas être envoyés
  * en l'état aux abonnés réels. Tout vrai numéro doit être rédigé par
- * l'équipe NFI Report avec sources vérifiées.
+ * la rédaction NFI Report avec sources vérifiées.
  *
  * Note BCEAO : la parité EUR/XOF est fixe à 655.957. Le franc CFA UEMOA
  * suit l'euro par convention monétaire ; toute variation EUR/XOF affichée
@@ -17,9 +17,9 @@ import { SITE_URL } from '@/lib/config';
 export const issue001Demo: NewsletterIssue = {
   number: 1,
   slug: '001-demo',
-  subject: 'Premium Briefing n°01 — L’or du Niger sous tension, la BRVM tient le cap',
+  subject: 'Premium Briefing n°01, l’or du Niger sous tension, la BRVM tient le cap',
   preheader:
-    'Or, BRVM, BCEAO : trois lectures pour démarrer la semaine côté finances Niger. Plus la citation hebdo et notre digest des marchés.',
+    'Or, BRVM, BCEAO : trois lectures pour démarrer la semaine côté finances Niger. Plus la phrase de la semaine et notre digest des marchés.',
   issueDateLabel: 'Lundi 4 mai 2026',
   readTimeMinutes: 7,
   webViewUrl: `${SITE_URL}/admin/newsletter/preview/001-demo`,
@@ -28,40 +28,50 @@ export const issue001Demo: NewsletterIssue = {
     eyebrow: 'Édition de démonstration',
     heading: 'L’or sous les projecteurs, la BRVM en silence',
     paragraph:
-      'Pendant que le cours de l’or atteint un nouveau record et que le pétrole consolide, la BRVM enchaîne sa quatrième séance de hausse — discrètement. On revient sur ce que ça change pour vos placements en zone UEMOA, et pourquoi le Niger reste un cas à part dans ce cycle.',
-    teasers: [
-      '🪙  L’or à 4 632 $ : pourquoi le Niger ne capte qu’une fraction de la rente',
-      '📈  BRVM : ce que la nouvelle politique BOAD change pour les PME',
-      '☕  Le digest de la semaine : agriculture, mobile money, BCEAO',
+      'Pendant que le cours de l’or atteint un nouveau record et que le pétrole consolide, la BRVM enchaîne sa quatrième séance de hausse, discrètement. On revient sur ce que ça change pour vos placements en zone UEMOA, et pourquoi le Niger reste un cas à part dans ce cycle.',
+    summary: [
+      { number: '01', label: 'L’or à 4 632 $ : pourquoi le Niger ne capte qu’une fraction de la rente' },
+      { number: '02', label: 'BRVM : ce que la nouvelle politique BOAD change pour les PME' },
+      { number: '03', label: 'Le digest de la semaine : agriculture, mobile money, BCEAO' },
     ],
   },
 
   market: {
     title: 'Marchés à la clôture du vendredi 1ᵉʳ mai',
-    caption: 'Les variations sont calculées sur la séance précédente.',
+    caption: 'Les variations sont calculées sur la séance précédente. Mini graphiques sur 7 jours.',
     rows: [
-      { label: 'BRVM Composite', value: '280,42', unit: 'pts', changePercent: 0.45 },
-      { label: 'BRVM 30', value: '140,18', unit: 'pts', changePercent: 0.62 },
-      { label: 'EUR / XOF', value: '655,957', changePercent: 0 },
-      { label: 'USD / XOF', value: '605,30', changePercent: -0.18 },
-      { label: 'Or (once)', value: '4 632', unit: 'USD', changePercent: 1.53 },
-      { label: 'Brent', value: '111,28', unit: 'USD', changePercent: 0.76 },
+      { label: 'BRVM Composite', value: '280,42', unit: 'pts', changePercent: 0.45, spark: [277.1, 276.8, 278.2, 277.9, 279.3, 279.1, 280.4] },
+      { label: 'BRVM 30', value: '140,18', unit: 'pts', changePercent: 0.62, spark: [137.9, 138.1, 139.0, 138.7, 139.3, 139.6, 140.2] },
+      { label: 'EUR / XOF', value: '655,957', changePercent: 0, spark: [655.957, 655.957, 655.957, 655.957, 655.957, 655.957, 655.957] },
+      { label: 'USD / XOF', value: '605,30', changePercent: -0.18, spark: [607.9, 607.4, 606.8, 606.2, 605.9, 605.6, 605.3] },
+      { label: 'Or (once)', value: '4 632', unit: 'USD', changePercent: 1.53, spark: [4485, 4502, 4548, 4561, 4587, 4561, 4632] },
+      { label: 'Brent', value: '111,28', unit: 'USD', changePercent: 0.76, spark: [108.4, 108.9, 109.6, 110.1, 109.7, 110.4, 111.3] },
     ],
     source: 'BRVM, BCEAO, LBMA, ICE Brent · données indicatives',
+  },
+
+  nigerKpi: {
+    title: 'L’économie nigérienne, en un coup d’œil',
+    caption: 'Trois indicateurs pour cadrer toute analyse Niger : croissance, prix, dette publique.',
+    items: [
+      { label: 'Croissance PIB 2026', value: '+6,2', unit: '%', delta: 'projection FMI · article IV', source: 'FMI, avril 2026' },
+      { label: 'Inflation à fin mars', value: '3,1', unit: '%', delta: 'glissement annuel, en repli', source: 'INS Niger' },
+      { label: 'Dette publique / PIB', value: '52,4', unit: '%', delta: '+1,6 pt vs 2025', source: 'BCEAO, mars 2026' },
+    ],
   },
 
   headlines: [
     {
       eyebrow: 'Analyse · Industrie',
       emoji: '🪙',
-      title: 'L’or grimpe, le Niger encaisse — mais combien, vraiment ?',
+      title: 'L’or grimpe, le Niger encaisse, mais combien, vraiment ?',
       whatHappening:
         'Le cours de l’once a franchi 4 632 USD vendredi, en hausse de plus de 1,5 % sur la séance et de 28 % depuis le début de l’année. Pour le Niger, troisième producteur d’or de la sous-région, c’est une bouffée d’oxygène fiscal alors que les recettes douanières restent sous tension depuis la révision du Code minier de 2025.',
       whatItMeans:
         'La rente or est mécaniquement haussière, mais elle est <strong>captée à hauteur d’environ un tiers seulement</strong> par l’État via redevances et participations. Le reste sort du pays sous forme de dividendes des opérateurs étrangers et de règlements en devises. Tant que la chaîne de valeur (raffinage, garantie, certification) reste à l’extérieur, chaque dollar de hausse profite plus à Londres qu’à Niamey.',
       whyCare:
-        'Si vous épargnez en CFA, l’or à ce niveau est <strong>une protection contre l’érosion du pouvoir d’achat</strong> — pas un pari spéculatif. Mais l’exposition via un compte titres BRVM (SGI agréée) reste limitée : aucune valeur or pure n’est cotée en zone UEMOA. Les alternatives sérieuses passent par la détention physique (lingots certifiés LBMA) ou un compte international, avec les frais et la fiscalité à anticiper.',
-      ctaLabel: 'Lire l’analyse complète sur nfireport.com',
+        'Si vous épargnez en CFA, l’or à ce niveau est <strong>une protection contre l’érosion du pouvoir d’achat</strong>, pas un pari spéculatif. Mais l’exposition via un compte titres BRVM (SGI agréée) reste limitée : aucune valeur or pure n’est cotée en zone UEMOA. Les alternatives sérieuses passent par la détention physique (lingots certifiés LBMA) ou un compte international, avec les frais et la fiscalité à anticiper.',
+      ctaLabel: 'Lire l’analyse complète',
       ctaUrl: `${SITE_URL}/articles`,
     },
     {
@@ -73,14 +83,11 @@ export const issue001Demo: NewsletterIssue = {
       whatItMeans:
         'C’est un signal fort : la BRVM a longtemps souffert d’un compartiment PME quasi désertique (4 sociétés cotées seulement fin 2025). Avec ce levier de refinancement, les SGI peuvent <strong>réduire leur coût d’intermédiation</strong> et donc baisser le ticket d’entrée pour les PME nigériennes, ivoiriennes ou sénégalaises qui souhaitent ouvrir leur capital.',
       whyCare:
-        'Pour un épargnant nigérien, ça ouvre — à terme — <strong>de nouvelles opportunités d’investir dans des entreprises sous-régionales en croissance</strong>, sans passer par les blue chips ivoiriennes ou sénégalaises traditionnelles. Mais le compartiment PME reste structurellement plus risqué : ne jamais y exposer plus de 10 % d’un portefeuille diversifié.',
+        'Pour un épargnant nigérien, ça ouvre, à terme, <strong>de nouvelles opportunités d’investir dans des entreprises sous-régionales en croissance</strong>, sans passer par les blue chips ivoiriennes ou sénégalaises traditionnelles. Mais le compartiment PME reste structurellement plus risqué : ne jamais y exposer plus de 10 % d’un portefeuille diversifié.',
       ctaLabel: 'Voir notre simulateur BRVM',
       ctaUrl: `${SITE_URL}/outil`,
     },
   ],
-
-  // chart : retiré pour la démo, faute de graphique réel.
-  //         Le composant ChartBlock reste disponible pour les vrais numéros.
 
   digest: {
     title: 'Ce qui a bougé cette semaine',
@@ -113,7 +120,7 @@ export const issue001Demo: NewsletterIssue = {
   },
 
   quote: {
-    text: 'Ne dépensez pas ce qui vous reste après avoir épargné — épargnez ce qui vous reste après avoir dépensé… non, l’inverse.',
+    text: 'Ne dépensez pas ce qui vous reste après avoir épargné, épargnez ce qui vous reste après avoir dépensé.',
     author: 'Warren Buffett',
     role: 'investisseur',
   },
@@ -136,4 +143,6 @@ export const issue001Demo: NewsletterIssue = {
       },
     ],
   },
+
+  nextIssueLabel: 'Lundi 11 mai · 7h GMT',
 };

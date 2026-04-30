@@ -1,0 +1,139 @@
+import type { NewsletterIssue } from '@/emails/types';
+import { SITE_URL } from '@/lib/config';
+
+/**
+ * Édition n°01 — DÉMONSTRATION
+ *
+ * ⚠️ Cette édition est un GABARIT DE DÉMONSTRATION. Les données financières
+ * et faits cités illustrent le rendu visuel et ne doivent pas être envoyés
+ * en l'état aux abonnés réels. Tout vrai numéro doit être rédigé par
+ * l'équipe NFI Report avec sources vérifiées.
+ *
+ * Note BCEAO : la parité EUR/XOF est fixe à 655.957. Le franc CFA UEMOA
+ * suit l'euro par convention monétaire ; toute variation EUR/XOF affichée
+ * différente de 0,00 % serait incorrecte.
+ */
+
+export const issue001Demo: NewsletterIssue = {
+  number: 1,
+  slug: '001-demo',
+  subject: 'Premium Briefing n°01 — L’or du Niger sous tension, la BRVM tient le cap',
+  preheader:
+    'Or, BRVM, BCEAO : trois lectures pour démarrer la semaine côté finances Niger. Plus la citation hebdo et notre digest des marchés.',
+  issueDateLabel: 'Lundi 4 mai 2026',
+  readTimeMinutes: 7,
+  webViewUrl: `${SITE_URL}/admin/newsletter/preview/001-demo`,
+
+  intro: {
+    eyebrow: 'Édition de démonstration',
+    heading: 'L’or sous les projecteurs, la BRVM en silence',
+    paragraph:
+      'Pendant que le cours de l’or atteint un nouveau record et que le pétrole consolide, la BRVM enchaîne sa quatrième séance de hausse — discrètement. On revient sur ce que ça change pour vos placements en zone UEMOA, et pourquoi le Niger reste un cas à part dans ce cycle.',
+    teasers: [
+      '🪙  L’or à 4 632 $ : pourquoi le Niger ne capte qu’une fraction de la rente',
+      '📈  BRVM : ce que la nouvelle politique BOAD change pour les PME',
+      '☕  Le digest de la semaine : agriculture, mobile money, BCEAO',
+    ],
+  },
+
+  market: {
+    title: 'Marchés à la clôture du vendredi 1ᵉʳ mai',
+    caption: 'Les variations sont calculées sur la séance précédente.',
+    rows: [
+      { label: 'BRVM Composite', value: '280,42', unit: 'pts', changePercent: 0.45 },
+      { label: 'BRVM 30', value: '140,18', unit: 'pts', changePercent: 0.62 },
+      { label: 'EUR / XOF', value: '655,957', changePercent: 0 },
+      { label: 'USD / XOF', value: '605,30', changePercent: -0.18 },
+      { label: 'Or (once)', value: '4 632', unit: 'USD', changePercent: 1.53 },
+      { label: 'Brent', value: '111,28', unit: 'USD', changePercent: 0.76 },
+    ],
+    source: 'BRVM, BCEAO, LBMA, ICE Brent · données indicatives',
+  },
+
+  headlines: [
+    {
+      eyebrow: 'Analyse · Industrie',
+      emoji: '🪙',
+      title: 'L’or grimpe, le Niger encaisse — mais combien, vraiment ?',
+      whatHappening:
+        'Le cours de l’once a franchi 4 632 USD vendredi, en hausse de plus de 1,5 % sur la séance et de 28 % depuis le début de l’année. Pour le Niger, troisième producteur d’or de la sous-région, c’est une bouffée d’oxygène fiscal alors que les recettes douanières restent sous tension depuis la révision du Code minier de 2025.',
+      whatItMeans:
+        'La rente or est mécaniquement haussière, mais elle est <strong>captée à hauteur d’environ un tiers seulement</strong> par l’État via redevances et participations. Le reste sort du pays sous forme de dividendes des opérateurs étrangers et de règlements en devises. Tant que la chaîne de valeur (raffinage, garantie, certification) reste à l’extérieur, chaque dollar de hausse profite plus à Londres qu’à Niamey.',
+      whyCare:
+        'Si vous épargnez en CFA, l’or à ce niveau est <strong>une protection contre l’érosion du pouvoir d’achat</strong> — pas un pari spéculatif. Mais l’exposition via un compte titres BRVM (SGI agréée) reste limitée : aucune valeur or pure n’est cotée en zone UEMOA. Les alternatives sérieuses passent par la détention physique (lingots certifiés LBMA) ou un compte international, avec les frais et la fiscalité à anticiper.',
+      ctaLabel: 'Lire l’analyse complète sur nfireport.com',
+      ctaUrl: `${SITE_URL}/articles`,
+    },
+    {
+      eyebrow: 'Analyse · Marchés régionaux',
+      emoji: '📈',
+      title: 'BRVM : la nouvelle ligne BOAD change la donne pour les PME',
+      whatHappening:
+        'La Banque Ouest-Africaine de Développement a annoncé jeudi un guichet de 50 milliards de FCFA dédié au refinancement des SGI (Sociétés de Gestion et d’Intermédiation) qui accompagnent des PME en levée de fonds sur le compartiment principal et le BRVM PME. La mesure entre en vigueur le 1ᵉʳ juillet.',
+      whatItMeans:
+        'C’est un signal fort : la BRVM a longtemps souffert d’un compartiment PME quasi désertique (4 sociétés cotées seulement fin 2025). Avec ce levier de refinancement, les SGI peuvent <strong>réduire leur coût d’intermédiation</strong> et donc baisser le ticket d’entrée pour les PME nigériennes, ivoiriennes ou sénégalaises qui souhaitent ouvrir leur capital.',
+      whyCare:
+        'Pour un épargnant nigérien, ça ouvre — à terme — <strong>de nouvelles opportunités d’investir dans des entreprises sous-régionales en croissance</strong>, sans passer par les blue chips ivoiriennes ou sénégalaises traditionnelles. Mais le compartiment PME reste structurellement plus risqué : ne jamais y exposer plus de 10 % d’un portefeuille diversifié.',
+      ctaLabel: 'Voir notre simulateur BRVM',
+      ctaUrl: `${SITE_URL}/outil`,
+    },
+  ],
+
+  // chart : retiré pour la démo, faute de graphique réel.
+  //         Le composant ChartBlock reste disponible pour les vrais numéros.
+
+  digest: {
+    title: 'Ce qui a bougé cette semaine',
+    items: [
+      {
+        emoji: '🌾',
+        title: 'Saison agricole : la FAO prudente sur le mil',
+        body:
+          'Les premières prévisions semis 2026 du CILSS pointent un retard de 2 semaines sur le bassin arachidier, lié à une transition tardive de l’ITCZ. Impact attendu sur les prix mil/sorgho fin août.',
+      },
+      {
+        emoji: '🏦',
+        title: 'BCEAO maintient son taux directeur à 3,50 %',
+        body:
+          'Sans surprise, le Comité de politique monétaire a confirmé le statu quo. La gouverneure souligne que la désinflation régionale (3,1 % en mars) reste fragile face aux chocs alimentaires.',
+      },
+      {
+        emoji: '🇨🇳',
+        title: 'CNPC investit 480 M$ supplémentaires sur Agadem',
+        body:
+          'Annonce signée à Pékin la semaine dernière : extension du champ pétrolier d’Agadem et upgrade du pipeline export Niger-Bénin. Création annoncée de ~3 000 emplois locaux d’ici 2028.',
+      },
+      {
+        emoji: '📱',
+        title: 'Mobile money : l’ARTP veut plafonner les frais',
+        body:
+          'L’Autorité de Régulation des Télécommunications et de la Poste a ouvert une consultation publique jusqu’au 30 mai sur un plafonnement des commissions cash-in/cash-out. Verdict attendu avant l’été.',
+      },
+    ],
+  },
+
+  quote: {
+    text: 'Ne dépensez pas ce qui vous reste après avoir épargné — épargnez ce qui vous reste après avoir dépensé… non, l’inverse.',
+    author: 'Warren Buffett',
+    role: 'investisseur',
+  },
+
+  radar: {
+    title: 'À garder à l’œil cette semaine',
+    items: [
+      {
+        title: 'Calendrier BCEAO : adjudication BAT mercredi',
+        hint: 'Bons du Trésor 13 et 26 semaines, indicateur clé du coût de l’argent court régional.',
+        url: 'https://www.bceao.int',
+      },
+      {
+        title: 'INS Niger : indice des prix d’avril attendu vendredi',
+        hint: 'Le glissement annuel passera-t-il sous 4 % pour la première fois depuis 2024 ?',
+      },
+      {
+        title: 'Conférence des CEO BRVM à Abidjan, jeudi',
+        hint: 'Sonatel, Ecobank, Onatel : les patrons des plus grosses capi présentent leurs perspectives 2026.',
+      },
+    ],
+  },
+};

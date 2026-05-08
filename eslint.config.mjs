@@ -28,6 +28,7 @@ export default [
       'IPAY/',
       'test-results/',
       'playwright-report/',
+      'scripts/',
       'next-env.d.ts',
       '*.config.js',
       '*.config.mjs',

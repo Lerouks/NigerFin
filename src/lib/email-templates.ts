@@ -64,6 +64,61 @@ function signature(): string {
   return `<p style="margin:24px 0 0;font-size:15px;line-height:1.6;color:#404040;">Cordialement,<br/>L'équipe NFI Report</p>`;
 }
 
+// ─── Receipt-style layout (sober, Apple-style, used by invoice email) ───
+// Not the same universe as emailLayout(): no gold brand line, no slogan,
+// no editorial tone. Receipts are legal documents, not brand moments.
+
+function receiptLayout(content: string): string {
+  return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="x-apple-disable-message-reformatting"/>
+<meta name="color-scheme" content="light only"/>
+<meta name="supported-color-schemes" content="light only"/>
+</head>
+<body style="margin:0;padding:0;background-color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;color:#1d1d1f;-webkit-font-smoothing:antialiased;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f7;">
+<tr><td align="center" style="padding:32px 16px;">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:12px;overflow:hidden;">
+
+<tr><td align="center" style="padding:32px 32px 24px;border-bottom:1px solid #d2d2d7;">
+  <p style="margin:0 0 4px;color:#1d1d1f;font-family:'Inter',sans-serif;font-size:17px;font-weight:700;letter-spacing:3px;">NFI REPORT</p>
+  <p style="margin:0;color:#86868b;font-family:'Inter',sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;">Reçu de paiement</p>
+</td></tr>
+
+${content}
+
+<tr><td align="center" style="padding:24px 32px 28px;background-color:#f5f5f7;border-top:1px solid #d2d2d7;">
+  <p style="margin:0 0 6px;color:#1d1d1f;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;">NFI Group SARL</p>
+  <p style="margin:0 0 12px;color:#86868b;font-family:'Inter',sans-serif;font-size:11px;line-height:1.65;letter-spacing:0.2px;">SARL au capital de 1 000 000 FCFA &middot; Siège : Quartier Plateau, Niamey, Niger<br/>Tél. +227 97 76 91 31</p>
+  <p style="margin:0;color:#86868b;font-family:'Inter',sans-serif;font-size:11px;line-height:1.65;">
+    <a href="mailto:contact@nfireport.com" style="color:#1d1d1f;text-decoration:underline;">contact@nfireport.com</a>&nbsp;&middot;&nbsp;
+    <a href="${SITE_URL}" style="color:#1d1d1f;text-decoration:underline;">nfireport.com</a>
+  </p>
+  <p style="margin:14px 0 0;color:#86868b;font-family:'Inter',sans-serif;font-size:10px;font-style:italic;letter-spacing:0.3px;">Document généré électroniquement, valide sans signature manuscrite.</p>
+</td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
+}
+
+function formatDateFr(iso: string): string {
+  return new Date(iso).toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
+function formatXofAmount(amount: number): string {
+  return `${amount.toLocaleString('fr-FR')} FCFA`;
+}
+
 // ─── Email templates ───
 
 export function welcomeSignupEmail(name: string): { subject: string; html: string } {
@@ -236,6 +291,102 @@ ${paragraph("Si vous n'êtes pas à l'origine de cette modification, veuillez no
 ${button('Accéder à votre compte', `${SITE_URL}/compte`)}
 ${signature()}
     `),
+  };
+}
+
+// ─── Invoice email (receipt Apple-style universe, no slogan) ───
+
+export function invoiceEmail({
+  customerName,
+  invoiceNumber,
+  amountXof,
+  paidAt,
+  periodStart,
+  periodEnd,
+  downloadUrl,
+}: {
+  customerName: string;
+  invoiceNumber: string;
+  amountXof: number;
+  paidAt: string;
+  periodStart?: string;
+  periodEnd?: string;
+  downloadUrl: string;
+}): { subject: string; html: string } {
+  const periodLine = periodStart && periodEnd
+    ? `Accès illimité aux articles, analyses, simulateurs et briefings exclusifs, du ${formatDateFr(periodStart)} au ${formatDateFr(periodEnd)}.`
+    : 'Accès illimité aux articles, analyses, simulateurs et briefings exclusifs.';
+
+  const content = `
+<tr><td style="padding:32px 32px 22px;">
+  <h1 style="margin:0 0 12px;color:#1d1d1f;font-family:'Inter',sans-serif;font-size:24px;font-weight:700;letter-spacing:-0.4px;line-height:1.2;">Votre facture est disponible</h1>
+  <p style="margin:0 0 8px;color:#3a3a3c;font-family:'Inter',sans-serif;font-size:15px;line-height:1.55;">Bonjour ${customerName},</p>
+  <p style="margin:0;color:#3a3a3c;font-family:'Inter',sans-serif;font-size:15px;line-height:1.55;">Vous trouverez ci-joint au format PDF votre facture pour l'activation de votre abonnement Premium. Vous pouvez la télécharger ici, ou la retrouver à tout moment dans votre espace compte.</p>
+</td></tr>
+
+<tr><td style="padding:0 32px;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#1d1d1f;border-radius:10px;">
+    <tr><td style="padding:22px 24px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td width="50%" style="padding:0 12px 0 0;">
+            <p style="margin:0 0 4px;color:rgba(255,255,255,0.55);font-family:'Inter',sans-serif;font-size:9.5px;font-weight:600;letter-spacing:1.8px;text-transform:uppercase;">Numéro</p>
+            <p style="margin:0;color:#ffffff;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;">${invoiceNumber}</p>
+          </td>
+          <td width="50%">
+            <p style="margin:0 0 4px;color:rgba(255,255,255,0.55);font-family:'Inter',sans-serif;font-size:9.5px;font-weight:600;letter-spacing:1.8px;text-transform:uppercase;">Date</p>
+            <p style="margin:0;color:#ffffff;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;">${formatDateFr(paidAt)}</p>
+          </td>
+        </tr>
+        <tr><td colspan="2" style="height:18px;line-height:18px;font-size:0;">&nbsp;</td></tr>
+        <tr>
+          <td width="50%" style="padding:0 12px 0 0;">
+            <p style="margin:0 0 4px;color:rgba(255,255,255,0.55);font-family:'Inter',sans-serif;font-size:9.5px;font-weight:600;letter-spacing:1.8px;text-transform:uppercase;">Montant</p>
+            <p style="margin:0;color:#ffffff;font-family:'Inter',sans-serif;font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;">${formatXofAmount(amountXof)}</p>
+          </td>
+          <td width="50%">
+            <p style="margin:0 0 4px;color:rgba(255,255,255,0.55);font-family:'Inter',sans-serif;font-size:9.5px;font-weight:600;letter-spacing:1.8px;text-transform:uppercase;">Statut</p>
+            <p style="margin:0;color:#16a34a;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;letter-spacing:0.5px;">PAYÉ ✓</p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</td></tr>
+
+<tr><td style="padding:24px 32px 8px;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f7;border-radius:8px;">
+    <tr><td style="padding:16px 20px;">
+      <p style="margin:0 0 4px;color:#86868b;font-family:'Inter',sans-serif;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;">Prestation</p>
+      <p style="margin:0 0 4px;color:#1d1d1f;font-family:'Inter',sans-serif;font-size:14.5px;font-weight:600;">Abonnement Premium</p>
+      <p style="margin:0;color:#3a3a3c;font-family:'Inter',sans-serif;font-size:13px;line-height:1.5;">${periodLine}</p>
+    </td></tr>
+  </table>
+</td></tr>
+
+<tr><td align="center" style="padding:28px 32px 4px;">
+  <table role="presentation" cellpadding="0" cellspacing="0">
+    <tr><td style="background-color:#1d1d1f;border-radius:8px;">
+      <a href="${downloadUrl}" style="display:inline-block;padding:14px 32px;color:#ffffff;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;letter-spacing:0.3px;text-decoration:none;">Télécharger la facture (PDF)</a>
+    </td></tr>
+  </table>
+</td></tr>
+
+<tr><td align="center" style="padding:8px 32px 28px;">
+  <a href="${SITE_URL}/compte/factures" style="font-family:'Inter',sans-serif;font-size:13px;color:#86868b;text-decoration:underline;">Voir toutes mes factures dans mon compte</a>
+</td></tr>
+
+<tr><td style="padding:0 32px 28px;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#fff9eb;border-left:3px solid #d97706;">
+    <tr><td style="padding:12px 16px;">
+      <p style="margin:0;color:#5c4308;font-family:'Inter',sans-serif;font-size:11.5px;line-height:1.55;"><strong>Conservation.</strong> Cette facture est un document comptable. Conservez-en une copie pour votre comptabilité (durée légale OHADA, 10 ans).</p>
+    </td></tr>
+  </table>
+</td></tr>`;
+
+  return {
+    subject: `Votre facture ${invoiceNumber} - NFI Report`,
+    html: receiptLayout(content),
   };
 }
 

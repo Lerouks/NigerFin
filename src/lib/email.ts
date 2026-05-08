@@ -34,14 +34,25 @@ function htmlToPlainText(html: string): string {
     .trim();
 }
 
+export interface EmailAttachment {
+  /** File name shown to the recipient (e.g. "facture-FAC-2026-0001.pdf"). */
+  filename: string;
+  /** Raw bytes of the attachment. */
+  content: Buffer;
+  /** Optional, defaults to 'application/octet-stream' if omitted. */
+  contentType?: string;
+}
+
 export async function sendTransactionalEmail({
   to,
   subject,
   html,
+  attachments,
 }: {
   to: string;
   subject: string;
   html: string;
+  attachments?: EmailAttachment[];
 }) {
   const resend = getResend();
   if (!resend) {
@@ -62,6 +73,11 @@ export async function sendTransactionalEmail({
       headers: {
         'List-Unsubscribe': '<mailto:contact@nfireport.com?subject=unsubscribe>',
       },
+      attachments: attachments?.map((a) => ({
+        filename: a.filename,
+        content: a.content,
+        contentType: a.contentType,
+      })),
     });
 
     if (result.error) {

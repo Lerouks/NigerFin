@@ -4,6 +4,8 @@ import { logAuditEvent } from '@/lib/audit';
 import { getBillingOption, type BillingCycle } from '@/config/pricing';
 import { sendTransactionalEmail } from '@/lib/email';
 import { paymentConfirmationEmail, paymentRejectionEmail } from '@/lib/email-templates';
+import { issueInvoice } from '@/lib/invoices/issue';
+import { getBillingCycleLabel } from '@/config/pricing';
 import { isValidUUID, safeParseJSON, isOneOf } from '@/lib/validation';
 import { serverError } from '@/lib/api-error';
 import * as Sentry from '@sentry/nextjs';
@@ -191,6 +193,32 @@ export async function POST(request: NextRequest) {
         Sentry.captureException(err, { tags: { context: 'payment-confirmation-email' }, extra: { userId: paymentRequest.user_id } });
       });
     }
+
+    // Issue an invoice (fire-and-forget : do not block the response if it fails).
+    const cycleLabelLower = getBillingCycleLabel(cycle).toLowerCase();
+    issueInvoice({
+      userId: paymentRequest.user_id,
+      amountXof: paymentRequest.amount,
+      description: `Abonnement Premium NFI Report (${cycleLabelLower})`,
+      lineItems: [
+        {
+          description: `Premium ${cycleLabelLower}, accès illimité aux articles, analyses, simulateurs et briefings exclusifs (du ${new Date(now).toLocaleDateString('fr-FR')} au ${expiresAt.toLocaleDateString('fr-FR')}).`,
+          qty: 1,
+          unitPriceXof: paymentRequest.amount,
+          totalXof: paymentRequest.amount,
+        },
+      ],
+      paymentMethod: paymentRequest.payment_method ?? undefined,
+      paymentReference: paymentRequest.transaction_number ?? paymentRequestId,
+      billingCycle: cycle,
+      periodStart: now,
+      periodEnd: expiresAt.toISOString(),
+    }).catch((err) => {
+      Sentry.captureException(err, {
+        tags: { context: 'invoice-issue-after-verify' },
+        extra: { userId: paymentRequest.user_id, paymentRequestId },
+      });
+    });
 
     return NextResponse.json({
       success: true,

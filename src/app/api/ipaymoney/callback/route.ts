@@ -4,6 +4,8 @@ import { logAuditEvent } from '@/lib/audit';
 import { getBillingOption, type BillingCycle } from '@/config/pricing';
 import { sendTransactionalEmail } from '@/lib/email';
 import { paymentConfirmationEmail } from '@/lib/email-templates';
+import { issueInvoice } from '@/lib/invoices/issue';
+import { getBillingCycleLabel } from '@/config/pricing';
 import { SITE_URL } from '@/lib/config';
 import * as Sentry from '@sentry/nextjs';
 
@@ -122,6 +124,32 @@ async function activateSubscription(
       });
     });
   }
+
+  // Issue an invoice (fire-and-forget).
+  const cycleLabelLower = getBillingCycleLabel(billingCycle).toLowerCase();
+  issueInvoice({
+    userId,
+    amountXof: amount,
+    description: `Abonnement Premium NFI Report (${cycleLabelLower})`,
+    lineItems: [
+      {
+        description: `Premium ${cycleLabelLower}, accès illimité aux articles, analyses, simulateurs et briefings exclusifs (du ${new Date(now).toLocaleDateString('fr-FR')} au ${expiresAt.toLocaleDateString('fr-FR')}).`,
+        qty: 1,
+        unitPriceXof: amount,
+        totalXof: amount,
+      },
+    ],
+    paymentMethod: 'iPayMoney',
+    paymentReference: iPayMoneyRef,
+    billingCycle,
+    periodStart: now,
+    periodEnd: expiresAt.toISOString(),
+  }).catch((err) => {
+    Sentry.captureException(err, {
+      tags: { context: 'invoice-issue-after-ipaymoney' },
+      extra: { userId, iPayMoneyRef },
+    });
+  });
 }
 
 /**

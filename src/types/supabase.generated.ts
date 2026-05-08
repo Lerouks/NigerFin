@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.1"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       api_cache: {
@@ -571,6 +546,153 @@ export type Database = {
           enabled?: boolean
           id?: number
           items?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      invoices: {
+        Row: {
+          amount_xof: number
+          billing_cycle: string | null
+          created_at: string
+          currency: string
+          customer: Json
+          description: string
+          id: string
+          invoice_number: string
+          issuer: Json
+          line_items: Json
+          paid_at: string | null
+          payment_method: string | null
+          payment_reference: string | null
+          pdf_path: string | null
+          period_end: string | null
+          period_start: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_xof: number
+          billing_cycle?: string | null
+          created_at?: string
+          currency?: string
+          customer: Json
+          description: string
+          id?: string
+          invoice_number: string
+          issuer: Json
+          line_items: Json
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          pdf_path?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_xof?: number
+          billing_cycle?: string | null
+          created_at?: string
+          currency?: string
+          customer?: Json
+          description?: string
+          id?: string
+          invoice_number?: string
+          issuer?: Json
+          line_items?: Json
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          pdf_path?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      learning_path_steps: {
+        Row: {
+          created_at: string
+          id: string
+          lesson_id: string
+          path_id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lesson_id: string
+          path_id: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          path_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_path_steps_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "education_lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_path_steps_path_id_fkey"
+            columns: ["path_id"]
+            isOneToOne: false
+            referencedRelation: "learning_paths"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_paths: {
+        Row: {
+          available: boolean
+          created_at: string
+          description: string
+          difficulty: string
+          goal_label: string
+          icon: string
+          id: string
+          slug: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          available?: boolean
+          created_at?: string
+          description?: string
+          difficulty?: string
+          goal_label?: string
+          icon?: string
+          id?: string
+          slug: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          available?: boolean
+          created_at?: string
+          description?: string
+          difficulty?: string
+          goal_label?: string
+          icon?: string
+          id?: string
+          slug?: string
+          sort_order?: number
+          title?: string
           updated_at?: string
         }
         Relationships: []
@@ -1384,6 +1506,44 @@ export type Database = {
         }
         Relationships: []
       }
+      user_lesson_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          last_viewed_at: string
+          lesson_id: string
+          quiz_score: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          last_viewed_at?: string
+          lesson_id: string
+          quiz_score?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          last_viewed_at?: string
+          lesson_id?: string
+          quiz_score?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_lesson_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "education_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_profiles: {
         Row: {
           address: string | null
@@ -1489,6 +1649,7 @@ export type Database = {
     }
     Functions: {
       cleanup_rate_limits: { Args: never; Returns: undefined }
+      generate_invoice_number: { Args: never; Returns: string }
       increment_premium_count: {
         Args: { p_user_id: string }
         Returns: undefined
@@ -1631,9 +1792,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {},
   },

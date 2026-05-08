@@ -10,6 +10,7 @@ import { QuoteBlock } from './components/QuoteBlock';
 import { DigestList } from './components/DigestList';
 import { Sponsor } from './components/Sponsor';
 import { Radar } from './components/Radar';
+import { ToolsPromoBlock } from './components/ToolsPromoBlock';
 import { Footer } from './components/Footer';
 import type { NewsletterIssue } from './types';
 
@@ -248,6 +249,16 @@ export function PremiumBriefing({
               eyebrow={issue.radar.eyebrow}
               title={issue.radar.title}
               items={issue.radar.items}
+            />
+          ) : null}
+
+          {issue.toolsPromo ? (
+            <ToolsPromoBlock
+              sectionNumeral={issue.toolsPromo.sectionNumeral ?? 'VII'}
+              eyebrow={issue.toolsPromo.eyebrow}
+              title={issue.toolsPromo.title}
+              caption={issue.toolsPromo.caption}
+              items={issue.toolsPromo.items}
             />
           ) : null}
 

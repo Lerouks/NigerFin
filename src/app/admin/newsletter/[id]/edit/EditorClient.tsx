@@ -473,6 +473,74 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
           </Field>
         </FormSection>
 
+        {/* TOOLS PROMO */}
+        <FormSection title="Outils Premium (promo, optionnel)">
+          <p className="text-xs text-foreground/55">Met en avant vos simulateurs/calculateurs financiers pour fidéliser et convertir.</p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Eyebrow (petit titre or)">
+              <input
+                type="text"
+                value={content.toolsPromo?.eyebrow ?? ''}
+                onChange={(e) => patchContent({ toolsPromo: { ...(content.toolsPromo ?? { items: [] }), eyebrow: e.target.value } })}
+                placeholder="Vos outils Premium"
+                className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
+              />
+            </Field>
+            <Field label="Titre principal">
+              <input
+                type="text"
+                value={content.toolsPromo?.title ?? ''}
+                onChange={(e) => patchContent({ toolsPromo: { ...(content.toolsPromo ?? { items: [] }), title: e.target.value } })}
+                placeholder="Mettez vos analyses en chiffres"
+                className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
+              />
+            </Field>
+          </div>
+          <Field label="Description courte">
+            <textarea
+              value={content.toolsPromo?.caption ?? ''}
+              onChange={(e) => patchContent({ toolsPromo: { ...(content.toolsPromo ?? { items: [] }), caption: e.target.value } })}
+              rows={2}
+              className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
+            />
+          </Field>
+          <RepeatableSection
+            label="Outils mis en avant"
+            items={content.toolsPromo?.items ?? []}
+            onAdd={() => patchContent({ toolsPromo: { ...(content.toolsPromo ?? { items: [] }), items: [...(content.toolsPromo?.items ?? []), { title: '', description: '', url: '' }] } })}
+            onRemove={(idx) => patchContent({ toolsPromo: { ...(content.toolsPromo ?? { items: [] }), items: (content.toolsPromo?.items ?? []).filter((_, i) => i !== idx) } })}
+            renderItem={(it, idx) => (
+              <div className="space-y-2">
+                <div className="grid gap-2 sm:grid-cols-[80px_1fr]">
+                  <input
+                    placeholder="📈"
+                    value={it.emoji ?? ''}
+                    onChange={(e) => patchContent({ toolsPromo: { ...(content.toolsPromo ?? { items: [] }), items: (content.toolsPromo?.items ?? []).map((x, i) => i === idx ? { ...x, emoji: e.target.value } : x) } })}
+                    className="rounded border border-foreground/15 bg-white px-2 py-1 text-base"
+                  />
+                  <input
+                    placeholder="Nom de l'outil"
+                    value={it.title}
+                    onChange={(e) => patchContent({ toolsPromo: { ...(content.toolsPromo ?? { items: [] }), items: (content.toolsPromo?.items ?? []).map((x, i) => i === idx ? { ...x, title: e.target.value } : x) } })}
+                    className="rounded border border-foreground/15 bg-white px-2 py-1 text-sm font-semibold"
+                  />
+                </div>
+                <input
+                  placeholder="1 ligne d'accroche (ex: Mensualités, coût total, capacité d'endettement)"
+                  value={it.description}
+                  onChange={(e) => patchContent({ toolsPromo: { ...(content.toolsPromo ?? { items: [] }), items: (content.toolsPromo?.items ?? []).map((x, i) => i === idx ? { ...x, description: e.target.value } : x) } })}
+                  className="w-full rounded border border-foreground/15 bg-white px-2 py-1 text-sm"
+                />
+                <ArticlePicker
+                  value={it.url}
+                  onChange={(url) => patchContent({ toolsPromo: { ...(content.toolsPromo ?? { items: [] }), items: (content.toolsPromo?.items ?? []).map((x, i) => i === idx ? { ...x, url: url ?? '' } : x) } })}
+                  placeholder="URL de l'outil (ex: nfireport.com/outil/simulateur-emprunt)"
+                />
+              </div>
+            )}
+          />
+        </FormSection>
+
         {/* PROCHAIN NUMERO */}
         <FormSection title="Prochain numéro (footer)">
           <Field label="Date du prochain envoi en clair">

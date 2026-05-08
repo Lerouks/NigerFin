@@ -6,6 +6,7 @@ import type { DigestItem } from './components/DigestList';
 import type { RadarItem } from './components/Radar';
 import type { SponsorProps } from './components/Sponsor';
 import type { NigerKpiItem } from './components/NigerKpiBlock';
+import type { ToolPromoItem } from './components/ToolsPromoBlock';
 
 /**
  * Forme typée d'un numéro de Premium Briefing.
@@ -54,6 +55,15 @@ export interface NewsletterIssue {
   quote?: QuoteBlockProps;
 
   radar?: { sectionNumeral?: string; eyebrow?: string; title?: string; items: RadarItem[] };
+
+  /** Bloc promotionnel des outils Premium NFI Report (simulateurs, calculateurs). */
+  toolsPromo?: {
+    sectionNumeral?: string;
+    eyebrow?: string;
+    title?: string;
+    caption?: string;
+    items: ToolPromoItem[];
+  };
 
   /** Date du prochain envoi en clair (footer). */
   nextIssueLabel?: string;

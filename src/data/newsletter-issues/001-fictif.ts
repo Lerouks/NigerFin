@@ -144,5 +144,31 @@ export const issue001Demo: NewsletterIssue = {
     ],
   },
 
+  toolsPromo: {
+    eyebrow: 'Vos outils Premium',
+    title: 'Mettez vos analyses en chiffres',
+    caption: 'Trois simulateurs pensés pour la fiscalité, les marchés et l’épargne en zone UEMOA. Inclus dans votre abonnement.',
+    items: [
+      {
+        emoji: '📈',
+        title: 'Simulateur emprunt BRVM',
+        description: 'Mensualités, coût total, capacité d’endettement adaptée au taux UEMOA.',
+        url: `${SITE_URL}/outil/simulateur-emprunt`,
+      },
+      {
+        emoji: '💼',
+        title: 'Simulateur salaire net Niger',
+        description: 'IRPP, IUTS, cotisations CNSS : du brut au net en moins de 30 secondes.',
+        url: `${SITE_URL}/outil/simulateur-salaire`,
+      },
+      {
+        emoji: '💰',
+        title: 'Calculateur intérêts composés',
+        description: 'Projetez votre épargne sur 1, 5, 10 ans avec inflation BCEAO incluse.',
+        url: `${SITE_URL}/outil/interet-simple`,
+      },
+    ],
+  },
+
   nextIssueLabel: 'Lundi 11 mai · 7h GMT',
 };

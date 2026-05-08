@@ -811,6 +811,111 @@ export type Database = {
         }
         Relationships: []
       }
+      newsletter_events: {
+        Row: {
+          event_type: string
+          id: string
+          issue_id: string | null
+          meta: Json | null
+          occurred_at: string
+          subscriber_id: string | null
+        }
+        Insert: {
+          event_type: string
+          id?: string
+          issue_id?: string | null
+          meta?: Json | null
+          occurred_at?: string
+          subscriber_id?: string | null
+        }
+        Update: {
+          event_type?: string
+          id?: string
+          issue_id?: string | null
+          meta?: Json | null
+          occurred_at?: string
+          subscriber_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "newsletter_events_issue_id_fkey"
+            columns: ["issue_id"]
+            isOneToOne: false
+            referencedRelation: "newsletter_issues"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "newsletter_events_subscriber_id_fkey"
+            columns: ["subscriber_id"]
+            isOneToOne: false
+            referencedRelation: "newsletter_subscribers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      newsletter_issues: {
+        Row: {
+          audience: string
+          bounced_count: number
+          clicked_count: number
+          content: Json
+          created_at: string
+          delivered_count: number
+          id: string
+          number: number
+          opened_count: number
+          preheader: string | null
+          recipients_count: number
+          scheduled_at: string | null
+          sent_at: string | null
+          slug: string
+          status: string
+          subject: string
+          unsubscribed_count: number
+          updated_at: string
+        }
+        Insert: {
+          audience?: string
+          bounced_count?: number
+          clicked_count?: number
+          content: Json
+          created_at?: string
+          delivered_count?: number
+          id?: string
+          number: number
+          opened_count?: number
+          preheader?: string | null
+          recipients_count?: number
+          scheduled_at?: string | null
+          sent_at?: string | null
+          slug: string
+          status?: string
+          subject: string
+          unsubscribed_count?: number
+          updated_at?: string
+        }
+        Update: {
+          audience?: string
+          bounced_count?: number
+          clicked_count?: number
+          content?: Json
+          created_at?: string
+          delivered_count?: number
+          id?: string
+          number?: number
+          opened_count?: number
+          preheader?: string | null
+          recipients_count?: number
+          scheduled_at?: string | null
+          sent_at?: string | null
+          slug?: string
+          status?: string
+          subject?: string
+          unsubscribed_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       newsletter_preferences: {
         Row: {
           alerts_custom: boolean | null
@@ -847,6 +952,48 @@ export type Database = {
           reports_pdf?: boolean | null
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      newsletter_subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          locale: string
+          opt_in_at: string
+          source: string | null
+          status: string
+          unsubscribe_token: string
+          unsubscribed_at: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          locale?: string
+          opt_in_at?: string
+          source?: string | null
+          status?: string
+          unsubscribe_token?: string
+          unsubscribed_at?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          locale?: string
+          opt_in_at?: string
+          source?: string | null
+          status?: string
+          unsubscribe_token?: string
+          unsubscribed_at?: string | null
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }

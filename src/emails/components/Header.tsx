@@ -1,8 +1,7 @@
 import * as React from 'react';
-import { Section, Row, Column, Text, Img } from '@react-email/components';
+import { Section, Row, Column, Text } from '@react-email/components';
 import { colors, fonts, fontSizes, letterSpacing } from './tokens';
 import { NigerMapAccent } from './NigerMapAccent';
-import { SITE_URL } from '@/lib/config';
 
 export interface HeaderProps {
   issueNumber: number;
@@ -118,24 +117,6 @@ export function Header({
               align="center"
               style={{ margin: '0 auto', position: 'relative' }}
             >
-              {/* Logo NFI argenté */}
-              <tr>
-                <td align="center" style={{ paddingBottom: '14px' }}>
-                  <Img
-                    src={`${SITE_URL}/logo-white.png`}
-                    alt="NFI Report"
-                    width={64}
-                    height={64}
-                    style={{
-                      display: 'block',
-                      width: '64px',
-                      height: 'auto',
-                      margin: '0 auto',
-                    }}
-                  />
-                </td>
-              </tr>
-
               {/* Wordmark NFI REPORT */}
               <tr>
                 <td align="center">

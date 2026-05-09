@@ -433,6 +433,11 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
             value={content.quote?.authorPhotoUrl}
             onChange={(url) => patchContent({ quote: { ...(content.quote ?? { text: '', author: '' }), authorPhotoUrl: url } })}
           />
+          <AssetUploader
+            label="Visuel finalisé du post du lundi (optionnel, remplace le rendu texte)"
+            value={content.quote?.postImageUrl}
+            onChange={(url) => patchContent({ quote: { ...(content.quote ?? { text: '', author: '' }), postImageUrl: url } })}
+          />
         </FormSection>
 
         {/* DIGEST */}

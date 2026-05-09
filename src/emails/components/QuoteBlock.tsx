@@ -10,13 +10,75 @@ export interface QuoteBlockProps {
   eyebrow?: string;
   /** URL de la photo de l'auteur (carrée idéalement, ratio 1:1). Affichée en rond 64px au-dessus de la citation. */
   authorPhotoUrl?: string;
+  /**
+   * URL d'un visuel "post citation" complet (style carrousel Insta/FB) qui
+   * remplace TOTALEMENT le rendu texte+photo. Utilisé pour réutiliser
+   * directement les visuels finalisés du post du lundi sans dupliquer
+   * la composition typographique. Ratio recommandé 4:5 (1080x1350) ou 3:4.
+   */
+  postImageUrl?: string;
+  /** Alt text de l'image (si postImageUrl). Default = `${author} : "${text}"`. */
+  postImageAlt?: string;
 }
 
 /**
  * Moment d'arrêt visuel. Citation centrée, gros guillemet or, fond crème.
  * Photo d'auteur optionnelle en haut, ronde et discrète.
+ *
+ * Mode "post image" : si `postImageUrl` est fourni, le bloc affiche
+ * directement le visuel finalisé du post du lundi (composition typographique
+ * deja faite dans l'image), sans repeter texte/auteur en HTML.
  */
-export function QuoteBlock({ text, author, role, eyebrow = 'La phrase de la semaine', authorPhotoUrl }: QuoteBlockProps) {
+export function QuoteBlock({
+  text,
+  author,
+  role,
+  eyebrow = 'La phrase de la semaine',
+  authorPhotoUrl,
+  postImageUrl,
+  postImageAlt,
+}: QuoteBlockProps) {
+  // Mode "post image" : visuel finalisé du post du lundi (Insta/FB)
+  if (postImageUrl) {
+    return (
+      <Section
+        style={{
+          padding: '32px 32px 32px',
+          backgroundColor: colors.surface,
+          margin: '24px 0',
+          textAlign: 'center',
+        }}
+      >
+        <Text
+          style={{
+            margin: '0 0 16px',
+            color: colors.gold,
+            fontFamily: fonts.sans,
+            fontSize: '10px',
+            fontWeight: 700,
+            letterSpacing: '4px',
+            textTransform: 'uppercase',
+          }}
+        >
+          {eyebrow}
+        </Text>
+        <Img
+          src={postImageUrl}
+          alt={postImageAlt ?? `${author} : ${text}`}
+          width={520}
+          style={{
+            display: 'block',
+            width: '100%',
+            maxWidth: '520px',
+            height: 'auto',
+            margin: '0 auto',
+            borderRadius: '12px',
+          }}
+        />
+      </Section>
+    );
+  }
+
   return (
     <Section
       style={{

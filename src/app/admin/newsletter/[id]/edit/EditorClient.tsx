@@ -619,8 +619,13 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
           <button type="button" onClick={() => setStatus('scheduled')} disabled={pending || !issue.scheduled_at} className="inline-flex items-center gap-1 rounded-md bg-gold px-3 py-1.5 text-sm font-semibold text-primary disabled:opacity-50">
             <Calendar className="h-3.5 w-3.5" /> Programmer
           </button>
-          <button type="button" onClick={() => { if (confirm('Envoyer maintenant à toute l\'audience ?')) setStatus('sending'); }} disabled={pending} className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-50">
-            <Send className="h-3.5 w-3.5" /> Envoyer
+          <button
+            type="button"
+            disabled
+            title="L'envoi automatique aux abonnés sera activé en Sprint 3 (pipeline batch Resend + cron). Pour l'instant, utilise le bouton 'Envoi test' pour vérifier sur ton email."
+            className="inline-flex cursor-not-allowed items-center gap-1 rounded-md bg-primary/40 px-3 py-1.5 text-sm font-semibold text-white"
+          >
+            <Send className="h-3.5 w-3.5" /> Envoyer (bientôt)
           </button>
           {issue.status === 'draft' ? (
             <button type="button" onClick={deleteIssue} disabled={pending} className="inline-flex items-center gap-1 rounded-md border border-red-200 bg-white px-3 py-1.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50">

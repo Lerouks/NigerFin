@@ -26,8 +26,10 @@ export const issue001Demo: NewsletterIssue = {
 
   editoNote: {
     eyebrow: 'Bonjour',
-    body: `<p style="margin:0 0 12px;">Bienvenue dans cette première édition Premium. On plonge directement dans <strong>l'or qui pulvérise son record</strong>, la BRVM qui se réveille avec la nouvelle ligne BOAD, et ce que tout ça veut dire concrètement pour votre épargne au Niger.</p>
-<p style="margin:0;">Et surtout, <strong>bonne semaine</strong>. La BCEAO publie ses chiffres jeudi, on en reparlera dans le briefing du vendredi. D'ici là, on vous laisse en bonne compagnie ci-dessous.</p>`,
+    body: `<p style="margin:0 0 14px;"><strong>Vous êtes parmi nos tout premiers lecteurs Premium</strong> et c'est un honneur. Un immense merci pour votre confiance dès cette première édition. On va tout donner pour la mériter, semaine après semaine.</p>
+<p style="margin:0 0 14px;">Quelques mots sur la citation ci-dessus. Schweitzer n'a pas dit "le meilleur moyen", il a dit <em>"le seul"</em>. Les mots ne convainquent personne. Ce qui transforme les autres, c'est ce qu'ils nous voient faire.</p>
+<p style="margin:0 0 14px;">Une équipe ne travaille avec rigueur que si elle voit ses dirigeants la pratiquer. Des enfants n'épargnent que s'ils voient leurs parents le faire. <strong>La cohérence entre ce que l'on dit et ce que l'on fait est la seule monnaie qui compte vraiment.</strong></p>
+<p style="margin:0;">Cette semaine, posons-nous la question pour chaque conseil donné : <em>est-ce que je l'applique moi-même ?</em> Bonne semaine de rigueur et de construction à tous.</p>`,
     signature: 'La rédaction NFI Report',
   },
 
@@ -127,9 +129,9 @@ export const issue001Demo: NewsletterIssue = {
   },
 
   quote: {
-    text: 'Ne dépensez pas ce qui vous reste après avoir épargné, épargnez ce qui vous reste après avoir dépensé.',
-    author: 'Warren Buffett',
-    role: 'investisseur',
+    text: "L'exemple n'est pas la meilleure façon de convaincre, c'est la seule.",
+    author: 'Albert Schweitzer',
+    role: 'médecin, prix Nobel de la paix',
   },
 
   radar: {

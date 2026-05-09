@@ -210,6 +210,8 @@ export function PremiumBriefing({
             webViewUrl={issue.webViewUrl}
           />
 
+          {issue.quote ? <QuoteBlock {...issue.quote} /> : null}
+
           <IntroBlock issue={issue} />
 
           <MarketTable
@@ -237,8 +239,6 @@ export function PremiumBriefing({
           {issue.sponsor ? <Sponsor {...issue.sponsor} /> : null}
 
           {headlines[1] ? <HeadlineCard {...headlines[1]} sectionNumeral={headlines[1].sectionNumeral ?? 'IV'} /> : null}
-
-          {issue.quote ? <QuoteBlock {...issue.quote} /> : null}
 
           {issue.digest ? (
             <DigestList

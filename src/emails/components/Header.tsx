@@ -144,7 +144,7 @@ export function Header({
                     style={{
                       margin: 0,
                       color: colors.gold,
-                      fontFamily: 'Georgia, "Times New Roman", serif',
+                      fontFamily: "'Playfair Display', Georgia, 'Times New Roman', serif",
                       fontSize: '13px',
                       fontStyle: 'italic',
                       letterSpacing: '0.5px',

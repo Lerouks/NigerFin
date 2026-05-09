@@ -60,7 +60,7 @@ export function QuoteBlock({ text, author, role, eyebrow = 'La phrase de la sema
         style={{
           margin: '0 0 14px',
           color: colors.gold,
-          fontFamily: 'Georgia, "Times New Roman", serif',
+          fontFamily: "'Playfair Display', Georgia, 'Times New Roman', serif",
           fontSize: '64px',
           fontWeight: 800,
           lineHeight: 0.9,
@@ -74,7 +74,7 @@ export function QuoteBlock({ text, author, role, eyebrow = 'La phrase de la sema
         style={{
           margin: '0 auto 22px',
           color: colors.ink,
-          fontFamily: 'Georgia, "Times New Roman", serif',
+          fontFamily: "'Playfair Display', Georgia, 'Times New Roman', serif",
           fontSize: '21px',
           fontWeight: 500,
           lineHeight: 1.4,

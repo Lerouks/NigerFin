@@ -49,7 +49,7 @@ function IntroBlock({ issue }: { issue: NewsletterIssue }) {
         style={{
           margin: '0 0 22px',
           color: colors.ink,
-          fontFamily: 'Georgia, "Times New Roman", serif',
+          fontFamily: "'Playfair Display', Georgia, 'Times New Roman', serif",
           fontSize: '30px',
           fontWeight: 700,
           letterSpacing: '-0.7px',
@@ -73,7 +73,7 @@ function IntroBlock({ issue }: { issue: NewsletterIssue }) {
               display: 'inline-block',
               float: 'left',
               color: colors.gold,
-              fontFamily: 'Georgia, "Times New Roman", serif',
+              fontFamily: "'Playfair Display', Georgia, 'Times New Roman', serif",
               fontSize: '64px',
               fontWeight: 700,
               letterSpacing: '-2px',
@@ -176,6 +176,12 @@ export function PremiumBriefing({
         <meta name="color-scheme" content="light only" />
         <meta name="supported-color-schemes" content="light only" />
         <title>{issue.subject}</title>
+        {/* Playfair Display chargee via Google Fonts pour les clients qui le supportent (Apple Mail, iOS, web preview). Fallback Georgia partout sinon. C est un template email, pas une page Next.js, donc le warning no-page-custom-font ne s applique pas. */}
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&display=swap"
+          rel="stylesheet"
+        />
       </Head>
       <Preview>{issue.preheader}</Preview>
       <Body

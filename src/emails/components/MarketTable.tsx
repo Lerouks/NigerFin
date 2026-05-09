@@ -32,13 +32,13 @@ function formatPct(pct: number): string {
  */
 export function MarketTable({ title = 'Marchés au dernier point', caption, rows, source }: MarketTableProps) {
   return (
-    <Section style={{ padding: '40px 32px 16px' }}>
+    <Section style={{ padding: '52px 32px 24px' }}>
       <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ borderCollapse: 'collapse', marginBottom: '14px' }}>
         <tr>
           <td>
             <Text
               style={{
-                margin: '0 0 6px',
+                margin: '0 0 10px',
                 color: colors.gold,
                 fontFamily: fonts.sans,
                 fontSize: '11px',

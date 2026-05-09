@@ -33,13 +33,13 @@ function Block({ heading, body, dropCap = false }: { heading: string; body: stri
   }
 
   return (
-    <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ marginBottom: '16px', borderCollapse: 'collapse' }}>
+    <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ marginBottom: '28px', borderCollapse: 'collapse' }}>
       <tr>
         <td width={3} style={{ backgroundColor: colors.gold, width: '3px', minWidth: '3px' }} />
-        <td style={{ paddingLeft: '14px' }}>
+        <td style={{ paddingLeft: '18px' }}>
           <Text
             style={{
-              margin: '0 0 8px',
+              margin: '0 0 12px',
               color: colors.gold,
               fontFamily: fonts.sans,
               fontSize: fontSizes.tiny,

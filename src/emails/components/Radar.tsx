@@ -17,8 +17,8 @@ export interface RadarProps {
 
 export function Radar({ sectionNumeral, eyebrow = 'À retenir', title = 'Sur notre radar', items }: RadarProps) {
   return (
-    <Section style={{ padding: '32px 32px 36px' }}>
-      <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ borderCollapse: 'collapse', marginBottom: '20px' }}>
+    <Section style={{ padding: '48px 32px 48px' }}>
+      <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ borderCollapse: 'collapse', marginBottom: '28px' }}>
         <tr>
           {sectionNumeral ? (
             <td width={64} style={{ verticalAlign: 'top', paddingRight: '16px' }}>

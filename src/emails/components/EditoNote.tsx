@@ -21,10 +21,10 @@ export function EditoNote({
   signature = 'La rédaction NFI Report',
 }: EditoNoteProps) {
   return (
-    <Section style={{ padding: '36px 32px 8px' }}>
+    <Section style={{ padding: '48px 32px 24px' }}>
       <Text
         style={{
-          margin: '0 0 14px',
+          margin: '0 0 20px',
           color: colors.gold,
           fontFamily: fonts.sans,
           fontSize: '11px',
@@ -47,7 +47,7 @@ export function EditoNote({
       />
       <Text
         style={{
-          margin: '18px 0 0',
+          margin: '26px 0 0',
           color: colors.gold,
           fontFamily: fonts.sans,
           fontSize: '13px',

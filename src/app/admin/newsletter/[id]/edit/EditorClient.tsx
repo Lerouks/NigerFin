@@ -151,6 +151,16 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
               className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
             />
           </Field>
+          <Field label="Accroche éditoriale (cover, ~80 chars)" hint="Affichée dans la cover sous le wordmark NFI REPORT">
+            <input
+              type="text"
+              value={content.coverHeadline ?? ''}
+              onChange={(e) => patchContent({ coverHeadline: e.target.value })}
+              maxLength={120}
+              placeholder="Cette semaine : l'or pulvérise son record, la BRVM se réveille."
+              className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
+            />
+          </Field>
           <div className="grid gap-4 sm:grid-cols-3">
             <Field label="Audience">
               <select

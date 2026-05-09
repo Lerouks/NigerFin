@@ -202,6 +202,7 @@ export function PremiumBriefing({
             issueDateLabel={issue.issueDateLabel}
             readTimeMinutes={issue.readTimeMinutes}
             webViewUrl={issue.webViewUrl}
+            coverHeadline={issue.coverHeadline}
           />
 
           {issue.quote ? <QuoteBlock {...issue.quote} /> : null}

@@ -85,8 +85,8 @@ export const issue001Demo: NewsletterIssue = {
         'C’est un signal fort : la BRVM a longtemps souffert d’un compartiment PME quasi désertique (4 sociétés cotées seulement fin 2025). Avec ce levier de refinancement, les SGI peuvent <strong>réduire leur coût d’intermédiation</strong> et donc baisser le ticket d’entrée pour les PME nigériennes, ivoiriennes ou sénégalaises qui souhaitent ouvrir leur capital.',
       whyCare:
         'Pour un épargnant nigérien, ça ouvre, à terme, <strong>de nouvelles opportunités d’investir dans des entreprises sous-régionales en croissance</strong>, sans passer par les blue chips ivoiriennes ou sénégalaises traditionnelles. Mais le compartiment PME reste structurellement plus risqué : ne jamais y exposer plus de 10 % d’un portefeuille diversifié.',
-      ctaLabel: 'Voir notre simulateur BRVM',
-      ctaUrl: `${SITE_URL}/outil`,
+      ctaLabel: 'Tous nos outils financiers',
+      ctaUrl: `${SITE_URL}/outils`,
     },
   ],
 
@@ -148,25 +148,25 @@ export const issue001Demo: NewsletterIssue = {
   toolsPromo: {
     eyebrow: 'Vos outils Premium',
     title: 'Mettez vos analyses en chiffres',
-    caption: 'Trois simulateurs pensés pour la fiscalité, les marchés et l’épargne en zone UEMOA. Inclus dans votre abonnement.',
+    caption: 'Trois outils inclus dans votre abonnement Premium pour passer du décryptage à la décision.',
     items: [
       {
-        emoji: '📈',
-        title: 'Simulateur emprunt BRVM',
-        description: 'Mensualités, coût total, capacité d’endettement adaptée au taux UEMOA.',
-        url: `${SITE_URL}/outil/simulateur-emprunt`,
-      },
-      {
         emoji: '💼',
-        title: 'Simulateur salaire net Niger',
+        title: 'Simulateur Salaire',
         description: 'IRPP, IUTS, cotisations CNSS : du brut au net en moins de 30 secondes.',
         url: `${SITE_URL}/outil/simulateur-salaire`,
       },
       {
         emoji: '💰',
-        title: 'Calculateur intérêts composés',
+        title: 'Intérêt Composé',
         description: 'Projetez votre épargne sur 1, 5, 10 ans avec inflation BCEAO incluse.',
-        url: `${SITE_URL}/outil/interet-simple`,
+        url: `${SITE_URL}/outil/interet-compose`,
+      },
+      {
+        emoji: '📊',
+        title: 'Budget Familial',
+        description: 'Catégorisez vos dépenses, suivez votre épargne mensuelle, ajustez en temps réel.',
+        url: `${SITE_URL}/outil/budget-familial`,
       },
     ],
   },

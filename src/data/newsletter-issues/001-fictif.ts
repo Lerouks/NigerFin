@@ -2,12 +2,18 @@ import type { NewsletterIssue } from '@/emails/types';
 import { SITE_URL } from '@/lib/config';
 
 /**
- * Édition n°01, DÉMONSTRATION
+ * Édition n°01, calée pour un envoi "type" du lundi 11 mai 2026.
  *
- * Cette édition est un GABARIT DE DÉMONSTRATION. Les données financières
- * et faits cités illustrent le rendu visuel et ne doivent pas être envoyés
- * en l'état aux abonnés réels. Tout vrai numéro doit être rédigé par
- * la rédaction NFI Report avec sources vérifiées.
+ * AVERTISSEMENT IMPORTANT POUR LA RÉDACTION :
+ * Avant tout envoi réel à des abonnés payants, la rédaction NFI Report
+ * DOIT VÉRIFIER ET METTRE À JOUR :
+ *   - Toutes les valeurs marchés (BRVM Composite, BRVM 30, USD/XOF, Or,
+ *     Brent) à la clôture réelle du vendredi précédent
+ *   - Les sparklines (séries 7 jours réelles)
+ *   - Les chiffres KPI Niger (PIB, inflation, dette publique)
+ *   - Toutes les actualités du digest (FAO, BCEAO, CNPC, ARTP)
+ *   - Le texte des analyses (faits, dates, montants)
+ * Sources à utiliser : sites officiels BRVM, BCEAO, FMI, INS Niger, LBMA, ICE.
  *
  * Note BCEAO : la parité EUR/XOF est fixe à 655.957. Le franc CFA UEMOA
  * suit l'euro par convention monétaire ; toute variation EUR/XOF affichée
@@ -21,7 +27,7 @@ export const issue001Demo: NewsletterIssue = {
   preheader:
     'Or, BRVM, BCEAO : trois lectures pour démarrer la semaine côté finances Niger. Plus la phrase de la semaine et notre digest des marchés.',
   issueDateLabel: 'Lundi 11 mai 2026',
-  readTimeMinutes: 7,
+  readTimeMinutes: 5,
   // webViewUrl will be set once the public archive (/newsletter/[slug]) is built (Sprint 4).
   // Leaving it undefined removes the "Voir dans le navigateur" link from the cover header.
 
@@ -98,6 +104,14 @@ export const issue001Demo: NewsletterIssue = {
       ctaUrl: `${SITE_URL}/outils`,
     },
   ],
+
+  chart: {
+    title: 'L\'or sur 12 mois, en USD l\'once',
+    imageUrl: 'https://images.unsplash.com/photo-1610375461246-83df859d849d?w=1200&q=80&auto=format&fit=crop',
+    imageAlt: 'Lingots et pièces d\'or, illustration LBMA',
+    caption: 'Le record des 4 632 USD vendredi dernier porte la performance YTD à +28 %. Pour la rente fiscale du Niger, chaque dollar compte.',
+    source: 'LBMA, données mensuelles',
+  },
 
   digest: {
     title: 'Ce qui a bougé cette semaine',

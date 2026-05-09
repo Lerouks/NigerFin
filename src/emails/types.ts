@@ -7,6 +7,7 @@ import type { RadarItem } from './components/Radar';
 import type { SponsorProps } from './components/Sponsor';
 import type { NigerKpiItem } from './components/NigerKpiBlock';
 import type { ToolPromoItem } from './components/ToolsPromoBlock';
+import type { DiscoverItem } from './components/DiscoverBlock';
 
 /**
  * Forme typée d'un numéro de Premium Briefing.
@@ -88,6 +89,19 @@ export interface NewsletterIssue {
     title?: string;
     caption?: string;
     items: ToolPromoItem[];
+  };
+
+  /**
+   * Bloc "Continuer sur NFI Report" : invitations vers les autres rubriques
+   * du site (education, entreprises BRVM, niger interactive, etc.) afin de
+   * valoriser la profondeur du produit au dela de l'edito de la semaine.
+   */
+  discover?: {
+    sectionNumeral?: string;
+    eyebrow?: string;
+    title?: string;
+    caption?: string;
+    items: DiscoverItem[];
   };
 
   /** Date du prochain envoi en clair (footer). */

@@ -11,6 +11,7 @@ import { DigestList } from './components/DigestList';
 import { Sponsor } from './components/Sponsor';
 import { Radar } from './components/Radar';
 import { ToolsPromoBlock } from './components/ToolsPromoBlock';
+import { DiscoverBlock } from './components/DiscoverBlock';
 import { EditoNote } from './components/EditoNote';
 import { Footer } from './components/Footer';
 import type { NewsletterIssue } from './types';
@@ -270,6 +271,16 @@ export function PremiumBriefing({
               title={issue.toolsPromo.title}
               caption={issue.toolsPromo.caption}
               items={issue.toolsPromo.items}
+            />
+          ) : null}
+
+          {issue.discover ? (
+            <DiscoverBlock
+              sectionNumeral={issue.discover.sectionNumeral ?? 'VIII'}
+              eyebrow={issue.discover.eyebrow}
+              title={issue.discover.title}
+              caption={issue.discover.caption}
+              items={issue.discover.items}
             />
           ) : null}
 

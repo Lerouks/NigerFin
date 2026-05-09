@@ -24,6 +24,13 @@ export const issue001Demo: NewsletterIssue = {
   readTimeMinutes: 7,
   webViewUrl: `${SITE_URL}/admin/newsletter/preview/001-demo`,
 
+  editoNote: {
+    eyebrow: 'Bonjour',
+    body: `<p style="margin:0 0 12px;">Bienvenue dans cette première édition Premium. On plonge directement dans <strong>l'or qui pulvérise son record</strong>, la BRVM qui se réveille avec la nouvelle ligne BOAD, et ce que tout ça veut dire concrètement pour votre épargne au Niger.</p>
+<p style="margin:0;">Et surtout, <strong>bonne semaine</strong>. La BCEAO publie ses chiffres jeudi, on en reparlera dans le briefing du vendredi. D'ici là, on vous laisse en bonne compagnie ci-dessous.</p>`,
+    signature: 'La rédaction NFI Report',
+  },
+
   intro: {
     eyebrow: 'Édition de démonstration',
     heading: 'L’or sous les projecteurs, la BRVM en silence',

@@ -11,6 +11,7 @@ import { DigestList } from './components/DigestList';
 import { Sponsor } from './components/Sponsor';
 import { Radar } from './components/Radar';
 import { ToolsPromoBlock } from './components/ToolsPromoBlock';
+import { EditoNote } from './components/EditoNote';
 import { Footer } from './components/Footer';
 import type { NewsletterIssue } from './types';
 
@@ -204,6 +205,14 @@ export function PremiumBriefing({
             webViewUrl={issue.webViewUrl}
             coverHeadline={issue.coverHeadline}
           />
+
+          {issue.editoNote ? (
+            <EditoNote
+              eyebrow={issue.editoNote.eyebrow}
+              body={issue.editoNote.body}
+              signature={issue.editoNote.signature}
+            />
+          ) : null}
 
           {issue.quote ? <QuoteBlock {...issue.quote} /> : null}
 

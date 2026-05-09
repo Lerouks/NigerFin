@@ -298,6 +298,18 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
 
         {/* MARKET */}
         <FormSection title="Tableau de bord marchés">
+          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-gold/40 bg-gold/5 p-3">
+            <input
+              type="checkbox"
+              checked={!!content.market.autoSync}
+              onChange={(e) => patchContent({ market: { ...content.market, autoSync: e.target.checked } })}
+              className="mt-1 h-4 w-4 accent-foreground"
+            />
+            <div className="flex-1 text-sm">
+              <span className="font-semibold text-foreground">Synchroniser automatiquement avec les vraies données du site</span>
+              <p className="mt-0.5 text-xs text-foreground/60">{"Si activé, le tableau ci-dessous est ignoré : la newsletter prend les valeurs vivantes depuis la table market_data du dashboard admin (BRVM, EUR/XOF, USD/XOF, Or, Brent, Uranium). Recommandé."}</p>
+            </div>
+          </label>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Titre du tableau">
               <input
@@ -307,12 +319,13 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
                 className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
               />
             </Field>
-            <Field label="Source (BCEAO, BRVM, …)">
+            <Field label="Source (BCEAO, BRVM, …) — ignoré si autoSync">
               <input
                 type="text"
                 value={content.market.source ?? ''}
                 onChange={(e) => patchContent({ market: { ...content.market, source: e.target.value } })}
                 className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
+                disabled={content.market.autoSync}
               />
             </Field>
           </div>
@@ -356,6 +369,81 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
                   value={row.changePercent}
                   onChange={(e) => patchContent({ market: { ...content.market, rows: content.market.rows.map((r, i) => i === idx ? { ...r, changePercent: Number(e.target.value) } : r) } })}
                   className="rounded border border-foreground/15 bg-white px-2 py-1 text-sm font-mono"
+                />
+              </div>
+            )}
+          />
+        </FormSection>
+
+        {/* NIGER KPI */}
+        <FormSection title="Niger en chiffres (bloc KPI noir, optionnel)">
+          <p className="text-xs text-foreground/55">Trois indicateurs clés (croissance, inflation, dette) pour cadrer toute analyse Niger.</p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Eyebrow (petit titre or)">
+              <input
+                type="text"
+                value={content.nigerKpi?.eyebrow ?? ''}
+                onChange={(e) => patchContent({ nigerKpi: { ...(content.nigerKpi ?? { items: [] }), eyebrow: e.target.value } })}
+                placeholder="Niger en chiffres"
+                className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
+              />
+            </Field>
+            <Field label="Titre">
+              <input
+                type="text"
+                value={content.nigerKpi?.title ?? ''}
+                onChange={(e) => patchContent({ nigerKpi: { ...(content.nigerKpi ?? { items: [] }), title: e.target.value } })}
+                placeholder="L'économie nigérienne, en un coup d'œil"
+                className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
+              />
+            </Field>
+          </div>
+          <Field label="Légende">
+            <input
+              type="text"
+              value={content.nigerKpi?.caption ?? ''}
+              onChange={(e) => patchContent({ nigerKpi: { ...(content.nigerKpi ?? { items: [] }), caption: e.target.value } })}
+              className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
+            />
+          </Field>
+          <RepeatableSection
+            label="Indicateurs (3 idéalement)"
+            items={content.nigerKpi?.items ?? []}
+            onAdd={() => patchContent({ nigerKpi: { ...(content.nigerKpi ?? { items: [] }), items: [...(content.nigerKpi?.items ?? []), { label: '', value: '' }] } })}
+            onRemove={(idx) => patchContent({ nigerKpi: { ...(content.nigerKpi ?? { items: [] }), items: (content.nigerKpi?.items ?? []).filter((_, i) => i !== idx) } })}
+            renderItem={(it, idx) => (
+              <div className="space-y-2">
+                <input
+                  placeholder="Label (ex: Croissance PIB 2026)"
+                  value={it.label}
+                  onChange={(e) => patchContent({ nigerKpi: { ...(content.nigerKpi ?? { items: [] }), items: (content.nigerKpi?.items ?? []).map((x, i) => i === idx ? { ...x, label: e.target.value } : x) } })}
+                  className="w-full rounded border border-foreground/15 bg-white px-2 py-1 text-sm font-semibold"
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    placeholder="Valeur (ex: +6,2)"
+                    value={it.value}
+                    onChange={(e) => patchContent({ nigerKpi: { ...(content.nigerKpi ?? { items: [] }), items: (content.nigerKpi?.items ?? []).map((x, i) => i === idx ? { ...x, value: e.target.value } : x) } })}
+                    className="rounded border border-foreground/15 bg-white px-2 py-1 text-sm font-mono"
+                  />
+                  <input
+                    placeholder="Unité (%, FCFA, $)"
+                    value={it.unit ?? ''}
+                    onChange={(e) => patchContent({ nigerKpi: { ...(content.nigerKpi ?? { items: [] }), items: (content.nigerKpi?.items ?? []).map((x, i) => i === idx ? { ...x, unit: e.target.value } : x) } })}
+                    className="rounded border border-foreground/15 bg-white px-2 py-1 text-sm"
+                  />
+                </div>
+                <input
+                  placeholder="Précision / delta (ex: projection FMI · article IV)"
+                  value={it.delta ?? ''}
+                  onChange={(e) => patchContent({ nigerKpi: { ...(content.nigerKpi ?? { items: [] }), items: (content.nigerKpi?.items ?? []).map((x, i) => i === idx ? { ...x, delta: e.target.value } : x) } })}
+                  className="w-full rounded border border-foreground/15 bg-white px-2 py-1 text-sm"
+                />
+                <input
+                  placeholder="Source (ex: FMI, avril 2026)"
+                  value={it.source ?? ''}
+                  onChange={(e) => patchContent({ nigerKpi: { ...(content.nigerKpi ?? { items: [] }), items: (content.nigerKpi?.items ?? []).map((x, i) => i === idx ? { ...x, source: e.target.value } : x) } })}
+                  className="w-full rounded border border-foreground/15 bg-white px-2 py-1 text-sm italic text-foreground/70"
                 />
               </div>
             )}
@@ -519,6 +607,14 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
               type="text"
               value={content.chart?.caption ?? ''}
               onChange={(e) => patchContent({ chart: { ...(content.chart ?? { title: '', imageUrl: '', imageAlt: '' }), caption: e.target.value } })}
+              className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
+            />
+          </Field>
+          <Field label="Source (ex: LBMA, données mensuelles)">
+            <input
+              type="text"
+              value={content.chart?.source ?? ''}
+              onChange={(e) => patchContent({ chart: { ...(content.chart ?? { title: '', imageUrl: '', imageAlt: '' }), source: e.target.value } })}
               className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
             />
           </Field>

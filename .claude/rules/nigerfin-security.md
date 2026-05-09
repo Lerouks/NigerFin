@@ -6,7 +6,7 @@ alwaysApply: true
 
 ## Checklist avant chaque commit
 
-- [ ] Aucun secret en dur (clés Supabase, iPayMoney, Sentry DSN, Resend, PostHog, Beehiiv)
+- [ ] Aucun secret en dur (clés Supabase, iPayMoney, Sentry DSN, Resend, PostHog)
 - [ ] Toutes les entrées utilisateur validées (Zod aux frontières API)
 - [ ] Prévention injection SQL (requêtes Supabase paramétrées, jamais de concaténation)
 - [ ] Prévention XSS (sanitiser le HTML, surtout les sorties TipTap/RichTextEditor)

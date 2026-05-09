@@ -48,11 +48,19 @@ export async function sendTransactionalEmail({
   subject,
   html,
   attachments,
+  unsubscribeUrl,
 }: {
   to: string;
   subject: string;
   html: string;
   attachments?: EmailAttachment[];
+  /**
+   * URL HTTPS de désabonnement one-click (RFC 8058). Si fournie,
+   * ajoute les headers `List-Unsubscribe` HTTPS + mailto et le
+   * `List-Unsubscribe-Post` qui débloque le bouton "Se désabonner"
+   * dans Gmail / Yahoo / Apple Mail.
+   */
+  unsubscribeUrl?: string;
 }) {
   const resend = getResend();
   if (!resend) {
@@ -63,6 +71,18 @@ export async function sendTransactionalEmail({
   }
 
   try {
+    // RFC 8058 + 2369 : si on a une URL HTTPS, on combine HTTPS + mailto + One-Click
+    const listUnsubscribe = unsubscribeUrl
+      ? `<${unsubscribeUrl}>, <mailto:contact@nfireport.com?subject=unsubscribe>`
+      : '<mailto:contact@nfireport.com?subject=unsubscribe>';
+    const headers: Record<string, string> = {
+      'List-Unsubscribe': listUnsubscribe,
+    };
+    if (unsubscribeUrl) {
+      // Active le bouton "Se désabonner" en 1 clic dans Gmail / Yahoo / Apple Mail
+      headers['List-Unsubscribe-Post'] = 'List-Unsubscribe=One-Click';
+    }
+
     const result = await resend.emails.send({
       from: 'NFI Report <noreply@nfireport.com>',
       replyTo: 'contact@nfireport.com',
@@ -70,9 +90,7 @@ export async function sendTransactionalEmail({
       subject,
       html,
       text: htmlToPlainText(html),
-      headers: {
-        'List-Unsubscribe': '<mailto:contact@nfireport.com?subject=unsubscribe>',
-      },
+      headers,
       attachments: attachments?.map((a) => ({
         filename: a.filename,
         content: a.content,

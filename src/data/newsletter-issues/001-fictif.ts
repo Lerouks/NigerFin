@@ -106,8 +106,8 @@ export const issue001Demo: NewsletterIssue = {
         'C’est un signal fort : la BRVM a longtemps souffert d’un compartiment PME quasi désertique (4 sociétés cotées seulement fin 2025). Avec ce levier de refinancement, les SGI peuvent <strong>réduire leur coût d’intermédiation</strong> et donc baisser le ticket d’entrée pour les PME nigériennes, ivoiriennes ou sénégalaises qui souhaitent ouvrir leur capital.',
       whyCare:
         'Pour un épargnant nigérien, ça ouvre, à terme, <strong>de nouvelles opportunités d’investir dans des entreprises sous-régionales en croissance</strong>, sans passer par les blue chips ivoiriennes ou sénégalaises traditionnelles. Mais le compartiment PME reste structurellement plus risqué : ne jamais y exposer plus de 10 % d’un portefeuille diversifié.',
-      ctaLabel: 'Tous nos outils financiers',
-      ctaUrl: `${SITE_URL}/outils`,
+      ctaLabel: 'Voir les fiches BRVM',
+      ctaUrl: `${SITE_URL}/entreprises`,
     },
   ],
 
@@ -146,6 +146,12 @@ export const issue001Demo: NewsletterIssue = {
         body:
           'L’Autorité de Régulation des Télécommunications et de la Poste a ouvert une consultation publique jusqu’au 30 mai sur un plafonnement des commissions cash-in/cash-out. Verdict attendu avant l’été.',
       },
+      {
+        emoji: '⚡',
+        title: 'NIGELEC : appel d’offres de 80 MW solaire à Gorou Banda',
+        body:
+          'Le projet, cofinancé par la Banque mondiale, doit ajouter ~12 % à la capacité installée nationale. Date limite des candidatures : 15 juin. Premier signal sectoriel post-restructuration tarifaire de février.',
+      },
     ],
   },
 
@@ -175,6 +181,10 @@ export const issue001Demo: NewsletterIssue = {
         title: 'Conférence des CEO BRVM à Abidjan, jeudi',
         hint: 'Sonatel, Ecobank, Onatel : les patrons des plus grosses capi présentent leurs perspectives 2026.',
       },
+      {
+        title: 'Réunion FMI / Niger sur la Facilité élargie de crédit',
+        hint: 'Mission de revue prévue à Niamey du 14 au 20 mai. Décaissement de la 3e tranche en jeu.',
+      },
     ],
   },
 
@@ -200,6 +210,38 @@ export const issue001Demo: NewsletterIssue = {
         title: 'Budget Familial',
         description: 'Catégorisez vos dépenses, suivez votre épargne mensuelle, ajustez en temps réel.',
         url: `${SITE_URL}/outil/budget-familial`,
+      },
+    ],
+  },
+
+  discover: {
+    eyebrow: 'Continuer la lecture',
+    title: 'Aussi cette semaine sur NFI Report',
+    caption: 'Trois rubriques qu’on vous recommande pour aller plus loin que le briefing de la semaine.',
+    items: [
+      {
+        emoji: '🎓',
+        rubric: 'Éducation financière',
+        title: 'Comprendre la BRVM en 6 leçons gratuites',
+        description: 'Notre parcours pédagogique pour passer de zéro à compte titres ouvert, à votre rythme. Le module 3 (lire un cours) vient d’être enrichi.',
+        url: `${SITE_URL}/education`,
+        ctaLabel: 'Commencer le parcours',
+      },
+      {
+        emoji: '🏢',
+        rubric: 'Entreprises BRVM',
+        title: 'Sonatel, Ecobank, BOA : les fiches mises à jour pour mai',
+        description: 'Capi, dividende, payout, dernier résultat : nos fiches synthétiques pour décider en 5 minutes si une valeur mérite une place dans votre portefeuille.',
+        url: `${SITE_URL}/entreprises`,
+        ctaLabel: 'Voir les fiches',
+      },
+      {
+        emoji: '🗺️',
+        rubric: 'Niger en data',
+        title: 'Les 8 régions du Niger, en chiffres',
+        description: 'Tableau de bord interactif : démographie, PIB régional, accès au crédit, mobile money. Idéal pour benchmarker votre marché si vous entreprenez.',
+        url: `${SITE_URL}/niger`,
+        ctaLabel: 'Explorer la carte',
       },
     ],
   },

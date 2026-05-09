@@ -55,6 +55,11 @@ export const issue001Demo: NewsletterIssue = {
   market: {
     title: 'Marchés à la clôture du vendredi 8 mai',
     caption: 'Les variations sont calculées sur la séance précédente. Mini graphiques sur 7 jours.',
+    // autoSync : au moment du rendu, le helper renderPremiumBriefingHtml remplace
+    // automatiquement `rows` (et `source`) par les valeurs vivantes de la table
+    // public.market_data (gerée depuis le dashboard admin du site). Les rows
+    // ci-dessous servent uniquement de fallback si la DB est inaccessible.
+    autoSync: true,
     rows: [
       { label: 'BRVM Composite', value: '280,42', unit: 'pts', changePercent: 0.45, spark: [277.1, 276.8, 278.2, 277.9, 279.3, 279.1, 280.4] },
       { label: 'BRVM 30', value: '140,18', unit: 'pts', changePercent: 0.62, spark: [137.9, 138.1, 139.0, 138.7, 139.3, 139.6, 140.2] },

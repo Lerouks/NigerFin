@@ -43,6 +43,13 @@ export interface NewsletterIssue {
     caption?: string;
     rows: MarketRow[];
     source?: string;
+    /**
+     * Si true, le helper de rendu remplace `rows` (et optionnellement `source`)
+     * par les valeurs vivantes de la table public.market_data au moment du
+     * rendu. Garantit que la newsletter affiche toujours les chiffres a jour
+     * gérés depuis le dashboard admin du site.
+     */
+    autoSync?: boolean;
   };
 
   /** Bloc "Niger en chiffres" : 3 KPI clés. */

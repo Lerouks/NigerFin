@@ -2,6 +2,7 @@ import { render } from '@react-email/render';
 import * as React from 'react';
 import { PremiumBriefing, type PremiumBriefingProps } from './PremiumBriefing';
 import type { NewsletterIssue } from './types';
+import { getLiveMarketRows, getMarketSourceLine } from '@/lib/newsletter/market-sync';
 
 /**
  * Rend la newsletter en HTML.
@@ -9,10 +10,33 @@ import type { NewsletterIssue } from './types';
  * (Gmail, Outlook 365, Apple Mail, iOS Mail, Yahoo).
  */
 export async function renderPremiumBriefingHtml(props: PremiumBriefingProps): Promise<string> {
-  const html = await render(React.createElement(PremiumBriefing, props), {
+  // Si l'issue a active autoSync sur les marches, on remplace les rows par les
+  // valeurs vivantes de la table market_data (single source of truth = site).
+  const issue = await maybeSyncMarketRows(props.issue);
+  const html = await render(React.createElement(PremiumBriefing, { ...props, issue }), {
     pretty: false,
   });
   return html;
+}
+
+async function maybeSyncMarketRows(issue: NewsletterIssue): Promise<NewsletterIssue> {
+  if (!issue.market?.autoSync) return issue;
+  try {
+    const liveRows = await getLiveMarketRows();
+    if (liveRows.length === 0) return issue; // fallback gracieux
+    const liveSource = await getMarketSourceLine();
+    return {
+      ...issue,
+      market: {
+        ...issue.market,
+        rows: liveRows,
+        source: liveSource || issue.market.source,
+      },
+    };
+  } catch {
+    // En cas d'erreur DB, on retombe sur les rows hardcodées (degradation gracieuse)
+    return issue;
+  }
 }
 
 /**

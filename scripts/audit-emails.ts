@@ -5,11 +5,29 @@
  *
  * Sortie : `~/AUDIT EMAILS NFI/` contenant 1 HTML par email + un index navigable.
  * Aucune dépendance externe au site (pas d'envoi réel, données factices).
+ *
+ * Charge .env.local pour permettre au sync market_data (Supabase) de fonctionner
+ * en preview locale. Sans ça, la newsletter affiche les rows hardcodées de fallback.
  */
 
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
+
+// Load .env.local manually (tsx ne le fait pas automatiquement contrairement à Next.js)
+async function loadEnvLocal(): Promise<void> {
+  try {
+    const content = await readFile(join(process.cwd(), '.env.local'), 'utf-8');
+    for (const line of content.split('\n')) {
+      const m = line.match(/^([A-Z_][A-Z0-9_]*)=(.*)$/);
+      if (m && m[1] && !process.env[m[1]]) {
+        process.env[m[1]] = m[2]!.replace(/^['"]|['"]$/g, '');
+      }
+    }
+  } catch {
+    // Pas grave si .env.local manque, on tombera sur les fallback rows
+  }
+}
 
 import { renderPremiumBriefingHtml } from '@/emails/render';
 import { issue001Demo } from '@/data/newsletter-issues/001-fictif';
@@ -381,6 +399,7 @@ function buildIndexHtml(entries: EmailEntry[]): string {
 }
 
 async function main(): Promise<void> {
+  await loadEnvLocal();
   await mkdir(OUT_DIR, { recursive: true });
   const entries = await buildAllEntries();
 

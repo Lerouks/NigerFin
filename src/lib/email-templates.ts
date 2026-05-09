@@ -26,7 +26,7 @@ ${content}
 
 <!-- Footer -->
 <tr><td style="background-color:#fafaf9;padding:24px 32px;border-top:1px solid #e5e5e5;text-align:center;">
-  <p style="margin:0 0 6px;font-family:'Playfair Display',Georgia,'Times New Roman',serif;font-size:13px;font-style:italic;color:#d4a843;letter-spacing:0.3px;">La connaissance, votre meilleur capital.</p>
+  <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-style:italic;color:#d4a843;letter-spacing:0.3px;">La connaissance, votre meilleur capital.</p>
   <p style="margin:0 0 8px;font-size:12px;color:#a3a3a3;">NFI Report, actualités économiques et financières du Niger</p>
   <p style="margin:0;font-size:12px;color:#d4d4d4;">
     <a href="${SITE_URL}" style="color:#a3a3a3;text-decoration:underline;">nfireport.com</a>

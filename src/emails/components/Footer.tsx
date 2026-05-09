@@ -124,7 +124,7 @@ export function Footer({
               style={{
                 margin: 0,
                 color: colors.inkFaint,
-                fontFamily: "'Playfair Display', Georgia, 'Times New Roman', serif",
+                fontFamily: "Arial, Helvetica, sans-serif",
                 fontSize: '13px',
                 lineHeight: lineHeights.relaxed,
                 fontStyle: 'italic',

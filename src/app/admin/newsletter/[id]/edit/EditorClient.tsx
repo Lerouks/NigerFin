@@ -161,6 +161,29 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
               className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
             />
           </Field>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Field label="Type d'édition">
+              <select
+                value={content.editionType ?? 'standard'}
+                onChange={(e) => patchContent({ editionType: e.target.value as 'standard' | 'special' | 'flash' })}
+                className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
+              >
+                <option value="standard">Standard (briefing du lundi)</option>
+                <option value="special">Édition spéciale</option>
+                <option value="flash">Flash exclusif</option>
+              </select>
+            </Field>
+            <Field label="Audience">
+              <select
+                value={issue.audience}
+                onChange={(e) => setIssue((s) => ({ ...s, audience: e.target.value as NewsletterAudience }))}
+                className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
+              >
+                <option value="premium">Premium uniquement</option>
+                <option value="free">Lecteurs gratuits</option>
+                <option value="all">Tous les abonnés</option>
+              </select>
+            </Field>
             <Field label="Slug (URL archive)">
               <input
                 type="text"

@@ -55,7 +55,7 @@ async function buildAllEntries(): Promise<EmailEntry[]> {
   const newsletterHtml = await renderPremiumBriefingHtml({
     issue: issue001Demo,
     siteUrl: SITE_URL,
-    managePreferencesUrl: `${SITE_URL}/compte`,
+    managePreferencesUrl: `${SITE_URL}/compte/preferences-newsletter`,
     unsubscribeUrl: `${SITE_URL}/api/newsletter/unsubscribe?token=DEMO`,
     socials: {
       instagram: 'https://instagram.com/nfireport',

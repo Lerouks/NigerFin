@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Section, Text } from '@react-email/components';
+import { Section, Text, Img } from '@react-email/components';
 import { colors, fonts, fontSizes, letterSpacing, lineHeights } from './tokens';
 
 export interface QuoteBlockProps {
@@ -8,13 +8,15 @@ export interface QuoteBlockProps {
   role?: string;
   /** Eyebrow type "Citation de la semaine". */
   eyebrow?: string;
+  /** URL de la photo de l'auteur (carrée idéalement, ratio 1:1). Affichée en rond 64px au-dessus de la citation. */
+  authorPhotoUrl?: string;
 }
 
 /**
- * Moment d'arrêt visuel. Citation centrée, gros guillemet or, fond crème,
- * contour Niger en watermark derrière.
+ * Moment d'arrêt visuel. Citation centrée, gros guillemet or, fond crème.
+ * Photo d'auteur optionnelle en haut, ronde et discrète.
  */
-export function QuoteBlock({ text, author, role, eyebrow = 'La phrase de la semaine' }: QuoteBlockProps) {
+export function QuoteBlock({ text, author, role, eyebrow = 'La phrase de la semaine', authorPhotoUrl }: QuoteBlockProps) {
   return (
     <Section
       style={{
@@ -26,6 +28,30 @@ export function QuoteBlock({ text, author, role, eyebrow = 'La phrase de la sema
         overflow: 'hidden',
       }}
     >
+      {authorPhotoUrl ? (
+        <table role="presentation" cellPadding={0} cellSpacing={0} border={0} align="center" style={{ margin: '0 auto 18px' }}>
+          <tr>
+            <td align="center">
+              <Img
+                src={authorPhotoUrl}
+                alt={author}
+                width={72}
+                height={72}
+                style={{
+                  display: 'block',
+                  width: '72px',
+                  height: '72px',
+                  borderRadius: '36px',
+                  objectFit: 'cover',
+                  border: `2px solid ${colors.gold}`,
+                  margin: '0 auto',
+                }}
+              />
+            </td>
+          </tr>
+        </table>
+      ) : null}
+
       <Text
         style={{
           margin: '0 0 12px',

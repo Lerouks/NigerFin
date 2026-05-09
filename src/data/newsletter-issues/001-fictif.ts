@@ -16,13 +16,13 @@ import { SITE_URL } from '@/lib/config';
 
 export const issue001Demo: NewsletterIssue = {
   number: 1,
-  slug: '001-demo',
+  slug: '001',
   subject: 'Premium Briefing n°01, l’or du Niger sous tension, la BRVM tient le cap',
   preheader:
     'Or, BRVM, BCEAO : trois lectures pour démarrer la semaine côté finances Niger. Plus la phrase de la semaine et notre digest des marchés.',
-  issueDateLabel: 'Lundi 4 mai 2026',
+  issueDateLabel: 'Lundi 11 mai 2026',
   readTimeMinutes: 7,
-  webViewUrl: `${SITE_URL}/admin/newsletter/preview/001-demo`,
+  webViewUrl: `${SITE_URL}/newsletter/001`,
 
   editoNote: {
     eyebrow: 'Bonjour',
@@ -34,7 +34,7 @@ export const issue001Demo: NewsletterIssue = {
   },
 
   intro: {
-    eyebrow: 'Édition de démonstration',
+    eyebrow: 'Édition n°01 · 11 mai 2026',
     heading: 'L’or sous les projecteurs, la BRVM en silence',
     paragraph:
       'Pendant que le cours de l’or atteint un nouveau record et que le pétrole consolide, la BRVM enchaîne sa quatrième séance de hausse, discrètement. On revient sur ce que ça change pour vos placements en zone UEMOA, et pourquoi le Niger reste un cas à part dans ce cycle.',
@@ -46,7 +46,7 @@ export const issue001Demo: NewsletterIssue = {
   },
 
   market: {
-    title: 'Marchés à la clôture du vendredi 1ᵉʳ mai',
+    title: 'Marchés à la clôture du vendredi 8 mai',
     caption: 'Les variations sont calculées sur la séance précédente. Mini graphiques sur 7 jours.',
     rows: [
       { label: 'BRVM Composite', value: '280,42', unit: 'pts', changePercent: 0.45, spark: [277.1, 276.8, 278.2, 277.9, 279.3, 279.1, 280.4] },
@@ -179,5 +179,5 @@ export const issue001Demo: NewsletterIssue = {
     ],
   },
 
-  nextIssueLabel: 'Lundi 11 mai · 7h GMT',
+  nextIssueLabel: 'Lundi 18 mai · 7h GMT',
 };

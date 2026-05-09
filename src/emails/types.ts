@@ -20,6 +20,8 @@ export interface NewsletterIssue {
   issueDateLabel: string;
   readTimeMinutes?: number;
   webViewUrl?: string;
+  /** Accroche éditoriale courte (~80 chars) affichée dans la cover, sous le wordmark. */
+  coverHeadline?: string;
 
   intro: {
     eyebrow?: string;

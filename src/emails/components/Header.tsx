@@ -9,6 +9,8 @@ export interface HeaderProps {
   readTimeMinutes?: number;
   webViewUrl?: string;
   tagline?: string;
+  /** Accroche éditoriale courte du numéro, affichée sous le wordmark. */
+  coverHeadline?: string;
 }
 
 /**
@@ -29,6 +31,7 @@ export function Header({
   readTimeMinutes,
   webViewUrl,
   tagline = 'Le Premium Briefing',
+  coverHeadline,
 }: HeaderProps) {
   const issueLabel = `Édition n°${String(issueNumber).padStart(2, '0')}`;
   const issueGiantLabel = `N°${String(issueNumber).padStart(2, '0')}`;
@@ -139,7 +142,7 @@ export function Header({
 
               {/* Tagline or italique */}
               <tr>
-                <td align="center" style={{ paddingTop: '8px', paddingBottom: '18px' }}>
+                <td align="center" style={{ paddingTop: '8px', paddingBottom: coverHeadline ? '14px' : '18px' }}>
                   <Text
                     style={{
                       margin: 0,
@@ -154,6 +157,28 @@ export function Header({
                   </Text>
                 </td>
               </tr>
+
+              {/* Accroche éditoriale du numéro */}
+              {coverHeadline ? (
+                <tr>
+                  <td align="center" style={{ padding: '0 24px 18px' }}>
+                    <Text
+                      style={{
+                        margin: 0,
+                        color: colors.surface,
+                        fontFamily: 'Arial, Helvetica, sans-serif',
+                        fontSize: '15px',
+                        fontWeight: 600,
+                        letterSpacing: '0.1px',
+                        lineHeight: 1.4,
+                        maxWidth: '400px',
+                      }}
+                    >
+                      {coverHeadline}
+                    </Text>
+                  </td>
+                </tr>
+              ) : null}
 
               {/* Niger contour proéminent + point Niamey */}
               <tr>

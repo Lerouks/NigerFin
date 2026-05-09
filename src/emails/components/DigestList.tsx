@@ -106,7 +106,7 @@ export function DigestList({ sectionNumeral, eyebrow = 'En bref', title = 'Le di
             }}
           >
             <tr>
-              <td width={36} style={{ verticalAlign: 'top', paddingTop: '16px', paddingRight: '12px' }}>
+              <td width={36} style={{ verticalAlign: 'top', paddingTop: '22px', paddingRight: '12px' }}>
                 <Text
                   style={{
                     margin: 0,
@@ -120,7 +120,7 @@ export function DigestList({ sectionNumeral, eyebrow = 'En bref', title = 'Le di
                   {String(idx + 1).padStart(2, '0')}
                 </Text>
               </td>
-              <td style={{ padding: '14px 0' }}>
+              <td style={{ padding: '20px 0' }}>
                 {titleNode}
                 <Text
                   style={{

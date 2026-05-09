@@ -202,7 +202,7 @@ export function HeadlineCard({
       <Block heading="Ce que ça veut dire" body={whatItMeans} />
       <Block heading="Pourquoi ça compte" body={whyCare} />
       {ctaLabel && ctaUrl ? (
-        <Text style={{ margin: '24px 0 0', textAlign: 'left' }}>
+        <Text style={{ margin: '28px 0 0', textAlign: 'left' }}>
           <Link
             href={ctaUrl}
             style={{
@@ -211,12 +211,14 @@ export function HeadlineCard({
               color: colors.surface,
               fontFamily: fonts.sans,
               fontSize: fontSizes.small,
-              fontWeight: 700,
-              padding: '14px 24px',
-              borderRadius: '6px',
+              fontWeight: 800,
+              padding: '15px 28px',
+              borderRadius: '8px',
               textDecoration: 'none',
-              letterSpacing: '0.5px',
+              letterSpacing: '0.6px',
               textTransform: 'uppercase',
+              borderTop: `2px solid ${colors.gold}`,
+              borderBottom: `2px solid ${colors.gold}`,
             }}
           >
             {ctaLabel} →

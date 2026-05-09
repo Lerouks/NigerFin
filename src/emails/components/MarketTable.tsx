@@ -6,10 +6,10 @@ import { Sparkline } from './Sparkline';
 export interface MarketRow {
   label: string;
   value: string;
-  changePercent: number; // signé : -1.23 = -1.23%
+  changePercent: number;
   unit?: string;
   asOf?: string;
-  /** Série 7 jours pour sparkline. Optionnelle ; si absente, pas de sparkline. */
+  /** Série 7 jours pour sparkline. Optionnelle. */
   spark?: number[];
 }
 
@@ -25,127 +25,15 @@ function formatPct(pct: number): string {
   return `${sign}${pct.toFixed(2)}%`;
 }
 
-function MarketCell({ row }: { row: MarketRow }) {
-  const isUp = row.changePercent >= 0;
-  const isFlat = row.changePercent === 0;
-  const trendColor = isFlat ? colors.inkMuted : isUp ? colors.positive : colors.negative;
-  const arrow = isFlat ? '◆' : isUp ? '▲' : '▼';
-  return (
-    <table
-      role="presentation"
-      cellPadding={0}
-      cellSpacing={0}
-      border={0}
-      width="100%"
-      style={{ borderCollapse: 'collapse' }}
-    >
-      <tr>
-        <td style={{ padding: '14px 16px 12px' }}>
-          {/* label + sparkline en bandeau */}
-          <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ borderCollapse: 'collapse' }}>
-            <tr>
-              <td style={{ verticalAlign: 'middle' }}>
-                <Text
-                  style={{
-                    margin: 0,
-                    color: colors.inkMuted,
-                    fontFamily: fonts.sans,
-                    fontSize: '10px',
-                    fontWeight: 700,
-                    letterSpacing: letterSpacing.caps,
-                    textTransform: 'uppercase',
-                    lineHeight: lineHeights.tight,
-                  }}
-                >
-                  {row.label}
-                </Text>
-              </td>
-              {row.spark && row.spark.length >= 2 ? (
-                <td align="right" style={{ verticalAlign: 'middle' }}>
-                  <Sparkline
-                    values={row.spark}
-                    strokeColor={trendColor}
-                    fillColor={trendColor}
-                    width={64}
-                    height={18}
-                    ariaLabel={`${row.label} sur 7 jours`}
-                  />
-                </td>
-              ) : null}
-            </tr>
-          </table>
-
-          {/* valeur + trend pill */}
-          <table
-            role="presentation"
-            cellPadding={0}
-            cellSpacing={0}
-            border={0}
-            style={{ marginTop: '8px', borderCollapse: 'collapse' }}
-          >
-            <tr>
-              <td style={{ paddingRight: '10px', verticalAlign: 'baseline' }}>
-                <Text
-                  style={{
-                    margin: 0,
-                    color: colors.ink,
-                    fontFamily: fonts.sans,
-                    fontSize: '20px',
-                    fontWeight: 800,
-                    letterSpacing: '-0.4px',
-                    lineHeight: lineHeights.tight,
-                  }}
-                >
-                  {row.value}
-                  {row.unit ? (
-                    <span
-                      style={{
-                        color: colors.inkMuted,
-                        fontWeight: 500,
-                        fontSize: fontSizes.tiny,
-                        marginLeft: '5px',
-                      }}
-                    >
-                      {row.unit}
-                    </span>
-                  ) : null}
-                </Text>
-              </td>
-              <td style={{ verticalAlign: 'baseline' }}>
-                <span
-                  style={{
-                    color: trendColor,
-                    fontFamily: fonts.sans,
-                    fontSize: '12px',
-                    fontWeight: 800,
-                    letterSpacing: '0.2px',
-                    display: 'inline-block',
-                  }}
-                >
-                  {arrow} {formatPct(row.changePercent)}
-                </span>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-  );
-}
-
+/**
+ * Style "ticker Bloomberg Terminal" : table dense 1 row par marché.
+ * Symbol uppercase + valeur tabular-nums big + variation pill colorée + sparkline.
+ * Plus dense et plus pro finance que les cards 2-col.
+ */
 export function MarketTable({ title = 'Marchés au dernier point', caption, rows, source }: MarketTableProps) {
-  // Pair the rows two-by-two for a 2-column grid
-  const pairs: [MarketRow, MarketRow | null][] = [];
-  for (let i = 0; i < rows.length; i += 2) {
-    const left = rows[i];
-    const right = rows[i + 1] ?? null;
-    if (!left) continue;
-    pairs.push([left, right]);
-  }
-
   return (
-    <Section style={{ padding: '40px 32px 12px' }}>
-      <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ borderCollapse: 'collapse', marginBottom: '20px' }}>
+    <Section style={{ padding: '40px 32px 16px' }}>
+      <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ borderCollapse: 'collapse', marginBottom: '14px' }}>
         <tr>
           <td>
             <Text
@@ -180,7 +68,7 @@ export function MarketTable({ title = 'Marchés au dernier point', caption, rows
       {caption ? (
         <Text
           style={{
-            margin: '0 0 18px',
+            margin: '0 0 16px',
             color: colors.inkMuted,
             fontFamily: fonts.sans,
             fontSize: fontSizes.small,
@@ -191,48 +79,154 @@ export function MarketTable({ title = 'Marchés au dernier point', caption, rows
         </Text>
       ) : null}
 
+      {/* Container ticker */}
       <table
         role="presentation"
         cellPadding={0}
         cellSpacing={0}
         border={0}
         width="100%"
-        style={{ borderCollapse: 'separate', borderSpacing: '8px 8px', marginLeft: '-8px', marginRight: '-8px' }}
+        style={{
+          borderCollapse: 'collapse',
+          backgroundColor: colors.surface,
+          border: `1px solid ${colors.divider}`,
+          borderRadius: '10px',
+          overflow: 'hidden',
+        }}
       >
         <tbody>
-          {pairs.map((pair, i) => (
-            <tr key={i}>
-              <td
-                width="50%"
-                style={{
-                  backgroundColor: colors.surface,
-                  border: `1px solid ${colors.divider}`,
-                  borderRadius: '12px',
-                  verticalAlign: 'top',
-                }}
-              >
-                <MarketCell row={pair[0]} />
-              </td>
-              <td
-                width="50%"
-                style={{
-                  backgroundColor: pair[1] ? colors.surface : 'transparent',
-                  border: pair[1] ? `1px solid ${colors.divider}` : 'none',
-                  borderRadius: '12px',
-                  verticalAlign: 'top',
-                }}
-              >
-                {pair[1] ? <MarketCell row={pair[1]} /> : null}
-              </td>
-            </tr>
-          ))}
+          {rows.map((row, i) => {
+            const isLast = i === rows.length - 1;
+            const isUp = row.changePercent > 0;
+            const isFlat = row.changePercent === 0;
+            const trendColor = isFlat ? colors.inkMuted : isUp ? colors.positive : colors.negative;
+            const trendBg = isFlat ? colors.muted : isUp ? colors.positiveBg : colors.negativeBg;
+            const arrow = isFlat ? '◆' : isUp ? '▲' : '▼';
+
+            return (
+              <tr key={i}>
+                {/* SYMBOL */}
+                <td
+                  style={{
+                    padding: '12px 8px 12px 16px',
+                    borderBottom: isLast ? 'none' : `1px solid ${colors.divider}`,
+                    verticalAlign: 'middle',
+                    width: '40%',
+                  }}
+                >
+                  <Text
+                    style={{
+                      margin: 0,
+                      color: colors.ink,
+                      fontFamily: fonts.sans,
+                      fontSize: '11px',
+                      fontWeight: 800,
+                      letterSpacing: letterSpacing.caps,
+                      textTransform: 'uppercase',
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {row.label}
+                  </Text>
+                </td>
+
+                {/* VALUE */}
+                <td
+                  align="right"
+                  style={{
+                    padding: '12px 8px',
+                    borderBottom: isLast ? 'none' : `1px solid ${colors.divider}`,
+                    verticalAlign: 'middle',
+                    width: '20%',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  <Text
+                    style={{
+                      margin: 0,
+                      color: colors.ink,
+                      fontFamily: fonts.sans,
+                      fontSize: '17px',
+                      fontWeight: 800,
+                      letterSpacing: '-0.3px',
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {row.value}
+                    {row.unit ? (
+                      <span
+                        style={{
+                          color: colors.inkMuted,
+                          fontWeight: 500,
+                          fontSize: '10px',
+                          marginLeft: '4px',
+                        }}
+                      >
+                        {row.unit}
+                      </span>
+                    ) : null}
+                  </Text>
+                </td>
+
+                {/* CHANGE PILL */}
+                <td
+                  align="right"
+                  style={{
+                    padding: '12px 8px',
+                    borderBottom: isLast ? 'none' : `1px solid ${colors.divider}`,
+                    verticalAlign: 'middle',
+                    width: '20%',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      backgroundColor: trendBg,
+                      color: trendColor,
+                      fontFamily: fonts.sans,
+                      fontSize: '11px',
+                      fontWeight: 800,
+                      letterSpacing: '0.2px',
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    {arrow} {isFlat ? 'fixe' : formatPct(row.changePercent)}
+                  </span>
+                </td>
+
+                {/* SPARKLINE */}
+                <td
+                  align="right"
+                  style={{
+                    padding: '12px 16px 12px 8px',
+                    borderBottom: isLast ? 'none' : `1px solid ${colors.divider}`,
+                    verticalAlign: 'middle',
+                    width: '20%',
+                  }}
+                >
+                  {row.spark && row.spark.length >= 2 ? (
+                    <Sparkline
+                      values={row.spark}
+                      strokeColor={trendColor}
+                      fillColor={trendColor}
+                      width={64}
+                      height={20}
+                      ariaLabel={`${row.label} sur 7 jours`}
+                    />
+                  ) : null}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
 
       {source ? (
         <Text
           style={{
-            margin: '14px 0 0',
+            margin: '12px 0 0',
             color: colors.inkFaint,
             fontFamily: fonts.sans,
             fontSize: '11px',

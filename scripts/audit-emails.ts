@@ -60,7 +60,6 @@ async function buildAllEntries(): Promise<EmailEntry[]> {
     socials: {
       instagram: 'https://instagram.com/nfireport',
       facebook: 'https://facebook.com/nfireport',
-      linkedin: 'https://linkedin.com/company/nfireport',
       tiktok: 'https://tiktok.com/@nfireport',
     },
   });

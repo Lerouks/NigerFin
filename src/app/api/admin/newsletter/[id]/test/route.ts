@@ -44,7 +44,6 @@ export async function POST(req: NextRequest, ctx: { params: Promise<Params> }) {
       socials: {
         instagram: 'https://instagram.com/nfireport',
         facebook: 'https://facebook.com/nfireport',
-        linkedin: 'https://linkedin.com/company/nfireport',
         tiktok: 'https://tiktok.com/@nfireport',
       },
     });

@@ -11,6 +11,8 @@ export interface HeaderProps {
   tagline?: string;
   /** Accroche éditoriale courte du numéro, affichée sous le wordmark. */
   coverHeadline?: string;
+  /** Type d'édition (impacte l'eyebrow et le filet décoratif). */
+  editionType?: 'standard' | 'special' | 'flash';
 }
 
 /**
@@ -32,9 +34,22 @@ export function Header({
   webViewUrl,
   tagline = 'Le Premium Briefing',
   coverHeadline,
+  editionType = 'standard',
 }: HeaderProps) {
-  const issueLabel = `Édition n°${String(issueNumber).padStart(2, '0')}`;
-  const issueGiantLabel = `N°${String(issueNumber).padStart(2, '0')}`;
+  const numStr = String(issueNumber).padStart(2, '0');
+  const issueLabel =
+    editionType === 'special'
+      ? `Édition spéciale · n°${numStr}`
+      : editionType === 'flash'
+        ? `Flash · n°${numStr}`
+        : `Édition n°${numStr}`;
+  const filetLabel =
+    editionType === 'special'
+      ? 'Édition spéciale Premium'
+      : editionType === 'flash'
+        ? 'Flash exclusif Premium'
+        : 'Édition exclusive Premium';
+  const issueGiantLabel = `N°${numStr}`;
   return (
     <Section style={{ backgroundColor: colors.primary, padding: 0, margin: 0 }}>
       {/* Bandeau du haut */}
@@ -213,7 +228,7 @@ export function Header({
                             lineHeight: 1,
                           }}
                         >
-                          Édition exclusive Premium
+                          {filetLabel}
                         </Text>
                       </td>
                       <td style={{ borderTop: `1px solid ${colors.gold}`, width: '40px', fontSize: 0, lineHeight: 0 }}>&nbsp;</td>

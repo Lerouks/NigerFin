@@ -25,22 +25,35 @@ export interface NewsletterIssueRow {
   updated_at: string;
 }
 
+function nextMondayLabel(): string {
+  const d = new Date();
+  const day = d.getDay(); // 0=Sun, 1=Mon, ... 6=Sat
+  const diff = day === 1 ? 7 : (8 - day) % 7 || 7; // jours jusqu'au prochain lundi (jamais aujourd'hui)
+  d.setDate(d.getDate() + diff);
+  return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function nextNextMondayShort(): string {
+  const d = new Date();
+  const day = d.getDay();
+  const diff = day === 1 ? 14 : ((8 - day) % 7 || 7) + 7;
+  d.setDate(d.getDate() + diff);
+  return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) + ' · 7h GMT';
+}
+
 export function emptyContent(slug: string, number: number): NewsletterIssue {
   return {
     number,
     slug,
     subject: '',
     preheader: '',
-    issueDateLabel: new Date().toLocaleDateString('fr-FR', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    }),
-    readTimeMinutes: 7,
+    issueDateLabel: nextMondayLabel().replace(/^./, (c) => c.toUpperCase()),
+    readTimeMinutes: 5,
+    editionType: 'standard',
     intro: { heading: '', paragraph: '', summary: [] },
-    market: { rows: [] },
+    market: { rows: [], autoSync: true },
     headlines: [],
+    nextIssueLabel: nextNextMondayShort().replace(/^./, (c) => c.toUpperCase()),
   };
 }
 

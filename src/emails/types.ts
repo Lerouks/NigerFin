@@ -23,6 +23,15 @@ export interface NewsletterIssue {
   /** Accroche éditoriale courte (~80 chars) affichée dans la cover, sous le wordmark. */
   coverHeadline?: string;
 
+  /**
+   * Type d'édition :
+   *  - 'standard' (défaut) : Premium Briefing hebdomadaire du lundi
+   *  - 'special'           : édition spéciale (élections, choc marché, hors-série)
+   *  - 'flash'             : alerte courte hors cadence
+   * Adapte l'eyebrow de la cover (ex: "ÉDITION SPÉCIALE · N°01" en or italique).
+   */
+  editionType?: 'standard' | 'special' | 'flash';
+
   /** Mot du rédacteur en ouverture (avant la citation). HTML rich autorisé dans body. */
   editoNote?: {
     eyebrow?: string;

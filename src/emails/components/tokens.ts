@@ -51,9 +51,9 @@ export const fontSizes = {
 } as const;
 
 export const lineHeights = {
-  tight: '1.2',
-  normal: '1.55',
-  relaxed: '1.7',
+  tight: '1.25',
+  normal: '1.65',
+  relaxed: '1.78',
 } as const;
 
 export const letterSpacing = {

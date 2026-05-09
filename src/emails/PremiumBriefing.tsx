@@ -204,6 +204,7 @@ export function PremiumBriefing({
             readTimeMinutes={issue.readTimeMinutes}
             webViewUrl={issue.webViewUrl}
             coverHeadline={issue.coverHeadline}
+            editionType={issue.editionType}
           />
 
           {issue.editoNote ? (

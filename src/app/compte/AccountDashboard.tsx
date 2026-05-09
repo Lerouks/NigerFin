@@ -13,6 +13,7 @@ import { getRoleLabel } from '@/lib/user-profile';
 import { PhoneField, validatePhone } from '@/components/PhoneField';
 import { CURRENCY, getBillingCycleLabel } from '@/config/pricing';
 import type { NewsletterPreferences } from '@/types';
+import { PreferencesForm } from './preferences-newsletter/PreferencesForm';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -81,7 +82,6 @@ export function AccountDashboard() {
   const [newsletterPrefs, setNewsletterPrefs] = useState<NewsletterPreferences>({
     newsletter_monthly: true, newsletter_weekly: false, alerts_news: false, alerts_custom: false, reports_pdf: false,
   });
-  const [savingPrefs, setSavingPrefs] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isSignedIn) router.push('/connexion');
@@ -199,19 +199,6 @@ export function AccountDashboard() {
     } finally {
       setSavingProfile(false);
       setTimeout(() => setProfileMessage(null), 4000);
-    }
-  };
-
-  const handleSaveNewsletterPrefs = async () => {
-    setSavingPrefs(true);
-    try {
-      await fetch('/api/user/newsletter-prefs', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newsletterPrefs),
-      });
-    } catch {} finally {
-      setSavingPrefs(false);
     }
   };
 
@@ -597,16 +584,9 @@ export function AccountDashboard() {
             {/* ─── NEWSLETTER ─────────────────────────────────── */}
             {activeSection === 'newsletter' && (
               <div className="bg-white rounded-2xl border border-black/[0.06] p-6 sm:p-8">
-                <h3 className="text-lg font-semibold mb-6">Préférences newsletter</h3>
-                <div className="space-y-4">
-                  <ToggleRow label="Newsletter mensuelle" description="Résumé mensuel des actualités économiques" checked={newsletterPrefs.newsletter_monthly} onChange={(v) => setNewsletterPrefs((p) => ({ ...p, newsletter_monthly: v }))} />
-                  <ToggleRow label="Newsletter hebdomadaire" description="Analyses et actualités chaque semaine" checked={newsletterPrefs.newsletter_weekly} onChange={(v) => setNewsletterPrefs((p) => ({ ...p, newsletter_weekly: v }))} disabled={!isSubscribed} premium />
-                  <ToggleRow label="Alertes actualités" description="Soyez alerté des événements économiques importants" checked={newsletterPrefs.alerts_news} onChange={(v) => setNewsletterPrefs((p) => ({ ...p, alerts_news: v }))} disabled={!isSubscribed} premium />
-                  <ToggleRow label="Rapports PDF" description="Recevez les rapports exclusifs en PDF" checked={newsletterPrefs.reports_pdf} onChange={(v) => setNewsletterPrefs((p) => ({ ...p, reports_pdf: v }))} disabled={!isSubscribed} premium />
-                </div>
-                <button onClick={handleSaveNewsletterPrefs} disabled={savingPrefs} className="mt-6 flex items-center gap-2 bg-[#111] text-white px-6 py-2.5 rounded-xl text-[13px] font-medium hover:bg-[#333] transition-colors">
-                  {savingPrefs ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Enregistrer
-                </button>
+                <h3 className="text-lg font-semibold mb-2">Préférences newsletter</h3>
+                <p className="mb-6 text-sm text-foreground/60">Choisissez les contenus NFI Report que vous souhaitez recevoir par email. Vos préférences sont enregistrées immédiatement.</p>
+                <PreferencesForm initial={newsletterPrefs} />
               </div>
             )}
           </div>
@@ -896,32 +876,3 @@ function DeleteAccountSection() {
   );
 }
 
-function ToggleRow({ label, description, checked, onChange, disabled, premium }: {
-  label: string; description: string; checked: boolean; onChange: (v: boolean) => void; disabled?: boolean; premium?: boolean;
-}) {
-  return (
-    <div className={`flex items-start justify-between p-4 rounded-xl border border-black/[0.04] ${disabled ? 'opacity-50' : ''}`}>
-      <div>
-        <div className="flex items-center gap-2">
-          <p className="text-[14px] font-medium">{label}</p>
-          {premium && (
-            <span className="text-[9px] font-semibold tracking-[0.1em] uppercase px-2 py-0.5 rounded-full bg-[#d4a843]/10 text-[#d4a843]">
-              Premium
-            </span>
-          )}
-        </div>
-        <p className="text-[12px] text-gray-500 mt-0.5">{description}</p>
-      </div>
-      <button
-        role="switch"
-        aria-checked={checked}
-        aria-label={label}
-        onClick={() => !disabled && onChange(!checked)}
-        disabled={disabled}
-        className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ml-4 ${checked ? 'bg-[#111]' : 'bg-gray-200'}`}
-      >
-        <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
-      </button>
-    </div>
-  );
-}

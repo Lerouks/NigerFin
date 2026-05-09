@@ -240,10 +240,6 @@ describe('POST /api/likes', () => {
 
 // ─── Newsletter route tests ────────────────────────────────────────────────
 
-vi.mock('@/lib/beehiiv', () => ({
-  subscribeToBeehiiv: vi.fn(async () => true),
-}));
-
 vi.mock('@/lib/email', () => ({
   sendTransactionalEmail: vi.fn(async () => {}),
 }));

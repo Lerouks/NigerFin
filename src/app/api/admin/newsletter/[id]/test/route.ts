@@ -39,7 +39,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<Params> }) {
     const html = await renderPremiumBriefingHtml({
       issue: issue.content,
       siteUrl: SITE_URL,
-      managePreferencesUrl: `${SITE_URL}/compte/preferences-newsletter`,
+      managePreferencesUrl: `${SITE_URL}/compte`,
       unsubscribeUrl: `${SITE_URL}/api/newsletter/unsubscribe?token=TEST`,
       socials: {
         instagram: 'https://instagram.com/nfireport',

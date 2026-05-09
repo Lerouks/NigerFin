@@ -161,18 +161,6 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
               className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
             />
           </Field>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <Field label="Audience">
-              <select
-                value={issue.audience}
-                onChange={(e) => setIssue((s) => ({ ...s, audience: e.target.value as NewsletterAudience }))}
-                className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
-              >
-                <option value="premium">Premium uniquement</option>
-                <option value="free">Lecteurs gratuits</option>
-                <option value="all">Tous les abonnés</option>
-              </select>
-            </Field>
             <Field label="Slug (URL archive)">
               <input
                 type="text"
@@ -181,11 +169,22 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
                 className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm font-mono"
               />
             </Field>
-            <Field label="Date affichée dans l'éd.">
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Date affichée dans l'éd." hint="Auto-rempli au lundi prochain à la création">
               <input
                 type="text"
                 value={content.issueDateLabel}
                 onChange={(e) => patchContent({ issueDateLabel: e.target.value })}
+                className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
+              />
+            </Field>
+            <Field label="Prochain numéro (footer)">
+              <input
+                type="text"
+                value={content.nextIssueLabel ?? ''}
+                onChange={(e) => patchContent({ nextIssueLabel: e.target.value })}
+                placeholder="Lundi 18 mai · 7h GMT"
                 className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
               />
             </Field>
@@ -688,18 +687,6 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
           />
         </FormSection>
 
-        {/* PROCHAIN NUMERO */}
-        <FormSection title="Prochain numéro (footer)">
-          <Field label="Date du prochain envoi en clair">
-            <input
-              type="text"
-              placeholder="Lundi 11 mai · 7h GMT"
-              value={content.nextIssueLabel ?? ''}
-              onChange={(e) => patchContent({ nextIssueLabel: e.target.value })}
-              className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
-            />
-          </Field>
-        </FormSection>
       </main>
 
       {/* STICKY ACTION BAR */}

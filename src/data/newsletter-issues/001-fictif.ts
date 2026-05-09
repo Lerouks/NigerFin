@@ -28,6 +28,7 @@ export const issue001Demo: NewsletterIssue = {
     'Or, BRVM, BCEAO : trois lectures pour démarrer la semaine côté finances Niger. Plus la phrase de la semaine et notre digest des marchés.',
   issueDateLabel: 'Lundi 11 mai 2026',
   readTimeMinutes: 5,
+  editionType: 'standard',
   // webViewUrl will be set once the public archive (/newsletter/[slug]) is built (Sprint 4).
   // Leaving it undefined removes the "Voir dans le navigateur" link from the cover header.
 

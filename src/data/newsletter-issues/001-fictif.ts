@@ -23,7 +23,6 @@ export const issue001Demo: NewsletterIssue = {
   issueDateLabel: 'Lundi 4 mai 2026',
   readTimeMinutes: 7,
   webViewUrl: `${SITE_URL}/admin/newsletter/preview/001-demo`,
-  coverHeadline: 'Cette semaine : l’or pulvérise son record, la BRVM se réveille.',
 
   intro: {
     eyebrow: 'Édition de démonstration',

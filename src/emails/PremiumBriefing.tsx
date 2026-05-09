@@ -30,7 +30,7 @@ function IntroBlock({ issue }: { issue: NewsletterIssue }) {
   const remainder = match ? issue.intro.paragraph.slice((match[1]?.length ?? 0) + (match[2]?.length ?? 0)) : issue.intro.paragraph;
 
   return (
-    <Section style={{ padding: '40px 32px 8px' }}>
+    <Section style={{ padding: '52px 32px 24px' }}>
       {issue.intro.eyebrow ? (
         <Text
           style={{
@@ -48,13 +48,13 @@ function IntroBlock({ issue }: { issue: NewsletterIssue }) {
       ) : null}
       <Text
         style={{
-          margin: '0 0 22px',
+          margin: '0 0 28px',
           color: colors.ink,
           fontFamily: "Arial, Helvetica, sans-serif",
           fontSize: '30px',
           fontWeight: 700,
           letterSpacing: '-0.7px',
-          lineHeight: 1.18,
+          lineHeight: 1.25,
         }}
       >
         {issue.intro.heading}

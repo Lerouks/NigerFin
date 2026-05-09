@@ -35,8 +35,8 @@ export function ToolsPromoBlock({
   if (!items.length) return null;
 
   return (
-    <Section style={{ padding: '32px 32px 12px' }}>
-      <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ borderCollapse: 'collapse', marginBottom: '18px' }}>
+    <Section style={{ padding: '48px 32px 32px' }}>
+      <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ borderCollapse: 'collapse', marginBottom: '28px' }}>
         <tr>
           <td>
             <Text

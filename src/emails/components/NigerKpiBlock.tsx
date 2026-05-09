@@ -33,8 +33,8 @@ export function NigerKpiBlock({
     <Section
       style={{
         backgroundColor: colors.primary,
-        padding: '36px 32px 32px',
-        margin: '32px 0',
+        padding: '52px 32px 48px',
+        margin: '40px 0',
         position: 'relative',
         overflow: 'hidden',
       }}

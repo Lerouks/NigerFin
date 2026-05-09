@@ -18,8 +18,8 @@ export interface DigestListProps {
 
 export function DigestList({ sectionNumeral, eyebrow = 'En bref', title = 'Le digest', items }: DigestListProps) {
   return (
-    <Section style={{ padding: '32px 32px' }}>
-      <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ borderCollapse: 'collapse', marginBottom: '20px' }}>
+    <Section style={{ padding: '48px 32px' }}>
+      <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ borderCollapse: 'collapse', marginBottom: '28px' }}>
         <tr>
           {sectionNumeral ? (
             <td width={64} style={{ verticalAlign: 'top', paddingRight: '16px' }}>

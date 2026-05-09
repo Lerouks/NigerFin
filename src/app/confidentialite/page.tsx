@@ -25,7 +25,7 @@ export default function ConfidentialitePage() {
         },
         {
           heading: '4. Finalités du traitement',
-          text: "Les données collectées sont traitées pour les finalités suivantes\u00A0: gestion des comptes utilisateurs et des abonnements\u00A0; envoi de la newsletter et des communications éditoriales (via Beehiiv et Resend)\u00A0; personnalisation de l'expérience utilisateur\u00A0; amélioration des services et analyse d'audience agrégée\u00A0; gestion des paiements et de la facturation\u00A0; respect des obligations légales, comptables et réglementaires\u00A0; prévention des fraudes et sécurité du Site. Aucune autre finalité incompatible ne sera poursuivie sans information préalable de l'utilisateur.",
+          text: "Les données collectées sont traitées pour les finalités suivantes\u00A0: gestion des comptes utilisateurs et des abonnements\u00A0; envoi de la newsletter et des communications éditoriales (via Resend)\u00A0; personnalisation de l'expérience utilisateur\u00A0; amélioration des services et analyse d'audience agrégée\u00A0; gestion des paiements et de la facturation\u00A0; respect des obligations légales, comptables et réglementaires\u00A0; prévention des fraudes et sécurité du Site. Aucune autre finalité incompatible ne sera poursuivie sans information préalable de l'utilisateur.",
         },
         {
           heading: '5. Base juridique du traitement',

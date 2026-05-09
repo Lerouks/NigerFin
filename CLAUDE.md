@@ -19,7 +19,7 @@ Tests live in `src/__tests__/*.test.ts` and match the pattern `src/**/*.test.ts`
 
 ## Architecture
 
-**Stack:** Next.js 15 App Router, React 19, Supabase (auth + DB), iPayMoney (payments Mobile Money & carte), Tailwind CSS 3, TipTap (rich text editor), Recharts, Sentry, PostHog analytics, Resend (transactional email), Beehiiv (newsletter).
+**Stack:** Next.js 15 App Router, React 19, Supabase (auth + DB + Storage), iPayMoney (payments Mobile Money & carte), Tailwind CSS 3, TipTap (rich text editor), Recharts, Sentry, PostHog analytics, Resend (transactional email + newsletter envoi self-hosted), React-PDF (génération PDF facture).
 
 **Routing:** French-language routes under `src/app/` — e.g., `/articles`, `/economie`, `/finance`, `/marches`, `/niger`, `/education`, `/entreprises`, `/outils`, `/compte`, `/paiement`, `/pricing`, `/admin`. Auth routes use a route group `(auth)/` with `/connexion` and `/inscription`.
 
@@ -78,7 +78,7 @@ Lors de chaque modification, ne pas se limiter à la demande stricte. Vérifier 
 
 **Rotation périodique** :
 - `SUPABASE_SERVICE_ROLE_KEY` : tous les 6 mois (prochaine rotation **2026-10-27**). Procédure dans `TODOS-SECURITY.md`.
-- `RESEND_API_KEY`, `BEEHIIV_API_KEY` : tous les 12 mois.
+- `RESEND_API_KEY` : tous les 12 mois.
 - `CRON_SECRET`, `REVALIDATE_SECRET` : tous les 12 mois ou immédiatement après tout soupçon de fuite.
 
 **Stockage local** : ne jamais commiter `.env.local`, vérifier régulièrement avec `git ls-files | grep .env` (sortie vide attendue, sauf `.env.local.example`).

@@ -37,7 +37,7 @@ describe('PremiumBriefing render', () => {
 
   it('contains the issue subject and preheader', () => {
     expect(html).toContain('Premium Briefing');
-    expect(html).toContain('Édition de démonstration');
+    expect(html).toContain('Édition n°01');
     expect(html).toMatch(/<title>.*Premium Briefing n°01/i);
   });
 

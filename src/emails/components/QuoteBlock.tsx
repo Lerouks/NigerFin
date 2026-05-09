@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Section, Text } from '@react-email/components';
 import { colors, fonts, fontSizes, letterSpacing, lineHeights } from './tokens';
-import { NigerMapAccent } from './NigerMapAccent';
 
 export interface QuoteBlockProps {
   text: string;
@@ -27,20 +26,6 @@ export function QuoteBlock({ text, author, role, eyebrow = 'La phrase de la sema
         overflow: 'hidden',
       }}
     >
-      {/* Niger en watermark */}
-      <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ borderCollapse: 'collapse', marginBottom: '-72px' }}>
-        <tr>
-          <td align="center">
-            <NigerMapAccent
-              width={220}
-              fill={colors.gold}
-              opacity={0.10}
-              ariaLabel=""
-            />
-          </td>
-        </tr>
-      </table>
-
       <Text
         style={{
           margin: '0 0 12px',

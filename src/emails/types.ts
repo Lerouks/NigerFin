@@ -23,6 +23,13 @@ export interface NewsletterIssue {
   /** Accroche éditoriale courte (~80 chars) affichée dans la cover, sous le wordmark. */
   coverHeadline?: string;
 
+  /** Mot du rédacteur en ouverture (avant la citation). HTML rich autorisé dans body. */
+  editoNote?: {
+    eyebrow?: string;
+    body: string;
+    signature?: string;
+  };
+
   intro: {
     eyebrow?: string;
     heading: string;

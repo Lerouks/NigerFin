@@ -202,6 +202,37 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
           </Field>
         </FormSection>
 
+        {/* EDITO NOTE */}
+        <FormSection title="Mot du rédacteur (optionnel)">
+          <p className="text-xs text-foreground/55">{"Ouverture chaleureuse de la newsletter. S'affiche entre la cover et la citation."}</p>
+          <Field label="Eyebrow (petit titre or)">
+            <input
+              type="text"
+              value={content.editoNote?.eyebrow ?? ''}
+              onChange={(e) => patchContent({ editoNote: { ...(content.editoNote ?? { body: '' }), eyebrow: e.target.value } })}
+              placeholder="Bonjour"
+              className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
+            />
+          </Field>
+          <Field label="Texte du mot" hint="Gras, italique, lien autorisés">
+            <MiniRichTextEditor
+              value={content.editoNote?.body ?? ''}
+              onChange={(html) => patchContent({ editoNote: { ...(content.editoNote ?? { body: '' }), body: html } })}
+              placeholder="Bienvenue dans cette édition…"
+              rows={6}
+            />
+          </Field>
+          <Field label="Signature (en italique or sous le mot)">
+            <input
+              type="text"
+              value={content.editoNote?.signature ?? ''}
+              onChange={(e) => patchContent({ editoNote: { ...(content.editoNote ?? { body: '' }), signature: e.target.value } })}
+              placeholder="La rédaction NFI Report"
+              className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
+            />
+          </Field>
+        </FormSection>
+
         {/* INTRO */}
         <FormSection title="Introduction">
           <Field label="Eyebrow (petit titre or au-dessus)">

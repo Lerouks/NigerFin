@@ -147,6 +147,7 @@ export const issue001Demo: NewsletterIssue = {
     text: "L'exemple n'est pas la meilleure façon de convaincre, c'est la seule.",
     author: 'Albert Schweitzer',
     role: 'médecin, prix Nobel de la paix',
+    authorPhotoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Bundesarchiv_Bild_183-D0116-0041-019%2C_Albert_Schweitzer.jpg/250px-Bundesarchiv_Bild_183-D0116-0041-019%2C_Albert_Schweitzer.jpg',
   },
 
   radar: {

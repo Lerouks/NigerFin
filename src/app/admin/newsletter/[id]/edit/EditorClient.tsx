@@ -428,6 +428,11 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
               />
             </Field>
           </div>
+          <AssetUploader
+            label="Photo de l'auteur (optionnel, ronde dans la newsletter)"
+            value={content.quote?.authorPhotoUrl}
+            onChange={(url) => patchContent({ quote: { ...(content.quote ?? { text: '', author: '' }), authorPhotoUrl: url } })}
+          />
         </FormSection>
 
         {/* DIGEST */}

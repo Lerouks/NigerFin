@@ -737,11 +737,29 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
           </button>
           <button
             type="button"
-            disabled
-            title="L'envoi automatique aux abonnés sera activé en Sprint 3 (pipeline batch Resend + cron). Pour l'instant, utilise le bouton 'Envoi test' pour vérifier sur ton email."
-            className="inline-flex cursor-not-allowed items-center gap-1 rounded-md bg-primary/40 px-3 py-1.5 text-sm font-semibold text-white"
+            onClick={() => {
+              if (!confirm("Envoyer maintenant à toute l'audience cible ? Cette action est irréversible.")) return;
+              setSaveMessage(null);
+              startTransition(async () => {
+                try {
+                  const res = await fetch(`/api/admin/newsletter/${issue.id}/send`, { method: 'POST' });
+                  const j = (await res.json().catch(() => ({}))) as { error?: string; recipientsCount?: number };
+                  if (!res.ok) {
+                    setSaveMessage(`Erreur envoi : ${j.error ?? res.status}`);
+                    return;
+                  }
+                  setSaveMessage(`Envoyé à ${j.recipientsCount ?? '?'} destinataires ✓`);
+                  router.refresh();
+                } catch (err) {
+                  setSaveMessage(err instanceof Error ? err.message : 'Erreur réseau');
+                }
+              });
+            }}
+            disabled={pending || issue.status === 'sent'}
+            title="Envoie à tous les abonnés actifs filtrés selon l'audience choisie."
+            className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-50"
           >
-            <Send className="h-3.5 w-3.5" /> Envoyer (bientôt)
+            <Send className="h-3.5 w-3.5" /> {issue.status === 'sent' ? 'Déjà envoyé' : 'Envoyer maintenant'}
           </button>
           {issue.status === 'draft' ? (
             <button type="button" onClick={deleteIssue} disabled={pending} className="inline-flex items-center gap-1 rounded-md border border-red-200 bg-white px-3 py-1.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50">

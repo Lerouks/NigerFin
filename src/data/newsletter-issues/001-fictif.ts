@@ -23,7 +23,7 @@ import { SITE_URL } from '@/lib/config';
 export const issue001Demo: NewsletterIssue = {
   number: 1,
   slug: '001',
-  subject: 'Premium Briefing n°01, l’or du Niger sous tension, la BRVM tient le cap',
+  subject: '📈 Premium Briefing n°01, l’or du Niger sous tension, la BRVM tient le cap',
   preheader:
     'Or, BRVM, BCEAO : trois lectures pour démarrer la semaine côté finances Niger. Plus la phrase de la semaine et notre digest des marchés.',
   issueDateLabel: 'Lundi 11 mai 2026',

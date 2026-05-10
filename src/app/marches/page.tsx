@@ -5,7 +5,11 @@ import { SectionArticlesFiltered } from '@/components/SectionArticlesFiltered';
 import { getArticlesByCategory, getArticleViewRanking } from '@/lib/articles';
 
 export const revalidate = 60;
-export const metadata: Metadata = { title: 'Marchés', description: 'Suivez les cours des marchés en temps réel : matières premières, devises, indices boursiers et actifs financiers africains.' };
+export const metadata: Metadata = {
+  title: 'Marchés financiers : indices, devises, BRVM',
+  description: 'Suivez les cours des marchés en temps réel : matières premières, devises, indices boursiers et actifs financiers africains, dont la BRVM.',
+  alternates: { canonical: '/marches' },
+};
 
 export default async function MarchesPage() {
   const [{ articles, total }, viewRanking] = await Promise.all([

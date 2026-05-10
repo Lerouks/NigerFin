@@ -12,19 +12,19 @@ import { BILLING_OPTIONS, formatPrice, PREMIUM_MONTHLY_PRICE } from '@/config/pr
 
 const SCREENSHOTS = [
   {
-    src: '/premium/marches.png',
+    src: '/premium/marches.webp',
     alt: 'Page Marchés - cours BRVM, devises, mati\u00e8res premi\u00e8res',
     label: 'Cours marchés',
     desc: 'Cours BRVM, devises FCFA / EUR / USD et mati\u00e8res premi\u00e8res (or, p\u00e9trole, uranium) mis \u00e0 jour plusieurs fois par jour. Les chiffres qui p\u00e8sent r\u00e9ellement sur ton pouvoir d\u2019achat et tes placements.',
   },
   {
-    src: '/premium/article-premium.png',
+    src: '/premium/article-premium.webp',
     alt: 'Article Premium - Banques nig\u00e9riennes sous pression',
     label: 'Article Premium',
     desc: 'Analyses in\u00e9dites : banques nig\u00e9riennes, g\u00e9opolitique sah\u00e9lienne, strat\u00e9gies d\u2019investissement en Afrique de l\u2019Ouest. \u00c9crites pour \u00eatre lues en 5 minutes, pas pour remplir un site.',
   },
   {
-    src: '/premium/outil-budget.png',
+    src: '/premium/outil-budget.webp',
     alt: 'Outil Budget - taux d\u2019\u00e9pargne, r\u00e9partition des d\u00e9penses',
     label: 'Outil Budget',
     desc: 'Entre tes revenus et d\u00e9penses. Obtiens ton taux d\u2019\u00e9pargne, ta r\u00e9partition par poste et des recommandations concr\u00e8tes pour passer \u00e0 15\u201320 % d\u2019\u00e9pargne. Export PDF inclus.',

@@ -12,6 +12,9 @@ import { SECTION_META } from '@/lib/sections';
 export const metadata: Metadata = {
   title: 'NFI Report - Actualités économiques et financières du Niger',
   description: "Votre source d'informations économiques et financières pour le Niger et l'Afrique de l'Ouest. Articles, analyses, outils financiers et données de marché.",
+  alternates: {
+    canonical: '/',
+  },
 };
 
 // ISR: page régénérée toutes les heures. Articles n'évoluent pas à la minute,

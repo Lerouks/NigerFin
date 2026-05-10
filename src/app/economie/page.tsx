@@ -4,7 +4,11 @@ import { SectionArticlesFiltered } from '@/components/SectionArticlesFiltered';
 import { getArticlesByCategory, getArticleViewRanking } from '@/lib/articles';
 
 export const revalidate = 60;
-export const metadata: Metadata = { title: 'Économie', description: 'Actualités économiques du Niger et de l\'Afrique de l\'Ouest.' };
+export const metadata: Metadata = {
+  title: 'Économie du Niger : actualités et analyses',
+  description: 'Actualités, analyses et indicateurs économiques du Niger et de l\'Afrique de l\'Ouest : croissance, inflation, secteurs clés, politiques publiques.',
+  alternates: { canonical: '/economie' },
+};
 
 export default async function EconomiePage() {
   const [{ articles, total }, viewRanking] = await Promise.all([

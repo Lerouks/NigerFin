@@ -4,7 +4,11 @@ import { SectionArticlesFiltered } from '@/components/SectionArticlesFiltered';
 import { getArticlesByCategory, getArticleViewRanking } from '@/lib/articles';
 
 export const revalidate = 60;
-export const metadata: Metadata = { title: 'Entreprises', description: 'Actualités des entreprises nigériennes et ouest-africaines : résultats, stratégies, fusions et opportunités d\'investissement.' };
+export const metadata: Metadata = {
+  title: 'Entreprises stratégiques du Niger',
+  description: 'Actualités des entreprises nigériennes et ouest-africaines : résultats, stratégies, fusions et opportunités d\'investissement.',
+  alternates: { canonical: '/entreprises' },
+};
 
 export default async function EntreprisesPage() {
   const [{ articles, total }, viewRanking] = await Promise.all([

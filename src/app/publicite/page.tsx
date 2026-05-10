@@ -3,7 +3,11 @@ import { DynamicLegalPage } from '@/components/DynamicLegalPage';
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = { title: 'Publicité & Partenariats', description: 'Découvrez nos offres publicitaires et partenariats pour toucher une audience de professionnels et investisseurs au Niger.' };
+export const metadata: Metadata = {
+  title: 'Publicité et partenariats : annonceurs',
+  description: 'Découvrez nos offres publicitaires et partenariats pour toucher une audience de professionnels et investisseurs au Niger et en Afrique de l\'Ouest.',
+  alternates: { canonical: '/publicite' },
+};
 
 export default function PublicitePage() {
   return (

@@ -6,7 +6,11 @@ import { createServiceClient } from '@/lib/supabase';
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = { title: 'Éducation', description: 'Apprenez la finance, l\'économie et les marchés à votre rythme grâce à nos cours et ressources pédagogiques gratuits.' };
+export const metadata: Metadata = {
+  title: 'Éducation financière : cours et ressources',
+  description: 'Apprenez la finance, l\'économie et les marchés à votre rythme grâce à nos cours et ressources pédagogiques gratuits, adaptés au contexte africain.',
+  alternates: { canonical: '/education' },
+};
 
 async function getCategories() {
   const supabase = createServiceClient();

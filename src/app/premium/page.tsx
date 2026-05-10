@@ -4,7 +4,7 @@ import { PremiumContent } from './PremiumContent';
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: 'Devenir Premium - NFI Report',
+  title: 'Devenir Premium : analyses et outils exclusifs',
   description:
     'La connaissance, votre meilleur capital. Pour les jeunes qui veulent savoir, agir et investir en Afrique de l\u2019Ouest. Newsletters, articles, outils et analyses Premium.',
   keywords: [

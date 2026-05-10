@@ -7,5 +7,10 @@ export const metadata: Metadata = {
 };
 
 export default function InscriptionLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <h1 className="sr-only">Créer un compte NFI Report</h1>
+      {children}
+    </>
+  );
 }

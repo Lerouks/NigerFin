@@ -11,7 +11,7 @@ import { SECTION_META } from '@/lib/sections';
 
 export const metadata: Metadata = {
   title: 'NFI Report - Actualités économiques et financières du Niger',
-  description: "Votre source d'informations économiques et financières pour le Niger et l'Afrique de l'Ouest. Articles, analyses, outils financiers et données de marché.",
+  description: "Actualités économiques et financières du Niger et de l'Afrique de l'Ouest : articles, analyses, données de marché et outils gratuits.",
   alternates: {
     canonical: '/',
   },

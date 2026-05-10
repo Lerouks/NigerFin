@@ -7,5 +7,10 @@ export const metadata: Metadata = {
 };
 
 export default function ConnexionLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <h1 className="sr-only">Connexion à NFI Report</h1>
+      {children}
+    </>
+  );
 }

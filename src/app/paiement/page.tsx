@@ -10,8 +10,11 @@ export const metadata: Metadata = {
 
 export default function PaymentPage() {
   return (
-    <Suspense>
-      <PaymentContent />
-    </Suspense>
+    <>
+      <h1 className="sr-only">Paiement de votre abonnement Premium</h1>
+      <Suspense>
+        <PaymentContent />
+      </Suspense>
+    </>
   );
 }

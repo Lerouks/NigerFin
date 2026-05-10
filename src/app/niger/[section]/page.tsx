@@ -13,11 +13,11 @@ const SECTION_KEYS = ['presentation', 'entreprises-strategiques'] as const;
 const SECTION_META: Record<string, { title: string; description: string }> = {
   'presentation': {
     title: 'Présentation du Niger',
-    description: 'Profil économique, chiffres clés, régions et ressources naturelles du Niger.',
+    description: 'Profil économique du Niger : chiffres clés (PIB, population), régions, ressources naturelles (uranium, pétrole, or) et secteurs stratégiques.',
   },
   'entreprises-strategiques': {
     title: 'Entreprises stratégiques du Niger',
-    description: 'Les 8 entreprises indispensables de l\'économie nigérienne.',
+    description: 'Les 8 entreprises piliers de l\'économie nigérienne : SOMAÏR, COMINAK, NIGELEC, SONIBANK, SONIDEP, BAGRI, SOPAMIN, Niger Telecoms.',
   },
 };
 

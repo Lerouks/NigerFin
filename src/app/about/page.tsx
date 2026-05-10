@@ -6,7 +6,7 @@ export const revalidate = 86400;
 
 export const metadata: Metadata = {
   title: 'À propos : notre mission et notre équipe',
-  description: "Découvrez NFI Report, votre source d'information économique et financière de référence pour le Niger et l'Afrique. Notre mission, nos valeurs, nos fondateurs.",
+  description: "Découvrez la mission, les valeurs et les fondateurs de NFI Report, source d'information économique et financière du Niger et de l'Afrique.",
   alternates: { canonical: '/about' },
   openGraph: {
     title: 'À propos : notre mission et notre équipe',

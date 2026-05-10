@@ -152,10 +152,11 @@ function IPhoneMockup({
             <Image
               src={src}
               alt={alt}
-              fill
+              width={900}
+              height={1955}
               sizes="(max-width: 640px) 280px, 320px"
               quality={85}
-              className="object-cover object-top"
+              className="absolute inset-0 w-full h-full object-cover object-top"
               priority={priority}
               loading={priority ? undefined : 'lazy'}
             />

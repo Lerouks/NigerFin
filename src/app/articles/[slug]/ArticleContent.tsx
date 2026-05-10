@@ -194,10 +194,11 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
                     <Image
                       src={imageUrl}
                       alt={article.mainImage?.alt || article.title}
-                      fill
+                      width={1600}
+                      height={900}
                       sizes="(max-width: 768px) 100vw, 900px"
                       quality={90}
-                      className="object-cover"
+                      className="absolute inset-0 w-full h-full object-cover"
                       priority
                     />
                   </div>
@@ -273,10 +274,11 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
                       <Image
                         src={imageUrl}
                         alt={article.mainImage?.alt || article.title}
-                        fill
+                        width={1600}
+                        height={900}
                         sizes="(max-width: 768px) 100vw, 900px"
                         quality={90}
-                        className="object-cover"
+                        className="absolute inset-0 w-full h-full object-cover"
                         priority
                       />
                     </div>

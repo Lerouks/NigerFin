@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase';
 import { createServiceClient } from '@/lib/supabase';
+import { compressImageBuffer } from '@/lib/image-compress';
 
 export async function POST(req: NextRequest) {
   // Auth check
@@ -36,13 +37,17 @@ export async function POST(req: NextRequest) {
   const filename = `${Date.now()}-${randomUUID()}.${ext}`;
   const path = `articles/${filename}`;
 
+  // Compress before upload (target <100KB, preserves format)
+  const originalBuffer = Buffer.from(await file.arrayBuffer());
+  const { buffer, beforeBytes, afterBytes } = await compressImageBuffer(originalBuffer, file.type);
+
   // Upload to Supabase Storage
-  const buffer = Buffer.from(await file.arrayBuffer());
   const { error: uploadError } = await service.storage
     .from('article-images')
     .upload(path, buffer, {
       contentType: file.type,
       upsert: false,
+      cacheControl: '31536000',
     });
 
   if (uploadError) {
@@ -54,5 +59,10 @@ export async function POST(req: NextRequest) {
     .from('article-images')
     .getPublicUrl(path);
 
-  return NextResponse.json({ url: publicUrl });
+  return NextResponse.json({
+    url: publicUrl,
+    originalSize: beforeBytes,
+    compressedSize: afterBytes,
+    savedPercent: beforeBytes > 0 ? Math.round(((beforeBytes - afterBytes) / beforeBytes) * 100) : 0,
+  });
 }

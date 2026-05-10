@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { serverError } from '@/lib/api-error';
+import { compressImageBuffer } from '@/lib/image-compress';
 
 const ALLOWED_MIME = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/svg+xml']);
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
@@ -50,7 +51,12 @@ export async function POST(req: NextRequest) {
     const cleanName = safeFilename(file.name) || `image.${file.type.split('/')[1] ?? 'bin'}`;
     const path = `${new Date().getFullYear()}/${Date.now()}-${cleanName}`;
 
-    const buffer = Buffer.from(await file.arrayBuffer());
+    const originalBuffer = Buffer.from(await file.arrayBuffer());
+    // Compress before upload (skips SVG and animated GIF)
+    const { buffer } = file.type === 'image/svg+xml'
+      ? { buffer: originalBuffer }
+      : await compressImageBuffer(originalBuffer, file.type);
+
     const { error: upErr } = await serviceClient.storage.from(BUCKET).upload(path, buffer, {
       contentType: file.type,
       cacheControl: 'public, max-age=31536000, immutable',

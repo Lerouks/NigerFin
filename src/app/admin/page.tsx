@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { AdminDashboard } from './AdminDashboard';
 
 export const metadata: Metadata = {
-  title: 'Admin Dashboard',
-  description: 'Dashboard administrateur NFI Report.',
+  title: 'Tableau de bord administrateur',
+  description: 'Tableau de bord administrateur NFI Report : gestion des articles, abonnements et utilisateurs.',
   robots: { index: false },
 };
 

@@ -1,8 +1,5 @@
-'use client';
-
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Loader2 } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 interface Section {
   id: string;
@@ -11,34 +8,13 @@ interface Section {
   display_order: number;
 }
 
-export function AboutContent() {
-  const [sections, setSections] = useState<Section[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/legal-sections?page=about')
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) setSections(data);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
-
+export function AboutContent({ sections }: { sections: Section[] }) {
   const getSection = (order: number) => sections.find((s) => s.display_order === order);
 
   const mission = getSection(1);
   const values = [getSection(2), getSection(3), getSection(4)].filter(Boolean) as Section[];
   const founders = [getSection(5), getSection(6)].filter(Boolean) as Section[];
   const coverage = getSection(7);
-
-  if (loading) {
-    return (
-      <div className="py-20 flex items-center justify-center">
-        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-      </div>
-    );
-  }
 
   const coverageSectors = coverage?.text
     ? coverage.text.split(/,\s*|;\s*/).map((s) => s.replace(/^(Nous couvrons.*:\s*)/i, '').trim()).filter(Boolean)

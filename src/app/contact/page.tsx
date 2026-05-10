@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { ContactForm } from './ContactForm';
+import { ContactSeoBlock } from './ContactSeoBlock';
 
 export const revalidate = 86400;
 
@@ -15,5 +16,10 @@ export const metadata: Metadata = {
 };
 
 export default function ContactPage() {
-  return <ContactForm />;
+  return (
+    <>
+      <ContactForm />
+      <ContactSeoBlock />
+    </>
+  );
 }

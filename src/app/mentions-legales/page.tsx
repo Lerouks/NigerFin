@@ -16,6 +16,12 @@ export default async function MentionsLegalesPage() {
     <DynamicLegalPage
       title="Mentions Légales"
       initialSections={initialSections}
+      introParagraphs={[
+        "Les présentes mentions légales identifient l'éditeur du site nfireport.com, son hébergeur, ses responsables éditoriaux et les conditions juridiques générales d'utilisation du service. Elles sont rédigées conformément aux exigences de transparence du droit nigérien et aux standards internationaux applicables aux services de presse en ligne et d'information économique et financière.",
+        "NFI Report constitue un service de presse en ligne spécialisé dans l'information économique, financière et entrepreneuriale dédié au Niger et à l'Afrique de l'Ouest. Le site n'est pas un prestataire de services d'investissement agréé et n'exerce aucune activité réglementée par les autorités de marché ouest-africaines. Les contenus publiés (articles, analyses, indicateurs, simulateurs) sont fournis à titre informatif et pédagogique uniquement et ne constituent en aucun cas un conseil personnalisé en investissement, en gestion de patrimoine, en fiscalité ou en droit.",
+        "L'ensemble des contenus est protégé par les lois sur la propriété intellectuelle nigériennes et les conventions internationales (notamment l'Accord de Bangui révisé instituant l'Organisation Africaine de la Propriété Intellectuelle, OAPI). Toute reproduction, représentation, diffusion ou exploitation non autorisée est strictement interdite. Les citations courtes à des fins d'information sont tolérées sous réserve d'indiquer clairement la source NFI Report et de fournir un lien actif vers l'article d'origine.",
+        "Les présentes mentions légales sont régies par le droit nigérien. En cas de litige, les parties s'engagent à rechercher une solution amiable avant toute action contentieuse. À défaut, les tribunaux compétents de Niamey seront seuls compétents pour connaître du litige, conformément aux règles de procédure civile nigérienne et aux dispositions OHADA applicables.",
+      ]}
       fallbackSections={[
         {
           heading: '1. Éditeur du site',

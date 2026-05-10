@@ -6,6 +6,7 @@ import { CategoryHero } from '@/components/CategoryHero';
 import { NigerPresentation } from '@/components/NigerPresentation';
 import { StrategicEnterprisesSection } from '@/components/StrategicEnterprisesSection';
 import { NigerSectionSelector } from '../NigerSectionSelector';
+import { NigerSectionSeoBlock } from './NigerSectionSeoBlock';
 
 // Define all valid sections here — add new ones to scale
 const SECTION_KEYS = ['presentation', 'entreprises-strategiques'] as const;
@@ -88,6 +89,8 @@ export default async function NigerSectionPage({ params }: NigerSectionPageProps
         {section === 'presentation' && <NigerPresentationServer />}
         {section === 'entreprises-strategiques' && <StrategicEnterprisesSection />}
       </div>
+
+      <NigerSectionSeoBlock section={section} />
     </div>
   );
 }

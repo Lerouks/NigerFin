@@ -8,5 +8,10 @@ export const metadata: Metadata = {
 };
 
 export default function ApiStatusPage() {
-  return <ApiStatusDashboard />;
+  return (
+    <>
+      <h1 className="sr-only">Statut des API et sources de données</h1>
+      <ApiStatusDashboard />
+    </>
+  );
 }

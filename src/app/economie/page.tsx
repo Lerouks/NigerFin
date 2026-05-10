@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { CategoryHero } from '@/components/CategoryHero';
+import { HubIntro } from '@/components/HubIntro';
 import { SectionArticlesFiltered } from '@/components/SectionArticlesFiltered';
 import { getArticlesByCategory, getArticleViewRanking } from '@/lib/articles';
 
@@ -18,6 +19,19 @@ export default async function EconomiePage() {
   return (
     <div className="min-h-screen bg-[#fafaf9]">
       <CategoryHero label="Rubrique" title="Économie" description="Analyses et actualités économiques du Niger et de l'Afrique de l'Ouest." />
+      <HubIntro
+        paragraphs={[
+          "La rubrique Économie de NFI Report couvre l'actualité, les analyses et les indicateurs qui façonnent la trajectoire économique du Niger et de l'Afrique de l'Ouest. Croissance du PIB, inflation, balance commerciale, dette publique, secteurs stratégiques (agriculture, mines, énergie, services) : nous décryptons les chiffres et les politiques qui impactent le quotidien des Nigériens et les perspectives de développement régional.",
+          "Le Niger affiche des fondamentaux économiques particuliers : une économie agricole dominante (40% du PIB), une dépendance forte aux matières premières exportées (uranium, pétrole, or), une démographie jeune et croissante, et une intégration profonde dans la zone UEMOA grâce au franc CFA. Les politiques de la BCEAO, du FMI, de la Banque Mondiale et l'évolution du contexte géopolitique régional (sécurité au Sahel, partenariats internationaux) influencent directement les conditions de croissance et d'investissement.",
+          "Que vous soyez décideur économique, investisseur, étudiant en sciences économiques ou simple citoyen engagé, nos analyses vous donnent une grille de lecture rigoureuse pour comprendre les enjeux, anticiper les tendances et participer pleinement aux débats économiques contemporains.",
+        ]}
+        highlights={[
+          { title: 'Indicateurs macroéconomiques', body: 'PIB, inflation, dette, balance commerciale : les chiffres clés actualisés pour le Niger et l\'UEMOA.' },
+          { title: 'Politiques publiques', body: 'Décryptage des budgets, lois de finances et stratégies sectorielles de l\'État nigérien.' },
+          { title: 'Secteurs stratégiques', body: 'Agriculture, mines, énergie, télécoms : analyses des dynamiques et défis sectoriels.' },
+          { title: 'Géopolitique économique', body: 'Sahel, CEDEAO, partenariats Russie/Chine/UE : les enjeux qui pèsent sur l\'économie.' },
+        ]}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
         <SectionArticlesFiltered articles={articles} total={total} sectionLabel="Économie" sectionPath="/economie" viewRanking={viewRanking} />
       </div>

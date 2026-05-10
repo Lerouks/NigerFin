@@ -8,5 +8,10 @@ export const metadata: Metadata = {
 };
 
 export default function AdminPage() {
-  return <AdminDashboard />;
+  return (
+    <>
+      <h1 className="sr-only">Tableau de bord administrateur NFI Report</h1>
+      <AdminDashboard />
+    </>
+  );
 }

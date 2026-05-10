@@ -4,7 +4,7 @@ import { SITE_URL } from '@/lib/config';
 export const metadata: Metadata = {
   title: {
     template: '%s | Niger | NFI Report',
-    default: 'Niger : présentation, économie et entreprises stratégiques',
+    default: 'Niger : économie, entreprises et chiffres clés',
   },
   description: 'Tout savoir sur le Niger : profil économique, chiffres clés, PIB, population, régions, ressources naturelles (uranium, pétrole, or) et les entreprises stratégiques du pays.',
   keywords: ['Niger', 'économie Niger', 'entreprises Niger', 'SOMAÏR', 'COMINAK', 'NIGELEC', 'SONIBANK', 'SONIDEP', 'BAGRI', 'SOPAMIN', 'Niger Telecoms', 'uranium Niger', 'Afrique de l\'Ouest', 'UEMOA'],

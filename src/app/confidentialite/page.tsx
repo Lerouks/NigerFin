@@ -3,7 +3,11 @@ import { DynamicLegalPage } from '@/components/DynamicLegalPage';
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = { title: 'Politique de Confidentialité', description: 'Politique de confidentialité de NFI Report : collecte, utilisation et protection de vos données personnelles.' };
+export const metadata: Metadata = {
+  title: 'Politique de confidentialité et données',
+  description: 'Politique de confidentialité de NFI Report : collecte, utilisation et protection de vos données personnelles.',
+  alternates: { canonical: '/confidentialite' },
+};
 
 export default function ConfidentialitePage() {
   return (

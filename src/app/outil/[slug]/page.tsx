@@ -45,7 +45,11 @@ export async function generateMetadata({ params }: ToolPageProps): Promise<Metad
   const { slug } = await params;
   const tool = toolsMeta[slug];
   if (!tool) return { title: 'Outil introuvable' };
-  return { title: tool.title, description: tool.description };
+  return {
+    title: tool.title,
+    description: tool.description,
+    alternates: { canonical: `/outil/${slug}` },
+  };
 }
 
 export async function generateStaticParams() {

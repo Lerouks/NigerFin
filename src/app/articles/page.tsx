@@ -6,14 +6,14 @@ import { getAllArticles, getArticleViewRanking } from '@/lib/articles';
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: 'Tous les articles - NFI Report',
+  title: 'Tous les articles : actualit\u00e9s et analyses',
   description:
     'Retrouvez l\u2019ensemble des articles de NFI Report : \u00e9conomie, finance, march\u00e9s, Niger, \u00e9ducation et entreprises. Analyses, actualit\u00e9s et d\u00e9cryptages.',
   alternates: {
     canonical: '/articles',
   },
   openGraph: {
-    title: 'Tous les articles - NFI Report',
+    title: 'Tous les articles : actualit\u00e9s et analyses',
     description:
       'L\u2019ensemble des analyses et actualit\u00e9s \u00e9conomiques et financi\u00e8res du Niger et de l\u2019Afrique de l\u2019Ouest.',
     type: 'website',

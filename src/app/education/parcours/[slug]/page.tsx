@@ -7,11 +7,20 @@ interface PageProps {
 
 export const revalidate = 60;
 
+function formatSlug(slug: string): string {
+  return slug
+    .split('-')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
+  const formatted = formatSlug(slug);
   return {
-    title: 'Parcours',
-    description: `Parcours guidé NFI Report : ${slug}`,
+    title: `Parcours : ${formatted}`,
+    description: `Parcours guidé NFI Report sur ${formatted.toLowerCase()} : leçons progressives pour maîtriser le sujet à votre rythme.`,
+    alternates: { canonical: `/education/parcours/${slug}` },
   };
 }
 

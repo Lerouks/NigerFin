@@ -4,8 +4,9 @@ import Link from 'next/link';
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: 'Plan du site',
-  description: 'Retrouvez l\'ensemble des pages et rubriques de NFI Report : économie, finance, marchés, outils et plus.',
+  title: 'Plan du site : toutes les rubriques',
+  description: 'Retrouvez l\'ensemble des pages et rubriques de NFI Report : économie, finance, marchés, outils, éducation et plus.',
+  alternates: { canonical: '/plan-du-site' },
 };
 
 const sections = [

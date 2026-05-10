@@ -3,7 +3,11 @@ import { DynamicLegalPage } from '@/components/DynamicLegalPage';
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = { title: "Conditions Générales d'Utilisation", description: "Conditions générales d'utilisation de NFI Report : accès au service, abonnement premium, droits et obligations." };
+export const metadata: Metadata = {
+  title: "Conditions générales d'utilisation",
+  description: "Conditions générales d'utilisation de NFI Report : accès au service, abonnement premium, droits et obligations.",
+  alternates: { canonical: '/cgu' },
+};
 
 export default function CGUPage() {
   return (

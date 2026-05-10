@@ -3,7 +3,11 @@ import { DynamicLegalPage } from '@/components/DynamicLegalPage';
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = { title: 'Mentions Légales', description: 'Mentions légales de NFI Report : éditeur, hébergeur, propriété intellectuelle et conditions d\'utilisation du site.' };
+export const metadata: Metadata = {
+  title: 'Mentions légales : éditeur et hébergeur',
+  description: 'Mentions légales de NFI Report : éditeur, hébergeur, propriété intellectuelle et conditions d\'utilisation du site.',
+  alternates: { canonical: '/mentions-legales' },
+};
 
 export default function MentionsLegalesPage() {
   return (

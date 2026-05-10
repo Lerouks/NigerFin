@@ -7,7 +7,7 @@ import { PreferencesForm, type NewsletterPrefs } from './PreferencesForm';
 export const metadata: Metadata = {
   title: 'Mes préférences newsletter',
   description: 'Choisissez les contenus NFI Report que vous souhaitez recevoir par email.',
-  robots: { index: false, follow: false },
+  robots: { index: false },
 };
 
 const DEFAULT_PREFS: NewsletterPrefs = {

@@ -5,6 +5,7 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  trailingSlash: false,
   transpilePackages: [
     'react-markdown',
     'rehype-raw',
@@ -50,6 +51,15 @@ const nextConfig = {
     ].join('; ');
 
     return [
+      {
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, follow',
+          },
+        ],
+      },
       {
         source: '/(.*)',
         headers: [

@@ -7,7 +7,7 @@ import { InvoicesList } from './InvoicesList';
 export const metadata: Metadata = {
   title: 'Mes factures',
   description: 'Téléchargez et conservez les factures de votre abonnement Premium NFI Report.',
-  robots: { index: false, follow: false },
+  robots: { index: false },
 };
 
 export default async function FacturesPage() {

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ToolContent } from './ToolContent';
+import { ToolSeoContent } from './ToolSeoContent';
 
 export const revalidate = 86400;
 
@@ -62,11 +63,14 @@ export default async function ToolPage({ params }: ToolPageProps) {
   if (!tool) notFound();
 
   return (
-    <ToolContent
-      slug={slug}
-      title={tool.title}
-      description={tool.description}
-      isPremium={tool.premium}
-    />
+    <>
+      <ToolContent
+        slug={slug}
+        title={tool.title}
+        description={tool.description}
+        isPremium={tool.premium}
+      />
+      <ToolSeoContent slug={slug} />
+    </>
   );
 }

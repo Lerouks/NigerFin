@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { DynamicLegalPage } from '@/components/DynamicLegalPage';
+import { fetchLegalSections } from '@/lib/legal-sections';
 
 export const revalidate = 86400;
 
@@ -9,11 +10,12 @@ export const metadata: Metadata = {
   alternates: { canonical: '/confidentialite' },
 };
 
-export default function ConfidentialitePage() {
+export default async function ConfidentialitePage() {
+  const initialSections = await fetchLegalSections('confidentialite');
   return (
     <DynamicLegalPage
-      slug="confidentialite"
       title="Politique de Confidentialité"
+      initialSections={initialSections}
       fallbackSections={[
         {
           heading: '1. Responsable du traitement',

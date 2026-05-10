@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { MarchesContent } from './MarchesContent';
 import { CategoryHero } from '@/components/CategoryHero';
+import { HubIntro } from '@/components/HubIntro';
 import { SectionArticlesFiltered } from '@/components/SectionArticlesFiltered';
 import { getArticlesByCategory, getArticleViewRanking } from '@/lib/articles';
 
@@ -22,6 +23,19 @@ export default async function MarchesPage() {
         label="Rubrique"
         title="Marchés"
         description="Suivez les cours en temps réel et apprenez à comprendre chaque actif grâce à nos fiches pédagogiques."
+      />
+      <HubIntro
+        paragraphs={[
+          "La rubrique Marchés de NFI Report rassemble les cours en temps réel et les analyses des principaux actifs financiers qui influencent l'économie nigérienne et ouest-africaine. Indices boursiers, devises, matières premières, actions cotées sur la BRVM (Bourse Régionale des Valeurs Mobilières) : nous couvrons tous les marchés que tout investisseur, importateur ou décideur doit suivre pour anticiper les évolutions de prix et prendre des décisions éclairées.",
+          "Le Niger, intégré à la zone UEMOA grâce au franc CFA, est exposé à plusieurs marchés : le marché des changes (parité fixe FCFA/EUR à 655,957, fluctuations USD/CNY/NGN), les matières premières que le pays exporte (uranium, pétrole, or) ou importe (céréales, carburants), et les indices régionaux (BRVM Composite, BRVM 10) qui reflètent la santé des entreprises cotées de la sous-région. Comprendre ces dynamiques permet de protéger son patrimoine, d'optimiser ses achats à l'international et d'investir avec discernement.",
+          "Nos fiches pédagogiques accompagnent chaque cours pour expliquer les facteurs clés (offre/demande, géopolitique, politique monétaire, tensions commerciales) qui font bouger les marchés au quotidien.",
+        ]}
+        highlights={[
+          { title: 'BRVM et marchés actions', body: 'Cours et analyses des sociétés cotées à Abidjan, dont les fleurons ouest-africains qui structurent l\'épargne longue.' },
+          { title: 'Devises et change', body: 'EUR, USD, CNY, NGN face au FCFA : suivez les parités qui pèsent sur les importations et le coût de la vie.' },
+          { title: 'Matières premières', body: 'Uranium, pétrole, or, céréales : les cours mondiaux qui impactent directement les exportations du Niger.' },
+          { title: 'Indicateurs UEMOA', body: 'Taux directeur BCEAO, inflation IHPC, réserves de change : les données qui pilotent l\'économie régionale.' },
+        ]}
       />
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
         <MarchesContent />

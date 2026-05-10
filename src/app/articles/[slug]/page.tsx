@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getArticleBySlug, getRelatedArticles, getAllArticleSlugs } from '@/lib/articles';
-import { SITE_URL } from '@/lib/config';
+import { SITE_URL, truncateSeoTitle } from '@/lib/config';
 import { ArticleContent } from './ArticleContent';
 
 export const revalidate = 60;
@@ -20,8 +20,10 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
   const articleUrl = `${siteUrl}/articles/${article.slug.current}`;
   const imageUrl = article.mainImage?.url || `${siteUrl}/og-default.jpg`;
 
+  const seoTitle = truncateSeoTitle(article.seo?.metaTitle || article.title);
+
   return {
-    title: article.seo?.metaTitle || article.title,
+    title: { absolute: seoTitle },
     description: article.seo?.metaDescription || article.excerpt,
     alternates: {
       canonical: articleUrl,

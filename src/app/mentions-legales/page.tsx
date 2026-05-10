@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { DynamicLegalPage } from '@/components/DynamicLegalPage';
+import { fetchLegalSections } from '@/lib/legal-sections';
 
 export const revalidate = 86400;
 
@@ -9,11 +10,12 @@ export const metadata: Metadata = {
   alternates: { canonical: '/mentions-legales' },
 };
 
-export default function MentionsLegalesPage() {
+export default async function MentionsLegalesPage() {
+  const initialSections = await fetchLegalSections('mentions-legales');
   return (
     <DynamicLegalPage
-      slug="mentions-legales"
       title="Mentions Légales"
+      initialSections={initialSections}
       fallbackSections={[
         {
           heading: '1. Éditeur du site',

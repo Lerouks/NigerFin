@@ -10,8 +10,11 @@ export const metadata: Metadata = {
 
 export default function ComptePage() {
   return (
-    <Suspense>
-      <AccountDashboard />
-    </Suspense>
+    <>
+      <h1 className="sr-only">Mon compte NFI Report</h1>
+      <Suspense>
+        <AccountDashboard />
+      </Suspense>
+    </>
   );
 }

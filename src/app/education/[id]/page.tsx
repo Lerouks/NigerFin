@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { createServiceClient } from '@/lib/supabase';
 import { EducationCategoryContent } from './EducationCategoryContent';
+import { EducationCategoryHero } from './EducationCategoryHero';
+import { EducationSeoBlock } from './EducationSeoBlock';
 
 export const revalidate = 3600;
 
@@ -11,7 +13,7 @@ async function getCategory(slug: string) {
 
   const { data } = await service
     .from('education_categories')
-    .select('slug, title')
+    .select('slug, title, description')
     .eq('slug', slug)
     .single();
 
@@ -38,11 +40,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     notFound();
   }
 
-  const title = `${category.title} : cours et leçons gratuits`;
+  const seoTitle = `${category.title} : cours gratuits | NFI Report`;
   const description = `Cours, leçons et exercices gratuits sur ${category.title.toLowerCase()} adaptés au contexte du Niger et de l'UEMOA. Formation en finance et économie pas-à-pas.`;
 
   return {
-    title,
+    title: { absolute: seoTitle },
     description,
     alternates: { canonical: `/education/${id}` },
     openGraph: {
@@ -61,5 +63,11 @@ export default async function EducationCategoryPage({ params }: { params: Promis
     notFound();
   }
 
-  return <EducationCategoryContent slug={id} />;
+  return (
+    <div className="min-h-screen bg-[#fafaf9]">
+      <EducationCategoryHero category={category} />
+      <EducationCategoryContent slug={id} />
+      <EducationSeoBlock slug={id} />
+    </div>
+  );
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { DynamicLegalPage } from '@/components/DynamicLegalPage';
+import { fetchLegalSections } from '@/lib/legal-sections';
 
 export const revalidate = 86400;
 
@@ -9,11 +10,12 @@ export const metadata: Metadata = {
   alternates: { canonical: '/publicite' },
 };
 
-export default function PublicitePage() {
+export default async function PublicitePage() {
+  const initialSections = await fetchLegalSections('publicite');
   return (
     <DynamicLegalPage
-      slug="publicite"
       title="Publicité & Partenariats"
+      initialSections={initialSections}
       fallbackSections={[
         { heading: 'Opportunités publicitaires', text: "NFI REPORT offre des opportunités publicitaires premium pour toucher une audience qualifiée de professionnels, investisseurs et décideurs au Niger et en Afrique de l'Ouest." },
         { heading: 'Formats disponibles', text: "Nous proposons différents formats : bannières display, articles sponsorisés, newsletters dédiées, et partenariats événementiels." },

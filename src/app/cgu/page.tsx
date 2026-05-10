@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { DynamicLegalPage } from '@/components/DynamicLegalPage';
+import { fetchLegalSections } from '@/lib/legal-sections';
 
 export const revalidate = 86400;
 
@@ -9,11 +10,12 @@ export const metadata: Metadata = {
   alternates: { canonical: '/cgu' },
 };
 
-export default function CGUPage() {
+export default async function CGUPage() {
+  const initialSections = await fetchLegalSections('cgu');
   return (
     <DynamicLegalPage
-      slug="cgu"
       title="Conditions Générales d'Utilisation"
+      initialSections={initialSections}
       fallbackSections={[
         { heading: 'Objet', text: "Les présentes conditions générales d'utilisation régissent l'accès et l'utilisation du site NFI REPORT. En accédant au site, vous acceptez sans réserve les présentes conditions." },
         { heading: 'Accès au service', text: "L'accès aux articles gratuits est ouvert à tous. L'accès au contenu premium nécessite la création d'un compte et la souscription d'un abonnement payant." },

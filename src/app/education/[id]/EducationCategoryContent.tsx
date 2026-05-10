@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
-import { ArrowLeft, BookOpen, Clock, Lock, Crown, CheckCircle2, ChevronDown, Loader2 } from 'lucide-react';
+import { BookOpen, Clock, Lock, Crown, CheckCircle2, ChevronDown, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import { useAuth } from '@/lib/auth-context';
@@ -70,28 +70,19 @@ const ACCESS_CONFIG: Record<string, { label: string; color: string; bg: string; 
 /* ─── Skeleton de chargement ─── */
 function LessonsSkeleton() {
   return (
-    <div className="min-h-screen bg-[#fafaf9]">
-      <section className="bg-[#111] text-white py-12 md:py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="h-4 w-32 bg-white/10 rounded animate-pulse mb-6" />
-          <div className="h-8 w-64 bg-white/10 rounded animate-pulse mb-3" />
-          <div className="h-4 w-96 bg-white/[0.06] rounded animate-pulse" />
-        </div>
-      </section>
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="h-5 w-24 bg-gray-200 rounded animate-pulse mb-6" />
-        <div className="space-y-3">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="flex items-center gap-4 p-5 rounded-xl border border-black/[0.06] bg-white">
-              <div className="w-9 h-9 rounded-full bg-gray-100 animate-pulse" />
-              <div className="flex-1 space-y-2">
-                <div className="h-4 w-3/5 bg-gray-200 rounded animate-pulse" />
-                <div className="h-3 w-20 bg-gray-100 rounded animate-pulse" />
-              </div>
-              <div className="h-6 w-16 bg-gray-100 rounded-full animate-pulse" />
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="h-5 w-24 bg-gray-200 rounded animate-pulse mb-6" />
+      <div className="space-y-3">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="flex items-center gap-4 p-5 rounded-xl border border-black/[0.06] bg-white">
+            <div className="w-9 h-9 rounded-full bg-gray-100 animate-pulse" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 w-3/5 bg-gray-200 rounded animate-pulse" />
+              <div className="h-3 w-20 bg-gray-100 rounded animate-pulse" />
             </div>
-          ))}
-        </div>
+            <div className="h-6 w-16 bg-gray-100 rounded-full animate-pulse" />
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -375,16 +366,8 @@ export function EducationCategoryContent({ slug }: { slug: string }) {
 
   if (notFound || !category) {
     return (
-      <div className="min-h-screen bg-[#fafaf9]">
-        <section className="bg-[#111] text-white py-12 md:py-16">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <Link href="/education" className="inline-flex items-center gap-1.5 text-white/40 hover:text-white/70 transition-colors text-[13px] mb-6">
-              <ArrowLeft className="w-4 h-4" />Retour à l&apos;éducation
-            </Link>
-            <h1 className="text-3xl font-bold">Catégorie introuvable</h1>
-            <p className="text-white/40 mt-2 text-[14px]">Cette catégorie n&apos;existe pas ou a été désactivée.</p>
-          </div>
-        </section>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <p className="text-[15px] text-gray-500">Cette catégorie n&apos;existe pas ou a été désactivée.</p>
       </div>
     );
   }
@@ -394,28 +377,10 @@ export function EducationCategoryContent({ slug }: { slug: string }) {
   const hasPremium = premiumLessons > 0;
 
   return (
-    <div className="min-h-screen bg-[#fafaf9]">
-      {/* Hero */}
-      <section className="bg-[#111] text-white py-12 md:py-16">
+    <>
+      {/* Stats chips (rendered below the SSR hero) */}
+      <section className="bg-[#111] text-white pb-8 -mt-2">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Link
-            href="/education"
-            className="inline-flex items-center gap-1.5 text-white/40 hover:text-white/70 transition-colors text-[13px] mb-6"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Retour à l&apos;éducation
-          </Link>
-
-          <div className="flex items-center gap-3 mb-3">
-            <BookOpen className="w-6 h-6 text-white/60" />
-            <span className="text-[11px] tracking-[0.2em] uppercase text-white/40">Éducation</span>
-          </div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-3">{category.title}</h1>
-          {category.description && (
-            <p className="text-white/50 text-[15px] max-w-xl mb-6">{category.description}</p>
-          )}
-
-          {/* Stats chips */}
           <div className="flex flex-wrap gap-3">
             <span className="text-[12px] bg-white/[0.08] text-white/60 px-3 py-1.5 rounded-full">
               {lessons.length} leçon{lessons.length !== 1 ? 's' : ''}
@@ -481,6 +446,6 @@ export function EducationCategoryContent({ slug }: { slug: string }) {
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 }

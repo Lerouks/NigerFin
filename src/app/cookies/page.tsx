@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { DynamicLegalPage } from '@/components/DynamicLegalPage';
+import { fetchLegalSections } from '@/lib/legal-sections';
 
 export const revalidate = 86400;
 
@@ -9,11 +10,12 @@ export const metadata: Metadata = {
   alternates: { canonical: '/cookies' },
 };
 
-export default function CookiesPage() {
+export default async function CookiesPage() {
+  const initialSections = await fetchLegalSections('cookies');
   return (
     <DynamicLegalPage
-      slug="cookies"
       title="Politique de Cookies"
+      initialSections={initialSections}
       fallbackSections={[
         { heading: "Qu'est-ce qu'un cookie ?", text: "Un cookie est un petit fichier texte déposé sur votre terminal lors de votre visite sur notre site. Il nous permet de vous reconnaître et de mémoriser vos préférences." },
         { heading: 'Cookies utilisés', text: "Nous utilisons des cookies strictement nécessaires au fonctionnement du site, des cookies d'analyse pour améliorer nos services, et des cookies de personnalisation pour adapter le contenu à vos centres d'intérêt." },

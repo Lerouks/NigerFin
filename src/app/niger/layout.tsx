@@ -6,7 +6,7 @@ export const metadata: Metadata = {
     template: '%s | Niger | NFI Report',
     default: 'Niger : économie, entreprises et chiffres clés',
   },
-  description: 'Tout savoir sur le Niger : profil économique, chiffres clés, PIB, population, régions, ressources naturelles (uranium, pétrole, or) et les entreprises stratégiques du pays.',
+  description: 'Tout savoir sur le Niger : profil économique, chiffres clés, régions, ressources naturelles et les entreprises stratégiques du pays.',
   keywords: ['Niger', 'économie Niger', 'entreprises Niger', 'SOMAÏR', 'COMINAK', 'NIGELEC', 'SONIBANK', 'SONIDEP', 'BAGRI', 'SOPAMIN', 'Niger Telecoms', 'uranium Niger', 'Afrique de l\'Ouest', 'UEMOA'],
   alternates: { canonical: `${SITE_URL}/niger` },
   openGraph: {

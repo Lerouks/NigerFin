@@ -19,3 +19,16 @@ export function truncateSeoTitle(title: string, maxLen = 58): string {
   const cut = lastSpace > maxLen * 0.6 ? slice.slice(0, lastSpace) : slice;
   return cut.replace(/[.,;:!?-]+$/, '') + '…';
 }
+
+/**
+ * Truncate a meta description (SEO).
+ * Targets ~150 chars (Google SERP limit) at the last word boundary.
+ */
+export function truncateSeoDescription(text: string, maxLen = 150): string {
+  if (!text) return '';
+  if (text.length <= maxLen) return text;
+  const slice = text.slice(0, maxLen);
+  const lastSpace = slice.lastIndexOf(' ');
+  const cut = lastSpace > maxLen * 0.6 ? slice.slice(0, lastSpace) : slice;
+  return cut.replace(/[.,;:!?-]+$/, '') + '…';
+}

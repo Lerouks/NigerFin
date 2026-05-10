@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { createServiceClient } from '@/lib/supabase';
-import { SITE_URL } from '@/lib/config';
+import { SITE_URL, truncateSeoDescription } from '@/lib/config';
 import { searchArticles } from '@/lib/articles';
 import { EnterpriseContent } from './EnterpriseContent';
 import { EnterpriseSeoBlock } from './EnterpriseSeoBlock';
@@ -53,9 +53,10 @@ export async function generateMetadata({ params }: EnterprisePageProps): Promise
   if (!enterprise) return { title: 'Entreprise introuvable' };
 
   const title = `${enterprise.name} - ${enterprise.sector}`;
-  const description = enterprise.full_name
+  const rawDescription = enterprise.full_name
     ? `${enterprise.full_name} (${enterprise.name}). ${enterprise.description}`
     : enterprise.description;
+  const description = truncateSeoDescription(rawDescription);
 
   return {
     title,

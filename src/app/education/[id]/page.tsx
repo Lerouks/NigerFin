@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { createServiceClient } from '@/lib/supabase';
 import { EducationCategoryContent } from './EducationCategoryContent';
 
@@ -33,17 +34,19 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const category = await getCategory(id);
 
-  if (!category) return { title: 'Éducation' };
+  if (!category) {
+    notFound();
+  }
 
-  const title = category.title;
-  const description = `Cours et leçons sur ${category.title.toLowerCase()} - formation gratuite en finance et économie au Niger.`;
+  const title = `${category.title} : cours et leçons gratuits`;
+  const description = `Cours, leçons et exercices gratuits sur ${category.title.toLowerCase()} adaptés au contexte du Niger et de l'UEMOA. Formation en finance et économie pas-à-pas.`;
 
   return {
     title,
     description,
     alternates: { canonical: `/education/${id}` },
     openGraph: {
-      title: `${title} | Éducation`,
+      title: `${category.title} : cours et leçons gratuits`,
       description,
       type: 'website',
     },

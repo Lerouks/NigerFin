@@ -1,4 +1,5 @@
 import type { LegalSection } from '@/lib/legal-sections';
+import { LegalIntroBlock } from '@/components/LegalIntroBlock';
 
 interface FallbackSection {
   heading: string;
@@ -7,11 +8,12 @@ interface FallbackSection {
 
 interface DynamicLegalPageProps {
   title: string;
+  introParagraphs?: string[];
   initialSections?: LegalSection[];
   fallbackSections?: FallbackSection[];
 }
 
-export function DynamicLegalPage({ title, initialSections, fallbackSections }: DynamicLegalPageProps) {
+export function DynamicLegalPage({ title, introParagraphs, initialSections, fallbackSections }: DynamicLegalPageProps) {
   const sections = initialSections && initialSections.length > 0 ? initialSections : null;
   const useFallback = !sections && fallbackSections && fallbackSections.length > 0;
 
@@ -36,6 +38,9 @@ export function DynamicLegalPage({ title, initialSections, fallbackSections }: D
       <section className="py-16 md:py-20">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-xl p-7 md:p-10 border border-black/[0.06]">
+            {introParagraphs && introParagraphs.length > 0 && (
+              <LegalIntroBlock paragraphs={introParagraphs} />
+            )}
             {sections ? (
               <div className="space-y-10 max-w-prose">
                 {sections.map((section) => (

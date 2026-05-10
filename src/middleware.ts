@@ -9,6 +9,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(target, 308);
   }
 
+  const { pathname } = request.nextUrl;
+  if (pathname.length > 1 && pathname.endsWith('/')) {
+    const target = new URL(request.nextUrl);
+    target.pathname = pathname.replace(/\/+$/, '');
+    return NextResponse.redirect(target, 308);
+  }
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) {

@@ -6,7 +6,7 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: 'Tarifs Premium : abonnement mensuel et annuel',
   description:
-    'Tarifs NFI Report Premium: mensuel 5 000 FCFA, trimestriel 13 750 FCFA, annuel 50 000 FCFA. Paiement Mobile Money (Airtel, Moov) ou Visa, Mastercard, American Express. Résiliable en ligne à tout moment.',
+    'Tarifs NFI Report Premium : 5 000 FCFA/mois, 13 750 FCFA/trim, 50 000 FCFA/an. Paiement Mobile Money ou carte bancaire. Résiliable en ligne.',
   keywords: [
     'tarifs NFI Report',
     'prix abonnement NFI Report',

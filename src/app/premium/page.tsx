@@ -6,7 +6,7 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: 'Devenir Premium : analyses et outils exclusifs',
   description:
-    'La connaissance, votre meilleur capital. Pour les jeunes qui veulent savoir, agir et investir en Afrique de l\u2019Ouest. Newsletters, articles, outils et analyses Premium.',
+    'Newsletters, articles et outils financiers exclusifs pour d\u00e9cider et investir en Afrique de l\u2019Ouest. \u00c0 partir de 5 000 FCFA/mois.',
   keywords: [
     'NFI Report Premium',
     'abonnement NFI Report',

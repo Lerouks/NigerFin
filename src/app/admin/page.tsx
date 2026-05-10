@@ -4,7 +4,7 @@ import { AdminDashboard } from './AdminDashboard';
 export const metadata: Metadata = {
   title: 'Admin Dashboard',
   description: 'Dashboard administrateur NFI Report.',
-  robots: { index: false, follow: false },
+  robots: { index: false },
 };
 
 export default function AdminPage() {

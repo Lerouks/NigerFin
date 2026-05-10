@@ -5,7 +5,7 @@ import { PaymentContent } from './PaymentContent';
 export const metadata: Metadata = {
   title: 'Paiement - NFI Report',
   description: 'Finalisez votre abonnement NFI Report via Nita ou Amana Transfert d\'Argent.',
-  robots: { index: false, follow: false },
+  robots: { index: false },
 };
 
 export default function PaymentPage() {

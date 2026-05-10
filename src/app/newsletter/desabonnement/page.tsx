@@ -4,7 +4,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Désabonnement newsletter',
   description: 'Confirmation de votre désabonnement à la newsletter NFI Report.',
-  robots: { index: false, follow: false },
+  robots: { index: false },
 };
 
 interface SearchParams {

@@ -85,7 +85,45 @@ Lors de chaque modification, ne pas se limiter à la demande stricte. Vérifier 
 
 **Disque dev** : FileVault doit être actif sur le Mac dev. Vérifier dans Système → Confidentialité et sécurité → FileVault.
 
-### 5. Suggestions proactives
+### 5. Supabase Data API : GRANT explicites obligatoires sur les nouvelles tables
+
+À partir du **30 octobre 2026**, Supabase n'expose plus automatiquement les tables `public` à la Data API (supabase-js, REST, GraphQL). Toute nouvelle table créée doit avoir des GRANT explicites pour les rôles `anon`, `authenticated` et `service_role`, sinon le code recevra une erreur `42501` "permission denied".
+
+**Procédure obligatoire à chaque création de table** (à inclure dans la migration SQL) :
+
+```sql
+-- 1. Créer la table
+CREATE TABLE public.ma_nouvelle_table (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES auth.users(id),
+  created_at timestamptz DEFAULT now()
+);
+
+-- 2. Activer RLS (obligatoire pour toute table publique NFI)
+ALTER TABLE public.ma_nouvelle_table ENABLE ROW LEVEL SECURITY;
+
+-- 3. GRANT explicites selon l'usage prévu
+GRANT SELECT ON public.ma_nouvelle_table TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.ma_nouvelle_table TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.ma_nouvelle_table TO service_role;
+
+-- 4. Policies RLS (ajouter au moins une policy par rôle qui doit accéder)
+CREATE POLICY "users read own rows" ON public.ma_nouvelle_table
+  FOR SELECT TO authenticated USING (auth.uid() = user_id);
+```
+
+**Fonctions SECURITY DEFINER (RPC)** : ne JAMAIS laisser une fonction `SECURITY DEFINER` accessible aux rôles `PUBLIC`, `anon` ou `authenticated` sauf si elle est explicitement conçue pour usage public. Procédure standard à appliquer après création de toute nouvelle RPC :
+
+```sql
+REVOKE ALL ON FUNCTION public.ma_fonction(args) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.ma_fonction(args) TO service_role;
+```
+
+Appeler ensuite la fonction depuis le code via `createServiceClient().rpc(...)`, jamais via le client client/server lié à l'utilisateur.
+
+**Audit régulier** : lancer `mcp__supabase__get_advisors` (type security) après chaque DDL pour détecter les régressions.
+
+### 6. Suggestions proactives
 Si, dans le cadre d'un projet de ce type (site d'actualité économique Next.js + Supabase + iPayMoney), Claude identifie un élément manquant, incomplet, ou améliorable que l'utilisateur n'a pas mentionné (SEO, métadonnées, sitemap, robots.txt, loading states, error boundaries, fallbacks, validation de formulaires, rate limiting, RGPD, etc.), il doit :
 1. **Le signaler clairement** à l'utilisateur avec une explication courte du pourquoi
 2. **Attendre l'accord explicite** de l'utilisateur

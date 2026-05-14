@@ -35,6 +35,20 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/niger/entreprises-strategiques',
+        destination: '/entreprises',
+        permanent: true,
+      },
+      {
+        source: '/niger/presentation',
+        destination: '/niger',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     const isDev = process.env.NODE_ENV === 'development';
     const csp = [

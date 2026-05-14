@@ -24,7 +24,10 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
-  try { await supabase.rpc('reset_monthly_premium_count'); } catch {}
+  const resetClient = createServiceClient();
+  if (resetClient) {
+    try { await resetClient.rpc('reset_monthly_premium_count'); } catch {}
+  }
 
   const { data: profile } = await supabase
     .from('user_profiles')

@@ -78,7 +78,6 @@ export const NFI_GROUP_ISSUER: InvoiceIssuer = {
   country: 'Niger',
   email: 'contact@nfireport.com',
   phone: '+227 97 76 91 31',
-  // RCCM et NIU à compléter après immatriculation officielle.
-  rccm: undefined,
-  niu: undefined,
+  rccm: 'NE-NIM-01-2026-B12-00204',
+  niu: '164936/R',
 };

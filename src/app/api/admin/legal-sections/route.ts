@@ -3,6 +3,22 @@ import { revalidatePath } from 'next/cache';
 import { requireAdmin } from '@/lib/admin-auth';
 import { serverError } from '@/lib/api-error';
 
+const LEGAL_PAGES = [
+  '/mentions-legales',
+  '/confidentialite',
+  '/cgu',
+  '/cookies',
+  '/about',
+  '/publicite',
+  '/contact',
+] as const;
+
+function revalidateAllLegalPages() {
+  for (const path of LEGAL_PAGES) {
+    revalidatePath(path);
+  }
+}
+
 export async function GET(req: NextRequest) {
   const auth = await requireAdmin();
   if ('error' in auth) return auth.error;
@@ -45,8 +61,7 @@ export async function PUT(req: NextRequest) {
     if (error) return serverError(error, 'admin-legal-sections');
   }
 
-  revalidatePath('/mentions-legales');
-  revalidatePath('/politique-de-confidentialite');
+  revalidateAllLegalPages();
   return NextResponse.json({ success: true });
 }
 
@@ -68,8 +83,7 @@ export async function POST(req: NextRequest) {
 
   if (error) return serverError(error, 'admin-legal-sections');
 
-  revalidatePath('/mentions-legales');
-  revalidatePath('/politique-de-confidentialite');
+  revalidateAllLegalPages();
   return NextResponse.json(data);
 }
 
@@ -88,7 +102,6 @@ export async function DELETE(req: NextRequest) {
 
   if (error) return serverError(error, 'admin-legal-sections');
 
-  revalidatePath('/mentions-legales');
-  revalidatePath('/politique-de-confidentialite');
+  revalidateAllLegalPages();
   return NextResponse.json({ success: true });
 }

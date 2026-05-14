@@ -92,7 +92,7 @@ ${content}
 
 <tr><td align="center" style="padding:24px 32px 28px;background-color:#f5f5f7;border-top:1px solid #d2d2d7;">
   <p style="margin:0 0 6px;color:#1d1d1f;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;">NFI Group SARL</p>
-  <p style="margin:0 0 12px;color:#86868b;font-family:'Inter',sans-serif;font-size:11px;line-height:1.65;letter-spacing:0.2px;">SARL au capital de 1 000 000 FCFA &middot; Siège : Quartier Plateau, Niamey, Niger<br/>Tél. +227 97 76 91 31</p>
+  <p style="margin:0 0 12px;color:#86868b;font-family:'Inter',sans-serif;font-size:11px;line-height:1.65;letter-spacing:0.2px;">SARL au capital de 1 000 000 FCFA &middot; RCCM NE-NIM-01-2026-B12-00204 &middot; NIF 164936/R &middot; Siège : Quartier Plateau, Niamey, Niger<br/>Tél. +227 97 76 91 31</p>
   <p style="margin:0;color:#86868b;font-family:'Inter',sans-serif;font-size:11px;line-height:1.65;">
     <a href="mailto:contact@nfireport.com" style="color:#1d1d1f;text-decoration:underline;">contact@nfireport.com</a>&nbsp;&middot;&nbsp;
     <a href="${SITE_URL}" style="color:#1d1d1f;text-decoration:underline;">nfireport.com</a>

@@ -17,8 +17,8 @@ export interface InvoiceCustomer {
   address?: string;
   city?: string;
   country?: string;
-  /** Numéro d'identification fiscale du client (entreprise B2B). */
-  niu?: string;
+  /** Numéro d'Identification Fiscale du client (entreprise B2B). Au Niger : NIF. */
+  nif?: string;
   /** Numéro RCCM du client (entreprise B2B). */
   rccm?: string;
 }
@@ -31,10 +31,10 @@ export interface InvoiceIssuer {
   country: string;
   email: string;
   phone: string;
-  /** Numéro RCCM NFI Group, complété après immatriculation. */
+  /** Numéro RCCM NFI Group. */
   rccm?: string;
-  /** Numéro d'identification fiscale, complété après immatriculation. */
-  niu?: string;
+  /** Numéro d'Identification Fiscale NFI Group. Au Niger : NIF. */
+  nif?: string;
 }
 
 export type InvoiceStatus = 'draft' | 'paid' | 'cancelled' | 'refunded';
@@ -79,5 +79,5 @@ export const NFI_GROUP_ISSUER: InvoiceIssuer = {
   email: 'contact@nfireport.com',
   phone: '+227 97 76 91 31',
   rccm: 'NE-NIM-01-2026-B12-00204',
-  niu: '164936/R',
+  nif: '164936/R',
 };

@@ -354,7 +354,7 @@ export function InvoicePdf({ invoice }: InvoicePdfProps) {
       : null,
     `Siège : ${invoice.issuer.address}, ${invoice.issuer.city}, ${invoice.issuer.country}`,
     invoice.issuer.rccm ? `RCCM : ${invoice.issuer.rccm}` : null,
-    invoice.issuer.niu ? `NIU : ${invoice.issuer.niu}` : null,
+    invoice.issuer.nif ? `NIF : ${invoice.issuer.nif}` : null,
     `Tél. ${invoice.issuer.phone}`,
     invoice.issuer.email,
   ]

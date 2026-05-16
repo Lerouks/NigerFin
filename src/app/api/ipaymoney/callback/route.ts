@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { logAuditEvent } from '@/lib/audit';
@@ -7,7 +8,54 @@ import { paymentConfirmationEmail } from '@/lib/email-templates';
 import { issueInvoice } from '@/lib/invoices/issue';
 import { getBillingCycleLabel } from '@/config/pricing';
 import { SITE_URL } from '@/lib/config';
+import { checkRateLimit, getClientIP, RATE_LIMITS } from '@/lib/rate-limit';
 import * as Sentry from '@sentry/nextjs';
+
+const WEBHOOK_SECRET = process.env.IPAYMONEY_WEBHOOK_SECRET;
+
+/**
+ * Vérifie qu'un callback iPayMoney provient bien d'une source autorisée.
+ *
+ * Trois sources de secret partagé acceptées, par ordre de préférence :
+ *  1. Header `X-Webhook-Secret: <secret>` (recommandé, ne fuit pas dans les logs)
+ *  2. Header `Authorization: Bearer <secret>`
+ *  3. Body field `webhook_secret` (fallback pour SDK iPayMoney/Ifutur qui ne supporterait pas les headers custom)
+ *
+ * Quand Ifutur livrera leur SDK avec signature HMAC native, ajouter ici la
+ * vérification `X-Signature` via crypto.timingSafeEqual(hmacSha256(rawBody, secret), provided).
+ *
+ * En l'absence de IPAYMONEY_WEBHOOK_SECRET :
+ *  - production : refuser tous les callbacks et alerter Sentry (faille critique)
+ *  - dev/test   : accepter pour permettre les tests locaux
+ */
+function verifyWebhookAuth(
+  request: NextRequest,
+  payload: Record<string, string | number | undefined>,
+): boolean {
+  if (!WEBHOOK_SECRET) {
+    if (process.env.NODE_ENV === 'production') {
+      Sentry.captureMessage('IPAYMONEY_WEBHOOK_SECRET non configuré en production', { level: 'error' });
+      return false;
+    }
+    return true;
+  }
+
+  const provided =
+    request.headers.get('x-webhook-secret') ||
+    request.headers.get('authorization')?.replace(/^Bearer\s+/i, '').trim() ||
+    (typeof payload.webhook_secret === 'string' ? payload.webhook_secret : null);
+
+  if (!provided) return false;
+
+  try {
+    const a = Buffer.from(provided, 'utf8');
+    const b = Buffer.from(WEBHOOK_SECRET, 'utf8');
+    if (a.length !== b.length) return false;
+    return crypto.timingSafeEqual(a, b);
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Activate subscription for a user after successful iPayMoney payment.
@@ -158,6 +206,14 @@ async function activateSubscription(
  */
 export async function POST(request: NextRequest) {
   try {
+    // 1) Rate-limit par IP pour empêcher le brute-force de transaction_id
+    const ip = getClientIP(request);
+    const rl = await checkRateLimit(`ipaymoney-callback:${ip}`, RATE_LIMITS.paymentCallback.limit, RATE_LIMITS.paymentCallback.windowMs);
+    if (rl.limited) {
+      Sentry.captureMessage('iPayMoney callback rate-limited', { level: 'warning', extra: { ip } });
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     const serviceClient = createServiceClient();
     if (!serviceClient) {
       return NextResponse.json({ error: 'Service indisponible' }, { status: 503 });
@@ -174,6 +230,15 @@ export async function POST(request: NextRequest) {
       // Parse URL-encoded form data
       const params = new URLSearchParams(rawBody);
       payload = Object.fromEntries(params.entries());
+    }
+
+    // 2) Vérification de l'authenticité du callback (shared secret en attendant HMAC Ifutur)
+    if (!verifyWebhookAuth(request, payload)) {
+      Sentry.captureMessage('iPayMoney callback unauthorized', {
+        level: 'warning',
+        extra: { ip, hasSecret: !!WEBHOOK_SECRET },
+      });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // iPayMoney SDK sends: transaction_id, status, amount, etc.
@@ -209,11 +274,37 @@ export async function POST(request: NextRequest) {
     }
 
     if (status === 'success' || status === 'completed' || status === 'successful') {
+      // 3) Re-valider amount/billing_cycle contre le pricing canonique
+      // Protège contre une manipulation de la table payment_requests qui aurait
+      // mis un amount inférieur (race condition, compte service compromis, etc.)
+      const billingCycle = (paymentRequest.billing_cycle || 'monthly') as BillingCycle;
+      const billingOption = getBillingOption(billingCycle);
+      if (!billingOption) {
+        Sentry.captureMessage('iPayMoney callback unknown billing cycle', {
+          level: 'error',
+          extra: { billingCycle, transactionId },
+        });
+        return NextResponse.json({ error: 'billing_cycle inconnu' }, { status: 400 });
+      }
+      if (paymentRequest.amount !== billingOption.price) {
+        Sentry.captureMessage('iPayMoney callback amount mismatch', {
+          level: 'error',
+          extra: {
+            expected: billingOption.price,
+            got: paymentRequest.amount,
+            billingCycle,
+            transactionId,
+            userId: paymentRequest.user_id,
+          },
+        });
+        return NextResponse.json({ error: 'amount mismatch' }, { status: 400 });
+      }
+
       await activateSubscription(
         serviceClient,
         paymentRequest.id,
         paymentRequest.user_id,
-        (paymentRequest.billing_cycle || 'monthly') as BillingCycle,
+        billingCycle,
         paymentRequest.amount,
         transactionId,
       );

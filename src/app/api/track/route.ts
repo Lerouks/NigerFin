@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { checkRateLimit, getClientIP, RATE_LIMITS } from '@/lib/rate-limit';
-import { safeParseJSON } from '@/lib/validation';
+import { safeParseJSON, isValidUUID } from '@/lib/validation';
 
 export async function POST(req: NextRequest) {
   try {
@@ -33,9 +33,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true }); // Silently fail
     }
 
+    // H-5 : valider article_id en UUID pour éviter la pollution de la table par
+    // des strings arbitraires (impacterait les vues admin + exports XLSX).
+    const safeArticleId = article_id && isValidUUID(article_id) ? article_id : null;
+
     await supabase.from('page_views').insert({
       page_path: String(page_path).slice(0, 500),
-      article_id: article_id || null,
+      article_id: safeArticleId,
       referrer: referrer ? String(referrer).slice(0, 500) : null,
       viewed_at: new Date().toISOString(),
     });

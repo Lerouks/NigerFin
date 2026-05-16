@@ -245,12 +245,18 @@ export async function searchArticles(query: string, limit = 20): Promise<Article
   const supabase = createServiceClient();
   if (!supabase || !query.trim()) return [];
 
-  // Sanitize query to escape SQL wildcards (%, _) and backslashes
+  // C-2 fix : whitelist stricte des caractères pour éviter l'injection PostgREST.
+  // L'ancien sanitizer échappait %, _, \ mais pas les séparateurs PostgREST (, ( ) :)
+  // qui permettaient de casser l'expression .or() en injectant des opérateurs.
+  // On garde uniquement : lettres latines (avec accents français), chiffres, espaces, tirets.
   const q = query.trim().toLowerCase()
-    .replace(/\\/g, '\\\\')
-    .replace(/%/g, '\\%')
-    .replace(/_/g, '\\_')
-    .slice(0, 200);
+    .normalize('NFC')
+    .replace(/[^a-zàâäéèêëîïôöùûüÿñç0-9\s-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 100);
+
+  if (!q) return [];
 
   // Use Supabase ilike for flexible partial matching across key fields
   const { data } = await supabase

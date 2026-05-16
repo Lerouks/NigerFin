@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
 import { createServiceClient } from '@/lib/supabase';
@@ -24,27 +25,120 @@ const TYPE_MAP: Record<string, 'delivered' | 'opened' | 'clicked' | 'bounced' | 
   // Ignored : email.sent, email.delivery_delayed, etc.
 };
 
+const SIGNING_SECRET = process.env.RESEND_WEBHOOK_SIGNING_SECRET; // format whsec_...
+const LEGACY_SECRET = process.env.RESEND_WEBHOOK_SECRET; // ancien secret shared, fallback transition
+
+/**
+ * Vérifie la signature Svix envoyée par Resend.
+ * Doc : https://docs.svix.com/receiving/verifying-payloads/how-manual
+ * Headers attendus : Svix-Id, Svix-Timestamp, Svix-Signature.
+ * Tolerance : 5 minutes pour anti-replay.
+ */
+function verifySvixSignature(req: NextRequest, rawBody: string): boolean {
+  if (!SIGNING_SECRET) return false;
+  if (!SIGNING_SECRET.startsWith('whsec_')) {
+    Sentry.captureMessage('RESEND_WEBHOOK_SIGNING_SECRET format invalide (doit commencer par whsec_)', { level: 'error' });
+    return false;
+  }
+
+  const svixId = req.headers.get('svix-id');
+  const svixTs = req.headers.get('svix-timestamp');
+  const svixSig = req.headers.get('svix-signature');
+  if (!svixId || !svixTs || !svixSig) return false;
+
+  // Anti-replay : refus si timestamp > 5 min de décalage
+  const tsSec = parseInt(svixTs, 10);
+  if (!Number.isFinite(tsSec)) return false;
+  const nowSec = Math.floor(Date.now() / 1000);
+  if (Math.abs(nowSec - tsSec) > 300) return false;
+
+  // Décode le secret base64 après le préfixe whsec_
+  let secretBytes: Buffer;
+  try {
+    secretBytes = Buffer.from(SIGNING_SECRET.slice('whsec_'.length), 'base64');
+  } catch {
+    return false;
+  }
+
+  // Signature attendue : HMAC-SHA256 sur "svixId.svixTimestamp.body" -> base64
+  const signedContent = `${svixId}.${svixTs}.${rawBody}`;
+  const expected = crypto.createHmac('sha256', secretBytes).update(signedContent).digest('base64');
+  const expectedBuf = Buffer.from(expected, 'base64');
+
+  // Le header peut contenir plusieurs signatures séparées par espace, format "v1,base64sig"
+  const candidates = svixSig.split(' ').map((s) => (s.startsWith('v1,') ? s.slice(3) : s));
+  for (const sig of candidates) {
+    try {
+      const sigBuf = Buffer.from(sig, 'base64');
+      if (sigBuf.length === expectedBuf.length && crypto.timingSafeEqual(sigBuf, expectedBuf)) {
+        return true;
+      }
+    } catch {}
+  }
+  return false;
+}
+
+/**
+ * Fallback : shared secret via header (pour transition, en attendant Svix sur Resend).
+ * Accepté UNIQUEMENT via header X-Webhook-Secret ou Authorization Bearer.
+ * Le pattern ?secret=X en query string est SUPPRIMÉ (apparaissait dans les logs Vercel).
+ */
+function verifyLegacySharedSecret(req: NextRequest): boolean {
+  if (!LEGACY_SECRET) return false;
+  const provided =
+    req.headers.get('x-webhook-secret') ||
+    req.headers.get('authorization')?.replace(/^Bearer\s+/i, '').trim();
+  if (!provided) return false;
+  try {
+    const a = Buffer.from(provided, 'utf8');
+    const b = Buffer.from(LEGACY_SECRET, 'utf8');
+    if (a.length !== b.length) return false;
+    return crypto.timingSafeEqual(a, b);
+  } catch {
+    return false;
+  }
+}
+
 /**
  * POST /api/webhooks/resend
- * Reçoit les événements de delivery Resend (delivered/opened/clicked/bounced/complained)
- * et les ingère dans newsletter_events. Met à jour le subscriber status pour
- * bounced/complained (auto-désabonnement).
+ * Reçoit les événements de delivery Resend et les ingère dans newsletter_events.
  *
- * Auth : URL secrète via env RESEND_WEBHOOK_SECRET (en query string ?secret=...)
- * Plus tard : signature Svix complète pour anti-replay.
+ * Authentification (par ordre de préférence) :
+ *  1. Signature Svix native (headers Svix-Id + Svix-Timestamp + Svix-Signature)
+ *     via RESEND_WEBHOOK_SIGNING_SECRET (format whsec_...). Anti-replay 5 min.
+ *  2. Fallback shared secret via header X-Webhook-Secret ou Authorization Bearer
+ *     via RESEND_WEBHOOK_SECRET. À retirer après migration complète vers Svix.
+ *
+ * Le pattern ?secret=X en query string est SUPPRIMÉ (H-3) : il fuit dans les
+ * logs Vercel et le CDN, ce qui exposait le secret.
  */
 export async function POST(req: NextRequest) {
-  const expectedSecret = process.env.RESEND_WEBHOOK_SECRET;
-  if (!expectedSecret) {
+  if (!SIGNING_SECRET && !LEGACY_SECRET) {
     return NextResponse.json({ error: 'Webhook not configured' }, { status: 503 });
   }
-  const providedSecret = req.nextUrl.searchParams.get('secret');
-  if (providedSecret !== expectedSecret) {
+
+  let rawBody: string;
+  try {
+    rawBody = await req.text();
+  } catch {
+    return NextResponse.json({ error: 'Bad request' }, { status: 400 });
+  }
+
+  // Auth : Svix d'abord, fallback shared secret header sinon
+  const authOk = verifySvixSignature(req, rawBody) || verifyLegacySharedSecret(req);
+  if (!authOk) {
+    Sentry.captureMessage('Resend webhook auth failed', {
+      level: 'warning',
+      extra: {
+        hasSvixHeaders: !!req.headers.get('svix-signature'),
+        hasSharedHeader: !!req.headers.get('x-webhook-secret'),
+      },
+    });
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   try {
-    const event = (await req.json()) as ResendEvent;
+    const event = JSON.parse(rawBody) as ResendEvent;
     const eventType = TYPE_MAP[event.type];
     if (!eventType) {
       return NextResponse.json({ ignored: true });

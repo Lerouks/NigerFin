@@ -10,7 +10,7 @@ import DOMPurify from 'isomorphic-dompurify';
  * Si l'admin account est compromis, l'attaquant ne peut plus injecter de JS
  * exécutable dans les emails ni dans la preview server-side.
  */
-const EMAIL_SAFE_CONFIG: DOMPurify.Config = {
+const EMAIL_SAFE_CONFIG = {
   ALLOWED_TAGS: [
     'p', 'br', 'span', 'div',
     'b', 'strong', 'i', 'em', 'u', 's',

@@ -2,7 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-export function ReadingProgressBar({ articleRef }: { articleRef: React.RefObject<HTMLElement | null> }) {
+interface ReadingProgressBarProps {
+  articleRef?: React.RefObject<HTMLElement | null>;
+  targetId?: string;
+}
+
+export function ReadingProgressBar({ articleRef, targetId }: ReadingProgressBarProps) {
   const [progress, setProgress] = useState(0);
   const rafRef = useRef<number>(0);
 
@@ -16,8 +21,14 @@ export function ReadingProgressBar({ articleRef }: { articleRef: React.RefObject
       );
     };
 
+    const resolveTarget = (): HTMLElement | null => {
+      if (articleRef?.current) return articleRef.current;
+      if (targetId) return document.getElementById(targetId);
+      return null;
+    };
+
     const calculate = () => {
-      const article = articleRef?.current;
+      const article = resolveTarget();
       if (!article) return;
 
       const rect = article.getBoundingClientRect();
@@ -56,9 +67,8 @@ export function ReadingProgressBar({ articleRef }: { articleRef: React.RefObject
       window.removeEventListener('resize', calculate);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [articleRef]);
+  }, [articleRef, targetId]);
 
-  // NEVER return null — always in DOM, hidden via opacity
   return (
     <div
       className="fixed top-0 left-0 h-[3px] bg-[#111] z-[9999] transition-none pointer-events-none"

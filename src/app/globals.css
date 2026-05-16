@@ -825,3 +825,12 @@ small, footer, .text-xs, .text-sm {
 html.nfi-printing-blocked .article-content--protected .article-content__body {
   display: none;
 }
+
+/* Réserve de l'espace en bas du body quand le bandeau cookies est visible sur mobile.
+   Sur desktop le bandeau est en bottom-right max-w-sm donc pas besoin. */
+@media (max-width: 639px) {
+  body.cookie-banner-visible {
+    padding-bottom: 200px;
+    transition: padding-bottom 0.3s ease-out;
+  }
+}

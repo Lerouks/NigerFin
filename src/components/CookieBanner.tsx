@@ -31,6 +31,17 @@ export function CookieBanner() {
     }
   }, []);
 
+  // Réserve de l'espace en bas du body sur mobile quand le bandeau est visible.
+  // Évite que le bandeau cache les CTAs en bas de page (/inscription, /pricing).
+  useEffect(() => {
+    if (shouldShow) {
+      document.body.classList.add('cookie-banner-visible');
+    } else {
+      document.body.classList.remove('cookie-banner-visible');
+    }
+    return () => document.body.classList.remove('cookie-banner-visible');
+  }, [shouldShow]);
+
   const dismiss = () => {
     setAnimate(false);
     setTimeout(() => setShouldShow(false), 300);

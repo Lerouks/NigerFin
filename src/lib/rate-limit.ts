@@ -114,5 +114,6 @@ export const RATE_LIMITS = {
   comments: { limit: 10, windowMs: 60 * 1000 },               // 10/min
   discussions: { limit: 5, windowMs: 10 * 60 * 1000 },        // 5/10min
   paymentSubmit: { limit: 5, windowMs: 60 * 60 * 1000 },      // 5/hour
+  paymentCallback: { limit: 20, windowMs: 60 * 1000 },        // 20/min per IP (webhook iPayMoney)
   auth: { limit: 10, windowMs: 15 * 60 * 1000 },              // 10/15min
 } as const;

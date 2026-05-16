@@ -6,43 +6,21 @@ import { Menu, Search, X, ChevronRight, LogOut } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { SearchOverlay } from './SearchOverlay';
+import { defaultNavigation, type NavItem } from '@/lib/site-data';
 
-interface NavItem {
-  label: string;
-  path: string;
-  order: number;
+interface HeaderProps {
+  navigation?: NavItem[];
 }
 
-const defaultNavigation: NavItem[] = [
-  { label: 'Économie', path: '/economie', order: 1 },
-  { label: 'Finance', path: '/finance', order: 2 },
-  { label: 'Marchés', path: '/marches', order: 3 },
-  { label: 'Entreprises', path: '/entreprises', order: 4 },
-  { label: 'Niger', path: '/niger', order: 5 },
-  { label: 'Éducation', path: '/education', order: 6 },
-  { label: 'Outils', path: '/outils', order: 7 },
-];
-
-export function Header() {
+export function Header({ navigation: navigationProp }: HeaderProps = {}) {
+  const navigation = navigationProp ?? defaultNavigation;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [navigation, setNavigation] = useState<NavItem[]>(defaultNavigation);
   const { isSignedIn, isLoading: isAuthLoading, user, userRole, signOut } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const userMenuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    fetch('/api/site-settings')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.navigation?.length) {
-          setNavigation(data.navigation.toSorted((a: NavItem, b: NavItem) => a.order - b.order));
-        }
-      })
-      .catch((err) => console.error('[Header] Failed to load site settings:', err));
-  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

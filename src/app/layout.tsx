@@ -5,6 +5,7 @@ import { MainLayoutShell } from '@/components/MainLayoutShell';
 import { ViewTracker } from '@/components/ViewTracker';
 import { CookieBanner } from '@/components/CookieBanner';
 import { SITE_URL } from '@/lib/config';
+import { getFlashBanner } from '@/lib/site-data';
 import './globals.css';
 
 const inter = localFont({
@@ -127,11 +128,13 @@ const websiteJsonLd = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const initialFlashBanner = await getFlashBanner();
+
   return (
     <html lang="fr" className={`${inter.variable}`} suppressHydrationWarning>
       <head>
@@ -147,7 +150,7 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col">
         <Providers>
           <ViewTracker />
-          <MainLayoutShell>{children}</MainLayoutShell>
+          <MainLayoutShell initialFlashBanner={initialFlashBanner}>{children}</MainLayoutShell>
           <CookieBanner />
         </Providers>
       </body>

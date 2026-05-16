@@ -1,16 +1,11 @@
 import { NextResponse } from 'next/server';
-import { navigationSections } from '@/data/mock-data';
+import {
+  defaultNavigation,
+  defaultSocialLinks,
+  defaultContactEmail,
+} from '@/lib/site-data';
 
 export const revalidate = 300;
-
-const defaultSocialLinks = {
-  facebook: 'https://www.facebook.com/share/1APpbXcsAV/?mibextid=wwXIfr',
-  twitter: '',
-  linkedin: '',
-  instagram: 'https://www.instagram.com/nfireport?igsh=Y3FmYTYyZXBrd3ph&utm_source=qr',
-  youtube: 'https://youtube.com/@nfireport?si=bnYKo7AVK9F9pklE',
-  tiktok: 'https://www.tiktok.com/@nfireport?_r=1&_t=ZN-94QaNLIYjkE',
-};
 
 const breakingNews = [
   { _id: 'f1', tag: 'MARCHES', text: "EUR/XOF stable a 655,957 : le franc CFA maintient sa parite fixe avec l'euro" },
@@ -21,18 +16,12 @@ const breakingNews = [
 ];
 
 export async function GET() {
-  const navigation = navigationSections.map((s) => ({
-    label: s.label,
-    path: s.path,
-    order: s.order,
-  }));
-
   return NextResponse.json({
     siteName: 'NFI Report',
     siteDescription: 'Niger Financial Insights',
-    contactEmail: 'contact@nfireport.com',
+    contactEmail: defaultContactEmail,
     socialLinks: defaultSocialLinks,
-    navigation,
+    navigation: defaultNavigation,
     breakingNews,
   });
 }

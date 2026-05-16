@@ -2,31 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { Zap, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import type { FlashBannerItem } from '@/lib/site-data';
 
-interface NewsItem {
-  tag: string;
-  text: string;
+interface BreakingNewsProps {
+  initialItems?: FlashBannerItem[];
+  initialEnabled?: boolean;
 }
 
-export function BreakingNews() {
-  const [items, setItems] = useState<NewsItem[]>([]);
+export function BreakingNews({ initialItems = [], initialEnabled = false }: BreakingNewsProps) {
+  const initialReady = initialEnabled && initialItems.length > 0;
+  const [items] = useState<FlashBannerItem[]>(initialReady ? initialItems : []);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [dismissed, setDismissed] = useState(false);
-  const [ready, setReady] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  useEffect(() => {
-    fetch('/api/flash-banner')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.enabled === false || !data.items?.length) {
-          setReady(false);
-          return;
-        }
-        setItems(data.items.map((n: NewsItem) => ({ tag: n.tag, text: n.text })));
-        setReady(true);
-      })
-      .catch(() => {});
-  }, []);
 
   useEffect(() => {
     if (isPaused || items.length === 0) return;
@@ -44,7 +32,7 @@ export function BreakingNews() {
     setCurrentIndex((prev) => (prev - 1 + items.length) % items.length);
   };
 
-  if (!ready || dismissed || items.length === 0) return null;
+  if (!initialReady || dismissed || items.length === 0) return null;
 
   const item = items[currentIndex];
   if (!item) return null;

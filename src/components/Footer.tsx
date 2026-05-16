@@ -1,18 +1,7 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Facebook, Twitter, Linkedin, Instagram, Mail, Youtube, Phone, MapPin } from 'lucide-react';
-
-interface SocialLinks {
-  facebook?: string;
-  twitter?: string;
-  linkedin?: string;
-  instagram?: string;
-  youtube?: string;
-  tiktok?: string;
-}
+import { defaultSocialLinks, defaultContactEmail } from '@/lib/site-data';
 
 function TikTokIcon({ className }: { className?: string }) {
   return (
@@ -23,18 +12,8 @@ function TikTokIcon({ className }: { className?: string }) {
 }
 
 export function Footer() {
-  const [socialLinks, setSocialLinks] = useState<SocialLinks>({});
-  const [contactEmail, setContactEmail] = useState('contact@nfireport.com');
-
-  useEffect(() => {
-    fetch('/api/site-settings')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.socialLinks) setSocialLinks(data.socialLinks);
-        if (data.contactEmail) setContactEmail(data.contactEmail);
-      })
-      .catch(() => {});
-  }, []);
+  const socialLinks = defaultSocialLinks;
+  const contactEmail = defaultContactEmail;
 
   const socialItems = [
     { icon: Facebook, label: 'Facebook', url: socialLinks.facebook },

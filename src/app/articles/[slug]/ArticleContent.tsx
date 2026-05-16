@@ -1,11 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
+import { useState, useEffect, type ReactNode } from 'react';
 import DOMPurify from 'isomorphic-dompurify';
 import { ReadingProgressBar } from '@/components/ReadingProgressBar';
-import { Clock, Calendar, User, Facebook, Linkedin, Link2, Check } from 'lucide-react';
+import { Facebook, Linkedin, Link2, Check } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { CommentsSection } from '@/components/CommentsSection';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
@@ -16,8 +14,6 @@ import { ArticleCard } from '@/components/ArticleCard';
 import { ArticleLikes } from '@/components/ArticleLikes';
 import { ViewTracker } from '@/components/ViewTracker';
 import type { Article } from '@/types';
-import { fallbackImageUrl } from '@/data/mock-data';
-import { formatDate } from '@/lib/utils';
 import { SITE_URL } from '@/lib/config';
 import {
   checkArticleAccess,
@@ -26,17 +22,13 @@ import {
   type AccessResult,
 } from '@/lib/access-control';
 import { trackPremiumArticleRead } from '@/lib/user-profile';
-import { SECTION_META } from '@/lib/sections';
 
 interface ArticleContentProps {
   article: Article;
   htmlBody: string;
   relatedArticles?: Article[];
-}
-
-function getArticleImageUrl(article: Article): string {
-  if (article.mainImage?.url) return article.mainImage.url;
-  return fallbackImageUrl;
+  /** Server-rendered article header (sections, title, subtitle, metadata, hero image). */
+  header: ReactNode;
 }
 
 function XIcon({ className }: { className?: string }) {
@@ -55,8 +47,7 @@ function WhatsAppIcon({ className }: { className?: string }) {
   );
 }
 
-export function ArticleContent({ article, htmlBody, relatedArticles = [] }: ArticleContentProps) {
-  const articleRef = useRef<HTMLElement>(null);
+export function ArticleContent({ article, htmlBody, relatedArticles = [], header }: ArticleContentProps) {
   const { user, isSignedIn, isLoading, userRole, premiumArticlesUsed, refreshProfile } = useAuth();
   const [accessResult, setAccessResult] = useState<AccessResult | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
@@ -64,7 +55,6 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
   const [resolvedBody, setResolvedBody] = useState<string | null>(null);
   const [bodyError, setBodyError] = useState(false);
   const [premiumLimit, setPremiumLimit] = useState(3);
-  const imageUrl = getArticleImageUrl(article);
   const contentType = getContentTypeFromArticle(article);
 
   const getArticleUrl = () =>
@@ -72,7 +62,6 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
       ? window.location.href
       : `${SITE_URL}/articles/${article.slug.current}`;
 
-  // Fetch paywall config once for configurable limit
   useEffect(() => {
     if (contentType !== 'premium') return;
     fetch('/api/paywall-config')
@@ -84,7 +73,6 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
   }, [contentType]);
 
   useEffect(() => {
-    // Wait for auth to finish loading before checking access
     if (isLoading) return;
 
     const result = checkArticleAccess(
@@ -110,16 +98,13 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
     }
   }, [contentType, userRole, premiumArticlesUsed, article, isSignedIn, isLoading, hasTracked, refreshProfile, premiumLimit]);
 
-  // Fetch body: use prop for free articles immediately, fetch securely for premium after auth
   useEffect(() => {
-    // Free articles: set body immediately from server prop (no auth needed)
     if (htmlBody && !resolvedBody) {
       setResolvedBody(htmlBody);
       return;
     }
-    // Premium articles: wait for auth to resolve access
     if (!accessResult?.allowed) return;
-    if (resolvedBody) return; // Already set
+    if (resolvedBody) return;
     let cancelled = false;
     setBodyError(false);
     fetch(`/api/articles/${article.slug.current}/content`, { credentials: 'include' })
@@ -155,15 +140,11 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
     };
   };
 
-  // Reading progress bar - always rendered, hidden when ref is null
-  const progressBar = <ReadingProgressBar articleRef={articleRef} />;
+  const progressBar = <ReadingProgressBar targetId="article-main" />;
 
-  // For free articles: show content immediately without waiting for auth
-  // For premium articles: show paywall until access is confirmed
   const isPremiumContent = contentType === 'premium';
   const authResolved = accessResult !== null;
   const accessAllowed = authResolved && accessResult.allowed;
-  // Show paywall if: premium article AND (auth not yet resolved OR access denied)
   const showPaywall = isPremiumContent && !accessAllowed;
 
   if (showPaywall) {
@@ -172,39 +153,10 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
         {progressBar}
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-6 sm:pt-10 pb-20">
           <div className="max-w-3xl mx-auto">
-            <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] overflow-hidden">
+            <article id="article-main" className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] overflow-hidden">
               <div className="p-5 sm:p-8 md:p-12">
-                {/* Article header */}
-                <div className="flex flex-wrap items-center gap-2 mb-3 sm:mb-4">
-                  {(article.sections || [article.category]).map((s) => (
-                    <Link key={s} href={SECTION_META[s]?.path || `/${s}`} className="text-[11px] tracking-[0.15em] uppercase text-gray-400 hover:text-black transition-colors">
-                      {SECTION_META[s]?.label || s}
-                    </Link>
-                  ))}
-                  <span className="text-[10px] font-semibold tracking-[0.12em] uppercase px-2.5 py-0.5 rounded-full bg-[#d4a843]/10 text-[#d4a843] ring-1 ring-inset ring-[#d4a843]/20">
-                    Premium
-                  </span>
-                </div>
-                <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 leading-tight">{article.title}</h1>
-                {article.excerpt && <p className="text-base sm:text-lg text-gray-600 mb-4 sm:mb-6">{article.excerpt}</p>}
+                {header}
 
-                {/* Cover image */}
-                {imageUrl && (
-                  <div className="relative aspect-video w-full overflow-hidden rounded-lg mb-6">
-                    <Image
-                      src={imageUrl}
-                      alt={article.mainImage?.alt || article.title}
-                      width={1600}
-                      height={900}
-                      sizes="(max-width: 768px) 100vw, 900px"
-                      quality={90}
-                      className="absolute inset-0 w-full h-full object-cover"
-                      priority
-                    />
-                  </div>
-                )}
-
-                {/* Fake text that fades out */}
                 <div className="relative select-none" aria-hidden="true">
                   <div className="space-y-4 text-[15px] sm:text-[16px] text-gray-700 leading-relaxed">
                     <p className="opacity-80">{article.excerpt || 'Cet article analyse en profondeur les dernières évolutions économiques et financières de la région, avec des données exclusives et des perspectives d\'experts.'}</p>
@@ -213,10 +165,9 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
                   </div>
                 </div>
 
-                {/* Paywall block with gradient, slogan, mockup, CTA */}
                 <PremiumPaywall articleTitle={article.title} />
               </div>
-            </div>
+            </article>
           </div>
         </div>
       </div>
@@ -233,69 +184,10 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           <div className="lg:col-span-8">
-            <article ref={articleRef} id="article-main" className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] overflow-hidden">
-              <div className="p-8 md:p-12">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="flex flex-wrap items-center gap-2">
-                    {(article.sections || [article.category]).map((s) => (
-                      <Link key={s} href={SECTION_META[s]?.path || `/${s}`} className="text-[11px] tracking-[0.15em] uppercase text-gray-400 hover:text-black transition-colors">
-                        {SECTION_META[s]?.label || s}
-                      </Link>
-                    ))}
-                  </div>
-                  {contentType !== 'free' && (
-                    <span className="text-[10px] font-semibold tracking-[0.12em] uppercase px-2.5 py-0.5 rounded-full bg-[#d4a843]/10 text-[#d4a843] ring-1 ring-inset ring-[#d4a843]/20">
-                      PREMIUM
-                    </span>
-                  )}
-                </div>
-                <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">{article.title}</h1>
-                {article.subtitle && <p className="text-xl text-gray-600 mb-6">{article.subtitle}</p>}
+            <article id="article-main" className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] overflow-hidden">
+              <div className="p-5 sm:p-8 md:p-12">
+                {header}
 
-                <div className="flex flex-wrap items-center gap-4 pb-6 mb-6 border-b border-black/[0.06]">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-full bg-[#f0efe9] flex items-center justify-center">
-                      <User className="w-3.5 h-3.5 text-gray-500" />
-                    </div>
-                    <span className="text-[13px]">{article.author.name}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-[13px] text-gray-500">
-                    <Calendar className="w-4 h-4" />{formatDate(article.publishedAt)}
-                  </div>
-                  <div className="flex items-center gap-2 text-[13px] text-gray-500">
-                    <Clock className="w-4 h-4" />{article.readTime} min de lecture
-                  </div>
-                </div>
-
-                {/* Cover image, after title & metadata */}
-                {imageUrl && (
-                  <figure className="-mx-8 md:-mx-12 mb-8">
-                    <div className="relative aspect-video w-full overflow-hidden">
-                      <Image
-                        src={imageUrl}
-                        alt={article.mainImage?.alt || article.title}
-                        width={1600}
-                        height={900}
-                        sizes="(max-width: 768px) 100vw, 900px"
-                        quality={90}
-                        className="absolute inset-0 w-full h-full object-cover"
-                        priority
-                      />
-                    </div>
-                    {(article.mainImage?.caption || article.mainImage?.source) && (
-                      <figcaption className="flex items-start justify-between mt-2 px-8 md:px-12">
-                        {article.mainImage?.caption && (
-                          <span className="text-[12px] text-gray-500">{article.mainImage.caption}</span>
-                        )}
-                        {article.mainImage?.source && (
-                          <span className="text-[11px] text-gray-400 ml-auto whitespace-nowrap">Source : {article.mainImage.source}</span>
-                        )}
-                      </figcaption>
-                    )}
-                  </figure>
-                )}
-
-                {/* Render HTML body (fetched securely for premium, sanitized) */}
                 {resolvedBody ? (
                   isPremiumContent ? (
                     <ProtectedArticleBody
@@ -318,7 +210,6 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
                       onClick={() => {
                         setBodyError(false);
                         setResolvedBody(null);
-                        // Re-trigger fetch by toggling accessResult
                         setAccessResult(prev => prev ? { ...prev } : prev);
                       }}
                       className="px-4 py-2 bg-[#111] text-white rounded-lg text-sm hover:bg-[#333] transition-colors"
@@ -336,7 +227,6 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
                   </div>
                 )}
 
-                {/* Tags */}
                 {article.tags.length > 0 && (
                   <div className="mt-10 pt-6 border-t border-black/[0.06]">
                     <div className="flex flex-wrap gap-2">
@@ -347,7 +237,6 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
                   </div>
                 )}
 
-                {/* Share Buttons */}
                 <div className="mt-6 pt-6 border-t border-black/[0.06]">
                   <div className="flex items-center justify-between mb-4">
                     <p className="text-[12px] tracking-[0.1em] uppercase text-gray-400">Partager cet article</p>
@@ -400,7 +289,6 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [] }: Arti
         </div>
       </div>
 
-      {/* Newsletter popup — shows once per session after scroll/time */}
       <NewsletterPopup />
     </div>
   );

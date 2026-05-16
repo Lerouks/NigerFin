@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { getArticleBySlug, getRelatedArticles, getAllArticleSlugs } from '@/lib/articles';
 import { SITE_URL, truncateSeoTitle, truncateSeoDescription } from '@/lib/config';
 import { ArticleContent } from './ArticleContent';
+import { ArticleHeader } from './ArticleHeader';
 
 export const revalidate = 60;
 
@@ -118,7 +119,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <ArticleContent article={article} htmlBody={safeHtmlBody} relatedArticles={related} />
+      <ArticleContent
+        article={article}
+        htmlBody={safeHtmlBody}
+        relatedArticles={related}
+        header={<ArticleHeader article={article} />}
+      />
     </>
   );
 }

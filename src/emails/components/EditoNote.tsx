@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Section, Text } from '@react-email/components';
 import { colors, fonts, fontSizes, lineHeights } from './tokens';
+import { sanitizeEmailHtml } from '../lib/sanitize';
 
 export interface EditoNoteProps {
   /** Salutation en eyebrow or, ex: "Bonjour" ou "La note du redacteur". */
@@ -43,7 +44,7 @@ export function EditoNote({
           fontSize: fontSizes.body,
           lineHeight: lineHeights.relaxed,
         }}
-        dangerouslySetInnerHTML={{ __html: body }}
+        dangerouslySetInnerHTML={{ __html: sanitizeEmailHtml(body) }}
       />
       <Text
         style={{

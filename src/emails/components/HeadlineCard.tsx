@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Section, Img, Link, Text } from '@react-email/components';
 import { colors, fonts, fontSizes, lineHeights, letterSpacing } from './tokens';
+import { sanitizeEmailHtml } from '../lib/sanitize';
 
 export interface HeadlineCardProps {
   /** Numéro de section (affiché en gros à gauche du titre, ex. "III"). Optionnel. */
@@ -76,7 +77,7 @@ function Block({ heading, body, dropCap = false }: { heading: string; body: stri
               >
                 {firstChar}
               </span>
-              <span dangerouslySetInnerHTML={{ __html: leadHtml }} />
+              <span dangerouslySetInnerHTML={{ __html: sanitizeEmailHtml(leadHtml) }} />
             </Text>
           ) : (
             <Text
@@ -87,7 +88,7 @@ function Block({ heading, body, dropCap = false }: { heading: string; body: stri
                 fontSize: fontSizes.body,
                 lineHeight: lineHeights.relaxed,
               }}
-              dangerouslySetInnerHTML={{ __html: body }}
+              dangerouslySetInnerHTML={{ __html: sanitizeEmailHtml(body) }}
             />
           )}
         </td>

@@ -19,7 +19,8 @@ export interface SupabaseArticle {
   main_image_alt: string | null;
   main_image_caption: string | null;
   main_image_source: string | null;
-  body: string;
+  /** Optional: omitted by summary fetchers. Only the full-article fetcher loads it. */
+  body?: string;
   read_time: number | null;
   tags: string[];
   seo_title: string | null;
@@ -84,7 +85,23 @@ function bodyToHtml(raw: string): string {
 
 // ─── Data fetching functions ────────────────────────────────────────────────
 
-/** Get paginated published articles */
+/**
+ * Column list for article cards / list views. Omits the heavy `body` field,
+ * which is only consumed by getArticleBySlug() and the secure body endpoint.
+ * Reduces row payload by ~10-20x on section pages.
+ */
+const ARTICLE_SUMMARY_FIELDS = [
+  'id', 'title', 'subtitle', 'slug', 'excerpt',
+  'category', 'sections', 'content_type',
+  'is_featured', 'featured_order',
+  'author_name', 'author_avatar',
+  'main_image_url', 'main_image_alt', 'main_image_caption', 'main_image_source',
+  'read_time', 'tags',
+  'seo_title', 'seo_description',
+  'status', 'published_at', 'created_at', 'updated_at',
+].join(',');
+
+/** Get paginated published articles (summary, no body) */
 export async function getAllArticles(page = 1, limit = 20): Promise<{ articles: Article[]; total: number }> {
   const supabase = createServiceClient();
   if (!supabase) return { articles: [], total: 0 };
@@ -93,18 +110,18 @@ export async function getAllArticles(page = 1, limit = 20): Promise<{ articles: 
 
   const { count } = await supabase
     .from('articles')
-    .select('*', { count: 'exact', head: true })
+    .select('id', { count: 'exact', head: true })
     .eq('status', 'published');
 
   const { data } = await supabase
     .from('articles')
-    .select('*')
+    .select(ARTICLE_SUMMARY_FIELDS)
     .eq('status', 'published')
     .order('published_at', { ascending: false })
     .range(offset, offset + limit - 1);
 
   return {
-    articles: (data || []).map(toArticle),
+    articles: (data || []).map((row) => toArticle(row as unknown as SupabaseArticle)),
     total: count || 0,
   };
 }
@@ -130,20 +147,20 @@ export async function getArticlesByCategory(category: string, page = 1, limit = 
 
   const { count } = await supabase
     .from('articles')
-    .select('*', { count: 'exact', head: true })
+    .select('id', { count: 'exact', head: true })
     .eq('status', 'published')
     .contains('sections', [category]);
 
   const { data } = await supabase
     .from('articles')
-    .select('*')
+    .select(ARTICLE_SUMMARY_FIELDS)
     .eq('status', 'published')
     .contains('sections', [category])
     .order('published_at', { ascending: false })
     .range(offset, offset + limit - 1);
 
   return {
-    articles: (data || []).map(toArticle),
+    articles: (data || []).map((row) => toArticle(row as unknown as SupabaseArticle)),
     total: count || 0,
   };
 }
@@ -153,12 +170,12 @@ export async function getFeaturedArticles(): Promise<Article[]> {
   if (!supabase) return [];
   const { data } = await supabase
     .from('articles')
-    .select('*')
+    .select(ARTICLE_SUMMARY_FIELDS)
     .eq('status', 'published')
     .eq('is_featured', true)
     .order('featured_order', { ascending: true })
     .limit(5);
-  return (data || []).map(toArticle);
+  return (data || []).map((row) => toArticle(row as unknown as SupabaseArticle));
 }
 
 /**
@@ -176,14 +193,14 @@ export async function getRelatedArticles(currentSlug: string, category: string, 
   // Fetch candidates: same section OR overlapping tags, max 20
   const { data: candidates } = await supabase
     .from('articles')
-    .select('*')
+    .select(ARTICLE_SUMMARY_FIELDS)
     .eq('status', 'published')
     .neq('slug', currentSlug)
     .or(`sections.cs.{${category}}${tags.length > 0 ? `,tags.ov.{${tags.join(',')}}` : ''}`)
     .order('published_at', { ascending: false })
     .limit(20);
 
-  const pool = (candidates || []).map(toArticle);
+  const pool = (candidates || []).map((row) => toArticle(row as unknown as SupabaseArticle));
   const result: Article[] = [];
   const usedIds = new Set<string>();
 
@@ -227,13 +244,13 @@ export async function getRelatedArticles(currentSlug: string, category: string, 
   if (result.length < TARGET) {
     const { data: latest } = await supabase
       .from('articles')
-      .select('*')
+      .select(ARTICLE_SUMMARY_FIELDS)
       .eq('status', 'published')
       .neq('slug', currentSlug)
       .order('published_at', { ascending: false })
       .limit(TARGET);
     for (const row of (latest || [])) {
-      add(toArticle(row));
+      add(toArticle(row as unknown as SupabaseArticle));
     }
   }
 
@@ -261,13 +278,13 @@ export async function searchArticles(query: string, limit = 20): Promise<Article
   // Use Supabase ilike for flexible partial matching across key fields
   const { data } = await supabase
     .from('articles')
-    .select('*')
+    .select(ARTICLE_SUMMARY_FIELDS)
     .eq('status', 'published')
     .or(`title.ilike.%${q}%,excerpt.ilike.%${q}%,category.ilike.%${q}%,author_name.ilike.%${q}%`)
     .order('published_at', { ascending: false })
     .limit(limit);
 
-  return (data || []).map(toArticle);
+  return (data || []).map((row) => toArticle(row as unknown as SupabaseArticle));
 }
 
 /** Get the latest N articles for each section in parallel (homepage) */
@@ -282,12 +299,12 @@ export async function getLatestBySection(
     sections.map(async (section) => {
       const { data } = await supabase
         .from('articles')
-        .select('*')
+        .select(ARTICLE_SUMMARY_FIELDS)
         .eq('status', 'published')
         .contains('sections', [section])
         .order('published_at', { ascending: false })
         .limit(limit);
-      return [section, (data || []).map(toArticle)] as const;
+      return [section, (data || []).map((row) => toArticle(row as unknown as SupabaseArticle))] as const;
     }),
   );
 

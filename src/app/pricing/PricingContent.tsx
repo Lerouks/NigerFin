@@ -15,6 +15,8 @@ import {
 } from '@/config/pricing';
 
 // ─── FadeUp helper (respects prefers-reduced-motion) ─────────────────────────
+// Uses `animate` instead of `whileInView` so content is always visible even
+// in full-page screenshots, social card crawlers, and before any scroll happens.
 
 function FadeUp({
   children,
@@ -30,8 +32,7 @@ function FadeUp({
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.55, ease: 'easeOut', delay }}
       className={className}
     >

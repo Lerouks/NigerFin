@@ -267,7 +267,7 @@ export function ArticlesManager() {
     setFeaturedWarning('');
     try {
       if (article.is_featured) {
-        // Trying to unfeature, server will block if it's the only one
+        // Unfeature, zero featured = pas de hero sur la home (fallback propre)
         const res = await fetch(`/api/admin/articles/featured?articleId=${article.id}`, { method: 'DELETE' });
         const data = await res.json();
         if (!res.ok) {

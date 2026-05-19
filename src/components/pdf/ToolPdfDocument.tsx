@@ -16,33 +16,47 @@ import {
   PDF_DISCLAIMER,
 } from './tokens';
 
-/* ── Fonts registration (once at module load) ─────────────────────── */
+/* ── Fonts registration (lazy, browser-side only) ──────────────────
+   Appelé à la 1ere génération PDF côté client. Évite Font.register
+   pendant le bundle SSR (qui ne peut pas fetcher) et utilise un path
+   absolu depuis window.location.origin pour bypass les soucis de
+   resolution relative dans React-PDF. */
 
-const FONT_ORIGIN = typeof window !== 'undefined' ? window.location.origin : '';
+let fontsRegistered = false;
 
-Font.register({
-  family: PDF_FONT.title,
-  fonts: [
-    { src: `${FONT_ORIGIN}/fonts/inter-400.woff`, fontWeight: 400 },
-    { src: `${FONT_ORIGIN}/fonts/inter-500.woff`, fontWeight: 500 },
-    { src: `${FONT_ORIGIN}/fonts/inter-600.woff`, fontWeight: 600 },
-    { src: `${FONT_ORIGIN}/fonts/inter-700.woff`, fontWeight: 700 },
-  ],
-});
+export function registerPdfFonts() {
+  if (fontsRegistered || typeof window === 'undefined') return;
+  fontsRegistered = true;
 
-Font.register({
-  family: PDF_FONT.body,
-  fonts: [
-    { src: `${FONT_ORIGIN}/fonts/montserrat-400.woff`, fontWeight: 400 },
-    { src: `${FONT_ORIGIN}/fonts/montserrat-500.woff`, fontWeight: 500 },
-  ],
-});
+  const origin = window.location.origin;
 
-Font.register({
-  family: PDF_FONT.wordmark,
-  src: `${FONT_ORIGIN}/fonts/playfair-700.woff`,
-  fontWeight: 700,
-});
+  Font.register({
+    family: PDF_FONT.title,
+    fonts: [
+      { src: `${origin}/fonts/inter-400.woff`, fontWeight: 400 },
+      { src: `${origin}/fonts/inter-500.woff`, fontWeight: 500 },
+      { src: `${origin}/fonts/inter-600.woff`, fontWeight: 600 },
+      { src: `${origin}/fonts/inter-700.woff`, fontWeight: 700 },
+    ],
+  });
+
+  Font.register({
+    family: PDF_FONT.body,
+    fonts: [
+      { src: `${origin}/fonts/montserrat-400.woff`, fontWeight: 400 },
+      { src: `${origin}/fonts/montserrat-500.woff`, fontWeight: 500 },
+    ],
+  });
+
+  Font.register({
+    family: PDF_FONT.wordmark,
+    src: `${origin}/fonts/playfair-700.woff`,
+    fontWeight: 700,
+  });
+
+  // Disable hyphenation for French text (avoid weird word breaks)
+  Font.registerHyphenationCallback((word) => [word]);
+}
 
 /* ── Sanitization helpers ─────────────────────────────────────────── */
 

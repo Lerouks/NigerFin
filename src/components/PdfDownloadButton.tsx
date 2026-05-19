@@ -43,7 +43,7 @@ export function PdfDownloadButton({ options, hasResults }: PdfDownloadButtonProp
         return;
       }
 
-      generate(options);
+      await generate(options);
     } catch {
       setError('Erreur réseau. Réessayez.');
     } finally {
@@ -84,7 +84,7 @@ export function PdfDownloadButton({ options, hasResults }: PdfDownloadButtonProp
         ) : (
           <Download className="w-4 h-4" />
         )}
-        {loading ? 'Vérification…' : 'Télécharger en PDF'}
+        {loading ? 'Génération du PDF…' : 'Télécharger en PDF'}
       </button>
       {error && (
         <p className="text-red-500 text-[12px] mt-2 text-center">{error}</p>

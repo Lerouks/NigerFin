@@ -44,8 +44,10 @@ export function PdfDownloadButton({ options, hasResults }: PdfDownloadButtonProp
       }
 
       await generate(options);
-    } catch {
-      setError('Erreur réseau. Réessayez.');
+    } catch (err) {
+      console.error('[PdfDownload] Erreur génération PDF', err);
+      const msg = err instanceof Error ? err.message : 'Erreur inconnue';
+      setError(`Erreur génération PDF, ${msg.slice(0, 80)}`);
     } finally {
       setLoading(false);
     }

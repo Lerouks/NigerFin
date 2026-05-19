@@ -27,7 +27,7 @@ const SCREENSHOTS = [
     src: '/premium/outil-budget.webp',
     alt: 'Outil Budget - taux d’épargne, répartition des dépenses',
     label: 'Outil Budget',
-    desc: 'Entre tes revenus et dépenses. Obtiens ton taux d’épargne, ta répartition par poste et des recommandations concrètes pour passer à 15\u201320 % d’épargne. Export PDF inclus.',
+    desc: 'Entre tes revenus et dépenses. Obtiens ton taux d’épargne, ta répartition par poste et des recommandations concrètes pour passer à 15-20 % d’épargne. Export PDF inclus.',
   },
 ];
 

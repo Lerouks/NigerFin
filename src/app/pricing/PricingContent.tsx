@@ -248,15 +248,15 @@ const PRICING_FAQ = [
   },
   {
     q: 'Je peux annuler quand ?',
-    a: 'À tout moment, en 1 clic depuis ton compte. Tu conserves l\u2019accès Premium jusqu\u2019à la fin de la période déjà payée.',
+    a: 'À tout moment, en 1 clic depuis ton compte. Tu conserves l’accès Premium jusqu’à la fin de la période déjà payée.',
   },
   {
     q: 'Puis-je changer de formule plus tard ?',
-    a: 'Oui. Tu peux passer d\u2019une formule mensuelle à trimestrielle ou annuelle depuis ton compte. Le changement s\u2019applique au prochain renouvellement.',
+    a: 'Oui. Tu peux passer d’une formule mensuelle à trimestrielle ou annuelle depuis ton compte. Le changement s’applique au prochain renouvellement.',
   },
   {
     q: 'Que se passe-t-il à la fin de ma période ?',
-    a: 'Ton abonnement se renouvelle automatiquement, sauf si tu l\u2019as annulé avant. Tu reçois toujours un rappel par email quelques jours avant.',
+    a: 'Ton abonnement se renouvelle automatiquement, sauf si tu l’as annulé avant. Tu reçois toujours un rappel par email quelques jours avant.',
   },
 ];
 

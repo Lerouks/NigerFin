@@ -6,16 +6,16 @@ import { getAllArticles, getArticleViewRanking } from '@/lib/articles';
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: 'Tous les articles : actualit\u00e9s et analyses',
+  title: 'Tous les articles : actualités et analyses',
   description:
-    'Retrouvez l\u2019ensemble des articles de NFI Report : \u00e9conomie, finance, march\u00e9s, Niger, \u00e9ducation et entreprises. Analyses, actualit\u00e9s et d\u00e9cryptages.',
+    'Retrouvez l’ensemble des articles de NFI Report : économie, finance, marchés, Niger, éducation et entreprises. Analyses, actualités et décryptages.',
   alternates: {
     canonical: '/articles',
   },
   openGraph: {
-    title: 'Tous les articles : actualit\u00e9s et analyses',
+    title: 'Tous les articles : actualités et analyses',
     description:
-      'L\u2019ensemble des analyses et actualit\u00e9s \u00e9conomiques et financi\u00e8res du Niger et de l\u2019Afrique de l\u2019Ouest.',
+      'L’ensemble des analyses et actualités économiques et financières du Niger et de l’Afrique de l’Ouest.',
     type: 'website',
     url: '/articles',
   },
@@ -32,7 +32,7 @@ export default async function ArticlesPage() {
       <CategoryHero
         label="Archives"
         title="Tous les articles"
-        description="L\u2019ensemble des analyses et actualit\u00e9s \u00e9conomiques et financi\u00e8res du Niger et de l\u2019Afrique de l\u2019Ouest."
+        description="L’ensemble des analyses et actualités économiques et financières du Niger et de l’Afrique de l’Ouest."
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
         <SectionArticlesFiltered

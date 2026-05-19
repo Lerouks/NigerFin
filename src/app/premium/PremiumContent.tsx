@@ -13,21 +13,21 @@ import { BILLING_OPTIONS, formatPrice, PREMIUM_MONTHLY_PRICE } from '@/config/pr
 const SCREENSHOTS = [
   {
     src: '/premium/marches.webp',
-    alt: 'Page Marchés - cours BRVM, devises, mati\u00e8res premi\u00e8res',
+    alt: 'Page Marchés - cours BRVM, devises, matières premières',
     label: 'Cours marchés',
-    desc: 'Cours BRVM, devises FCFA / EUR / USD et mati\u00e8res premi\u00e8res (or, p\u00e9trole, uranium) mis \u00e0 jour plusieurs fois par jour. Les chiffres qui p\u00e8sent r\u00e9ellement sur ton pouvoir d\u2019achat et tes placements.',
+    desc: 'Cours BRVM, devises FCFA / EUR / USD et matières premières (or, pétrole, uranium) mis à jour plusieurs fois par jour. Les chiffres qui pèsent réellement sur ton pouvoir d’achat et tes placements.',
   },
   {
     src: '/premium/article-premium.webp',
-    alt: 'Article Premium - Banques nig\u00e9riennes sous pression',
+    alt: 'Article Premium - Banques nigériennes sous pression',
     label: 'Article Premium',
-    desc: 'Analyses in\u00e9dites : banques nig\u00e9riennes, g\u00e9opolitique sah\u00e9lienne, strat\u00e9gies d\u2019investissement en Afrique de l\u2019Ouest. \u00c9crites pour \u00eatre lues en 5 minutes, pas pour remplir un site.',
+    desc: 'Analyses inédites : banques nigériennes, géopolitique sahélienne, stratégies d’investissement en Afrique de l’Ouest. Écrites pour être lues en 5 minutes, pas pour remplir un site.',
   },
   {
     src: '/premium/outil-budget.webp',
-    alt: 'Outil Budget - taux d\u2019\u00e9pargne, r\u00e9partition des d\u00e9penses',
+    alt: 'Outil Budget - taux d’épargne, répartition des dépenses',
     label: 'Outil Budget',
-    desc: 'Entre tes revenus et d\u00e9penses. Obtiens ton taux d\u2019\u00e9pargne, ta r\u00e9partition par poste et des recommandations concr\u00e8tes pour passer \u00e0 15\u201320 % d\u2019\u00e9pargne. Export PDF inclus.',
+    desc: 'Entre tes revenus et dépenses. Obtiens ton taux d’épargne, ta répartition par poste et des recommandations concrètes pour passer à 15\u201320 % d’épargne. Export PDF inclus.',
   },
 ];
 
@@ -54,7 +54,7 @@ const BENEFITS = [
   },
   {
     icon: GraduationCap,
-    title: 'Cours d\u2019éducation financière',
+    title: 'Cours d’éducation financière',
     desc: 'Modules complets : épargne, investissement, BRVM, crypto, devises. Apprends à ton rythme.',
   },
   {
@@ -71,7 +71,7 @@ const FAQ = [
   },
   {
     q: 'Je peux annuler quand ?',
-    a: 'Quand tu veux, en 1 clic depuis ton compte. Tu gardes l\u2019accès jusqu\u2019\u00e0 la fin de la période payée.',
+    a: 'Quand tu veux, en 1 clic depuis ton compte. Tu gardes l’accès jusqu’à la fin de la période payée.',
   },
   {
     q: 'Y a-t-il un essai gratuit ?',
@@ -79,7 +79,7 @@ const FAQ = [
   },
   {
     q: 'Que recouvre exactement Premium ?',
-    a: 'Tout : 2 newsletters/semaine, articles & analyses illimités, outils Premium avec PDF, cours d\u2019\u00e9ducation financière, alertes.',
+    a: 'Tout : 2 newsletters/semaine, articles & analyses illimités, outils Premium avec PDF, cours d’éducation financière, alertes.',
   },
 ];
 

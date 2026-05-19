@@ -47,7 +47,7 @@ const EMPTY_BANNER: FlashBannerData = { enabled: false, items: [] };
 /**
  * Server-only fetcher for the flash banner. Uses the anon Supabase client
  * (no cookies) so the result is shared across requests and cacheable.
- * Cached for 60 seconds; admin updates should call revalidateTag('flash-banner').
+ * Cached for 60 seconds; admin updates should call revalidateTag('flash-banner', 'max').
  */
 export const getFlashBanner = unstable_cache(
   async (): Promise<FlashBannerData> => {

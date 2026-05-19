@@ -58,7 +58,7 @@ export async function PUT(request: NextRequest) {
     return serverError(error, 'admin-flash-banner');
   }
 
-  revalidateTag('flash-banner');
+  revalidateTag('flash-banner', 'max');
   revalidatePath('/');
   return NextResponse.json(data);
 }

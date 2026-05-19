@@ -1,8 +1,9 @@
 import { ImageResponse } from 'next/og';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
-export const alt = 'NFI Report - Actualités économiques et financières du Niger';
+export const alt = 'NFI Report, actualités économiques et financières du Niger';
+
 export const size = {
   width: 1200,
   height: 630,

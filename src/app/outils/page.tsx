@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { CategoryHero } from '@/components/CategoryHero';
-import { HubIntro } from '@/components/HubIntro';
+import { HubFooter } from '@/components/HubFooter';
 import { PracticalTools } from '@/components/PracticalTools';
 
 export const revalidate = 3600;
@@ -24,7 +24,8 @@ export default function OutilsPage() {
         title="Outils Financiers"
         description="Simulateurs et calculateurs financiers optimisés pour le contexte économique africain."
       />
-      <HubIntro
+      <PracticalTools />
+      <HubFooter
         paragraphs={[
           "Les outils financiers de NFI Report sont conçus spécifiquement pour le contexte économique du Niger et de la zone UEMOA. Que vous prépariez l'achat d'une voiture, le financement d'un projet immobilier, l'analyse de votre salaire ou la gestion de votre budget familial, nos simulateurs vous aident à prendre des décisions éclairées en quelques secondes.",
           "Tous nos calculateurs intègrent les paramètres locaux pertinents : taux d'usure BCEAO, barème CNSS et impôt sur les traitements et salaires (ITS) du Niger, devise FCFA, indices économiques régionaux (UEMOA, CEDEAO). Vous n'avez plus besoin de jongler avec des outils internationaux mal adaptés au contexte africain ou de faire des calculs approximatifs : nos formules sont validées par des professionnels de la finance.",
@@ -37,7 +38,6 @@ export default function OutilsPage() {
           { title: 'Budget familial', body: 'Analysez vos revenus et dépenses avec la méthode 50/30/20 adaptée au Niger.' },
         ]}
       />
-      <PracticalTools />
     </div>
   );
 }

@@ -44,7 +44,7 @@ const SUBSECTIONS: Record<string, { title: string; from: number; to: number }[]>
     { title: 'Les fondamentaux de la bourse', from: 1, to: 4 },
     { title: 'Analyse technique', from: 5, to: 9 },
     { title: 'Analyse fondamentale', from: 10, to: 13 },
-    { title: 'Psychologie de l\u2019investisseur', from: 14, to: 18 },
+    { title: 'Psychologie de l’investisseur', from: 14, to: 18 },
   ],
   'economie-niger': [
     { title: 'Macroéconomie', from: 1, to: 3 },
@@ -431,8 +431,8 @@ export function EducationCategoryContent({ slug }: { slug: string }) {
                 </div>
                 <p className="text-white/50 text-[14px] leading-relaxed">
                   {isSignedIn
-                    ? `Accédez aux ${premiumLessons} leçon${premiumLessons !== 1 ? 's' : ''} premium de cette catégorie avec l\u2019abonnement.`
-                    : 'Connectez-vous et abonnez-vous pour accéder à l\u2019ensemble du contenu éducatif.'}
+                    ? `Accédez aux ${premiumLessons} leçon${premiumLessons !== 1 ? 's' : ''} premium de cette catégorie avec l’abonnement.`
+                    : 'Connectez-vous et abonnez-vous pour accéder à l’ensemble du contenu éducatif.'}
                 </p>
               </div>
               <Link

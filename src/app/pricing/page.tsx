@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   keywords: [
     'tarifs NFI Report',
     'prix abonnement NFI Report',
-    's\u2019abonner NFI Report',
+    's’abonner NFI Report',
     'Premium FCFA',
     'paiement Mobile Money',
   ],

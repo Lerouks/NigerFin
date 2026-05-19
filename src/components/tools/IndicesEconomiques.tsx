@@ -5,6 +5,8 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { ChartTooltip } from './ChartTooltip';
 import { useNigerMacro } from '@/hooks/useNigerMacro';
+import { MacroIndicatorsBlock } from '@/components/MacroIndicatorsBlock';
+import { NIGER_MACRO_INDICATORS, INS_LAST_UPDATE } from '@/data/ins-indicators';
 
 /**
  * Affiche exclusivement les indicateurs réellement récupérés depuis les
@@ -326,6 +328,23 @@ export function IndicesEconomiques() {
             Mis à jour : {new Date(lastUpdated).toLocaleDateString('fr-FR')}
           </p>
         )}
+      </div>
+
+      {/* ── Conjoncture récente INS Niger ─────────────────────────
+          Complément aux séries longues Banque mondiale / FMI ci-dessus.
+          Données plus fraîches (T4 2025 + Avril 2026), publiées
+          directement par l'Institut National de la Statistique du Niger.
+          Source de vérité : src/data/ins-indicators.ts
+      */}
+      <div className="pt-8 mt-4 border-t border-black/[0.06]">
+        <MacroIndicatorsBlock
+          eyebrow="Conjoncture récente"
+          title="Indicateurs INS Niger temps quasi-réel"
+          subtitle="Publications officielles INS Niger plus récentes que les séries Banque mondiale / FMI, qui ont 1 à 2 ans de lag. Mise à jour à chaque nouveau bulletin INS."
+          indicators={NIGER_MACRO_INDICATORS}
+          columns={3}
+          asOf={INS_LAST_UPDATE}
+        />
       </div>
     </div>
   );

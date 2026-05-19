@@ -83,6 +83,11 @@ export function AccountDashboard() {
     newsletter_monthly: true, newsletter_weekly: false, alerts_news: false, alerts_custom: false, reports_pdf: false,
   });
 
+  const [nowMs, setNowMs] = useState<number | null>(null);
+  useEffect(() => {
+    setNowMs(Date.now());
+  }, []);
+
   useEffect(() => {
     if (!isLoading && !isSignedIn) router.push('/connexion');
   }, [isLoading, isSignedIn, router]);
@@ -143,8 +148,8 @@ export function AccountDashboard() {
     ? new Date(rawPeriodEnd).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
     : null;
   const remainingDays = (() => {
-    if (!rawPeriodEnd) return null;
-    const diff = new Date(rawPeriodEnd).getTime() - Date.now();
+    if (!rawPeriodEnd || nowMs === null) return null;
+    const diff = new Date(rawPeriodEnd).getTime() - nowMs;
     return diff > 0 ? Math.ceil(diff / 86400000) : null;
   })();
 

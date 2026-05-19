@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-NFI Report is a French-language economic and financial news site for Niger and West Africa, built with Next.js 15 (App Router), React 19, Supabase, and Tailwind CSS. Deployed on Vercel.
+NFI Report is a French-language economic and financial news site for Niger and West Africa, built with Next.js 16 (App Router, webpack build), React 19, Supabase, and Tailwind CSS. Deployed on Vercel.
 
 ## Commands
 
@@ -19,7 +19,7 @@ Tests live in `src/__tests__/*.test.ts` and match the pattern `src/**/*.test.ts`
 
 ## Architecture
 
-**Stack:** Next.js 15 App Router, React 19, Supabase (auth + DB + Storage), iPayMoney (payments Mobile Money & carte), Tailwind CSS 3, TipTap (rich text editor), Recharts, Sentry, PostHog analytics, Resend (transactional email + newsletter envoi self-hosted), React-PDF (génération PDF facture).
+**Stack:** Next.js 16 (App Router, webpack build forcé via `--webpack` car Sentry v8 pas encore compatible Turbopack), React 19, Supabase (auth + DB + Storage), iPayMoney (payments Mobile Money & carte), Tailwind CSS 3, TipTap (rich text editor), Recharts, Sentry, PostHog analytics, Resend (transactional email + newsletter envoi self-hosted), React-PDF (génération PDF facture).
 
 **Routing:** French-language routes under `src/app/` — e.g., `/articles`, `/economie`, `/finance`, `/marches`, `/niger`, `/education`, `/entreprises`, `/outils`, `/compte`, `/paiement`, `/pricing`, `/admin`. Auth routes use a route group `(auth)/` with `/connexion` and `/inscription`.
 
@@ -30,7 +30,7 @@ Tests live in `src/__tests__/*.test.ts` and match the pattern `src/**/*.test.ts`
 - `createServiceClient()` — Admin operations (service role key)
 - `createBrowserSupabaseClient()` — Client-side (from `supabase-browser.ts`)
 
-**Middleware** (`src/middleware.ts`): Refreshes Supabase auth tokens on every request.
+**Proxy** (`src/proxy.ts`, anciennement `middleware.ts` avant Next 16): Refreshes Supabase auth tokens on every request.
 
 **Content model:** Articles have `ContentType` (free/premium), users have `UserRole` (reader/premium/admin), subscriptions tracked via `SubscriptionStatus`. Access control in `src/lib/access-control.ts`.
 

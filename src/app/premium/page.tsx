@@ -6,13 +6,13 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: 'Devenir Premium : analyses et outils exclusifs',
   description:
-    'Newsletters, articles et outils financiers exclusifs pour d\u00e9cider et investir en Afrique de l\u2019Ouest. \u00c0 partir de 5 000 FCFA/mois.',
+    'Newsletters, articles et outils financiers exclusifs pour décider et investir en Afrique de l’Ouest. À partir de 5 000 FCFA/mois.',
   keywords: [
     'NFI Report Premium',
     'abonnement NFI Report',
     'newsletter économique Afrique',
     'analyses financières Niger',
-    'éducation financière Afrique de l\u2019Ouest',
+    'éducation financière Afrique de l’Ouest',
   ],
   alternates: {
     canonical: '/premium',

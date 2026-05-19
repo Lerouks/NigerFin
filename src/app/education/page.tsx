@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { CategoryHero } from '@/components/CategoryHero';
-import { HubIntro } from '@/components/HubIntro';
+import { HubFooter } from '@/components/HubFooter';
 import { EducationGrid } from './EducationGrid';
 import { LearningPathsSection } from '@/components/LearningPathsSection';
 import { createServiceClient } from '@/lib/supabase';
@@ -45,19 +45,6 @@ export default async function EducationPage() {
         title="Éducation"
         description="Apprenez la finance, l'économie et les marchés à votre rythme. Choisissez une catégorie pour commencer."
       />
-      <HubIntro
-        paragraphs={[
-          "L'éducation financière reste l'un des piliers de l'autonomie économique et de la réussite patrimoniale, en particulier dans un contexte ouest-africain où l'inclusion financière progresse mais où la culture financière demeure peu démocratisée. La section Éducation de NFI Report propose des cours, leçons et parcours guidés gratuits, conçus pour tous les niveaux, du débutant complet à l'investisseur averti.",
-          "Notre pédagogie s'appuie sur des cas concrets adaptés au Niger et à la zone UEMOA : choix d'une banque locale, ouverture d'un compte titres BRVM via une SGI, calcul de l'ITS sur votre fiche de paie, gestion d'un budget familial en FCFA, comparaison entre Mobile Money et compte bancaire, fiscalité OHADA pour les entrepreneurs. Chaque catégorie regroupe une série de leçons progressives, courtes et accessibles, avec des exemples chiffrés et des conseils pratiques.",
-          "Que vous soyez étudiant, salarié, entrepreneur, investisseur particulier ou simple curieux, vous trouverez dans nos parcours les clés pour mieux comprendre l'argent, mieux le gérer et mieux le faire fructifier. Les leçons gratuites posent les bases ; les leçons Premium approfondissent les sujets pour ceux qui veulent aller plus loin.",
-        ]}
-        highlights={[
-          { title: 'Catégories thématiques', body: 'Budget, banque, bourse, immobilier, crypto, fiscalité, assurance, entrepreneuriat : un panorama complet.' },
-          { title: 'Parcours guidés', body: 'Suivez des séquences pédagogiques structurées du débutant à l\'investisseur autonome.' },
-          { title: 'Cas concrets Niger', body: 'Exemples chiffrés, comparaisons de banques locales, fiscalité OHADA, paiements mobile money.' },
-          { title: 'Leçons gratuites', body: 'Une partie significative du contenu est accessible sans abonnement, pour démocratiser la culture financière.' },
-        ]}
-      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
         <LearningPathsSection />
         <div className="flex items-end justify-between mb-6">
@@ -70,6 +57,19 @@ export default async function EducationPage() {
         </div>
         <EducationGrid categories={categories} />
       </div>
+      <HubFooter
+        paragraphs={[
+          "L'éducation financière reste l'un des piliers de l'autonomie économique et de la réussite patrimoniale, en particulier dans un contexte ouest-africain où l'inclusion financière progresse mais où la culture financière demeure peu démocratisée. La section Éducation de NFI Report propose des cours, leçons et parcours guidés gratuits, conçus pour tous les niveaux, du débutant complet à l'investisseur averti.",
+          "Notre pédagogie s'appuie sur des cas concrets adaptés au Niger et à la zone UEMOA : choix d'une banque locale, ouverture d'un compte titres BRVM via une SGI, calcul de l'ITS sur votre fiche de paie, gestion d'un budget familial en FCFA, comparaison entre Mobile Money et compte bancaire, fiscalité OHADA pour les entrepreneurs. Chaque catégorie regroupe une série de leçons progressives, courtes et accessibles, avec des exemples chiffrés et des conseils pratiques.",
+          "Que vous soyez étudiant, salarié, entrepreneur, investisseur particulier ou simple curieux, vous trouverez dans nos parcours les clés pour mieux comprendre l'argent, mieux le gérer et mieux le faire fructifier. Les leçons gratuites posent les bases ; les leçons Premium approfondissent les sujets pour ceux qui veulent aller plus loin.",
+        ]}
+        highlights={[
+          { title: 'Catégories thématiques', body: 'Budget, banque, bourse, immobilier, crypto, fiscalité, assurance, entrepreneuriat : un panorama complet.' },
+          { title: 'Parcours guidés', body: 'Suivez des séquences pédagogiques structurées du débutant à l\'investisseur autonome.' },
+          { title: 'Cas concrets Niger', body: 'Exemples chiffrés, comparaisons de banques locales, fiscalité OHADA, paiements mobile money.' },
+          { title: 'Leçons gratuites', body: 'Une partie significative du contenu est accessible sans abonnement, pour démocratiser la culture financière.' },
+        ]}
+      />
     </div>
   );
 }

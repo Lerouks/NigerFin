@@ -62,7 +62,7 @@ export function MarketDataWidget() {
 
           return (
             <div key={type}>
-              <h4 className="text-[10px] uppercase tracking-[0.12em] text-gray-400 mb-3">
+              <h4 className="text-[11px] uppercase tracking-[0.14em] font-semibold text-gray-500 mb-3">
                 {TYPE_LABELS[type]}
               </h4>
               <div className="space-y-2.5">

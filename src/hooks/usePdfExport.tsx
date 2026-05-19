@@ -2,7 +2,7 @@
 
 import { useCallback } from 'react';
 import { pdf } from '@react-pdf/renderer';
-import { ToolPdfDocument, type ToolPdfData } from '@/components/pdf/ToolPdfDocument';
+import { ToolPdfDocument, registerPdfFonts, type ToolPdfData } from '@/components/pdf/ToolPdfDocument';
 
 /** Replace narrow no-break space (U+202F) and non-breaking space (U+00A0) with regular spaces. */
 function sanitize(s: string): string {
@@ -60,6 +60,9 @@ export interface PdfExportOptions {
  */
 export function usePdfExport() {
   const generate = useCallback(async (opts: PdfExportOptions) => {
+    // Register fonts lazy on first generate (browser-side only, after window is ready)
+    registerPdfFonts();
+
     const data: ToolPdfData = {
       title: opts.title,
       eyebrow: opts.eyebrow,

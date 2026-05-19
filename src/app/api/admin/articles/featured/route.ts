@@ -30,7 +30,9 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ success: true });
 }
 
-// DELETE: unfeature an article (with warning check)
+// DELETE: unfeature an article. Zero featured = no hero section displayed on /,
+// la home a un fallback propre (ticker marchés + dernières actualités prennent
+// alors le relais visuel).
 export async function DELETE(req: NextRequest) {
   const auth = await requireAdmin();
   if ('error' in auth) return auth.error;
@@ -41,19 +43,6 @@ export async function DELETE(req: NextRequest) {
 
   if (!articleId) {
     return NextResponse.json({ error: 'Missing articleId' }, { status: 400 });
-  }
-
-  // Check how many featured articles exist
-  const { count } = await serviceClient
-    .from('articles')
-    .select('*', { count: 'exact', head: true })
-    .eq('is_featured', true);
-
-  if ((count || 0) <= 1) {
-    return NextResponse.json(
-      { error: 'Impossible de retirer le seul article à la une. Choisissez d\'abord un autre article.' },
-      { status: 400 }
-    );
   }
 
   const { error } = await serviceClient.rpc('unfeature_article', {

@@ -25,30 +25,27 @@ export function HubFooter({
           <div className="flex-1 h-px bg-black/[0.06]" />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-12">
           <div className="lg:col-span-2 space-y-4 text-[14px] sm:text-[15px] leading-relaxed text-gray-600">
-            {paragraphs.map((p) => (
-              <p key={p.slice(0, 24)}>{p}</p>
+            {paragraphs.map((p, idx) => (
+              <p key={`${idx}-${p.slice(0, 24)}`}>{p}</p>
             ))}
           </div>
 
           {highlights && highlights.length > 0 && (
             <aside className="lg:col-span-1">
-              <div className="space-y-4">
-                {highlights.map((h) => (
-                  <div
-                    key={h.title}
-                    className="border-l-2 border-gold/30 pl-4 py-1"
-                  >
-                    <h3 className="text-[13px] font-semibold text-[#111] mb-1">
+              <dl className="space-y-6">
+                {highlights.map((h, idx) => (
+                  <div key={`${idx}-${h.title}`}>
+                    <dt className="text-[11px] tracking-[0.14em] uppercase font-semibold text-[#111] mb-1.5">
                       {h.title}
-                    </h3>
-                    <p className="text-[13px] leading-relaxed text-gray-500">
+                    </dt>
+                    <dd className="text-[13px] leading-relaxed text-gray-500">
                       {h.body}
-                    </p>
+                    </dd>
                   </div>
                 ))}
-              </div>
+              </dl>
             </aside>
           )}
         </div>

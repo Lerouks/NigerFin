@@ -90,9 +90,11 @@ Sticky white-with-backdrop-blur header (`sticky top-0 z-50 bg-white/80 backdrop-
 
 Black footer (`bg-[#111]`) with 4 columns: brand+description, Rubriques, Société, Suivez-nous. Bottom strip: copyright + legal links + slogan. Footer links can be 16px text without padding (acceptable for tertiary nav).
 
-### Section pages (Économie, Finance, Marchés, Entreprises, Niger, Éducation)
+### Section pages (Économie, Finance, Marchés, Entreprises, Niger, Éducation, Outils)
 
-Black hero with category title (48px) + intro paragraph (text-gray-300). Overlapping white intro card with prose + 4 highlight blocks in a 2x2 grid. Article grid below, with filter sidebar on the left (Pertinence, Période, Format, Durée). Cards use the same `ArticleCard` component everywhere.
+Black hero with category title (48px) + intro paragraph (text-gray-300). Interactive content first (cours, articles, simulateurs, parcours) right under the hero to prioritize data over description, Bloomberg / Apple Stocks pattern. Article grid uses the `SectionArticlesFiltered` component with filter sidebar on the left (Pertinence, Période, Format, Durée). Cards use the same `ArticleCard` component everywhere.
+
+After the interactive content, a discrete SEO footer (`HubFooter` component) closes the page with a `Comprendre cette rubrique` block: 2/3 column of paragraphs + 1/3 column definition list of highlights, pure typography hierarchy (no colored borders or decorative containers — both would trip the AI slop blacklist).
 
 ### Article page
 

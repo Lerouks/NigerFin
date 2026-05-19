@@ -3,6 +3,8 @@ import { SITE_URL } from '@/lib/config';
 import { createServiceClient } from '@/lib/supabase';
 import { CategoryHero } from '@/components/CategoryHero';
 import { NigerPresentation } from '@/components/NigerPresentation';
+import { MacroIndicatorsBlock } from '@/components/MacroIndicatorsBlock';
+import { NIGER_MACRO_INDICATORS, INS_LAST_UPDATE } from '@/data/ins-indicators';
 import { NigerSeoBlock } from './NigerSeoBlock';
 
 export const revalidate = 300;
@@ -49,6 +51,17 @@ export default async function NigerPage() {
         description="Profil économique, chiffres clés, régions et ressources naturelles du Niger."
         accentGold
       />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 md:pt-16">
+        <MacroIndicatorsBlock
+          eyebrow="Niger en chiffres"
+          title="Indicateurs macroéconomiques officiels"
+          subtitle="Données INS Niger, Note de Conjoncture T4 2025 et IHPC mensuel. Sources citables, mises à jour à chaque nouvelle publication officielle."
+          indicators={NIGER_MACRO_INDICATORS}
+          columns={3}
+          asOf={INS_LAST_UPDATE}
+        />
+      </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16">
         <NigerPresentation initialData={data} />

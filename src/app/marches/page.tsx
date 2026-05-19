@@ -2,7 +2,9 @@ import type { Metadata } from 'next';
 import { MarchesContent } from './MarchesContent';
 import { CategoryHero } from '@/components/CategoryHero';
 import { HubFooter } from '@/components/HubFooter';
+import { MacroIndicatorsBlock } from '@/components/MacroIndicatorsBlock';
 import { SectionArticlesFiltered } from '@/components/SectionArticlesFiltered';
+import { COMMODITIES_NIGER_EXPOSED, FOOD_PRICES_2025, INS_LAST_UPDATE } from '@/data/ins-indicators';
 import { getArticlesByCategory, getArticleViewRanking } from '@/lib/articles';
 
 export const revalidate = 60;
@@ -26,6 +28,28 @@ export default async function MarchesPage() {
       />
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
         <MarchesContent />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14 md:pb-20">
+        <MacroIndicatorsBlock
+          eyebrow="Matières premières"
+          title="Cours mondiaux qui pèsent sur le Niger"
+          subtitle="Or, uranium, pétrole et fer. Le Niger figure parmi les exportateurs stratégiques de ces 4 actifs."
+          indicators={COMMODITIES_NIGER_EXPOSED}
+          columns={4}
+          asOf={INS_LAST_UPDATE}
+        />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14 md:pb-20">
+        <MacroIndicatorsBlock
+          eyebrow="Produits alimentaires"
+          title="Cours des céréales importées au Niger"
+          subtitle="Blé, riz, maïs et sucre, principales matières alimentaires importées. Ces cours impactent directement le coût de la vie."
+          indicators={FOOD_PRICES_2025}
+          columns={4}
+          asOf={INS_LAST_UPDATE}
+        />
       </div>
       {(articles.length > 0 || total > 0) && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14 md:pb-20">

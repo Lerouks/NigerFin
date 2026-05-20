@@ -30,10 +30,10 @@ export function ContactForm() {
     return section?.text || fallback;
   };
 
-  const address = getInfo(1, 'Niamey, Niger\nPlateau – BP 800');
+  const address = getInfo(1, 'Niamey, Niger\nPlateau, BP 800');
   const email = getInfo(2, 'contact@nfireport.com');
-  const phone = getInfo(3, '+227 97 76 91 31');
-  const hoursText = getInfo(4, 'Lundi - Vendredi : 08h00 - 18h00 | Samedi : 09h00 - 13h00 | Dimanche : Fermé');
+  const phone = getInfo(3, '+227 97 76 91 31');
+  const hoursText = getInfo(4, 'Lundi au vendredi : 08h00 à 18h00 | Samedi : 09h00 à 13h00 | Dimanche : fermé');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

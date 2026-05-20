@@ -45,6 +45,10 @@ export interface PdfExportOptions {
   results: { label: string; value: string }[];
   table?: { head: string[]; body: (string | number)[][] };
   recommendations?: string[];
+  /** Civilite du client Premium (M. ou Mme), injectee par PdfDownloadButton via /api/tools/pdf-verify */
+  recipientCivility?: 'M.' | 'Mme' | null;
+  /** Nom complet du client Premium pour personnalisation (Etabli pour) */
+  recipientName?: string;
 }
 
 /**
@@ -71,6 +75,8 @@ export function usePdfExport() {
       table: opts.table,
       recommendations: opts.recommendations,
       generatedAt: fmtDate(),
+      recipientCivility: opts.recipientCivility ?? null,
+      recipientName: opts.recipientName ?? '',
     };
 
     const blob = await pdf(<ToolPdfDocument data={data} />).toBlob();

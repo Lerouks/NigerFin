@@ -75,6 +75,9 @@ export interface UserProfile {
   newsletter_subscribed: boolean;
   created_at: string;
   updated_at: string;
+  civility: 'M.' | 'Mme' | null;
+  first_name: string | null;
+  last_name: string | null;
 }
 
 export interface Subscription {

@@ -15,7 +15,12 @@ interface AuthContextType {
   premiumArticlesUsed: number;
   error: string | null;
   signIn: (email: string, password: string) => Promise<{ error: { message: string } | null }>;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: { message: string } | null; existingUser: boolean }>;
+  signUp: (
+    email: string,
+    password: string,
+    fullName: string,
+    civility?: 'M.' | 'Mme'
+  ) => Promise<{ error: { message: string } | null; existingUser: boolean }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -136,13 +141,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error };
   };
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    fullName: string,
+    civility?: 'M.' | 'Mme'
+  ) => {
     if (!supabase) return { error: { message: 'Supabase not configured' }, existingUser: false };
+
+    // Split full_name in first/last (Premier mot = prenom, le reste = nom)
+    const trimmed = fullName.trim();
+    const parts = trimmed.split(/\s+/);
+    const firstName = parts[0] || '';
+    const lastName = parts.slice(1).join(' ');
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { full_name: fullName },
+        data: {
+          full_name: fullName,
+          civility: civility ?? null,
+          first_name: firstName,
+          last_name: lastName,
+        },
       },
     });
 

@@ -1,11 +1,7 @@
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-  Font,
-} from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
+
+// Disable mid-word hyphenation (avoid "im-mobilier" breaks on long French words)
+Font.registerHyphenationCallback((word) => [word]);
 import {
   PDF_COLORS,
   PDF_FONT,
@@ -14,144 +10,163 @@ import {
   PDF_BORDER_RADIUS,
   PDF_SLOGAN,
   PDF_DISCLAIMER,
+  PDF_BRAND_NAME,
+  PDF_BRAND_TAG,
+  PDF_SITE,
 } from './tokens';
 
-/* ── Fonts registration (lazy, browser-side only) ──────────────────
-   Appelé à la 1ere génération PDF côté client. Évite Font.register
-   pendant le bundle SSR (qui ne peut pas fetcher) et utilise un path
-   absolu depuis window.location.origin pour bypass les soucis de
-   resolution relative dans React-PDF. */
-
-let fontsRegistered = false;
-
-export function registerPdfFonts() {
-  if (fontsRegistered || typeof window === 'undefined') return;
-  fontsRegistered = true;
-
-  const origin = window.location.origin;
-
-  Font.register({
-    family: PDF_FONT.title,
-    fonts: [
-      { src: `${origin}/fonts/inter-400.woff`, fontWeight: 400 },
-      { src: `${origin}/fonts/inter-500.woff`, fontWeight: 500 },
-      { src: `${origin}/fonts/inter-600.woff`, fontWeight: 600 },
-      { src: `${origin}/fonts/inter-700.woff`, fontWeight: 700 },
-    ],
-  });
-
-  Font.register({
-    family: PDF_FONT.body,
-    fonts: [
-      { src: `${origin}/fonts/montserrat-400.woff`, fontWeight: 400 },
-      { src: `${origin}/fonts/montserrat-500.woff`, fontWeight: 500 },
-    ],
-  });
-
-  Font.register({
-    family: PDF_FONT.wordmark,
-    src: `${origin}/fonts/playfair-700.woff`,
-    fontWeight: 700,
-  });
-
-  // Disable hyphenation for French text (avoid weird word breaks)
-  Font.registerHyphenationCallback((word) => [word]);
+/**
+ * Stub conservé pour compat avec les imports existants.
+ * Plus de fonts custom à charger : on utilise Helvetica built-in
+ * (pas de fetch, pas de CORS, pas de risque de rendu cassé).
+ */
+export function registerPdfFonts(): void {
+  // no-op
 }
 
-/* ── Sanitization helpers ─────────────────────────────────────────── */
-
-/** Convertit les caractères qui posent problème dans React-PDF en équivalents safe. */
+/** Remplace les caractères qui posent problème dans React-PDF. */
 function sanitize(s: string): string {
   return s
-    .replace(/[  ]/g, ' ') // non-break spaces
-    .replace(/—/g, ', ') // em-dash interdit charte
-    .replace(/–/g, '-'); // en-dash interdit charte
+    .replace(/[  ]/g, ' ')
+    .replace(/—/g, ', ')
+    .replace(/–/g, '-');
 }
-
-/* ── Styles ────────────────────────────────────────────────────────── */
 
 const styles = StyleSheet.create({
   page: {
-    flexDirection: 'column',
-    backgroundColor: PDF_COLORS.bg,
     paddingTop: PDF_SPACING.pageMarginTop,
     paddingBottom: PDF_SPACING.pageMarginBottom,
     paddingHorizontal: PDF_SPACING.pageMarginX,
-    fontFamily: PDF_FONT.body,
+    fontFamily: PDF_FONT.regular,
     fontSize: PDF_SIZE.body,
-    color: PDF_COLORS.inkSecondary,
+    color: PDF_COLORS.ink,
     lineHeight: PDF_SPACING.bodyLineHeight,
+    backgroundColor: PDF_COLORS.paper,
   },
 
-  /* Header (page 1 only) */
+  /* Header */
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    paddingBottom: 14,
+    marginBottom: 28,
+    paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: PDF_COLORS.inkPrimary,
-    marginBottom: 24,
+    borderBottomColor: PDF_COLORS.divider,
+    borderBottomStyle: 'solid',
   },
-  wordmarkRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
+  brandBlock: {
+    maxWidth: 220,
   },
-  wordmarkN: {
-    fontFamily: PDF_FONT.wordmark,
-    fontSize: PDF_SIZE.wordmark + 2,
-    color: PDF_COLORS.gold,
+  brandName: {
+    fontFamily: PDF_FONT.bold,
     fontWeight: 700,
+    fontSize: PDF_SIZE.brand,
+    letterSpacing: 3,
+    color: PDF_COLORS.ink,
   },
-  wordmarkMain: {
-    fontFamily: PDF_FONT.title,
-    fontSize: PDF_SIZE.wordmark,
-    color: PDF_COLORS.inkPrimary,
-    fontWeight: 600,
-    letterSpacing: 0.4,
+  brandTag: {
+    fontSize: PDF_SIZE.brandTag,
+    color: PDF_COLORS.mutedLight,
+    letterSpacing: 1,
+    marginTop: 4,
+    textTransform: 'uppercase',
   },
-  wordmarkR: {
-    fontFamily: PDF_FONT.wordmark,
-    fontSize: PDF_SIZE.wordmark + 2,
-    color: PDF_COLORS.gold,
+  docTitleBox: {
+    textAlign: 'right',
+    flex: 1,
+    paddingLeft: 24,
+  },
+  docEyebrow: {
+    fontFamily: PDF_FONT.bold,
     fontWeight: 700,
-  },
-  headerDate: {
-    fontFamily: PDF_FONT.body,
-    fontSize: PDF_SIZE.caption,
-    color: PDF_COLORS.inkMuted,
-  },
-
-  /* Page title */
-  pageTitleEyebrow: {
-    fontFamily: PDF_FONT.title,
-    fontSize: PDF_SIZE.micro,
-    fontWeight: 600,
-    color: PDF_COLORS.gold,
-    letterSpacing: 1.8,
+    fontSize: PDF_SIZE.eyebrow,
+    color: PDF_COLORS.mutedLight,
+    letterSpacing: 1.5,
     textTransform: 'uppercase',
     marginBottom: 6,
   },
-  pageTitle: {
-    fontFamily: PDF_FONT.title,
-    fontSize: PDF_SIZE.pageTitle,
-    fontWeight: 600,
-    color: PDF_COLORS.inkPrimary,
+  docTitle: {
+    fontFamily: PDF_FONT.bold,
+    fontWeight: 700,
+    fontSize: PDF_SIZE.docTitle,
+    letterSpacing: -0.5,
+    color: PDF_COLORS.ink,
     lineHeight: PDF_SPACING.titleLineHeight,
+  },
+  docRef: {
+    fontSize: PDF_SIZE.docRef,
+    color: PDF_COLORS.muted,
+    marginTop: 6,
+    letterSpacing: 0.3,
+  },
+
+  /* Meta grid noir (date + source) */
+  metaGrid: {
+    backgroundColor: PDF_COLORS.ink,
+    borderRadius: PDF_BORDER_RADIUS.card,
+    padding: PDF_SPACING.metaPadding,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     marginBottom: PDF_SPACING.sectionGap,
+  },
+  metaItem: {
+    flexGrow: 1,
+    flexBasis: 0,
+    paddingHorizontal: 4,
+  },
+  metaLabel: {
+    fontSize: PDF_SIZE.metaLabel,
+    color: 'rgba(255,255,255,0.6)',
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    marginBottom: 4,
+  },
+  metaValue: {
+    color: '#ffffff',
+    fontSize: PDF_SIZE.meta,
+    fontFamily: PDF_FONT.bold,
+    fontWeight: 700,
   },
 
   /* Section title */
   sectionTitle: {
-    fontFamily: PDF_FONT.title,
+    fontFamily: PDF_FONT.bold,
+    fontWeight: 700,
     fontSize: PDF_SIZE.sectionTitle,
-    fontWeight: 600,
-    color: PDF_COLORS.inkPrimary,
-    marginBottom: PDF_SPACING.blockGap,
-    letterSpacing: 0.2,
+    color: PDF_COLORS.ink,
+    textTransform: 'uppercase',
+    letterSpacing: 1.4,
+    marginBottom: 14,
   },
 
-  /* Cards (KPI grid) */
+  /* Hero KPI (1 résultat unique) */
+  hero: {
+    marginBottom: PDF_SPACING.sectionGap,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: PDF_COLORS.divider,
+    borderBottomStyle: 'solid',
+  },
+  heroLabel: {
+    fontSize: PDF_SIZE.metaLabel,
+    color: PDF_COLORS.mutedLight,
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+    marginBottom: 6,
+    fontFamily: PDF_FONT.bold,
+    fontWeight: 700,
+  },
+  heroValue: {
+    fontFamily: PDF_FONT.bold,
+    fontWeight: 700,
+    fontSize: PDF_SIZE.heroValue,
+    color: PDF_COLORS.ink,
+    letterSpacing: -0.8,
+    lineHeight: 1.1,
+  },
+
+  /* Cards (2-4 résultats) */
   cardGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -159,207 +174,196 @@ const styles = StyleSheet.create({
     marginBottom: PDF_SPACING.sectionGap,
   },
   card: {
-    flexBasis: '47%',
+    flexBasis: '48%',
     flexGrow: 1,
-    backgroundColor: PDF_COLORS.card,
+    backgroundColor: PDF_COLORS.paperSoft,
     borderRadius: PDF_BORDER_RADIUS.card,
     padding: PDF_SPACING.cardPadding,
-    borderWidth: 1,
-    borderColor: PDF_COLORS.borderHairline,
   },
   cardLabel: {
-    fontFamily: PDF_FONT.body,
-    fontSize: PDF_SIZE.micro,
-    color: PDF_COLORS.inkMuted,
-    fontWeight: 500,
-    letterSpacing: 0.4,
+    fontSize: PDF_SIZE.metaLabel,
+    color: PDF_COLORS.mutedLight,
+    fontFamily: PDF_FONT.bold,
+    fontWeight: 700,
+    letterSpacing: 1.2,
     textTransform: 'uppercase',
     marginBottom: 6,
   },
   cardValue: {
-    fontFamily: PDF_FONT.title,
-    fontSize: PDF_SIZE.sectionTitle + 2,
-    fontWeight: 600,
-    color: PDF_COLORS.inkPrimary,
+    fontFamily: PDF_FONT.bold,
+    fontWeight: 700,
+    fontSize: PDF_SIZE.cardValue,
+    color: PDF_COLORS.ink,
+    letterSpacing: -0.3,
   },
 
-  /* Parameter list (rows) */
-  paramsList: {
-    backgroundColor: PDF_COLORS.card,
-    borderRadius: PDF_BORDER_RADIUS.card,
-    borderWidth: 1,
-    borderColor: PDF_COLORS.borderHairline,
-    padding: PDF_SPACING.cardPadding,
+  /* Liste paramètres / résultats (5+) */
+  list: {
     marginBottom: PDF_SPACING.sectionGap,
   },
-  paramRow: {
+  listRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 6,
+    alignItems: 'baseline',
+    paddingVertical: 9,
     borderBottomWidth: 1,
-    borderBottomColor: PDF_COLORS.borderHairline,
+    borderBottomColor: PDF_COLORS.dividerLight,
+    borderBottomStyle: 'solid',
   },
-  paramRowLast: {
+  listRowLast: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 6,
+    alignItems: 'baseline',
+    paddingVertical: 9,
   },
-  paramLabel: {
-    color: PDF_COLORS.inkMuted,
+  listLabel: {
+    color: PDF_COLORS.muted,
     fontSize: PDF_SIZE.body,
   },
-  paramValue: {
-    color: PDF_COLORS.inkPrimary,
-    fontFamily: PDF_FONT.title,
-    fontWeight: 500,
+  listValue: {
+    color: PDF_COLORS.ink,
+    fontFamily: PDF_FONT.bold,
+    fontWeight: 700,
     fontSize: PDF_SIZE.body,
   },
 
-  /* Detail table */
+  /* Table */
   table: {
     marginBottom: PDF_SPACING.sectionGap,
-    borderRadius: PDF_BORDER_RADIUS.card,
-    borderWidth: 1,
-    borderColor: PDF_COLORS.borderHairline,
-    overflow: 'hidden',
   },
-  tableHead: {
+  tableHeaderRow: {
     flexDirection: 'row',
-    backgroundColor: PDF_COLORS.inkPrimary,
+    backgroundColor: PDF_COLORS.paperSoft,
+    borderBottomWidth: 2,
+    borderBottomColor: PDF_COLORS.ink,
+    borderBottomStyle: 'solid',
   },
-  tableHeadCell: {
+  tableHeaderCell: {
     flexGrow: 1,
     flexBasis: 0,
-    color: PDF_COLORS.card,
-    fontFamily: PDF_FONT.title,
-    fontSize: PDF_SIZE.tableHead,
-    fontWeight: 600,
-    padding: 8,
-    letterSpacing: 0.3,
+    fontSize: PDF_SIZE.tableHead - 0.5,
+    fontFamily: PDF_FONT.bold,
+    fontWeight: 700,
+    color: PDF_COLORS.ink,
     textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
   },
   tableRow: {
     flexDirection: 'row',
-    backgroundColor: PDF_COLORS.card,
-    borderTopWidth: 1,
-    borderTopColor: PDF_COLORS.borderHairline,
-  },
-  tableRowAlt: {
-    flexDirection: 'row',
-    backgroundColor: PDF_COLORS.bg,
-    borderTopWidth: 1,
-    borderTopColor: PDF_COLORS.borderHairline,
+    borderBottomWidth: 1,
+    borderBottomColor: PDF_COLORS.dividerLight,
+    borderBottomStyle: 'solid',
   },
   tableCell: {
     flexGrow: 1,
     flexBasis: 0,
-    color: PDF_COLORS.inkPrimary,
-    fontFamily: PDF_FONT.title,
     fontSize: PDF_SIZE.tableCell,
-    padding: 7,
+    color: PDF_COLORS.ink,
+    paddingVertical: 9,
+    paddingHorizontal: 12,
   },
 
-  /* Recommendations bullets */
+  /* Recommandations */
   recItem: {
     flexDirection: 'row',
     marginBottom: 8,
+    paddingLeft: 0,
   },
-  recBullet: {
-    color: PDF_COLORS.gold,
+  recRule: {
+    width: 14,
+    color: PDF_COLORS.mutedLight,
     fontSize: PDF_SIZE.body,
-    marginRight: 8,
+    fontFamily: PDF_FONT.bold,
     fontWeight: 700,
   },
   recText: {
     flex: 1,
-    color: PDF_COLORS.inkSecondary,
+    color: PDF_COLORS.inkSoft,
     fontSize: PDF_SIZE.body,
     lineHeight: PDF_SPACING.bodyLineHeight,
   },
 
-  /* Slogan (last page only) */
-  slogan: {
-    marginTop: PDF_SPACING.sectionGap,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: PDF_COLORS.borderHairline,
-    fontFamily: PDF_FONT.wordmark,
-    fontSize: PDF_SIZE.body,
-    color: PDF_COLORS.gold,
-    textAlign: 'center',
-    letterSpacing: 0.6,
+  /* Disclaimer (notice Apple-style) */
+  disclaimer: {
+    marginTop: 10,
+    padding: 14,
+    backgroundColor: PDF_COLORS.warningBg,
+    borderLeftWidth: 3,
+    borderLeftColor: PDF_COLORS.warning,
+    borderLeftStyle: 'solid',
+  },
+  disclaimerText: {
+    fontSize: PDF_SIZE.micro + 0.5,
+    color: PDF_COLORS.warningInk,
+    lineHeight: PDF_SPACING.bodyLineHeight,
   },
 
-  /* Footer (fixed on every page) */
+  /* Slogan (dernière page seulement) */
+  slogan: {
+    marginTop: 18,
+    textAlign: 'center',
+    fontSize: PDF_SIZE.micro,
+    color: PDF_COLORS.mutedLight,
+    letterSpacing: 0.4,
+    fontFamily: PDF_FONT.italic,
+  },
+
+  /* Footer fixed */
   footer: {
     position: 'absolute',
-    bottom: 20,
     left: PDF_SPACING.pageMarginX,
     right: PDF_SPACING.pageMarginX,
+    bottom: 28,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
-    paddingTop: 10,
+    paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: PDF_COLORS.borderHairline,
+    borderTopColor: PDF_COLORS.dividerLight,
+    borderTopStyle: 'solid',
   },
-  footerLeft: {
-    fontFamily: PDF_FONT.body,
-    fontSize: PDF_SIZE.micro,
-    color: PDF_COLORS.inkMuted,
+  footerText: {
+    fontSize: PDF_SIZE.footer,
+    color: PDF_COLORS.mutedLight,
+    letterSpacing: 0.2,
   },
-  footerRight: {
-    fontFamily: PDF_FONT.title,
-    fontSize: PDF_SIZE.micro,
-    color: PDF_COLORS.inkMuted,
-  },
-
-  /* Disclaimer */
-  disclaimer: {
-    marginTop: PDF_SPACING.sectionGap,
-    fontFamily: PDF_FONT.body,
-    fontSize: PDF_SIZE.micro,
-    color: PDF_COLORS.inkSubtle,
-    lineHeight: 1.5,
+  footerBrand: {
+    fontFamily: PDF_FONT.bold,
+    fontWeight: 700,
+    color: PDF_COLORS.muted,
+    letterSpacing: 1,
   },
 });
 
-/* ── Component types ──────────────────────────────────────────────── */
-
 export interface ToolPdfData {
   title: string;
-  /** Optional eyebrow (e.g. "Simulateur d'emprunt") */
   eyebrow?: string;
   params: { label: string; value: string }[];
-  /** Display results as KPI cards (max 4) when 1-4 entries, else as a list */
   results: { label: string; value: string }[];
   table?: { head: string[]; body: (string | number)[][] };
   recommendations?: string[];
-  /** Date string already formatted */
   generatedAt: string;
 }
 
-/* ── Wordmark component ───────────────────────────────────────────── */
-
-/** Wordmark "NFI Report" avec N et R en Playfair, reste en Inter. */
-function Wordmark() {
-  return (
-    <View style={styles.wordmarkRow}>
-      <Text style={styles.wordmarkN}>N</Text>
-      <Text style={styles.wordmarkMain}>FI Repo</Text>
-      <Text style={styles.wordmarkR}>r</Text>
-      <Text style={styles.wordmarkMain}>t</Text>
-    </View>
-  );
+/** Génère un numéro de référence court à partir d'un timestamp ISO. */
+function refFromDate(): string {
+  const now = new Date();
+  const y = String(now.getFullYear()).slice(-2);
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  const rand = String(now.getTime()).slice(-4);
+  return `${y}${m}${d}-${rand}`;
 }
-
-/* ── Main document ────────────────────────────────────────────────── */
 
 export function ToolPdfDocument({ data }: { data: ToolPdfData }) {
   const { title, eyebrow, params, results, table, recommendations, generatedAt } = data;
+  const docRef = refFromDate();
 
-  // KPI cards format if 2-4 results, otherwise list format
-  const resultsAsCards = results.length >= 2 && results.length <= 4;
+  const hasHero = results.length === 1;
+  const hasCards = results.length >= 2 && results.length <= 4;
+  const heroResult = results[0];
 
   return (
     <Document
@@ -369,36 +373,45 @@ export function ToolPdfDocument({ data }: { data: ToolPdfData }) {
       keywords="Niger, finance, simulateur, NFI Report"
     >
       <Page size="A4" style={styles.page}>
-        {/* Header (page 1 only via not fixed) */}
+        {/* HEADER */}
         <View style={styles.header}>
-          <Wordmark />
-          <Text style={styles.headerDate}>{sanitize(generatedAt)}</Text>
-        </View>
-
-        {/* Page title */}
-        {eyebrow && <Text style={styles.pageTitleEyebrow}>{sanitize(eyebrow)}</Text>}
-        <Text style={styles.pageTitle}>{sanitize(title)}</Text>
-
-        {/* Parameters list, indivisible block */}
-        <View wrap={false} style={{ marginBottom: PDF_SPACING.sectionGap }} minPresenceAhead={40}>
-          <Text style={styles.sectionTitle}>Paramètres de la simulation</Text>
-          <View style={styles.paramsList}>
-            {params.map((p, i) => (
-              <View
-                key={`${i}-${p.label}`}
-                style={i === params.length - 1 ? styles.paramRowLast : styles.paramRow}
-              >
-                <Text style={styles.paramLabel}>{sanitize(p.label)}</Text>
-                <Text style={styles.paramValue}>{sanitize(p.value)}</Text>
-              </View>
-            ))}
+          <View style={styles.brandBlock}>
+            <Text style={styles.brandName}>{PDF_BRAND_NAME}</Text>
+            <Text style={styles.brandTag}>{PDF_BRAND_TAG}</Text>
+          </View>
+          <View style={styles.docTitleBox}>
+            {eyebrow && <Text style={styles.docEyebrow}>{sanitize(eyebrow)}</Text>}
+            <Text style={styles.docTitle}>{sanitize(title)}</Text>
+            <Text style={styles.docRef}>Référence {docRef}</Text>
           </View>
         </View>
 
-        {/* Results, indivisible block */}
-        <View wrap={false} style={{ marginBottom: PDF_SPACING.sectionGap }} minPresenceAhead={40}>
-          <Text style={styles.sectionTitle}>Résultats</Text>
-          {resultsAsCards ? (
+        {/* META GRID NOIR */}
+        <View style={styles.metaGrid}>
+          <View style={styles.metaItem}>
+            <Text style={styles.metaLabel}>Généré le</Text>
+            <Text style={styles.metaValue}>{sanitize(generatedAt.replace(/^Généré le /, ''))}</Text>
+          </View>
+          <View style={styles.metaItem}>
+            <Text style={styles.metaLabel}>Source</Text>
+            <Text style={styles.metaValue}>{PDF_SITE}</Text>
+          </View>
+          <View style={styles.metaItem}>
+            <Text style={styles.metaLabel}>Format</Text>
+            <Text style={styles.metaValue}>Simulation Premium</Text>
+          </View>
+        </View>
+
+        {/* RÉSULTAT(S) */}
+        <View wrap={false} minPresenceAhead={60}>
+          <Text style={styles.sectionTitle}>Résultat{results.length > 1 ? 's' : ''}</Text>
+          {hasHero && heroResult && (
+            <View style={styles.hero}>
+              <Text style={styles.heroLabel}>{sanitize(heroResult.label)}</Text>
+              <Text style={styles.heroValue}>{sanitize(heroResult.value)}</Text>
+            </View>
+          )}
+          {hasCards && (
             <View style={styles.cardGrid}>
               {results.map((r, i) => (
                 <View key={`${i}-${r.label}`} style={styles.card} wrap={false}>
@@ -407,39 +420,52 @@ export function ToolPdfDocument({ data }: { data: ToolPdfData }) {
                 </View>
               ))}
             </View>
-          ) : (
-            <View style={styles.paramsList}>
+          )}
+          {!hasHero && !hasCards && (
+            <View style={styles.list}>
               {results.map((r, i) => (
                 <View
                   key={`${i}-${r.label}`}
-                  style={i === results.length - 1 ? styles.paramRowLast : styles.paramRow}
+                  style={i === results.length - 1 ? styles.listRowLast : styles.listRow}
                 >
-                  <Text style={styles.paramLabel}>{sanitize(r.label)}</Text>
-                  <Text style={styles.paramValue}>{sanitize(r.value)}</Text>
+                  <Text style={styles.listLabel}>{sanitize(r.label)}</Text>
+                  <Text style={styles.listValue}>{sanitize(r.value)}</Text>
                 </View>
               ))}
             </View>
           )}
         </View>
 
-        {/* Detail table (can split across pages, but header repeats) */}
+        {/* PARAMÈTRES */}
+        <View wrap={false} minPresenceAhead={60}>
+          <Text style={styles.sectionTitle}>Paramètres de la simulation</Text>
+          <View style={styles.list}>
+            {params.map((p, i) => (
+              <View
+                key={`${i}-${p.label}`}
+                style={i === params.length - 1 ? styles.listRowLast : styles.listRow}
+              >
+                <Text style={styles.listLabel}>{sanitize(p.label)}</Text>
+                <Text style={styles.listValue}>{sanitize(p.value)}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* DÉTAIL */}
         {table && table.body.length > 0 && (
-          <View style={{ marginBottom: PDF_SPACING.sectionGap }} minPresenceAhead={60}>
+          <View style={{ marginBottom: PDF_SPACING.sectionGap }} minPresenceAhead={80}>
             <Text style={styles.sectionTitle}>Détail</Text>
             <View style={styles.table}>
-              <View style={styles.tableHead} fixed>
+              <View style={styles.tableHeaderRow} fixed>
                 {table.head.map((cell, i) => (
-                  <Text key={`th-${i}`} style={styles.tableHeadCell}>
+                  <Text key={`th-${i}`} style={styles.tableHeaderCell}>
                     {sanitize(cell)}
                   </Text>
                 ))}
               </View>
               {table.body.map((row, i) => (
-                <View
-                  key={`tr-${i}`}
-                  style={i % 2 === 0 ? styles.tableRow : styles.tableRowAlt}
-                  wrap={false}
-                >
+                <View key={`tr-${i}`} style={styles.tableRow} wrap={false}>
                   {row.map((cell, j) => (
                     <Text key={`td-${i}-${j}`} style={styles.tableCell}>
                       {sanitize(String(cell))}
@@ -451,40 +477,33 @@ export function ToolPdfDocument({ data }: { data: ToolPdfData }) {
           </View>
         )}
 
-        {/* Recommendations */}
+        {/* RECOMMANDATIONS */}
         {recommendations && recommendations.length > 0 && (
-          <View minPresenceAhead={60} style={{ marginBottom: PDF_SPACING.sectionGap }}>
+          <View minPresenceAhead={80} style={{ marginBottom: PDF_SPACING.sectionGap }}>
             <Text style={styles.sectionTitle}>Recommandations</Text>
             {recommendations.map((rec, i) => (
               <View key={`rec-${i}`} style={styles.recItem} wrap={false}>
-                <Text style={styles.recBullet}>•</Text>
+                <Text style={styles.recRule}>{String(i + 1).padStart(2, '0')}</Text>
                 <Text style={styles.recText}>{sanitize(rec)}</Text>
               </View>
             ))}
           </View>
         )}
 
-        {/* Disclaimer */}
-        <Text style={styles.disclaimer}>{PDF_DISCLAIMER}</Text>
-
-        {/* Slogan on last page only */}
-        <Text
-          style={styles.slogan}
-          render={({ pageNumber, totalPages }) =>
-            pageNumber === totalPages ? PDF_SLOGAN : ''
-          }
-        />
-
-        {/* Footer fixed on every page */}
-        <View style={styles.footer} fixed>
-          <Text style={styles.footerLeft}>nfireport.com</Text>
-          <Text
-            style={styles.footerRight}
-            render={({ pageNumber, totalPages }) =>
-              `Page ${pageNumber} / ${totalPages}`
-            }
-          />
+        {/* DISCLAIMER */}
+        <View style={styles.disclaimer}>
+          <Text style={styles.disclaimerText}>{PDF_DISCLAIMER}</Text>
         </View>
+
+        {/* SLOGAN (apparait apres le disclaimer, donc sur la derniere page naturellement) */}
+        <Text style={styles.slogan}>{PDF_SLOGAN}</Text>
+
+        {/* FOOTER FIXED, brand + site */}
+        <View style={styles.footer} fixed>
+          <Text style={[styles.footerText, styles.footerBrand]}>{PDF_BRAND_NAME}</Text>
+          <Text style={styles.footerText}>{PDF_SITE}</Text>
+        </View>
+
       </Page>
     </Document>
   );

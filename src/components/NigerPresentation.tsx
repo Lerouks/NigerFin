@@ -198,13 +198,15 @@ export function NigerPresentation({ initialData }: NigerPresentationProps = {}) 
           </div>
         )}
 
-        {/* Carte vectorielle Niger : 9 villes principales + 7 pays voisins */}
+        {/* Carte vectorielle Niger : 9 villes principales + 7 pays voisins, interactive */}
         <div className="mb-14">
-          <div className="rounded-2xl overflow-hidden bg-gradient-to-b from-white to-[#f5f5f0] border border-black/[0.06] shadow-[0_4px_40px_-12px_rgba(0,0,0,0.06)] p-4 sm:p-6 md:p-8">
-            <NigerOutlineMap className="w-full h-auto block" />
+          <div className="rounded-2xl overflow-hidden bg-gradient-to-b from-white to-[#f5f1e6] border border-black/[0.06] shadow-[0_4px_40px_-12px_rgba(0,0,0,0.06)] p-3 sm:p-5 md:p-6">
+            <div className="aspect-[4/3] sm:aspect-[5/4] lg:aspect-[16/11] w-full">
+              <NigerOutlineMap className="w-full h-full block" />
+            </div>
           </div>
           <p className="text-[11px] text-gray-500 mt-3 text-center">
-            Carte du Niger, 9 principales villes et pays frontaliers. Source : NFI Report.
+            Survolez une ville pour afficher son rôle. Source : NFI Report.
           </p>
         </div>
 

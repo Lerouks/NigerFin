@@ -71,7 +71,7 @@ export function ReadingProgressBar({ articleRef, targetId }: ReadingProgressBarP
 
   return (
     <div
-      className="fixed top-0 left-0 h-[3px] bg-[#111] z-[9999] transition-none pointer-events-none"
+      className="fixed top-0 left-0 h-[3px] bg-gradient-to-r from-[#d4a843] via-[#e5b854] to-[#d4a843] z-[9999] transition-none pointer-events-none shadow-[0_1px_8px_rgba(212,168,67,0.3)]"
       style={{
         width: `${progress}%`,
         opacity: progress > 0 ? 1 : 0,

@@ -221,6 +221,19 @@ small, footer, .text-xs, .text-sm {
 .stagger-grid > *:nth-child(7) { animation-delay: 480ms; }
 .stagger-grid > *:nth-child(8) { animation-delay: 560ms; }
 
+/* Reveal-on-scroll wrapper */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+.reveal-on-scroll.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in-up,
@@ -232,10 +245,12 @@ small, footer, .text-xs, .text-sm {
   .animate-gold-line,
   .animate-marquee,
   .animate-subtle-pulse,
-  .stagger-grid > * {
+  .stagger-grid > *,
+  .reveal-on-scroll {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
+    transition: none !important;
   }
 }
 

@@ -11,7 +11,6 @@ import {
   PDF_SLOGAN,
   PDF_DISCLAIMER,
   PDF_BRAND_NAME,
-  PDF_BRAND_TAG,
   PDF_SITE,
 } from './tokens';
 
@@ -64,13 +63,6 @@ const styles = StyleSheet.create({
     fontSize: PDF_SIZE.brand,
     letterSpacing: 3,
     color: PDF_COLORS.ink,
-  },
-  brandTag: {
-    fontSize: PDF_SIZE.brandTag,
-    color: PDF_COLORS.mutedLight,
-    letterSpacing: 1,
-    marginTop: 4,
-    textTransform: 'uppercase',
   },
   docTitleBox: {
     textAlign: 'right',
@@ -377,7 +369,6 @@ export function ToolPdfDocument({ data }: { data: ToolPdfData }) {
         <View style={styles.header}>
           <View style={styles.brandBlock}>
             <Text style={styles.brandName}>{PDF_BRAND_NAME}</Text>
-            <Text style={styles.brandTag}>{PDF_BRAND_TAG}</Text>
           </View>
           <View style={styles.docTitleBox}>
             {eyebrow && <Text style={styles.docEyebrow}>{sanitize(eyebrow)}</Text>}

@@ -32,7 +32,6 @@ export const PDF_FONT = {
 export const PDF_SIZE = {
   // Hiérarchie typo (alignée sur InvoicePdf)
   brand: 14,
-  brandTag: 8,
   docTitle: 22,
   docRef: 10,
   eyebrow: 7.5,
@@ -75,5 +74,4 @@ export const PDF_DISCLAIMER =
   'Les simulations produites par NFI Report sont fournies à titre indicatif. Elles ne constituent pas un conseil financier, fiscal ou juridique. NFI Report ne saurait être tenu responsable des décisions prises sur la base de ces résultats.';
 
 export const PDF_BRAND_NAME = 'NFI REPORT';
-export const PDF_BRAND_TAG = 'Actualités économiques et financières du Niger';
 export const PDF_SITE = 'nfireport.com';

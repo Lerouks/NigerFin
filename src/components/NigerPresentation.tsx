@@ -5,6 +5,7 @@ import { MapPin, Users, Ruler, Coins, Gem, Factory, Globe, Calendar, TrendingUp,
 import { NigerRegions } from './niger/NigerRegions';
 import { NigerResources } from './niger/NigerResources';
 import { NigerOutlineMap } from './niger/NigerOutlineMap';
+import { RevealOnScroll } from './RevealOnScroll';
 import { useNigerCountry } from '@/hooks/useNigerCountry';
 import { useNigerMacro } from '@/hooks/useNigerMacro';
 
@@ -213,7 +214,7 @@ export function NigerPresentation({ initialData }: NigerPresentationProps = {}) 
         {/* Données clés */}
         <div className="space-y-10">
           {sortedCategories.map((cat) => (
-            <div key={cat}>
+            <RevealOnScroll key={cat}>
               <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-600 font-semibold mb-4 pb-2 border-b border-black/[0.06]">
                 {CATEGORY_LABELS[cat] || cat}
               </h3>
@@ -236,7 +237,7 @@ export function NigerPresentation({ initialData }: NigerPresentationProps = {}) 
                   );
                 })}
               </div>
-            </div>
+            </RevealOnScroll>
           ))}
         </div>
 

@@ -1,5 +1,6 @@
 import { ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
 import type { MacroIndicator } from '@/data/ins-indicators';
+import { AnimatedNumber } from './AnimatedNumber';
 
 interface MacroIndicatorsBlockProps {
   /** Eyebrow gold uppercase */
@@ -114,9 +115,10 @@ export function MacroIndicatorsBlock({
 
               {/* Value */}
               <div className="flex items-baseline gap-1.5 mb-3">
-                <span className="text-2xl md:text-[28px] font-bold text-[#111] tabular-nums leading-none">
-                  {kpi.value}
-                </span>
+                <AnimatedNumber
+                  value={kpi.value}
+                  className="text-2xl md:text-[28px] font-bold text-[#111] tabular-nums leading-none"
+                />
                 <span className="text-[13px] text-gray-500 font-medium">
                   {kpi.unit}
                 </span>

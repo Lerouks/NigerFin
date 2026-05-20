@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, Send, Check } from 'lucide-react';
+import { useToast } from '@/components/Toast';
 
 interface ContactSection {
   heading: string;
@@ -10,6 +11,7 @@ interface ContactSection {
 }
 
 export function ContactForm() {
+  const { show } = useToast();
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -47,12 +49,17 @@ export function ContactForm() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        setError(data?.error || 'Une erreur est survenue. Veuillez réessayer.');
+        const msg = data?.error || 'Une erreur est survenue. Veuillez réessayer.';
+        setError(msg);
+        show(msg, 'error');
         return;
       }
       setSubmitted(true);
+      show('Message envoyé. Nous vous répondons rapidement.', 'success');
     } catch {
-      setError('Impossible de contacter le serveur. Vérifiez votre connexion.');
+      const msg = 'Impossible de contacter le serveur. Vérifiez votre connexion.';
+      setError(msg);
+      show(msg, 'error');
     } finally {
       setLoading(false);
     }

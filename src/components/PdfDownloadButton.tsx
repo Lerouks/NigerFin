@@ -3,9 +3,17 @@
 import { useState } from 'react';
 import { Download, Lock, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import type { PdfExportOptions } from '@/hooks/usePdfExport';
 import { usePdfExport } from '@/hooks/usePdfExport';
+
+/** Extrait le slug d'outil depuis l'URL courante (ex: /outil/simulateur-emprunt -> simulateur-emprunt). */
+function extractToolSlug(pathname: string | null): string {
+  if (!pathname) return 'outil';
+  const match = pathname.match(/\/outil\/([^/?#]+)/);
+  return match?.[1] ?? 'outil';
+}
 
 interface PdfDownloadButtonProps {
   options: PdfExportOptions;
@@ -15,10 +23,12 @@ interface PdfDownloadButtonProps {
 export function PdfDownloadButton({ options, hasResults }: PdfDownloadButtonProps) {
   const { isSignedIn, userRole } = useAuth();
   const { generate } = usePdfExport();
+  const pathname = usePathname();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isPremium = isSignedIn && (userRole === 'premium' || userRole === 'admin');
+  const toolSlug = extractToolSlug(pathname);
 
   if (!hasResults) return null;
 
@@ -28,8 +38,20 @@ export function PdfDownloadButton({ options, hasResults }: PdfDownloadButtonProp
     setError(null);
 
     try {
-      // Server-side premium verification + recuperation des infos client pour personnalisation
-      const res = await fetch('/api/tools/pdf-verify', { method: 'POST' });
+      // Verification Premium + generation reference stable + persistance DB
+      const res = await fetch('/api/tools/pdf-create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          toolSlug,
+          title: options.title,
+          eyebrow: options.eyebrow,
+          params: options.params,
+          results: options.results,
+          table: options.table,
+          recommendations: options.recommendations,
+        }),
+      });
       if (res.status === 401) {
         setError('Veuillez vous connecter.');
         return;
@@ -39,18 +61,20 @@ export function PdfDownloadButton({ options, hasResults }: PdfDownloadButtonProp
         return;
       }
       if (!res.ok) {
-        setError('Erreur de vérification.');
+        setError('Erreur de génération.');
         return;
       }
 
       const payload = (await res.json()) as {
         ok: boolean;
+        reference?: string;
         recipientCivility?: 'M.' | 'Mme' | null;
         recipientName?: string;
       };
 
       await generate({
         ...options,
+        reference: payload.reference,
         recipientCivility: payload.recipientCivility ?? null,
         recipientName: payload.recipientName ?? '',
       });

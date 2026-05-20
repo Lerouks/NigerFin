@@ -25,7 +25,7 @@ export default async function MentionsLegalesPage() {
       fallbackSections={[
         {
           heading: '1. Éditeur du site',
-          text: "Le site NFI Report (ci-après «\u00A0le Site\u00A0») est édité par NFI Report, société de droit nigérien. Siège social\u00A0: Niamey (Niger). Contact\u00A0: contact@nfireport.com. Directeur de la publication\u00A0: le représentant légal de NFI Report. Le Site constitue un service de presse en ligne spécialisé dans l'information économique et financière relative au Niger et à l'Afrique de l'Ouest.",
+          text: "Le site NFI Report (ci-après «\u00A0le Site\u00A0») est édité par NFI Group SARL, société à responsabilité limitée de droit nigérien et OHADA, au capital social de 1\u00A0000\u00A0000\u00A0FCFA, immatriculée au Registre du Commerce et du Crédit Mobilier du Niger sous le numéro RCCM\u00A0NE-NIM-01-2026-B12-00204, NIF\u00A0164936/R. Siège social\u00A0: Quartier Plateau, Niamey, Niger. Contact\u00A0: contact@nfireport.com. Tél.\u00A0+227\u00A097\u00A076\u00A091\u00A031. Le Site constitue un service de presse en ligne spécialisé dans l'information économique et financière relative au Niger et à l'Afrique de l'Ouest.",
         },
         {
           heading: '2. Hébergement',

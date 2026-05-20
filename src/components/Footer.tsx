@@ -150,7 +150,7 @@ export function Footer() {
               </a>
               <p className="text-white/40 text-[13px] flex items-start gap-2">
                 <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                <span>Niamey, Niger<br />Plateau &ndash; BP 800</span>
+                <span>Niamey, Niger<br />Plateau, BP&nbsp;800</span>
               </p>
             </div>
           </div>

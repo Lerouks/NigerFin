@@ -4,6 +4,7 @@ import { Providers } from './providers';
 import { MainLayoutShell } from '@/components/MainLayoutShell';
 import { ViewTracker } from '@/components/ViewTracker';
 import { CookieBanner } from '@/components/CookieBanner';
+import { CivilityPrompt } from '@/components/CivilityPrompt';
 import { SITE_URL } from '@/lib/config';
 import { getFlashBanner } from '@/lib/site-data';
 import './globals.css';
@@ -152,6 +153,7 @@ export default async function RootLayout({
           <ViewTracker />
           <MainLayoutShell initialFlashBanner={initialFlashBanner}>{children}</MainLayoutShell>
           <CookieBanner />
+          <CivilityPrompt />
         </Providers>
       </body>
     </html>

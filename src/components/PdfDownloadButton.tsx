@@ -28,7 +28,7 @@ export function PdfDownloadButton({ options, hasResults }: PdfDownloadButtonProp
     setError(null);
 
     try {
-      // Server-side premium verification
+      // Server-side premium verification + recuperation des infos client pour personnalisation
       const res = await fetch('/api/tools/pdf-verify', { method: 'POST' });
       if (res.status === 401) {
         setError('Veuillez vous connecter.');
@@ -43,7 +43,17 @@ export function PdfDownloadButton({ options, hasResults }: PdfDownloadButtonProp
         return;
       }
 
-      await generate(options);
+      const payload = (await res.json()) as {
+        ok: boolean;
+        recipientCivility?: 'M.' | 'Mme' | null;
+        recipientName?: string;
+      };
+
+      await generate({
+        ...options,
+        recipientCivility: payload.recipientCivility ?? null,
+        recipientName: payload.recipientName ?? '',
+      });
     } catch (err) {
       console.error('[PdfDownload] Erreur génération PDF', err);
       const msg = err instanceof Error ? err.message : 'Erreur inconnue';

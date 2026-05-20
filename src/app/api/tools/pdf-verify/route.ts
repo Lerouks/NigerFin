@@ -14,7 +14,7 @@ export async function POST() {
 
   const { data: profile } = await supabase
     .from('user_profiles')
-    .select('role')
+    .select('role, civility, full_name, first_name, last_name')
     .eq('id', user.id)
     .single();
 
@@ -22,5 +22,13 @@ export async function POST() {
     return NextResponse.json({ error: 'Abonnement Premium requis' }, { status: 403 });
   }
 
-  return NextResponse.json({ ok: true });
+  // Composer le nom affiche : prenom + nom si dispo, sinon full_name complet
+  const composedName = [profile.first_name, profile.last_name].filter(Boolean).join(' ').trim();
+  const recipientName = composedName || profile.full_name || '';
+
+  return NextResponse.json({
+    ok: true,
+    recipientCivility: profile.civility || null,
+    recipientName,
+  });
 }

@@ -20,8 +20,11 @@ function getPasswordStrength(password: string): { level: 'weak' | 'medium' | 'st
   return { level: 'strong', label: 'Fort', color: 'text-emerald-600', bgColor: 'bg-emerald-500', width: 'w-full' };
 }
 
+type Civility = 'M.' | 'Mme';
+
 function InscriptionContent() {
   const searchParams = useSearchParams();
+  const [civility, setCivility] = useState<Civility | ''>('');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState(searchParams.get('email') || '');
   const [password, setPassword] = useState('');
@@ -40,11 +43,18 @@ function InscriptionContent() {
   const trimmedName = fullName.trim();
   const nameParts = trimmedName.split(/\s+/).filter(p => p.length >= 2);
   const isNameValid = nameParts.length >= 2;
+  const isCivilityValid = civility === 'M.' || civility === 'Mme';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    if (!isCivilityValid) {
+      setError('Veuillez sélectionner votre civilité.');
+      setLoading(false);
+      return;
+    }
 
     if (!isNameValid) {
       setError('Veuillez entrer votre nom et prénom (au moins 2 caractères chacun).');
@@ -64,7 +74,7 @@ function InscriptionContent() {
       return;
     }
 
-    const { error, existingUser } = await signUp(email, password, trimmedName);
+    const { error, existingUser } = await signUp(email, password, trimmedName, civility as Civility);
 
     if (existingUser) {
       setAccountExists(true);
@@ -149,6 +159,36 @@ function InscriptionContent() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          <fieldset>
+            <legend className="block text-sm font-medium mb-2">Civilité</legend>
+            <div className="grid grid-cols-2 gap-3">
+              {(['M.', 'Mme'] as const).map((opt) => {
+                const selected = civility === opt;
+                return (
+                  <label
+                    key={opt}
+                    className={`flex items-center justify-center gap-2 cursor-pointer border rounded-xl px-4 py-3 text-sm transition-all ${
+                      selected
+                        ? 'border-[#111] bg-[#fafaf9] text-[#111]'
+                        : 'border-black/[0.08] bg-white text-gray-600 hover:border-black/[0.16]'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="civility"
+                      value={opt}
+                      required
+                      checked={selected}
+                      onChange={() => setCivility(opt)}
+                      className="sr-only"
+                    />
+                    <span className="font-medium">{opt === 'M.' ? 'Monsieur' : 'Madame'}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </fieldset>
+
           <div>
             <label htmlFor="name" className="block text-sm font-medium mb-2">Nom complet</label>
             <div className="relative">
@@ -263,7 +303,7 @@ function InscriptionContent() {
 
           <button
             type="submit"
-            disabled={loading || !isNameValid || password.length < 8 || password !== confirmPassword}
+            disabled={loading || !isCivilityValid || !isNameValid || password.length < 8 || password !== confirmPassword}
             className="w-full bg-[#111] text-white py-3.5 rounded-xl hover:bg-[#222] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-[14px] font-medium active:scale-[0.98]"
           >
             {loading ? (

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, type ReactNode } from 'react';
-import DOMPurify from 'isomorphic-dompurify';
+import { sanitizeHtml } from '@/lib/sanitize-html';
 import { ReadingProgressBar } from '@/components/ReadingProgressBar';
 import { Facebook, Linkedin, Link2, Check } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
@@ -197,7 +197,7 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [], header
                   ) : (
                     <div
                       className="article-content"
-                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(resolvedBody, {
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(resolvedBody, {
                         ADD_TAGS: ['figure', 'figcaption'],
                         ADD_ATTR: ['data-type', 'data-value', 'data-label', 'target', 'rel'],
                       }) }}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import DOMPurify from 'isomorphic-dompurify';
+import { sanitizeHtml } from '@/lib/sanitize-html';
 import { buildWatermarkSvgDataUrl, isBlockedShortcut } from './ProtectedArticleBody.helpers';
 
 interface ProtectedArticleBodyProps {
@@ -20,7 +20,7 @@ export function ProtectedArticleBody({ html, watermarkLabel }: ProtectedArticleB
   const [hintVisible, setHintVisible] = useState(false);
   const hintTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const sanitized = useMemo(() => DOMPurify.sanitize(html, SANITIZE_CONFIG), [html]);
+  const sanitized = useMemo(() => sanitizeHtml(html, SANITIZE_CONFIG), [html]);
   const watermarkUrl = useMemo(() => buildWatermarkSvgDataUrl(watermarkLabel), [watermarkLabel]);
 
   const flashHint = useCallback(() => {

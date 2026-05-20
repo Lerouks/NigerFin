@@ -251,7 +251,7 @@ export async function POST(request: NextRequest) {
     if (!transactionId) {
       Sentry.captureMessage('iPayMoney callback missing transaction ID', {
         level: 'warning',
-        extra: { payload },
+        extra: { payloadKeys: Object.keys(payload), payloadHasStatus: !!payload.status },
       });
       return NextResponse.json({ error: 'transaction_id manquant' }, { status: 400 });
     }
@@ -331,10 +331,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, status });
     }
 
-    // Unknown status, log and acknowledge
+    // Unknown status, log and acknowledge. On NE log PAS le payload brut
+    // (contient telephone, nom client = PII). Si un debug pousse est requis,
+    // utiliser les logs Vercel en mode "Function logs" temporairement.
     Sentry.captureMessage('iPayMoney callback with unknown status', {
       level: 'warning',
-      extra: { status, transactionId, payload },
+      extra: { status, transactionId, payloadKeys: Object.keys(payload) },
     });
 
     return NextResponse.json({ success: true });

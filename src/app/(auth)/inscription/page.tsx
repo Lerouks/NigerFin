@@ -182,7 +182,7 @@ function InscriptionContent() {
                       onChange={() => setCivility(opt)}
                       className="sr-only"
                     />
-                    <span className="font-medium">{opt === 'M.' ? 'Monsieur' : 'Madame'}</span>
+                    <span className="font-medium" aria-label={opt === 'M.' ? 'Monsieur' : 'Madame'}>{opt}</span>
                   </label>
                 );
               })}

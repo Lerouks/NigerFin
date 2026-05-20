@@ -154,26 +154,46 @@ export async function POST(req: NextRequest) {
     const supabase = createServiceClient();
     if (!supabase) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
 
-    // Insert event
-    await supabase.from('newsletter_events').insert({
+    // Insert event. On capture les erreurs Supabase pour Sentry sinon les
+    // events bounce/complain restent silencieux (audit securite 2026-05-20,
+    // critique pour la deliverability newsletter).
+    const { error: insertEventError } = await supabase.from('newsletter_events').insert({
       issue_id: issueId,
       subscriber_id: subscriberId,
       event_type: eventType,
       meta: { resend_id: event.data?.email_id, raw: event.data },
     });
+    if (insertEventError) {
+      Sentry.captureException(insertEventError, {
+        tags: { context: 'resend-webhook', op: 'insert-newsletter-event' },
+        extra: { issueId, subscriberId, eventType },
+      });
+    }
 
     // Side effects on the subscriber
     if (eventType === 'bounced' || eventType === 'complained') {
-      await supabase
+      const { error: subUpdateError } = await supabase
         .from('newsletter_subscribers')
         .update({ status: eventType, unsubscribed_at: new Date().toISOString() })
         .eq('id', subscriberId);
+      if (subUpdateError) {
+        Sentry.captureException(subUpdateError, {
+          tags: { context: 'resend-webhook', op: 'update-subscriber-bounced-complained' },
+          extra: { subscriberId, eventType },
+        });
+      }
     }
     if (eventType === 'unsubscribed') {
-      await supabase
+      const { error: unsubError } = await supabase
         .from('newsletter_subscribers')
         .update({ status: 'unsubscribed', unsubscribed_at: new Date().toISOString() })
         .eq('id', subscriberId);
+      if (unsubError) {
+        Sentry.captureException(unsubError, {
+          tags: { context: 'resend-webhook', op: 'update-subscriber-unsubscribed' },
+          extra: { subscriberId },
+        });
+      }
     }
 
     // Increment denormalized counter on the issue (bestEffort)

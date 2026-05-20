@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import { createServerSupabaseClient } from '@/lib/supabase';
 import { isValidUUID, safeParseJSON } from '@/lib/validation';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
@@ -76,15 +77,36 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (existing) {
-      // Unlike
-      await supabase.from('article_likes').delete().eq('id', existing.id);
+      // Unlike : on capture l'erreur Supabase pour Sentry sinon la suppression
+      // peut echouer silencieusement (audit 2026-05-20)
+      const { error: deleteError } = await supabase
+        .from('article_likes')
+        .delete()
+        .eq('id', existing.id);
+      if (deleteError) {
+        Sentry.captureException(deleteError, {
+          tags: { context: 'likes-api', op: 'unlike' },
+          extra: { article_id, user_id: user.id },
+        });
+        return NextResponse.json({ error: 'Erreur suppression like' }, { status: 500 });
+      }
       return NextResponse.json({ liked: false });
     } else {
       // Like
-      await supabase.from('article_likes').insert({ article_id, user_id: user.id });
+      const { error: insertError } = await supabase
+        .from('article_likes')
+        .insert({ article_id, user_id: user.id });
+      if (insertError) {
+        Sentry.captureException(insertError, {
+          tags: { context: 'likes-api', op: 'like' },
+          extra: { article_id, user_id: user.id },
+        });
+        return NextResponse.json({ error: 'Erreur création like' }, { status: 500 });
+      }
       return NextResponse.json({ liked: true });
     }
-  } catch {
+  } catch (err) {
+    Sentry.captureException(err, { tags: { context: 'likes-api' } });
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }

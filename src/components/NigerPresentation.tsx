@@ -1,10 +1,10 @@
 'use client';
 
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { MapPin, Users, Ruler, Coins, Gem, Factory, Globe, Calendar, TrendingUp, BarChart3 } from 'lucide-react';
 import { NigerRegions } from './niger/NigerRegions';
 import { NigerResources } from './niger/NigerResources';
+import { NigerOutlineMap } from './niger/NigerOutlineMap';
 import { useNigerCountry } from '@/hooks/useNigerCountry';
 import { useNigerMacro } from '@/hooks/useNigerMacro';
 
@@ -179,10 +179,13 @@ export function NigerPresentation({ initialData }: NigerPresentationProps = {}) 
       {/* Profil Pays */}
       <section className="border-t border-black/[0.06] pt-14 md:pt-20">
         <div className="mb-10">
-          <span className="text-[11px] tracking-[0.2em] uppercase text-gray-400 block mb-3">Profil pays</span>
-          <h2 className="text-2xl md:text-3xl leading-tight">{presentation.intro_title}</h2>
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="h-px w-6 bg-gold/60" />
+            <span className="text-[11px] tracking-[0.2em] uppercase text-gold font-semibold">Profil pays</span>
+          </div>
+          <h2 className="text-3xl md:text-4xl font-semibold tracking-tight leading-[1.1]">{presentation.intro_title}</h2>
           {countryData.lastUpdated && (
-            <p className="text-[10px] text-gray-400 mt-2">Source : REST Countries &middot; {new Date(countryData.lastUpdated).toLocaleDateString('fr-FR')}</p>
+            <p className="text-[11px] text-gray-500 mt-3">Source : REST Countries &middot; {new Date(countryData.lastUpdated).toLocaleDateString('fr-FR')}</p>
           )}
         </div>
 
@@ -195,31 +198,13 @@ export function NigerPresentation({ initialData }: NigerPresentationProps = {}) 
           </div>
         )}
 
-        {/* Carte pleine largeur */}
+        {/* Carte vectorielle Niger : 9 villes principales + 7 pays voisins */}
         <div className="mb-14">
-          {presentation.map_image_url ? (
-            <div className="rounded-xl overflow-hidden bg-[#f5f5f0] border border-black/[0.06]">
-              <Image
-                src={presentation.map_image_url}
-                alt={presentation.map_image_alt || 'Carte administrative du Niger'}
-                width={1320}
-                height={916}
-                className="w-full h-auto block"
-                priority
-                quality={90}
-                sizes="(max-width: 1280px) 100vw, 1200px"
-              />
-            </div>
-          ) : (
-            <div className="rounded-xl bg-[#f5f5f0] border border-black/[0.06] aspect-[1320/916] flex items-center justify-center">
-              <div className="text-center text-gray-400">
-                <MapPin className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                <p className="text-[13px]">Carte du Niger</p>
-              </div>
-            </div>
-          )}
-          <p className="text-[11px] text-gray-400 mt-3 text-center">
-            Carte administrative du Niger &mdash; Source : Ministère des Affaires étrangères
+          <div className="rounded-2xl overflow-hidden bg-gradient-to-b from-white to-[#f5f5f0] border border-black/[0.06] shadow-[0_4px_40px_-12px_rgba(0,0,0,0.06)] p-4 sm:p-6 md:p-8">
+            <NigerOutlineMap className="w-full h-auto block" />
+          </div>
+          <p className="text-[11px] text-gray-500 mt-3 text-center">
+            Carte du Niger, 9 principales villes et pays frontaliers. Source : NFI Report.
           </p>
         </div>
 
@@ -227,7 +212,7 @@ export function NigerPresentation({ initialData }: NigerPresentationProps = {}) 
         <div className="space-y-10">
           {sortedCategories.map((cat) => (
             <div key={cat}>
-              <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4 pb-2 border-b border-black/[0.06]">
+              <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-600 font-semibold mb-4 pb-2 border-b border-black/[0.06]">
                 {CATEGORY_LABELS[cat] || cat}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -239,10 +224,10 @@ export function NigerPresentation({ initialData }: NigerPresentationProps = {}) 
                       className="group flex items-start gap-3.5 p-5 rounded-xl bg-white border border-black/[0.06] hover:border-black/[0.1] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
                     >
                       <div className="w-9 h-9 rounded-lg bg-[#fafaf9] border border-black/[0.06] flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:bg-[#111] group-hover:border-[#111] transition-colors duration-200">
-                        <Icon className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors duration-200" />
+                        <Icon className="w-4 h-4 text-gray-500 group-hover:text-white transition-colors duration-200" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1">{fact.label}</p>
+                        <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">{fact.label}</p>
                         <p className="text-[14px] font-semibold text-gray-900 leading-snug">{fact.value}</p>
                       </div>
                     </div>

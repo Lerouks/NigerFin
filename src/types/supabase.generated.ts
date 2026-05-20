@@ -1653,6 +1653,45 @@ export type Database = {
         }
         Relationships: []
       }
+      tool_pdf_documents: {
+        Row: {
+          generated_at: string
+          id: string
+          params: Json
+          recipient_civility: string | null
+          recipient_name: string | null
+          reference: string
+          results: Json
+          title: string
+          tool_slug: string
+          user_id: string
+        }
+        Insert: {
+          generated_at?: string
+          id?: string
+          params?: Json
+          recipient_civility?: string | null
+          recipient_name?: string | null
+          reference: string
+          results?: Json
+          title: string
+          tool_slug: string
+          user_id: string
+        }
+        Update: {
+          generated_at?: string
+          id?: string
+          params?: Json
+          recipient_civility?: string | null
+          recipient_name?: string | null
+          reference?: string
+          results?: Json
+          title?: string
+          tool_slug?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_lesson_progress: {
         Row: {
           completed_at: string | null
@@ -1801,6 +1840,7 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: undefined
       }
+      next_user_pdf_reference: { Args: { p_user_id: string }; Returns: string }
       reset_market_previous_close: { Args: never; Returns: undefined }
       reset_monthly_premium_count: { Args: never; Returns: undefined }
       set_featured_article: {

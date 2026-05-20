@@ -22,15 +22,15 @@ export default function HomeLoading() {
           <div className="lg:col-span-8">
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-xl font-bold text-[#1a1a1a]">Dernières actualités</h3>
-              <div className="h-4 w-20 bg-gray-100 rounded animate-pulse" />
+              <div className="h-4 w-20 bg-[#f5f1e6] rounded animate-pulse" />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {[...Array(4)].map((_, i) => (
                 <div key={i} className="rounded-xl overflow-hidden border border-black/[0.06] bg-white">
-                  <div className="h-48 bg-gradient-to-br from-gray-50 to-gray-100 animate-pulse" />
+                  <div className="h-48 bg-gradient-to-br from-[#f5f1e6] to-[#ede4ca] animate-pulse" />
                   <div className="p-5 space-y-3">
-                    <div className="h-3 w-20 bg-gray-100 rounded animate-pulse" />
-                    <div className="h-5 w-full bg-gray-100 rounded animate-pulse" />
+                    <div className="h-3 w-20 bg-[#f5f1e6] rounded animate-pulse" />
+                    <div className="h-5 w-full bg-[#f5f1e6] rounded animate-pulse" />
                     <div className="h-4 w-3/4 bg-gray-50 rounded animate-pulse" />
                   </div>
                 </div>
@@ -43,8 +43,8 @@ export default function HomeLoading() {
               <div className="space-y-3">
                 {[...Array(4)].map((_, i) => (
                   <div key={i} className="flex justify-between items-center py-2 border-b border-black/[0.04] last:border-b-0">
-                    <div className="h-3 w-16 bg-gray-100 rounded animate-pulse" />
-                    <div className="h-3 w-20 bg-gray-100 rounded animate-pulse" />
+                    <div className="h-3 w-16 bg-[#f5f1e6] rounded animate-pulse" />
+                    <div className="h-3 w-20 bg-[#f5f1e6] rounded animate-pulse" />
                   </div>
                 ))}
               </div>

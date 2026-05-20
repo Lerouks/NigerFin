@@ -1,10 +1,14 @@
+'use client';
+
+import { useState } from 'react';
+
 /**
- * Carte vectorielle du Niger, contour officiel + 9 villes principales et
- * pays voisins, style sobre Apple. Reste nette a toute resolution (SVG inline,
- * pas de raster). Le path provient de public/newsletter/niger-outline.svg.
+ * Carte vectorielle du Niger (v2). Reste nette a toute resolution.
+ * viewBox aligne sur le path reel (1000x750) + container aspect-ratio
+ * pour remplir la zone disponible sur desktop, tablet et mobile.
  *
- * viewBox 1000x748 : projection plate-carree approximative,
- * positions des villes calibrees visuellement.
+ * 9 villes cliquables/hoverables, 7 pays voisins en filigrane.
+ * Tooltip Apple-style sur hover (desktop) ou tap (mobile).
  */
 
 const NIGER_PATH =
@@ -14,20 +18,21 @@ interface City {
   name: string;
   x: number;
   y: number;
+  role: string;
   capital?: boolean;
   align?: 'left' | 'right' | 'top' | 'bottom';
 }
 
 const CITIES: City[] = [
-  { name: 'Niamey', x: 255, y: 615, capital: true, align: 'bottom' },
-  { name: 'Tillabéri', x: 215, y: 555, align: 'left' },
-  { name: 'Dosso', x: 295, y: 650, align: 'right' },
-  { name: 'Tahoua', x: 445, y: 530, align: 'top' },
-  { name: 'Agadez', x: 570, y: 370, align: 'right' },
-  { name: 'Arlit', x: 540, y: 285, align: 'left' },
-  { name: 'Maradi', x: 525, y: 615, align: 'bottom' },
-  { name: 'Zinder', x: 620, y: 620, align: 'right' },
-  { name: 'Diffa', x: 845, y: 615, align: 'top' },
+  { name: 'Niamey', x: 260, y: 622, role: 'Capitale du Niger', capital: true, align: 'bottom' },
+  { name: 'Tillabéri', x: 215, y: 555, role: "Chef-lieu de la région de Tillabéri", align: 'left' },
+  { name: 'Dosso', x: 305, y: 656, role: 'Chef-lieu de la région de Dosso', align: 'right' },
+  { name: 'Tahoua', x: 445, y: 530, role: 'Chef-lieu de la région de Tahoua', align: 'top' },
+  { name: 'Agadez', x: 570, y: 370, role: "Chef-lieu de la région d'Agadez", align: 'right' },
+  { name: 'Arlit', x: 540, y: 285, role: 'Ville minière (uranium)', align: 'left' },
+  { name: 'Maradi', x: 525, y: 620, role: 'Chef-lieu de la région de Maradi', align: 'bottom' },
+  { name: 'Zinder', x: 620, y: 625, role: 'Chef-lieu de la région de Zinder', align: 'right' },
+  { name: 'Diffa', x: 840, y: 615, role: 'Chef-lieu de la région de Diffa', align: 'top' },
 ];
 
 interface Neighbor {
@@ -37,23 +42,28 @@ interface Neighbor {
 }
 
 const NEIGHBORS: Neighbor[] = [
-  { name: 'ALGÉRIE', x: 420, y: 90 },
-  { name: 'LIBYE', x: 870, y: 90 },
-  { name: 'MALI', x: 110, y: 460 },
-  { name: 'TCHAD', x: 950, y: 380 },
-  { name: 'BURKINA FASO', x: 95, y: 680 },
-  { name: 'BÉNIN', x: 230, y: 770 },
-  { name: 'NIGÉRIA', x: 540, y: 770 },
+  { name: 'ALGÉRIE', x: 480, y: 95 },
+  { name: 'LIBYE', x: 850, y: 100 },
+  { name: 'MALI', x: 110, y: 470 },
+  { name: 'TCHAD', x: 905, y: 420 },
+  { name: 'BURKINA FASO', x: 165, y: 750 },
+  { name: 'BÉNIN', x: 310, y: 760 },
+  { name: 'NIGÉRIA', x: 555, y: 765 },
 ];
+
+const FONT_FAMILY =
+  '-apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif';
 
 interface NigerOutlineMapProps {
   className?: string;
 }
 
 export function NigerOutlineMap({ className }: NigerOutlineMapProps) {
+  const [activeCity, setActiveCity] = useState<City | null>(null);
+
   return (
     <svg
-      viewBox="-60 -60 1160 900"
+      viewBox="-40 -40 1080 830"
       role="img"
       aria-label="Carte du Niger avec ses principales villes"
       className={className}
@@ -61,26 +71,41 @@ export function NigerOutlineMap({ className }: NigerOutlineMapProps) {
     >
       <title>Carte du Niger</title>
       <desc>
-        Contour territorial du Niger, ses 9 principales villes (Niamey capitale,
-        Agadez, Arlit, Tahoua, Tillabéri, Dosso, Maradi, Zinder, Diffa) et les
+        Contour territorial du Niger, 9 villes principales (Niamey capitale,
+        Agadez, Arlit, Tahoua, Tillabéri, Dosso, Maradi, Zinder, Diffa) et
         7 pays frontaliers.
       </desc>
 
       <defs>
         <linearGradient id="niger-bg" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#fdfcfa" />
-          <stop offset="100%" stopColor="#f5f5f0" />
+          <stop offset="100%" stopColor="#f5f1e6" />
         </linearGradient>
         <linearGradient id="niger-fill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#fcfcfa" />
-          <stop offset="100%" stopColor="#f0ede2" />
+          <stop offset="0%" stopColor="#fcfaf3" />
+          <stop offset="100%" stopColor="#f0e8d0" />
         </linearGradient>
+        <radialGradient id="capital-halo" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#d4a843" stopOpacity="0.55" />
+          <stop offset="60%" stopColor="#d4a843" stopOpacity="0.18" />
+          <stop offset="100%" stopColor="#d4a843" stopOpacity="0" />
+        </radialGradient>
       </defs>
 
       {/* Fond doux */}
-      <rect x="-60" y="-60" width="1160" height="900" fill="url(#niger-bg)" />
+      <rect x="-40" y="-40" width="1080" height="830" fill="url(#niger-bg)" />
 
-      {/* Pays voisins en filigrane */}
+      {/* Contour du Niger */}
+      <path
+        d={NIGER_PATH}
+        fill="url(#niger-fill)"
+        stroke="#1f2937"
+        strokeWidth={2.5}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+
+      {/* Pays voisins en filigrane, rendus apres le path pour rester lisibles */}
       {NEIGHBORS.map((n) => (
         <text
           key={n.name}
@@ -88,102 +113,169 @@ export function NigerOutlineMap({ className }: NigerOutlineMapProps) {
           y={n.y}
           textAnchor="middle"
           dominantBaseline="middle"
-          className="fill-[#b5b1a8]"
+          fill="#9b9078"
+          opacity={0.9}
           style={{
             fontSize: 16,
-            fontWeight: 500,
-            letterSpacing: '0.18em',
-            fontFamily:
-              '-apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif',
+            fontWeight: 700,
+            letterSpacing: '0.2em',
+            fontFamily: FONT_FAMILY,
+            paintOrder: 'stroke',
+            stroke: '#fdfcfa',
+            strokeWidth: 3,
+            strokeLinejoin: 'round',
           }}
         >
           {n.name}
         </text>
       ))}
 
-      {/* Contour du Niger */}
-      <path
-        d={NIGER_PATH}
-        fill="url(#niger-fill)"
-        stroke="#1f2937"
-        strokeWidth={1.6}
-        strokeLinejoin="round"
-        strokeLinecap="round"
-      />
-
-      {/* Marker capitale Niamey, anneau gold + cercle */}
-      <g>
-        <circle cx={255} cy={615} r={10} fill="#d4a843" opacity={0.18} />
-        <circle cx={255} cy={615} r={6.5} fill="#d4a843" />
-        <circle cx={255} cy={615} r={2.6} fill="#fdfcfa" />
-      </g>
-
-      {/* Marqueurs villes secondaires */}
-      {CITIES.filter((c) => !c.capital).map((c) => (
-        <circle
+      {/* Villes : un groupe interactif par ville (hit-area + marker + label) */}
+      {CITIES.map((c) => (
+        <CityNode
           key={c.name}
-          cx={c.x}
-          cy={c.y}
-          r={4}
-          fill="#1f2937"
-          stroke="#fdfcfa"
-          strokeWidth={1.4}
+          city={c}
+          onActivate={() => setActiveCity(c)}
+          onDeactivate={() => setActiveCity((curr) => (curr?.name === c.name ? null : curr))}
         />
       ))}
 
-      {/* Labels des villes */}
-      {CITIES.map((c) => {
-        let dx = 0;
-        let dy = 0;
-        let anchor: 'start' | 'middle' | 'end' = 'middle';
-        let baseline: 'auto' | 'hanging' | 'middle' = 'auto';
-        const offset = c.capital ? 14 : 8;
-        switch (c.align ?? 'bottom') {
-          case 'top':
-            dy = -offset;
-            anchor = 'middle';
-            baseline = 'auto';
-            break;
-          case 'bottom':
-            dy = offset + 10;
-            anchor = 'middle';
-            baseline = 'hanging';
-            break;
-          case 'left':
-            dx = -offset;
-            anchor = 'end';
-            baseline = 'middle';
-            break;
-          case 'right':
-            dx = offset;
-            anchor = 'start';
-            baseline = 'middle';
-            break;
-        }
-        return (
-          <text
-            key={`label-${c.name}`}
-            x={c.x + dx}
-            y={c.y + dy}
-            textAnchor={anchor}
-            dominantBaseline={baseline}
-            className="fill-[#111111]"
-            style={{
-              fontSize: c.capital ? 18 : 15,
-              fontWeight: c.capital ? 700 : 500,
-              fontFamily:
-                '-apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif',
-              paintOrder: 'stroke',
-              stroke: '#fdfcfa',
-              strokeWidth: 3,
-              strokeLinejoin: 'round',
-            }}
-          >
-            {c.name}
-          </text>
-        );
-      })}
-
+      {/* Tooltip rendu au-dessus de la ville active (apres les villes pour passer dessus) */}
+      {activeCity && <Tooltip city={activeCity} />}
     </svg>
+  );
+}
+
+function CityNode({
+  city,
+  onActivate,
+  onDeactivate,
+}: {
+  city: City;
+  onActivate: () => void;
+  onDeactivate: () => void;
+}) {
+  const offset = city.capital ? 18 : 11;
+  let dx = 0;
+  let dy = 0;
+  let anchor: 'start' | 'middle' | 'end' = 'middle';
+  let baseline: 'auto' | 'hanging' | 'middle' = 'auto';
+  switch (city.align ?? 'bottom') {
+    case 'top':
+      dy = -offset;
+      anchor = 'middle';
+      baseline = 'auto';
+      break;
+    case 'bottom':
+      dy = offset + 12;
+      anchor = 'middle';
+      baseline = 'hanging';
+      break;
+    case 'left':
+      dx = -offset;
+      anchor = 'end';
+      baseline = 'middle';
+      break;
+    case 'right':
+      dx = offset;
+      anchor = 'start';
+      baseline = 'middle';
+      break;
+  }
+
+  return (
+    <g
+      style={{ cursor: 'pointer' }}
+      onMouseEnter={onActivate}
+      onMouseLeave={onDeactivate}
+      onFocus={onActivate}
+      onBlur={onDeactivate}
+      onClick={onActivate}
+      tabIndex={0}
+      role="button"
+      aria-label={`${city.name}, ${city.role}`}
+    >
+      {/* Marker */}
+      {city.capital ? (
+        <>
+          <circle cx={city.x} cy={city.y} r={26} fill="url(#capital-halo)" />
+          <circle cx={city.x} cy={city.y} r={9} fill="#d4a843" />
+          <circle cx={city.x} cy={city.y} r={3.5} fill="#fdfcfa" />
+        </>
+      ) : (
+        <circle cx={city.x} cy={city.y} r={5.5} fill="#0f172a" stroke="#fdfcfa" strokeWidth={2} />
+      )}
+      {/* Hit-area transparente, plus large */}
+      <circle cx={city.x} cy={city.y} r={28} fill="rgba(0,0,0,0)" pointerEvents="all" />
+      {/* Label */}
+      <text
+        x={city.x + dx}
+        y={city.y + dy}
+        textAnchor={anchor}
+        dominantBaseline={baseline}
+        fill="#111111"
+        pointerEvents="none"
+        style={{
+          fontSize: city.capital ? 22 : 18,
+          fontWeight: city.capital ? 800 : 600,
+          letterSpacing: city.capital ? '-0.01em' : '0',
+          fontFamily: FONT_FAMILY,
+          paintOrder: 'stroke',
+          stroke: '#fdfcfa',
+          strokeWidth: 4,
+          strokeLinejoin: 'round',
+        }}
+      >
+        {city.name}
+      </text>
+    </g>
+  );
+}
+
+function Tooltip({ city }: { city: City }) {
+  const nameWidth = Math.max(city.name.length * 11 + 24, 110);
+  const roleWidth = city.role.length * 7 + 24;
+  const w = Math.max(nameWidth, roleWidth, 180);
+  const h = 56;
+  const x = city.x - w / 2;
+  const y = city.y - h - 28;
+  const tipX = city.x;
+
+  return (
+    <g pointerEvents="none" style={{ filter: 'drop-shadow(0 8px 24px rgba(15, 23, 42, 0.18))' }}>
+      <path
+        d={`M${x + 14},${y} h${w - 28} a14,14 0 0 1 14,14 v${h - 28} a14,14 0 0 1 -14,14 h${(w - 16) / 2 - (tipX - x) + 16} l-7,9 l-7,-9 h${(tipX - x) - (w - 16) / 2 - 16} a14,14 0 0 1 -14,-14 v${-(h - 28)} a14,14 0 0 1 14,-14 z`}
+        fill="#ffffff"
+        stroke="#111"
+        strokeOpacity={0.06}
+        strokeWidth={1}
+      />
+      <text
+        x={tipX}
+        y={y + 22}
+        textAnchor="middle"
+        fill="#111"
+        style={{
+          fontSize: 15,
+          fontWeight: 700,
+          fontFamily: FONT_FAMILY,
+        }}
+      >
+        {city.name}
+      </text>
+      <text
+        x={tipX}
+        y={y + 40}
+        textAnchor="middle"
+        fill="#6b7280"
+        style={{
+          fontSize: 11.5,
+          fontWeight: 500,
+          fontFamily: FONT_FAMILY,
+        }}
+      >
+        {city.role}
+      </text>
+    </g>
   );
 }

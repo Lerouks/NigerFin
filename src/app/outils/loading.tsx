@@ -11,11 +11,11 @@ export default function Loading() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
             <div key={i} className="rounded-xl overflow-hidden border border-black/[0.06] bg-white">
-              <div className="h-48 bg-gray-100 animate-pulse" />
+              <div className="h-48 bg-[#f5f1e6] animate-pulse" />
               <div className="p-5 space-y-3">
-                <div className="h-3 w-20 bg-gray-200 rounded animate-pulse" />
-                <div className="h-5 w-full bg-gray-200 rounded animate-pulse" />
-                <div className="h-4 w-3/4 bg-gray-100 rounded animate-pulse" />
+                <div className="h-3 w-20 bg-[#ede4ca] rounded animate-pulse" />
+                <div className="h-5 w-full bg-[#ede4ca] rounded animate-pulse" />
+                <div className="h-4 w-3/4 bg-[#f5f1e6] rounded animate-pulse" />
               </div>
             </div>
           ))}

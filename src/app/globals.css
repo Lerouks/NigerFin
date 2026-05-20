@@ -221,6 +221,16 @@ small, footer, .text-xs, .text-sm {
 .stagger-grid > *:nth-child(7) { animation-delay: 480ms; }
 .stagger-grid > *:nth-child(8) { animation-delay: 560ms; }
 
+/* Loading bar indeterminate (root loading fallback) */
+@keyframes loadingBarSlide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+.loading-bar-indeterminate {
+  width: 25%;
+  animation: loadingBarSlide 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
 /* Reveal-on-scroll wrapper */
 .reveal-on-scroll {
   opacity: 0;
@@ -246,7 +256,8 @@ small, footer, .text-xs, .text-sm {
   .animate-marquee,
   .animate-subtle-pulse,
   .stagger-grid > *,
-  .reveal-on-scroll {
+  .reveal-on-scroll,
+  .loading-bar-indeterminate {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;

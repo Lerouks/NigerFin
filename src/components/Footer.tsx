@@ -146,7 +146,7 @@ export function Footer() {
                 className="text-white/40 hover:text-white/70 transition-colors text-[13px] flex items-center gap-2"
               >
                 <Phone className="w-4 h-4" />
-                +227 97 76 91 31
+                +227&nbsp;97&nbsp;76&nbsp;91&nbsp;31
               </a>
               <p className="text-white/40 text-[13px] flex items-start gap-2">
                 <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />

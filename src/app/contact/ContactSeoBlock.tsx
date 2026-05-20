@@ -78,10 +78,10 @@ export function ContactSeoBlock() {
           <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700">
             Toutes les communications adressées à NFI Report sont traitées de manière
             confidentielle. Vos données personnelles (nom, email, téléphone) sont conservées
-            uniquement pour répondre à votre demande, pendant une durée maximale de 12 mois.
+            uniquement pour répondre à votre demande, pendant une durée maximale de 12&nbsp;mois.
             Elles ne sont jamais partagées avec des tiers à des fins commerciales et vous
             pouvez à tout moment demander leur suppression conformément à notre politique de
-            confidentialité et à la loi nigérienne n° 2017-28 sur la protection des données
+            confidentialité et à la loi nigérienne n°&nbsp;2017-28 sur la protection des données
             personnelles.
           </p>
         </div>

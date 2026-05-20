@@ -76,8 +76,8 @@ export default async function HomePage() {
                   <div className="flex-1 h-px bg-black/[0.06]" />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 stagger-grid">
-                  {latestFiltered.map((article) => (
-                    <ArticleCard key={article._id} article={article} />
+                  {latestFiltered.map((article, index) => (
+                    <ArticleCard key={article._id} article={article} priority={index === 0} />
                   ))}
                 </div>
               </section>

@@ -9,6 +9,7 @@ import { SECTION_META } from '@/lib/sections';
 interface ArticleCardProps {
   article: Article;
   featured?: boolean;
+  priority?: boolean;
 }
 
 function getImageUrl(article: Article): string {
@@ -36,7 +37,7 @@ function SectionBadges({ sections, category, variant = 'light' }: { sections?: s
   );
 }
 
-export function ArticleCard({ article, featured = false }: ArticleCardProps) {
+export function ArticleCard({ article, featured = false, priority = false }: ArticleCardProps) {
   const imageUrl = getImageUrl(article);
 
   if (featured) {
@@ -94,6 +95,7 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             quality={85}
             className="w-full h-40 md:h-48 object-cover group-hover:scale-[1.03] transition-transform duration-500"
+            priority={priority}
           />
           {article.isPremium && (
             <div className="absolute top-3 left-3 bg-[#d4a843]/90 backdrop-blur-sm text-white text-[10px] font-semibold tracking-[0.12em] uppercase px-2.5 py-1 rounded-full shadow-sm">

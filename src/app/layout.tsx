@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
+import { headers } from 'next/headers';
 import { Providers } from './providers';
 import { MainLayoutShell } from '@/components/MainLayoutShell';
 import { ViewTracker } from '@/components/ViewTracker';
@@ -135,16 +136,20 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const initialFlashBanner = await getFlashBanner();
+  // Recupere le nonce CSP injecte par src/proxy.ts pour les scripts inline.
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
 
   return (
     <html lang="fr" className={`${inter.variable}`} suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"
+          nonce={nonce}
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
         <script
           type="application/ld+json"
+          nonce={nonce}
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
       </head>

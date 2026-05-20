@@ -50,20 +50,9 @@ const nextConfig = {
     ];
   },
   async headers() {
-    const isDev = process.env.NODE_ENV === 'development';
-    const csp = [
-      "default-src 'self'",
-      `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${isDev ? " 'unsafe-eval'" : ''}`,
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co",
-      "font-src 'self'",
-      `connect-src 'self' https://*.supabase.co https://*.sentry.io https://*.posthog.com${isDev ? ' ws://localhost:* http://localhost:*' : ''}`,
-      "frame-src 'none'",
-      "object-src 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-    ].join('; ');
-
+    // La CSP est maintenant generee dynamiquement avec un nonce par requete
+    // dans src/proxy.ts (middleware). Voir la fonction buildCspHeader.
+    // Cette configuration ne gere plus que les headers statiques sans nonce.
     return [
       {
         source: '/api/:path*',
@@ -101,10 +90,8 @@ const nextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
           },
-          {
-            key: 'Content-Security-Policy',
-            value: csp,
-          },
+          // Content-Security-Policy gere dynamiquement avec un nonce par
+          // requete dans src/proxy.ts (middleware) pour CSP nonce-based.
         ],
       },
     ];

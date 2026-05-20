@@ -1,6 +1,33 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
+/**
+ * Construit une CSP nonce-based dynamique. Le nonce est unique par requete
+ * et applique aux scripts inline via React + Next.js (via headers().get('x-nonce')).
+ * 'strict-dynamic' autorise les scripts charges PAR un script noncee a charger
+ * d'autres scripts sans nonce (hydration React, Sentry, PostHog).
+ *
+ * En dev on garde 'unsafe-eval' pour React Hot Reload + DevTools.
+ */
+function buildCspHeader(nonce: string): string {
+  const isDev = process.env.NODE_ENV === 'development';
+  const directives = [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'wasm-unsafe-eval'${isDev ? " 'unsafe-eval'" : ''}`,
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co",
+    "font-src 'self'",
+    `connect-src 'self' https://*.supabase.co https://*.sentry.io https://*.posthog.com${isDev ? ' ws://localhost:* http://localhost:*' : ''}`,
+    "frame-src 'none'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+    'upgrade-insecure-requests',
+  ];
+  return directives.join('; ');
+}
+
 export async function proxy(request: NextRequest) {
   const host = request.headers.get('host') || '';
   if (host.startsWith('www.')) {
@@ -16,15 +43,26 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(target, 308);
   }
 
+  // Generation d'un nonce CSP par requete. Utilise pour les scripts inline
+  // (JSON-LD dans layout, scripts d'hydration React via Next.js).
+  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
+  const cspHeader = buildCspHeader(nonce);
+
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-nonce', nonce);
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) {
-    return NextResponse.next();
+    const response = NextResponse.next({ request: { headers: requestHeaders } });
+    response.headers.set('Content-Security-Policy', cspHeader);
+    return response;
   }
 
   let supabaseResponse = NextResponse.next({
-    request,
+    request: { headers: requestHeaders },
   });
+  supabaseResponse.headers.set('Content-Security-Policy', cspHeader);
 
   const supabase = createServerClient(url, key,
     {
@@ -37,8 +75,9 @@ export async function proxy(request: NextRequest) {
             request.cookies.set(name, value)
           );
           supabaseResponse = NextResponse.next({
-            request,
+            request: { headers: requestHeaders },
           });
+          supabaseResponse.headers.set('Content-Security-Policy', cspHeader);
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           );

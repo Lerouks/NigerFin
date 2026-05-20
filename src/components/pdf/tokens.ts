@@ -1,67 +1,67 @@
 /**
  * Tokens design pour les PDFs des outils NFI Report.
- * Source de vérité unique pour assurer la cohérence Apple-style avec InvoicePdf.tsx.
- *
- * Charte typo, strictement, Inter Display + Montserrat + Playfair (mission requirement).
- * Toutes les fonts vivent dans /public/fonts/, déclarées via Font.register dans ToolPdfDocument.tsx.
+ * Cohérent avec src/emails/InvoicePdf.tsx (Apple-style validé en prod).
+ * Helvetica built-in (pas de fonts custom) pour éviter tout problème
+ * d'embedding/CORS/CSP et garantir un rendu identique partout.
  */
 
 export const PDF_COLORS = {
-  // Surfaces
-  bg: '#fafaf9',
-  card: '#ffffff',
-  inkPrimary: '#111111',
-  inkSecondary: '#374151',
-  inkMuted: '#6b7280',
-  inkSubtle: '#9ca3af',
-  // Borders
-  borderSoft: '#e5e7eb',
-  borderHairline: '#f0efe9',
-  // Accents
-  gold: '#d4a843',
-  goldSoft: 'rgba(212, 168, 67, 0.12)',
-  // Semantic
-  success: '#10b981',
-  error: '#ef4444',
+  // Surfaces (palette Apple)
+  paper: '#ffffff',
+  paperSoft: '#f5f5f7',
+  ink: '#1d1d1f',
+  inkSoft: '#3a3a3c',
+  muted: '#6e6e73',
+  mutedLight: '#86868b',
+  divider: '#d2d2d7',
+  dividerLight: '#e5e5e7',
+  // Notice (disclaimer)
+  warning: '#d97706',
+  warningBg: '#fff9eb',
+  warningInk: '#5c4308',
+  // Brand accent (utilisé avec parcimonie, uniquement sur slogan final)
+  brand: '#1d1d1f',
 } as const;
 
 export const PDF_FONT = {
-  // Stack body : Montserrat pour le corps texte (paragraphes, recommandations)
-  body: 'Montserrat',
-  // Stack titles : Inter pour les titres + données (chiffres clés, KPIs, headers)
-  title: 'Inter',
-  // Stack wordmark : Playfair pour le N et le R du wordmark NFI Report
-  wordmark: 'Playfair',
+  regular: 'Helvetica',
+  bold: 'Helvetica-Bold',
+  italic: 'Helvetica-Oblique',
 } as const;
 
 export const PDF_SIZE = {
-  // Hierarchie typo
-  wordmark: 16,
-  pageTitle: 18,
-  sectionTitle: 12,
-  subSection: 10,
-  body: 10,
-  caption: 9,
+  // Hiérarchie typo (alignée sur InvoicePdf)
+  brand: 14,
+  brandTag: 8,
+  docTitle: 22,
+  docRef: 10,
+  eyebrow: 7.5,
+  sectionTitle: 11,
+  body: 10.5,
+  bodySmall: 10,
+  meta: 10.5,
+  metaLabel: 7,
   micro: 8,
-  // Tabular
-  tableHead: 9,
-  tableCell: 9,
+  // Hero KPI (chiffre principal)
+  heroValue: 32,
+  cardValue: 20,
+  // Table
+  tableHead: 8,
+  tableCell: 10,
+  // Footer
+  footer: 7.5,
 } as const;
 
 export const PDF_SPACING = {
-  // Page margins (mm-like in pt)
-  pageMarginTop: 48,
+  pageMarginTop: 56,
   pageMarginBottom: 56,
-  pageMarginX: 40,
-  // Section spacing
-  sectionGap: 24,
+  pageMarginX: 56,
+  sectionGap: 22,
   blockGap: 12,
-  rowGap: 6,
-  // Block padding
-  cardPadding: 14,
-  // Line heights
+  cardPadding: 16,
+  metaPadding: 16,
   bodyLineHeight: 1.55,
-  titleLineHeight: 1.25,
+  titleLineHeight: 1.15,
 } as const;
 
 export const PDF_BORDER_RADIUS = {
@@ -69,9 +69,11 @@ export const PDF_BORDER_RADIUS = {
   pill: 999,
 } as const;
 
-/** Slogan de fin de PDF, dernière page seulement */
 export const PDF_SLOGAN = 'La connaissance, votre meilleur capital';
 
-/** Texte légal commun à tous les PDFs des outils */
 export const PDF_DISCLAIMER =
   'Les simulations produites par NFI Report sont fournies à titre indicatif. Elles ne constituent pas un conseil financier, fiscal ou juridique. NFI Report ne saurait être tenu responsable des décisions prises sur la base de ces résultats.';
+
+export const PDF_BRAND_NAME = 'NFI REPORT';
+export const PDF_BRAND_TAG = 'Actualités économiques et financières du Niger';
+export const PDF_SITE = 'nfireport.com';

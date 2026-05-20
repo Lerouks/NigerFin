@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react';
 import { ArrowRight, Check, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { isNewsletterSubscribed, markNewsletterSubscribed } from '@/components/NewsletterPopup';
+import { useToast } from '@/components/Toast';
 
 export function NewsletterForm() {
   const { userRole, profile, isLoading } = useAuth();
+  const { show } = useToast();
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -42,6 +44,7 @@ export function NewsletterForm() {
       if (!res.ok) throw new Error();
       setSubscribed(true);
       markNewsletterSubscribed();
+      show('Merci, vous etes inscrit a la newsletter NFI Report.', 'success');
       setTimeout(() => {
         setEmail('');
         setAlreadySubscribed(true);
@@ -49,6 +52,7 @@ export function NewsletterForm() {
     } catch {
       setEmail('');
       setError(true);
+      show('Inscription impossible, reessayez dans un instant.', 'error');
       setTimeout(() => setError(false), 3000);
     } finally {
       setLoading(false);

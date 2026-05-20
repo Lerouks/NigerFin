@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { AuthProvider } from '@/lib/auth-context';
 import { initPostHog } from '@/lib/posthog';
 import { hasAcceptedConsent } from '@/lib/consent';
+import { ToastProvider } from '@/components/Toast';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -15,5 +16,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  return <AuthProvider>{children}</AuthProvider>;
+  return (
+    <AuthProvider>
+      <ToastProvider>{children}</ToastProvider>
+    </AuthProvider>
+  );
 }

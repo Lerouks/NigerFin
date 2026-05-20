@@ -44,6 +44,50 @@ export const defaultContactEmail = 'contact@nfireport.com';
 
 const EMPTY_BANNER: FlashBannerData = { enabled: false, items: [] };
 
+export interface SiteFeatures {
+  /** Bandeau marche defilant en haut de la home */
+  marketTickerEnabled: boolean;
+}
+
+const DEFAULT_FEATURES: SiteFeatures = {
+  marketTickerEnabled: true,
+};
+
+/**
+ * Server-only fetcher for site-wide feature toggles. Table site_features
+ * a une seule row (id=1). En cas d'erreur ou de table manquante, retourne
+ * les defaults (tout active) pour ne jamais casser le rendu.
+ * Cache 60s, invalide via revalidateTag('site-features').
+ */
+export const getSiteFeatures = unstable_cache(
+  async (): Promise<SiteFeatures> => {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || !key) return DEFAULT_FEATURES;
+
+    try {
+      const supabase = createClient(url, key, {
+        auth: { persistSession: false },
+      });
+      const { data, error } = await supabase
+        .from('site_features')
+        .select('market_ticker_enabled')
+        .eq('id', 1)
+        .maybeSingle();
+
+      if (error || !data) return DEFAULT_FEATURES;
+
+      return {
+        marketTickerEnabled: data.market_ticker_enabled !== false,
+      };
+    } catch {
+      return DEFAULT_FEATURES;
+    }
+  },
+  ['site-features-v1'],
+  { revalidate: 60, tags: ['site-features'] },
+);
+
 /**
  * Server-only fetcher for the flash banner. Uses the anon Supabase client
  * (no cookies) so the result is shared across requests and cacheable.

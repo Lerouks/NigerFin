@@ -443,51 +443,79 @@ export function ToolPdfDocument({ data }: { data: ToolPdfData }) {
           </View>
         </View>
 
-        {/* DÉTAIL */}
-        {table && table.body.length > 0 && (
-          <View style={{ marginBottom: PDF_SPACING.sectionGap }} minPresenceAhead={80}>
-            <Text style={styles.sectionTitle}>Détail</Text>
-            <View style={styles.table}>
-              <View style={styles.tableHeaderRow} fixed>
-                {table.head.map((cell, i) => (
-                  <Text key={`th-${i}`} style={styles.tableHeaderCell}>
-                    {sanitize(cell)}
-                  </Text>
-                ))}
-              </View>
-              {table.body.map((row, i) => (
-                <View key={`tr-${i}`} style={styles.tableRow} wrap={false}>
-                  {row.map((cell, j) => (
-                    <Text key={`td-${i}-${j}`} style={styles.tableCell}>
-                      {sanitize(String(cell))}
+        {/* DÉTAIL, regroupage des 3 dernieres rows pour eviter qu'une seule ligne se retrouve isolee sur une page */}
+        {table && table.body.length > 0 && (() => {
+          const total = table.body.length;
+          const tailSize = total >= 4 ? 3 : 0;
+          const head = tailSize > 0 ? table.body.slice(0, total - tailSize) : table.body;
+          const tail = tailSize > 0 ? table.body.slice(total - tailSize) : [];
+
+          const renderRow = (row: (string | number)[], absoluteIndex: number) => (
+            <View key={`tr-${absoluteIndex}`} style={styles.tableRow} wrap={false}>
+              {row.map((cell, j) => (
+                <Text key={`td-${absoluteIndex}-${j}`} style={styles.tableCell}>
+                  {sanitize(String(cell))}
+                </Text>
+              ))}
+            </View>
+          );
+
+          return (
+            <View style={{ marginBottom: PDF_SPACING.sectionGap }} minPresenceAhead={80}>
+              <Text style={styles.sectionTitle}>Détail</Text>
+              <View style={styles.table}>
+                <View style={styles.tableHeaderRow} fixed>
+                  {table.head.map((cell, i) => (
+                    <Text key={`th-${i}`} style={styles.tableHeaderCell}>
+                      {sanitize(cell)}
                     </Text>
                   ))}
                 </View>
-              ))}
-            </View>
-          </View>
-        )}
-
-        {/* RECOMMANDATIONS */}
-        {recommendations && recommendations.length > 0 && (
-          <View minPresenceAhead={80} style={{ marginBottom: PDF_SPACING.sectionGap }}>
-            <Text style={styles.sectionTitle}>Recommandations</Text>
-            {recommendations.map((rec, i) => (
-              <View key={`rec-${i}`} style={styles.recItem} wrap={false}>
-                <Text style={styles.recRule}>{String(i + 1).padStart(2, '0')}</Text>
-                <Text style={styles.recText}>{sanitize(rec)}</Text>
+                {head.map((row, i) => renderRow(row, i))}
+                {tail.length > 0 && (
+                  <View wrap={false}>
+                    {tail.map((row, j) => renderRow(row, head.length + j))}
+                  </View>
+                )}
               </View>
-            ))}
+            </View>
+          );
+        })()}
+
+        {/* RECOMMANDATIONS, regroupage des 2 derniers items pour eviter orphelin solo */}
+        {recommendations && recommendations.length > 0 && (() => {
+          const total = recommendations.length;
+          const tailSize = total >= 3 ? 2 : 0;
+          const head = tailSize > 0 ? recommendations.slice(0, total - tailSize) : recommendations;
+          const tail = tailSize > 0 ? recommendations.slice(total - tailSize) : [];
+
+          const renderItem = (rec: string, absoluteIndex: number) => (
+            <View key={`rec-${absoluteIndex}`} style={styles.recItem} wrap={false}>
+              <Text style={styles.recRule}>{String(absoluteIndex + 1).padStart(2, '0')}</Text>
+              <Text style={styles.recText}>{sanitize(rec)}</Text>
+            </View>
+          );
+
+          return (
+            <View minPresenceAhead={80} style={{ marginBottom: PDF_SPACING.sectionGap }}>
+              <Text style={styles.sectionTitle}>Recommandations</Text>
+              {head.map((rec, i) => renderItem(rec, i))}
+              {tail.length > 0 && (
+                <View wrap={false}>
+                  {tail.map((rec, j) => renderItem(rec, head.length + j))}
+                </View>
+              )}
+            </View>
+          );
+        })()}
+
+        {/* BLOC FINAL, disclaimer + slogan indissociables (jamais 1 ligne solo sur une page) */}
+        <View wrap={false}>
+          <View style={styles.disclaimer}>
+            <Text style={styles.disclaimerText}>{PDF_DISCLAIMER}</Text>
           </View>
-        )}
-
-        {/* DISCLAIMER */}
-        <View style={styles.disclaimer}>
-          <Text style={styles.disclaimerText}>{PDF_DISCLAIMER}</Text>
+          <Text style={styles.slogan}>{PDF_SLOGAN}</Text>
         </View>
-
-        {/* SLOGAN (apparait apres le disclaimer, donc sur la derniere page naturellement) */}
-        <Text style={styles.slogan}>{PDF_SLOGAN}</Text>
 
         {/* FOOTER FIXED, brand + site */}
         <View style={styles.footer} fixed>

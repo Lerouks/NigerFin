@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import { createServiceClient } from '@/lib/supabase';
 import { checkRateLimit, getClientIP, RATE_LIMITS } from '@/lib/rate-limit';
 import { safeParseJSON, isValidUUID } from '@/lib/validation';
@@ -37,15 +38,26 @@ export async function POST(req: NextRequest) {
     // des strings arbitraires (impacterait les vues admin + exports XLSX).
     const safeArticleId = article_id && isValidUUID(article_id) ? article_id : null;
 
-    await supabase.from('page_views').insert({
+    // Tracking est best-effort, on retourne toujours 200 au client pour ne
+    // pas casser le rendu, mais on capture les erreurs Supabase a Sentry en
+    // niveau info pour qu'un drop massif soit observable (audit 2026-05-20).
+    const { error: insertError } = await supabase.from('page_views').insert({
       page_path: String(page_path).slice(0, 500),
       article_id: safeArticleId,
       referrer: referrer ? String(referrer).slice(0, 500) : null,
       viewed_at: new Date().toISOString(),
     });
+    if (insertError) {
+      Sentry.captureMessage('page_views insert failed', {
+        level: 'info',
+        tags: { context: 'track-api' },
+        extra: { code: insertError.code, hint: insertError.hint },
+      });
+    }
 
     return NextResponse.json({ ok: true });
-  } catch {
+  } catch (err) {
+    Sentry.captureException(err, { level: 'info', tags: { context: 'track-api' } });
     return NextResponse.json({ ok: true }); // Never fail tracking
   }
 }

@@ -3,10 +3,16 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // On-demand cache revalidation endpoint
 // Called after article creation/update/deletion from admin
+//
+// Authentification : header `Authorization: Bearer <REVALIDATE_SECRET>`.
+// Le secret n'est PLUS accepte en query string, qui etait logge en clair
+// par Vercel function logs (durcissement audit securite 2026-05-20).
 export async function POST(request: NextRequest) {
-  const secret = request.nextUrl.searchParams.get('secret');
+  const authHeader = request.headers.get('authorization') ?? '';
+  const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+  const expected = process.env.REVALIDATE_SECRET;
 
-  if (!secret || !process.env.REVALIDATE_SECRET || secret !== process.env.REVALIDATE_SECRET) {
+  if (!bearer || !expected || bearer !== expected) {
     return NextResponse.json({ message: 'Invalid secret' }, { status: 401 });
   }
 

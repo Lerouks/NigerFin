@@ -415,8 +415,13 @@ export function PricingContent() {
   const { isSignedIn, userRole, refreshProfile } = useAuth();
 
   useEffect(() => {
-    refreshProfile();
-  }, [refreshProfile]);
+    // Ne pas declencher de fetch profil pour les visiteurs anonymes :
+    // evite 4 x GET /api/user/profile -> 401 logges en bruit Sentry
+    // (le hook fetchProfile retry 3 fois sur 401 pour gerer le cookie-sync).
+    if (isSignedIn) {
+      refreshProfile();
+    }
+  }, [isSignedIn, refreshProfile]);
 
   const isSubscribed = userRole === 'premium' || userRole === 'admin';
 

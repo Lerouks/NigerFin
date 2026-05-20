@@ -1,8 +1,23 @@
 'use client';
 
 import { useCallback } from 'react';
-import { pdf } from '@react-pdf/renderer';
-import { ToolPdfDocument, registerPdfFonts, type ToolPdfData } from '@/components/pdf/ToolPdfDocument';
+
+/**
+ * Hook d'export PDF des outils, AVEC import dynamique de @react-pdf/renderer.
+ *
+ * Pourquoi : @react-pdf/renderer et ToolPdfDocument pesent environ 400-500 KB
+ * gzip a l'analyse bundle, sans utilite tant que l'utilisateur ne clique pas
+ * "Telecharger en PDF". L'import statique forcait ce poids dans le chunk de
+ * chaque outil Premium (LCP en souffrait sur 4G/3G). On l'isole via import()
+ * dynamique dans generate() : webpack cree un chunk separe, charge a la
+ * demande au moment du clic uniquement.
+ *
+ * Design PDF :
+ * - Helvetica built-in (pas de fonts custom a fetcher)
+ * - Wordmark NFI Report, meta grid noire, hierarchie editoriale
+ * - Personnalisation client Premium (Etabli pour M./Mme Nom)
+ * - Reference stable type NFI-YYYY-NNNN injectee par /api/tools/pdf-create
+ */
 
 /** Replace narrow no-break space (U+202F) and non-breaking space (U+00A0) with regular spaces. */
 function sanitize(s: string): string {
@@ -53,23 +68,18 @@ export interface PdfExportOptions {
   reference?: string;
 }
 
-/**
- * Hook d'export PDF pour les outils du site.
- * Renvoie une fonction `generate` qui crée un PDF React-PDF et le télécharge.
- *
- * Migration de jsPDF vers React-PDF (mai 2026) :
- * - Fonts custom (Inter, Montserrat, Playfair) servies depuis /public/fonts/
- * - Wordmark NFI Report avec N et R en Playfair
- * - Pagination propre via wrap={false} et minPresenceAhead
- * - Footer fixed avec nfireport.com + Page X / Y
- * - Slogan La connaissance, votre meilleur capital en dernière page
- */
 export function usePdfExport() {
   const generate = useCallback(async (opts: PdfExportOptions) => {
-    // Register fonts lazy on first generate (browser-side only, after window is ready)
+    // Import dynamique : @react-pdf/renderer + ToolPdfDocument arrivent
+    // dans un chunk separe (lazy), chargement uniquement au clic.
+    const [{ pdf }, { ToolPdfDocument, registerPdfFonts }] = await Promise.all([
+      import('@react-pdf/renderer'),
+      import('@/components/pdf/ToolPdfDocument'),
+    ]);
+
     registerPdfFonts();
 
-    const data: ToolPdfData = {
+    const data = {
       title: opts.title,
       eyebrow: opts.eyebrow,
       params: opts.params,

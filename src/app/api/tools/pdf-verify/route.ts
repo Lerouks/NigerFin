@@ -22,9 +22,16 @@ export async function POST() {
     return NextResponse.json({ error: 'Abonnement Premium requis' }, { status: 403 });
   }
 
-  // Composer le nom affiche : prenom + nom si dispo, sinon full_name complet
-  const composedName = [profile.first_name, profile.last_name].filter(Boolean).join(' ').trim();
-  const recipientName = composedName || profile.full_name || '';
+  // Convention française type private banking : "M. Nom" / "Mme Nom" sans le prenom.
+  // Source preferee : last_name explicite dans le profil (l'utilisateur a indique
+  // lui-meme quel est son nom de famille).
+  // Fallback : pour les anciens comptes qui n'ont qu'un full_name, on prend
+  // le DERNIER mot du full_name (convention francophone : "Prenom(s) Nom").
+  let recipientName = (profile.last_name ?? '').trim();
+  if (!recipientName && profile.full_name) {
+    const parts = profile.full_name.trim().split(/\s+/).filter(Boolean);
+    recipientName = parts.length > 0 ? parts[parts.length - 1] ?? '' : '';
+  }
 
   return NextResponse.json({
     ok: true,

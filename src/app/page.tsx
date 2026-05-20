@@ -8,6 +8,7 @@ import { NewsletterForm } from '@/components/NewsletterForm';
 import { PracticalTools } from '@/components/PracticalTools';
 import { getAllArticles, getFeaturedArticles, getLatestBySection } from '@/lib/articles';
 import { SECTION_META } from '@/lib/sections';
+import { getSiteFeatures } from '@/lib/site-data';
 
 export const metadata: Metadata = {
   title: 'NFI Report - Actualités économiques et financières du Niger',
@@ -28,10 +29,11 @@ const LATEST_COUNT = 6;
 const ARTICLES_PER_SECTION = 4;
 
 export default async function HomePage() {
-  const [featured, { articles: latestArticles }, sectionArticles] = await Promise.all([
+  const [featured, { articles: latestArticles }, sectionArticles, siteFeatures] = await Promise.all([
     getFeaturedArticles(),
     getAllArticles(1, LATEST_COUNT),
     getLatestBySection([...HOME_SECTIONS], ARTICLES_PER_SECTION),
+    getSiteFeatures(),
   ]);
 
   const featuredArticle = featured[0] ?? null;
@@ -51,16 +53,18 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* Market Ticker Bar */}
-      <div className="bg-[#111] border-b border-white/[0.06] overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center gap-6 min-w-0">
-          <span className="text-[10px] tracking-[0.2em] uppercase text-gold font-bold flex-shrink-0">
-            Marchés
-          </span>
-          <div className="h-3 w-px bg-white/10 flex-shrink-0" />
-          <MarketMarquee />
+      {/* Market Ticker Bar, contrôlable depuis l'admin (site_features.market_ticker_enabled) */}
+      {siteFeatures.marketTickerEnabled && (
+        <div className="bg-[#111] border-b border-white/[0.06] overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center gap-6 min-w-0">
+            <span className="text-[10px] tracking-[0.2em] uppercase text-gold font-bold flex-shrink-0">
+              Marchés
+            </span>
+            <div className="h-3 w-px bg-white/10 flex-shrink-0" />
+            <MarketMarquee />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">

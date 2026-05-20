@@ -6,6 +6,7 @@ import {
   BarChart3, Shield, Loader2, Download, Building2,
   DollarSign, FileText, Newspaper, LineChart, Zap, BookOpen,
   SlidersHorizontal, Mail, CreditCard, Users, Activity, MessageSquare,
+  Eye,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { ArticlesManager } from './ArticlesManager';
@@ -19,6 +20,7 @@ import { LegalSectionsManager } from './LegalSectionsManager';
 import { StatsManager } from './StatsManager';
 import { MessagesManager } from './MessagesManager';
 import { StrategicEnterprisesManager } from './StrategicEnterprisesManager';
+import { SiteFeaturesManager } from './SiteFeaturesManager';
 import { OverviewTab } from './OverviewTab';
 import { UsersTab } from './UsersTab';
 import { PaymentsTab } from './PaymentsTab';
@@ -63,7 +65,7 @@ interface OverviewData {
   monthlyUsers_chart: { month: string; users: number }[];
 }
 
-type TabId = 'overview' | 'articles' | 'comments' | 'market' | 'flash' | 'education' | 'niger' | 'enterprises' | 'legal' | 'paywall' | 'users' | 'payments' | 'pricing' | 'stats' | 'audit' | 'messages';
+type TabId = 'overview' | 'articles' | 'comments' | 'market' | 'flash' | 'education' | 'niger' | 'enterprises' | 'legal' | 'paywall' | 'users' | 'payments' | 'pricing' | 'stats' | 'audit' | 'messages' | 'site';
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -136,6 +138,7 @@ export function AdminDashboard() {
     { id: 'comments', label: 'Commentaires', icon: MessageSquare },
     { id: 'market', label: 'Marchés', icon: LineChart },
     { id: 'flash', label: 'Flash Info', icon: Zap },
+    { id: 'site', label: 'Visibilité site', icon: Eye },
     { id: 'education', label: 'Éducation', icon: BookOpen },
     { id: 'niger', label: 'Niger', icon: Activity },
     { id: 'enterprises', label: 'Entreprises', icon: Building2 },
@@ -208,6 +211,7 @@ export function AdminDashboard() {
         {activeTab === 'comments' && <CommentsManager />}
         {activeTab === 'market' && <MarketDataManager />}
         {activeTab === 'flash' && <FlashBannerManager />}
+        {activeTab === 'site' && <SiteFeaturesManager />}
         {activeTab === 'education' && <EducationManager />}
         {activeTab === 'niger' && <NigerPresentationManager />}
         {activeTab === 'enterprises' && <StrategicEnterprisesManager />}

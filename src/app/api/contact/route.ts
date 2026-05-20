@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { createServiceClient } from '@/lib/supabase';
 import { sendTransactionalEmail } from '@/lib/email';
 import { contactConfirmationEmail, contactNotificationEmail } from '@/lib/email-templates';
-import { isValidEmail, safeParseJSON } from '@/lib/validation';
+import { parseJsonBody } from '@/lib/validation';
 import { checkRateLimit, getClientIP, RATE_LIMITS } from '@/lib/rate-limit';
 import * as Sentry from '@sentry/nextjs';
+
+const ContactBody = z.object({
+  name: z.string().trim().min(2).max(200),
+  email: z.string().trim().toLowerCase().email().max(254),
+  subject: z.string().trim().min(2).max(200),
+  message: z.string().trim().min(10).max(5000),
+});
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,25 +27,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = await safeParseJSON(request);
-    if (!body) {
-      return NextResponse.json({ error: 'Corps de requête JSON invalide' }, { status: 400 });
+    const parsed = await parseJsonBody(request, ContactBody);
+    if (!parsed.ok) {
+      return NextResponse.json({ error: parsed.error }, { status: parsed.status });
     }
-
-    const { name, email, subject, message } = body as {
-      name?: string;
-      email?: string;
-      subject?: string;
-      message?: string;
-    };
-
-    if (!name || !email || !subject || !message) {
-      return NextResponse.json({ error: 'Champs requis manquants' }, { status: 400 });
-    }
-
-    if (!isValidEmail(email)) {
-      return NextResponse.json({ error: 'Email invalide' }, { status: 400 });
-    }
+    const { name, email, subject, message } = parsed.data;
 
     const serviceClient = createServiceClient();
 

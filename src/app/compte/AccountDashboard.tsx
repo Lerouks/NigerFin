@@ -111,28 +111,28 @@ export function AccountDashboard() {
     if (isSignedIn) fetchData();
   }, [isSignedIn, fetchData]);
 
-  // Sync profile edit fields
+  // Sync profile edit fields (UserProfile est maintenant typé exhaustivement,
+  // plus de cast unsafe via Record<string, unknown> necessaire)
   useEffect(() => {
     if (profile) {
-      const p = profile as unknown as Record<string, unknown>;
-      setCivility((p.civility as string) || '');
-      setFirstName((p.first_name as string) || '');
-      setLastName2((p.last_name as string) || '');
-      setPhone((p.phone as string) || '');
-      setBirthDay(p.birth_day ? String(p.birth_day) : '');
-      setBirthMonth(p.birth_month ? String(p.birth_month) : '');
-      setBirthYear(p.birth_year ? String(p.birth_year) : '');
-      setAddress((p.address as string) || '');
-      setCity((p.city as string) || '');
-      setPostalCode((p.postal_code as string) || '');
-      setCountry((p.country as string) || 'Niger');
-      setProfession((p.profession as string) || '');
+      setCivility(profile.civility ?? '');
+      setFirstName(profile.first_name ?? '');
+      setLastName2(profile.last_name ?? '');
+      setPhone(profile.phone ?? '');
+      setBirthDay(profile.birth_day != null ? String(profile.birth_day) : '');
+      setBirthMonth(profile.birth_month != null ? String(profile.birth_month) : '');
+      setBirthYear(profile.birth_year != null ? String(profile.birth_year) : '');
+      setAddress(profile.address ?? '');
+      setCity(profile.city ?? '');
+      setPostalCode(profile.postal_code ?? '');
+      setCountry(profile.country ?? 'Niger');
+      setProfession(profile.profession ?? '');
     }
   }, [profile]);
 
   if (isLoading || !isSignedIn) {
     return (
-      <div className="min-h-screen bg-[#fafaf9] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
       </div>
     );
@@ -153,10 +153,13 @@ export function AccountDashboard() {
     return diff > 0 ? Math.ceil(diff / 86400000) : null;
   })();
 
-  // Extract name for greeting
-  const p = profile as unknown as Record<string, unknown>;
-  const greetCivility = (p?.civility as string) || '';
-  const greetLastName = (p?.last_name as string) || profile?.full_name?.split(' ').pop() || user?.email?.split('@')[0] || '';
+  // Extract name for greeting (M./Mme + nom de famille, comme dans le PDF Premium)
+  const greetCivility = profile?.civility ?? '';
+  const greetLastName =
+    profile?.last_name ||
+    profile?.full_name?.split(' ').pop() ||
+    user?.email?.split('@')[0] ||
+    '';
   const greetName = greetCivility ? `${greetCivility} ${greetLastName}` : greetLastName;
 
   const handleSaveProfile = async () => {
@@ -215,9 +218,9 @@ export function AccountDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#fafaf9]">
+    <div className="min-h-screen bg-background">
       {/* Header - Bonjour style JA */}
-      <section className="bg-[#111] text-white">
+      <section className="bg-primary text-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14 text-center">
           <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center text-2xl font-bold">
             {greetLastName.charAt(0).toUpperCase()}
@@ -231,7 +234,7 @@ export function AccountDashboard() {
           <div className="flex items-center justify-center gap-3">
             <span className={`text-[10px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full ${
               isSubscribed
-                ? 'bg-[#d4a843]/20 text-[#d4a843] border border-[#d4a843]/30'
+                ? 'bg-gold/20 text-gold border border-gold/30'
                 : 'bg-white/10 text-white/50 border border-white/10'
             }`}>
               {getRoleLabel(userRole || 'reader')}
@@ -263,7 +266,7 @@ export function AccountDashboard() {
                     onClick={() => setActiveSection(s.id)}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[14px] font-medium transition-all ${
                       isActive
-                        ? 'bg-[#111] text-white shadow-sm'
+                        ? 'bg-primary text-white shadow-sm'
                         : 'text-gray-500 hover:bg-white hover:text-gray-700'
                     }`}
                   >
@@ -293,7 +296,7 @@ export function AccountDashboard() {
                     key={s.id}
                     onClick={() => setActiveSection(s.id)}
                     className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap flex-1 justify-center ${
-                      activeSection === s.id ? 'bg-[#111] text-white' : 'text-gray-400'
+                      activeSection === s.id ? 'bg-primary text-white' : 'text-gray-400'
                     }`}
                   >
                     <Icon className="w-3.5 h-3.5" />
@@ -313,7 +316,7 @@ export function AccountDashboard() {
                 {/* Subscription status - skeleton while loading */}
                 {summaryLoading ? (
                   <div className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden animate-pulse">
-                    <div className="bg-[#111] p-6 sm:p-8">
+                    <div className="bg-primary p-6 sm:p-8">
                       <div className="h-4 w-32 bg-white/10 rounded mb-4" />
                       <div className="h-7 w-64 bg-white/10 rounded mb-2" />
                       <div className="h-4 w-80 bg-white/5 rounded" />
@@ -330,8 +333,8 @@ export function AccountDashboard() {
                   <div className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden">
                     <div className="bg-gradient-to-r from-[#111] to-[#1a1a1a] text-white p-6 sm:p-8">
                       <div className="flex items-center gap-2 mb-3">
-                        <Crown className="w-5 h-5 text-[#d4a843]" />
-                        <span className="text-[11px] tracking-[0.15em] uppercase text-[#d4a843]">Abonnement en cours</span>
+                        <Crown className="w-5 h-5 text-gold" />
+                        <span className="text-[11px] tracking-[0.15em] uppercase text-gold">Abonnement en cours</span>
                       </div>
                       <h2 className="text-2xl font-bold mb-1">
                         Abonnement {getBillingCycleLabel(sub.billing_cycle || 'monthly')}
@@ -359,7 +362,7 @@ export function AccountDashboard() {
                           <div>
                             <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1">Temps restant</p>
                             <div className="flex items-center gap-1.5">
-                              <Timer className="w-4 h-4 text-[#d4a843]" />
+                              <Timer className="w-4 h-4 text-gold" />
                               <span className="text-[14px] font-medium">
                                 {remainingDays > 30 ? `${Math.floor(remainingDays / 30)} mois` : `${remainingDays} jour${remainingDays !== 1 ? 's' : ''}`}
                               </span>
@@ -372,14 +375,14 @@ export function AccountDashboard() {
                 ) : (
                   <div className="bg-gradient-to-br from-[#111] to-[#1a1a1a] text-white rounded-2xl p-6 sm:p-8">
                     <div className="flex items-center gap-2 mb-3">
-                      <Zap className="w-5 h-5 text-[#d4a843]" />
-                      <span className="text-[11px] tracking-[0.15em] uppercase text-[#d4a843]">Passez Premium</span>
+                      <Zap className="w-5 h-5 text-gold" />
+                      <span className="text-[11px] tracking-[0.15em] uppercase text-gold">Passez Premium</span>
                     </div>
                     <h2 className="text-2xl font-bold mb-2">Débloquez un accès illimité</h2>
                     <p className="text-white/50 text-[14px] mb-6 max-w-lg">
                       Accédez à tous les articles, analyses, outils premium et newsletters exclusives.
                     </p>
-                    <Link href="/pricing" className="inline-flex items-center gap-2 bg-[#d4a843] text-white px-6 py-3 rounded-xl text-[14px] font-medium hover:bg-[#c49a3a] transition-colors">
+                    <Link href="/pricing" className="inline-flex items-center gap-2 bg-gold text-white px-6 py-3 rounded-xl text-[14px] font-medium hover:bg-[#c49a3a] transition-colors">
                       Voir les plans <ArrowRight className="w-4 h-4" />
                     </Link>
                   </div>
@@ -396,12 +399,12 @@ export function AccountDashboard() {
                       return (
                         <div key={benefit.label} className="flex items-center gap-4">
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                            isSubscribed ? 'bg-[#d4a843]/10' : 'bg-gray-100'
+                            isSubscribed ? 'bg-gold/10' : 'bg-gray-100'
                           }`}>
-                            <Icon className={`w-5 h-5 ${isSubscribed ? 'text-[#d4a843]' : 'text-gray-400'}`} />
+                            <Icon className={`w-5 h-5 ${isSubscribed ? 'text-gold' : 'text-gray-400'}`} />
                           </div>
                           <p className="text-[15px] font-medium">{benefit.label}</p>
-                          {isSubscribed && <Check className="w-4 h-4 text-[#d4a843] ml-auto" />}
+                          {isSubscribed && <Check className="w-4 h-4 text-gold ml-auto" />}
                         </div>
                       );
                     })}
@@ -480,13 +483,13 @@ export function AccountDashboard() {
                     {/* Boutons */}
                     {editingProfile ? (
                       <div className="flex gap-2 pt-2">
-                        <button onClick={handleSaveProfile} disabled={savingProfile || !firstName.trim() || !lastName2.trim()} className="flex items-center gap-2 bg-[#111] text-white px-6 py-2.5 rounded-xl text-[13px] font-medium hover:bg-[#333] transition-colors disabled:opacity-50">
+                        <button onClick={handleSaveProfile} disabled={savingProfile || !firstName.trim() || !lastName2.trim()} className="flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-xl text-[13px] font-medium hover:bg-primary/75 transition-colors disabled:opacity-50">
                           {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Enregistrer
                         </button>
                         <button onClick={() => { setEditingProfile(false); /* fields reset on next profile sync */ }} className="px-4 py-2.5 rounded-xl text-[13px] text-gray-500 hover:bg-gray-50 transition-colors">Annuler</button>
                       </div>
                     ) : (
-                      <button onClick={() => setEditingProfile(true)} className="flex items-center gap-2 bg-[#111] text-white px-6 py-2.5 rounded-xl text-[13px] font-medium hover:bg-[#333] transition-colors">Modifier</button>
+                      <button onClick={() => setEditingProfile(true)} className="flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-xl text-[13px] font-medium hover:bg-primary/75 transition-colors">Modifier</button>
                     )}
                   </div>
                 </div>
@@ -497,10 +500,10 @@ export function AccountDashboard() {
                   <div className="space-y-5">
                     <div>
                       <label className="block text-[13px] font-medium text-gray-700 mb-1.5">E-mail</label>
-                      <input type="email" value={user?.email || ''} disabled className="w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-[#fafaf9] text-gray-500" />
+                      <input type="email" value={user?.email || ''} disabled className="w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-background text-gray-500" />
                       <p className="text-[11px] text-gray-400 mt-1.5">Pour changer votre e-mail, <Link href="/contact" className="underline hover:text-gray-600">contactez-nous</Link>.</p>
                     </div>
-                    <button onClick={() => setActiveSection('securite')} className="flex items-center gap-2 border border-black/[0.08] px-4 py-2.5 rounded-xl text-[13px] font-medium text-gray-700 hover:bg-[#f5f5f0] transition-colors">
+                    <button onClick={() => setActiveSection('securite')} className="flex items-center gap-2 border border-black/[0.08] px-4 py-2.5 rounded-xl text-[13px] font-medium text-gray-700 hover:bg-secondary transition-colors">
                       <Lock className="w-4 h-4" /> Changer le mot de passe
                     </button>
                   </div>
@@ -514,15 +517,15 @@ export function AccountDashboard() {
                     <div>
                       <label className="block text-[13px] font-medium text-gray-700 mb-1.5">Date de naissance</label>
                       <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                        <select value={birthDay} onChange={(e) => setBirthDay(e.target.value)} disabled={!editingProfile} className="border border-black/[0.08] rounded-lg px-2 sm:px-3 py-3 text-[13px] sm:text-[14px] bg-[#fafaf9] disabled:text-gray-500 w-full min-w-0">
+                        <select value={birthDay} onChange={(e) => setBirthDay(e.target.value)} disabled={!editingProfile} className="border border-black/[0.08] rounded-lg px-2 sm:px-3 py-3 text-[13px] sm:text-[14px] bg-background disabled:text-gray-500 w-full min-w-0">
                           <option value="">Jour</option>
                           {Array.from({ length: 31 }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}</option>)}
                         </select>
-                        <select value={birthMonth} onChange={(e) => setBirthMonth(e.target.value)} disabled={!editingProfile} className="border border-black/[0.08] rounded-lg px-2 sm:px-3 py-3 text-[13px] sm:text-[14px] bg-[#fafaf9] disabled:text-gray-500 w-full min-w-0">
+                        <select value={birthMonth} onChange={(e) => setBirthMonth(e.target.value)} disabled={!editingProfile} className="border border-black/[0.08] rounded-lg px-2 sm:px-3 py-3 text-[13px] sm:text-[14px] bg-background disabled:text-gray-500 w-full min-w-0">
                           <option value="">Mois</option>
                           {['Jan.','Fév.','Mars','Avr.','Mai','Juin','Juil.','Août','Sep.','Oct.','Nov.','Déc.'].map((m, i) => <option key={i + 1} value={i + 1}>{m}</option>)}
                         </select>
-                        <select value={birthYear} onChange={(e) => setBirthYear(e.target.value)} disabled={!editingProfile} className="border border-black/[0.08] rounded-lg px-2 sm:px-3 py-3 text-[13px] sm:text-[14px] bg-[#fafaf9] disabled:text-gray-500 w-full min-w-0">
+                        <select value={birthYear} onChange={(e) => setBirthYear(e.target.value)} disabled={!editingProfile} className="border border-black/[0.08] rounded-lg px-2 sm:px-3 py-3 text-[13px] sm:text-[14px] bg-background disabled:text-gray-500 w-full min-w-0">
                           <option value="">Année</option>
                           {Array.from({ length: 80 }, (_, i) => new Date().getFullYear() - 13 - i).map((y) => <option key={y} value={y}>{y}</option>)}
                         </select>
@@ -544,7 +547,7 @@ export function AccountDashboard() {
                     {/* Pays */}
                     <div>
                       <label className="block text-[13px] font-medium text-gray-700 mb-1.5">Pays</label>
-                      <select value={country} onChange={(e) => setCountry(e.target.value)} disabled={!editingProfile} className="w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-[#fafaf9] disabled:text-gray-500">
+                      <select value={country} onChange={(e) => setCountry(e.target.value)} disabled={!editingProfile} className="w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-background disabled:text-gray-500">
                         <optgroup label="Afrique de l'Ouest">
                           {WEST_AFRICA_COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
                         </optgroup>
@@ -557,7 +560,7 @@ export function AccountDashboard() {
                     {/* Profession */}
                     <div>
                       <label className="block text-[13px] font-medium text-gray-700 mb-1.5">Profession</label>
-                      <select value={profession} onChange={(e) => setProfession(e.target.value)} disabled={!editingProfile} className="w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-[#fafaf9] disabled:text-gray-500">
+                      <select value={profession} onChange={(e) => setProfession(e.target.value)} disabled={!editingProfile} className="w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-background disabled:text-gray-500">
                         <option value="">Sélectionner</option>
                         {PROFESSIONS.map((p2) => <option key={p2} value={p2}>{p2}</option>)}
                       </select>
@@ -565,7 +568,7 @@ export function AccountDashboard() {
 
                     {editingProfile && (
                       <div className="flex gap-2 pt-2">
-                        <button onClick={handleSaveProfile} disabled={savingProfile || !firstName.trim() || !lastName2.trim()} className="flex items-center gap-2 bg-[#111] text-white px-6 py-2.5 rounded-xl text-[13px] font-medium hover:bg-[#333] transition-colors disabled:opacity-50">
+                        <button onClick={handleSaveProfile} disabled={savingProfile || !firstName.trim() || !lastName2.trim()} className="flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-xl text-[13px] font-medium hover:bg-primary/75 transition-colors disabled:opacity-50">
                           {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Enregistrer
                         </button>
                         <button onClick={() => setEditingProfile(false)} className="px-4 py-2.5 rounded-xl text-[13px] text-gray-500 hover:bg-gray-50 transition-colors">Annuler</button>
@@ -652,7 +655,7 @@ function ProfileField({ label, value, onChange, disabled, required, placeholder,
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
-        className="w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black/10 disabled:text-gray-500 transition-colors"
+        className="w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-background focus:outline-none focus:ring-1 focus:ring-black/10 disabled:text-gray-500 transition-colors"
         placeholder={placeholder}
       />
     </div>
@@ -744,7 +747,7 @@ function PasswordChangeSection({ isReset = false }: { isReset?: boolean }) {
           <PasswordField id="confirm-password" label="Confirmer le nouveau mot de passe" value={confirmPassword} onChange={setConfirmPassword} show={showConfirm} onToggle={() => setShowConfirm(!showConfirm)} placeholder="Confirmez le mot de passe" required className={confirmPassword && !passwordsMatch ? 'border-red-300' : undefined} />
           {confirmPassword && !passwordsMatch && <p className="text-[11px] mt-1 text-red-500">Les mots de passe ne correspondent pas.</p>}
         </div>
-        <button type="submit" disabled={!canSubmit} className="flex items-center gap-2 bg-[#111] text-white px-6 py-2.5 rounded-xl text-[13px] font-medium hover:bg-[#333] disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+        <button type="submit" disabled={!canSubmit} className="flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-xl text-[13px] font-medium hover:bg-primary/75 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Mettre à jour
         </button>
       </form>
@@ -779,7 +782,7 @@ function PasswordField({ id, label, value, onChange, show, onToggle, placeholder
       <label htmlFor={id} className="block text-[13px] font-medium mb-1.5">{label}</label>
       <div className="relative">
         <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-        <input id={id} type={show ? 'text' : 'password'} value={value} onChange={(e) => onChange(e.target.value)} className={`w-full border rounded-lg pl-10 pr-10 py-3 bg-[#fafaf9] focus:outline-none focus:ring-1 transition-all text-[14px] ${className || 'border-black/[0.08] focus:ring-black/5'}`} placeholder={placeholder} required={required} minLength={minLength} />
+        <input id={id} type={show ? 'text' : 'password'} value={value} onChange={(e) => onChange(e.target.value)} className={`w-full border rounded-lg pl-10 pr-10 py-3 bg-background focus:outline-none focus:ring-1 transition-all text-[14px] ${className || 'border-black/[0.08] focus:ring-black/5'}`} placeholder={placeholder} required={required} minLength={minLength} />
         <button type="button" onClick={onToggle} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
           {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
         </button>
@@ -848,7 +851,7 @@ function DeleteAccountSection() {
                 value={confirmText}
                 onChange={(e) => setConfirmText(e.target.value)}
                 placeholder="SUPPRIMER"
-                className="w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-red-200"
+                className="w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-background focus:outline-none focus:ring-1 focus:ring-red-200"
                 autoComplete="off"
               />
             </div>

@@ -3,18 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import {
-  Building2,
-  Pickaxe,
-  Zap,
-  Phone,
-  Landmark,
-  Wheat,
-  Truck,
-  HardHat,
-  Fuel,
-  type LucideIcon,
-} from 'lucide-react';
+import { getSector } from '@/lib/sectors';
 
 interface Enterprise {
   id: string;
@@ -25,21 +14,6 @@ interface Enterprise {
   logo_url: string | null;
   image_url: string | null;
   brand_color: string | null;
-}
-
-const SECTOR_ICONS: Record<string, LucideIcon> = {
-  'Mines & Ressources': Pickaxe,
-  'Pétrole & Énergie': Fuel,
-  'Électricité & Énergie': Zap,
-  'Télécommunications': Phone,
-  'Banque & Finance': Landmark,
-  'Agriculture & Agroalimentaire': Wheat,
-  'Transport & Logistique': Truck,
-  'BTP & Infrastructures': HardHat,
-};
-
-function getSectorIcon(sector: string): LucideIcon {
-  return SECTOR_ICONS[sector] || Building2;
 }
 
 export function StrategicEnterprisesSection() {
@@ -117,7 +91,7 @@ export function StrategicEnterprisesSection() {
         </span>
       </div>
 
-      {/* Filtres pilules monochrome */}
+      {/* Filtres pilules avec icône colorée par secteur */}
       <div className="flex flex-wrap gap-2 mb-8">
         <button
           onClick={() => setActiveSector(null)}
@@ -129,21 +103,25 @@ export function StrategicEnterprisesSection() {
         >
           Tous les secteurs
         </button>
-        {sectors.map((sector) => {
-          const Icon = getSectorIcon(sector);
-          const isActive = activeSector === sector;
+        {sectors.map((sectorLabel) => {
+          const sector = getSector(sectorLabel);
+          const Icon = sector.icon;
+          const isActive = activeSector === sectorLabel;
           return (
             <button
-              key={sector}
-              onClick={() => handleSectorClick(sector)}
+              key={sectorLabel}
+              onClick={() => handleSectorClick(sectorLabel)}
               className={`flex items-center gap-2 px-4 py-2 rounded-full text-[12px] font-medium transition-colors duration-200 ${
                 isActive
                   ? 'bg-[#111] text-white'
                   : 'bg-white text-gray-700 border border-black/[0.08] hover:border-black/20 hover:bg-gray-50'
               }`}
             >
-              <Icon className="w-3.5 h-3.5" />
-              {sector}
+              <Icon
+                className="w-3.5 h-3.5"
+                style={{ color: isActive ? sector.hexLight : sector.hex }}
+              />
+              {sectorLabel}
             </button>
           );
         })}
@@ -152,7 +130,9 @@ export function StrategicEnterprisesSection() {
       {/* Grid cards blanches */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {filtered.map((enterprise, index) => {
-          const Icon = getSectorIcon(enterprise.sector);
+          const sector = getSector(enterprise.sector);
+          const Icon = sector.icon;
+          const accent = sector.hex;
 
           const cardContent = (
             <article
@@ -165,6 +145,11 @@ export function StrategicEnterprisesSection() {
                 transitionDelay: visible ? `${index * 40}ms` : '0ms',
               }}
             >
+              {/* Bande verticale couleur secteur, accent gauche */}
+              <div
+                className="absolute left-0 top-6 bottom-6 w-[3px] rounded-r"
+                style={{ backgroundColor: accent }}
+              />
               <div className="flex items-start gap-4 mb-4">
                 <div className="w-12 h-12 rounded-lg bg-gray-50 border border-black/[0.06] flex items-center justify-center flex-shrink-0 overflow-hidden">
                   {enterprise.logo_url ? (
@@ -185,7 +170,13 @@ export function StrategicEnterprisesSection() {
                   <h3 className="text-[16px] font-semibold text-[#111] leading-tight">
                     {enterprise.name}
                   </h3>
-                  <span className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-0.5 text-[10px] font-medium tracking-wider uppercase text-gold bg-gold/10 rounded">
+                  <span
+                    className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-0.5 text-[10px] font-semibold tracking-wider uppercase rounded"
+                    style={{
+                      color: accent,
+                      backgroundColor: `${accent}14`,
+                    }}
+                  >
                     <Icon className="w-3 h-3" />
                     {enterprise.sector}
                   </span>
@@ -202,7 +193,8 @@ export function StrategicEnterprisesSection() {
             <Link
               key={enterprise.id}
               href={`/entreprises/${enterprise.slug}`}
-              className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 rounded-xl"
+              className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 rounded-xl"
+              style={{ ['--tw-ring-color' as string]: accent }}
             >
               {cardContent}
             </Link>

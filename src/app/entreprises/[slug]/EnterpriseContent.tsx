@@ -10,6 +10,22 @@ import { ArticleCard } from '@/components/ArticleCard';
 import { getSector } from '@/lib/sectors';
 import type { Article } from '@/types';
 
+/**
+ * Eclaircit un hex en le melangeant avec du blanc.
+ * amount entre 0 (couleur originale) et 1 (blanc pur).
+ * Garantit que la couleur reste lisible sur fond noir meme pour des
+ * brand colors tres sombres (ex: #8B1A2B bordeaux COMINAK -> rose-saumon).
+ */
+function lightenHex(hex: string, amount: number): string {
+  const clean = hex.replace('#', '');
+  const r = parseInt(clean.slice(0, 2), 16);
+  const g = parseInt(clean.slice(2, 4), 16);
+  const b = parseInt(clean.slice(4, 6), 16);
+  const mix = (channel: number) => Math.round(channel + (255 - channel) * amount);
+  const toHex = (n: number) => n.toString(16).padStart(2, '0');
+  return `#${toHex(mix(r))}${toHex(mix(g))}${toHex(mix(b))}`;
+}
+
 interface Enterprise {
   id: string;
   name: string;
@@ -57,24 +73,17 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
     || enterprise.ownership || enterprise.employees || enterprise.revenue || enterprise.website;
   const sector = getSector(enterprise.sector);
   const SectorIcon = sector.icon;
-  const accent = sector.hex;
-  const accentLight = sector.hexLight;
-  const logoFallbackColor = enterprise.brand_color || accent;
+  // Couleur de la SOCIETE (brand_color DB), fallback sur couleur secteur si null.
+  // accentLight = version eclaircie programmatique pour rester lisible sur fond noir
+  // meme quand brand_color est tres sombre (ex bordeaux COMINAK).
+  const accent = enterprise.brand_color || sector.hex;
+  const accentLight = lightenHex(accent, 0.45);
+  const logoFallbackColor = accent;
 
   return (
     <div className="min-h-screen bg-[#fafaf9]">
-      {/* Header */}
+      {/* Header noir sobre, sans halos colores derriere le logo */}
       <div className="relative bg-[#111] text-white overflow-hidden">
-        {/* Sector accent ambient glow */}
-        <div
-          className="absolute top-0 right-0 w-96 h-96 rounded-full blur-[120px] opacity-20 pointer-events-none"
-          style={{ backgroundColor: accentLight }}
-        />
-        <div
-          className="absolute bottom-0 left-1/4 w-64 h-64 rounded-full blur-[100px] opacity-12 pointer-events-none"
-          style={{ backgroundColor: accentLight }}
-        />
-
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
           <Link
             href="/entreprises"
@@ -229,18 +238,14 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
                 </div>
               )}
 
-              {/* CTA */}
-              <div className="bg-[#111] text-white rounded-xl p-6 relative overflow-hidden">
-                <div
-                  className="absolute -right-10 -bottom-10 w-40 h-40 rounded-full blur-[60px] opacity-25 pointer-events-none"
-                  style={{ backgroundColor: accentLight }}
-                />
-                <p className="relative text-[13px] text-white/70 mb-3">
+              {/* CTA sobre, sans halo */}
+              <div className="bg-[#111] text-white rounded-xl p-6">
+                <p className="text-[13px] text-white/70 mb-3">
                   Vous souhaitez suivre l&apos;actualité de cette entreprise ?
                 </p>
                 <Link
                   href="/entreprises"
-                  className="relative inline-flex items-center gap-2 text-[13px] font-semibold transition-opacity hover:opacity-80"
+                  className="inline-flex items-center gap-2 text-[13px] font-semibold transition-opacity hover:opacity-80"
                   style={{ color: accentLight }}
                 >
                   Voir toutes les entreprises

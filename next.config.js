@@ -21,8 +21,10 @@ const nextConfig = {
     dangerouslyAllowSVG: false,
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // Trim deviceSizes / imageSizes : reduit l'explosion combinatoire du cache
+    // image Vercel. 4 breakpoints couvrent 95% du parc (mobile/tablet/desktop/wide).
+    deviceSizes: [640, 828, 1200, 1920],
+    imageSizes: [16, 64, 128, 384],
     qualities: [75, 85, 90],
     minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [

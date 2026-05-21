@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
-import { headers } from 'next/headers';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Providers } from './providers';
 import { MainLayoutShell } from '@/components/MainLayoutShell';
 import { ViewTracker } from '@/components/ViewTracker';
@@ -136,22 +136,21 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const initialFlashBanner = await getFlashBanner();
-  // Recupere le nonce CSP injecte par src/proxy.ts pour les scripts inline.
-  const nonce = (await headers()).get('x-nonce') ?? undefined;
 
   return (
     <html lang="fr" className={`${inter.variable}`} suppressHydrationWarning>
       <head>
+        {/* JSON-LD : pas de nonce car ce ne sont pas des scripts JavaScript
+            executables (type="application/ld+json" = donnees structurees pour
+            les crawlers SEO). Retirer le nonce permet d'eviter l'appel a
+            headers() qui forcerait toute la page en mode dynamique et
+            casserait le cache Edge Vercel. */}
         <script
           type="application/ld+json"
-          nonce={nonce}
-          suppressHydrationWarning
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
         <script
           type="application/ld+json"
-          nonce={nonce}
-          suppressHydrationWarning
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
       </head>
@@ -162,6 +161,7 @@ export default async function RootLayout({
           <CookieBanner />
           <CivilityPrompt />
         </Providers>
+        <SpeedInsights />
       </body>
     </html>
   );

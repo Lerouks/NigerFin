@@ -5,7 +5,7 @@ import { SITE_URL, truncateSeoTitle, truncateSeoDescription } from '@/lib/config
 import { ArticleContent } from './ArticleContent';
 import { ArticleHeader } from './ArticleHeader';
 
-export const revalidate = 60;
+export const revalidate = 3600;
 
 interface ArticlePageProps {
   params: Promise<{ slug: string }>;

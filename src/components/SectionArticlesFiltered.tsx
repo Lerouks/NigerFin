@@ -259,10 +259,10 @@ export function SectionArticlesFiltered({
             {totalPages > 1 && ` · Page ${safePage} sur ${totalPages}`}
           </p>
 
-          {/* Articles grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 stagger-grid">
+          {/* Articles grid : 1 colonne si peu d'articles pour ne pas laisser de vide */}
+          <div className={`grid gap-6 stagger-grid ${paginatedArticles.length === 1 ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
             {paginatedArticles.map((article) => (
-              <ArticleCard key={article._id} article={article} />
+              <ArticleCard key={article._id} article={article} featured={paginatedArticles.length === 1} />
             ))}
           </div>
 

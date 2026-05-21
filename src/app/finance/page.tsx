@@ -4,7 +4,7 @@ import { HubFooter } from '@/components/HubFooter';
 import { SectionArticlesFiltered } from '@/components/SectionArticlesFiltered';
 import { getArticlesByCategory, getArticleViewRanking } from '@/lib/articles';
 
-export const revalidate = 60;
+export const revalidate = 3600;
 export const metadata: Metadata = {
   title: 'Finance au Niger : marchés, banques, placements',
   description: 'Actualités financières, analyses bancaires et tendances du secteur financier au Niger et en Afrique de l\'Ouest : crédit, épargne, placements, BRVM.',

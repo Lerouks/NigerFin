@@ -4,7 +4,7 @@ import { SectionArticlesFiltered } from '@/components/SectionArticlesFiltered';
 import { StrategicEnterprisesSection } from '@/components/StrategicEnterprisesSection';
 import { getArticlesByCategory, getArticleViewRanking } from '@/lib/articles';
 
-export const revalidate = 60;
+export const revalidate = 3600;
 export const metadata: Metadata = {
   title: 'Entreprises stratégiques du Niger',
   description: 'Les 8 piliers économiques du Niger et l\'actualité des entreprises nigériennes et ouest-africaines : résultats, stratégies, opportunités d\'investissement.',

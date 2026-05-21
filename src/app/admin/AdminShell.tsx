@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, Newspaper, Users, Wallet, Server } from 'lucide-react';
+import { LayoutDashboard, Newspaper, Users, Wallet, Server, Search } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { CommandPalette } from './CommandPalette';
 
 interface NavItem {
   href: string;
@@ -23,17 +24,39 @@ const NAV: NavItem[] = [
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() ?? '/admin';
+  const [paletteOpen, setPaletteOpen] = useState(false);
   useServiceWorkerRegistration();
+  useCommandPaletteShortcut(setPaletteOpen);
 
   return (
     <div className="min-h-screen bg-[#fafaf9] text-[#1a1a1a]">
-      <AdminSidebar pathname={pathname} />
+      <AdminSidebar pathname={pathname} onOpenPalette={() => setPaletteOpen(true)} />
       <div className="lg:pl-64">
         <main className="pb-24 lg:pb-12">{children}</main>
       </div>
       <AdminBottomNav pathname={pathname} />
+      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
     </div>
   );
+}
+
+function useCommandPaletteShortcut(setOpen: (next: boolean | ((prev: boolean) => boolean)) => void) {
+  // Cmd+K (macOS) / Ctrl+K (Win/Linux) toggle le palette de commandes. Pas de
+  // raccourci sur mobile (les clients touch n'ont pas de clavier). Le handler
+  // est volontairement permissif : il n'interfere pas avec les inputs natifs
+  // car cmdk ne capture les fleches qu'a l'interieur de sa boite.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onKey = (e: KeyboardEvent) => {
+      const isK = e.key === 'k' || e.key === 'K';
+      if (!isK) return;
+      if (!(e.metaKey || e.ctrlKey)) return;
+      e.preventDefault();
+      setOpen((prev) => !prev);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [setOpen]);
 }
 
 function useServiceWorkerRegistration() {
@@ -57,7 +80,13 @@ function useServiceWorkerRegistration() {
   }, []);
 }
 
-function AdminSidebar({ pathname }: { pathname: string }) {
+function AdminSidebar({
+  pathname,
+  onOpenPalette,
+}: {
+  pathname: string;
+  onOpenPalette: () => void;
+}) {
   return (
     <aside
       aria-label="Navigation administration"
@@ -68,6 +97,23 @@ function AdminSidebar({ pathname }: { pathname: string }) {
         <p className="text-[11px] tracking-widest uppercase text-[#1a1a1a]/45 mt-2 font-medium">
           Administration
         </p>
+      </div>
+
+      <div className="px-3 pb-3">
+        <button
+          type="button"
+          onClick={onOpenPalette}
+          aria-label="Ouvrir la recherche du Cockpit (Cmd + K)"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-[#1a1a1a]/55 bg-black/[0.03] hover:bg-black/[0.05] hover:text-[#1a1a1a] transition"
+        >
+          <Search className="w-[16px] h-[16px]" aria-hidden="true" />
+          <span className="flex-1 text-left font-medium">Rechercher</span>
+          <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white text-[#1a1a1a]/55 border border-black/[0.06]">
+            <span aria-hidden="true">{getCommandKeyLabel()}</span>
+            <span className="sr-only">{getCommandKeyAriaLabel()}</span>
+            K
+          </kbd>
+        </button>
       </div>
 
       <nav className="flex-1 px-3 py-2 space-y-1" role="navigation">
@@ -135,4 +181,22 @@ function AdminBottomNav({ pathname }: { pathname: string }) {
       </div>
     </nav>
   );
+}
+
+function getCommandKeyLabel(): string {
+  if (typeof navigator === 'undefined') return 'Ctrl';
+  const platform =
+    (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ??
+    navigator.platform ??
+    '';
+  return /mac|iphone|ipad/i.test(platform) ? '⌘' : 'Ctrl';
+}
+
+function getCommandKeyAriaLabel(): string {
+  if (typeof navigator === 'undefined') return 'Ctrl + ';
+  const platform =
+    (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ??
+    navigator.platform ??
+    '';
+  return /mac|iphone|ipad/i.test(platform) ? 'Commande plus ' : 'Controle plus ';
 }

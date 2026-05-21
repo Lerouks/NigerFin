@@ -3,7 +3,7 @@ import { CategoryHero } from '@/components/CategoryHero';
 import { SectionArticlesFiltered } from '@/components/SectionArticlesFiltered';
 import { getAllArticles, getArticleViewRanking } from '@/lib/articles';
 
-export const revalidate = 60;
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: 'Tous les articles : actualités et analyses',

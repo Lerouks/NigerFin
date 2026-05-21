@@ -5,7 +5,7 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-export const revalidate = 60;
+export const revalidate = 3600;
 
 function formatSlug(slug: string): string {
   return slug

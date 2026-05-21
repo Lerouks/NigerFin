@@ -43,12 +43,11 @@ export function NigerMapInteractive({ className }: NigerMapInteractiveProps) {
     <div className={`relative w-full ${className ?? ''}`}>
       <div className="relative aspect-[3/2] w-full">
         <Image
-          src="/carte-niger.png"
+          src="/carte-niger.webp"
           alt="Carte du Niger avec ses 7 principales villes : Niamey (capitale), Tillabéri, Tahoua, Agadez, Maradi, Zinder, Diffa"
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1280px) 90vw, 1200px"
-          quality={95}
-          priority
+          quality={85}
           className="object-contain select-none pointer-events-none"
           style={{ mixBlendMode: 'darken' }}
         />

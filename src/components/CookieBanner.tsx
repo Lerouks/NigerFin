@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Cookie, X } from 'lucide-react';
 import { getConsent, setConsent } from '@/lib/consent';
@@ -15,10 +16,14 @@ import { initPostHog } from '@/lib/posthog';
  * d'erreurs restent désactivés.
  */
 export function CookieBanner() {
+  const pathname = usePathname() ?? '/';
+  const isAdminSurface =
+    pathname.startsWith('/admin') || pathname.startsWith('/dev-cockpit-preview');
   const [shouldShow, setShouldShow] = useState(false);
   const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
+    if (isAdminSurface) return;
     const consent = getConsent();
     if (consent === null) {
       const timer = setTimeout(() => {
@@ -29,7 +34,7 @@ export function CookieBanner() {
     } else if (consent === 'accepted') {
       initPostHog();
     }
-  }, []);
+  }, [isAdminSurface]);
 
   // Réserve de l'espace en bas du body sur mobile quand le bandeau est visible.
   // Évite que le bandeau cache les CTAs en bas de page (/inscription, /pricing).

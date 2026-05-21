@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { MapPin, Users, Ruler, Coins, Gem, Factory, Globe, Calendar, TrendingUp, BarChart3 } from 'lucide-react';
 import { NigerRegions } from './niger/NigerRegions';
 import { NigerResources } from './niger/NigerResources';
-import { NigerOutlineMap } from './niger/NigerOutlineMap';
+import { NigerMapInteractive } from './niger/NigerMapInteractive';
 import { RevealOnScroll } from './RevealOnScroll';
 import { useNigerCountry } from '@/hooks/useNigerCountry';
 import { useNigerMacro } from '@/hooks/useNigerMacro';
@@ -199,12 +199,10 @@ export function NigerPresentation({ initialData }: NigerPresentationProps = {}) 
           </div>
         )}
 
-        {/* Carte vectorielle Niger : 9 villes principales + 7 pays voisins, interactive */}
+        {/* Carte du Niger custom (PNG public/carte-niger.png) avec tooltips villes au survol */}
         <div className="mb-14">
-          <div className="rounded-2xl overflow-hidden bg-gradient-to-b from-white to-[#f5f1e6] border border-black/[0.06] shadow-[0_4px_40px_-12px_rgba(0,0,0,0.06)] p-3 sm:p-5 md:p-6">
-            <div className="aspect-[4/3] sm:aspect-[5/4] lg:aspect-[16/11] w-full">
-              <NigerOutlineMap className="w-full h-full block" />
-            </div>
+          <div className="rounded-2xl overflow-hidden bg-white border border-black/[0.06] shadow-[0_4px_40px_-12px_rgba(0,0,0,0.06)] p-2 sm:p-4 md:p-6">
+            <NigerMapInteractive />
           </div>
           <p className="text-[11px] text-gray-500 mt-3 text-center">
             Survolez une ville pour afficher son rôle. Source : NFI Report.

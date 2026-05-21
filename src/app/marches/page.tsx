@@ -7,7 +7,7 @@ import { SectionArticlesFiltered } from '@/components/SectionArticlesFiltered';
 import { COMMODITIES_NIGER_EXPOSED, FOOD_PRICES_2025, INS_LAST_UPDATE } from '@/data/ins-indicators';
 import { getArticlesByCategory, getArticleViewRanking } from '@/lib/articles';
 
-export const revalidate = 3600;
+export const revalidate = 60;
 export const metadata: Metadata = {
   title: 'Marchés financiers : indices, devises, BRVM',
   description: 'Suivez les cours des marchés en temps réel : matières premières, devises, indices boursiers et actifs financiers africains, dont la BRVM.',

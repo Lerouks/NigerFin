@@ -59,21 +59,6 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  // Court-circuit perf : si aucun cookie Supabase n'est present (visiteur anonyme,
-  // ~90% du trafic Niger), on skip TOTALEMENT le refresh auth. Sans cookie write,
-  // la reponse reste cacheable au niveau Edge Vercel, ce qui debloque l'ISR
-  // (revalidate=3600) et evite le round-trip Niger -> Paris -> us-west-1 sur
-  // chaque visite. Gain LCP estime -1 a -1.5s sur 3G.
-  const hasSupabaseSession = request.cookies
-    .getAll()
-    .some((c) => c.name.startsWith('sb-'));
-
-  if (!hasSupabaseSession) {
-    const response = NextResponse.next({ request: { headers: requestHeaders } });
-    response.headers.set('Content-Security-Policy', cspHeader);
-    return response;
-  }
-
   let supabaseResponse = NextResponse.next({
     request: { headers: requestHeaders },
   });

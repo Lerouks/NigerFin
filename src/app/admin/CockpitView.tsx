@@ -2,7 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowUpRight, ArrowDownRight, Bell, Play, Sparkles } from 'lucide-react';
+import {
+  ArrowUpRight,
+  ArrowDownRight,
+  Bell,
+  Play,
+  Sparkles,
+  Wallet,
+  MessageSquare,
+  UserPlus,
+  Newspaper,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { useAdminApiPolling } from './hooks/useAdminApi';
 
 interface OverviewData {
@@ -47,7 +58,8 @@ export function CockpitView({ greeting }: { greeting: ProfileGreeting }) {
       />
 
       <StatsRow
-        articlesViews={overview?.viewsToday ?? null}
+        newUsers={overview?.newUsersToday ?? null}
+        newUsersGrowth={overview?.newUsersTodayGrowthPercent ?? null}
         mrr={overview?.mrr ?? null}
         mrrGrowth={overview?.revenueTodayGrowthPercent ?? null}
         isLoading={isLoading}
@@ -146,26 +158,38 @@ function HeroCardViews({
 }
 
 function StatsRow({
-  articlesViews,
+  newUsers,
+  newUsersGrowth,
   mrr,
   mrrGrowth,
   isLoading,
 }: {
-  articlesViews: number | null;
+  newUsers: number | null;
+  newUsersGrowth: number | null;
   mrr: number | null;
   mrrGrowth: number | null;
   isLoading: boolean;
 }) {
   const positive = (mrrGrowth ?? 0) >= 0;
+  const newUsersPositive = (newUsersGrowth ?? 0) >= 0;
   return (
     <section className="grid grid-cols-2 gap-3 mb-6">
       <div className="bg-black/[0.025] rounded-2xl p-4">
         <p className="text-[10px] tracking-widest uppercase text-[#1a1a1a]/45 font-semibold">
-          Articles vus
+          Nouveaux lecteurs
         </p>
         <p className="font-extrabold text-[28px] leading-tight mt-2 tabular-nums">
-          <AnimatedNumber value={articlesViews} isLoading={isLoading} />
+          <AnimatedNumber value={newUsers} isLoading={isLoading} />
         </p>
+        <span
+          className={[
+            'inline-flex items-center gap-1 text-[11px] font-bold mt-1',
+            newUsersPositive ? 'text-[#00a004]' : 'text-red-600',
+          ].join(' ')}
+        >
+          {newUsersPositive ? '▲' : '▼'}{' '}
+          {newUsersGrowth === null ? '-' : `${newUsersPositive ? '+' : ''}${newUsersGrowth}%`}
+        </span>
       </div>
       <div className="rounded-2xl p-4 border border-[#d4a843]/15 bg-gradient-to-br from-[#d4a843]/8 to-[#ff8c42]/4">
         <p className="text-[10px] tracking-widest uppercase text-[#d4a843] font-semibold">
@@ -188,14 +212,47 @@ function StatsRow({
   );
 }
 
+type ActivityType = 'payment' | 'comment' | 'signup' | 'article';
+
 interface ActivityEvent {
   id: string;
+  type?: ActivityType;
   initials?: string;
   label: string;
   detail: string;
   relativeTime: string;
   highlight?: string;
 }
+
+const TYPE_VISUAL: Record<
+  ActivityType,
+  { icon: LucideIcon; bg: string; iconColor: string; label: string }
+> = {
+  payment: {
+    icon: Wallet,
+    bg: 'bg-gradient-to-br from-[#d4a843] to-[#ff8c42]',
+    iconColor: 'text-white',
+    label: 'Paiement',
+  },
+  comment: {
+    icon: MessageSquare,
+    bg: 'bg-[#00c805]/12',
+    iconColor: 'text-[#00a004]',
+    label: 'Commentaire',
+  },
+  signup: {
+    icon: UserPlus,
+    bg: 'bg-[#1a1a1a]/[0.06]',
+    iconColor: 'text-[#1a1a1a]/70',
+    label: 'Nouvel utilisateur',
+  },
+  article: {
+    icon: Newspaper,
+    bg: 'bg-[#1a1a1a]',
+    iconColor: 'text-[#d4a843]',
+    label: 'Article',
+  },
+};
 
 function ActivitySection() {
   const { data, isLoading } = useAdminApiPolling<{ events: ActivityEvent[] }>(
@@ -229,7 +286,7 @@ function ActivitySection() {
               key={e.id}
               className="flex items-center gap-3 bg-white border border-black/[0.06] rounded-2xl p-3.5"
             >
-              <Avatar initials={e.initials ?? '••'} />
+              <EventVisual type={e.type} initials={e.initials} />
               <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-semibold leading-tight text-[#1a1a1a]">
                   {e.label}{' '}
@@ -276,6 +333,24 @@ function Avatar({ initials }: { initials: string }) {
   return (
     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#d4a843] to-[#ff8c42] flex items-center justify-center text-white font-bold text-[12px] flex-shrink-0">
       {initials}
+    </div>
+  );
+}
+
+function EventVisual({ type, initials }: { type?: ActivityType; initials?: string }) {
+  // Payment = personne reelle qui paye => avatar gradient avec ses initiales.
+  // Comment / signup / article = visuel distinct par type d'evenement.
+  if (type === 'payment' || (!type && initials)) {
+    return <Avatar initials={initials ?? '••'} />;
+  }
+  const visual = type ? TYPE_VISUAL[type] : TYPE_VISUAL.signup;
+  const Icon = visual.icon;
+  return (
+    <div
+      className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${visual.bg}`}
+      aria-label={visual.label}
+    >
+      <Icon className={`w-[18px] h-[18px] ${visual.iconColor}`} aria-hidden="true" />
     </div>
   );
 }

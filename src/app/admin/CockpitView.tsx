@@ -135,7 +135,7 @@ function HeroCardViews({
             ) : (
               <ArrowDownRight className="w-3 h-3" aria-hidden="true" />
             )}
-            {growthPercent === null ? '—' : `${positive ? '+' : ''}${growthPercent}%`}
+            {growthPercent === null ? '-' : `${positive ? '+' : ''}${growthPercent}%`}
           </span>
           <span className="text-[12px] text-[#1a1a1a]/45">vs hier</span>
         </div>
@@ -181,7 +181,7 @@ function StatsRow({
             positive ? 'text-[#d4a843]' : 'text-red-600',
           ].join(' ')}
         >
-          {positive ? '▲' : '▼'} {mrrGrowth === null ? '—' : `${positive ? '+' : ''}${mrrGrowth}%`}
+          {positive ? '▲' : '▼'} {mrrGrowth === null ? '-' : `${positive ? '+' : ''}${mrrGrowth}%`}
         </span>
       </div>
     </section>
@@ -408,7 +408,7 @@ function AnimatedNumber({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
-  if (isLoading && value === null) return <span className="text-[#1a1a1a]/20">—</span>;
+  if (isLoading && value === null) return <span className="text-[#1a1a1a]/20">-</span>;
   return <>{display.toLocaleString('fr-FR')}</>;
 }
 

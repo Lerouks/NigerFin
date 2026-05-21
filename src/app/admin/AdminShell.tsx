@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { LayoutDashboard, Newspaper, Users, Wallet, Server } from 'lucide-react';
@@ -22,6 +23,7 @@ const NAV: NavItem[] = [
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() ?? '/admin';
+  useServiceWorkerRegistration();
 
   return (
     <div className="min-h-screen bg-[#fafaf9] text-[#1a1a1a]">
@@ -32,6 +34,27 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       <AdminBottomNav pathname={pathname} />
     </div>
   );
+}
+
+function useServiceWorkerRegistration() {
+  // Enregistre le service worker du Cockpit pour activer la PWA installable +
+  // les push notifications. Scope limite a /admin (declare dans manifest.webmanifest).
+  // Le SW lui-meme (public/sw.js) gere le caching NetworkFirst pour /admin/*
+  // + l affichage des notifications push recues.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!('serviceWorker' in navigator)) return;
+    const onLoad = () => {
+      navigator.serviceWorker
+        .register('/sw.js', { scope: '/admin' })
+        .catch((err) => {
+          console.warn('[NFI Cockpit] Enregistrement du service worker echoue', err);
+        });
+    };
+    if (document.readyState === 'complete') onLoad();
+    else window.addEventListener('load', onLoad, { once: true });
+    return () => window.removeEventListener('load', onLoad);
+  }, []);
 }
 
 function AdminSidebar({ pathname }: { pathname: string }) {

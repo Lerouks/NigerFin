@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { User, X } from 'lucide-react';
 
@@ -17,12 +18,19 @@ const DISMISS_COOLDOWN_DAYS = 7;
  * d'usage côté livrables tant que le compte n'est pas Premium).
  */
 export function CivilityPrompt() {
+  const pathname = usePathname() ?? '/';
+  const isAdminSurface =
+    pathname.startsWith('/admin') || pathname.startsWith('/dev-cockpit-preview');
   const { isSignedIn, profile, userRole, refreshProfile } = useAuth();
   const [selected, setSelected] = useState<Civility | ''>('');
   const [saving, setSaving] = useState(false);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    if (isAdminSurface) {
+      setVisible(false);
+      return;
+    }
     if (!isSignedIn || !profile) {
       setVisible(false);
       return;
@@ -51,7 +59,7 @@ export function CivilityPrompt() {
       // localStorage indisponible (mode privé etc), on affiche par défaut
     }
     setVisible(true);
-  }, [isSignedIn, profile, userRole]);
+  }, [isAdminSurface, isSignedIn, profile, userRole]);
 
   if (!visible) return null;
 

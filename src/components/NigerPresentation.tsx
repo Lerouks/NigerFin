@@ -199,10 +199,10 @@ export function NigerPresentation({ initialData }: NigerPresentationProps = {}) 
         )}
 
         {/* Carte du Niger custom (PNG public/carte-niger.png) avec tooltips villes au survol */}
+        {/* Pas de container card : la PNG est rendue directement sur le fond ivoire,
+            mix-blend-mode darken rend le fond blanc de la PNG transparent. */}
         <div className="mb-14">
-          <div className="rounded-2xl overflow-hidden bg-white border border-black/[0.06] shadow-[0_4px_40px_-12px_rgba(0,0,0,0.06)] p-2 sm:p-4 md:p-6">
-            <NigerMapInteractive />
-          </div>
+          <NigerMapInteractive />
           <p className="text-[11px] text-gray-500 mt-3 text-center">
             Survolez une ville pour afficher son rôle. Source : NFI Report.
           </p>

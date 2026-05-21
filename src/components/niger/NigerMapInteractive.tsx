@@ -50,6 +50,7 @@ export function NigerMapInteractive({ className }: NigerMapInteractiveProps) {
           quality={95}
           priority
           className="object-contain select-none pointer-events-none"
+          style={{ mixBlendMode: 'darken' }}
         />
 
         {/* Layer interactif au-dessus de l'image : 1 hit-area par ville */}

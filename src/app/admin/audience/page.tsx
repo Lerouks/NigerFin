@@ -1,19 +1,13 @@
 import type { Metadata } from 'next';
-import { ModulePlaceholder } from '../ModulePlaceholder';
+import { AudienceView } from './AudienceView';
 
 export const metadata: Metadata = {
   title: 'Audience · NFI Cockpit',
-  description: 'Utilisateurs, messages, statistiques et heatmaps.',
+  description:
+    'Utilisateurs, messages, statistiques avancées et funnel de conversion.',
   robots: { index: false },
 };
 
 export default function AudiencePage() {
-  return (
-    <ModulePlaceholder
-      title="Audience"
-      description="Utilisateurs, messages, statistiques avancées et heatmap horaire. Module prévu pour la Phase 2."
-      phaseLabel="Phase 2 · à venir"
-      legacyTab="users"
-    />
-  );
+  return <AudienceView />;
 }

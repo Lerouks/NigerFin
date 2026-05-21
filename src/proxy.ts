@@ -17,7 +17,7 @@ function buildCspHeader(nonce: string): string {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co",
     "font-src 'self'",
-    `connect-src 'self' https://*.supabase.co https://*.sentry.io https://*.posthog.com${isDev ? ' ws://localhost:* http://localhost:*' : ''}`,
+    `connect-src 'self' data: https://*.supabase.co https://*.sentry.io https://*.posthog.com${isDev ? ' ws://localhost:* http://localhost:*' : ''}`,
     "frame-src 'none'",
     "object-src 'none'",
     "base-uri 'self'",

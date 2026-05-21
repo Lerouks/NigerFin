@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase';
+import { AdminShell } from './AdminShell';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createServerSupabaseClient();
@@ -21,5 +22,5 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect('/');
   }
 
-  return <>{children}</>;
+  return <AdminShell>{children}</AdminShell>;
 }

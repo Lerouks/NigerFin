@@ -11,6 +11,9 @@ export async function GET() {
   const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
   const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+  const yesterdayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 0, 0, 0);
+  const yesterdayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
 
   // ─── Parallel queries ──────────────────────────────────────────────────────
 
@@ -86,6 +89,41 @@ export async function GET() {
       .select('created_at')
       .gte('created_at', new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString())
       .order('created_at', { ascending: true }),
+  ]);
+
+  // Today and yesterday stats (parallel)
+  const [
+    viewsTodayRes,
+    viewsYesterdayRes,
+    newUsersTodayRes,
+    newUsersYesterdayRes,
+    articlesPublishedTodayRes,
+    paymentsTodayRes,
+    paymentsYesterdayRes,
+    last7DaysViewsRes,
+  ] = await Promise.all([
+    serviceClient.from('page_views').select('*', { count: 'exact', head: true })
+      .gte('viewed_at', todayStart.toISOString()),
+    serviceClient.from('page_views').select('*', { count: 'exact', head: true })
+      .gte('viewed_at', yesterdayStart.toISOString())
+      .lt('viewed_at', yesterdayEnd.toISOString()),
+    serviceClient.from('user_profiles').select('*', { count: 'exact', head: true })
+      .gte('created_at', todayStart.toISOString()),
+    serviceClient.from('user_profiles').select('*', { count: 'exact', head: true })
+      .gte('created_at', yesterdayStart.toISOString())
+      .lt('created_at', yesterdayEnd.toISOString()),
+    serviceClient.from('articles').select('*', { count: 'exact', head: true })
+      .eq('status', 'published')
+      .gte('published_at', todayStart.toISOString()),
+    serviceClient.from('payment_requests').select('amount')
+      .eq('status', 'verified')
+      .gte('verified_at', todayStart.toISOString()),
+    serviceClient.from('payment_requests').select('amount')
+      .eq('status', 'verified')
+      .gte('verified_at', yesterdayStart.toISOString())
+      .lt('verified_at', yesterdayEnd.toISOString()),
+    serviceClient.from('page_views').select('viewed_at')
+      .gte('viewed_at', new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()),
   ]);
 
   // ─── Revenue calculations ─────────────────────────────────────────────────
@@ -229,6 +267,44 @@ export async function GET() {
     ? Math.round(((newUsersThisMonth - newUsersLastMonth) / newUsersLastMonth) * 100)
     : newUsersThisMonth > 0 ? 100 : 0;
 
+  // ─── Today vs Yesterday metrics (for Cockpit hero cards) ─────────────────
+
+  const viewsToday = viewsTodayRes.count || 0;
+  const viewsYesterday = viewsYesterdayRes.count || 0;
+  const viewsTodayGrowthPercent = viewsYesterday > 0
+    ? Math.round(((viewsToday - viewsYesterday) / viewsYesterday) * 100)
+    : viewsToday > 0 ? 100 : 0;
+
+  const newUsersToday = newUsersTodayRes.count || 0;
+  const newUsersYesterday = newUsersYesterdayRes.count || 0;
+  const newUsersTodayGrowthPercent = newUsersYesterday > 0
+    ? Math.round(((newUsersToday - newUsersYesterday) / newUsersYesterday) * 100)
+    : newUsersToday > 0 ? 100 : 0;
+
+  const articlesPublishedToday = articlesPublishedTodayRes.count || 0;
+
+  const revenueToday = (paymentsTodayRes.data || []).reduce((sum, p) => sum + (p.amount || 0), 0);
+  const revenueYesterday = (paymentsYesterdayRes.data || []).reduce((sum, p) => sum + (p.amount || 0), 0);
+  const revenueTodayGrowthPercent = revenueYesterday > 0
+    ? Math.round(((revenueToday - revenueYesterday) / revenueYesterday) * 100)
+    : revenueToday > 0 ? 100 : 0;
+
+  // 7-day sparkline data (views per day)
+  const viewsSparkline: number[] = [];
+  if (last7DaysViewsRes.data) {
+    const buckets: Record<string, number> = {};
+    for (const row of last7DaysViewsRes.data) {
+      const d = new Date(row.viewed_at);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      buckets[key] = (buckets[key] || 0) + 1;
+    }
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      viewsSparkline.push(buckets[key] || 0);
+    }
+  }
+
   return NextResponse.json({
     // Revenue
     mrr,
@@ -259,6 +335,16 @@ export async function GET() {
     viewsThisMonth,
     viewsLastMonth,
     viewsGrowthPercent,
+
+    // Today (Cockpit hero cards)
+    viewsToday,
+    viewsTodayGrowthPercent,
+    newUsersToday,
+    newUsersTodayGrowthPercent,
+    articlesPublishedToday,
+    revenueToday,
+    revenueTodayGrowthPercent,
+    viewsSparkline,
 
     // Charts
     monthlyRevenue_chart: monthlyRevenue,

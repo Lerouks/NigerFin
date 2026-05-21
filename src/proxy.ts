@@ -23,8 +23,8 @@ function buildCspHeader(nonce: string): string {
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
-    'upgrade-insecure-requests',
   ];
+  if (!isDev) directives.push('upgrade-insecure-requests');
   return directives.join('; ');
 }
 

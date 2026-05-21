@@ -238,7 +238,7 @@ export function PathContent({ slug }: { slug: string }) {
         <div className="flex items-center gap-3 mb-8">
           <h2 className="text-[15px] font-semibold text-[#111]">Programme</h2>
           <div className="flex-1 h-px bg-black/[0.06]" />
-          <span className="text-[12px] text-gray-400">
+          <span className="text-[12px] text-gray-500">
             {data.step_count} étape{data.step_count !== 1 ? 's' : ''}
           </span>
         </div>
@@ -269,11 +269,11 @@ export function PathContent({ slug }: { slug: string }) {
                   <div className="flex-1 min-w-0">
                     <p className="text-[15px] font-medium text-[#111] truncate">{lesson.title}</p>
                     <div className="flex items-center gap-3 mt-1 flex-wrap">
-                      <span className="text-[11px] text-gray-400">
+                      <span className="text-[11px] text-gray-500">
                         {lesson.category.title}
                       </span>
-                      <span className="text-[11px] text-gray-400">•</span>
-                      <span className="text-[11px] text-gray-400 flex items-center gap-1">
+                      <span className="text-[11px] text-gray-500">•</span>
+                      <span className="text-[11px] text-gray-500 flex items-center gap-1">
                         <Clock className="w-3 h-3" />
                         {lesson.duration}
                       </span>

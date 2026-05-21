@@ -53,7 +53,7 @@ function PlanCard({ title, badge, tools, isPremium = false, isSubscribed = false
       >
         <span
           className={`inline-block text-[10px] font-semibold tracking-[0.15em] uppercase mb-3 px-2.5 py-0.5 rounded-full ${
-            isPremium ? 'bg-[#d4a843]/20 text-[#d4a843]' : 'text-gray-400'
+            isPremium ? 'bg-[#d4a843]/20 text-[#d4a843]' : 'text-gray-500'
           }`}
         >
           {badge}
@@ -153,7 +153,7 @@ export function PracticalTools() {
     <section id="outils" className="py-20 md:py-28 scroll-mt-[180px]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-xl mb-14">
-          <span className="text-[11px] tracking-[0.15em] uppercase text-gray-400 block mb-3">
+          <span className="text-[11px] tracking-[0.15em] uppercase text-gray-500 block mb-3">
             Outils financiers
           </span>
           <h2 className="text-3xl md:text-4xl mb-4">Calculez, simulez, anticipez</h2>
@@ -169,7 +169,7 @@ export function PracticalTools() {
         </div>
 
         <div className="text-center mt-10">
-          <p className="text-[12px] text-gray-400">
+          <p className="text-[12px] text-gray-500">
             Tous les outils sont optimisés pour le contexte économique africain
           </p>
         </div>

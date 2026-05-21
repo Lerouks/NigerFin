@@ -69,7 +69,7 @@ export function SiteFeaturesManager() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+        <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
       </div>
     );
   }
@@ -123,7 +123,7 @@ export function SiteFeaturesManager() {
               </>
             ) : (
               <>
-                <EyeOff className="w-3.5 h-3.5 text-gray-400" />
+                <EyeOff className="w-3.5 h-3.5 text-gray-500" />
                 Masqué actuellement
               </>
             )}

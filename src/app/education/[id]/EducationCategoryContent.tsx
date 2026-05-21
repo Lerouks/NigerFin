@@ -123,11 +123,11 @@ function LessonRow({
           {isCompleted && accessible ? <CheckCircle2 className="w-4 h-4" /> : index}
         </span>
         <div className="flex-1 min-w-0">
-          <p className={`text-[15px] font-medium truncate ${accessible ? 'text-[#111]' : 'text-gray-400'}`}>
+          <p className={`text-[15px] font-medium truncate ${accessible ? 'text-[#111]' : 'text-gray-500'}`}>
             {lesson.title}
           </p>
           <div className="flex items-center gap-3 mt-1">
-            <span className="text-[12px] text-gray-400 flex items-center gap-1">
+            <span className="text-[12px] text-gray-500 flex items-center gap-1">
               <Clock className="w-3 h-3" />{lesson.duration}
             </span>
             <span className={`text-[11px] px-2 py-0.5 rounded-full border ${config.bg} ${config.color}`}>
@@ -141,7 +141,7 @@ function LessonRow({
         {!accessible ? (
           <Lock className="w-4 h-4 text-gray-300 shrink-0" />
         ) : lesson.content ? (
-          <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`w-4 h-4 text-gray-500 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
         ) : (
           <CheckCircle2 className="w-4 h-4 text-gray-200 shrink-0" />
         )}
@@ -256,7 +256,7 @@ function renderLessons(
             <div className="flex items-center gap-3 mb-4">
               <h3 className="text-[14px] font-semibold text-[#111]">{sub.title}</h3>
               <div className="flex-1 h-px bg-black/[0.06]" />
-              <span className="text-[11px] text-gray-400">{subLessons.length} leçon{subLessons.length !== 1 ? 's' : ''}</span>
+              <span className="text-[11px] text-gray-500">{subLessons.length} leçon{subLessons.length !== 1 ? 's' : ''}</span>
             </div>
             <div className="space-y-3">
               {subLessons.map((lesson) => {
@@ -405,7 +405,7 @@ export function EducationCategoryContent({ slug }: { slug: string }) {
         <div className="flex items-center gap-3 mb-8">
           <h2 className="text-[15px] font-semibold text-[#111]">Programme</h2>
           <div className="flex-1 h-px bg-black/[0.06]" />
-          <span className="text-[12px] text-gray-400">{lessons.length} leçon{lessons.length !== 1 ? 's' : ''}</span>
+          <span className="text-[12px] text-gray-500">{lessons.length} leçon{lessons.length !== 1 ? 's' : ''}</span>
         </div>
 
         {/* Lesson list (with optional subsections) */}
@@ -415,7 +415,7 @@ export function EducationCategoryContent({ slug }: { slug: string }) {
         {lessons.length === 0 && (
           <div className="text-center py-16 bg-white border border-black/[0.06] rounded-xl">
             <BookOpen className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-            <p className="text-[15px] font-medium text-gray-400">Aucune leçon pour le moment</p>
+            <p className="text-[15px] font-medium text-gray-500">Aucune leçon pour le moment</p>
             <p className="text-[13px] text-gray-300 mt-1">Le contenu sera bientôt disponible.</p>
           </div>
         )}

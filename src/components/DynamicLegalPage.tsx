@@ -65,7 +65,7 @@ export function DynamicLegalPage({ title, introParagraphs, initialSections, fall
 
             {lastUpdated && (
               <div className="mt-8 text-center">
-                <p className="text-[12px] text-gray-400">
+                <p className="text-[12px] text-gray-500">
                   Dernière mise à jour : {lastUpdated.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                 </p>
               </div>

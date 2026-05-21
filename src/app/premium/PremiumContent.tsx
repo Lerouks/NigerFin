@@ -579,7 +579,7 @@ function FinalCta() {
             Devenir Premium maintenant
             <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
           </Link>
-          <p className="text-[12.5px] text-gray-400">
+          <p className="text-[12.5px] text-gray-500">
             5 000 FCFA/mois · Annulation à tout moment
           </p>
         </div>

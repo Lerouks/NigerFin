@@ -327,7 +327,7 @@ export function ArticlesManager() {
           <div className="lg:col-span-2 space-y-4">
             {/* Title */}
             <div>
-              <label className="text-[11px] uppercase tracking-wider text-gray-400 block mb-1.5">Titre *</label>
+              <label className="text-[11px] uppercase tracking-wider text-gray-500 block mb-1.5">Titre *</label>
               <input type="text" value={form.title}
                 onChange={(e) => setForm((f) => ({
                   ...f,
@@ -341,7 +341,7 @@ export function ArticlesManager() {
 
             {/* Subtitle */}
             <div>
-              <label className="text-[11px] uppercase tracking-wider text-gray-400 block mb-1.5">Sous-titre</label>
+              <label className="text-[11px] uppercase tracking-wider text-gray-500 block mb-1.5">Sous-titre</label>
               <input type="text" value={form.subtitle}
                 onChange={(e) => setForm((f) => ({ ...f, subtitle: e.target.value }))}
                 className="w-full px-4 py-2.5 border border-black/[0.08] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black bg-white"
@@ -351,7 +351,7 @@ export function ArticlesManager() {
 
             {/* Excerpt */}
             <div>
-              <label className="text-[11px] uppercase tracking-wider text-gray-400 block mb-1.5">Extrait</label>
+              <label className="text-[11px] uppercase tracking-wider text-gray-500 block mb-1.5">Extrait</label>
               <textarea value={form.excerpt}
                 onChange={(e) => setForm((f) => ({ ...f, excerpt: e.target.value }))}
                 rows={2}
@@ -362,7 +362,7 @@ export function ArticlesManager() {
 
             {/* Main Image */}
             <div>
-              <label className="text-[11px] uppercase tracking-wider text-gray-400 block mb-1.5">Image principale</label>
+              <label className="text-[11px] uppercase tracking-wider text-gray-500 block mb-1.5">Image principale</label>
               {form.main_image_url ? (
                 <div className="relative rounded-lg overflow-hidden border border-black/[0.08]">
                   <Image src={form.main_image_url} alt={form.main_image_alt || form.title} width={600} height={192} className="w-full h-48 object-cover" unoptimized />
@@ -374,12 +374,12 @@ export function ArticlesManager() {
               ) : (
                 <label className="flex flex-col items-center justify-center h-40 border-2 border-dashed border-black/[0.1] rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                   {uploading ? (
-                    <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                    <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
                   ) : (
                     <>
-                      <Upload className="w-6 h-6 text-gray-400 mb-2" />
+                      <Upload className="w-6 h-6 text-gray-500 mb-2" />
                       <span className="text-sm text-gray-500">Cliquer pour uploader une image</span>
-                      <span className="text-[11px] text-gray-400 mt-1">JPG, PNG, WebP (max 5MB)</span>
+                      <span className="text-[11px] text-gray-500 mt-1">JPG, PNG, WebP (max 5MB)</span>
                     </>
                   )}
                   <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
@@ -404,7 +404,7 @@ export function ArticlesManager() {
 
             {/* Body (Rich Text Editor) */}
             <div>
-              <label className="text-[11px] uppercase tracking-wider text-gray-400 block mb-1.5">Contenu de l&apos;article</label>
+              <label className="text-[11px] uppercase tracking-wider text-gray-500 block mb-1.5">Contenu de l&apos;article</label>
               <RichTextEditor
                 content={form.body}
                 onChange={(html) => setForm((f) => ({ ...f, body: html }))}
@@ -424,7 +424,7 @@ export function ArticlesManager() {
           <div className="space-y-4">
             {/* Status */}
             <div className="bg-white border border-black/[0.06] rounded-xl p-4">
-              <label className="text-[11px] uppercase tracking-wider text-gray-400 block mb-2">Statut</label>
+              <label className="text-[11px] uppercase tracking-wider text-gray-500 block mb-2">Statut</label>
               <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-medium ${
                 form.status === 'published' ? 'bg-green-100 text-green-700' :
                 form.status === 'archived' ? 'bg-gray-100 text-gray-600' :
@@ -447,8 +447,8 @@ export function ArticlesManager() {
 
             {/* Slug */}
             <div className="bg-white border border-black/[0.06] rounded-xl p-4">
-              <label className="text-[11px] uppercase tracking-wider text-gray-400 block mb-1.5">Slug (URL)</label>
-              <div className="flex items-center gap-1 text-[12px] text-gray-400 mb-1">/articles/</div>
+              <label className="text-[11px] uppercase tracking-wider text-gray-500 block mb-1.5">Slug (URL)</label>
+              <div className="flex items-center gap-1 text-[12px] text-gray-500 mb-1">/articles/</div>
               <input type="text" value={form.slug}
                 onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
                 className="w-full px-3 py-2 border border-black/[0.08] rounded-lg text-[13px] focus:outline-none bg-white font-mono"
@@ -457,7 +457,7 @@ export function ArticlesManager() {
 
             {/* Sections (multi-select) */}
             <div className="bg-white border border-black/[0.06] rounded-xl p-4">
-              <label className="text-[11px] uppercase tracking-wider text-gray-400 block mb-2">Sections</label>
+              <label className="text-[11px] uppercase tracking-wider text-gray-500 block mb-2">Sections</label>
               <div className="space-y-1.5">
                 {SECTIONS.map((s) => {
                   const checked = form.sections.includes(s.value);
@@ -487,7 +487,7 @@ export function ArticlesManager() {
 
             {/* Content type */}
             <div className="bg-white border border-black/[0.06] rounded-xl p-4">
-              <label className="text-[11px] uppercase tracking-wider text-gray-400 block mb-2">Niveau d&apos;accès</label>
+              <label className="text-[11px] uppercase tracking-wider text-gray-500 block mb-2">Niveau d&apos;accès</label>
               <div className="space-y-1.5">
                 {CONTENT_TYPES.map((ct) => (
                   <label key={ct.value} className={`flex items-center gap-2.5 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
@@ -513,7 +513,7 @@ export function ArticlesManager() {
                   <span className="text-sm font-medium flex items-center gap-1.5">
                     <Star className="w-4 h-4 text-amber-500" /> A la une
                   </span>
-                  <span className="text-[11px] text-gray-400 block">Affiche en hero sur la page d&apos;accueil</span>
+                  <span className="text-[11px] text-gray-500 block">Affiche en hero sur la page d&apos;accueil</span>
                 </div>
               </label>
             </div>
@@ -521,14 +521,14 @@ export function ArticlesManager() {
             {/* Author & Read time */}
             <div className="bg-white border border-black/[0.06] rounded-xl p-4 space-y-3">
               <div>
-                <label className="text-[11px] uppercase tracking-wider text-gray-400 block mb-1.5">Auteur</label>
+                <label className="text-[11px] uppercase tracking-wider text-gray-500 block mb-1.5">Auteur</label>
                 <input type="text" value={form.author_name}
                   onChange={(e) => setForm((f) => ({ ...f, author_name: e.target.value }))}
                   className="w-full px-3 py-2 border border-black/[0.08] rounded-lg text-sm focus:outline-none bg-white"
                 />
               </div>
               <div>
-                <label className="text-[11px] uppercase tracking-wider text-gray-400 block mb-1.5">Temps de lecture (min)</label>
+                <label className="text-[11px] uppercase tracking-wider text-gray-500 block mb-1.5">Temps de lecture (min)</label>
                 <input type="number" value={form.read_time} min={1}
                   onChange={(e) => setForm((f) => ({ ...f, read_time: parseInt(e.target.value) || 3 }))}
                   className="w-full px-3 py-2 border border-black/[0.08] rounded-lg text-sm focus:outline-none bg-white"
@@ -538,12 +538,12 @@ export function ArticlesManager() {
 
             {/* Tags */}
             <div className="bg-white border border-black/[0.06] rounded-xl p-4">
-              <label className="text-[11px] uppercase tracking-wider text-gray-400 block mb-1.5">Tags</label>
+              <label className="text-[11px] uppercase tracking-wider text-gray-500 block mb-1.5">Tags</label>
               <div className="flex gap-1.5 flex-wrap mb-2">
                 {form.tags.map((tag) => (
                   <span key={tag} className="flex items-center gap-1 px-2 py-1 bg-gray-100 text-[12px] rounded-full">
                     #{tag}
-                    <button onClick={() => handleRemoveTag(tag)} className="text-gray-400 hover:text-red-500">
+                    <button onClick={() => handleRemoveTag(tag)} className="text-gray-500 hover:text-red-500">
                       <X className="w-3 h-3" />
                     </button>
                   </span>
@@ -565,9 +565,9 @@ export function ArticlesManager() {
 
             {/* SEO */}
             <div className="bg-white border border-black/[0.06] rounded-xl p-4 space-y-3">
-              <p className="text-[11px] uppercase tracking-wider text-gray-400">SEO</p>
+              <p className="text-[11px] uppercase tracking-wider text-gray-500">SEO</p>
               <div>
-                <label className="text-[11px] text-gray-400 block mb-1">Titre SEO</label>
+                <label className="text-[11px] text-gray-500 block mb-1">Titre SEO</label>
                 <input type="text" value={form.seo_title}
                   onChange={(e) => setForm((f) => ({ ...f, seo_title: e.target.value }))}
                   className="w-full px-3 py-2 border border-black/[0.08] rounded-lg text-[12px] focus:outline-none bg-white"
@@ -575,7 +575,7 @@ export function ArticlesManager() {
                 />
               </div>
               <div>
-                <label className="text-[11px] text-gray-400 block mb-1">Description SEO</label>
+                <label className="text-[11px] text-gray-500 block mb-1">Description SEO</label>
                 <textarea value={form.seo_description}
                   onChange={(e) => setForm((f) => ({ ...f, seo_description: e.target.value }))}
                   rows={2}
@@ -625,10 +625,10 @@ export function ArticlesManager() {
       )}
 
       {loading ? (
-        <div className="text-center py-16"><Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto" /></div>
+        <div className="text-center py-16"><Loader2 className="w-6 h-6 animate-spin text-gray-500 mx-auto" /></div>
       ) : filteredArticles.length === 0 ? (
         <div className="text-center py-16">
-          <p className="text-gray-400 mb-4">Aucun article</p>
+          <p className="text-gray-500 mb-4">Aucun article</p>
           <button onClick={handleNew}
             className="px-4 py-2 bg-[#111] text-white rounded-lg text-sm hover:bg-[#333]">
             Créer le premier article
@@ -639,12 +639,12 @@ export function ArticlesManager() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-black/[0.04]">
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Article</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Sections</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Statut</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Accès</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Date</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Actions</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Article</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Sections</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Statut</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Accès</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Date</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -668,7 +668,7 @@ export function ArticlesManager() {
                           )}
                           {a.title}
                         </p>
-                        <p className="text-[11px] text-gray-400 font-mono">/articles/{a.slug}</p>
+                        <p className="text-[11px] text-gray-500 font-mono">/articles/{a.slug}</p>
                       </div>
                     </div>
                   </td>
@@ -715,7 +715,7 @@ export function ArticlesManager() {
                         ) : a.is_featured ? (
                           <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
                         ) : (
-                          <StarOff className="w-3.5 h-3.5 text-gray-400" />
+                          <StarOff className="w-3.5 h-3.5 text-gray-500" />
                         )}
                       </button>
                       <button onClick={() => handleEdit(a)} className="p-1.5 hover:bg-gray-100 rounded transition-colors" title="Modifier">

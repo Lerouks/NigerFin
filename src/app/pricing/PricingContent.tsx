@@ -338,7 +338,7 @@ function PaymentMethods() {
   return (
     <section className="py-12 sm:py-16">
       <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-        <p className="mb-5 text-[12px] font-semibold uppercase tracking-wider text-gray-400">
+        <p className="mb-5 text-[12px] font-semibold uppercase tracking-wider text-gray-500">
           Moyens de paiement acceptés
         </p>
         <div className="flex flex-wrap items-center justify-center gap-4">

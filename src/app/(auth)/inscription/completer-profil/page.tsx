@@ -96,7 +96,7 @@ export default function CompleterProfilPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#fafaf9] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
       </div>
     );
   }
@@ -195,7 +195,7 @@ export default function CompleterProfilPage() {
             </button>
             <button
               onClick={handleSkip}
-              className="w-full text-center text-[13px] text-gray-400 hover:text-gray-600 transition-colors py-2"
+              className="w-full text-center text-[13px] text-gray-500 hover:text-gray-600 transition-colors py-2"
             >
               Passer cette étape
             </button>

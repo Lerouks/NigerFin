@@ -77,7 +77,7 @@ export default function PlanDuSitePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {sections.map((section) => (
               <div key={section.title} className="bg-white rounded-xl p-6 border border-black/[0.06]">
-                <h2 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4 font-medium">
+                <h2 className="text-[11px] tracking-[0.15em] uppercase text-gray-500 mb-4 font-medium">
                   {section.title}
                 </h2>
                 <ul className="space-y-2.5">

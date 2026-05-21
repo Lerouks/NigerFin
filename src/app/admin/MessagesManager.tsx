@@ -136,12 +136,12 @@ export function MessagesManager() {
 
       {loading ? (
         <div className="text-center py-12">
-          <Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto" />
+          <Loader2 className="w-6 h-6 animate-spin text-gray-500 mx-auto" />
         </div>
       ) : messages.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-xl border border-black/[0.06]">
           <Mail className="w-8 h-8 text-gray-300 mx-auto mb-3" />
-          <p className="text-sm text-gray-400">Aucun message</p>
+          <p className="text-sm text-gray-500">Aucun message</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -170,7 +170,7 @@ export function MessagesManager() {
                         <span className={`text-[14px] ${msg.status === 'unread' ? 'font-bold' : 'font-medium'}`}>
                           {msg.full_name}
                         </span>
-                        <span className="text-[12px] text-gray-400">&lt;{msg.email}&gt;</span>
+                        <span className="text-[12px] text-gray-500">&lt;{msg.email}&gt;</span>
                       </div>
                       <p className="text-[13px] text-gray-600 truncate">{msg.subject}</p>
                     </div>
@@ -179,19 +179,19 @@ export function MessagesManager() {
                     <span className={`text-[10px] px-2 py-0.5 rounded-full ${config.color}`}>
                       {config.label}
                     </span>
-                    <span className="text-[11px] text-gray-400 whitespace-nowrap">
+                    <span className="text-[11px] text-gray-500 whitespace-nowrap">
                       {new Date(msg.created_at).toLocaleDateString('fr-FR', {
                         day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
                       })}
                     </span>
-                    {isOpen ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+                    {isOpen ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
                   </div>
                 </div>
 
                 {/* Expanded content */}
                 {isOpen && (
                   <div className="border-t border-black/[0.06] px-5 py-4">
-                    <div className="text-[13px] text-gray-400 mb-3 flex items-center gap-4">
+                    <div className="text-[13px] text-gray-500 mb-3 flex items-center gap-4">
                       <span>IP: {msg.ip_address}</span>
                       <span>Reçu le {new Date(msg.created_at).toLocaleString('fr-FR')}</span>
                     </div>
@@ -234,7 +234,7 @@ export function MessagesManager() {
                         <Trash2 className="w-3.5 h-3.5" />
                         Supprimer
                       </button>
-                      {isProcessing && <Loader2 className="w-4 h-4 animate-spin text-gray-400" />}
+                      {isProcessing && <Loader2 className="w-4 h-4 animate-spin text-gray-500" />}
                     </div>
                   </div>
                 )}

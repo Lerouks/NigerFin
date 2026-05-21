@@ -88,7 +88,7 @@ export function UsersTab({ onStatsRefresh }: UsersTabProps) {
     <div className="space-y-4">
       <div className="flex gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
           <input
             type="text"
             placeholder="Rechercher par nom ou email..."
@@ -109,22 +109,22 @@ export function UsersTab({ onStatsRefresh }: UsersTabProps) {
         </select>
       </div>
 
-      <p className="text-[12px] text-gray-400">{users.length} utilisateur(s)</p>
+      <p className="text-[12px] text-gray-500">{users.length} utilisateur(s)</p>
 
       {loadingData ? (
         <div className="text-center py-12">
-          <Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto" />
+          <Loader2 className="w-6 h-6 animate-spin text-gray-500 mx-auto" />
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-black/[0.06] overflow-hidden">
           <table className="w-full">
             <thead>
               <tr className="border-b border-black/[0.04]">
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Utilisateur</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Rôle</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Statut</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Inscrit le</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Actions</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Utilisateur</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Rôle</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Statut</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Inscrit le</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -144,7 +144,7 @@ export function UsersTab({ onStatsRefresh }: UsersTabProps) {
             </tbody>
           </table>
           {users.length === 0 && (
-            <p className="text-center py-8 text-sm text-gray-400">Aucun utilisateur trouvé</p>
+            <p className="text-center py-8 text-sm text-gray-500">Aucun utilisateur trouvé</p>
           )}
         </div>
       )}
@@ -200,7 +200,7 @@ function UserRow({ user, expanded, processing, onToggle, onAction, deleteConfirm
   };
 
   const statusLabel = isActive ? 'Premium actif' : user.subscription_status === 'expired' ? 'Expiré' : 'Lecteur gratuit';
-  const statusColor = isActive ? 'text-emerald-600' : user.subscription_status === 'expired' ? 'text-amber-600' : 'text-gray-400';
+  const statusColor = isActive ? 'text-emerald-600' : user.subscription_status === 'expired' ? 'text-amber-600' : 'text-gray-500';
   const statusBg = isActive ? 'bg-emerald-50' : user.subscription_status === 'expired' ? 'bg-amber-50' : 'bg-gray-50';
 
   return (
@@ -210,7 +210,7 @@ function UserRow({ user, expanded, processing, onToggle, onAction, deleteConfirm
           <div className="flex items-center gap-2">
             <div>
               <p className="text-sm font-medium">{user.full_name || '-'}</p>
-              <p className="text-[12px] text-gray-400">{user.email}</p>
+              <p className="text-[12px] text-gray-500">{user.email}</p>
             </div>
             {user.blocked && (
               <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded">Bloqué</span>
@@ -230,7 +230,7 @@ function UserRow({ user, expanded, processing, onToggle, onAction, deleteConfirm
           <div className="flex flex-col gap-0.5">
             <span className={`text-[12px] font-medium ${statusColor}`}>{statusLabel}</span>
             {isActive && user.subscription_end && (
-              <span className="text-[10px] text-gray-400">
+              <span className="text-[10px] text-gray-500">
                 Exp. {new Date(user.subscription_end).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
               </span>
             )}
@@ -262,7 +262,7 @@ function UserRow({ user, expanded, processing, onToggle, onAction, deleteConfirm
               <div className="space-y-3">
                 <div className={`${statusBg} rounded-lg p-4 border border-black/[0.04]`}>
                   <div className="flex items-center gap-2 mb-2">
-                    {isActive ? <Crown className="w-4 h-4 text-amber-500" /> : <Users className="w-4 h-4 text-gray-400" />}
+                    {isActive ? <Crown className="w-4 h-4 text-amber-500" /> : <Users className="w-4 h-4 text-gray-500" />}
                     <span className="text-[11px] uppercase tracking-wider text-gray-500 font-medium">Statut actuel</span>
                   </div>
                   <p className={`text-sm font-semibold ${statusColor}`}>{statusLabel}</p>
@@ -282,7 +282,7 @@ function UserRow({ user, expanded, processing, onToggle, onAction, deleteConfirm
 
                 <div className="flex items-end gap-2">
                   <div>
-                    <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Rôle</label>
+                    <label className="text-[11px] text-gray-500 uppercase tracking-wider block mb-1">Rôle</label>
                     <select
                       defaultValue={user.role}
                       onChange={(e) => onAction('changeRole', { role: e.target.value })}
@@ -312,12 +312,12 @@ function UserRow({ user, expanded, processing, onToggle, onAction, deleteConfirm
               {/* Right: Subscription management */}
               <div className="bg-white rounded-lg border border-black/[0.06] p-4 space-y-3">
                 <div className="flex items-center gap-2">
-                  <CreditCard className="w-4 h-4 text-gray-400" />
+                  <CreditCard className="w-4 h-4 text-gray-500" />
                   <span className="text-[11px] uppercase tracking-wider text-gray-500 font-medium">Gestion abonnement</span>
                 </div>
 
                 <div>
-                  <label className="text-[11px] text-gray-400 block mb-1">Nouveau statut</label>
+                  <label className="text-[11px] text-gray-500 block mb-1">Nouveau statut</label>
                   <div className="flex gap-2">
                     <button
                       onClick={() => { if (isActive) setShowDowngradeConfirm(true); }}
@@ -336,7 +336,7 @@ function UserRow({ user, expanded, processing, onToggle, onAction, deleteConfirm
                 </div>
 
                 <div>
-                  <label className="text-[11px] text-gray-400 block mb-1">Durée de l&apos;abonnement</label>
+                  <label className="text-[11px] text-gray-500 block mb-1">Durée de l&apos;abonnement</label>
                   <div className="grid grid-cols-2 gap-1.5">
                     {[{ value: '1', label: '1 mois' }, { value: '3', label: '3 mois' }, { value: '6', label: '6 mois' }, { value: '12', label: '12 mois' }].map((opt) => (
                       <button
@@ -362,15 +362,15 @@ function UserRow({ user, expanded, processing, onToggle, onAction, deleteConfirm
                     <div className="mt-2 flex items-center gap-2">
                       <input type="number" placeholder="Nombre de jours" value={customDays} onChange={(e) => setCustomDays(e.target.value)} min={1}
                         className="flex-1 text-[12px] border border-gray-200 rounded px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-black" />
-                      <span className="text-[11px] text-gray-400">jours</span>
+                      <span className="text-[11px] text-gray-500">jours</span>
                     </div>
                   )}
                 </div>
 
                 <div className="bg-[#fafaf9] rounded-lg p-3 border border-black/[0.04]">
                   <div className="flex items-center gap-1.5 mb-1">
-                    <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                    <span className="text-[11px] text-gray-400">Date de fin calculée</span>
+                    <Calendar className="w-3.5 h-3.5 text-gray-500" />
+                    <span className="text-[11px] text-gray-500">Date de fin calculée</span>
                   </div>
                   <p className="text-[13px] font-medium">{getProjectedEnd()}</p>
                 </div>
@@ -405,7 +405,7 @@ function UserRow({ user, expanded, processing, onToggle, onAction, deleteConfirm
             </div>
 
             {processing && (
-              <div className="mt-3 flex items-center gap-2 text-[12px] text-gray-400">
+              <div className="mt-3 flex items-center gap-2 text-[12px] text-gray-500">
                 <Loader2 className="w-4 h-4 animate-spin" /> Traitement en cours...
               </div>
             )}

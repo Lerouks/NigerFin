@@ -133,7 +133,7 @@ export function AccountDashboard() {
   if (isLoading || !isSignedIn) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
       </div>
     );
   }
@@ -278,7 +278,7 @@ export function AccountDashboard() {
               <div className="h-px bg-black/[0.06] my-3" />
               <button
                 onClick={async () => { await signOut(); router.push('/'); }}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[14px] text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[14px] text-gray-500 hover:text-red-500 hover:bg-red-50 transition-colors"
               >
                 <LogOut className="w-4 h-4" />
                 Déconnexion
@@ -296,7 +296,7 @@ export function AccountDashboard() {
                     key={s.id}
                     onClick={() => setActiveSection(s.id)}
                     className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap flex-1 justify-center ${
-                      activeSection === s.id ? 'bg-primary text-white' : 'text-gray-400'
+                      activeSection === s.id ? 'bg-primary text-white' : 'text-gray-500'
                     }`}
                   >
                     <Icon className="w-3.5 h-3.5" />
@@ -346,7 +346,7 @@ export function AccountDashboard() {
                     <div className="p-6 sm:p-8">
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
                         <div>
-                          <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1">Statut</p>
+                          <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Statut</p>
                           <div className="flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full bg-emerald-400" />
                             <span className="text-[14px] font-medium">Actif</span>
@@ -354,13 +354,13 @@ export function AccountDashboard() {
                         </div>
                         {periodEnd && (
                           <div>
-                            <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1">Renouvellement</p>
+                            <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Renouvellement</p>
                             <p className="text-[14px] font-medium">{periodEnd}</p>
                           </div>
                         )}
                         {remainingDays != null && (
                           <div>
-                            <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1">Temps restant</p>
+                            <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Temps restant</p>
                             <div className="flex items-center gap-1.5">
                               <Timer className="w-4 h-4 text-gold" />
                               <span className="text-[14px] font-medium">
@@ -401,7 +401,7 @@ export function AccountDashboard() {
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
                             isSubscribed ? 'bg-gold/10' : 'bg-gray-100'
                           }`}>
-                            <Icon className={`w-5 h-5 ${isSubscribed ? 'text-gold' : 'text-gray-400'}`} />
+                            <Icon className={`w-5 h-5 ${isSubscribed ? 'text-gold' : 'text-gray-500'}`} />
                           </div>
                           <p className="text-[15px] font-medium">{benefit.label}</p>
                           {isSubscribed && <Check className="w-4 h-4 text-gold ml-auto" />}
@@ -415,7 +415,7 @@ export function AccountDashboard() {
                 {summary?.recentPayments && summary.recentPayments.length > 0 && (
                   <div className="bg-white rounded-2xl border border-black/[0.06] p-6 sm:p-8">
                     <div className="flex items-center gap-2 mb-5">
-                      <Heart className="w-4 h-4 text-gray-400" />
+                      <Heart className="w-4 h-4 text-gray-500" />
                       <h3 className="text-lg font-semibold">Historique des paiements</h3>
                     </div>
                     <div className="space-y-3">
@@ -423,7 +423,7 @@ export function AccountDashboard() {
                         <div key={payment.id} className="flex items-center justify-between py-3 border-b border-black/[0.04] last:border-0">
                           <div>
                             <p className="text-[14px] font-medium capitalize">{payment.tier} - {getBillingCycleLabel(payment.billing_cycle || 'monthly')}</p>
-                            <p className="text-[12px] text-gray-400">
+                            <p className="text-[12px] text-gray-500">
                               {new Date(payment.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                             </p>
                           </div>
@@ -501,7 +501,7 @@ export function AccountDashboard() {
                     <div>
                       <label className="block text-[13px] font-medium text-gray-700 mb-1.5">E-mail</label>
                       <input type="email" value={user?.email || ''} disabled className="w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-background text-gray-500" />
-                      <p className="text-[11px] text-gray-400 mt-1.5">Pour changer votre e-mail, <Link href="/contact" className="underline hover:text-gray-600">contactez-nous</Link>.</p>
+                      <p className="text-[11px] text-gray-500 mt-1.5">Pour changer votre e-mail, <Link href="/contact" className="underline hover:text-gray-600">contactez-nous</Link>.</p>
                     </div>
                     <button onClick={() => setActiveSection('securite')} className="flex items-center gap-2 border border-black/[0.08] px-4 py-2.5 rounded-xl text-[13px] font-medium text-gray-700 hover:bg-secondary transition-colors">
                       <Lock className="w-4 h-4" /> Changer le mot de passe
@@ -575,7 +575,7 @@ export function AccountDashboard() {
                       </div>
                     )}
 
-                    <p className="text-[11px] text-gray-400">Les champs avec * sont obligatoires</p>
+                    <p className="text-[11px] text-gray-500">Les champs avec * sont obligatoires</p>
                   </div>
                 </div>
               </>
@@ -734,10 +734,10 @@ function PasswordChangeSection({ isReset = false }: { isReset?: boolean }) {
               <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden"><div className={`h-full ${strength.bgColor} ${strength.width} rounded-full transition-all`} /></div>
               <p className={`text-[11px] ${strength.color}`}>Force : {strength.label}</p>
               <div className="grid grid-cols-2 gap-1">
-                <p className={`text-[11px] ${strength.checks.length ? 'text-emerald-600' : 'text-gray-400'}`}>{strength.checks.length ? '✓' : '○'} 8 caractères min.</p>
-                <p className={`text-[11px] ${strength.checks.uppercase ? 'text-emerald-600' : 'text-gray-400'}`}>{strength.checks.uppercase ? '✓' : '○'} 1 majuscule</p>
-                <p className={`text-[11px] ${strength.checks.digit ? 'text-emerald-600' : 'text-gray-400'}`}>{strength.checks.digit ? '✓' : '○'} 1 chiffre</p>
-                <p className={`text-[11px] ${strength.checks.special ? 'text-emerald-600' : 'text-gray-400'}`}>{strength.checks.special ? '✓' : '○'} 1 spécial (!@#$%^&*)</p>
+                <p className={`text-[11px] ${strength.checks.length ? 'text-emerald-600' : 'text-gray-500'}`}>{strength.checks.length ? '✓' : '○'} 8 caractères min.</p>
+                <p className={`text-[11px] ${strength.checks.uppercase ? 'text-emerald-600' : 'text-gray-500'}`}>{strength.checks.uppercase ? '✓' : '○'} 1 majuscule</p>
+                <p className={`text-[11px] ${strength.checks.digit ? 'text-emerald-600' : 'text-gray-500'}`}>{strength.checks.digit ? '✓' : '○'} 1 chiffre</p>
+                <p className={`text-[11px] ${strength.checks.special ? 'text-emerald-600' : 'text-gray-500'}`}>{strength.checks.special ? '✓' : '○'} 1 spécial (!@#$%^&*)</p>
               </div>
             </div>
           )}
@@ -781,9 +781,9 @@ function PasswordField({ id, label, value, onChange, show, onToggle, placeholder
     <div>
       <label htmlFor={id} className="block text-[13px] font-medium mb-1.5">{label}</label>
       <div className="relative">
-        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
         <input id={id} type={show ? 'text' : 'password'} value={value} onChange={(e) => onChange(e.target.value)} className={`w-full border rounded-lg pl-10 pr-10 py-3 bg-background focus:outline-none focus:ring-1 transition-all text-[14px] ${className || 'border-black/[0.08] focus:ring-black/5'}`} placeholder={placeholder} required={required} minLength={minLength} />
-        <button type="button" onClick={onToggle} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+        <button type="button" onClick={onToggle} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600">
           {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
         </button>
       </div>

@@ -104,7 +104,7 @@ export function FlashBannerManager() {
   if (loading) {
     return (
       <div className="text-center py-12">
-        <Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto" />
+        <Loader2 className="w-6 h-6 animate-spin text-gray-500 mx-auto" />
       </div>
     );
   }
@@ -149,7 +149,7 @@ export function FlashBannerManager() {
         {data.items.map((item, index) => (
           <div key={index} className="p-4 flex gap-3 items-start">
             <div className="w-24 flex-shrink-0">
-              <label className="text-[10px] text-gray-400 uppercase tracking-wider block mb-1">Tag</label>
+              <label className="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">Tag</label>
               <input
                 type="text"
                 value={item.tag}
@@ -159,7 +159,7 @@ export function FlashBannerManager() {
               />
             </div>
             <div className="flex-1">
-              <label className="text-[10px] text-gray-400 uppercase tracking-wider block mb-1">Message</label>
+              <label className="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">Message</label>
               <input
                 type="text"
                 value={item.text}
@@ -170,7 +170,7 @@ export function FlashBannerManager() {
             </div>
             <button
               onClick={() => removeItem(index)}
-              className="mt-5 p-1.5 rounded hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors flex-shrink-0"
+              className="mt-5 p-1.5 rounded hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors flex-shrink-0"
               title="Supprimer"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -178,7 +178,7 @@ export function FlashBannerManager() {
           </div>
         ))}
         {data.items.length === 0 && (
-          <p className="text-center py-6 text-sm text-gray-400">Aucun flash info</p>
+          <p className="text-center py-6 text-sm text-gray-500">Aucun flash info</p>
         )}
       </div>
 

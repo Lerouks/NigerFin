@@ -75,7 +75,7 @@ export function BreakingNews({ initialItems = [], initialEnabled = false }: Brea
 
           <div className="hidden sm:flex items-center gap-1 flex-shrink-0 ml-2">
             <button onClick={goPrev} className="p-1 hover:bg-white/10 rounded transition-colors" aria-label="Précédent">
-              <ChevronLeft className="w-3.5 h-3.5 text-gray-400" />
+              <ChevronLeft className="w-3.5 h-3.5 text-gray-500" />
             </button>
             <div className="flex items-center gap-1 mx-1">
               {items.map((_, i) => (
@@ -91,7 +91,7 @@ export function BreakingNews({ initialItems = [], initialEnabled = false }: Brea
               ))}
             </div>
             <button onClick={goNext} className="p-1 hover:bg-white/10 rounded transition-colors" aria-label="Suivant">
-              <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
+              <ChevronRight className="w-3.5 h-3.5 text-gray-500" />
             </button>
           </div>
 

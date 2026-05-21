@@ -92,11 +92,11 @@ export function MarchesContent() {
 
       {/* Footer */}
       <div className="text-center space-y-1 pt-2">
-        <p className="text-[11px] text-gray-400">
+        <p className="text-[11px] text-gray-500">
           Variations par rapport à la dernière mise à jour
         </p>
         {lastUpdated && (
-          <p className="text-[11px] text-gray-400">
+          <p className="text-[11px] text-gray-500">
             Dernière mise à jour :{' '}
             {new Date(lastUpdated).toLocaleString('fr-FR', {
               day: '2-digit',
@@ -158,7 +158,7 @@ function QuoteRow({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="text-[15px] font-medium">{item.name}</span>
-            <span className="text-[11px] text-gray-400 font-mono">{item.symbol}</span>
+            <span className="text-[11px] text-gray-500 font-mono">{item.symbol}</span>
             {hasEducation && (
               <BookOpen
                 className={`w-3.5 h-3.5 transition-colors ${
@@ -176,12 +176,12 @@ function QuoteRow({
                 maximumFractionDigits: 2,
               })}
               {item.unit && (
-                <span className="text-[11px] text-gray-400 font-normal ml-1">{item.unit}</span>
+                <span className="text-[11px] text-gray-500 font-normal ml-1">{item.unit}</span>
               )}
             </div>
           </div>
           {item.symbol === 'EUR/XOF' ? (
-            <div className="flex items-center gap-1 min-w-[80px] justify-end text-[13px] font-medium text-gray-400">
+            <div className="flex items-center gap-1 min-w-[80px] justify-end text-[13px] font-medium text-gray-500">
               Taux fixe
             </div>
           ) : (

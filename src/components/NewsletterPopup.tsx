@@ -248,7 +248,7 @@ export function NewsletterPopup() {
               </form>
             )}
 
-            <p className="text-[10px] text-gray-400 text-center mt-4">
+            <p className="text-[10px] text-gray-500 text-center mt-4">
               Gratuit, sans spam. Désabonnez-vous à tout moment.
             </p>
           </div>

@@ -106,7 +106,7 @@ function InscriptionContent() {
           >
             Se connecter
           </Link>
-          <p className="text-gray-400 text-[12px] mt-4">
+          <p className="text-gray-500 text-[12px] mt-4">
             Mot de passe oublié ? Contactez le support.
           </p>
         </div>
@@ -192,7 +192,7 @@ function InscriptionContent() {
           <div>
             <label htmlFor="name" className="block text-sm font-medium mb-2">Nom complet</label>
             <div className="relative">
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-400" />
+              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-500" />
               <input
                 id="name"
                 type="text"
@@ -217,7 +217,7 @@ function InscriptionContent() {
           <div>
             <label htmlFor="email" className="block text-sm font-medium mb-2">Email</label>
             <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-400" />
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-500" />
               <input
                 id="email"
                 type="email"
@@ -234,7 +234,7 @@ function InscriptionContent() {
           <div>
             <label htmlFor="password" className="block text-sm font-medium mb-2">Mot de passe</label>
             <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-400" />
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-500" />
               <input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
@@ -249,7 +249,7 @@ function InscriptionContent() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600"
                 aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -271,7 +271,7 @@ function InscriptionContent() {
           <div>
             <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2">Confirmer le mot de passe</label>
             <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-400" />
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-500" />
               <input
                 id="confirmPassword"
                 type={showConfirmPassword ? 'text' : 'password'}
@@ -290,7 +290,7 @@ function InscriptionContent() {
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600"
                 aria-label={showConfirmPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
               >
                 {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -320,7 +320,7 @@ function InscriptionContent() {
             <div className="w-full border-t border-black/[0.06]" />
           </div>
           <div className="relative flex justify-center text-xs">
-            <span className="px-3 bg-white text-gray-400">ou</span>
+            <span className="px-3 bg-white text-gray-500">ou</span>
           </div>
         </div>
 

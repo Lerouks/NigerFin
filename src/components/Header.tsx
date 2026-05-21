@@ -86,7 +86,7 @@ export function Header({ navigation: navigationProp }: HeaderProps = {}) {
                   <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-black/[0.06] py-1 z-50 animate-scale-in origin-top-right" role="menu">
                     <div className="px-4 py-2 border-b border-black/[0.04]">
                       <p className="text-[12px] font-medium truncate">{user?.user_metadata?.full_name || user?.email?.split('@')[0]}</p>
-                      <p className="text-[11px] text-gray-400 truncate">{user?.email}</p>
+                      <p className="text-[11px] text-gray-500 truncate">{user?.email}</p>
                     </div>
                     <Link
                       href="/compte"

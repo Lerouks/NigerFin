@@ -45,7 +45,7 @@ export function PremiumPaywall({ articleTitle }: PremiumPaywallProps) {
 
         {/* Article title preview */}
         {articleTitle && (
-          <p className="text-[14px] text-gray-400 mb-2 max-w-sm line-clamp-2">
+          <p className="text-[14px] text-gray-500 mb-2 max-w-sm line-clamp-2">
             &laquo; {articleTitle} &raquo;
           </p>
         )}
@@ -90,7 +90,7 @@ export function PremiumPaywall({ articleTitle }: PremiumPaywallProps) {
         </div>
 
         {/* Subtle features */}
-        <div className="flex flex-wrap justify-center gap-x-6 gap-y-1 mt-8 text-[11px] text-gray-400">
+        <div className="flex flex-wrap justify-center gap-x-6 gap-y-1 mt-8 text-[11px] text-gray-500">
           <span>Analyses complètes</span>
           <span>·</span>
           <span>Outils premium</span>

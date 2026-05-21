@@ -32,7 +32,7 @@ export function NigerRegions({ regions }: { regions: Region[] }) {
   return (
     <section className="border-t border-black/[0.06] pt-14 md:pt-20">
       <div className="mb-10">
-        <span className="text-[11px] tracking-[0.2em] uppercase text-gray-400 block mb-3">Géographie</span>
+        <span className="text-[11px] tracking-[0.2em] uppercase text-gray-500 block mb-3">Géographie</span>
         <h2 className="text-2xl md:text-3xl leading-tight">Régions du Niger</h2>
         <p className="text-[15px] text-gray-500 mt-2">8 régions aux profils économiques distincts</p>
       </div>
@@ -53,10 +53,10 @@ export function NigerRegions({ regions }: { regions: Region[] }) {
               }`}
             >
               <div className="flex items-center gap-2 mb-2">
-                <MapPin className={`w-3.5 h-3.5 ${isSelected ? 'text-white/60' : 'text-gray-400'}`} />
+                <MapPin className={`w-3.5 h-3.5 ${isSelected ? 'text-white/60' : 'text-gray-500'}`} />
                 <span className="text-[13px] font-medium">{region.name}</span>
               </div>
-              <p className={`text-[11px] ${isSelected ? 'text-white/50' : 'text-gray-400'}`}>
+              <p className={`text-[11px] ${isSelected ? 'text-white/50' : 'text-gray-500'}`}>
                 {(region.population / 1_000_000).toFixed(1)}M hab.
               </p>
             </button>
@@ -69,7 +69,7 @@ export function NigerRegions({ regions }: { regions: Region[] }) {
           <div className="flex items-start justify-between mb-6">
             <div>
               <h3 className="text-xl font-medium">{selectedRegion.name}</h3>
-              <p className="text-[13px] text-gray-400 mt-1">Capitale : {selectedRegion.capital}</p>
+              <p className="text-[13px] text-gray-500 mt-1">Capitale : {selectedRegion.capital}</p>
             </div>
             {(() => {
               const secStyle = SECURITY_STYLES[selectedRegion.security_level];
@@ -85,8 +85,8 @@ export function NigerRegions({ regions }: { regions: Region[] }) {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <Users className="w-3.5 h-3.5 text-gray-400" />
-                <span className="text-[11px] uppercase tracking-wider text-gray-400">Population & Superficie</span>
+                <Users className="w-3.5 h-3.5 text-gray-500" />
+                <span className="text-[11px] uppercase tracking-wider text-gray-500">Population & Superficie</span>
               </div>
               <p className="text-[14px] text-gray-900 font-medium">{selectedRegion.population.toLocaleString('fr-FR')} hab.</p>
               <p className="text-[13px] text-gray-500 mt-1">{Number(selectedRegion.area_km2).toLocaleString('fr-FR')} km²</p>
@@ -94,8 +94,8 @@ export function NigerRegions({ regions }: { regions: Region[] }) {
 
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <Briefcase className="w-3.5 h-3.5 text-gray-400" />
-                <span className="text-[11px] uppercase tracking-wider text-gray-400">Activités</span>
+                <Briefcase className="w-3.5 h-3.5 text-gray-500" />
+                <span className="text-[11px] uppercase tracking-wider text-gray-500">Activités</span>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {selectedRegion.economic_activities.map((a) => (
@@ -106,8 +106,8 @@ export function NigerRegions({ regions }: { regions: Region[] }) {
 
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <Pickaxe className="w-3.5 h-3.5 text-gray-400" />
-                <span className="text-[11px] uppercase tracking-wider text-gray-400">Ressources</span>
+                <Pickaxe className="w-3.5 h-3.5 text-gray-500" />
+                <span className="text-[11px] uppercase tracking-wider text-gray-500">Ressources</span>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {selectedRegion.natural_resources.length > 0 ? (
@@ -115,14 +115,14 @@ export function NigerRegions({ regions }: { regions: Region[] }) {
                     <span key={r} className="text-[12px] px-2.5 py-1 rounded-full bg-amber-50 border border-amber-100 text-amber-700">{r}</span>
                   ))
                 ) : (
-                  <span className="text-[12px] text-gray-400">-</span>
+                  <span className="text-[12px] text-gray-500">-</span>
                 )}
               </div>
             </div>
           </div>
 
           {selectedRegion.security_note && (
-            <p className="text-[12px] text-gray-400 mt-5 pt-4 border-t border-black/[0.04]">
+            <p className="text-[12px] text-gray-500 mt-5 pt-4 border-t border-black/[0.04]">
               {selectedRegion.security_note}
             </p>
           )}

@@ -137,7 +137,7 @@ export function LegalSectionsManager() {
       {/* Page selector */}
       <div>
         <h2 className="text-lg font-bold">Pages éditables</h2>
-        <p className="text-[13px] text-gray-400 mb-3">Sélectionnez une page pour éditer ses sections</p>
+        <p className="text-[13px] text-gray-500 mb-3">Sélectionnez une page pour éditer ses sections</p>
         <div className="flex gap-2 flex-wrap">
           {PAGES.map((page) => (
             <button
@@ -160,7 +160,7 @@ export function LegalSectionsManager() {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-semibold">{activePage.label}</h3>
-          <p className="text-[12px] text-gray-400">
+          <p className="text-[12px] text-gray-500">
             Route : <span className="font-mono">{activePage.route}</span>
             {sections.length === 0 && !loading && (
               <span className="ml-2 text-amber-600">· Aucune section (contenu vide)</span>
@@ -199,7 +199,7 @@ export function LegalSectionsManager() {
       {/* Sections */}
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+          <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
         </div>
       ) : (
       <div className="space-y-4">
@@ -212,7 +212,7 @@ export function LegalSectionsManager() {
                 <button
                   onClick={() => moveSection(index, -1)}
                   disabled={index === 0}
-                  className="text-[10px] text-gray-400 hover:text-black disabled:opacity-30"
+                  className="text-[10px] text-gray-500 hover:text-black disabled:opacity-30"
                   title="Monter"
                 >
                   &uarr;
@@ -220,7 +220,7 @@ export function LegalSectionsManager() {
                 <button
                   onClick={() => moveSection(index, 1)}
                   disabled={index === sections.length - 1}
-                  className="text-[10px] text-gray-400 hover:text-black disabled:opacity-30"
+                  className="text-[10px] text-gray-500 hover:text-black disabled:opacity-30"
                   title="Descendre"
                 >
                   &darr;
@@ -230,7 +230,7 @@ export function LegalSectionsManager() {
               {/* Fields */}
               <div className="flex-1 space-y-3">
                 <div>
-                  <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">
+                  <label className="text-[11px] text-gray-500 uppercase tracking-wider block mb-1">
                     Titre de la section
                   </label>
                   <input
@@ -241,7 +241,7 @@ export function LegalSectionsManager() {
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">
+                  <label className="text-[11px] text-gray-500 uppercase tracking-wider block mb-1">
                     Contenu
                   </label>
                   <textarea
@@ -257,7 +257,7 @@ export function LegalSectionsManager() {
               <button
                 onClick={() => handleDelete(section.id)}
                 disabled={deletingId === section.id}
-                className="flex-shrink-0 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                className="flex-shrink-0 p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                 title="Supprimer"
               >
                 {deletingId === section.id ? (
@@ -271,7 +271,7 @@ export function LegalSectionsManager() {
         ))}
 
         {sections.length === 0 && (
-          <div className="text-center py-12 text-sm text-gray-400">
+          <div className="text-center py-12 text-sm text-gray-500">
             Aucune section pour cette page. Cliquez sur &quot;Ajouter une section&quot; pour commencer.
           </div>
         )}

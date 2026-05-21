@@ -92,7 +92,7 @@ export function PdfDownloadButton({ options, hasResults }: PdfDownloadButtonProp
       <div className="relative group inline-block w-full">
         <button
           disabled
-          className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed text-[14px] border border-black/[0.04]"
+          className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed text-[14px] border border-black/[0.04]"
         >
           <Lock className="w-4 h-4" />
           Télécharger en PDF

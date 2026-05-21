@@ -34,7 +34,7 @@ export function ArticleHeader({ article }: ArticleHeaderProps) {
           <Link
             key={s}
             href={SECTION_META[s]?.path || `/${s}`}
-            className="text-[11px] tracking-[0.15em] uppercase text-gray-400 hover:text-black transition-colors"
+            className="text-[11px] tracking-[0.15em] uppercase text-gray-500 hover:text-black transition-colors"
           >
             {SECTION_META[s]?.label || s}
           </Link>
@@ -90,7 +90,7 @@ export function ArticleHeader({ article }: ArticleHeaderProps) {
                 <span className="text-[12px] text-gray-500">{article.mainImage.caption}</span>
               )}
               {article.mainImage?.source && (
-                <span className="text-[11px] text-gray-400 ml-auto whitespace-nowrap">
+                <span className="text-[11px] text-gray-500 ml-auto whitespace-nowrap">
                   Source : {article.mainImage.source}
                 </span>
               )}

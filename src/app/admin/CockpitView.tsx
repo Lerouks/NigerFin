@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useAdminApiPolling } from './hooks/useAdminApi';
+import { NotificationsManager } from './NotificationsManager';
 
 interface OverviewData {
   mrr: number;
@@ -66,6 +67,8 @@ export function CockpitView({ greeting }: { greeting: ProfileGreeting }) {
       />
 
       <ActivitySection />
+
+      <NotificationsManager />
 
       <TopArticleSection top={overview?.topArticle ?? null} isLoading={isLoading} />
 

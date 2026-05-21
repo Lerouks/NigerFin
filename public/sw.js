@@ -116,7 +116,11 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const targetUrl = (event.notification.data && event.notification.data.url) || '/admin';
+  // Defense in depth : on n'ouvre que des chemins relatifs same-origin commencant
+  // par /. Empeche un futur push compromis d'envoyer un targetUrl externe et de
+  // forcer openWindow vers un site malveillant.
+  const raw = event.notification.data && event.notification.data.url;
+  const targetUrl = typeof raw === 'string' && raw.startsWith('/') ? raw : '/admin';
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
       for (const client of clients) {

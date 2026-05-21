@@ -64,7 +64,10 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [], header
 
   useEffect(() => {
     if (contentType !== 'premium') return;
-    fetch('/api/paywall-config')
+    // Endpoint reel : /api/paywall (l'URL /api/paywall-config n'existe pas).
+    // Si la config retourne free_articles_count, on s'aligne sur le reglage
+    // admin ; sinon on garde le default useState(3).
+    fetch('/api/paywall')
       .then((r) => r.ok ? r.json() : null)
       .then((config) => {
         if (config?.free_articles_count) setPremiumLimit(config.free_articles_count);
@@ -239,7 +242,7 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [], header
 
                 <div className="mt-6 pt-6 border-t border-black/[0.06]">
                   <div className="flex items-center justify-between mb-4">
-                    <p className="text-[12px] tracking-[0.1em] uppercase text-gray-400">Partager cet article</p>
+                    <p className="text-[12px] tracking-[0.1em] uppercase text-gray-500">Partager cet article</p>
                     <ArticleLikes articleId={article._id} />
                   </div>
                   <div className="flex flex-wrap gap-2">

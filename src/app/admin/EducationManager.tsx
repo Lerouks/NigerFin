@@ -190,7 +190,7 @@ export function EducationManager() {
   if (loading) {
     return (
       <div className="text-center py-12">
-        <Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto" />
+        <Loader2 className="w-6 h-6 animate-spin text-gray-500 mx-auto" />
       </div>
     );
   }
@@ -218,7 +218,7 @@ export function EducationManager() {
 
         <div className="bg-white rounded-xl border border-black/[0.06] p-4">
           <h3 className="font-semibold text-sm">{selectedCategory.title}</h3>
-          <p className="text-[12px] text-gray-400 mt-0.5">{lessons.length} leçon{lessons.length !== 1 ? 's' : ''}</p>
+          <p className="text-[12px] text-gray-500 mt-0.5">{lessons.length} leçon{lessons.length !== 1 ? 's' : ''}</p>
         </div>
 
         {/* Lesson form */}
@@ -228,7 +228,7 @@ export function EducationManager() {
             <div className="space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div className="md:col-span-2">
-                  <label className="text-[10px] text-gray-400 uppercase tracking-wider block mb-1">Titre *</label>
+                  <label className="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">Titre *</label>
                   <input
                     type="text"
                     value={lessonForm.title}
@@ -238,7 +238,7 @@ export function EducationManager() {
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] text-gray-400 uppercase tracking-wider block mb-1">Durée</label>
+                  <label className="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">Durée</label>
                   <input
                     type="text"
                     value={lessonForm.duration}
@@ -250,7 +250,7 @@ export function EducationManager() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
-                  <label className="text-[10px] text-gray-400 uppercase tracking-wider block mb-1">Accès</label>
+                  <label className="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">Accès</label>
                   <select
                     value={lessonForm.access_level}
                     onChange={(e) => setLessonForm({ ...lessonForm, access_level: e.target.value })}
@@ -262,7 +262,7 @@ export function EducationManager() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-[10px] text-gray-400 uppercase tracking-wider block mb-1">Ordre</label>
+                  <label className="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">Ordre</label>
                   <input
                     type="number"
                     value={lessonForm.sort_order}
@@ -272,7 +272,7 @@ export function EducationManager() {
                 </div>
               </div>
               <div>
-                <label className="text-[10px] text-gray-400 uppercase tracking-wider block mb-1">Contenu</label>
+                <label className="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">Contenu</label>
                 <textarea
                   value={lessonForm.content}
                   onChange={(e) => setLessonForm({ ...lessonForm, content: e.target.value })}
@@ -308,7 +308,7 @@ export function EducationManager() {
                 </span>
                 <div className="min-w-0">
                   <p className="text-sm font-medium truncate">{lesson.title}</p>
-                  <p className="text-[11px] text-gray-400">{lesson.duration}</p>
+                  <p className="text-[11px] text-gray-500">{lesson.duration}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
@@ -328,7 +328,7 @@ export function EducationManager() {
                     </button>
                   </div>
                 ) : (
-                  <button onClick={() => setDeleteConfirm(lesson.id)} className="p-1.5 rounded hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors">
+                  <button onClick={() => setDeleteConfirm(lesson.id)} className="p-1.5 rounded hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 )}
@@ -336,7 +336,7 @@ export function EducationManager() {
             </div>
           ))}
           {lessons.length === 0 && (
-            <p className="text-center py-8 text-sm text-gray-400">Aucune leçon dans cette catégorie</p>
+            <p className="text-center py-8 text-sm text-gray-500">Aucune leçon dans cette catégorie</p>
           )}
         </div>
       </div>
@@ -364,7 +364,7 @@ export function EducationManager() {
           <div className="space-y-3">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
               <div className="md:col-span-2">
-                <label className="text-[10px] text-gray-400 uppercase tracking-wider block mb-1">Titre *</label>
+                <label className="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">Titre *</label>
                 <input
                   type="text"
                   value={catForm.title}
@@ -378,7 +378,7 @@ export function EducationManager() {
                 />
               </div>
               <div>
-                <label className="text-[10px] text-gray-400 uppercase tracking-wider block mb-1">Slug</label>
+                <label className="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">Slug</label>
                 <input
                   type="text"
                   value={catForm.slug}
@@ -388,7 +388,7 @@ export function EducationManager() {
                 />
               </div>
               <div>
-                <label className="text-[10px] text-gray-400 uppercase tracking-wider block mb-1">Ordre</label>
+                <label className="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">Ordre</label>
                 <input
                   type="number"
                   value={catForm.sort_order}
@@ -399,7 +399,7 @@ export function EducationManager() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] text-gray-400 uppercase tracking-wider block mb-1">Icône</label>
+                <label className="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">Icône</label>
                 <select
                   value={catForm.icon}
                   onChange={(e) => setCatForm({ ...catForm, icon: e.target.value })}
@@ -423,7 +423,7 @@ export function EducationManager() {
               </div>
             </div>
             <div>
-              <label className="text-[10px] text-gray-400 uppercase tracking-wider block mb-1">Description</label>
+              <label className="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">Description</label>
               <textarea
                 value={catForm.description}
                 onChange={(e) => setCatForm({ ...catForm, description: e.target.value })}
@@ -460,19 +460,19 @@ export function EducationManager() {
               onClick={() => setSelectedCategory(cat)}
               className="flex items-center gap-3 min-w-0 text-left flex-1"
             >
-              <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${cat.available ? 'bg-[#111] text-white' : 'bg-gray-100 text-gray-400'}`}>
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${cat.available ? 'bg-[#111] text-white' : 'bg-gray-100 text-gray-500'}`}>
                 <BookOpen className="w-4 h-4" />
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-medium truncate">{cat.title}</p>
-                <p className="text-[11px] text-gray-400">{cat.lesson_count} leçon{cat.lesson_count !== 1 ? 's' : ''} · /{cat.slug}</p>
-                {cat.description && <p className="text-[11px] text-gray-400 truncate mt-0.5">{cat.description}</p>}
+                <p className="text-[11px] text-gray-500">{cat.lesson_count} leçon{cat.lesson_count !== 1 ? 's' : ''} · /{cat.slug}</p>
+                {cat.description && <p className="text-[11px] text-gray-500 truncate mt-0.5">{cat.description}</p>}
               </div>
             </button>
             <div className="flex items-center gap-2 flex-shrink-0">
               <button
                 onClick={() => toggleCategoryAvailable(cat)}
-                className={`p-1.5 rounded transition-colors ${cat.available ? 'text-emerald-600 hover:bg-emerald-50' : 'text-gray-400 hover:bg-gray-100'}`}
+                className={`p-1.5 rounded transition-colors ${cat.available ? 'text-emerald-600 hover:bg-emerald-50' : 'text-gray-500 hover:bg-gray-100'}`}
                 title={cat.available ? 'Visible' : 'Masqué'}
               >
                 {cat.available ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
@@ -490,7 +490,7 @@ export function EducationManager() {
                   </button>
                 </div>
               ) : (
-                <button onClick={() => setDeleteConfirm(cat.id)} className="p-1.5 rounded hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors">
+                <button onClick={() => setDeleteConfirm(cat.id)} className="p-1.5 rounded hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors">
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
               )}
@@ -498,7 +498,7 @@ export function EducationManager() {
           </div>
         ))}
         {categories.length === 0 && (
-          <p className="text-center py-8 text-sm text-gray-400">Aucune catégorie</p>
+          <p className="text-center py-8 text-sm text-gray-500">Aucune catégorie</p>
         )}
       </div>
     </div>

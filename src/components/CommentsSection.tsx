@@ -179,9 +179,9 @@ export function CommentsSection({ articleId }: CommentsSectionProps) {
         )}
 
         {loading ? (
-          <div className="text-center py-8 text-gray-400 text-[14px]">Chargement des commentaires...</div>
+          <div className="text-center py-8 text-gray-500 text-[14px]">Chargement des commentaires...</div>
         ) : comments.length === 0 ? (
-          <div className="text-center py-8 text-gray-400 text-[14px]">Aucun commentaire pour le moment. Soyez le premier !</div>
+          <div className="text-center py-8 text-gray-500 text-[14px]">Aucun commentaire pour le moment. Soyez le premier !</div>
         ) : (
           <div className="space-y-6">
             {topLevel.map((comment) => (
@@ -205,7 +205,7 @@ export function CommentsSection({ articleId }: CommentsSectionProps) {
                       rows={2}
                     />
                     <div className="flex justify-end gap-2 mt-2">
-                      <button onClick={() => { setReplyTo(null); setReplyText(''); }} className="text-[12px] text-gray-400 hover:text-gray-600">Annuler</button>
+                      <button onClick={() => { setReplyTo(null); setReplyText(''); }} className="text-[12px] text-gray-500 hover:text-gray-600">Annuler</button>
                       <button
                         onClick={() => handleReply(comment.id)}
                         disabled={!replyText.trim() || submitting}
@@ -289,7 +289,7 @@ function CommentItem({
             {isOwner && (
               <button
                 onClick={() => onDelete(comment.id)}
-                className="flex items-center gap-1 text-xs text-gray-400 hover:text-red-600 transition-colors"
+                className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-600 transition-colors"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 Supprimer

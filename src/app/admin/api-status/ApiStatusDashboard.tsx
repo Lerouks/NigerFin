@@ -138,7 +138,7 @@ export function ApiStatusDashboard() {
                         )}
                         <h3 className="text-[15px] font-semibold">{label.name}</h3>
                       </div>
-                      <p className="text-[12px] text-gray-400 mt-0.5 ml-6">{label.description}</p>
+                      <p className="text-[12px] text-gray-500 mt-0.5 ml-6">{label.description}</p>
                     </div>
                     <span className={`text-[11px] font-medium px-2.5 py-1 rounded-full ${
                       isOk ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'
@@ -151,8 +151,8 @@ export function ApiStatusDashboard() {
                     {/* Response time */}
                     <div className="text-center">
                       <div className="flex items-center justify-center gap-1 mb-1">
-                        <Clock className="w-3 h-3 text-gray-400" />
-                        <span className="text-[10px] text-gray-400">Temps</span>
+                        <Clock className="w-3 h-3 text-gray-500" />
+                        <span className="text-[10px] text-gray-500">Temps</span>
                       </div>
                       <p className="text-[14px] font-semibold tabular-nums">
                         {service.responseTime}ms
@@ -162,15 +162,15 @@ export function ApiStatusDashboard() {
                     {/* Success rate */}
                     <div className="text-center">
                       <div className="flex items-center justify-center gap-1 mb-1">
-                        <CheckCircle className="w-3 h-3 text-gray-400" />
-                        <span className="text-[10px] text-gray-400">24h</span>
+                        <CheckCircle className="w-3 h-3 text-gray-500" />
+                        <span className="text-[10px] text-gray-500">24h</span>
                       </div>
                       <p className={`text-[14px] font-semibold tabular-nums ${
                         service.successRate24h !== null && service.successRate24h >= 90
                           ? 'text-emerald-600'
                           : service.successRate24h !== null && service.successRate24h >= 50
                             ? 'text-amber-500'
-                            : 'text-gray-400'
+                            : 'text-gray-500'
                       }`}>
                         {service.successRate24h !== null ? `${service.successRate24h}%` : '-'}
                       </p>
@@ -179,8 +179,8 @@ export function ApiStatusDashboard() {
                     {/* Cache entries */}
                     <div className="text-center">
                       <div className="flex items-center justify-center gap-1 mb-1">
-                        <Database className="w-3 h-3 text-gray-400" />
-                        <span className="text-[10px] text-gray-400">Cache</span>
+                        <Database className="w-3 h-3 text-gray-500" />
+                        <span className="text-[10px] text-gray-500">Cache</span>
                       </div>
                       <p className="text-[14px] font-semibold tabular-nums">
                         {service.cacheEntries}
@@ -190,7 +190,7 @@ export function ApiStatusDashboard() {
 
                   {/* Last successful fetch */}
                   {service.lastSuccessful && (
-                    <p className="text-[10px] text-gray-400 mt-3 pt-2 border-t border-black/[0.04]">
+                    <p className="text-[10px] text-gray-500 mt-3 pt-2 border-t border-black/[0.04]">
                       Dernier succès : {new Date(service.lastSuccessful).toLocaleString('fr-FR', {
                         day: '2-digit', month: '2-digit', year: 'numeric',
                         hour: '2-digit', minute: '2-digit',
@@ -211,7 +211,7 @@ export function ApiStatusDashboard() {
         )}
 
         {!health && (
-          <div className="text-center py-20 text-gray-400">
+          <div className="text-center py-20 text-gray-500">
             Impossible de charger le statut des API.
           </div>
         )}

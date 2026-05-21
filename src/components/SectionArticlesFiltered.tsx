@@ -23,7 +23,7 @@ interface SectionArticlesFilteredProps {
 function FilterGroup({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-2">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-gray-400">{label}</p>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-gray-500">{label}</p>
       <div className="space-y-1">{children}</div>
     </div>
   );
@@ -253,7 +253,7 @@ export function SectionArticlesFiltered({
         {/* Articles */}
         <div className="flex-1 min-w-0">
           {/* Results count */}
-          <p className="text-[13px] text-gray-400 mb-6">
+          <p className="text-[13px] text-gray-500 mb-6">
             {filtered.length} article{filtered.length !== 1 ? 's' : ''}
             {hasActiveFilters ? ' (filtré)' : ''}
             {totalPages > 1 && ` · Page ${safePage} sur ${totalPages}`}
@@ -269,7 +269,7 @@ export function SectionArticlesFiltered({
           {/* Empty state (filters active) */}
           {filtered.length === 0 && articles.length > 0 && (
             <div className="text-center py-16">
-              <p className="text-gray-400 text-lg mb-2">Aucun article ne correspond aux filtres</p>
+              <p className="text-gray-500 text-lg mb-2">Aucun article ne correspond aux filtres</p>
               <button
                 onClick={resetFilters}
                 className="text-[13px] text-[#d4a843] hover:text-[#c49a3a] font-medium transition-colors"
@@ -282,7 +282,7 @@ export function SectionArticlesFiltered({
           {/* Empty state (no articles) */}
           {articles.length === 0 && (
             <div className="text-center py-20">
-              <p className="text-gray-400 text-lg mb-2">Aucun article dans cette rubrique</p>
+              <p className="text-gray-500 text-lg mb-2">Aucun article dans cette rubrique</p>
               <p className="text-gray-300 text-sm">De nouveaux contenus arrivent bientôt.</p>
             </div>
           )}

@@ -24,7 +24,7 @@ function SectionBadges({ sections, category, variant = 'light' }: { sections?: s
       {items.map((s, i) => (
         <span key={s}>
           <span className={`text-[11px] tracking-[0.1em] uppercase ${
-            variant === 'dark' ? 'text-white/50' : 'text-gray-400'
+            variant === 'dark' ? 'text-white/50' : 'text-gray-500'
           }`}>
             {SECTION_META[s]?.label || s}
           </span>
@@ -107,7 +107,7 @@ export function ArticleCard({ article, featured = false, priority = false }: Art
           <div className="flex items-center gap-2 mb-3">
             <SectionBadges sections={article.sections} category={article.category} />
             <span className="w-1 h-1 rounded-full bg-gray-200" />
-            <span className="text-[11px] text-gray-400 flex items-center gap-1">
+            <span className="text-[11px] text-gray-500 flex items-center gap-1">
               <Clock className="w-3 h-3" />
               {article.readTime} min
             </span>
@@ -118,7 +118,7 @@ export function ArticleCard({ article, featured = false, priority = false }: Art
           <p className="text-[13px] text-gray-500 mb-4 line-clamp-2 leading-relaxed">
             {article.excerpt}
           </p>
-          <div className="flex items-center justify-between text-xs text-gray-400">
+          <div className="flex items-center justify-between text-xs text-gray-500">
             <span>{article.author.name}</span>
             <ArrowUpRight className="w-4 h-4 text-gray-300 group-hover:text-gold group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200" />
           </div>

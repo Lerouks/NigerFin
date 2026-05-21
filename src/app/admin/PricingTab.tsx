@@ -57,7 +57,7 @@ export function PricingTab() {
 
       <div className="bg-white rounded-xl border border-black/[0.06] p-6">
         <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-          <Settings className="w-4 h-4 text-gray-400" />
+          <Settings className="w-4 h-4 text-gray-500" />
           Plan Premium
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -104,12 +104,12 @@ function PriceEditor({ label, defaultAmount, currentAmount, saving, onSave }: {
           <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">Personnalisé</span>
         )}
       </div>
-      <p className="text-[11px] text-gray-400 mb-2">Par défaut : {formatPrice(defaultAmount)}</p>
+      <p className="text-[11px] text-gray-500 mb-2">Par défaut : {formatPrice(defaultAmount)}</p>
       <div className="flex gap-2">
         <div className="relative flex-1">
           <input type="number" value={value} onChange={(e) => setValue(e.target.value)} min={100} step={100}
             className="w-full border border-black/[0.08] rounded px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:border-black/15" />
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400">{CURRENCY}</span>
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-500">{CURRENCY}</span>
         </div>
         <button onClick={() => onSave(parseInt(value))} disabled={saving || !isDifferent || parseInt(value) < 100}
           className="px-3 py-2 bg-[#111] text-white rounded text-[12px] hover:bg-[#333] disabled:opacity-30 transition-colors">

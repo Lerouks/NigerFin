@@ -52,7 +52,7 @@ export function NigerResources({ resources }: { resources: Resource[] }) {
   return (
     <section className="border-t border-black/[0.06] pt-14 md:pt-20">
       <div className="mb-10">
-        <span className="text-[11px] tracking-[0.2em] uppercase text-gray-400 block mb-3">Richesses naturelles</span>
+        <span className="text-[11px] tracking-[0.2em] uppercase text-gray-500 block mb-3">Richesses naturelles</span>
         <h2 className="text-2xl md:text-3xl leading-tight">Ressources stratégiques</h2>
       </div>
 
@@ -79,12 +79,12 @@ export function NigerResources({ resources }: { resources: Resource[] }) {
               </div>
 
               <h3 className="text-[15px] font-medium mb-1">{resource.name}</h3>
-              <p className="text-[12px] text-gray-400 mb-4">{resource.location_name}</p>
+              <p className="text-[12px] text-gray-500 mb-4">{resource.location_name}</p>
 
               <div className="bg-gray-50 rounded-lg p-3 mb-4">
-                <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1">Production estimée</p>
+                <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Production estimée</p>
                 <p className="text-[15px] font-medium text-gray-900">
-                  {resource.estimated_production} <span className="text-[12px] text-gray-400 font-normal">{resource.production_unit}</span>
+                  {resource.estimated_production} <span className="text-[12px] text-gray-500 font-normal">{resource.production_unit}</span>
                 </p>
               </div>
 

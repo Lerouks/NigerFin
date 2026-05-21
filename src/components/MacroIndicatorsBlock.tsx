@@ -73,7 +73,7 @@ export function MacroIndicatorsBlock({
         </div>
         {asOf && (
           <div className="text-right">
-            <div className="text-[11px] tracking-[0.12em] uppercase text-gray-400">
+            <div className="text-[11px] tracking-[0.12em] uppercase text-gray-500">
               Snapshot
             </div>
             <div className="text-[13px] text-gray-600 font-medium tabular-nums">
@@ -99,7 +99,7 @@ export function MacroIndicatorsBlock({
                   <div className="text-[13px] font-semibold text-[#111] leading-tight">
                     {kpi.label}
                   </div>
-                  <div className="text-[11px] text-gray-400 mt-0.5">
+                  <div className="text-[11px] text-gray-500 mt-0.5">
                     {kpi.period}
                   </div>
                 </div>
@@ -132,7 +132,7 @@ export function MacroIndicatorsBlock({
               )}
 
               {/* Source */}
-              <div className="text-[10px] tracking-[0.08em] uppercase text-gray-400 mt-3 pt-3 border-t border-black/[0.04]">
+              <div className="text-[10px] tracking-[0.08em] uppercase text-gray-500 mt-3 pt-3 border-t border-black/[0.04]">
                 {kpi.source}
               </div>
             </article>

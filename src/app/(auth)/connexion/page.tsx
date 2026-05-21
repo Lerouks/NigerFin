@@ -94,7 +94,7 @@ function ConnexionContent() {
             <div>
               <label htmlFor="reset-email" className="block text-sm font-medium mb-2.5">Email</label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
                 <input id="reset-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
                   className="w-full border border-black/[0.08] rounded-xl pl-12 pr-4 py-3.5 bg-[#fafaf9] focus:outline-none focus:border-gold/30 focus:ring-2 focus:ring-gold/10 transition-all text-base"
                   placeholder="votre@email.com" />
@@ -135,7 +135,7 @@ function ConnexionContent() {
           <div>
             <label htmlFor="email" className="block text-sm font-medium mb-2.5">Email</label>
             <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
               <input
                 id="email"
                 type="email"
@@ -157,7 +157,7 @@ function ConnexionContent() {
               </button>
             </div>
             <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
               <input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
@@ -171,7 +171,7 @@ function ConnexionContent() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600"
                 aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -198,7 +198,7 @@ function ConnexionContent() {
             <div className="w-full border-t border-black/[0.06]" />
           </div>
           <div className="relative flex justify-center text-xs">
-            <span className="px-3 bg-white text-gray-400">ou</span>
+            <span className="px-3 bg-white text-gray-500">ou</span>
           </div>
         </div>
 

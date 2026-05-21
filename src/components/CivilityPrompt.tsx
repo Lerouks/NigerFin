@@ -115,7 +115,7 @@ export function CivilityPrompt() {
           type="button"
           onClick={handleDismiss}
           aria-label="Fermer"
-          className="text-gray-400 hover:text-gray-600 transition-colors shrink-0"
+          className="text-gray-500 hover:text-gray-600 transition-colors shrink-0"
         >
           <X className="w-4 h-4" />
         </button>

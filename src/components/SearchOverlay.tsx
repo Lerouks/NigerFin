@@ -89,7 +89,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-4 h-16">
             {loading ? (
-              <Loader2 className="w-5 h-5 text-gray-400 flex-shrink-0 animate-spin" />
+              <Loader2 className="w-5 h-5 text-gray-500 flex-shrink-0 animate-spin" />
             ) : (
               <Search className="w-5 h-5 text-gray-300 flex-shrink-0" />
             )}
@@ -115,9 +115,9 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
           {query.trim().length < 2 ? (
             <div className="text-center py-16 bg-white rounded-xl shadow-lg">
               <Search className="w-12 h-12 text-gray-200 mx-auto mb-5" />
-              <p className="text-gray-400 text-[15px]">Tapez au moins 2 caractères pour rechercher</p>
+              <p className="text-gray-500 text-[15px]">Tapez au moins 2 caractères pour rechercher</p>
               <div className="mt-6">
-                <p className="text-[13px] text-gray-400 mb-4">Suggestions populaires</p>
+                <p className="text-[13px] text-gray-500 mb-4">Suggestions populaires</p>
                 <div className="flex flex-wrap gap-2 justify-center">
                   {['Économie', 'Finance', 'BRVM', 'Uranium', 'Éducation', 'Outils'].map((tag) => (
                     <button
@@ -133,7 +133,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
             </div>
           ) : searched && results.length === 0 && !loading ? (
             <div className="text-center py-16 bg-white rounded-xl shadow-lg">
-              <p className="text-gray-400 text-[15px]">
+              <p className="text-gray-500 text-[15px]">
                 Aucun résultat pour &ldquo;<span className="font-semibold">{query}</span>&rdquo;
               </p>
             </div>
@@ -141,7 +141,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
             <>
               {results.length > 0 && (
                 <>
-                  <p className="text-[12px] text-gray-400 mb-6">
+                  <p className="text-[12px] text-gray-500 mb-6">
                     {results.length} résultat{results.length > 1 ? 's' : ''} pour &ldquo;{query}&rdquo;
                   </p>
                   <div className="space-y-0">
@@ -154,7 +154,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                       >
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-[10px] tracking-[0.1em] uppercase text-gray-400">
+                            <span className="text-[10px] tracking-[0.1em] uppercase text-gray-500">
                               {article.category}
                             </span>
                             {article.isPremium && (
@@ -167,7 +167,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                             {article.title}
                           </h3>
                           <p className="text-sm text-gray-500 line-clamp-2">{article.excerpt}</p>
-                          <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
+                          <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
                             <span>{article.author.name}</span>
                             <span className="flex items-center gap-1">
                               <Clock className="w-3 h-3" />

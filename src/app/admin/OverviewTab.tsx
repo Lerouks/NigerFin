@@ -59,7 +59,7 @@ function KpiCard({ label, value, sub, variation, icon: Icon, color, bg }: {
   return (
     <div className="bg-white rounded-xl border border-black/[0.06] p-5">
       <div className="flex items-center justify-between mb-2">
-        <p className="text-[12px] text-gray-400 uppercase tracking-wider">{label}</p>
+        <p className="text-[12px] text-gray-500 uppercase tracking-wider">{label}</p>
         <div className={`w-8 h-8 rounded-lg ${bg} flex items-center justify-center`}>
           <Icon className={`w-4 h-4 ${color}`} />
         </div>
@@ -68,11 +68,11 @@ function KpiCard({ label, value, sub, variation, icon: Icon, color, bg }: {
       {variation !== undefined && (
         <div className="flex items-center gap-1 mt-1">
           <VariationBadge value={variation} pill />
-          <span className="text-[10px] text-gray-400 ml-0.5">vs mois dernier</span>
+          <span className="text-[10px] text-gray-500 ml-0.5">vs mois dernier</span>
         </div>
       )}
       {sub && !variation && variation !== 0 && (
-        <p className="text-[11px] text-gray-400 mt-1">{sub}</p>
+        <p className="text-[11px] text-gray-500 mt-1">{sub}</p>
       )}
     </div>
   );
@@ -86,17 +86,17 @@ export function OverviewTab({ overview, stats }: OverviewTabProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white rounded-xl border border-black/[0.06] p-6">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[12px] text-gray-400 uppercase tracking-wider">MRR</p>
+            <p className="text-[12px] text-gray-500 uppercase tracking-wider">MRR</p>
             <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
               <DollarSign className="w-4 h-4 text-emerald-600" />
             </div>
           </div>
           <p className="text-4xl font-bold text-emerald-600">{overview ? formatPrice(overview.mrr) : '-'}</p>
-          <p className="text-[11px] text-gray-400 mt-1">Monthly Recurring Revenue</p>
+          <p className="text-[11px] text-gray-500 mt-1">Monthly Recurring Revenue</p>
         </div>
         <div className="bg-white rounded-xl border border-black/[0.06] p-6">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[12px] text-gray-400 uppercase tracking-wider">Abonnés actifs</p>
+            <p className="text-[12px] text-gray-500 uppercase tracking-wider">Abonnés actifs</p>
             <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
               <Crown className="w-4 h-4 text-blue-600" />
             </div>
@@ -111,7 +111,7 @@ export function OverviewTab({ overview, stats }: OverviewTabProps) {
         </div>
         <div className="bg-white rounded-xl border border-black/[0.06] p-6">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[12px] text-gray-400 uppercase tracking-wider">Churn Rate</p>
+            <p className="text-[12px] text-gray-500 uppercase tracking-wider">Churn Rate</p>
             <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center">
               <UserMinus className="w-4 h-4 text-red-600" />
             </div>
@@ -119,7 +119,7 @@ export function OverviewTab({ overview, stats }: OverviewTabProps) {
           <p className={`text-4xl font-bold ${overview && overview.churnRate > 5 ? 'text-red-600' : overview && overview.churnRate > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
             {overview ? `${overview.churnRate}%` : '-'}
           </p>
-          <p className="text-[11px] text-gray-400 mt-1">
+          <p className="text-[11px] text-gray-500 mt-1">
             {overview ? `${overview.expiredThisMonth} résiliation(s) ce mois` : ''}
           </p>
         </div>
@@ -168,7 +168,7 @@ export function OverviewTab({ overview, stats }: OverviewTabProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-white rounded-xl border border-black/[0.06] p-6">
             <h3 className="font-semibold mb-4 flex items-center gap-2 text-sm">
-              <Activity className="w-4 h-4 text-gray-400" />
+              <Activity className="w-4 h-4 text-gray-500" />
               Revenus mensuels (6 derniers mois)
             </h3>
             <div className="flex items-end gap-3 h-40">
@@ -177,7 +177,7 @@ export function OverviewTab({ overview, stats }: OverviewTabProps) {
                 const height = (m.revenue / max) * 100;
                 return (
                   <div key={m.month} className="flex-1 flex flex-col items-center gap-1">
-                    <span className="text-[9px] text-gray-400 font-medium">
+                    <span className="text-[9px] text-gray-500 font-medium">
                       {m.revenue > 0 ? formatPrice(m.revenue) : ''}
                     </span>
                     <div
@@ -193,7 +193,7 @@ export function OverviewTab({ overview, stats }: OverviewTabProps) {
 
           <div className="bg-white rounded-xl border border-black/[0.06] p-6">
             <h3 className="font-semibold mb-4 flex items-center gap-2 text-sm">
-              <Users className="w-4 h-4 text-gray-400" />
+              <Users className="w-4 h-4 text-gray-500" />
               Nouveaux inscrits (6 derniers mois)
             </h3>
             <div className="flex items-end gap-3 h-40">
@@ -202,7 +202,7 @@ export function OverviewTab({ overview, stats }: OverviewTabProps) {
                 const height = (m.users / max) * 100;
                 return (
                   <div key={m.month} className="flex-1 flex flex-col items-center gap-1">
-                    <span className="text-[9px] text-gray-400 font-medium">
+                    <span className="text-[9px] text-gray-500 font-medium">
                       {m.users > 0 ? m.users : ''}
                     </span>
                     <div
@@ -232,7 +232,7 @@ export function OverviewTab({ overview, stats }: OverviewTabProps) {
 
         {overview?.topArticle && (
           <div className="mt-4 bg-white rounded-xl border border-black/[0.06] p-5">
-            <p className="text-[12px] text-gray-400 uppercase tracking-wider mb-2">Article le plus lu ce mois</p>
+            <p className="text-[12px] text-gray-500 uppercase tracking-wider mb-2">Article le plus lu ce mois</p>
             <div className="flex items-center justify-between">
               <p className="font-semibold text-sm truncate mr-4">{overview.topArticle.title}</p>
               <span className="text-sm text-purple-600 font-medium whitespace-nowrap flex items-center gap-1">

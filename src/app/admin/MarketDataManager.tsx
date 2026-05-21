@@ -338,20 +338,20 @@ export function MarketDataManager() {
       {/* Table */}
       {loading ? (
         <div className="text-center py-12">
-          <Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto" />
+          <Loader2 className="w-6 h-6 animate-spin text-gray-500 mx-auto" />
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-black/[0.06] overflow-hidden">
           <table className="w-full">
             <thead>
               <tr className="border-b border-black/[0.04]">
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Nom</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Type</th>
-                <th className="text-right text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Valeur</th>
-                <th className="text-right text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Variation</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Source</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Mis à jour</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Actions</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Nom</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Type</th>
+                <th className="text-right text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Valeur</th>
+                <th className="text-right text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Variation</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Source</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Mis à jour</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -372,7 +372,7 @@ export function MarketDataManager() {
                   <tr key={entry.id} className="border-b border-black/[0.03] last:border-0 hover:bg-gray-50/50">
                     <td className="px-4 py-3">
                       <p className="text-sm font-medium">{entry.name}</p>
-                      <p className="text-[11px] text-gray-400">{entry.symbol}</p>
+                      <p className="text-[11px] text-gray-500">{entry.symbol}</p>
                     </td>
                     <td className="px-4 py-3">
                       <span className={`text-[11px] px-2 py-1 rounded ${
@@ -389,7 +389,7 @@ export function MarketDataManager() {
                         {Number(entry.value).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                       {entry.unit && (
-                        <span className="text-[11px] text-gray-400 ml-1">{entry.unit}</span>
+                        <span className="text-[11px] text-gray-500 ml-1">{entry.unit}</span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-right">
@@ -401,7 +401,7 @@ export function MarketDataManager() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-[12px] text-gray-500">{entry.source || '-'}</td>
-                    <td className="px-4 py-3 text-[11px] text-gray-400 whitespace-nowrap">
+                    <td className="px-4 py-3 text-[11px] text-gray-500 whitespace-nowrap">
                       {entry.updated_at ? new Date(entry.updated_at).toLocaleString('fr-FR', {
                         day: '2-digit', month: '2-digit', year: 'numeric',
                         hour: '2-digit', minute: '2-digit',
@@ -436,7 +436,7 @@ export function MarketDataManager() {
                         ) : (
                           <button
                             onClick={() => setDeleteConfirm(entry.id)}
-                            className="p-1.5 rounded hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors"
+                            className="p-1.5 rounded hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors"
                             title="Supprimer"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -450,7 +450,7 @@ export function MarketDataManager() {
             </tbody>
           </table>
           {filtered.length === 0 && (
-            <p className="text-center py-8 text-sm text-gray-400">Aucune donnée de marché</p>
+            <p className="text-center py-8 text-sm text-gray-500">Aucune donnée de marché</p>
           )}
         </div>
       )}
@@ -464,11 +464,11 @@ export function MarketDataManager() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-base font-semibold">Données non récupérées</h3>
-                  <p className="text-[12px] text-gray-400 mt-0.5">Entrez les valeurs manuellement</p>
+                  <p className="text-[12px] text-gray-500 mt-0.5">Entrez les valeurs manuellement</p>
                 </div>
                 <button
                   onClick={() => setShowFailedPopup(false)}
-                  className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400"
+                  className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -479,7 +479,7 @@ export function MarketDataManager() {
                 <div key={item.symbol} className="flex items-center gap-3">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{item.name}</p>
-                    <p className="text-[11px] text-gray-400">{item.symbol}</p>
+                    <p className="text-[11px] text-gray-500">{item.symbol}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <input
@@ -493,7 +493,7 @@ export function MarketDataManager() {
                       className="w-32 border border-black/[0.08] rounded-lg px-3 py-2 text-sm text-right bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black tabular-nums"
                     />
                     {item.unit && (
-                      <span className="text-[11px] text-gray-400 w-10">{item.unit}</span>
+                      <span className="text-[11px] text-gray-500 w-10">{item.unit}</span>
                     )}
                   </div>
                 </div>
@@ -537,7 +537,7 @@ function MarketForm({ form, setForm, onSave, onCancel, saving }: {
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div>
-          <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Nom *</label>
+          <label className="text-[11px] text-gray-500 uppercase tracking-wider block mb-1">Nom *</label>
           <input
             type="text"
             value={form.name}
@@ -547,7 +547,7 @@ function MarketForm({ form, setForm, onSave, onCancel, saving }: {
           />
         </div>
         <div>
-          <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Symbole *</label>
+          <label className="text-[11px] text-gray-500 uppercase tracking-wider block mb-1">Symbole *</label>
           <input
             type="text"
             value={form.symbol}
@@ -557,7 +557,7 @@ function MarketForm({ form, setForm, onSave, onCancel, saving }: {
           />
         </div>
         <div>
-          <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Type *</label>
+          <label className="text-[11px] text-gray-500 uppercase tracking-wider block mb-1">Type *</label>
           <select
             value={form.type}
             onChange={(e) => update('type', e.target.value)}
@@ -571,7 +571,7 @@ function MarketForm({ form, setForm, onSave, onCancel, saving }: {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div>
-          <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Valeur</label>
+          <label className="text-[11px] text-gray-500 uppercase tracking-wider block mb-1">Valeur</label>
           <input
             type="text"
             inputMode="decimal"
@@ -582,10 +582,10 @@ function MarketForm({ form, setForm, onSave, onCancel, saving }: {
             placeholder="Ex: 655,96"
             className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black tabular-nums"
           />
-          <p className="text-[10px] text-gray-400 mt-1">La variation sera calculée automatiquement (virgule ou point accepté)</p>
+          <p className="text-[10px] text-gray-500 mt-1">La variation sera calculée automatiquement (virgule ou point accepté)</p>
         </div>
         <div>
-          <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Unité</label>
+          <label className="text-[11px] text-gray-500 uppercase tracking-wider block mb-1">Unité</label>
           <input
             type="text"
             value={form.unit}
@@ -595,7 +595,7 @@ function MarketForm({ form, setForm, onSave, onCancel, saving }: {
           />
         </div>
         <div>
-          <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Source</label>
+          <label className="text-[11px] text-gray-500 uppercase tracking-wider block mb-1">Source</label>
           <input
             type="text"
             value={form.source}
@@ -607,7 +607,7 @@ function MarketForm({ form, setForm, onSave, onCancel, saving }: {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
-          <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Description pédagogique</label>
+          <label className="text-[11px] text-gray-500 uppercase tracking-wider block mb-1">Description pédagogique</label>
           <input
             type="text"
             value={form.description}
@@ -617,7 +617,7 @@ function MarketForm({ form, setForm, onSave, onCancel, saving }: {
           />
         </div>
         <div>
-          <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Lien éducation</label>
+          <label className="text-[11px] text-gray-500 uppercase tracking-wider block mb-1">Lien éducation</label>
           <input
             type="text"
             value={form.education_link}
@@ -625,7 +625,7 @@ function MarketForm({ form, setForm, onSave, onCancel, saving }: {
             placeholder="Ex: /education/bourse-marches"
             className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
           />
-          <p className="text-[10px] text-gray-400 mt-1">Lien vers la page éducation correspondante</p>
+          <p className="text-[10px] text-gray-500 mt-1">Lien vers la page éducation correspondante</p>
         </div>
       </div>
       <div className="flex gap-2 pt-2">

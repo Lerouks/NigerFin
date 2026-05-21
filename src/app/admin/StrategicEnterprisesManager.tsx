@@ -390,7 +390,7 @@ export function StrategicEnterprisesManager() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Building2 className="w-5 h-5 text-gray-400" />
+          <Building2 className="w-5 h-5 text-gray-500" />
           <div>
             <h2 className="text-lg font-bold text-gray-900">Entreprises stratégiques</h2>
             <p className="text-[13px] text-gray-500">
@@ -415,7 +415,7 @@ export function StrategicEnterprisesManager() {
       {/* Loading */}
       {loading && (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+          <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
         </div>
       )}
 
@@ -424,7 +424,7 @@ export function StrategicEnterprisesManager() {
         <div className="text-center py-16 bg-white border border-black/[0.06] rounded-xl">
           <Building2 className="w-10 h-10 text-gray-300 mx-auto mb-3" />
           <p className="text-gray-500 text-[14px]">Aucune entreprise stratégique</p>
-          <p className="text-gray-400 text-[13px]">Cliquez sur &quot;Ajouter&quot; pour commencer.</p>
+          <p className="text-gray-500 text-[13px]">Cliquez sur &quot;Ajouter&quot; pour commencer.</p>
         </div>
       )}
 
@@ -437,7 +437,7 @@ export function StrategicEnterprisesManager() {
               {/* Drag handle + order */}
               <div className="flex flex-col items-center gap-1 pt-1">
                 <GripVertical className="w-4 h-4 text-gray-300" />
-                <span className="text-[11px] text-gray-400 font-mono">{item.display_order}</span>
+                <span className="text-[11px] text-gray-500 font-mono">{item.display_order}</span>
               </div>
 
               {/* Logo or placeholder */}
@@ -462,7 +462,7 @@ export function StrategicEnterprisesManager() {
                 </div>
                 <p className="text-[13px] text-gray-500 line-clamp-2">{item.description}</p>
                 {item.image_url && (
-                  <div className="flex items-center gap-1 mt-1 text-[11px] text-gray-400">
+                  <div className="flex items-center gap-1 mt-1 text-[11px] text-gray-500">
                     <ImageIcon className="w-3 h-3" />
                     Image configurée
                   </div>
@@ -474,13 +474,13 @@ export function StrategicEnterprisesManager() {
                 <button
                   onClick={() => handleToggleVisibility(item)}
                   title={item.is_visible ? 'Masquer' : 'Afficher'}
-                  className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors"
                 >
                   {item.is_visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                 </button>
                 <button
                   onClick={() => startEdit(item)}
-                  className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors"
                 >
                   <Pencil className="w-4 h-4" />
                 </button>
@@ -503,7 +503,7 @@ export function StrategicEnterprisesManager() {
                 ) : (
                   <button
                     onClick={() => setDeleteConfirm(item.id)}
-                    className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                    className="p-2 rounded-lg text-gray-500 hover:text-red-500 hover:bg-red-50 transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>

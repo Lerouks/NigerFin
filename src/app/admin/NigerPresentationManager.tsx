@@ -128,7 +128,7 @@ export function NigerPresentationManager() {
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+        <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
       </div>
     );
   }
@@ -177,7 +177,7 @@ export function NigerPresentationManager() {
               <Icon className="w-3.5 h-3.5" />
               {tab.label}
               {tab.id !== 'presentation' && (
-                <span className={`text-[10px] ml-1 ${subTab === tab.id ? 'text-white/60' : 'text-gray-400'}`}>
+                <span className={`text-[10px] ml-1 ${subTab === tab.id ? 'text-white/60' : 'text-gray-500'}`}>
                   {visibleCounts[tab.id as keyof typeof visibleCounts]}/{
                     tab.id === 'facts' ? facts.length :
                     tab.id === 'regions' ? regions.length :
@@ -252,7 +252,7 @@ function PresentationEditor({
       <h3 className="text-sm font-semibold">Carte et introduction</h3>
 
       <div>
-        <label className="text-[11px] uppercase tracking-wider text-gray-400 block mb-2">Image de la carte</label>
+        <label className="text-[11px] uppercase tracking-wider text-gray-500 block mb-2">Image de la carte</label>
         <div className="flex gap-4 items-start">
           <div className="flex-1">
             <input
@@ -279,7 +279,7 @@ function PresentationEditor({
       </div>
 
       <div>
-        <label className="text-[11px] uppercase tracking-wider text-gray-400 block mb-2">Alt text de la carte</label>
+        <label className="text-[11px] uppercase tracking-wider text-gray-500 block mb-2">Alt text de la carte</label>
         <input
           type="text"
           value={presentation.map_image_alt}
@@ -289,7 +289,7 @@ function PresentationEditor({
       </div>
 
       <div>
-        <label className="text-[11px] uppercase tracking-wider text-gray-400 block mb-2">Titre</label>
+        <label className="text-[11px] uppercase tracking-wider text-gray-500 block mb-2">Titre</label>
         <input
           type="text"
           value={presentation.intro_title}
@@ -299,7 +299,7 @@ function PresentationEditor({
       </div>
 
       <div>
-        <label className="text-[11px] uppercase tracking-wider text-gray-400 block mb-2">Texte d&apos;introduction</label>
+        <label className="text-[11px] uppercase tracking-wider text-gray-500 block mb-2">Texte d&apos;introduction</label>
         <textarea
           value={presentation.intro_text}
           onChange={(e) => setPresentation((prev) => ({ ...prev, intro_text: e.target.value }))}
@@ -327,7 +327,7 @@ function FactsEditor({ facts, setFacts }: { facts: Fact[]; setFacts: (f: Fact[])
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-semibold">Données clés</h3>
-          <p className="text-[12px] text-gray-400 mt-0.5">Modifiez les labels, valeurs et visibilité des données affichées.</p>
+          <p className="text-[12px] text-gray-500 mt-0.5">Modifiez les labels, valeurs et visibilité des données affichées.</p>
         </div>
         <div className="flex gap-2">
           <button onClick={() => toggleAll(true)} className="text-[11px] px-2 py-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
@@ -354,7 +354,7 @@ function FactsEditor({ facts, setFacts }: { facts: Fact[]; setFacts: (f: Fact[])
               />
             </div>
             <div className="col-span-2">
-              <span className="text-[10px] uppercase tracking-wider text-gray-400">{fact.fact_key}</span>
+              <span className="text-[10px] uppercase tracking-wider text-gray-500">{fact.fact_key}</span>
             </div>
             <div className="col-span-3">
               <input
@@ -427,7 +427,7 @@ function RegionsEditor({ regions, setRegions }: { regions: Region[]; setRegions:
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-semibold">Régions du Niger</h3>
-          <p className="text-[12px] text-gray-400 mt-0.5">Gérez les informations et la visibilité de chaque région.</p>
+          <p className="text-[12px] text-gray-500 mt-0.5">Gérez les informations et la visibilité de chaque région.</p>
         </div>
         <div className="flex gap-2">
           <button onClick={() => toggleAll(true)} className="text-[11px] px-2 py-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
@@ -457,7 +457,7 @@ function RegionsEditor({ regions, setRegions }: { regions: Region[]; setRegions:
                 />
                 <div className="flex-1 min-w-0">
                   <span className="text-[13px] font-medium">{region.name}</span>
-                  <span className="text-[11px] text-gray-400 ml-2">Capitale : {region.capital}</span>
+                  <span className="text-[11px] text-gray-500 ml-2">Capitale : {region.capital}</span>
                 </div>
                 <span className={`text-[11px] px-2 py-0.5 rounded ${
                   region.security_level === 'stable' ? 'bg-emerald-50 text-emerald-700' :
@@ -470,7 +470,7 @@ function RegionsEditor({ regions, setRegions }: { regions: Region[]; setRegions:
                 </span>
                 <button
                   onClick={() => setExpandedId(isExpanded ? null : region.id)}
-                  className="p-1.5 rounded hover:bg-gray-200 text-gray-400 transition-colors"
+                  className="p-1.5 rounded hover:bg-gray-200 text-gray-500 transition-colors"
                 >
                   {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
@@ -481,7 +481,7 @@ function RegionsEditor({ regions, setRegions }: { regions: Region[]; setRegions:
                 <div className="px-4 pb-4 space-y-3 border-t border-black/[0.04] pt-3">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div>
-                      <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">Nom</label>
+                      <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Nom</label>
                       <input
                         type="text"
                         value={region.name}
@@ -490,7 +490,7 @@ function RegionsEditor({ regions, setRegions }: { regions: Region[]; setRegions:
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">Capitale</label>
+                      <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Capitale</label>
                       <input
                         type="text"
                         value={region.capital}
@@ -499,7 +499,7 @@ function RegionsEditor({ regions, setRegions }: { regions: Region[]; setRegions:
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">Population</label>
+                      <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Population</label>
                       <input
                         type="number"
                         value={region.population}
@@ -508,7 +508,7 @@ function RegionsEditor({ regions, setRegions }: { regions: Region[]; setRegions:
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">Superficie (km²)</label>
+                      <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Superficie (km²)</label>
                       <input
                         type="text"
                         value={region.area_km2}
@@ -519,7 +519,7 @@ function RegionsEditor({ regions, setRegions }: { regions: Region[]; setRegions:
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">Niveau de sécurité</label>
+                      <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Niveau de sécurité</label>
                       <select
                         value={region.security_level}
                         onChange={(e) => update(region.id, 'security_level', e.target.value)}
@@ -532,7 +532,7 @@ function RegionsEditor({ regions, setRegions }: { regions: Region[]; setRegions:
                       </select>
                     </div>
                     <div>
-                      <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">Note sécurité</label>
+                      <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Note sécurité</label>
                       <input
                         type="text"
                         value={region.security_note}
@@ -543,7 +543,7 @@ function RegionsEditor({ regions, setRegions }: { regions: Region[]; setRegions:
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">Activités économiques (séparées par virgule)</label>
+                      <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Activités économiques (séparées par virgule)</label>
                       <input
                         type="text"
                         value={region.economic_activities.join(', ')}
@@ -552,7 +552,7 @@ function RegionsEditor({ regions, setRegions }: { regions: Region[]; setRegions:
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">Ressources naturelles (séparées par virgule)</label>
+                      <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Ressources naturelles (séparées par virgule)</label>
                       <input
                         type="text"
                         value={region.natural_resources.join(', ')}
@@ -568,7 +568,7 @@ function RegionsEditor({ regions, setRegions }: { regions: Region[]; setRegions:
         })}
       </div>
       {regions.length === 0 && (
-        <p className="text-center py-8 text-sm text-gray-400">Aucune région</p>
+        <p className="text-center py-8 text-sm text-gray-500">Aucune région</p>
       )}
     </div>
   );
@@ -598,7 +598,7 @@ function ResourcesEditor({ resources, setResources }: { resources: Resource[]; s
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-semibold">Ressources stratégiques</h3>
-          <p className="text-[12px] text-gray-400 mt-0.5">Gérez les ressources naturelles et leur visibilité.</p>
+          <p className="text-[12px] text-gray-500 mt-0.5">Gérez les ressources naturelles et leur visibilité.</p>
         </div>
         <div className="flex gap-2">
           <button onClick={() => toggleAll(true)} className="text-[11px] px-2 py-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
@@ -627,7 +627,7 @@ function ResourcesEditor({ resources, setResources }: { resources: Resource[]; s
                 />
                 <div className="flex-1 min-w-0">
                   <span className="text-[13px] font-medium">{res.name}</span>
-                  <span className="text-[11px] text-gray-400 ml-2">{res.location_name}</span>
+                  <span className="text-[11px] text-gray-500 ml-2">{res.location_name}</span>
                 </div>
                 <span className={`text-[10px] px-2 py-0.5 rounded border font-medium ${
                   res.economic_importance === 'critique' ? 'bg-red-50 text-red-700 border-red-100' :
@@ -636,10 +636,10 @@ function ResourcesEditor({ resources, setResources }: { resources: Resource[]; s
                 }`}>
                   {IMPORTANCE_LABELS[res.economic_importance] || res.economic_importance}
                 </span>
-                <span className="text-[11px] text-gray-400">{res.type}</span>
+                <span className="text-[11px] text-gray-500">{res.type}</span>
                 <button
                   onClick={() => setExpandedId(isExpanded ? null : res.id)}
-                  className="p-1.5 rounded hover:bg-gray-200 text-gray-400 transition-colors"
+                  className="p-1.5 rounded hover:bg-gray-200 text-gray-500 transition-colors"
                 >
                   {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
@@ -649,7 +649,7 @@ function ResourcesEditor({ resources, setResources }: { resources: Resource[]; s
                 <div className="px-4 pb-4 space-y-3 border-t border-black/[0.04] pt-3">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div>
-                      <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">Nom</label>
+                      <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Nom</label>
                       <input
                         type="text"
                         value={res.name}
@@ -658,7 +658,7 @@ function ResourcesEditor({ resources, setResources }: { resources: Resource[]; s
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">Type</label>
+                      <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Type</label>
                       <select
                         value={res.type}
                         onChange={(e) => update(res.id, 'type', e.target.value)}
@@ -672,7 +672,7 @@ function ResourcesEditor({ resources, setResources }: { resources: Resource[]; s
                       </select>
                     </div>
                     <div>
-                      <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">Localisation</label>
+                      <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Localisation</label>
                       <input
                         type="text"
                         value={res.location_name}
@@ -681,7 +681,7 @@ function ResourcesEditor({ resources, setResources }: { resources: Resource[]; s
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">Importance</label>
+                      <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Importance</label>
                       <select
                         value={res.economic_importance}
                         onChange={(e) => update(res.id, 'economic_importance', e.target.value)}
@@ -695,7 +695,7 @@ function ResourcesEditor({ resources, setResources }: { resources: Resource[]; s
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
-                      <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">Production estimée</label>
+                      <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Production estimée</label>
                       <input
                         type="text"
                         value={res.estimated_production}
@@ -704,7 +704,7 @@ function ResourcesEditor({ resources, setResources }: { resources: Resource[]; s
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">Unité production</label>
+                      <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Unité production</label>
                       <input
                         type="text"
                         value={res.production_unit}
@@ -713,7 +713,7 @@ function ResourcesEditor({ resources, setResources }: { resources: Resource[]; s
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">Entreprises (séparées par virgule)</label>
+                      <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Entreprises (séparées par virgule)</label>
                       <input
                         type="text"
                         value={res.operating_companies.join(', ')}
@@ -723,7 +723,7 @@ function ResourcesEditor({ resources, setResources }: { resources: Resource[]; s
                     </div>
                   </div>
                   <div>
-                    <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">Description importance</label>
+                    <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Description importance</label>
                     <textarea
                       value={res.importance_description}
                       onChange={(e) => update(res.id, 'importance_description', e.target.value)}
@@ -738,7 +738,7 @@ function ResourcesEditor({ resources, setResources }: { resources: Resource[]; s
         })}
       </div>
       {resources.length === 0 && (
-        <p className="text-center py-8 text-sm text-gray-400">Aucune ressource</p>
+        <p className="text-center py-8 text-sm text-gray-500">Aucune ressource</p>
       )}
     </div>
   );

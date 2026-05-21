@@ -73,7 +73,7 @@ export function MarketDataWidget() {
                   >
                     <div className="flex-1">
                       <div className="text-[13px] font-medium">{item.name}</div>
-                      <div className="text-[11px] text-gray-400">{item.symbol}</div>
+                      <div className="text-[11px] text-gray-500">{item.symbol}</div>
                     </div>
                     <div className="text-right">
                       <div className="text-[13px] tabular-nums font-medium">
@@ -82,12 +82,12 @@ export function MarketDataWidget() {
                           maximumFractionDigits: 2,
                         })}
                         {item.unit && (
-                          <span className="text-[10px] text-gray-400 ml-0.5">{item.unit}</span>
+                          <span className="text-[10px] text-gray-500 ml-0.5">{item.unit}</span>
                         )}
                       </div>
                       <div className="flex justify-end">
                         {item.symbol === 'EUR/XOF' ? (
-                          <span className="text-[10px] text-gray-400">Taux fixe</span>
+                          <span className="text-[10px] text-gray-500">Taux fixe</span>
                         ) : (
                           <VariationBadge value={item.changePercent} pill />
                         )}
@@ -101,11 +101,11 @@ export function MarketDataWidget() {
         })}
       </div>
       <div className="border-t border-black/[0.04] px-5 py-3 bg-[#fafaf9] rounded-b-xl space-y-0.5">
-        <p className="text-[10px] text-gray-400 text-center">
+        <p className="text-[10px] text-gray-500 text-center">
           Données gérées par l&apos;équipe NFI Report
         </p>
         {lastUpdated && (
-          <p className="text-[10px] text-gray-400 text-center">
+          <p className="text-[10px] text-gray-500 text-center">
             Dernière mise à jour :{' '}
             {new Date(lastUpdated).toLocaleString('fr-FR', {
               day: '2-digit',

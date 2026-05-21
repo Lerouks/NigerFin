@@ -97,7 +97,7 @@ export function LearningPathsSection() {
                     <div className="w-9 h-9 rounded-full bg-[#f5f5f0] flex items-center justify-center">
                       <Icon className="w-[18px] h-[18px] text-[#111]" />
                     </div>
-                    <span className="text-[10px] uppercase tracking-wider text-gray-400 font-medium">
+                    <span className="text-[10px] uppercase tracking-wider text-gray-500 font-medium">
                       {path.difficulty}
                     </span>
                   </div>
@@ -106,7 +106,7 @@ export function LearningPathsSection() {
                       {path.title}
                     </h3>
                     <p className="text-[11px] text-gray-500 mt-1 line-clamp-2">{path.goal_label}</p>
-                    <div className="flex items-center gap-3 mt-3 text-[11px] text-gray-400">
+                    <div className="flex items-center gap-3 mt-3 text-[11px] text-gray-500">
                       <span className="flex items-center gap-1">
                         <BookOpen className="w-3 h-3" />
                         {path.step_count} leçon{path.step_count !== 1 ? 's' : ''}
@@ -118,7 +118,7 @@ export function LearningPathsSection() {
                     </div>
                     {showProgress && (
                       <div className="mt-3">
-                        <div className="flex items-center justify-between text-[10px] text-gray-400 mb-1">
+                        <div className="flex items-center justify-between text-[10px] text-gray-500 mb-1">
                           <span>
                             {path.completed_count}/{path.step_count} terminées
                           </span>

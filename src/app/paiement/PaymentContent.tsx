@@ -282,7 +282,7 @@ export function PaymentContent() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#fafaf9] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
       </div>
     );
   }
@@ -336,7 +336,7 @@ export function PaymentContent() {
 
       {/* Title */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-2">
-        <Link href="/pricing" className="inline-flex items-center gap-2 text-gray-400 hover:text-gray-600 text-[13px] mb-4 transition-colors">
+        <Link href="/pricing" className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-600 text-[13px] mb-4 transition-colors">
           <ArrowLeft className="w-4 h-4" />
           Retour aux abonnements
         </Link>
@@ -430,7 +430,7 @@ export function PaymentContent() {
                     )}
                     <form onSubmit={handleForgotPassword} className="space-y-4">
                       <div className="relative">
-                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                         <input
                           type="email"
                           required
@@ -471,7 +471,7 @@ export function PaymentContent() {
                     <form onSubmit={authMode === 'login' ? handleLogin : handleSignup} className="space-y-4">
                       {authMode === 'signup' && (
                         <div className="relative">
-                          <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                          <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                           <input
                             type="text"
                             required
@@ -485,7 +485,7 @@ export function PaymentContent() {
                       )}
 
                       <div className="relative">
-                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                         <input
                           type="email"
                           required
@@ -498,7 +498,7 @@ export function PaymentContent() {
                       </div>
 
                       <div className="relative">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                         <input
                           type={showPassword ? 'text' : 'password'}
                           required
@@ -512,7 +512,7 @@ export function PaymentContent() {
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600"
                           aria-label={showPassword ? 'Masquer' : 'Afficher'}
                         >
                           {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -521,7 +521,7 @@ export function PaymentContent() {
 
                       {authMode === 'signup' && (
                         <div className="relative">
-                          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                           <input
                             type={showPassword ? 'text' : 'password'}
                             required
@@ -556,7 +556,7 @@ export function PaymentContent() {
                     {authMode === 'login' && (
                       <button
                         onClick={() => { setForgotMode(true); setAuthError(''); }}
-                        className="block w-full text-center text-[13px] text-gray-400 hover:text-gray-600 mt-3 transition-colors"
+                        className="block w-full text-center text-[13px] text-gray-500 hover:text-gray-600 mt-3 transition-colors"
                       >
                         Mot de passe oublié ?
                       </button>
@@ -567,7 +567,7 @@ export function PaymentContent() {
                         <div className="w-full border-t border-black/[0.06]" />
                       </div>
                       <div className="relative flex justify-center text-xs">
-                        <span className="px-3 bg-white text-gray-400">ou</span>
+                        <span className="px-3 bg-white text-gray-500">ou</span>
                       </div>
                     </div>
 
@@ -597,7 +597,7 @@ export function PaymentContent() {
                 <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[13px] font-bold ${
                   isSignedIn
                     ? 'bg-[#111] text-white'
-                    : 'bg-gray-200 text-gray-400'
+                    : 'bg-gray-200 text-gray-500'
                 }`}>
                   {'2'}
                 </div>
@@ -608,7 +608,7 @@ export function PaymentContent() {
                 <div className="px-7 py-6">
                   {/* Billing cycle selector */}
                   <div className="mb-6">
-                    <p className="text-[12px] text-gray-400 uppercase tracking-wider font-semibold mb-3">Durée</p>
+                    <p className="text-[12px] text-gray-500 uppercase tracking-wider font-semibold mb-3">Durée</p>
                     <div className="grid grid-cols-3 gap-2">
                       {BILLING_OPTIONS.map((opt) => (
                         <button
@@ -633,7 +633,7 @@ export function PaymentContent() {
                   {/* Step 1: Choose method */}
                   {paymentStep === 'choose-method' && (
                     <div>
-                      <p className="text-[12px] text-gray-400 uppercase tracking-wider font-semibold mb-3">
+                      <p className="text-[12px] text-gray-500 uppercase tracking-wider font-semibold mb-3">
                         Méthode de paiement
                       </p>
 
@@ -677,7 +677,7 @@ export function PaymentContent() {
                           <h3 className="font-bold text-[15px]">iPayMoney</h3>
                           <p className="text-gray-500 text-[12px]">Mobile Money (Airtel, Moov) · Visa, Mastercard, Amex</p>
                         </div>
-                        {ipaymoneyLoading && <Loader2 className="w-5 h-5 animate-spin text-gray-400" />}
+                        {ipaymoneyLoading && <Loader2 className="w-5 h-5 animate-spin text-gray-500" />}
                       </button>
 
                       {paymentError && (
@@ -698,20 +698,20 @@ export function PaymentContent() {
 
                       <div className="space-y-4 mb-5">
                         <div>
-                          <span className="text-[11px] text-gray-400 uppercase tracking-wider">Montant exact</span>
+                          <span className="text-[11px] text-gray-500 uppercase tracking-wider">Montant exact</span>
                           <p className="text-xl font-bold mt-0.5">{formatPrice(price)}</p>
                         </div>
                         <div>
-                          <span className="text-[11px] text-gray-400 uppercase tracking-wider">Numéro du destinataire</span>
+                          <span className="text-[11px] text-gray-500 uppercase tracking-wider">Numéro du destinataire</span>
                           <div className="flex items-center gap-3 mt-0.5">
                             <p className="text-lg font-bold font-mono">{method.recipientNumber}</p>
-                            <button onClick={handleCopyNumber} className="text-gray-400 hover:text-gray-700 transition-colors" title="Copier">
+                            <button onClick={handleCopyNumber} className="text-gray-500 hover:text-gray-700 transition-colors" title="Copier">
                               {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
                             </button>
                           </div>
                         </div>
                         <div>
-                          <span className="text-[11px] text-gray-400 uppercase tracking-wider">Bénéficiaire</span>
+                          <span className="text-[11px] text-gray-500 uppercase tracking-wider">Bénéficiaire</span>
                           <p className="text-base font-semibold mt-0.5">{method.recipientName}</p>
                         </div>
                       </div>
@@ -737,7 +737,7 @@ export function PaymentContent() {
                   {paymentStep === 'confirm' && method && (
                     <div>
                       <div className="mb-4">
-                        <p className="text-[12px] text-gray-400 mb-3">
+                        <p className="text-[12px] text-gray-500 mb-3">
                           <span className="font-semibold text-gray-600">{method.name}</span> &middot; {billingOption.durationLabel} &middot; {formatPrice(price)}
                         </p>
                         <label htmlFor="txn" className="block text-sm font-medium mb-2">
@@ -751,7 +751,7 @@ export function PaymentContent() {
                           placeholder="Ex: TXN123456789"
                           className="w-full border border-black/[0.08] rounded-lg px-4 py-3 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 transition-all text-[14px] font-mono"
                         />
-                        <p className="text-[11px] text-gray-400 mt-1.5">
+                        <p className="text-[11px] text-gray-500 mt-1.5">
                           Entrez le numéro reçu après votre transfert {method.shortName}.
                         </p>
                       </div>
@@ -812,7 +812,7 @@ export function PaymentContent() {
               </p>
 
               <div className="border-t border-black/[0.04] pt-5">
-                <h4 className="text-[12px] text-gray-400 uppercase tracking-wider font-semibold mb-4">
+                <h4 className="text-[12px] text-gray-500 uppercase tracking-wider font-semibold mb-4">
                   Ce que vous obtenez :
                 </h4>
                 <ul className="space-y-3">

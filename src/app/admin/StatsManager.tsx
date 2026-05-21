@@ -65,13 +65,13 @@ export function StatsManager() {
   if (loading) {
     return (
       <div className="text-center py-16">
-        <Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto" />
+        <Loader2 className="w-6 h-6 animate-spin text-gray-500 mx-auto" />
       </div>
     );
   }
 
   if (!data) {
-    return <p className="text-center py-16 text-gray-400">Erreur de chargement des statistiques</p>;
+    return <p className="text-center py-16 text-gray-500">Erreur de chargement des statistiques</p>;
   }
 
   const maxDaily = Math.max(...data.dailyViews.map((d) => d.views), 1);
@@ -98,7 +98,7 @@ export function StatsManager() {
       <div className="bg-white rounded-xl border border-black/[0.06] p-5">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-[12px] text-gray-400 uppercase tracking-wider mb-1">Revenus du mois en cours</p>
+            <p className="text-[12px] text-gray-500 uppercase tracking-wider mb-1">Revenus du mois en cours</p>
             <p className="text-3xl font-bold">{formatPrice(data.revenueThisMonth)}</p>
           </div>
           <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center">
@@ -110,7 +110,7 @@ export function StatsManager() {
       {/* Daily views chart */}
       <div className="bg-white rounded-xl border border-black/[0.06] p-6">
         <h3 className="font-semibold mb-4 flex items-center gap-2">
-          <BarChart3 className="w-4 h-4 text-gray-400" />
+          <BarChart3 className="w-4 h-4 text-gray-500" />
           Vues par jour (30 derniers jours)
         </h3>
         <div className="flex items-end gap-1 h-40">
@@ -127,7 +127,7 @@ export function StatsManager() {
                 />
                 {/* Show date label every 5th day */}
                 {data.dailyViews.indexOf(d) % 5 === 0 && (
-                  <span className="text-[9px] text-gray-400 -rotate-45 origin-top-left mt-1">{d.date.slice(5)}</span>
+                  <span className="text-[9px] text-gray-500 -rotate-45 origin-top-left mt-1">{d.date.slice(5)}</span>
                 )}
               </div>
             );
@@ -140,11 +140,11 @@ export function StatsManager() {
         {/* Top Articles */}
         <div className="bg-white rounded-xl border border-black/[0.06] p-5">
           <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-            <FileText className="w-4 h-4 text-gray-400" />
+            <FileText className="w-4 h-4 text-gray-500" />
             Articles les plus lus (30j)
           </h3>
           {data.topArticles.length === 0 ? (
-            <p className="text-[13px] text-gray-400 py-4 text-center">Aucune donnee de vue encore</p>
+            <p className="text-[13px] text-gray-500 py-4 text-center">Aucune donnee de vue encore</p>
           ) : (
             <div className="space-y-2">
               {data.topArticles.map((article, i) => (
@@ -163,11 +163,11 @@ export function StatsManager() {
         {/* Top Pages */}
         <div className="bg-white rounded-xl border border-black/[0.06] p-5">
           <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-            <Eye className="w-4 h-4 text-gray-400" />
+            <Eye className="w-4 h-4 text-gray-500" />
             Pages les plus visitées (30j)
           </h3>
           {data.topPages.length === 0 ? (
-            <p className="text-[13px] text-gray-400 py-4 text-center">Aucune donnee de vue encore</p>
+            <p className="text-[13px] text-gray-500 py-4 text-center">Aucune donnee de vue encore</p>
           ) : (
             <div className="space-y-2">
               {data.topPages.map((page, i) => (
@@ -197,7 +197,7 @@ function KpiCard({ icon, label, value, color, bg }: {
   return (
     <div className="bg-white rounded-xl border border-black/[0.06] p-5">
       <div className="flex items-center justify-between mb-2">
-        <p className="text-[12px] text-gray-400 uppercase tracking-wider">{label}</p>
+        <p className="text-[12px] text-gray-500 uppercase tracking-wider">{label}</p>
         <div className={`w-8 h-8 rounded-lg ${bg} flex items-center justify-center`}>
           <span className={color}>{icon}</span>
         </div>

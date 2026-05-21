@@ -116,21 +116,21 @@ export function PaymentsTab({ onStatsRefresh }: PaymentsTabProps) {
 
       {loading ? (
         <div className="text-center py-12">
-          <Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto" />
+          <Loader2 className="w-6 h-6 animate-spin text-gray-500 mx-auto" />
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-black/[0.06] overflow-hidden">
           <table className="w-full">
             <thead>
               <tr className="border-b border-black/[0.04]">
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Utilisateur</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Plan</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Montant</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Méthode</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">N° Transaction</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Date</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Utilisateur</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Plan</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Montant</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Méthode</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">N° Transaction</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Date</th>
                 {paymentFilter === 'pending' && (
-                  <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Actions</th>
+                  <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Actions</th>
                 )}
               </tr>
             </thead>
@@ -139,11 +139,11 @@ export function PaymentsTab({ onStatsRefresh }: PaymentsTabProps) {
                 <tr key={p.id} className="border-b border-black/[0.03] last:border-0">
                   <td className="px-4 py-3">
                     <p className="text-sm font-medium">{p.user_profiles?.full_name || '-'}</p>
-                    <p className="text-[12px] text-gray-400">{p.user_profiles?.email || p.user_id}</p>
+                    <p className="text-[12px] text-gray-500">{p.user_profiles?.email || p.user_id}</p>
                   </td>
                   <td className="px-4 py-3">
                     <span className="text-[11px] uppercase tracking-wider px-2 py-1 rounded bg-amber-100 text-amber-700">{p.tier}</span>
-                    <span className="text-[10px] text-gray-400 ml-1">{getBillingCycleLabel(p.billing_cycle)}</span>
+                    <span className="text-[10px] text-gray-500 ml-1">{getBillingCycleLabel(p.billing_cycle)}</span>
                   </td>
                   <td className="px-4 py-3 text-sm font-medium">{formatPrice(p.amount)}</td>
                   <td className="px-4 py-3 text-[12px] text-gray-600 capitalize">{p.payment_method}</td>
@@ -168,7 +168,7 @@ export function PaymentsTab({ onStatsRefresh }: PaymentsTabProps) {
             </tbody>
           </table>
           {payments.length === 0 && (
-            <p className="text-center py-8 text-sm text-gray-400">Aucun paiement {paymentFilter === 'pending' ? 'en attente' : ''}</p>
+            <p className="text-center py-8 text-sm text-gray-500">Aucun paiement {paymentFilter === 'pending' ? 'en attente' : ''}</p>
           )}
         </div>
       )}

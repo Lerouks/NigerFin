@@ -102,13 +102,13 @@ export function PaywallManager() {
   if (loading) {
     return (
       <div className="text-center py-12">
-        <Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto" />
+        <Loader2 className="w-6 h-6 animate-spin text-gray-500 mx-auto" />
       </div>
     );
   }
 
   if (!config) {
-    return <p className="text-center py-12 text-gray-400">Erreur de chargement de la configuration</p>;
+    return <p className="text-center py-12 text-gray-500">Erreur de chargement de la configuration</p>;
   }
 
   return (
@@ -143,7 +143,7 @@ export function PaywallManager() {
           {/* Case breakdown */}
           {analytics.case_breakdown && Object.keys(analytics.case_breakdown).length > 0 && (
             <div className="bg-white rounded-xl border border-black/[0.06] p-5">
-              <h4 className="text-[11px] uppercase tracking-wider text-gray-400 mb-3">Repartition par cas utilisateur</h4>
+              <h4 className="text-[11px] uppercase tracking-wider text-gray-500 mb-3">Repartition par cas utilisateur</h4>
               <div className="space-y-2">
                 {Object.entries(analytics.case_breakdown)
                   .sort(([, a], [, b]) => b - a)
@@ -178,7 +178,7 @@ export function PaywallManager() {
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-semibold">Paywall overlay</h3>
-            <p className="text-[12px] text-gray-400 mt-0.5">Affiche un overlay incitatif aux non-abonnes</p>
+            <p className="text-[12px] text-gray-500 mt-0.5">Affiche un overlay incitatif aux non-abonnes</p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input
@@ -195,10 +195,10 @@ export function PaywallManager() {
 
         {/* Trigger settings */}
         <div>
-          <h4 className="text-[11px] uppercase tracking-wider text-gray-400 mb-3">Declenchement</h4>
+          <h4 className="text-[11px] uppercase tracking-wider text-gray-500 mb-3">Declenchement</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
-              <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Mode</label>
+              <label className="text-[11px] text-gray-500 uppercase tracking-wider block mb-1">Mode</label>
               <select
                 value={config.trigger_type}
                 onChange={(e) => update('trigger_type', e.target.value as PaywallConfig['trigger_type'])}
@@ -210,7 +210,7 @@ export function PaywallManager() {
               </select>
             </div>
             <div>
-              <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Seuil scroll (%)</label>
+              <label className="text-[11px] text-gray-500 uppercase tracking-wider block mb-1">Seuil scroll (%)</label>
               <input
                 type="number"
                 min={10}
@@ -221,7 +221,7 @@ export function PaywallManager() {
               />
             </div>
             <div>
-              <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Delai (secondes)</label>
+              <label className="text-[11px] text-gray-500 uppercase tracking-wider block mb-1">Delai (secondes)</label>
               <input
                 type="number"
                 min={1}
@@ -238,10 +238,10 @@ export function PaywallManager() {
 
         {/* Content */}
         <div>
-          <h4 className="text-[11px] uppercase tracking-wider text-gray-400 mb-3">Contenu (overlay legacy)</h4>
+          <h4 className="text-[11px] uppercase tracking-wider text-gray-500 mb-3">Contenu (overlay legacy)</h4>
           <div className="space-y-3">
             <div>
-              <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Titre</label>
+              <label className="text-[11px] text-gray-500 uppercase tracking-wider block mb-1">Titre</label>
               <input
                 type="text"
                 value={config.title}
@@ -250,7 +250,7 @@ export function PaywallManager() {
               />
             </div>
             <div>
-              <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Message</label>
+              <label className="text-[11px] text-gray-500 uppercase tracking-wider block mb-1">Message</label>
               <textarea
                 value={config.message}
                 onChange={(e) => update('message', e.target.value)}
@@ -260,7 +260,7 @@ export function PaywallManager() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
-                <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Bouton abonnement</label>
+                <label className="text-[11px] text-gray-500 uppercase tracking-wider block mb-1">Bouton abonnement</label>
                 <input
                   type="text"
                   value={config.cta_subscribe_text}
@@ -269,7 +269,7 @@ export function PaywallManager() {
                 />
               </div>
               <div>
-                <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Lien connexion</label>
+                <label className="text-[11px] text-gray-500 uppercase tracking-wider block mb-1">Lien connexion</label>
                 <input
                   type="text"
                   value={config.cta_login_text}
@@ -278,7 +278,7 @@ export function PaywallManager() {
                 />
               </div>
               <div>
-                <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Bouton fermer</label>
+                <label className="text-[11px] text-gray-500 uppercase tracking-wider block mb-1">Bouton fermer</label>
                 <input
                   type="text"
                   value={config.cta_dismiss_text}
@@ -294,7 +294,7 @@ export function PaywallManager() {
 
         {/* Counter */}
         <div>
-          <h4 className="text-[11px] uppercase tracking-wider text-gray-400 mb-3">Compteur d&apos;articles</h4>
+          <h4 className="text-[11px] uppercase tracking-wider text-gray-500 mb-3">Compteur d&apos;articles</h4>
           <div className="flex items-center gap-4 mb-3">
             <label className="relative inline-flex items-center cursor-pointer">
               <input
@@ -308,7 +308,7 @@ export function PaywallManager() {
             <span className="text-sm text-gray-600">Afficher le compteur</span>
           </div>
           <div>
-            <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">
+            <label className="text-[11px] text-gray-500 uppercase tracking-wider block mb-1">
               Message compteur <span className="normal-case">(utiliser {'{remaining}'} pour le nombre)</span>
             </label>
             <input
@@ -324,7 +324,7 @@ export function PaywallManager() {
 
         {/* Appearance */}
         <div>
-          <h4 className="text-[11px] uppercase tracking-wider text-gray-400 mb-3">Apparence</h4>
+          <h4 className="text-[11px] uppercase tracking-wider text-gray-500 mb-3">Apparence</h4>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <ColorField label="Fond overlay" value={config.bg_color} onChange={(v) => update('bg_color', v)} />
             <ColorField label="Texte overlay" value={config.text_color} onChange={(v) => update('text_color', v)} />
@@ -332,7 +332,7 @@ export function PaywallManager() {
             <ColorField label="Texte bouton" value={config.cta_text_color} onChange={(v) => update('cta_text_color', v)} />
           </div>
           <div className="mt-3">
-            <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">Duree cookie dismiss (heures)</label>
+            <label className="text-[11px] text-gray-500 uppercase tracking-wider block mb-1">Duree cookie dismiss (heures)</label>
             <input
               type="number"
               min={1}
@@ -365,7 +365,7 @@ export function PaywallManager() {
         {/* Preview */}
         <hr className="border-black/[0.04]" />
         <div>
-          <h4 className="text-[11px] uppercase tracking-wider text-gray-400 mb-3">Apercu</h4>
+          <h4 className="text-[11px] uppercase tracking-wider text-gray-500 mb-3">Apercu</h4>
           <div
             className="rounded-xl p-6 text-center max-w-md mx-auto"
             style={{ backgroundColor: config.bg_color, color: config.text_color }}
@@ -412,8 +412,8 @@ function StatCard({ icon, label, value, accent }: { icon: React.ReactNode; label
   return (
     <div className="bg-white rounded-xl border border-black/[0.06] p-4">
       <div className="flex items-center gap-2 mb-1">
-        <span className={accent ? 'text-emerald-600' : 'text-gray-400'}>{icon}</span>
-        <span className="text-[11px] uppercase tracking-wider text-gray-400">{label}</span>
+        <span className={accent ? 'text-emerald-600' : 'text-gray-500'}>{icon}</span>
+        <span className="text-[11px] uppercase tracking-wider text-gray-500">{label}</span>
       </div>
       <p className={`text-xl font-bold ${accent ? 'text-emerald-600' : ''}`}>{value}</p>
     </div>
@@ -423,7 +423,7 @@ function StatCard({ icon, label, value, accent }: { icon: React.ReactNode; label
 function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
     <div>
-      <label className="text-[11px] text-gray-400 uppercase tracking-wider block mb-1">{label}</label>
+      <label className="text-[11px] text-gray-500 uppercase tracking-wider block mb-1">{label}</label>
       <div className="flex items-center gap-2">
         <input
           type="color"

@@ -31,14 +31,14 @@ const upStyles: Record<Intensity, { text: string; bg: string }> = {
   strong:   { text: 'text-emerald-700', bg: 'bg-emerald-100' },
   moderate: { text: 'text-emerald-600', bg: 'bg-emerald-50' },
   mild:     { text: 'text-emerald-500', bg: 'bg-emerald-50/60' },
-  neutral:  { text: 'text-gray-400',    bg: 'bg-gray-100' },
+  neutral:  { text: 'text-gray-500',    bg: 'bg-gray-100' },
 };
 
 const downStyles: Record<Intensity, { text: string; bg: string }> = {
   strong:   { text: 'text-red-700',  bg: 'bg-red-100' },
   moderate: { text: 'text-red-600',  bg: 'bg-red-50' },
   mild:     { text: 'text-red-500',  bg: 'bg-red-50/60' },
-  neutral:  { text: 'text-gray-400', bg: 'bg-gray-100' },
+  neutral:  { text: 'text-gray-500', bg: 'bg-gray-100' },
 };
 
 export function VariationBadge({

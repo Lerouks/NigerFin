@@ -87,7 +87,7 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }
       <p className="text-[13px] text-[#111] leading-snug flex-1">{toast.message}</p>
       <button
         onClick={onDismiss}
-        className="flex-shrink-0 text-gray-400 hover:text-gray-700 transition-colors -mr-1 -mt-0.5"
+        className="flex-shrink-0 text-gray-500 hover:text-gray-700 transition-colors -mr-1 -mt-0.5"
         aria-label="Fermer la notification"
       >
         <X className="w-4 h-4" />

@@ -32,11 +32,11 @@ export function AuditTab() {
         <table className="w-full">
           <thead>
             <tr className="border-b border-black/[0.04]">
-              <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Date</th>
-              <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Admin</th>
-              <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Action</th>
-              <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Type</th>
-              <th className="text-left text-[11px] uppercase tracking-wider text-gray-400 px-4 py-3">Détails</th>
+              <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Date</th>
+              <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Admin</th>
+              <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Action</th>
+              <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Type</th>
+              <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Détails</th>
             </tr>
           </thead>
           <tbody>
@@ -60,7 +60,7 @@ export function AuditTab() {
           </tbody>
         </table>
         {auditLog.length === 0 && (
-          <p className="text-center py-8 text-sm text-gray-400">Aucune action enregistrée</p>
+          <p className="text-center py-8 text-sm text-gray-500">Aucune action enregistrée</p>
         )}
       </div>
     </div>

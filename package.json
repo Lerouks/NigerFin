@@ -44,6 +44,7 @@
     "next": "^16.2.6",
     "pako": "^2.1.0",
     "posthog-js": "^1.190.0",
+    "posthog-node": "^5.35.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-markdown": "^10.1.0",

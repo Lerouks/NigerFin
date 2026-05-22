@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { requireAdmin as requireAdminShared } from '@/lib/admin-auth';
 import { serverError } from '@/lib/api-error';
+import { ARTICLE_CACHE_TAG } from '@/lib/articles';
 
 /** Revalidate all pages that display article data */
 function revalidateArticlePages(slug?: string) {
+  // Purge le Data Cache Next.js (unstable_cache des fonctions articles).
+  // Sans ça, les pages re-rendues serviraient encore l'ancien snapshot data.
+  // Next.js 16 : second argument obligatoire, { expire: 0 } = purge immédiate.
+  revalidateTag(ARTICLE_CACHE_TAG, { expire: 0 });
   revalidatePath('/');
   if (slug) revalidatePath(`/articles/${slug}`);
   for (const cat of ['/economie', '/finance', '/entreprises', '/education', '/marches', '/niger']) {

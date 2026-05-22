@@ -1,4 +1,12 @@
+import { unstable_cache } from 'next/cache';
 import { createServiceClient } from '@/lib/supabase';
+
+/**
+ * Tags d'invalidation utilisés par unstable_cache.
+ * Les routes admin doivent appeler revalidateTag(ARTICLE_CACHE_TAG) après tout
+ * create/update/delete d'article pour purger le Data Cache Next.js.
+ */
+export const ARTICLE_CACHE_TAG = 'articles';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -101,8 +109,10 @@ const ARTICLE_SUMMARY_FIELDS = [
   'status', 'published_at', 'created_at', 'updated_at',
 ].join(',');
 
-/** Get paginated published articles (summary, no body) */
-export async function getAllArticles(page = 1, limit = 20): Promise<{ articles: Article[]; total: number }> {
+async function getAllArticlesUncached(
+  page: number,
+  limit: number,
+): Promise<{ articles: Article[]; total: number }> {
   const supabase = createServiceClient();
   if (!supabase) return { articles: [], total: 0 };
 
@@ -126,7 +136,20 @@ export async function getAllArticles(page = 1, limit = 20): Promise<{ articles: 
   };
 }
 
-export async function getArticleBySlug(slug: string): Promise<{ article: Article; htmlBody: string } | null> {
+/**
+ * Get paginated published articles (summary, no body).
+ * Mis en cache via unstable_cache (Data Cache Next.js), partagé entre toutes
+ * les instances Vercel Functions. Invalidé via revalidateTag(ARTICLE_CACHE_TAG).
+ */
+export const getAllArticles = unstable_cache(
+  getAllArticlesUncached,
+  ['articles-list'],
+  { tags: [ARTICLE_CACHE_TAG], revalidate: 3600 },
+);
+
+async function getArticleBySlugUncached(
+  slug: string,
+): Promise<{ article: Article; htmlBody: string } | null> {
   const supabase = createServiceClient();
   if (!supabase) return null;
   const { data } = await supabase
@@ -139,7 +162,17 @@ export async function getArticleBySlug(slug: string): Promise<{ article: Article
   return { article: toArticle(data), htmlBody: bodyToHtml(data.body || '') };
 }
 
-export async function getArticlesByCategory(category: string, page = 1, limit = 20): Promise<{ articles: Article[]; total: number }> {
+export const getArticleBySlug = unstable_cache(
+  getArticleBySlugUncached,
+  ['article-by-slug'],
+  { tags: [ARTICLE_CACHE_TAG], revalidate: 3600 },
+);
+
+async function getArticlesByCategoryUncached(
+  category: string,
+  page: number,
+  limit: number,
+): Promise<{ articles: Article[]; total: number }> {
   const supabase = createServiceClient();
   if (!supabase) return { articles: [], total: 0 };
 
@@ -165,7 +198,13 @@ export async function getArticlesByCategory(category: string, page = 1, limit = 
   };
 }
 
-export async function getFeaturedArticles(): Promise<Article[]> {
+export const getArticlesByCategory = unstable_cache(
+  getArticlesByCategoryUncached,
+  ['articles-by-category'],
+  { tags: [ARTICLE_CACHE_TAG], revalidate: 3600 },
+);
+
+async function getFeaturedArticlesUncached(): Promise<Article[]> {
   const supabase = createServiceClient();
   if (!supabase) return [];
   const { data } = await supabase
@@ -177,6 +216,12 @@ export async function getFeaturedArticles(): Promise<Article[]> {
     .limit(5);
   return (data || []).map((row) => toArticle(row as unknown as SupabaseArticle));
 }
+
+export const getFeaturedArticles = unstable_cache(
+  getFeaturedArticlesUncached,
+  ['featured-articles'],
+  { tags: [ARTICLE_CACHE_TAG], revalidate: 3600 },
+);
 
 /**
  * Get exactly 3 related articles using a multi-level priority algorithm:
@@ -287,10 +332,9 @@ export async function searchArticles(query: string, limit = 20): Promise<Article
   return (data || []).map((row) => toArticle(row as unknown as SupabaseArticle));
 }
 
-/** Get the latest N articles for each section in parallel (homepage) */
-export async function getLatestBySection(
+async function getLatestBySectionUncached(
   sections: string[],
-  limit = 4,
+  limit: number,
 ): Promise<Record<string, Article[]>> {
   const supabase = createServiceClient();
   if (!supabase) return Object.fromEntries(sections.map((s) => [s, []]));
@@ -310,6 +354,13 @@ export async function getLatestBySection(
 
   return Object.fromEntries(results);
 }
+
+/** Get the latest N articles for each section in parallel (homepage) */
+export const getLatestBySection = unstable_cache(
+  getLatestBySectionUncached,
+  ['latest-by-section'],
+  { tags: [ARTICLE_CACHE_TAG], revalidate: 3600 },
+);
 
 /** Get article IDs ranked by view count (most viewed first). Used for "most read" filter. */
 export async function getArticleViewRanking(): Promise<string[]> {

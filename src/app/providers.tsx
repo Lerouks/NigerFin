@@ -1,10 +1,31 @@
 'use client';
 
 import { useEffect } from 'react';
-import { AuthProvider } from '@/lib/auth-context';
-import { initPostHog } from '@/lib/posthog';
+import { AuthProvider, useAuth } from '@/lib/auth-context';
+import {
+  initPostHog,
+  identifyPostHogUser,
+  resetPostHogIdentity,
+} from '@/lib/posthog';
 import { hasAcceptedConsent } from '@/lib/consent';
 import { ToastProvider } from '@/components/Toast';
+
+function PostHogIdentitySync() {
+  const { user, profile } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      identifyPostHogUser(user.id, {
+        email: user.email,
+        role: profile?.role,
+      });
+    } else {
+      resetPostHogIdentity();
+    }
+  }, [user, profile?.role]);
+
+  return null;
+}
 
 export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -18,6 +39,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthProvider>
+      <PostHogIdentitySync />
       <ToastProvider>{children}</ToastProvider>
     </AuthProvider>
   );

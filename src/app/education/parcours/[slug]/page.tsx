@@ -8,6 +8,7 @@ interface PageProps {
 }
 
 export const revalidate = 3600;
+export const dynamicParams = false;
 
 async function getPathMeta(slug: string) {
   const service = createServiceClient();

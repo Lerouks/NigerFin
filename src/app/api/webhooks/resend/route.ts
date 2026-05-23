@@ -172,27 +172,44 @@ export async function POST(req: NextRequest) {
 
     // Side effects on the subscriber
     if (eventType === 'bounced' || eventType === 'complained') {
-      const { error: subUpdateError } = await supabase
+      const { data: updated, error: subUpdateError } = await supabase
         .from('newsletter_subscribers')
         .update({ status: eventType, unsubscribed_at: new Date().toISOString() })
-        .eq('id', subscriberId);
+        .eq('id', subscriberId)
+        .select('user_id')
+        .maybeSingle();
       if (subUpdateError) {
         Sentry.captureException(subUpdateError, {
           tags: { context: 'resend-webhook', op: 'update-subscriber-bounced-complained' },
           extra: { subscriberId, eventType },
         });
       }
+      // Sync flag profil pour cohérence single-source-of-truth.
+      if (updated?.user_id) {
+        await supabase
+          .from('user_profiles')
+          .update({ newsletter_subscribed: false, updated_at: new Date().toISOString() })
+          .eq('id', updated.user_id);
+      }
     }
     if (eventType === 'unsubscribed') {
-      const { error: unsubError } = await supabase
+      const { data: updated, error: unsubError } = await supabase
         .from('newsletter_subscribers')
         .update({ status: 'unsubscribed', unsubscribed_at: new Date().toISOString() })
-        .eq('id', subscriberId);
+        .eq('id', subscriberId)
+        .select('user_id')
+        .maybeSingle();
       if (unsubError) {
         Sentry.captureException(unsubError, {
           tags: { context: 'resend-webhook', op: 'update-subscriber-unsubscribed' },
           extra: { subscriberId },
         });
+      }
+      if (updated?.user_id) {
+        await supabase
+          .from('user_profiles')
+          .update({ newsletter_subscribed: false, updated_at: new Date().toISOString() })
+          .eq('id', updated.user_id);
       }
     }
 

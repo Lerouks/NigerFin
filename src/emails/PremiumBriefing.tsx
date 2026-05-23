@@ -14,6 +14,7 @@ import { ToolsPromoBlock } from './components/ToolsPromoBlock';
 import { DiscoverBlock } from './components/DiscoverBlock';
 import { EditoNote } from './components/EditoNote';
 import { Footer } from './components/Footer';
+import { PremiumPaywall } from './components/PremiumPaywall';
 import type { NewsletterIssue } from './types';
 
 export interface PremiumBriefingProps {
@@ -22,6 +23,13 @@ export interface PremiumBriefingProps {
   managePreferencesUrl?: string;
   unsubscribeUrl?: string;
   socials?: { instagram?: string; facebook?: string; linkedin?: string; tiktok?: string };
+  /**
+   * Audience pour ce rendu spécifique :
+   *  - 'premium' (défaut) : tout le contenu visible
+   *  - 'free'             : email coupé après l'intro + 1er headline + paywall
+   *                         CTA Premium, reste des blocs supprimé
+   */
+  audience?: 'premium' | 'free';
 }
 
 function IntroBlock({ issue }: { issue: NewsletterIssue }) {
@@ -167,8 +175,10 @@ export function PremiumBriefing({
   managePreferencesUrl,
   unsubscribeUrl,
   socials,
+  audience = 'premium',
 }: PremiumBriefingProps) {
   const headlines = issue.headlines ?? [];
+  const isFree = audience === 'free';
   return (
     <Html lang="fr">
       <Head>
@@ -220,69 +230,99 @@ export function PremiumBriefing({
 
           <IntroBlock issue={issue} />
 
-          <MarketTable
-            title={issue.market.title}
-            caption={issue.market.caption}
-            rows={issue.market.rows}
-            source={issue.market.source}
-          />
-
-          {issue.nigerKpi ? (
-            <NigerKpiBlock
-              eyebrow={issue.nigerKpi.eyebrow}
-              title={issue.nigerKpi.title}
-              caption={issue.nigerKpi.caption}
-              items={issue.nigerKpi.items}
-            />
+          {/* Pour les abonnés Gratuits : on garde uniquement le 1er headline
+              (la promesse principale de l'édition) puis le paywall.
+              Les autres blocs (marché, KPI, digest, radar, etc.) sont réservés
+              Premium. */}
+          {isFree ? (
+            <>
+              {headlines[0] ? (
+                <HeadlineCard
+                  {...headlines[0]}
+                  sectionNumeral={headlines[0].sectionNumeral ?? 'III'}
+                  dropCap
+                />
+              ) : null}
+              <PremiumPaywall upgradeUrl={`${siteUrl}/pricing?ref=newsletter_paywall`} />
+            </>
           ) : (
-            <Hr style={{ borderColor: colors.divider, margin: '8px 32px' }} />
+            <>
+              <MarketTable
+                title={issue.market.title}
+                caption={issue.market.caption}
+                rows={issue.market.rows}
+                source={issue.market.source}
+              />
+
+              {issue.nigerKpi ? (
+                <NigerKpiBlock
+                  eyebrow={issue.nigerKpi.eyebrow}
+                  title={issue.nigerKpi.title}
+                  caption={issue.nigerKpi.caption}
+                  items={issue.nigerKpi.items}
+                />
+              ) : (
+                <Hr style={{ borderColor: colors.divider, margin: '8px 32px' }} />
+              )}
+
+              {headlines[0] ? (
+                <HeadlineCard
+                  {...headlines[0]}
+                  sectionNumeral={headlines[0].sectionNumeral ?? 'III'}
+                  dropCap
+                />
+              ) : null}
+
+              {issue.chart ? <ChartBlock {...issue.chart} /> : null}
+
+              {issue.sponsor ? <Sponsor {...issue.sponsor} /> : null}
+
+              {headlines[1] ? (
+                <HeadlineCard
+                  {...headlines[1]}
+                  sectionNumeral={headlines[1].sectionNumeral ?? 'IV'}
+                />
+              ) : null}
+
+              {issue.digest ? (
+                <DigestList
+                  sectionNumeral={issue.digest.sectionNumeral ?? 'V'}
+                  eyebrow={issue.digest.eyebrow}
+                  title={issue.digest.title}
+                  items={issue.digest.items}
+                />
+              ) : null}
+
+              {issue.radar ? (
+                <Radar
+                  sectionNumeral={issue.radar.sectionNumeral ?? 'VI'}
+                  eyebrow={issue.radar.eyebrow}
+                  title={issue.radar.title}
+                  items={issue.radar.items}
+                />
+              ) : null}
+
+              {issue.toolsPromo ? (
+                <ToolsPromoBlock
+                  sectionNumeral={issue.toolsPromo.sectionNumeral ?? 'VII'}
+                  eyebrow={issue.toolsPromo.eyebrow}
+                  title={issue.toolsPromo.title}
+                  caption={issue.toolsPromo.caption}
+                  items={issue.toolsPromo.items}
+                />
+              ) : null}
+
+              {issue.discover ? (
+                <DiscoverBlock
+                  sectionNumeral={issue.discover.sectionNumeral ?? 'VIII'}
+                  eyebrow={issue.discover.eyebrow}
+                  title={issue.discover.title}
+                  caption={issue.discover.caption}
+                  items={issue.discover.items}
+                />
+              ) : null}
+            </>
           )}
-
-          {headlines[0] ? <HeadlineCard {...headlines[0]} sectionNumeral={headlines[0].sectionNumeral ?? 'III'} dropCap /> : null}
-
-          {issue.chart ? <ChartBlock {...issue.chart} /> : null}
-
-          {issue.sponsor ? <Sponsor {...issue.sponsor} /> : null}
-
-          {headlines[1] ? <HeadlineCard {...headlines[1]} sectionNumeral={headlines[1].sectionNumeral ?? 'IV'} /> : null}
-
-          {issue.digest ? (
-            <DigestList
-              sectionNumeral={issue.digest.sectionNumeral ?? 'V'}
-              eyebrow={issue.digest.eyebrow}
-              title={issue.digest.title}
-              items={issue.digest.items}
-            />
-          ) : null}
-
-          {issue.radar ? (
-            <Radar
-              sectionNumeral={issue.radar.sectionNumeral ?? 'VI'}
-              eyebrow={issue.radar.eyebrow}
-              title={issue.radar.title}
-              items={issue.radar.items}
-            />
-          ) : null}
-
-          {issue.toolsPromo ? (
-            <ToolsPromoBlock
-              sectionNumeral={issue.toolsPromo.sectionNumeral ?? 'VII'}
-              eyebrow={issue.toolsPromo.eyebrow}
-              title={issue.toolsPromo.title}
-              caption={issue.toolsPromo.caption}
-              items={issue.toolsPromo.items}
-            />
-          ) : null}
-
-          {issue.discover ? (
-            <DiscoverBlock
-              sectionNumeral={issue.discover.sectionNumeral ?? 'VIII'}
-              eyebrow={issue.discover.eyebrow}
-              title={issue.discover.title}
-              caption={issue.discover.caption}
-              items={issue.discover.items}
-            />
-          ) : null}
 
           <Footer
             siteUrl={siteUrl}

@@ -262,23 +262,38 @@ export async function getSubscriberStats(): Promise<SubscriberStats> {
   };
 }
 
+export interface UnsubscribeByIdResult {
+  /** True si la requête a abouti côté DB (pas d'erreur de connexion/permissions). */
+  ok: boolean;
+  /** True si une ligne correspondant a été trouvée et mise à jour. */
+  found: boolean;
+  /** Email de l'abonné désabonné, pour audit log. */
+  email?: string;
+}
+
 /**
  * Désabonner manuellement un abonné par son id (admin only).
  * Soft delete : on garde la ligne en status='unsubscribed' pour audit + anti-réinscription.
+ *
+ * Renvoie `found: false` si l'id n'existe pas (permet à l'API de répondre 404).
  */
-export async function unsubscribeById(id: string): Promise<boolean> {
+export async function unsubscribeById(id: string): Promise<UnsubscribeByIdResult> {
   const supabase = createServiceClient();
-  if (!supabase) return false;
+  if (!supabase) return { ok: false, found: false };
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('newsletter_subscribers')
     .update({
       status: 'unsubscribed',
       unsubscribed_at: new Date().toISOString(),
     })
-    .eq('id', id);
+    .eq('id', id)
+    .select('id, email')
+    .maybeSingle();
 
-  return !error;
+  if (error) return { ok: false, found: false };
+  if (!data) return { ok: true, found: false };
+  return { ok: true, found: true, email: data.email };
 }
 
 /**

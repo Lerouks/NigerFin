@@ -34,19 +34,21 @@ export async function GET(request: NextRequest) {
 
     const source = params.get('source') ?? 'all';
 
-    const PAGE_SIZE = 200;
+    const EXPORT_PAGE_SIZE = 200;
+    const MAX_EXPORT_PAGES = 500;
     let page = 1;
     const lines: string[] = [
       ['email', 'status', 'source', 'opt_in_at', 'unsubscribed_at', 'locale', 'user_id'].join(','),
     ];
 
-    // Pagination interne pour éviter de loader des centaines de milliers de lignes en RAM
+    // Pagination interne pour éviter de loader des centaines de milliers de lignes en RAM.
+    // Garde-fou MAX_EXPORT_PAGES * EXPORT_PAGE_SIZE = 100 000 lignes max par export.
     while (true) {
       const { rows, total } = await listSubscribers({
         status,
         source,
         page,
-        limit: PAGE_SIZE,
+        limit: EXPORT_PAGE_SIZE,
       });
       for (const row of rows) {
         lines.push(
@@ -61,9 +63,9 @@ export async function GET(request: NextRequest) {
           ].join(','),
         );
       }
-      if (page * PAGE_SIZE >= total) break;
+      if (page * EXPORT_PAGE_SIZE >= total) break;
       page += 1;
-      if (page > 500) break; // garde-fou : max 100 000 lignes
+      if (page > MAX_EXPORT_PAGES) break;
     }
 
     const filename = `nfi-abonnes-newsletter-${new Date().toISOString().slice(0, 10)}.csv`;

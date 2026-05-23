@@ -41,8 +41,8 @@ export function MarketDataWidget() {
         <div className="p-5 space-y-3">
           {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="flex justify-between items-center py-1.5">
-              <div className="h-3 w-24 bg-[#f5f1e6] rounded animate-pulse" />
-              <div className="h-3 w-16 bg-[#f5f1e6] rounded animate-pulse" />
+              <div className="h-3 w-24 bg-gray-100 rounded animate-pulse" />
+              <div className="h-3 w-16 bg-gray-100 rounded animate-pulse" />
             </div>
           ))}
         </div>

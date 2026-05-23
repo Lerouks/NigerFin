@@ -515,6 +515,13 @@ function QuickAccessSection({
         'Liste complète, recherche, blocage, gestion des abonnements.',
     },
     {
+      href: '/admin/audience/abonnes-newsletter',
+      icon: Mail,
+      title: 'Abonnés newsletter',
+      description:
+        'Liste, sources, désabonnements et export CSV des abonnés.',
+    },
+    {
       href: '/admin/audience/messages',
       icon: Mail,
       title: 'Messages',

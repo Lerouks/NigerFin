@@ -35,7 +35,7 @@ export async function upsertNewsletterSubscriber(
   // Check existing
   const { data: existing, error: selErr } = await supabase
     .from('newsletter_subscribers')
-    .select('id, status')
+    .select('id, status, unsubscribed_at')
     .eq('email', email)
     .maybeSingle();
 
@@ -48,7 +48,24 @@ export async function upsertNewsletterSubscriber(
       return { id: existing.id, isNew: false, reactivated: false };
     }
 
-    // Reactivate previously unsubscribed/bounced/complained.
+    // Cooldown 30j sur bounced/complained : protège le sender score Resend
+    // contre les boucles infinies (email invalide reréabonné -> rebounce).
+    // Pour 'unsubscribed' (désabo volontaire), pas de cooldown : si l'user
+    // clique sur S'inscrire, c'est son choix de revenir.
+    if (
+      (existing.status === 'bounced' || existing.status === 'complained') &&
+      existing.unsubscribed_at
+    ) {
+      const unsubDate = new Date(existing.unsubscribed_at).getTime();
+      const cooldownEnd = unsubDate + 30 * 24 * 60 * 60 * 1000;
+      if (Date.now() < cooldownEnd) {
+        // No-op silencieux : on ne révèle pas le status à l'attaquant et l'UX
+        // reste identique à un succès (l'user voit le check vert).
+        return { id: existing.id, isNew: false, reactivated: false };
+      }
+    }
+
+    // Reactivate previously unsubscribed/bounced/complained (hors cooldown).
     const { error: updErr } = await supabase
       .from('newsletter_subscribers')
       .update({
@@ -276,6 +293,9 @@ export interface UnsubscribeByIdResult {
  * Soft delete : on garde la ligne en status='unsubscribed' pour audit + anti-réinscription.
  *
  * Renvoie `found: false` si l'id n'existe pas (permet à l'API de répondre 404).
+ *
+ * Synchronise aussi `user_profiles.newsletter_subscribed = false` si l'abonné
+ * a un compte NFI lié (sinon la home dirait à tort "déjà inscrit").
  */
 export async function unsubscribeById(id: string): Promise<UnsubscribeByIdResult> {
   const supabase = createServiceClient();
@@ -288,17 +308,56 @@ export async function unsubscribeById(id: string): Promise<UnsubscribeByIdResult
       unsubscribed_at: new Date().toISOString(),
     })
     .eq('id', id)
-    .select('id, email')
+    .select('id, email, user_id')
     .maybeSingle();
 
   if (error) return { ok: false, found: false };
   if (!data) return { ok: true, found: false };
+
+  if (data.user_id) {
+    await syncProfileNewsletterFlag(data.user_id, false);
+  }
+
   return { ok: true, found: true, email: data.email };
+}
+
+/**
+ * Synchronise le flag `user_profiles.newsletter_subscribed` avec l'état réel
+ * dans `newsletter_subscribers`. Évite la désynchronisation entre les 2 sources
+ * de vérité quand un désabo passe par un autre canal que /api/newsletter POST.
+ *
+ * Best-effort : log l'erreur sans casser le flow appelant.
+ */
+async function syncProfileNewsletterFlag(
+  userId: string,
+  subscribed: boolean,
+): Promise<void> {
+  const supabase = createServiceClient();
+  if (!supabase) return;
+
+  const { error } = await supabase
+    .from('user_profiles')
+    .update({
+      newsletter_subscribed: subscribed,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', userId);
+
+  if (error) {
+    console.error('[newsletter] sync profile flag failed', {
+      userId,
+      subscribed,
+      error: error.message,
+    });
+  }
 }
 
 /**
  * Mark a subscriber as unsubscribed (RFC 8058 one-click and standard flow).
  * Idempotent: no-op if already unsubscribed.
+ *
+ * Synchronise aussi `user_profiles.newsletter_subscribed = false` quand le
+ * subscriber a un user_id lié (single source of truth).
  */
 export async function unsubscribeBy(
   field: 'email' | 'unsubscribe_token',
@@ -309,7 +368,7 @@ export async function unsubscribeBy(
 
   const { data: existing } = await supabase
     .from('newsletter_subscribers')
-    .select('id, status')
+    .select('id, status, user_id')
     .eq(field, value)
     .maybeSingle();
 
@@ -325,6 +384,10 @@ export async function unsubscribeBy(
       unsubscribed_at: new Date().toISOString(),
     })
     .eq('id', existing.id);
+
+  if (existing.user_id) {
+    await syncProfileNewsletterFlag(existing.user_id, false);
+  }
 
   return { found: true, alreadyUnsubscribed: false };
 }

@@ -5,6 +5,7 @@ import { logAuditEvent } from '@/lib/audit';
 import { getBillingOption, type BillingCycle } from '@/config/pricing';
 import { sendTransactionalEmail } from '@/lib/email';
 import { paymentConfirmationEmail } from '@/lib/email-templates';
+import { upsertNewsletterSubscriber } from '@/lib/newsletter/subscribers';
 import { issueInvoice } from '@/lib/invoices/issue';
 import { getBillingCycleLabel } from '@/config/pricing';
 import { SITE_URL } from '@/lib/config';
@@ -168,6 +169,19 @@ async function activateSubscription(
     await sendTransactionalEmail({ to: profile.email, ...confirmation }).catch((err) => {
       Sentry.captureException(err, {
         tags: { context: 'ipaymoney-confirmation-email' },
+        extra: { userId },
+      });
+    });
+
+    // Auto-abo newsletter pour tout nouveau Premium (cohérent positionnement
+    // produit). Idempotent : no-op si déjà abonné.
+    await upsertNewsletterSubscriber({
+      email: profile.email,
+      source: 'premium_upgrade',
+      userId,
+    }).catch((err) => {
+      Sentry.captureException(err, {
+        tags: { context: 'ipaymoney-newsletter-auto-sub' },
         extra: { userId },
       });
     });

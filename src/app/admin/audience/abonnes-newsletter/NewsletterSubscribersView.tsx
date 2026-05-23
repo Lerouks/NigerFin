@@ -46,9 +46,12 @@ const STATUS_BADGE: Record<SubscriberStatus, string> = {
 };
 
 const SOURCE_LABELS: Record<string, string> = {
-  form: 'Formulaire',
-  popup: 'Popup',
+  form: 'Formulaire (legacy)',
+  form_home: 'Bloc home',
+  popup: 'Popup (legacy)',
+  popup_scroll: 'Popup scroll',
   signup: 'Inscription',
+  premium_upgrade: 'Upgrade Premium',
   backfill_user_profiles: 'Migration profil',
   admin: 'Manuel admin',
   magic_link: 'Magic link',

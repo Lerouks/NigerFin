@@ -5,6 +5,7 @@ import { getBillingOption, type BillingCycle } from '@/config/pricing';
 import { sendTransactionalEmail } from '@/lib/email';
 import { paymentConfirmationEmail, paymentRejectionEmail } from '@/lib/email-templates';
 import { issueInvoice } from '@/lib/invoices/issue';
+import { upsertNewsletterSubscriber } from '@/lib/newsletter/subscribers';
 import { getBillingCycleLabel } from '@/config/pricing';
 import { isValidUUID, safeParseJSON, isOneOf } from '@/lib/validation';
 import { serverError } from '@/lib/api-error';
@@ -191,6 +192,20 @@ export async function POST(request: NextRequest) {
       );
       await sendTransactionalEmail({ to: verifiedProfile.email, ...confirmation }).catch((err) => {
         Sentry.captureException(err, { tags: { context: 'payment-confirmation-email' }, extra: { userId: paymentRequest.user_id } });
+      });
+
+      // Auto-abo newsletter : tout Premium est par défaut abonné (cohérent
+      // avec le positionnement : la newsletter Premium fait partie de l'offre).
+      // Best-effort, idempotent (no-op si déjà abonné).
+      await upsertNewsletterSubscriber({
+        email: verifiedProfile.email,
+        source: 'premium_upgrade',
+        userId: paymentRequest.user_id,
+      }).catch((err) => {
+        Sentry.captureException(err, {
+          tags: { context: 'payment-verify-newsletter-auto-sub' },
+          extra: { userId: paymentRequest.user_id },
+        });
       });
     }
 

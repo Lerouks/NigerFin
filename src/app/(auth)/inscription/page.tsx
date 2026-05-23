@@ -35,6 +35,7 @@ function InscriptionContent() {
   const [accountExists, setAccountExists] = useState(false);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [newsletterOptIn, setNewsletterOptIn] = useState(true);
   const { signUp } = useAuth();
 
   const strength = password ? getPasswordStrength(password) : null;
@@ -83,6 +84,16 @@ function InscriptionContent() {
       setError(error.message || 'Une erreur est survenue.');
       setLoading(false);
     } else {
+      // Opt-in newsletter best-effort, ne bloque pas la création du compte
+      // si Resend/Supabase plante (l'user verra juste pas l'email de bienvenue,
+      // l'inscription compte reste valide).
+      if (newsletterOptIn) {
+        fetch('/api/newsletter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, source: 'signup' }),
+        }).catch(() => {});
+      }
       setSuccess(true);
       setLoading(false);
     }
@@ -300,6 +311,18 @@ function InscriptionContent() {
               <p className="text-[11px] mt-1 text-red-500">Les mots de passe ne correspondent pas.</p>
             )}
           </div>
+
+          <label className="flex items-start gap-2.5 text-[13px] text-gray-600 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={newsletterOptIn}
+              onChange={(e) => setNewsletterOptIn(e.target.checked)}
+              className="mt-0.5 w-4 h-4 rounded border-black/20 text-[#111] focus:ring-2 focus:ring-gold/30 focus:ring-offset-0"
+            />
+            <span className="leading-relaxed">
+              Recevoir la newsletter NFI Report (1 édito long par semaine sur l&apos;économie Niger et UEMOA, désabonnement en 1 clic).
+            </span>
+          </label>
 
           <button
             type="submit"

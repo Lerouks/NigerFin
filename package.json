@@ -14,9 +14,6 @@
     "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
-    "@fontsource/inter": "^5.2.8",
-    "@fontsource/montserrat": "^5.2.8",
-    "@fontsource/playfair-display": "^5.2.8",
     "@react-email/components": "^1.0.12",
     "@react-email/render": "^2.0.8",
     "@react-pdf/renderer": "^4.5.1",

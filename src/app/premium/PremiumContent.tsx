@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion, AnimatePresence, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import {
   Check, Mail, FileText, Wrench, GraduationCap, Bell, Download,
   ArrowRight, Sparkles,
@@ -83,10 +82,7 @@ const FAQ = [
   },
 ];
 
-// FadeUp helper (respects prefers-reduced-motion)
-// Uses `animate` instead of `whileInView` so content is always visible even
-// when IntersectionObserver fails to trigger (headless browsers, SEO crawlers,
-// or conflicts with other scroll-driven animations on the page).
+// FadeUp helper (CSS-only, respects prefers-reduced-motion via globals.css).
 
 function FadeUp({
   children,
@@ -97,19 +93,13 @@ function FadeUp({
   delay?: number;
   className?: string;
 }) {
-  const prefersReduced = useReducedMotion();
-  if (prefersReduced) {
-    return <div className={className}>{children}</div>;
-  }
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: 'easeOut', delay }}
-      className={className}
+    <div
+      className={`animate-fade-in-up ${className}`}
+      style={delay > 0 ? { animationDelay: `${delay * 1000}ms` } : undefined}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
 
@@ -197,27 +187,14 @@ function IPhoneMockup({
   );
 }
 
-// ─── Hero with scroll-driven phone ────────────────────────────────────────────
+// ─── Hero ─────────────────────────────────────────────────────────────────────
+// Note : parallax scroll-driven (rotate/scale/y) retire en meme temps que la
+// suppression de framer-motion (perf C-7). Le phone reste statique, propre et
+// pixel-sharp sur toutes les resolutions.
 
 function HeroSection() {
-  const ref = useRef<HTMLDivElement>(null);
-  const prefersReduced = useReducedMotion();
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start start', 'end start'],
-  });
-
-  // Smooth scroll-driven transforms (disabled if user prefers reduced motion).
-  // Start rotate at 0 so the phone is pixel-sharp on load: CSS transforms
-  // rasterize the compositor layer and non-identity rotation at low DPR blurs
-  // the iPhone content. Rotation kicks in as the user scrolls.
-  const rotate = useTransform(scrollYProgress, [0, 1], prefersReduced ? [0, 0] : [0, 10]);
-  const scale = useTransform(scrollYProgress, [0, 1], prefersReduced ? [1, 1] : [1, 0.85]);
-  const y = useTransform(scrollYProgress, [0, 1], prefersReduced ? [0, 0] : [0, 80]);
-  const opacity = useTransform(scrollYProgress, [0, 0.7, 1], [1, 0.9, 0.5]);
-
   return (
-    <section ref={ref} className="relative overflow-hidden bg-[#fafaf9] pb-20 pt-10 sm:pt-16 lg:pt-20">
+    <section className="relative overflow-hidden bg-[#fafaf9] pb-20 pt-10 sm:pt-16 lg:pt-20">
       <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 sm:px-6 lg:grid-cols-12 lg:gap-8 lg:px-8">
         {/* Text column */}
         <div className="lg:col-span-7 lg:pr-8">
@@ -278,17 +255,7 @@ function HeroSection() {
 
         {/* iPhone column */}
         <div className="flex justify-center lg:col-span-5 lg:justify-end">
-          <motion.div
-            style={{
-              rotate,
-              scale,
-              y,
-              opacity,
-              transformStyle: 'preserve-3d',
-              willChange: 'transform',
-            }}
-            className="relative"
-          >
+          <div className="relative">
             {/* Soft golden glow behind */}
             <div className="absolute inset-0 -z-10 rounded-full bg-gold/20 blur-3xl" />
             <div
@@ -301,7 +268,7 @@ function HeroSection() {
             >
               <IPhoneMockup src={SCREENSHOTS[0]!.src} alt={SCREENSHOTS[0]!.alt} priority />
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>
@@ -418,20 +385,17 @@ function PreviewSection() {
                     >
                       {item.label}
                     </span>
-                    <AnimatePresence initial={false}>
-                      {active && (
-                        <motion.p
-                          key={item.label}
-                          initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                          animate={{ opacity: 1, height: 'auto', marginTop: 8 }}
-                          exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                          transition={{ duration: 0.28, ease: 'easeOut' }}
-                          className="overflow-hidden text-[13.5px] leading-relaxed text-gray-600"
-                        >
-                          {item.desc}
-                        </motion.p>
-                      )}
-                    </AnimatePresence>
+                    <div
+                      className={`grid overflow-hidden transition-all duration-300 ease-out ${
+                        active
+                          ? 'mt-2 grid-rows-[1fr] opacity-100'
+                          : 'mt-0 grid-rows-[0fr] opacity-0'
+                      }`}
+                    >
+                      <p className="min-h-0 overflow-hidden text-[13.5px] leading-relaxed text-gray-600">
+                        {item.desc}
+                      </p>
+                    </div>
                   </div>
                 </button>
               );
@@ -440,16 +404,11 @@ function PreviewSection() {
         </FadeUp>
 
         <div className="flex justify-center lg:col-span-6 lg:justify-end">
-          <motion.div
-            key={current.src}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4, ease: 'easeOut' }}
-            className="relative"
-          >
+          {/* key force le remount => l'animation CSS scale-in rejoue a chaque changement de screenshot */}
+          <div key={current.src} className="animate-scale-in relative">
             <div className="absolute inset-0 -z-10 rounded-full bg-gold/15 blur-3xl" />
             <IPhoneMockup src={current.src} alt={current.alt} />
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

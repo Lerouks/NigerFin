@@ -12,7 +12,15 @@ interface RateLimitResult {
   resetAt: Date;
 }
 
-// In-memory fallback (last resort)
+// In-memory fallback (last resort).
+//
+// LOW-SEC-2 : ce store n'est PAS partage entre les instances serverless
+// Vercel. Si Supabase devient indisponible et qu'on bascule sur memory,
+// chaque instance applique son propre compteur => l'effective rate limit
+// peut etre N x la valeur configuree (N = nb de containers warm).
+// C'est acceptable comme defense de derniere chance : objectif = fail-open
+// plutot que de tout casser. En operation normale, le store Supabase est
+// la source de verite (consistent global rate limit).
 const memoryStore = new Map<string, { count: number; resetAt: number }>();
 
 function memoryRateLimit(key: string, limit: number, windowMs: number): RateLimitResult {

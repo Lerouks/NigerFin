@@ -14,9 +14,6 @@
     "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
-    "@fontsource/inter": "^5.2.8",
-    "@fontsource/montserrat": "^5.2.8",
-    "@fontsource/playfair-display": "^5.2.8",
     "@react-email/components": "^1.0.12",
     "@react-email/render": "^2.0.8",
     "@react-pdf/renderer": "^4.5.1",
@@ -38,7 +35,6 @@
     "@tiptap/starter-kit": "^3.20.1",
     "cmdk": "^1.1.1",
     "exceljs": "^4.4.0",
-    "framer-motion": "^12.38.0",
     "isomorphic-dompurify": "^3.0.0",
     "lucide-react": "^0.460.0",
     "next": "^16.2.6",
@@ -52,7 +48,8 @@
     "rehype-raw": "^7.0.0",
     "resend": "^4.0.0",
     "swr": "^2.4.1",
-    "web-push": "^3.6.7"
+    "web-push": "^3.6.7",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^16.2.6",

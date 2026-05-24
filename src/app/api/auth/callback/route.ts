@@ -3,12 +3,13 @@ import { createServerClient } from '@supabase/ssr';
 import { sendTransactionalEmail } from '@/lib/email';
 import { welcomeSignupEmail } from '@/lib/email-templates';
 import { createServiceClient } from '@/lib/supabase';
+import { safeNextPath } from '@/lib/validation';
 import * as Sentry from '@sentry/nextjs';
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/';
+  const next = safeNextPath(searchParams.get('next'));
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -41,7 +42,8 @@ export async function GET(request: NextRequest) {
       exchangeError = result.error;
       data = result.data;
     } catch (err) {
-      console.error('[AUTH CALLBACK] Code exchange failed:', err);
+      // Sec H-5 : on n'imprime pas l'erreur brute (peut contenir PKCE verifier ou tokens
+      // d'un debug Supabase). Sentry reste capture pour suivi.
       Sentry.captureException(err, { tags: { context: 'auth-callback-exchange' } });
       return NextResponse.redirect(`${origin}/connexion?error=auth`);
     }
@@ -51,7 +53,6 @@ export async function GET(request: NextRequest) {
       if (data?.user) {
         const userId = data.user.id;
         sendWelcomeIfNew(userId, data.user.email, data.user.user_metadata?.full_name as string | undefined).catch((err) => {
-          console.error('[EMAIL] Welcome email failed:', err);
           Sentry.captureException(err, { tags: { context: 'welcome-email' }, extra: { userId } });
         });
       }

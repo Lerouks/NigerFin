@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { sendTransactionalEmail } from '@/lib/email';
 import { subscriptionExpiredEmail } from '@/lib/email-templates';
+import { SYSTEM_AUDIT_ID } from '@/lib/audit';
 import * as Sentry from '@sentry/nextjs';
 
 /**
@@ -109,8 +110,10 @@ export async function GET(request: NextRequest) {
   });
 
   // Batch audit log inserts
+  // Sec M-6 : admin_id = SYSTEM_AUDIT_ID au lieu de user.id. L'action est
+  // executee par le cron, pas par le user qui expire.
   const auditRows = expiredUsers.map((user) => ({
-    admin_id: user.id,
+    admin_id: SYSTEM_AUDIT_ID,
     action: 'subscription_expired',
     entity_type: 'user',
     entity_id: user.id,

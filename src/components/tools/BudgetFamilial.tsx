@@ -1,9 +1,15 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { Wallet } from 'lucide-react';
-import { GraphRepartition } from './GraphRepartition';
 import { ResultSummary } from './ResultSummary';
+
+// Perf H-1 : recharts (~80 KB) charge seulement quand l'utilisateur calcule.
+const GraphRepartition = dynamic(
+  () => import('./GraphRepartition').then((m) => m.GraphRepartition),
+  { ssr: false },
+);
 import { AutoAnalysis } from './AutoAnalysis';
 import { EmptyState } from './EmptyState';
 import { PdfDownloadButton } from '@/components/PdfDownloadButton';

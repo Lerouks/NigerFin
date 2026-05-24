@@ -416,7 +416,7 @@ export function EducationCategoryContent({ slug }: { slug: string }) {
           <div className="text-center py-16 bg-white border border-black/[0.06] rounded-xl">
             <BookOpen className="w-10 h-10 text-gray-200 mx-auto mb-3" />
             <p className="text-[15px] font-medium text-gray-500">Aucune leçon pour le moment</p>
-            <p className="text-[13px] text-gray-300 mt-1">Le contenu sera bientôt disponible.</p>
+            <p className="text-[13px] text-gray-500 mt-1">Le contenu sera bientôt disponible.</p>
           </div>
         )}
 

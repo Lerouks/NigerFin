@@ -42,6 +42,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const enterpriseRows = ('data' in enterprisesResult ? enterprisesResult.data : enterprisesResult) || [];
   const categories = ('data' in categoriesResult ? categoriesResult.data : categoriesResult) || [];
 
+  // SEO M-1 : /connexion et /inscription retires - contradiction avec
+  // robots.txt Disallow (Perf H-5). Les pages auth sont noindex en plus.
   const staticPages: MetadataRoute.Sitemap = [
     '',
     '/economie',
@@ -52,8 +54,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/outils',
     '/pricing',
     '/contact',
-    '/connexion',
-    '/inscription',
     '/cgu',
     '/confidentialite',
     '/mentions-legales',

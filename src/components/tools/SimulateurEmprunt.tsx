@@ -1,9 +1,19 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { GraphRepartition } from './GraphRepartition';
-import { GraphEvolution } from './GraphEvolution';
+import dynamic from 'next/dynamic';
 import { ResultSummary } from './ResultSummary';
+
+// Perf H-1 : recharts (~80 KB) charge seulement quand l'utilisateur calcule
+// pour la premiere fois.
+const GraphRepartition = dynamic(
+  () => import('./GraphRepartition').then((m) => m.GraphRepartition),
+  { ssr: false },
+);
+const GraphEvolution = dynamic(
+  () => import('./GraphEvolution').then((m) => m.GraphEvolution),
+  { ssr: false },
+);
 import { AutoAnalysis } from './AutoAnalysis';
 import { EmptyState } from './EmptyState';
 import { PdfDownloadButton } from '@/components/PdfDownloadButton';

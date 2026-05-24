@@ -1,6 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+// Perf M-3 : page de confirmation post-clic email = jamais cacheable.
+// Explicite plutot que de laisser Next.js inferer (les searchParams forcent
+// deja le dynamic en pratique, mais c'est plus clair pour le futur).
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Désabonnement newsletter',
   description: 'Confirmation de votre désabonnement à la newsletter NFI Report.',

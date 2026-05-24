@@ -61,8 +61,6 @@ export function CivilityPrompt() {
     setVisible(true);
   }, [isAdminSurface, isSignedIn, profile, userRole]);
 
-  if (!visible) return null;
-
   const handleDismiss = () => {
     try {
       window.localStorage.setItem(DISMISS_KEY, String(Date.now()));
@@ -71,6 +69,18 @@ export function CivilityPrompt() {
     }
     setVisible(false);
   };
+
+  // Escape key to dismiss (a11y : SC 2.1.2 No Keyboard Trap)
+  useEffect(() => {
+    if (!visible) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleDismiss();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [visible]);
+
+  if (!visible) return null;
 
   const handleSave = async () => {
     if (selected !== 'M.' && selected !== 'Mme') return;
@@ -96,8 +106,7 @@ export function CivilityPrompt() {
   };
 
   return (
-    <div
-      role="dialog"
+    <aside
       aria-label="Indiquer votre civilité"
       className="fixed bottom-4 right-4 z-50 max-w-sm bg-white rounded-2xl shadow-[0_10px_60px_-10px_rgba(0,0,0,0.18)] border border-black/[0.06] p-5 animate-fade-in-up"
     >
@@ -156,6 +165,6 @@ export function CivilityPrompt() {
       >
         Plus tard
       </button>
-    </div>
+    </aside>
   );
 }

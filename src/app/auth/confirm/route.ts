@@ -37,9 +37,12 @@ export async function GET(request: NextRequest) {
         return redirectResponse;
       }
 
-      console.error('[AUTH CONFIRM] OTP verification failed:', error.message);
+      Sentry.captureMessage('OTP verification failed', {
+        level: 'warning',
+        tags: { context: 'auth-confirm-otp' },
+        extra: { errorMessage: error.message },
+      });
     } catch (err) {
-      console.error('[AUTH CONFIRM] Unexpected error:', err);
       Sentry.captureException(err, { tags: { context: 'auth-confirm-verify' } });
     }
   }

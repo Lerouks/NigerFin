@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { dataOrchestrator } from '@/lib/services';
-import { createServiceClient } from '@/lib/supabase';
+import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase';
 import * as Sentry from '@sentry/nextjs';
 
 export const dynamic = 'force-dynamic';
@@ -11,7 +11,33 @@ export async function GET(request: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;
 
   // Allow access from admin or cron
-  const isCron = cronSecret && authHeader === `Bearer ${cronSecret}`;
+  const isCron = !!(cronSecret && authHeader === `Bearer ${cronSecret}`);
+
+  // Sec M-9 : sans auth (ni cron ni admin), on retourne uniquement un
+  // statut binaire. Avant, l'endpoint exposait noms de services, success rates,
+  // cache volumes, lastSuccessful timestamps => reconnaissance facilitee.
+  let isAdmin = false;
+  if (!isCron) {
+    try {
+      const supabase = await createServerSupabaseClient();
+      if (supabase) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const service = createServiceClient();
+          if (service) {
+            const { data: profile } = await service
+              .from('user_profiles')
+              .select('role')
+              .eq('id', user.id)
+              .single();
+            isAdmin = profile?.role === 'admin';
+          }
+        }
+      }
+    } catch {
+      // No auth context (anonymous) - rester sur reponse slim.
+    }
+  }
 
   try {
     const healthResults = await dataOrchestrator.healthCheck();
@@ -20,6 +46,13 @@ export async function GET(request: NextRequest) {
     const services = Object.entries(healthResults);
     const healthy = services.filter(([, s]) => s.status === 'ok').length;
     const total = services.length;
+
+    // Reponse slim pour visiteurs non authentifies (probes externes / curieux).
+    // Retourne juste un statut global, pas la liste des services internes.
+    if (!isCron && !isAdmin) {
+      const status = healthy === total ? 'healthy' : healthy > 0 ? 'degraded' : 'down';
+      return NextResponse.json({ status, timestamp: new Date().toISOString() });
+    }
 
     // Get 24h success rate from Supabase
     const successRate24h: Record<string, number> = {};

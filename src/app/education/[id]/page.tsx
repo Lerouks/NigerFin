@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { createServiceClient } from '@/lib/supabase';
+import { SITE_URL } from '@/lib/config';
 import { EducationCategoryContent } from './EducationCategoryContent';
 import { EducationCategoryHero } from './EducationCategoryHero';
 import { EducationSeoBlock } from './EducationSeoBlock';
@@ -63,8 +65,25 @@ export default async function EducationCategoryPage({ params }: { params: Promis
     notFound();
   }
 
+  const nonce = (await headers()).get('x-nonce') || undefined;
+  // SEO M-2 : BreadcrumbList JSON-LD pour rich results SERP.
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Accueil', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Éducation', item: `${SITE_URL}/education` },
+      { '@type': 'ListItem', position: 3, name: category.title, item: `${SITE_URL}/education/${id}` },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-[#fafaf9]">
+      <script
+        type="application/ld+json"
+        nonce={nonce}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
       <EducationCategoryHero category={category} />
       <EducationCategoryContent slug={id} />
       <EducationSeoBlock slug={id} />

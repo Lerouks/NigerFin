@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import { useRouter } from 'next/navigation';
 import { Command } from 'cmdk';
 import {
@@ -175,8 +176,11 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
     try {
       const supabase = createBrowserSupabaseClient();
       await supabase.auth.signOut();
-    } catch {
-      // ignore
+    } catch (err) {
+      // signOut peut echouer si Supabase est inaccessible ; on continue le
+      // redirect cote client malgre tout (la session sera invalidee a la
+      // prochaine requete API). Capture Sentry pour suivi.
+      Sentry.captureException(err, { tags: { context: 'admin-logout' } });
     }
     router.push('/');
   };

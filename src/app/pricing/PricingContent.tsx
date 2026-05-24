@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Loader2, ArrowRight, Check, Crown, ArrowLeft, ShieldCheck, RefreshCw, XCircle } from 'lucide-react';
-import { motion, useReducedMotion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
@@ -14,9 +13,7 @@ import {
   type BillingCycle,
 } from '@/config/pricing';
 
-// ─── FadeUp helper (respects prefers-reduced-motion) ─────────────────────────
-// Uses `animate` instead of `whileInView` so content is always visible even
-// in full-page screenshots, social card crawlers, and before any scroll happens.
+// ─── FadeUp helper (CSS-only, respects prefers-reduced-motion via globals.css) ──
 
 function FadeUp({
   children,
@@ -27,17 +24,13 @@ function FadeUp({
   delay?: number;
   className?: string;
 }) {
-  const prefersReduced = useReducedMotion();
-  if (prefersReduced) return <div className={className}>{children}</div>;
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.55, ease: 'easeOut', delay }}
-      className={className}
+    <div
+      className={`animate-fade-in-up ${className}`}
+      style={delay > 0 ? { animationDelay: `${delay * 1000}ms` } : undefined}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
 

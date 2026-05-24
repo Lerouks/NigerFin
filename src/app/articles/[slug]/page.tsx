@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { getArticleBySlug, getRelatedArticles, getAllArticleSlugs } from '@/lib/articles';
 import { SITE_URL, truncateSeoTitle, truncateSeoDescription } from '@/lib/config';
@@ -67,6 +68,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     notFound();
   }
 
+  // A11y M-1 : nonce CSP transmis par proxy.ts (x-nonce header). Permet
+  // au <script type=application/ld+json> de passer la CSP strict-dynamic
+  // sans 'unsafe-inline'.
+  const nonce = (await headers()).get('x-nonce') || undefined;
+
   const { article, htmlBody } = result;
 
   // Security: never include premium body in static payload
@@ -119,6 +125,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     <>
       <script
         type="application/ld+json"
+        nonce={nonce}
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <ArticleContent

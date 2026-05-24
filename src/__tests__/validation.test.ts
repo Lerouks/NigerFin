@@ -55,6 +55,13 @@ describe('sanitizeSearchQuery', () => {
     expect(sanitizeSearchQuery('%_\\')).toBe('\\%\\_\\\\');
   });
 
+  it('strips PostgREST structural chars (comma, parentheses)', () => {
+    // Sec M-3 : ces chars seraient utilisables pour greffer .or() clause si injectes.
+    expect(sanitizeSearchQuery('John,admin')).toBe('John admin');
+    expect(sanitizeSearchQuery('(test)')).toBe(' test ');
+    expect(sanitizeSearchQuery('a,b(c)d')).toBe('a b c d');
+  });
+
   it('truncates to 200 characters', () => {
     const longInput = 'a'.repeat(300);
     expect(sanitizeSearchQuery(longInput).length).toBe(200);

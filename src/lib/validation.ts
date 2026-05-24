@@ -19,12 +19,18 @@ export function isValidEmail(value: unknown): value is string {
   return typeof value === 'string' && value.length <= 254 && EMAIL_REGEX.test(value);
 }
 
-/** Sanitize a string for use in Supabase ilike/text filters, escapes SQL wildcards and special chars */
+/** Sanitize a string for use in Supabase ilike/text filters, escapes SQL wildcards and special chars.
+ *
+ * Sec M-3 : on enleve aussi les caracteres PostgREST de structure (`,`, `(`, `)`)
+ * qui pourraient permettre de greffer une clause .or() supplementaire si l'input
+ * est injecte dans un template `email.ilike.%${q}%,full_name.ilike.%${q}%`.
+ */
 export function sanitizeSearchQuery(value: string): string {
   return value
     .replace(/\\/g, '\\\\')
     .replace(/%/g, '\\%')
     .replace(/_/g, '\\_')
+    .replace(/[,()]/g, ' ')
     .slice(0, 200);
 }
 

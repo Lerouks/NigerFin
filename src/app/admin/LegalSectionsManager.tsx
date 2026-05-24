@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import { Loader2, Save, Plus, Trash2, GripVertical, FileText } from 'lucide-react';
 
 interface LegalSection {
@@ -41,7 +42,8 @@ export function LegalSectionsManager() {
       const data = await res.json();
       if (Array.isArray(data)) setSections(data);
       else setSections([]);
-    } catch {
+    } catch (err) {
+      Sentry.captureException(err, { tags: { context: 'legal-sections-fetch' } });
       setMessage({ type: 'error', text: 'Erreur de chargement' });
     }
     setLoading(false);
@@ -70,7 +72,8 @@ export function LegalSectionsManager() {
       } else {
         setMessage({ type: 'error', text: 'Erreur lors de la sauvegarde' });
       }
-    } catch {
+    } catch (err) {
+      Sentry.captureException(err, { tags: { context: 'legal-sections-save' } });
       setMessage({ type: 'error', text: 'Erreur réseau' });
     }
     setSaving(false);
@@ -94,7 +97,8 @@ export function LegalSectionsManager() {
         await fetchSections(activeSlug);
         setMessage({ type: 'success', text: 'Section ajoutée' });
       }
-    } catch {
+    } catch (err) {
+      Sentry.captureException(err, { tags: { context: 'legal-sections-add' } });
       setMessage({ type: 'error', text: "Erreur lors de l'ajout" });
     }
     setAdding(false);
@@ -114,7 +118,8 @@ export function LegalSectionsManager() {
         await fetchSections(activeSlug);
         setMessage({ type: 'success', text: 'Section supprimée' });
       }
-    } catch {
+    } catch (err) {
+      Sentry.captureException(err, { tags: { context: 'legal-sections-delete' } });
       setMessage({ type: 'error', text: 'Erreur lors de la suppression' });
     }
     setDeletingId(null);

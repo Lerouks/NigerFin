@@ -15,7 +15,11 @@ function buildCspHeader(nonce: string): string {
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'wasm-unsafe-eval'${isDev ? " 'unsafe-eval'" : ''}`,
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co",
+    // LOW-SEC-4 : on restreint au bucket Supabase reel (extrait de
+    // NEXT_PUBLIC_SUPABASE_URL) plutot que d'autoriser tous les sous-domaines
+    // *.supabase.co. Reduit la surface si un autre client Supabase fait
+    // fuiter un URL d'image vers nos pages.
+    "img-src 'self' data: blob: https://images.unsplash.com https://golrvonbqivqzywprjoo.supabase.co",
     "font-src 'self'",
     // Sec M-2 : iPayMoney (checkout SDK + callback endpoints) doit etre dans
     // connect-src sinon les paiements echouent en mode CSP strict.

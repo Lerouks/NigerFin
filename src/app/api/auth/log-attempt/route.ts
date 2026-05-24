@@ -20,8 +20,12 @@ export async function POST(request: NextRequest) {
 
     const { type, email } = body as { type?: string; email?: string };
 
+    // LOW-SEC-3 : on retourne 200 silencieusement (au lieu de 400 avec message)
+    // pour ne pas leak l'existence/le schema de cet endpoint au scanner.
+    // Tout l'endpoint suit ce pattern fail-silent : ne JAMAIS donner d'info au
+    // scanner sur ce qui a marche ou non.
     if (!type || !email || !isValidEmail(email)) {
-      return NextResponse.json({ error: 'Missing or invalid fields' }, { status: 400 });
+      return NextResponse.json({ ok: true });
     }
 
     const supabase = createServiceClient();

@@ -90,8 +90,11 @@ const nextConfig = {
             value: 'strict-origin-when-cross-origin',
           },
           {
+            // LOW-SEC-1 : push=(self) requis pour Web Push (admin Cockpit
+            // notifications). Sans, l'API navigator.serviceWorker.pushManager
+            // sera bloquee par certains navigateurs.
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()',
+            value: 'camera=(), microphone=(), geolocation=(), push=(self)',
           },
           // Content-Security-Policy gere dynamiquement avec un nonce par
           // requete dans src/proxy.ts (middleware) pour CSP nonce-based.

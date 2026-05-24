@@ -1,7 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { logAuditEvent } from '@/lib/audit';
-import ExcelJS from 'exceljs';
+import type ExcelJSType from 'exceljs';
+
+// LOW-PERF-1 : ExcelJS (~1 MB) charge dynamiquement uniquement au moment de
+// l'export. Ne penalise pas le cold-start des autres routes admin partageant
+// le meme container serverless.
+let ExcelJSModule: typeof ExcelJSType | null = null;
+async function getExcelJS(): Promise<typeof ExcelJSType> {
+  if (!ExcelJSModule) {
+    const mod = await import('exceljs');
+    ExcelJSModule = mod.default;
+  }
+  return ExcelJSModule;
+}
 
 const XLSX_CONTENT_TYPE =
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -11,7 +23,8 @@ const XLSX_CONTENT_TYPE =
 const EXPORT_ROW_LIMIT = 5000;
 
 /** Create a workbook with a single styled sheet, auto-sized columns, and bold headers. */
-function createWorkbook(sheetName: string, headers: string[], rows: (string | number | boolean | null)[][]) {
+async function createWorkbook(sheetName: string, headers: string[], rows: (string | number | boolean | null)[][]) {
+  const ExcelJS = await getExcelJS();
   const workbook = new ExcelJS.Workbook();
   workbook.creator = 'NFI Report';
   workbook.created = new Date();
@@ -93,7 +106,7 @@ export async function GET(request: NextRequest) {
       ];
     });
 
-    const workbook = createWorkbook('Paiements', headers, rows);
+    const workbook = await createWorkbook('Paiements', headers, rows);
     const buffer = await workbook.xlsx.writeBuffer();
 
     await logAuditEvent(user.id, 'export_xlsx', 'payments', undefined, { rowCount: data.length, truncated });
@@ -130,7 +143,7 @@ export async function GET(request: NextRequest) {
       fmtDate(u.created_at),
     ]);
 
-    const workbook = createWorkbook('Utilisateurs', headers, rows);
+    const workbook = await createWorkbook('Utilisateurs', headers, rows);
     const buffer = await workbook.xlsx.writeBuffer();
 
     await logAuditEvent(user.id, 'export_xlsx', 'users', undefined, { rowCount: data.length, truncated });
@@ -170,7 +183,7 @@ export async function GET(request: NextRequest) {
       fmtDate(a.created_at),
     ]);
 
-    const workbook = createWorkbook('Articles', headers, rows);
+    const workbook = await createWorkbook('Articles', headers, rows);
     const buffer = await workbook.xlsx.writeBuffer();
 
     await logAuditEvent(user.id, 'export_xlsx', 'articles', undefined, { rowCount: data.length, truncated });
@@ -205,7 +218,7 @@ export async function GET(request: NextRequest) {
       fmtDate(v.viewed_at),
     ]);
 
-    const workbook = createWorkbook('Statistiques', headers, rows);
+    const workbook = await createWorkbook('Statistiques', headers, rows);
     const buffer = await workbook.xlsx.writeBuffer();
 
     await logAuditEvent(user.id, 'export_xlsx', 'stats', undefined, { rowCount: data.length, truncated });
@@ -242,7 +255,7 @@ export async function GET(request: NextRequest) {
       fmtDate(m.created_at),
     ]);
 
-    const workbook = createWorkbook('Messages', headers, rows);
+    const workbook = await createWorkbook('Messages', headers, rows);
     const buffer = await workbook.xlsx.writeBuffer();
 
     await logAuditEvent(user.id, 'export_xlsx', 'messages', undefined, { rowCount: data.length, truncated });

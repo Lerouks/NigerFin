@@ -17,7 +17,9 @@ function buildCspHeader(nonce: string): string {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co",
     "font-src 'self'",
-    `connect-src 'self' data: https://*.supabase.co https://*.sentry.io https://*.posthog.com${isDev ? ' ws://localhost:* http://localhost:*' : ''}`,
+    // Sec M-2 : iPayMoney (checkout SDK + callback endpoints) doit etre dans
+    // connect-src sinon les paiements echouent en mode CSP strict.
+    `connect-src 'self' data: https://*.supabase.co https://*.sentry.io https://*.posthog.com https://*.ipaymoney.com https://*.ifutur.com${isDev ? ' ws://localhost:* http://localhost:*' : ''}`,
     "frame-src 'none'",
     "object-src 'none'",
     "base-uri 'self'",

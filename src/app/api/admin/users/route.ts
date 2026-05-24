@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
 
     const { data: sub } = await serviceClient
       .from('subscriptions')
-      .select('*')
+      .select('id, user_id, tier, status, billing_cycle, current_period_start, current_period_end, started_at, expires_at, price_amount, created_at, updated_at')
       .eq('user_id', userId)
       .single();
 

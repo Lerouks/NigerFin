@@ -283,7 +283,7 @@ export function SectionArticlesFiltered({
           {articles.length === 0 && (
             <div className="text-center py-20">
               <p className="text-gray-500 text-lg mb-2">Aucun article dans cette rubrique</p>
-              <p className="text-gray-300 text-sm">De nouveaux contenus arrivent bientôt.</p>
+              <p className="text-gray-500 text-sm">De nouveaux contenus arrivent bientôt.</p>
             </div>
           )}
 

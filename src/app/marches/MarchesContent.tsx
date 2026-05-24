@@ -107,7 +107,7 @@ export function MarchesContent() {
             })}
           </p>
         )}
-        <p className="text-[10px] text-gray-300">
+        <p className="text-[11px] text-gray-500">
           Données gérées par l&apos;équipe NFI Report
         </p>
       </div>
@@ -162,8 +162,9 @@ function QuoteRow({
             {hasEducation && (
               <BookOpen
                 className={`w-3.5 h-3.5 transition-colors ${
-                  isExpanded ? 'text-[#111]' : 'text-gray-300'
+                  isExpanded ? 'text-[#111]' : 'text-gray-400'
                 }`}
+                aria-hidden="true"
               />
             )}
           </div>

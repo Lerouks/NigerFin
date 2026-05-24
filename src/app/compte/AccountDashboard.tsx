@@ -241,10 +241,10 @@ export function AccountDashboard() {
             </span>
           </div>
           <div className="mt-4">
-            <p className="text-white/30 text-[12px]">{user?.email}</p>
+            <p className="text-white/75 text-[12px]">{user?.email}</p>
             <button
               onClick={async () => { await signOut(); router.push('/'); }}
-              className="inline-flex items-center gap-1.5 mt-2 text-[12px] text-white/30 hover:text-white/60 transition-colors"
+              className="inline-flex items-center gap-1.5 mt-2 text-[12px] text-white/75 hover:text-white transition-colors"
             >
               Pas vous ? <span className="underline">Se déconnecter</span>
             </button>

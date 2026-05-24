@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { getArticleBySlug, getRelatedArticles, getAllArticleSlugs } from '@/lib/articles';
 import { SITE_URL, truncateSeoTitle, truncateSeoDescription } from '@/lib/config';
@@ -67,6 +68,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     notFound();
   }
 
+  // A11y M-1 : nonce CSP transmis par proxy.ts (x-nonce header). Permet
+  // au <script type=application/ld+json> de passer la CSP strict-dynamic
+  // sans 'unsafe-inline'.
+  const nonce = (await headers()).get('x-nonce') || undefined;
+
   const { article, htmlBody } = result;
 
   // Security: never include premium body in static payload
@@ -89,7 +95,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     description: article.excerpt,
     image: article.mainImage?.url || `${siteUrl}/og-default.jpg`,
     datePublished: article.publishedAt,
-    dateModified: article.publishedAt,
+    // SEO H-2 : Google re-crawl seulement quand dateModified change. Sans
+    // updated_at, les corrections post-publication ne sont jamais reprises.
+    dateModified: article.updatedAt || article.publishedAt,
     author: {
       '@type': 'Person',
       name: article.author.name,
@@ -113,11 +121,30 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     }),
   };
 
+  // SEO M-2 : BreadcrumbList JSON-LD pour rich results SERP.
+  const categoryLabel =
+    article.category.charAt(0).toUpperCase() + article.category.slice(1);
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Accueil', item: siteUrl },
+      { '@type': 'ListItem', position: 2, name: categoryLabel, item: `${siteUrl}/${article.category}` },
+      { '@type': 'ListItem', position: 3, name: article.title, item: articleUrl },
+    ],
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
+        nonce={nonce}
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        nonce={nonce}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       <ArticleContent
         article={article}

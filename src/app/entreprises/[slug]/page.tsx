@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { createServiceClient } from '@/lib/supabase';
 import { SITE_URL, truncateSeoDescription } from '@/lib/config';
@@ -105,11 +106,29 @@ export default async function EnterprisePage({ params }: EnterprisePageProps) {
     ...(enterprise.logo_url && { logo: enterprise.logo_url }),
   };
 
+  const nonce = (await headers()).get('x-nonce') || undefined;
+  // SEO M-2 : BreadcrumbList JSON-LD pour rich results SERP.
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Accueil', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Entreprises', item: `${SITE_URL}/entreprises` },
+      { '@type': 'ListItem', position: 3, name: enterprise.name, item: `${SITE_URL}/entreprises/${slug}` },
+    ],
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
+        nonce={nonce}
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        nonce={nonce}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       <EnterpriseContent enterprise={enterprise} relatedArticles={relatedArticles} />
       <EnterpriseSeoBlock enterprise={enterprise} />

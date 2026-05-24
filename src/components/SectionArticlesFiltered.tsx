@@ -212,7 +212,13 @@ export function SectionArticlesFiltered({
       {/* Mobile: filter bottom sheet */}
       {mobileFiltersOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setMobileFiltersOpen(false)} />
+          {/* a11y H-3 : backdrop click-outside accessible via bouton invisible. */}
+          <button
+            type="button"
+            aria-label="Fermer les filtres"
+            onClick={() => setMobileFiltersOpen(false)}
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm cursor-default"
+          />
           <div className="absolute inset-x-0 bottom-0 max-h-[85vh] bg-white rounded-t-2xl shadow-2xl overflow-y-auto overscroll-contain animate-slide-up">
             {/* Drag handle */}
             <div className="sticky top-0 bg-white pt-3 pb-2 px-6 border-b border-black/[0.04] z-10">
@@ -283,7 +289,7 @@ export function SectionArticlesFiltered({
           {articles.length === 0 && (
             <div className="text-center py-20">
               <p className="text-gray-500 text-lg mb-2">Aucun article dans cette rubrique</p>
-              <p className="text-gray-300 text-sm">De nouveaux contenus arrivent bientôt.</p>
+              <p className="text-gray-500 text-sm">De nouveaux contenus arrivent bientôt.</p>
             </div>
           )}
 

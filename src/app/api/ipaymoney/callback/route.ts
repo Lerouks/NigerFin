@@ -17,10 +17,13 @@ const WEBHOOK_SECRET = process.env.IPAYMONEY_WEBHOOK_SECRET;
 /**
  * Vérifie qu'un callback iPayMoney provient bien d'une source autorisée.
  *
- * Trois sources de secret partagé acceptées, par ordre de préférence :
- *  1. Header `X-Webhook-Secret: <secret>` (recommandé, ne fuit pas dans les logs)
- *  2. Header `Authorization: Bearer <secret>`
- *  3. Body field `webhook_secret` (fallback pour SDK iPayMoney/Ifutur qui ne supporterait pas les headers custom)
+ * Sec H-6 : on n'accepte plus le secret dans le body JSON (avant : fallback
+ * `payload.webhook_secret`). Le body est loggé/persiste plus facilement que
+ * les headers => risque de fuite en cas de log applicatif un peu trop verbeux.
+ *
+ * Sources acceptées (header uniquement) :
+ *  1. `X-Webhook-Secret: <secret>` (recommandé)
+ *  2. `Authorization: Bearer <secret>` (compat. SDK legacy)
  *
  * Quand Ifutur livrera leur SDK avec signature HMAC native, ajouter ici la
  * vérification `X-Signature` via crypto.timingSafeEqual(hmacSha256(rawBody, secret), provided).
@@ -29,10 +32,7 @@ const WEBHOOK_SECRET = process.env.IPAYMONEY_WEBHOOK_SECRET;
  *  - production : refuser tous les callbacks et alerter Sentry (faille critique)
  *  - dev/test   : accepter pour permettre les tests locaux
  */
-function verifyWebhookAuth(
-  request: NextRequest,
-  payload: Record<string, string | number | undefined>,
-): boolean {
+function verifyWebhookAuth(request: NextRequest): boolean {
   if (!WEBHOOK_SECRET) {
     if (process.env.NODE_ENV === 'production') {
       Sentry.captureMessage('IPAYMONEY_WEBHOOK_SECRET non configuré en production', { level: 'error' });
@@ -44,7 +44,7 @@ function verifyWebhookAuth(
   const provided =
     request.headers.get('x-webhook-secret') ||
     request.headers.get('authorization')?.replace(/^Bearer\s+/i, '').trim() ||
-    (typeof payload.webhook_secret === 'string' ? payload.webhook_secret : null);
+    null;
 
   if (!provided) return false;
 
@@ -247,7 +247,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 2) Vérification de l'authenticité du callback (shared secret en attendant HMAC Ifutur)
-    if (!verifyWebhookAuth(request, payload)) {
+    if (!verifyWebhookAuth(request)) {
       Sentry.captureMessage('iPayMoney callback unauthorized', {
         level: 'warning',
         extra: { ip, hasSecret: !!WEBHOOK_SECRET },

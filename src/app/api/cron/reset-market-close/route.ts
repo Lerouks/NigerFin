@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
+import * as Sentry from '@sentry/nextjs';
 
 /**
  * Cron endpoint: resets previous_close to current value each day at midnight.
@@ -24,7 +25,8 @@ export async function GET(request: NextRequest) {
   const { error } = await supabase.rpc('reset_market_previous_close');
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    Sentry.captureException(error, { tags: { context: 'cron-reset-market-close' } });
+    return NextResponse.json({ error: 'Erreur lors de la réinitialisation' }, { status: 500 });
   }
 
   return NextResponse.json({ success: true, message: 'Previous close reset for all market data' });

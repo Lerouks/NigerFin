@@ -60,7 +60,11 @@ export function AssetUploader({ value, onChange, label }: AssetUploaderProps) {
       {value ? (
         <div className="relative inline-block max-w-xs rounded-md border border-foreground/10 overflow-hidden bg-white">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={value} alt="aperçu" className="block max-h-48 w-auto" />
+          <img
+            src={value}
+            alt={label ? `Aperçu : ${label}` : 'Aperçu de l\'image téléchargée'}
+            className="block max-h-48 w-auto"
+          />
           <button
             type="button"
             onClick={() => onChange(undefined)}

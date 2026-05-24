@@ -1,11 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import * as Sentry from '@sentry/nextjs';
+import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { LayoutDashboard, Newspaper, Users, Wallet, Server, Search } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { CommandPalette } from './CommandPalette';
+
+// Perf H-3 : cmdk (~80 KB) n'est utile qu'au Cmd+K. Lazy-load => bundle initial
+// admin plus leger. ssr: false car le composant ne s'affiche qu'au shortcut user.
+const CommandPalette = dynamic(
+  () => import('./CommandPalette').then((m) => m.CommandPalette),
+  { ssr: false },
+);
 
 interface NavItem {
   href: string;
@@ -71,7 +79,7 @@ function useServiceWorkerRegistration() {
       navigator.serviceWorker
         .register('/sw.js', { scope: '/admin' })
         .catch((err) => {
-          console.warn('[NFI Cockpit] Enregistrement du service worker echoue', err);
+          Sentry.captureException(err, { tags: { context: 'cockpit-sw-register' } });
         });
     };
     if (document.readyState === 'complete') onLoad();

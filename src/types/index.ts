@@ -15,6 +15,8 @@ export interface Article {
     avatar?: { url: string; alt?: string } | string | null;
   };
   publishedAt: string;
+  /** Date du dernier UPDATE en base. Sert au JSON-LD dateModified (SEO H-2). */
+  updatedAt?: string;
   mainImage: { url: string; alt?: string | null; width?: number; height?: number; caption?: string | null; source?: string | null } | null;
   body: Record<string, unknown>[];
   isPremium: boolean;

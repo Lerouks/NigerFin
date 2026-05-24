@@ -65,7 +65,7 @@ export function AccountDashboard() {
   const [editingProfile, setEditingProfile] = useState(false);
   const [civility, setCivility] = useState('');
   const [firstName, setFirstName] = useState('');
-  const [lastName2, setLastName2] = useState('');
+  const [lastName, setLastName2] = useState('');
   const [phone, setPhone] = useState('');
   const [birthDay, setBirthDay] = useState('');
   const [birthMonth, setBirthMonth] = useState('');
@@ -164,7 +164,7 @@ export function AccountDashboard() {
 
   const handleSaveProfile = async () => {
     // Client-side validation
-    if (!firstName.trim() || !lastName2.trim()) {
+    if (!firstName.trim() || !lastName.trim()) {
       setProfileMessage({ type: 'error', text: 'Le prénom et le nom sont obligatoires.' });
       return;
     }
@@ -182,7 +182,7 @@ export function AccountDashboard() {
         body: JSON.stringify({
           civility: civility || null,
           first_name: firstName,
-          last_name: lastName2,
+          last_name: lastName,
           phone: phone || null,
           birth_day: birthDay ? parseInt(birthDay) : null,
           birth_month: birthMonth ? parseInt(birthMonth) : null,
@@ -241,10 +241,10 @@ export function AccountDashboard() {
             </span>
           </div>
           <div className="mt-4">
-            <p className="text-white/30 text-[12px]">{user?.email}</p>
+            <p className="text-white/75 text-[12px]">{user?.email}</p>
             <button
               onClick={async () => { await signOut(); router.push('/'); }}
-              className="inline-flex items-center gap-1.5 mt-2 text-[12px] text-white/30 hover:text-white/60 transition-colors"
+              className="inline-flex items-center gap-1.5 mt-2 text-[12px] text-white/75 hover:text-white transition-colors"
             >
               Pas vous ? <span className="underline">Se déconnecter</span>
             </button>
@@ -477,13 +477,13 @@ export function AccountDashboard() {
                     {/* Prénom / Nom */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <ProfileField label="Prénom" value={firstName} onChange={setFirstName} disabled={!editingProfile} required placeholder="Votre prénom" />
-                      <ProfileField label="Nom" value={lastName2} onChange={setLastName2} disabled={!editingProfile} required placeholder="Votre nom" />
+                      <ProfileField label="Nom" value={lastName} onChange={setLastName2} disabled={!editingProfile} required placeholder="Votre nom" />
                     </div>
 
                     {/* Boutons */}
                     {editingProfile ? (
                       <div className="flex gap-2 pt-2">
-                        <button onClick={handleSaveProfile} disabled={savingProfile || !firstName.trim() || !lastName2.trim()} className="flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-xl text-[13px] font-medium hover:bg-primary/75 transition-colors disabled:opacity-50">
+                        <button onClick={handleSaveProfile} disabled={savingProfile || !firstName.trim() || !lastName.trim()} className="flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-xl text-[13px] font-medium hover:bg-primary/75 transition-colors disabled:opacity-50">
                           {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Enregistrer
                         </button>
                         <button onClick={() => { setEditingProfile(false); /* fields reset on next profile sync */ }} className="px-4 py-2.5 rounded-xl text-[13px] text-gray-500 hover:bg-gray-50 transition-colors">Annuler</button>
@@ -568,7 +568,7 @@ export function AccountDashboard() {
 
                     {editingProfile && (
                       <div className="flex gap-2 pt-2">
-                        <button onClick={handleSaveProfile} disabled={savingProfile || !firstName.trim() || !lastName2.trim()} className="flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-xl text-[13px] font-medium hover:bg-primary/75 transition-colors disabled:opacity-50">
+                        <button onClick={handleSaveProfile} disabled={savingProfile || !firstName.trim() || !lastName.trim()} className="flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-xl text-[13px] font-medium hover:bg-primary/75 transition-colors disabled:opacity-50">
                           {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Enregistrer
                         </button>
                         <button onClick={() => setEditingProfile(false)} className="px-4 py-2.5 rounded-xl text-[13px] text-gray-500 hover:bg-gray-50 transition-colors">Annuler</button>

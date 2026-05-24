@@ -1,7 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
 import { requireAdmin } from '@/lib/admin-auth';
 import { serverError } from '@/lib/api-error';
+import { parseJsonBody, isValidUUID } from '@/lib/validation';
+
+// Sec H-2 : allowlist explicite des champs autorises en POST/PUT.
+// Avant : { id, ...updates } => mass-assignment possible sur n'importe
+// quelle colonne. Ici on accepte uniquement les colonnes editables par l'UI.
+const MARKET_TYPE = z.enum(['currency', 'commodity', 'index', 'crypto']);
+
+const CreateBody = z.object({
+  name: z.string().min(1).max(120),
+  symbol: z.string().min(1).max(32),
+  type: MARKET_TYPE,
+  value: z.union([z.string(), z.number()]).optional(),
+  unit: z.string().max(32).optional(),
+  source: z.string().max(120).optional(),
+  description: z.string().max(2000).optional(),
+  education_link: z.string().max(500).optional(),
+});
+
+const UpdateBody = z.object({
+  id: z.string().refine((v) => isValidUUID(v), { message: 'id invalide' }),
+  name: z.string().min(1).max(120).optional(),
+  symbol: z.string().min(1).max(32).optional(),
+  type: MARKET_TYPE.optional(),
+  value: z.union([z.string(), z.number()]).optional(),
+  unit: z.string().max(32).optional(),
+  source: z.string().max(120).optional(),
+  description: z.string().max(2000).optional(),
+  education_link: z.string().max(500).optional(),
+});
 
 function revalidateMarketPages() {
   revalidatePath('/');
@@ -32,16 +62,11 @@ export async function POST(request: NextRequest) {
   if ('error' in auth) return auth.error;
   const { serviceClient } = auth;
 
-  const body = await request.json();
-  const { name, symbol, type, value, unit, source, description, education_link } = body;
-
-  if (!name || !symbol || !type) {
-    return NextResponse.json({ error: 'Nom, symbole et type requis' }, { status: 400 });
+  const parsed = await parseJsonBody(request, CreateBody);
+  if (!parsed.ok) {
+    return NextResponse.json({ error: parsed.error }, { status: parsed.status });
   }
-
-  if (!['currency', 'commodity', 'index', 'crypto'].includes(type)) {
-    return NextResponse.json({ error: 'Type invalide' }, { status: 400 });
-  }
+  const { name, symbol, type, value, unit, source, description, education_link } = parsed.data;
 
   const { data, error } = await serviceClient
     .from('market_data')
@@ -74,39 +99,47 @@ export async function PUT(request: NextRequest) {
   if ('error' in auth) return auth.error;
   const { serviceClient } = auth;
 
-  const body = await request.json();
-  const { id, ...updates } = body;
-
-  if (!id) {
-    return NextResponse.json({ error: 'ID requis' }, { status: 400 });
+  const parsed = await parseJsonBody(request, UpdateBody);
+  if (!parsed.ok) {
+    return NextResponse.json({ error: parsed.error }, { status: parsed.status });
   }
 
-  if (updates.type && !['currency', 'commodity', 'index', 'crypto'].includes(updates.type)) {
-    return NextResponse.json({ error: 'Type invalide' }, { status: 400 });
-  }
+  const { id, ...rawUpdates } = parsed.data;
+
+  // Build updates from allowlist only (defensive : Zod a deja filtre,
+  // mais on construit explicitement le payload pour ecarter tout risque
+  // de mass-assignment futur).
+  const updates: Record<string, unknown> = {};
+  if (rawUpdates.name !== undefined) updates.name = rawUpdates.name;
+  if (rawUpdates.symbol !== undefined) updates.symbol = rawUpdates.symbol;
+  if (rawUpdates.type !== undefined) updates.type = rawUpdates.type;
+  if (rawUpdates.unit !== undefined) updates.unit = rawUpdates.unit;
+  if (rawUpdates.source !== undefined) updates.source = rawUpdates.source;
+  if (rawUpdates.description !== undefined) updates.description = rawUpdates.description;
+  if (rawUpdates.education_link !== undefined) updates.education_link = rawUpdates.education_link;
 
   // Normalize value: accept comma as decimal separator
-  if (updates.value !== undefined) {
-    updates.value = typeof updates.value === 'string'
-      ? parseFloat(updates.value.replace(',', '.'))
-      : Number(updates.value);
-  }
+  if (rawUpdates.value !== undefined) {
+    const v = typeof rawUpdates.value === 'string'
+      ? parseFloat(rawUpdates.value.replace(',', '.'))
+      : Number(rawUpdates.value);
+    updates.value = v;
 
-  // Auto-calculate daily variation based on previous_close
-  if (updates.value !== undefined && !isNaN(updates.value)) {
-    const { data: current } = await serviceClient
-      .from('market_data')
-      .select('value, previous_close')
-      .eq('id', id)
-      .single();
+    // Auto-calculate daily variation based on previous_close
+    if (!isNaN(v)) {
+      const { data: current } = await serviceClient
+        .from('market_data')
+        .select('value, previous_close')
+        .eq('id', id)
+        .single();
 
-    if (current) {
-      const refPrice = Number(current.previous_close) || Number(current.value);
-      const newValue = Number(updates.value);
-      updates.change = newValue - refPrice;
-      updates.change_percent = refPrice !== 0
-        ? ((newValue - refPrice) / refPrice) * 100
-        : 0;
+      if (current) {
+        const refPrice = Number(current.previous_close) || Number(current.value);
+        updates.change = v - refPrice;
+        updates.change_percent = refPrice !== 0
+          ? ((v - refPrice) / refPrice) * 100
+          : 0;
+      }
     }
   }
 
@@ -134,8 +167,8 @@ export async function DELETE(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
 
-  if (!id) {
-    return NextResponse.json({ error: 'ID requis' }, { status: 400 });
+  if (!id || !isValidUUID(id)) {
+    return NextResponse.json({ error: 'ID invalide (UUID requis)' }, { status: 400 });
   }
 
   const { error } = await serviceClient

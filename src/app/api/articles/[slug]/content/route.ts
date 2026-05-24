@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase';
+import { sanitizeHtml } from '@/lib/sanitize-html';
 
 export async function GET(
   _request: NextRequest,
@@ -119,14 +120,22 @@ export async function GET(
   return NextResponse.json({ error: 'Premium subscription required' }, { status: 403, headers: noCacheHeaders });
 }
 
+// Sec H-1 : defense-en-profondeur. Meme si l'editeur admin (TipTap) sanitize
+// l'input, on re-passe le body au moment du serve. Couvre les cas :
+//   - articles ecrits avant l'introduction du sanitize cote ecriture
+//   - compromission d'un compte admin qui ecrirait du HTML brut via SQL
+//   - bug futur dans le pipeline editeur
 function bodyToHtml(raw: string): string {
   if (!raw.trim()) return '';
+  let html: string;
   if (/<(?:p|div|h[1-6]|ul|ol|blockquote|figure|table|section|article)\b/i.test(raw)) {
-    return raw;
+    html = raw;
+  } else {
+    html = raw
+      .split(/\n{2,}/)
+      .filter(block => block.trim())
+      .map(block => `<p>${block.trim().replace(/\n/g, '<br>')}</p>`)
+      .join('\n');
   }
-  return raw
-    .split(/\n{2,}/)
-    .filter(block => block.trim())
-    .map(block => `<p>${block.trim().replace(/\n/g, '<br>')}</p>`)
-    .join('\n');
+  return sanitizeHtml(html);
 }

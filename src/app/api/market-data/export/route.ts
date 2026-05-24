@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase';
-import ExcelJS from 'exceljs';
+
+// LOW-PERF-1 : ExcelJS (~1 MB) charge dynamiquement uniquement quand l'export
+// XLSX est demande. Sans ca, le cold start de cette route inclut ExcelJS meme
+// si l'auth echoue tot.
 
 export const dynamic = 'force-dynamic';
 
@@ -56,7 +59,8 @@ export async function GET() {
     return NextResponse.json({ error: 'Aucune donnée disponible' }, { status: 404 });
   }
 
-  // Build XLSX workbook
+  // Build XLSX workbook (ExcelJS dynamic-loaded ici)
+  const { default: ExcelJS } = await import('exceljs');
   const workbook = new ExcelJS.Workbook();
   workbook.creator = 'NFI Report';
   workbook.created = new Date();

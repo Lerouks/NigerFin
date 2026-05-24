@@ -4,9 +4,11 @@
 //  - CacheFirst pour les assets statiques (/icons/, /_next/static/) : performance + offline shell
 //  - Pas d'interception du site public (le PWA scope est limite a /admin)
 //
-// Version cache : incrementer a chaque deploy majeur pour purger l'ancien cache.
-
-const CACHE_VERSION = 'nfi-cockpit-v1';
+// Perf M-4 : version cache aligne sur la version package.json (bump manuel a
+// chaque release notable). Pour une invalidation automatique parfaite, viser
+// a terme un build-step qui remplace CACHE_VERSION par VERCEL_DEPLOYMENT_ID
+// (voir TODOS-SECURITY.md - non bloquant pour le launch).
+const CACHE_VERSION = 'nfi-cockpit-v2-2026-05';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const DYNAMIC_CACHE = `${CACHE_VERSION}-dynamic`;
 

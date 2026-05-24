@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import {
   Loader2, Plus, Pencil, Trash2, Check, X, ChevronLeft, Eye, EyeOff,
   BookOpen,
 } from 'lucide-react';
+import { useToast } from '@/components/Toast';
 
 interface Category {
   id: string;
@@ -39,11 +41,21 @@ const ICONS = [
 ];
 
 export function EducationManager() {
+  const { show: showToast } = useToast();
   const [categories, setCategories] = useState<Category[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+
+  // Qual H-1 : helper centralise au lieu de catches vides. Toast + Sentry.
+  const handleError = useCallback(
+    (err: unknown, context: string, userMessage: string) => {
+      Sentry.captureException(err, { tags: { context: `education-manager-${context}` } });
+      showToast(userMessage, 'error');
+    },
+    [showToast],
+  );
 
   // Category form
   const [showCatForm, setShowCatForm] = useState(false);
@@ -62,16 +74,20 @@ export function EducationManager() {
     try {
       const res = await fetch('/api/admin/education/categories');
       if (res.ok) setCategories(await res.json());
-    } catch { /* ignore */ }
+    } catch (err) {
+      handleError(err, 'crud', 'Erreur lors de l\'opération. Réessayez.');
+    }
     setLoading(false);
-  }, []);
+  }, [handleError]);
 
   const fetchLessons = useCallback(async (categoryId: string) => {
     try {
       const res = await fetch(`/api/admin/education/lessons?category_id=${categoryId}`);
       if (res.ok) setLessons(await res.json());
-    } catch { /* ignore */ }
-  }, []);
+    } catch (err) {
+      handleError(err, 'crud', 'Erreur lors de l\'opération. Réessayez.');
+    }
+  }, [handleError]);
 
   useEffect(() => { fetchCategories(); }, [fetchCategories]);
   useEffect(() => { if (selectedCategory) fetchLessons(selectedCategory.id); }, [selectedCategory, fetchLessons]);
@@ -91,7 +107,9 @@ export function EducationManager() {
         resetCatForm();
         fetchCategories();
       }
-    } catch { /* ignore */ }
+    } catch (err) {
+      handleError(err, 'crud', 'Erreur lors de l\'opération. Réessayez.');
+    }
     setSaving(false);
   };
 
@@ -103,7 +121,9 @@ export function EducationManager() {
         if (selectedCategory?.id === id) setSelectedCategory(null);
         fetchCategories();
       }
-    } catch { /* ignore */ }
+    } catch (err) {
+      handleError(err, 'crud', 'Erreur lors de l\'opération. Réessayez.');
+    }
   };
 
   const startEditCategory = (cat: Category) => {
@@ -126,7 +146,9 @@ export function EducationManager() {
         body: JSON.stringify({ id: cat.id, available: !cat.available }),
       });
       fetchCategories();
-    } catch { /* ignore */ }
+    } catch (err) {
+      handleError(err, 'crud', 'Erreur lors de l\'opération. Réessayez.');
+    }
   };
 
   // ── Lesson CRUD ──
@@ -148,7 +170,9 @@ export function EducationManager() {
         fetchLessons(selectedCategory.id);
         fetchCategories();
       }
-    } catch { /* ignore */ }
+    } catch (err) {
+      handleError(err, 'crud', 'Erreur lors de l\'opération. Réessayez.');
+    }
     setSaving(false);
   };
 
@@ -161,7 +185,9 @@ export function EducationManager() {
         fetchLessons(selectedCategory.id);
         fetchCategories();
       }
-    } catch { /* ignore */ }
+    } catch (err) {
+      handleError(err, 'crud', 'Erreur lors de l\'opération. Réessayez.');
+    }
   };
 
   const startEditLesson = (lesson: Lesson) => {

@@ -40,6 +40,12 @@ Tests live in `src/__tests__/*.test.ts` and match the pattern `src/**/*.test.ts`
 - `src/config/pricing.ts` — Pricing configuration
 - `src/types/` — TypeScript types including Supabase generated types
 
+**Convention nommage composants admin (`src/app/admin/`)** (LOW-QUAL-2 du code review 2026-05-22) :
+- `XxxManager.tsx` : composants CRUD complets avec liste + edit + delete (Articles, Education, FlashBanner, LegalSections, MarketData, Messages, NigerPresentation, Notifications, Paywall, SiteFeatures, StrategicEnterprises, Comments).
+- `XxxTab.tsx` : pages-onglets du Cockpit principal (Audit, Overview, Payments, Pricing, Users) - presentationnels, consomment des datas via hooks.
+- `XxxView.tsx` : vues read-only avec drill-down (CockpitView, SiteView).
+- `XxxStats.tsx` : sous-blocs KPI dans une page parent (ContenuStats, UsersStats).
+
 **Cron jobs** (configured in `vercel.json`): Daily subscription expiration check (2 AM) and expiration warning emails (8 AM).
 
 **Design tokens:** Custom Tailwind colors (background: `#fafaf9`, foreground: `#1a1a1a`, primary: `#111111`, secondary: `#f5f5f0`, muted: `#f0efe9`, gold: `#d4a843`). Font: Inter (body and headings), loaded as a local font.

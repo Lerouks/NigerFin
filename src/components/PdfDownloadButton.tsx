@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import { Download, Lock, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -79,7 +80,7 @@ export function PdfDownloadButton({ options, hasResults }: PdfDownloadButtonProp
         recipientName: payload.recipientName ?? '',
       });
     } catch (err) {
-      console.error('[PdfDownload] Erreur génération PDF', err);
+      Sentry.captureException(err, { tags: { context: 'pdf-download' } });
       const msg = err instanceof Error ? err.message : 'Erreur inconnue';
       setError(`Erreur génération PDF, ${msg.slice(0, 80)}`);
     } finally {

@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import { createBrowserSupabaseClient, isSupabaseConfigured } from '@/lib/supabase-browser';
 import type { User, Session, SupabaseClient } from '@supabase/supabase-js';
 import type { UserRole, UserProfile } from '@/types';
@@ -81,7 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setPremiumArticlesUsed(data.count || 0);
       }
     } catch (err) {
-      console.error('[AUTH] Failed to fetch premium count:', err);
+      Sentry.captureException(err, { tags: { context: 'auth-fetch-premium-count' } });
       setError('Impossible de charger le compteur premium');
     }
   }, []);
@@ -101,7 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       setIsLoading(false);
     }).catch((err) => {
-      console.error('[AUTH] Failed to get session:', err);
+      Sentry.captureException(err, { tags: { context: 'auth-get-session' } });
       setIsLoading(false);
     });
 
@@ -182,7 +183,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           body: JSON.stringify({ type: 'duplicate_signup', email }),
         });
       } catch (err) {
-        console.error('[AUTH] Failed to log duplicate signup attempt:', err);
+        Sentry.captureException(err, { tags: { context: 'auth-log-duplicate-signup' } });
       }
     }
 

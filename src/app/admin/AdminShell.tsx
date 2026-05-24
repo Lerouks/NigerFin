@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -78,7 +79,7 @@ function useServiceWorkerRegistration() {
       navigator.serviceWorker
         .register('/sw.js', { scope: '/admin' })
         .catch((err) => {
-          console.warn('[NFI Cockpit] Enregistrement du service worker echoue', err);
+          Sentry.captureException(err, { tags: { context: 'cockpit-sw-register' } });
         });
     };
     if (document.readyState === 'complete') onLoad();

@@ -8,7 +8,13 @@ import { parsePagination, paginatedResponse } from '@/lib/pagination';
 import { deleteUserCompletely } from '@/lib/delete-user';
 import * as Sentry from '@sentry/nextjs';
 
-const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || 'raoufbark@gmail.com';
+const SUPER_ADMIN_EMAIL: string = (() => {
+  const value = process.env.SUPER_ADMIN_EMAIL;
+  if (!value) {
+    throw new Error('SUPER_ADMIN_EMAIL env var is required');
+  }
+  return value;
+})();
 
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin();

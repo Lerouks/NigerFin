@@ -42,7 +42,8 @@ export async function GET(request: NextRequest) {
       exchangeError = result.error;
       data = result.data;
     } catch (err) {
-      console.error('[AUTH CALLBACK] Code exchange failed:', err);
+      // Sec H-5 : on n'imprime pas l'erreur brute (peut contenir PKCE verifier ou tokens
+      // d'un debug Supabase). Sentry reste capture pour suivi.
       Sentry.captureException(err, { tags: { context: 'auth-callback-exchange' } });
       return NextResponse.redirect(`${origin}/connexion?error=auth`);
     }
@@ -52,7 +53,6 @@ export async function GET(request: NextRequest) {
       if (data?.user) {
         const userId = data.user.id;
         sendWelcomeIfNew(userId, data.user.email, data.user.user_metadata?.full_name as string | undefined).catch((err) => {
-          console.error('[EMAIL] Welcome email failed:', err);
           Sentry.captureException(err, { tags: { context: 'welcome-email' }, extra: { userId } });
         });
       }

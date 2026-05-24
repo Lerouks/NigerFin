@@ -1,5 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { createServerSupabaseClient } from '@/lib/supabase';
+import { parseJsonBody } from '@/lib/validation';
+
+// Qual H-3 : on accepte uniquement les booleens documentes. Tout autre champ
+// du body est ignore (allowlist Zod).
+const PrefsUpdate = z.object({
+  newsletter_monthly: z.boolean().optional(),
+  newsletter_weekly: z.boolean().optional(),
+  alerts_news: z.boolean().optional(),
+  alerts_custom: z.boolean().optional(),
+  reports_pdf: z.boolean().optional(),
+});
 
 export async function GET() {
   const supabase = await createServerSupabaseClient();
@@ -30,7 +42,11 @@ export async function PUT(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
-  const body = await request.json();
+  const parsed = await parseJsonBody(request, PrefsUpdate);
+  if (!parsed.ok) {
+    return NextResponse.json({ error: parsed.error }, { status: parsed.status });
+  }
+  const body = parsed.data;
 
   await supabase
     .from('newsletter_preferences')

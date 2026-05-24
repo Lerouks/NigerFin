@@ -10,12 +10,11 @@ import { sendNewsletterIssue } from '@/lib/newsletter/send';
  */
 export async function GET(req: NextRequest) {
   // Vercel Cron envoie le header Authorization: Bearer ${CRON_SECRET}
+  // Fail-closed : sans CRON_SECRET configure, l'endpoint refuse toutes les requetes (securite C-2).
   const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
-    const auth = req.headers.get('authorization');
-    if (auth !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+  const auth = req.headers.get('authorization');
+  if (!cronSecret || auth !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   const supabase = createServiceClient();

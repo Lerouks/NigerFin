@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isValidUUID, isValidEmail, sanitizeSearchQuery, isOneOf } from '@/lib/validation';
+import { isValidUUID, isValidEmail, sanitizeSearchQuery, isOneOf, safeNextPath } from '@/lib/validation';
 
 describe('isValidUUID', () => {
   it('accepts valid UUIDs', () => {
@@ -74,5 +74,42 @@ describe('isOneOf', () => {
     expect(isOneOf('superadmin', roles)).toBe(false);
     expect(isOneOf('', roles)).toBe(false);
     expect(isOneOf(123, roles)).toBe(false);
+  });
+});
+
+describe('safeNextPath', () => {
+  it('accepts internal absolute paths', () => {
+    expect(safeNextPath('/')).toBe('/');
+    expect(safeNextPath('/articles')).toBe('/articles');
+    expect(safeNextPath('/articles/slug-123')).toBe('/articles/slug-123');
+    expect(safeNextPath('/compte?tab=infos')).toBe('/compte?tab=infos');
+  });
+
+  it('rejects protocol-relative URLs (open redirect)', () => {
+    expect(safeNextPath('//evil.com')).toBe('/');
+    expect(safeNextPath('//evil.com/steal')).toBe('/');
+  });
+
+  it('rejects external URLs', () => {
+    expect(safeNextPath('https://evil.com')).toBe('/');
+    expect(safeNextPath('http://evil.com')).toBe('/');
+    expect(safeNextPath('javascript:alert(1)')).toBe('/');
+    expect(safeNextPath('data:text/html,<script>alert(1)</script>')).toBe('/');
+  });
+
+  it('rejects backslash variants', () => {
+    expect(safeNextPath('/\\evil.com')).toBe('/');
+    expect(safeNextPath('/\\/evil.com')).toBe('/');
+  });
+
+  it('rejects relative paths', () => {
+    expect(safeNextPath('articles')).toBe('/');
+    expect(safeNextPath('../admin')).toBe('/');
+  });
+
+  it('handles null, undefined, empty', () => {
+    expect(safeNextPath(null)).toBe('/');
+    expect(safeNextPath(undefined)).toBe('/');
+    expect(safeNextPath('')).toBe('/');
   });
 });

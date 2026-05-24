@@ -73,3 +73,21 @@ export async function parseJsonBody<TSchema extends ZodTypeAny>(
 export function isOneOf<T extends string>(value: unknown, options: readonly T[]): value is T {
   return typeof value === 'string' && (options as readonly string[]).includes(value);
 }
+
+/**
+ * Bornes un chemin de redirection post-auth aux URLs internes (securite C-1).
+ *
+ * Accepte uniquement les chemins absolus mono-slash (`/`, `/articles`, etc.).
+ * Rejette les URLs protocol-relative (`//evil.com`), externes (`https://...`,
+ * `data:...`), et les variantes Windows (`/\\evil.com`).
+ *
+ * Retourne `/` par defaut si l'entree est nulle/vide/dangereuse.
+ */
+export function safeNextPath(raw: string | null | undefined): string {
+  if (!raw) return '/';
+  if (typeof raw !== 'string') return '/';
+  if (!raw.startsWith('/')) return '/';
+  if (raw.startsWith('//')) return '/';
+  if (raw.startsWith('/\\')) return '/';
+  return raw;
+}

@@ -3,12 +3,13 @@ import { createServerClient } from '@supabase/ssr';
 import { sendTransactionalEmail } from '@/lib/email';
 import { welcomeSignupEmail } from '@/lib/email-templates';
 import { createServiceClient } from '@/lib/supabase';
+import { safeNextPath } from '@/lib/validation';
 import * as Sentry from '@sentry/nextjs';
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/';
+  const next = safeNextPath(searchParams.get('next'));
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;

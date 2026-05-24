@@ -57,6 +57,7 @@ function toArticle(row: SupabaseArticle): Article {
       avatar: row.author_avatar,
     },
     publishedAt: row.published_at || row.created_at,
+    updatedAt: row.updated_at,
     mainImage: row.main_image_url ? { url: row.main_image_url, alt: row.main_image_alt, caption: row.main_image_caption, source: row.main_image_source } : null,
     body: row.body ? [{ _type: 'block', children: [{ _type: 'span', text: '' }] }] : [],
     isPremium: row.content_type !== 'free',

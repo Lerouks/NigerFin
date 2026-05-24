@@ -89,7 +89,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     description: article.excerpt,
     image: article.mainImage?.url || `${siteUrl}/og-default.jpg`,
     datePublished: article.publishedAt,
-    dateModified: article.publishedAt,
+    // SEO H-2 : Google re-crawl seulement quand dateModified change. Sans
+    // updated_at, les corrections post-publication ne sont jamais reprises.
+    dateModified: article.updatedAt || article.publishedAt,
     author: {
       '@type': 'Person',
       name: article.author.name,

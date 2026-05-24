@@ -56,9 +56,19 @@ function beforeSend(event: ErrorEvent, _hint: EventHint): ErrorEvent | null {
   return event;
 }
 
+// Sec M-5 : ne pas tracer les cron jobs ni health checks. Ils sont bruyants
+// (1+ executions/jour) et n'apportent rien a la perf prod observable. Le
+// tracesSampler herite de tracesSampleRate pour le reste, mais retourne 0
+// pour les routes exclues.
+function tracesSampler(samplingContext: { transactionContext?: { name?: string } }): number {
+  const name = samplingContext.transactionContext?.name || '';
+  if (name.includes('/api/cron/') || name.includes('/api/health')) return 0;
+  return 0.1;
+}
+
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-  tracesSampleRate: 0.1,
+  tracesSampler,
   debug: false,
   beforeSend,
   sendDefaultPii: false,

@@ -19,12 +19,18 @@ export function isValidEmail(value: unknown): value is string {
   return typeof value === 'string' && value.length <= 254 && EMAIL_REGEX.test(value);
 }
 
-/** Sanitize a string for use in Supabase ilike/text filters, escapes SQL wildcards and special chars */
+/** Sanitize a string for use in Supabase ilike/text filters, escapes SQL wildcards and special chars.
+ *
+ * Sec M-3 : on enleve aussi les caracteres PostgREST de structure (`,`, `(`, `)`)
+ * qui pourraient permettre de greffer une clause .or() supplementaire si l'input
+ * est injecte dans un template `email.ilike.%${q}%,full_name.ilike.%${q}%`.
+ */
 export function sanitizeSearchQuery(value: string): string {
   return value
     .replace(/\\/g, '\\\\')
     .replace(/%/g, '\\%')
     .replace(/_/g, '\\_')
+    .replace(/[,()]/g, ' ')
     .slice(0, 200);
 }
 
@@ -72,4 +78,22 @@ export async function parseJsonBody<TSchema extends ZodTypeAny>(
 /** Validate that a value is one of allowed options */
 export function isOneOf<T extends string>(value: unknown, options: readonly T[]): value is T {
   return typeof value === 'string' && (options as readonly string[]).includes(value);
+}
+
+/**
+ * Bornes un chemin de redirection post-auth aux URLs internes (securite C-1).
+ *
+ * Accepte uniquement les chemins absolus mono-slash (`/`, `/articles`, etc.).
+ * Rejette les URLs protocol-relative (`//evil.com`), externes (`https://...`,
+ * `data:...`), et les variantes Windows (`/\\evil.com`).
+ *
+ * Retourne `/` par defaut si l'entree est nulle/vide/dangereuse.
+ */
+export function safeNextPath(raw: string | null | undefined): string {
+  if (!raw) return '/';
+  if (typeof raw !== 'string') return '/';
+  if (!raw.startsWith('/')) return '/';
+  if (raw.startsWith('//')) return '/';
+  if (raw.startsWith('/\\')) return '/';
+  return raw;
 }

@@ -1,11 +1,13 @@
-'use client';
-
 import {
   Users, BarChart3, TrendingUp, DollarSign, Activity,
   Ban, UserPlus, UserMinus, Repeat, Target, FileBarChart, Crown, Eye, Newspaper, FileText, Clock,
 } from 'lucide-react';
 import { formatPrice } from '@/config/pricing';
 import { VariationBadge } from '@/components/data/VariationBadge';
+
+// Qual H-6 : composant purement presentationnel (zero hook, zero handler).
+// Pas besoin de 'use client'. Il continue de marcher en Server Component
+// meme s'il est instancie depuis un Client Component (AdminDashboard).
 
 interface OverviewData {
   mrr: number;

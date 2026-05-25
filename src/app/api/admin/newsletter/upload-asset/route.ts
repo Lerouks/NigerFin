@@ -1,11 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
+import DOMPurify from 'isomorphic-dompurify';
 import { requireAdmin } from '@/lib/admin-auth';
 import { serverError } from '@/lib/api-error';
 import { compressImageBuffer } from '@/lib/image-compress';
 
+// Sec M-7 : SVG accepte UNIQUEMENT apres sanitize DOMPurify (profile SVG).
+// Sans ca, un admin compromis pouvait uploader un SVG avec un <script>
+// inline => stored XSS quand le SVG est rendu inline dans la newsletter.
 const ALLOWED_MIME = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/svg+xml']);
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 const BUCKET = 'newsletter-assets';
+
+function sanitizeSvg(buffer: Buffer): Buffer {
+  const raw = buffer.toString('utf8');
+  const clean = DOMPurify.sanitize(raw, {
+    USE_PROFILES: { svg: true, svgFilters: true },
+    FORBID_TAGS: ['script', 'foreignObject', 'iframe'],
+    FORBID_ATTR: ['onload', 'onclick', 'onerror', 'onmouseover'],
+  });
+  return Buffer.from(clean, 'utf8');
+}
 
 function safeFilename(name: string): string {
   return name
@@ -52,9 +66,10 @@ export async function POST(req: NextRequest) {
     const path = `${new Date().getFullYear()}/${Date.now()}-${cleanName}`;
 
     const originalBuffer = Buffer.from(await file.arrayBuffer());
-    // Compress before upload (skips SVG and animated GIF)
+    // SVG : sanitize DOMPurify (strip script/foreignObject/on* handlers).
+    // Autres formats : compression image standard.
     const { buffer } = file.type === 'image/svg+xml'
-      ? { buffer: originalBuffer }
+      ? { buffer: sanitizeSvg(originalBuffer) }
       : await compressImageBuffer(originalBuffer, file.type);
 
     const { error: upErr } = await serviceClient.storage.from(BUCKET).upload(path, buffer, {

@@ -3,12 +3,14 @@
 import { useState, useTransition, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Save, Eye, Send, Trash2, Plus, Minus, Calendar, Mail } from 'lucide-react';
+import { Save, Eye, Send, Trash2, Calendar, Mail } from 'lucide-react';
 import { MiniRichTextEditor } from '@/components/admin/MiniRichTextEditor';
 import { AssetUploader } from '@/components/admin/AssetUploader';
 import { ArticlePicker } from '@/components/admin/ArticlePicker';
 import type { NewsletterIssueRow, NewsletterAudience, NewsletterStatus } from '@/lib/newsletter/issues';
 import type { NewsletterIssue } from '@/emails/types';
+import { FormSection, Field, RepeatableSection } from './EditorFormParts';
+import { EditorDiscoverSection } from './EditorDiscoverSection';
 
 interface EditorClientProps {
   issue: NewsletterIssueRow;
@@ -710,89 +712,8 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
           />
         </FormSection>
 
-        {/* DISCOVER (autres rubriques du site) */}
-        <FormSection title="Continuer sur NFI Report (rubriques à valoriser)">
-          <p className="text-xs text-foreground/55">
-            Mets en avant les autres rubriques du site (éducation, entreprises BRVM, niger interactive…) pour
-            que la newsletter ne soit pas qu’un éditorial mais aussi une porte d’entrée vers tout le produit.
-          </p>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Eyebrow (petit titre or)">
-              <input
-                type="text"
-                value={content.discover?.eyebrow ?? ''}
-                onChange={(e) => patchContent({ discover: { ...(content.discover ?? { items: [] }), eyebrow: e.target.value } })}
-                placeholder="Continuer la lecture"
-                className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
-              />
-            </Field>
-            <Field label="Titre principal">
-              <input
-                type="text"
-                value={content.discover?.title ?? ''}
-                onChange={(e) => patchContent({ discover: { ...(content.discover ?? { items: [] }), title: e.target.value } })}
-                placeholder="Aussi cette semaine sur NFI Report"
-                className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
-              />
-            </Field>
-          </div>
-          <Field label="Description courte (optionnelle)">
-            <textarea
-              value={content.discover?.caption ?? ''}
-              onChange={(e) => patchContent({ discover: { ...(content.discover ?? { items: [] }), caption: e.target.value } })}
-              rows={2}
-              className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
-            />
-          </Field>
-          <RepeatableSection
-            label="Rubriques à mettre en avant (3 idéal)"
-            items={content.discover?.items ?? []}
-            onAdd={() => patchContent({ discover: { ...(content.discover ?? { items: [] }), items: [...(content.discover?.items ?? []), { rubric: '', title: '', description: '', url: '' }] } })}
-            onRemove={(idx) => patchContent({ discover: { ...(content.discover ?? { items: [] }), items: (content.discover?.items ?? []).filter((_, i) => i !== idx) } })}
-            renderItem={(it, idx) => (
-              <div className="space-y-2">
-                <div className="grid gap-2 sm:grid-cols-[80px_1fr_1fr]">
-                  <input
-                    placeholder="🎓"
-                    value={it.emoji ?? ''}
-                    onChange={(e) => patchContent({ discover: { ...(content.discover ?? { items: [] }), items: (content.discover?.items ?? []).map((x, i) => i === idx ? { ...x, emoji: e.target.value } : x) } })}
-                    className="rounded border border-foreground/15 bg-white px-2 py-1 text-base"
-                  />
-                  <input
-                    placeholder="Rubrique (ex: Éducation financière)"
-                    value={it.rubric}
-                    onChange={(e) => patchContent({ discover: { ...(content.discover ?? { items: [] }), items: (content.discover?.items ?? []).map((x, i) => i === idx ? { ...x, rubric: e.target.value } : x) } })}
-                    className="rounded border border-foreground/15 bg-white px-2 py-1 text-sm uppercase tracking-wider"
-                  />
-                  <input
-                    placeholder="CTA (ex: Commencer le parcours)"
-                    value={it.ctaLabel ?? ''}
-                    onChange={(e) => patchContent({ discover: { ...(content.discover ?? { items: [] }), items: (content.discover?.items ?? []).map((x, i) => i === idx ? { ...x, ctaLabel: e.target.value } : x) } })}
-                    className="rounded border border-foreground/15 bg-white px-2 py-1 text-sm"
-                  />
-                </div>
-                <input
-                  placeholder="Titre accrocheur (ex: Comprendre la BRVM en 6 leçons)"
-                  value={it.title}
-                  onChange={(e) => patchContent({ discover: { ...(content.discover ?? { items: [] }), items: (content.discover?.items ?? []).map((x, i) => i === idx ? { ...x, title: e.target.value } : x) } })}
-                  className="w-full rounded border border-foreground/15 bg-white px-2 py-1 text-sm font-semibold"
-                />
-                <textarea
-                  placeholder="1 à 2 lignes d'accroche pour donner envie de cliquer"
-                  value={it.description}
-                  onChange={(e) => patchContent({ discover: { ...(content.discover ?? { items: [] }), items: (content.discover?.items ?? []).map((x, i) => i === idx ? { ...x, description: e.target.value } : x) } })}
-                  rows={2}
-                  className="w-full rounded border border-foreground/15 bg-white px-2 py-1 text-sm"
-                />
-                <ArticlePicker
-                  value={it.url}
-                  onChange={(url) => patchContent({ discover: { ...(content.discover ?? { items: [] }), items: (content.discover?.items ?? []).map((x, i) => i === idx ? { ...x, url: url ?? '' } : x) } })}
-                  placeholder="URL de la rubrique (ex: nfireport.com/education)"
-                />
-              </div>
-            )}
-          />
-        </FormSection>
+        {/* DISCOVER (autres rubriques du site) - extrait dans EditorDiscoverSection.tsx (QUAL-H4) */}
+        <EditorDiscoverSection content={content} patchContent={patchContent} />
 
       </main>
 
@@ -866,63 +787,3 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
   );
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────
-
-function FormSection({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="rounded-2xl border border-foreground/10 bg-white p-5 shadow-sm">
-      <h2 className="mb-4 text-sm font-bold uppercase tracking-[0.18em] text-foreground/60">{title}</h2>
-      <div className="space-y-3">{children}</div>
-    </section>
-  );
-}
-
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-foreground/60">
-        {label}
-        {hint ? <span className="ml-2 normal-case font-normal text-foreground/40">{hint}</span> : null}
-      </label>
-      {children}
-    </div>
-  );
-}
-
-interface RepeatableSectionProps<T> {
-  label: string;
-  items: T[];
-  onAdd: () => void;
-  onRemove: (idx: number) => void;
-  renderItem: (item: T, idx: number) => React.ReactNode;
-}
-
-function RepeatableSection<T>({ label, items, onAdd, onRemove, renderItem }: RepeatableSectionProps<T>) {
-  return (
-    <div>
-      <div className="mb-2 flex items-center justify-between">
-        <span className="text-xs font-semibold uppercase tracking-wider text-foreground/60">{label}</span>
-        <button type="button" onClick={onAdd} className="inline-flex items-center gap-1 rounded-md border border-foreground/15 bg-white px-2 py-1 text-xs font-semibold hover:bg-muted">
-          <Plus className="h-3.5 w-3.5" /> Ajouter
-        </button>
-      </div>
-      {items.length === 0 ? (
-        <p className="rounded-md border border-dashed border-foreground/15 bg-muted/30 px-3 py-2 text-xs text-foreground/55">Aucun item.</p>
-      ) : (
-        <div className="space-y-3">
-          {items.map((item, idx) => (
-            <div key={idx} className="rounded-md border border-foreground/10 bg-muted/30 p-3">
-              <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs font-semibold text-foreground/55">#{idx + 1}</span>
-                <button type="button" onClick={() => onRemove(idx)} className="inline-flex items-center gap-1 text-xs text-red-700 hover:underline">
-                  <Minus className="h-3.5 w-3.5" /> Supprimer
-                </button>
-              </div>
-              {renderItem(item, idx)}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}

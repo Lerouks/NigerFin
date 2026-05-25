@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
+import { SITE_URL } from '@/lib/config';
 import { ToolContent } from './ToolContent';
 import { ToolSeoContent } from './ToolSeoContent';
 
@@ -62,8 +64,53 @@ export default async function ToolPage({ params }: ToolPageProps) {
   const tool = toolsMeta[slug];
   if (!tool) notFound();
 
+  const nonce = (await headers()).get('x-nonce') || undefined;
+  // SEO M-3 : SoftwareApplication schema. Sert a Google pour les rich results
+  // sur les outils financiers (mensualites, simulateurs).
+  const softwareLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: tool.title,
+    description: tool.description,
+    applicationCategory: 'FinanceApplication',
+    operatingSystem: 'Web',
+    url: `${SITE_URL}/outil/${slug}`,
+    inLanguage: 'fr',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'XOF',
+      availability: 'https://schema.org/InStock',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'NFI Report',
+      url: SITE_URL,
+    },
+  };
+  // SEO M-2 : BreadcrumbList pour SERP riche.
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Accueil', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Outils', item: `${SITE_URL}/outils` },
+      { '@type': 'ListItem', position: 3, name: tool.title, item: `${SITE_URL}/outil/${slug}` },
+    ],
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        nonce={nonce}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareLd) }}
+      />
+      <script
+        type="application/ld+json"
+        nonce={nonce}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
       <ToolContent
         slug={slug}
         title={tool.title}

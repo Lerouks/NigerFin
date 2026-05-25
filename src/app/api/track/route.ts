@@ -25,8 +25,14 @@ export async function POST(req: NextRequest) {
       referrer?: string;
     };
 
-    if (!page_path) {
-      return NextResponse.json({ error: 'page_path required' }, { status: 400 });
+    // LOW-SEC-5 : page_path doit etre un chemin interne plausible.
+    // Empeche la pollution de page_views par des strings arbitraires
+    // ou par des URLs externes (qui n'ont rien a faire dans notre table).
+    if (!page_path || typeof page_path !== 'string') {
+      return NextResponse.json({ ok: true });
+    }
+    if (!page_path.startsWith('/') || page_path.length > 500 || /[\s<>"]/.test(page_path)) {
+      return NextResponse.json({ ok: true });
     }
 
     const supabase = createServiceClient();

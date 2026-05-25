@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { requireAdmin } from '@/lib/admin-auth';
+import * as Sentry from '@sentry/nextjs';
 
 // POST: set a single article as featured (atomic)
 export async function POST(req: NextRequest) {
@@ -21,7 +22,8 @@ export async function POST(req: NextRequest) {
   });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    Sentry.captureException(error, { tags: { context: 'admin-featured-set' }, extra: { articleId } });
+    return NextResponse.json({ error: 'Erreur lors de la mise à la une' }, { status: 500 });
   }
 
   // Immediately revalidate homepage so featured change is visible
@@ -50,7 +52,8 @@ export async function DELETE(req: NextRequest) {
   });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    Sentry.captureException(error, { tags: { context: 'admin-featured-unset' }, extra: { articleId } });
+    return NextResponse.json({ error: 'Erreur lors du retrait de la une' }, { status: 500 });
   }
 
   revalidatePath('/');

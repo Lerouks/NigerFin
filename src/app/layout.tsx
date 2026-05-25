@@ -140,7 +140,7 @@ export default async function RootLayout({
   const nonce = (await headers()).get('x-nonce') ?? undefined;
 
   return (
-    <html lang="fr" className={`${inter.variable}`} suppressHydrationWarning>
+    <html lang="fr" dir="ltr" className={`${inter.variable}`} suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"

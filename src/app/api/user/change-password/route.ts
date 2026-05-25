@@ -100,6 +100,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Erreur lors de la mise à jour. Veuillez réessayer.' }, { status: 500 });
   }
 
+  // Sec H-8 : invalide les sessions sur les autres appareils. La session courante
+  // (celle qui a fait le changement de mot de passe) reste valide pour eviter de
+  // forcer l'utilisateur a se reconnecter immediatement apres son changement.
+  // En cas d'erreur, on log mais on n'echoue pas : le mot de passe est deja change.
+  const { error: signOutError } = await supabase.auth.signOut({ scope: 'others' });
+  if (signOutError) {
+    Sentry.captureException(signOutError, {
+      tags: { context: 'password-change-signout-others' },
+      extra: { userId: user.id },
+    });
+  }
+
   // Audit log success
   await logAuditEvent(user.id, 'password_changed', 'user', user.id);
 

@@ -51,7 +51,9 @@ export async function GET(request: NextRequest) {
     (profiles || []).map((p) => [p.id, p])
   );
 
-  let sent = 0;
+  // Qual H-2 : un seul UPDATE batch a la fin de la boucle au lieu d'un UPDATE
+  // par envoi reussi (N+1 vers Supabase, lent sur 50-100 expirations).
+  const successUserIds: string[] = [];
 
   for (const sub of expiring) {
     const profile = profileMap.get(sub.user_id);
@@ -64,16 +66,24 @@ export async function GET(request: NextRequest) {
 
     try {
       await sendTransactionalEmail({ to: profile.email, ...warning });
-      // Mark as sent to avoid duplicates
-      await service
-        .from('user_profiles')
-        .update({ expiration_warning_sent: true })
-        .eq('id', sub.user_id);
-      sent++;
+      successUserIds.push(sub.user_id);
     } catch (err) {
       Sentry.captureException(err, { tags: { context: 'cron-expiration-warning-email' }, extra: { userId: sub.user_id } });
     }
   }
 
-  return NextResponse.json({ sent, total: expiring.length });
+  if (successUserIds.length > 0) {
+    const { error: updateErr } = await service
+      .from('user_profiles')
+      .update({ expiration_warning_sent: true })
+      .in('id', successUserIds);
+    if (updateErr) {
+      Sentry.captureException(updateErr, {
+        tags: { context: 'cron-expiration-warning-batch-update' },
+        extra: { successCount: successUserIds.length },
+      });
+    }
+  }
+
+  return NextResponse.json({ sent: successUserIds.length, total: expiring.length });
 }

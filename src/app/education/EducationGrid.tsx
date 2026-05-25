@@ -35,11 +35,11 @@ export function EducationGrid({ categories }: { categories: Category[] }) {
               href={`/education/${cat.slug}`}
               className="group relative flex flex-col justify-between rounded-xl p-5 h-[160px] md:h-[180px] text-left transition-all duration-150 border bg-[#1a1a1a] border-white/[0.06] text-white hover:border-white/20 hover:bg-[#222] hover:shadow-lg hover:-translate-y-0.5"
             >
-              <Icon className="w-7 h-7 text-white/70 group-hover:text-white transition-colors" />
+              <Icon className="w-7 h-7 text-white/70 group-hover:text-white transition-colors" aria-hidden="true" />
               <div>
                 <p className="text-[14px] font-semibold leading-tight">{cat.title}</p>
                 {cat.lesson_count > 0 && (
-                  <span className="text-[10px] text-white/30 mt-1 block">{cat.lesson_count} leçon{cat.lesson_count !== 1 ? 's' : ''}</span>
+                  <span className="text-[11px] text-white/70 mt-1 block">{cat.lesson_count} leçon{cat.lesson_count !== 1 ? 's' : ''}</span>
                 )}
               </div>
             </Link>
@@ -49,12 +49,13 @@ export function EducationGrid({ categories }: { categories: Category[] }) {
         return (
           <div
             key={cat.id}
-            className="relative flex flex-col justify-between rounded-xl p-5 h-[160px] md:h-[180px] text-left border bg-[#1a1a1a] border-white/[0.04] text-white/30 cursor-not-allowed"
+            aria-disabled="true"
+            className="relative flex flex-col justify-between rounded-xl p-5 h-[160px] md:h-[180px] text-left border bg-[#1a1a1a] border-white/[0.06] text-white/55 cursor-not-allowed"
           >
-            <Icon className="w-7 h-7 text-white/20" />
+            <Icon className="w-7 h-7 text-white/55" aria-hidden="true" />
             <div>
-              <p className="text-[14px] font-semibold leading-tight">{cat.title}</p>
-              <span className="text-[10px] text-white/20 mt-1 block">Bientôt disponible</span>
+              <p className="text-[14px] font-semibold leading-tight text-white/80">{cat.title}</p>
+              <span className="text-[11px] text-white/60 mt-1 block">Bientôt disponible</span>
             </div>
           </div>
         );

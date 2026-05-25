@@ -63,11 +63,24 @@ export function CookieBanner() {
     dismiss();
   };
 
+  // Escape key to dismiss (treat as reject for safety - GDPR conservative default).
+  // a11y : SC 2.1.2 No Keyboard Trap.
+  useEffect(() => {
+    if (!shouldShow) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      setConsent('rejected');
+      setAnimate(false);
+      setTimeout(() => setShouldShow(false), 300);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [shouldShow]);
+
   if (!shouldShow) return null;
 
   return (
-    <div
-      role="dialog"
+    <aside
       aria-live="polite"
       aria-label="Consentement aux cookies"
       className="fixed z-[100] inset-x-0 bottom-0 sm:inset-x-auto sm:bottom-4 sm:left-4 sm:max-w-sm pointer-events-none"
@@ -121,6 +134,6 @@ export function CookieBanner() {
           </button>
         </div>
       </div>
-    </div>
+    </aside>
   );
 }

@@ -69,6 +69,8 @@ export function GraphRepartition({
   const capitalPercent = ((capital / total) * 100).toFixed(1);
   const interestPercent = ((interest / total) * 100).toFixed(1);
 
+  // LOW-QUAL-1 : Recharts ne type pas correctement le param de activeShape
+  // (signature interne). Le cast en any est volontaire et limite a ce callback.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderActive = (props: any) => {
     const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props;
@@ -120,6 +122,9 @@ export function GraphRepartition({
         <div className="w-36 h-36 sm:w-40 sm:h-40 flex-shrink-0 cursor-pointer">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
+              {/* LOW-QUAL-1 : Recharts Pie types restreignent activeIndex
+                  alors qu'a l'execution number ou undefined fonctionnent.
+                  Cast volontaire, contenu et documente. */}
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               <Pie {...pieProps as any}>
                 {data.map((_, index) => (

@@ -60,11 +60,13 @@ function beforeSend(event: ErrorEvent, _hint: EventHint): ErrorEvent | null {
 // (1+ executions/jour) et n'apportent rien a la perf prod observable. Le
 // tracesSampler herite de tracesSampleRate pour le reste, mais retourne 0
 // pour les routes exclues.
-function tracesSampler(samplingContext: { transactionContext?: { name?: string } }): number {
-  const name = samplingContext.transactionContext?.name || '';
+type SentryTracesSampler = NonNullable<NonNullable<Parameters<typeof Sentry.init>[0]>['tracesSampler']>;
+
+const tracesSampler: SentryTracesSampler = (samplingContext) => {
+  const name = samplingContext.name || '';
   if (name.includes('/api/cron/') || name.includes('/api/health')) return 0;
   return 0.1;
-}
+};
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,

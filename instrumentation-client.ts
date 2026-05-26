@@ -64,3 +64,5 @@ if (hasConsent) {
     sendDefaultPii: false,
   });
 }
+
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

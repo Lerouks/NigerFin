@@ -64,7 +64,7 @@ const sections = [
 
 export default function PlanDuSitePage() {
   return (
-    <div className="min-h-screen bg-[#fafaf9]">
+    <div className="min-h-screen bg-background">
       <section className="bg-[#111] text-white py-16 md:py-20">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-3xl md:text-4xl">Plan du site</h1>
@@ -76,7 +76,7 @@ export default function PlanDuSitePage() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {sections.map((section) => (
-              <div key={section.title} className="bg-white rounded-xl p-6 border border-black/[0.06]">
+              <div key={section.title} className="bg-white rounded-xl p-6 border border-black/6">
                 <h2 className="text-[11px] tracking-[0.15em] uppercase text-gray-500 mb-4 font-medium">
                   {section.title}
                 </h2>
@@ -98,7 +98,7 @@ export default function PlanDuSitePage() {
         </div>
       </section>
 
-      <section className="bg-white border-t border-black/[0.06]">
+      <section className="bg-white border-t border-black/6">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
           <div className="prose prose-sm sm:prose-base max-w-none">
             <h2 className="text-2xl sm:text-3xl font-bold text-[#111] mb-4">À propos de ce plan du site</h2>

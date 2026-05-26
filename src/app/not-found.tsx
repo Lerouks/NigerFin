@@ -3,10 +3,10 @@ import { ArrowRight } from 'lucide-react';
 
 export default function NotFound() {
   return (
-    <div className="min-h-[70vh] bg-[#fafaf9] flex items-center justify-center">
+    <div className="min-h-[70vh] bg-background flex items-center justify-center">
       <div className="text-center px-4">
         <div className="mb-8">
-          <span className="text-[120px] md:text-[160px] font-bold text-black/[0.04] leading-none block">
+          <span className="text-[120px] md:text-[160px] font-bold text-black/4 leading-none block">
             404
           </span>
         </div>
@@ -25,7 +25,7 @@ export default function NotFound() {
           </Link>
           <Link
             href="/contact"
-            className="inline-flex items-center justify-center gap-2 border border-black/[0.1] px-7 py-3 rounded-full hover:bg-black/5 transition-colors text-[14px]"
+            className="inline-flex items-center justify-center gap-2 border border-black/10 px-7 py-3 rounded-full hover:bg-black/5 transition-colors text-[14px]"
           >
             Nous contacter
           </Link>

@@ -95,17 +95,17 @@ export default function CompleterProfilPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#fafaf9] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
       </div>
     );
   }
 
-  const inputClass = "w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black/10";
-  const selectClass = "w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-[#fafaf9]";
+  const inputClass = "w-full border border-black/8 rounded-lg px-4 py-3 text-[14px] bg-background focus:outline-hidden focus:ring-1 focus:ring-black/10";
+  const selectClass = "w-full border border-black/8 rounded-lg px-4 py-3 text-[14px] bg-background";
 
   return (
-    <div className="min-h-screen bg-[#fafaf9] flex items-center justify-center px-4 py-10">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-lg">
         <div className="bg-white rounded-2xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] p-8 sm:p-10 animate-fade-in-up">
           {/* Header */}

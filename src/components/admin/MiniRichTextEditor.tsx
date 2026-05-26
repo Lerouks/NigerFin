@@ -46,7 +46,7 @@ export function MiniRichTextEditor({ value, onChange, placeholder, rows = 4 }: M
     immediatelyRender: false,
     editorProps: {
       attributes: {
-        class: `prose prose-sm max-w-none min-h-[${rows * 1.6}em] p-3 focus:outline-none`,
+        class: `prose prose-sm max-w-none min-h-[${rows * 1.6}em] p-3 focus:outline-hidden`,
         'data-placeholder': placeholder ?? '',
       },
     },
@@ -109,11 +109,11 @@ export function MiniRichTextEditor({ value, onChange, placeholder, rows = 4 }: M
             value={linkValue}
             onChange={(e) => setLinkValue(e.target.value)}
             placeholder="https://nfireport.com/articles/..."
-            className="flex-1 rounded border border-foreground/20 bg-white px-2 py-1 text-xs"
+            className="flex-1 rounded-sm border border-foreground/20 bg-white px-2 py-1 text-xs"
             autoFocus
           />
-          <button type="button" onClick={applyLink} className="rounded bg-primary px-2 py-1 text-xs font-semibold text-white">OK</button>
-          <button type="button" onClick={() => setLinkOpen(false)} className="rounded px-2 py-1 text-xs text-foreground/60">Annuler</button>
+          <button type="button" onClick={applyLink} className="rounded-sm bg-primary px-2 py-1 text-xs font-semibold text-white">OK</button>
+          <button type="button" onClick={() => setLinkOpen(false)} className="rounded-sm px-2 py-1 text-xs text-foreground/60">Annuler</button>
         </div>
       ) : null}
     </div>

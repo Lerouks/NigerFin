@@ -225,7 +225,7 @@ export function IndicesEconomiques() {
   return (
     <div className="space-y-8">
       {/* Graphique d'évolution du PIB */}
-      <div className="bg-white border border-black/[0.06] rounded-xl p-6">
+      <div className="bg-white border border-black/6 rounded-xl p-6">
         <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
           Évolution du PIB du Niger (Mrd FCFA)
         </h3>
@@ -282,7 +282,7 @@ export function IndicesEconomiques() {
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-24 bg-white border border-black/[0.06] rounded-xl animate-pulse" />
+            <div key={i} className="h-24 bg-white border border-black/6 rounded-xl animate-pulse" />
           ))}
         </div>
       ) : indicators.length > 0 ? (
@@ -290,7 +290,7 @@ export function IndicesEconomiques() {
           {indicators.map((idx) => (
             <div
               key={idx.key}
-              className="flex items-center justify-between p-5 bg-white border border-black/[0.06] rounded-xl hover:border-black/[0.12] transition-colors"
+              className="flex items-center justify-between p-5 bg-white border border-black/6 rounded-xl hover:border-black/12 transition-colors"
             >
               <div>
                 <p className="text-[13px] text-gray-500">{idx.name}</p>
@@ -314,7 +314,7 @@ export function IndicesEconomiques() {
           ))}
         </div>
       ) : (
-        <div className="p-8 text-center bg-white border border-black/[0.06] rounded-xl text-[14px] text-gray-500">
+        <div className="p-8 text-center bg-white border border-black/6 rounded-xl text-[14px] text-gray-500">
           Aucun indicateur disponible pour le moment. Les APIs publiques (Banque mondiale, FMI) sont temporairement indisponibles.
         </div>
       )}
@@ -336,7 +336,7 @@ export function IndicesEconomiques() {
           directement par l'Institut National de la Statistique du Niger.
           Source de vérité : src/data/ins-indicators.ts
       */}
-      <div className="pt-8 mt-4 border-t border-black/[0.06]">
+      <div className="pt-8 mt-4 border-t border-black/6">
         <MacroIndicatorsBlock
           eyebrow="Conjoncture récente"
           title="Indicateurs INS Niger temps quasi-réel"

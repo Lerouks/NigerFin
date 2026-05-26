@@ -255,7 +255,7 @@ export function AccountDashboard() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           {/* Sidebar navigation - desktop */}
-          <aside className="hidden lg:block w-[200px] flex-shrink-0">
+          <aside className="hidden lg:block w-[200px] shrink-0">
             <nav className="sticky top-24 space-y-1">
               {sections.map((s) => {
                 const Icon = s.icon;
@@ -266,7 +266,7 @@ export function AccountDashboard() {
                     onClick={() => setActiveSection(s.id)}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[14px] font-medium transition-all ${
                       isActive
-                        ? 'bg-primary text-white shadow-sm'
+                        ? 'bg-primary text-white shadow-xs'
                         : 'text-gray-500 hover:bg-white hover:text-gray-700'
                     }`}
                   >
@@ -275,7 +275,7 @@ export function AccountDashboard() {
                   </button>
                 );
               })}
-              <div className="h-px bg-black/[0.06] my-3" />
+              <div className="h-px bg-black/6 my-3" />
               <button
                 onClick={async () => { await signOut(); router.push('/'); }}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[14px] text-gray-500 hover:text-red-500 hover:bg-red-50 transition-colors"
@@ -288,7 +288,7 @@ export function AccountDashboard() {
 
           {/* Mobile navigation */}
           <div className="lg:hidden w-full mb-6">
-            <div className="flex gap-1 bg-white rounded-xl p-1.5 border border-black/[0.06] shadow-sm overflow-x-auto">
+            <div className="flex gap-1 bg-white rounded-xl p-1.5 border border-black/6 shadow-xs overflow-x-auto">
               {sections.map((s) => {
                 const Icon = s.icon;
                 return (
@@ -315,11 +315,11 @@ export function AccountDashboard() {
               <>
                 {/* Subscription status - skeleton while loading */}
                 {summaryLoading ? (
-                  <div className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden animate-pulse">
+                  <div className="bg-white rounded-2xl border border-black/6 overflow-hidden animate-pulse">
                     <div className="bg-primary p-6 sm:p-8">
-                      <div className="h-4 w-32 bg-white/10 rounded mb-4" />
-                      <div className="h-7 w-64 bg-white/10 rounded mb-2" />
-                      <div className="h-4 w-80 bg-white/5 rounded" />
+                      <div className="h-4 w-32 bg-white/10 rounded-sm mb-4" />
+                      <div className="h-7 w-64 bg-white/10 rounded-sm mb-2" />
+                      <div className="h-4 w-80 bg-white/5 rounded-sm" />
                     </div>
                     <div className="p-6 sm:p-8">
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -330,8 +330,8 @@ export function AccountDashboard() {
                     </div>
                   </div>
                 ) : isSubscribed && sub ? (
-                  <div className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden">
-                    <div className="bg-gradient-to-r from-[#111] to-[#1a1a1a] text-white p-6 sm:p-8">
+                  <div className="bg-white rounded-2xl border border-black/6 overflow-hidden">
+                    <div className="bg-linear-to-r from-[#111] to-foreground text-white p-6 sm:p-8">
                       <div className="flex items-center gap-2 mb-3">
                         <Crown className="w-5 h-5 text-gold" />
                         <span className="text-[11px] tracking-[0.15em] uppercase text-gold">Abonnement en cours</span>
@@ -373,7 +373,7 @@ export function AccountDashboard() {
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-gradient-to-br from-[#111] to-[#1a1a1a] text-white rounded-2xl p-6 sm:p-8">
+                  <div className="bg-linear-to-br from-[#111] to-foreground text-white rounded-2xl p-6 sm:p-8">
                     <div className="flex items-center gap-2 mb-3">
                       <Zap className="w-5 h-5 text-gold" />
                       <span className="text-[11px] tracking-[0.15em] uppercase text-gold">Passez Premium</span>
@@ -389,7 +389,7 @@ export function AccountDashboard() {
                 )}
 
                 {/* Rappel des avantages - style JA */}
-                <div className="bg-white rounded-2xl border border-black/[0.06] p-6 sm:p-8">
+                <div className="bg-white rounded-2xl border border-black/6 p-6 sm:p-8">
                   <h3 className="text-lg font-semibold mb-6">
                     {isSubscribed ? 'Rappel de vos avantages' : 'Avantages Premium'}
                   </h3>
@@ -398,7 +398,7 @@ export function AccountDashboard() {
                       const Icon = benefit.icon;
                       return (
                         <div key={benefit.label} className="flex items-center gap-4">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
                             isSubscribed ? 'bg-gold/10' : 'bg-gray-100'
                           }`}>
                             <Icon className={`w-5 h-5 ${isSubscribed ? 'text-gold' : 'text-gray-500'}`} />
@@ -413,14 +413,14 @@ export function AccountDashboard() {
 
                 {/* Historique paiements */}
                 {summary?.recentPayments && summary.recentPayments.length > 0 && (
-                  <div className="bg-white rounded-2xl border border-black/[0.06] p-6 sm:p-8">
+                  <div className="bg-white rounded-2xl border border-black/6 p-6 sm:p-8">
                     <div className="flex items-center gap-2 mb-5">
                       <Heart className="w-4 h-4 text-gray-500" />
                       <h3 className="text-lg font-semibold">Historique des paiements</h3>
                     </div>
                     <div className="space-y-3">
                       {summary.recentPayments.map((payment) => (
-                        <div key={payment.id} className="flex items-center justify-between py-3 border-b border-black/[0.04] last:border-0">
+                        <div key={payment.id} className="flex items-center justify-between py-3 border-b border-black/4 last:border-0">
                           <div>
                             <p className="text-[14px] font-medium capitalize">{payment.tier} - {getBillingCycleLabel(payment.billing_cycle || 'monthly')}</p>
                             <p className="text-[12px] text-gray-500">
@@ -458,7 +458,7 @@ export function AccountDashboard() {
                 )}
 
                 {/* Coordonnées */}
-                <div className="bg-white rounded-2xl border border-black/[0.06] p-6 sm:p-8">
+                <div className="bg-white rounded-2xl border border-black/6 p-6 sm:p-8">
                   <h3 className="text-lg font-semibold mb-6">Vos coordonnées</h3>
                   <div className="space-y-5">
                     {/* Civilité */}
@@ -495,37 +495,37 @@ export function AccountDashboard() {
                 </div>
 
                 {/* Identifiants */}
-                <div className="bg-white rounded-2xl border border-black/[0.06] p-6 sm:p-8">
+                <div className="bg-white rounded-2xl border border-black/6 p-6 sm:p-8">
                   <h3 className="text-lg font-semibold mb-6">Vos identifiants</h3>
                   <div className="space-y-5">
                     <div>
                       <label className="block text-[13px] font-medium text-gray-700 mb-1.5">E-mail</label>
-                      <input type="email" value={user?.email || ''} disabled className="w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-background text-gray-500" />
+                      <input type="email" value={user?.email || ''} disabled className="w-full border border-black/8 rounded-lg px-4 py-3 text-[14px] bg-background text-gray-500" />
                       <p className="text-[11px] text-gray-500 mt-1.5">Pour changer votre e-mail, <Link href="/contact" className="underline hover:text-gray-600">contactez-nous</Link>.</p>
                     </div>
-                    <button onClick={() => setActiveSection('securite')} className="flex items-center gap-2 border border-black/[0.08] px-4 py-2.5 rounded-xl text-[13px] font-medium text-gray-700 hover:bg-secondary transition-colors">
+                    <button onClick={() => setActiveSection('securite')} className="flex items-center gap-2 border border-black/8 px-4 py-2.5 rounded-xl text-[13px] font-medium text-gray-700 hover:bg-secondary transition-colors">
                       <Lock className="w-4 h-4" /> Changer le mot de passe
                     </button>
                   </div>
                 </div>
 
                 {/* Compléter votre profil */}
-                <div className="bg-white rounded-2xl border border-black/[0.06] p-6 sm:p-8">
+                <div className="bg-white rounded-2xl border border-black/6 p-6 sm:p-8">
                   <h3 className="text-lg font-semibold mb-6">Compléter votre profil</h3>
                   <div className="space-y-5">
                     {/* Date de naissance */}
                     <div>
                       <label className="block text-[13px] font-medium text-gray-700 mb-1.5">Date de naissance</label>
                       <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                        <select value={birthDay} onChange={(e) => setBirthDay(e.target.value)} disabled={!editingProfile} className="border border-black/[0.08] rounded-lg px-2 sm:px-3 py-3 text-[13px] sm:text-[14px] bg-background disabled:text-gray-500 w-full min-w-0">
+                        <select value={birthDay} onChange={(e) => setBirthDay(e.target.value)} disabled={!editingProfile} className="border border-black/8 rounded-lg px-2 sm:px-3 py-3 text-[13px] sm:text-[14px] bg-background disabled:text-gray-500 w-full min-w-0">
                           <option value="">Jour</option>
                           {Array.from({ length: 31 }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}</option>)}
                         </select>
-                        <select value={birthMonth} onChange={(e) => setBirthMonth(e.target.value)} disabled={!editingProfile} className="border border-black/[0.08] rounded-lg px-2 sm:px-3 py-3 text-[13px] sm:text-[14px] bg-background disabled:text-gray-500 w-full min-w-0">
+                        <select value={birthMonth} onChange={(e) => setBirthMonth(e.target.value)} disabled={!editingProfile} className="border border-black/8 rounded-lg px-2 sm:px-3 py-3 text-[13px] sm:text-[14px] bg-background disabled:text-gray-500 w-full min-w-0">
                           <option value="">Mois</option>
                           {['Jan.','Fév.','Mars','Avr.','Mai','Juin','Juil.','Août','Sep.','Oct.','Nov.','Déc.'].map((m, i) => <option key={i + 1} value={i + 1}>{m}</option>)}
                         </select>
-                        <select value={birthYear} onChange={(e) => setBirthYear(e.target.value)} disabled={!editingProfile} className="border border-black/[0.08] rounded-lg px-2 sm:px-3 py-3 text-[13px] sm:text-[14px] bg-background disabled:text-gray-500 w-full min-w-0">
+                        <select value={birthYear} onChange={(e) => setBirthYear(e.target.value)} disabled={!editingProfile} className="border border-black/8 rounded-lg px-2 sm:px-3 py-3 text-[13px] sm:text-[14px] bg-background disabled:text-gray-500 w-full min-w-0">
                           <option value="">Année</option>
                           {Array.from({ length: 80 }, (_, i) => new Date().getFullYear() - 13 - i).map((y) => <option key={y} value={y}>{y}</option>)}
                         </select>
@@ -547,7 +547,7 @@ export function AccountDashboard() {
                     {/* Pays */}
                     <div>
                       <label className="block text-[13px] font-medium text-gray-700 mb-1.5">Pays</label>
-                      <select value={country} onChange={(e) => setCountry(e.target.value)} disabled={!editingProfile} className="w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-background disabled:text-gray-500">
+                      <select value={country} onChange={(e) => setCountry(e.target.value)} disabled={!editingProfile} className="w-full border border-black/8 rounded-lg px-4 py-3 text-[14px] bg-background disabled:text-gray-500">
                         <optgroup label="Afrique de l'Ouest">
                           {WEST_AFRICA_COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
                         </optgroup>
@@ -560,7 +560,7 @@ export function AccountDashboard() {
                     {/* Profession */}
                     <div>
                       <label className="block text-[13px] font-medium text-gray-700 mb-1.5">Profession</label>
-                      <select value={profession} onChange={(e) => setProfession(e.target.value)} disabled={!editingProfile} className="w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-background disabled:text-gray-500">
+                      <select value={profession} onChange={(e) => setProfession(e.target.value)} disabled={!editingProfile} className="w-full border border-black/8 rounded-lg px-4 py-3 text-[14px] bg-background disabled:text-gray-500">
                         <option value="">Sélectionner</option>
                         {PROFESSIONS.map((p2) => <option key={p2} value={p2}>{p2}</option>)}
                       </select>
@@ -591,7 +591,7 @@ export function AccountDashboard() {
 
             {/* ─── NEWSLETTER ─────────────────────────────────── */}
             {activeSection === 'newsletter' && (
-              <div className="bg-white rounded-2xl border border-black/[0.06] p-6 sm:p-8">
+              <div className="bg-white rounded-2xl border border-black/6 p-6 sm:p-8">
                 <h3 className="text-lg font-semibold mb-2">Préférences newsletter</h3>
                 <p className="mb-6 text-sm text-foreground/60">Choisissez les contenus NFI Report que vous souhaitez recevoir par email. Vos préférences sont enregistrées immédiatement.</p>
                 <PreferencesForm initial={newsletterPrefs} />
@@ -655,7 +655,7 @@ function ProfileField({ label, value, onChange, disabled, required, placeholder,
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
-        className="w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-background focus:outline-none focus:ring-1 focus:ring-black/10 disabled:text-gray-500 transition-colors"
+        className="w-full border border-black/8 rounded-lg px-4 py-3 text-[14px] bg-background focus:outline-hidden focus:ring-1 focus:ring-black/10 disabled:text-gray-500 transition-colors"
         placeholder={placeholder}
       />
     </div>
@@ -710,7 +710,7 @@ function PasswordChangeSection({ isReset = false }: { isReset?: boolean }) {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-black/[0.06] p-6 sm:p-8">
+    <div className="bg-white rounded-2xl border border-black/6 p-6 sm:p-8">
       <div className="flex items-center gap-2 mb-2">
         <Lock className="w-4 h-4 text-gray-500" />
         <h3 className="text-lg font-semibold">{isReset ? 'Définir un nouveau mot de passe' : 'Modifier le mot de passe'}</h3>
@@ -782,7 +782,7 @@ function PasswordField({ id, label, value, onChange, show, onToggle, placeholder
       <label htmlFor={id} className="block text-[13px] font-medium mb-1.5">{label}</label>
       <div className="relative">
         <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-        <input id={id} type={show ? 'text' : 'password'} value={value} onChange={(e) => onChange(e.target.value)} className={`w-full border rounded-lg pl-10 pr-10 py-3 bg-background focus:outline-none focus:ring-1 transition-all text-[14px] ${className || 'border-black/[0.08] focus:ring-black/5'}`} placeholder={placeholder} required={required} minLength={minLength} />
+        <input id={id} type={show ? 'text' : 'password'} value={value} onChange={(e) => onChange(e.target.value)} className={`w-full border rounded-lg pl-10 pr-10 py-3 bg-background focus:outline-hidden focus:ring-1 transition-all text-[14px] ${className || 'border-black/8 focus:ring-black/5'}`} placeholder={placeholder} required={required} minLength={minLength} />
         <button type="button" onClick={onToggle} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600">
           {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
         </button>
@@ -836,7 +836,7 @@ function DeleteAccountSection() {
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => !deleting && setShowModal(false)} />
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-xs" onClick={() => !deleting && setShowModal(false)} />
           <div className="relative bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full animate-fade-in-up">
             <h3 className="text-lg font-bold text-red-600 mb-3">Supprimer définitivement mon compte</h3>
             <p className="text-[13px] text-gray-600 mb-4 leading-relaxed">
@@ -851,7 +851,7 @@ function DeleteAccountSection() {
                 value={confirmText}
                 onChange={(e) => setConfirmText(e.target.value)}
                 placeholder="SUPPRIMER"
-                className="w-full border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-background focus:outline-none focus:ring-1 focus:ring-red-200"
+                className="w-full border border-black/8 rounded-lg px-4 py-3 text-[14px] bg-background focus:outline-hidden focus:ring-1 focus:ring-red-200"
                 autoComplete="off"
               />
             </div>

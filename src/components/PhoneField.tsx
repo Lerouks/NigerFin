@@ -129,7 +129,7 @@ export function PhoneField({ value, onChange, disabled }: PhoneFieldProps) {
           value={countryCode}
           onChange={(e) => handleCountryChange(e.target.value)}
           disabled={disabled}
-          className="border border-black/[0.08] rounded-lg px-2 py-3 text-[13px] bg-[#fafaf9] disabled:text-gray-500 min-w-0 w-[120px] sm:w-[140px] flex-shrink-0"
+          className="border border-black/8 rounded-lg px-2 py-3 text-[13px] bg-background disabled:text-gray-500 min-w-0 w-[120px] sm:w-[140px] shrink-0"
         >
           <optgroup label="Afrique de l'Ouest">
             {WEST_AFRICA.map((c) => (
@@ -156,7 +156,7 @@ export function PhoneField({ value, onChange, disabled }: PhoneFieldProps) {
           disabled={disabled}
           maxLength={country.digits + Math.floor(country.digits / 2)}
           placeholder={country.placeholder}
-          className="flex-1 border border-black/[0.08] rounded-lg px-4 py-3 text-[14px] bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black/10 disabled:text-gray-500 min-w-0"
+          className="flex-1 border border-black/8 rounded-lg px-4 py-3 text-[14px] bg-background focus:outline-hidden focus:ring-1 focus:ring-black/10 disabled:text-gray-500 min-w-0"
         />
       </div>
     </div>

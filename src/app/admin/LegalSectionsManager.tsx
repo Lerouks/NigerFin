@@ -151,7 +151,7 @@ export function LegalSectionsManager() {
               className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] transition-all ${
                 activeSlug === page.slug
                   ? 'bg-[#111] text-white'
-                  : 'bg-white border border-black/[0.06] text-gray-600 hover:bg-gray-50'
+                  : 'bg-white border border-black/6 text-gray-600 hover:bg-gray-50'
               }`}
             >
               <FileText className="w-3.5 h-3.5" />
@@ -176,7 +176,7 @@ export function LegalSectionsManager() {
           <button
             onClick={handleAdd}
             disabled={adding}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] bg-white border border-black/[0.06] hover:bg-gray-50 transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] bg-white border border-black/6 hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
             {adding ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
             Ajouter une section
@@ -209,7 +209,7 @@ export function LegalSectionsManager() {
       ) : (
       <div className="space-y-4">
         {sections.map((section, index) => (
-          <div key={section.id} className="bg-white rounded-xl border border-black/[0.06] p-5">
+          <div key={section.id} className="bg-white rounded-xl border border-black/6 p-5">
             <div className="flex items-start gap-3">
               {/* Reorder controls */}
               <div className="flex flex-col items-center gap-1 pt-1">
@@ -242,7 +242,7 @@ export function LegalSectionsManager() {
                     type="text"
                     value={section.heading}
                     onChange={(e) => handleFieldChange(section.id, 'heading', e.target.value)}
-                    className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-2 focus:ring-black/10"
+                    className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-2 focus:ring-black/10"
                   />
                 </div>
                 <div>
@@ -253,7 +253,7 @@ export function LegalSectionsManager() {
                     value={section.text}
                     onChange={(e) => handleFieldChange(section.id, 'text', e.target.value)}
                     rows={4}
-                    className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-2 focus:ring-black/10 resize-y"
+                    className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-2 focus:ring-black/10 resize-y"
                   />
                 </div>
               </div>
@@ -262,7 +262,7 @@ export function LegalSectionsManager() {
               <button
                 onClick={() => handleDelete(section.id)}
                 disabled={deletingId === section.id}
-                className="flex-shrink-0 p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                className="shrink-0 p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                 title="Supprimer"
               >
                 {deletingId === section.id ? (

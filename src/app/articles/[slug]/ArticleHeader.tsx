@@ -52,9 +52,9 @@ export function ArticleHeader({ article }: ArticleHeaderProps) {
         <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-4 sm:mb-6">{article.subtitle}</p>
       )}
 
-      <div className="flex flex-wrap items-center gap-4 pb-6 mb-6 border-b border-black/[0.06]">
+      <div className="flex flex-wrap items-center gap-4 pb-6 mb-6 border-b border-black/6">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-[#f0efe9] flex items-center justify-center">
+          <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center">
             <User className="w-3.5 h-3.5 text-gray-500" />
           </div>
           <span className="text-[13px]">{article.author.name}</span>

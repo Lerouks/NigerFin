@@ -84,14 +84,14 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex flex-col animate-fade-in" role="dialog" aria-modal="true" aria-label="Recherche">
+    <div className="fixed inset-0 z-60 bg-black/60 backdrop-blur-xs flex flex-col animate-fade-in" role="dialog" aria-modal="true" aria-label="Recherche">
       <div className="bg-white shadow-lg animate-fade-in-up">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-4 h-16">
             {loading ? (
-              <Loader2 className="w-5 h-5 text-gray-500 flex-shrink-0 animate-spin" />
+              <Loader2 className="w-5 h-5 text-gray-500 shrink-0 animate-spin" />
             ) : (
-              <Search className="w-5 h-5 text-gray-300 flex-shrink-0" />
+              <Search className="w-5 h-5 text-gray-300 shrink-0" />
             )}
             <input
               ref={inputRef}
@@ -101,7 +101,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
               placeholder="Rechercher un article, un sujet, une catégorie..."
               aria-label="Rechercher un article"
               autoComplete="off"
-              className="flex-1 text-[16px] bg-transparent border-none outline-none placeholder:text-gray-300"
+              className="flex-1 text-[16px] bg-transparent border-none outline-hidden placeholder:text-gray-300"
             />
             <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
               <X className="w-6 h-6" />
@@ -123,7 +123,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                     <button
                       key={tag}
                       onClick={() => setQuery(tag)}
-                      className="px-4 py-2 bg-[#f5f5f0] text-[13px] text-gray-600 hover:bg-[#eee] transition-colors rounded-full"
+                      className="px-4 py-2 bg-secondary text-[13px] text-gray-600 hover:bg-[#eee] transition-colors rounded-full"
                     >
                       {tag}
                     </button>
@@ -150,11 +150,11 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                         key={article._id}
                         href={`/articles/${article.slug.current}`}
                         onClick={onClose}
-                        className="flex gap-5 p-5 border-b border-black/[0.04] last:border-0 hover:bg-[#fafaf9] transition-all group bg-white first:rounded-t-xl last:rounded-b-xl"
+                        className="flex gap-5 p-5 border-b border-black/4 last:border-0 hover:bg-background transition-all group bg-white first:rounded-t-xl last:rounded-b-xl"
                       >
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-[10px] tracking-[0.1em] uppercase text-gray-500">
+                            <span className="text-[10px] tracking-widest uppercase text-gray-500">
                               {article.category}
                             </span>
                             {article.isPremium && (

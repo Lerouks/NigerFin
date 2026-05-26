@@ -71,9 +71,9 @@ function PathSkeleton() {
     <>
       <section className="bg-[#111] text-white py-12 md:py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="h-4 w-32 bg-white/10 rounded animate-pulse mb-6" />
-          <div className="h-8 w-64 bg-white/10 rounded animate-pulse mb-3" />
-          <div className="h-4 w-96 bg-white/[0.06] rounded animate-pulse" />
+          <div className="h-4 w-32 bg-white/10 rounded-sm animate-pulse mb-6" />
+          <div className="h-8 w-64 bg-white/10 rounded-sm animate-pulse mb-3" />
+          <div className="h-4 w-96 bg-white/6 rounded-sm animate-pulse" />
         </div>
       </section>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -81,12 +81,12 @@ function PathSkeleton() {
           {[1, 2, 3, 4, 5].map((i) => (
             <div
               key={i}
-              className="flex items-center gap-4 p-5 rounded-xl border border-black/[0.06] bg-white"
+              className="flex items-center gap-4 p-5 rounded-xl border border-black/6 bg-white"
             >
               <div className="w-9 h-9 rounded-full bg-gray-100 animate-pulse" />
               <div className="flex-1 space-y-2">
-                <div className="h-4 w-3/5 bg-gray-200 rounded animate-pulse" />
-                <div className="h-3 w-20 bg-gray-100 rounded animate-pulse" />
+                <div className="h-4 w-3/5 bg-gray-200 rounded-sm animate-pulse" />
+                <div className="h-3 w-20 bg-gray-100 rounded-sm animate-pulse" />
               </div>
             </div>
           ))}
@@ -159,15 +159,15 @@ export function PathContent({ slug }: { slug: string }) {
           </p>
 
           <div className="flex flex-wrap gap-3">
-            <span className="text-[12px] bg-white/[0.08] text-white/60 px-3 py-1.5 rounded-full flex items-center gap-1.5">
+            <span className="text-[12px] bg-white/8 text-white/60 px-3 py-1.5 rounded-full flex items-center gap-1.5">
               <BookOpen className="w-3 h-3" />
               {data.step_count} leçon{data.step_count !== 1 ? 's' : ''}
             </span>
-            <span className="text-[12px] bg-white/[0.08] text-white/60 px-3 py-1.5 rounded-full flex items-center gap-1.5">
+            <span className="text-[12px] bg-white/8 text-white/60 px-3 py-1.5 rounded-full flex items-center gap-1.5">
               <Clock className="w-3 h-3" />
               {formatDuration(data.total_minutes)}
             </span>
-            <span className="text-[12px] bg-white/[0.08] text-white/60 px-3 py-1.5 rounded-full">
+            <span className="text-[12px] bg-white/8 text-white/60 px-3 py-1.5 rounded-full">
               {data.difficulty}
             </span>
             {freeLessons > 0 && (
@@ -191,7 +191,7 @@ export function PathContent({ slug }: { slug: string }) {
                 </span>
                 <span className="tabular-nums">{progressPct}%</span>
               </div>
-              <div className="h-1.5 w-full bg-white/[0.08] rounded-full overflow-hidden">
+              <div className="h-1.5 w-full bg-white/8 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-emerald-400 rounded-full transition-all"
                   style={{ width: `${progressPct}%` }}
@@ -210,7 +210,7 @@ export function PathContent({ slug }: { slug: string }) {
           )}
 
           {!data.is_signed_in && (
-            <div className="mt-8 max-w-md p-4 rounded-xl bg-white/[0.05] border border-white/[0.08]">
+            <div className="mt-8 max-w-md p-4 rounded-xl bg-white/5 border border-white/8">
               <p className="text-[13px] text-white/70">
                 Crée un compte gratuit pour suivre ton avancement, reprendre où tu t&apos;étais arrêté et
                 débloquer tes succès.
@@ -237,7 +237,7 @@ export function PathContent({ slug }: { slug: string }) {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
         <div className="flex items-center gap-3 mb-8">
           <h2 className="text-[15px] font-semibold text-[#111]">Programme</h2>
-          <div className="flex-1 h-px bg-black/[0.06]" />
+          <div className="flex-1 h-px bg-black/6" />
           <span className="text-[12px] text-gray-500">
             {data.step_count} étape{data.step_count !== 1 ? 's' : ''}
           </span>
@@ -254,14 +254,14 @@ export function PathContent({ slug }: { slug: string }) {
                   className={`flex items-center gap-4 p-5 rounded-xl border transition-all duration-200 ${
                     lesson.completed
                       ? 'bg-emerald-50/50 border-emerald-100 hover:border-emerald-200'
-                      : 'bg-white border-black/[0.06] hover:border-black/[0.14] hover:shadow-sm'
+                      : 'bg-white border-black/6 hover:border-black/[0.14] hover:shadow-xs'
                   }`}
                 >
                   <span
                     className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-[13px] font-semibold ${
                       lesson.completed
                         ? 'bg-emerald-500 text-white'
-                        : 'bg-[#f5f5f0] text-gray-500'
+                        : 'bg-secondary text-gray-500'
                     }`}
                   >
                     {lesson.completed ? <CheckCircle2 className="w-4 h-4" /> : lesson.step_order}

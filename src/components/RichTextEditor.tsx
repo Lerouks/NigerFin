@@ -275,9 +275,9 @@ export function RichTextEditor({ content, onChange, onImageUpload }: RichTextEdi
   if (!editor) return null;
 
   return (
-    <div className="border border-black/[0.08] rounded-lg overflow-hidden bg-white">
+    <div className="border border-black/8 rounded-lg overflow-hidden bg-white">
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 border-b border-black/[0.06] bg-gray-50/80">
+      <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 border-b border-black/6 bg-gray-50/80">
         {/* Structure */}
         <ToolbarButton onClick={() => editor.chain().focus().setParagraph().run()} active={editor.isActive('paragraph')} title="Paragraphe">
           <Type className="w-4 h-4" />
@@ -350,21 +350,21 @@ export function RichTextEditor({ content, onChange, onImageUpload }: RichTextEdi
 
       {/* Link input popup */}
       {showLinkInput && (
-        <div className="flex items-center gap-2 px-3 py-2 border-b border-black/[0.06] bg-blue-50/50">
+        <div className="flex items-center gap-2 px-3 py-2 border-b border-black/6 bg-blue-50/50">
           <input
             type="url"
             value={linkUrl}
             onChange={(e) => setLinkUrl(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSetLink(); } }}
             placeholder="https://..."
-            className="flex-1 px-3 py-1.5 border border-black/[0.08] rounded text-sm focus:outline-none focus:ring-2 focus:ring-black bg-white"
+            className="flex-1 px-3 py-1.5 border border-black/8 rounded-sm text-sm focus:outline-hidden focus:ring-2 focus:ring-black bg-white"
             autoFocus
           />
-          <button onClick={handleSetLink} className="px-3 py-1.5 bg-[#111] text-white rounded text-[12px]">
+          <button onClick={handleSetLink} className="px-3 py-1.5 bg-[#111] text-white rounded-sm text-[12px]">
             Appliquer
           </button>
           {editor.isActive('link') && (
-            <button onClick={() => { editor.chain().focus().unsetLink().run(); setShowLinkInput(false); }} className="px-3 py-1.5 bg-red-100 text-red-700 rounded text-[12px]">
+            <button onClick={() => { editor.chain().focus().unsetLink().run(); setShowLinkInput(false); }} className="px-3 py-1.5 bg-red-100 text-red-700 rounded-sm text-[12px]">
               Retirer
             </button>
           )}

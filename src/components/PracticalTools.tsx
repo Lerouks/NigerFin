@@ -45,11 +45,11 @@ function PlanCard({ title, badge, tools, isPremium = false, isSubscribed = false
       className={`rounded-xl overflow-hidden border transition-all duration-300 ${
         isPremium
           ? 'bg-[#111] text-white border-white/10'
-          : 'bg-white border-black/[0.06] hover:border-black/[0.1]'
+          : 'bg-white border-black/6 hover:border-black/10'
       }`}
     >
       <div
-        className={`px-6 pt-6 pb-5 ${isPremium ? 'border-b border-white/[0.06]' : 'border-b border-black/[0.05]'}`}
+        className={`px-6 pt-6 pb-5 ${isPremium ? 'border-b border-white/6' : 'border-b border-black/5'}`}
       >
         <span
           className={`inline-block text-[10px] font-semibold tracking-[0.15em] uppercase mb-3 px-2.5 py-0.5 rounded-full ${
@@ -70,12 +70,12 @@ function PlanCard({ title, badge, tools, isPremium = false, isSubscribed = false
               key={tool._id}
               href={`/outil/${slug}`}
               className={`flex items-center gap-4 p-4 rounded-lg transition-all duration-200 group/item ${
-                isPremium ? 'hover:bg-white/[0.05]' : 'hover:bg-[#fafaf9]'
+                isPremium ? 'hover:bg-white/5' : 'hover:bg-background'
               }`}
             >
               <div
                 className={`w-10 h-10 flex items-center justify-center rounded-lg ${
-                  isPremium ? 'bg-white/[0.08]' : 'bg-[#f5f5f0]'
+                  isPremium ? 'bg-white/8' : 'bg-secondary'
                 }`}
               >
                 <Icon className={`w-5 h-5 ${isPremium ? 'text-white/70' : 'text-gray-500'}`} />

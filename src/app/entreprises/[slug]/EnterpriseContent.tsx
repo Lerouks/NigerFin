@@ -55,7 +55,7 @@ function InfoRow({ icon: Icon, label, value, color }: { icon: React.ElementType;
   return (
     <div className="flex items-start gap-3 py-3">
       <div
-        className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
         style={{ backgroundColor: `${color}14` }}
       >
         <Icon className="w-4 h-4" style={{ color }} />
@@ -81,7 +81,7 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
   const logoFallbackColor = accent;
 
   return (
-    <div className="min-h-screen bg-[#fafaf9]">
+    <div className="min-h-screen bg-background">
       {/* Header noir sobre, sans halos colores derriere le logo */}
       <div className="relative bg-[#111] text-white overflow-hidden">
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
@@ -95,7 +95,7 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
 
           <div className="flex items-start gap-5">
             {/* Logo - white background for clarity */}
-            <div className="w-[4.5rem] h-[4.5rem] sm:w-24 sm:h-24 rounded-2xl bg-white flex items-center justify-center flex-shrink-0 shadow-xl p-2.5 sm:p-3">
+            <div className="w-18 h-18 sm:w-24 sm:h-24 rounded-2xl bg-white flex items-center justify-center shrink-0 shadow-xl p-2.5 sm:p-3">
               {enterprise.logo_url ? (
                 <Image
                   src={enterprise.logo_url}
@@ -170,10 +170,10 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
                   {enterprise.key_facts.map((fact, i) => (
                     <div
                       key={i}
-                      className="p-4 rounded-lg border border-black/[0.05]"
+                      className="p-4 rounded-lg border border-black/5"
                       style={{ backgroundColor: `${accent}0D`, borderLeftColor: accent, borderLeftWidth: '2px' }}
                     >
-                      <p className="text-[11px] uppercase tracking-[0.1em] mb-1 font-semibold" style={{ color: accent }}>{fact.label}</p>
+                      <p className="text-[11px] uppercase tracking-widest mb-1 font-semibold" style={{ color: accent }}>{fact.label}</p>
                       <p className="text-[14px] font-medium text-gray-900">{fact.value}</p>
                     </div>
                   ))}
@@ -186,7 +186,7 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
               <div>
                 <div className="flex items-center gap-4 mb-6">
                   <h2 className="text-lg font-semibold">Articles liés</h2>
-                  <div className="flex-1 h-px bg-black/[0.06]" />
+                  <div className="flex-1 h-px bg-black/6" />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {relatedArticles.map((article) => (
@@ -203,7 +203,7 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
               {hasInfo && (
                 <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] p-6">
                   <h2 className="text-[12px] uppercase tracking-[0.15em] text-gray-500 mb-3">Fiche d&apos;identité</h2>
-                  <div className="divide-y divide-black/[0.05]">
+                  <div className="divide-y divide-black/5">
                     {enterprise.headquarters && (
                       <InfoRow icon={MapPin} label="Siège" value={enterprise.headquarters} color={accent} />
                     )}

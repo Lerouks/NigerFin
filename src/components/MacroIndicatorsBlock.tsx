@@ -91,7 +91,7 @@ export function MacroIndicatorsBlock({
           return (
             <article
               key={kpi.id}
-              className="bg-white rounded-xl border border-black/[0.06] p-5 hover:border-black/[0.12] transition-colors"
+              className="bg-white rounded-xl border border-black/6 p-5 hover:border-black/12 transition-colors"
             >
               {/* Label + period */}
               <div className="flex items-start justify-between gap-2 mb-3">
@@ -132,7 +132,7 @@ export function MacroIndicatorsBlock({
               )}
 
               {/* Source */}
-              <div className="text-[10px] tracking-[0.08em] uppercase text-gray-500 mt-3 pt-3 border-t border-black/[0.04]">
+              <div className="text-[10px] tracking-[0.08em] uppercase text-gray-500 mt-3 pt-3 border-t border-black/4">
                 {kpi.source}
               </div>
             </article>

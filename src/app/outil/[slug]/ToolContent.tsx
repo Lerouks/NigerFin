@@ -259,12 +259,12 @@ export function ToolContent({ slug, title, description, isPremium }: ToolContent
   const needsGate = !canAccess;
 
   return (
-    <div className="min-h-screen bg-[#fafaf9]">
+    <div className="min-h-screen bg-background">
       <section className="bg-[#111] text-white py-10 md:py-14">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <Link href="/#outils" className="inline-flex items-center gap-1.5 text-[13px] text-white/40 hover:text-white/70 transition-colors mb-6"><ArrowLeft className="w-4 h-4" />Retour aux outils</Link>
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-white/[0.08] rounded-xl flex items-center justify-center"><Icon className="w-6 h-6 text-white/70" /></div>
+            <div className="w-12 h-12 bg-white/8 rounded-xl flex items-center justify-center"><Icon className="w-6 h-6 text-white/70" /></div>
             <div>
               <div className="flex items-center gap-3">
                 <h1 className="text-3xl font-bold">{title}</h1>
@@ -279,7 +279,7 @@ export function ToolContent({ slug, title, description, isPremium }: ToolContent
       <section className="py-10 md:py-14">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {needsGate ? (
-            <div className="text-center py-20 bg-white border border-black/[0.06] rounded-xl">
+            <div className="text-center py-20 bg-white border border-black/6 rounded-xl">
               <Lock className="w-12 h-12 text-gray-300 mx-auto mb-4" />
               <h2 className="text-2xl font-bold mb-3">Outil Premium</h2>
               <p className="text-gray-600 mb-8 max-w-md mx-auto">
@@ -302,7 +302,7 @@ export function ToolContent({ slug, title, description, isPremium }: ToolContent
       {education && (
         <section className="pb-10 md:pb-14">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-white border border-black/[0.06] rounded-xl divide-y divide-black/[0.06]">
+            <div className="bg-white border border-black/6 rounded-xl divide-y divide-black/6">
               {education.sections.map((sec, i) => (
                 <div key={i} className="px-6 sm:px-8 py-8">
                   <h2 className="text-xl font-bold text-[#111] mb-4">{sec.heading}</h2>

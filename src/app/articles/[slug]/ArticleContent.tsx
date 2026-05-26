@@ -153,7 +153,7 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [], header
 
   if (showPaywall) {
     return (
-      <div className="min-h-screen bg-[#fafaf9]">
+      <div className="min-h-screen bg-background">
         {progressBar}
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-6 sm:pt-10 pb-20">
           <div className="max-w-3xl mx-auto">
@@ -181,7 +181,7 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [], header
   const shareLinks = getShareLinks();
 
   return (
-    <div className="min-h-screen bg-[#fafaf9]">
+    <div className="min-h-screen bg-background">
       {progressBar}
       <ViewTracker articleId={article._id} />
 
@@ -223,27 +223,27 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [], header
                   </div>
                 ) : (
                   <div className="animate-pulse space-y-4 py-8">
-                    <div className="h-4 bg-gray-100 rounded w-full" />
-                    <div className="h-4 bg-gray-100 rounded w-11/12" />
-                    <div className="h-4 bg-gray-100 rounded w-9/12" />
-                    <div className="h-4 bg-gray-100 rounded w-full" />
-                    <div className="h-4 bg-gray-100 rounded w-10/12" />
+                    <div className="h-4 bg-gray-100 rounded-sm w-full" />
+                    <div className="h-4 bg-gray-100 rounded-sm w-11/12" />
+                    <div className="h-4 bg-gray-100 rounded-sm w-9/12" />
+                    <div className="h-4 bg-gray-100 rounded-sm w-full" />
+                    <div className="h-4 bg-gray-100 rounded-sm w-10/12" />
                   </div>
                 )}
 
                 {article.tags.length > 0 && (
-                  <div className="mt-10 pt-6 border-t border-black/[0.06]">
+                  <div className="mt-10 pt-6 border-t border-black/6">
                     <div className="flex flex-wrap gap-2">
                       {article.tags.map((tag) => (
-                        <span key={tag} className="px-3 py-1.5 bg-[#f5f5f0] text-[12px] rounded-full hover:bg-[#eee] transition-colors cursor-pointer text-gray-600">#{tag}</span>
+                        <span key={tag} className="px-3 py-1.5 bg-secondary text-[12px] rounded-full hover:bg-[#eee] transition-colors cursor-pointer text-gray-600">#{tag}</span>
                       ))}
                     </div>
                   </div>
                 )}
 
-                <div className="mt-6 pt-6 border-t border-black/[0.06]">
+                <div className="mt-6 pt-6 border-t border-black/6">
                   <div className="flex items-center justify-between mb-4">
-                    <p className="text-[12px] tracking-[0.1em] uppercase text-gray-500">Partager cet article</p>
+                    <p className="text-[12px] tracking-widest uppercase text-gray-500">Partager cet article</p>
                     <ArticleLikes articleId={article._id} />
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -276,7 +276,7 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [], header
               <div className="mt-10">
                 <div className="flex items-center gap-4 mb-6">
                   <h2 className="text-xl font-semibold">Articles similaires</h2>
-                  <div className="flex-1 h-px bg-black/[0.06]" />
+                  <div className="flex-1 h-px bg-black/6" />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {relatedArticles.map((related) => (

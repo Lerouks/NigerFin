@@ -110,13 +110,13 @@ export function ArgentView() {
 function ArgentHeader() {
   return (
     <header className="mb-8">
-      <p className="text-[10px] tracking-widest uppercase text-[#1a1a1a]/45 font-bold">
+      <p className="text-[10px] tracking-widest uppercase text-foreground/45 font-bold">
         Module
       </p>
       <h1 className="font-extrabold text-[32px] leading-tight tracking-tight mt-1">
         Argent
       </h1>
-      <p className="text-[15px] text-[#1a1a1a]/60 mt-3 leading-relaxed max-w-[560px]">
+      <p className="text-[15px] text-foreground/60 mt-3 leading-relaxed max-w-[560px]">
         Le revenu réel de votre business en direct.
       </p>
     </header>
@@ -178,13 +178,13 @@ function MrrCard({
         <p className="text-[11px] tracking-widest uppercase text-[#d4a843] font-bold">
           Revenu mensuel récurrent
         </p>
-        <span className="text-[11px] text-[#1a1a1a]/40">en direct</span>
+        <span className="text-[11px] text-foreground/40">en direct</span>
       </div>
       <div className="flex items-baseline gap-2 mt-3 flex-wrap">
         <span className="font-black text-[44px] leading-none tracking-tight tabular-nums">
           <AnimatedNumber value={mrr} isLoading={isLoading} />
         </span>
-        <span className="text-[14px] text-[#1a1a1a]/45 font-semibold">FCFA</span>
+        <span className="text-[14px] text-foreground/45 font-semibold">FCFA</span>
       </div>
       <div className="flex items-center gap-2 mt-3">
         <span
@@ -204,7 +204,7 @@ function MrrCard({
             ? '·'
             : `${positive ? '+' : ''}${growthPercent}%`}
         </span>
-        <span className="text-[12px] text-[#1a1a1a]/45">vs mois dernier</span>
+        <span className="text-[12px] text-foreground/45">vs mois dernier</span>
       </div>
     </div>
   );
@@ -218,14 +218,14 @@ function ArrCard({
   isLoading: boolean;
 }) {
   return (
-    <div className="bg-white border border-black/[0.06] rounded-2xl p-4">
-      <p className="text-[10px] tracking-widest uppercase text-[#1a1a1a]/45 font-semibold">
+    <div className="bg-white border border-black/6 rounded-2xl p-4">
+      <p className="text-[10px] tracking-widest uppercase text-foreground/45 font-semibold">
         Revenu annualisé
       </p>
       <p className="font-extrabold text-[22px] leading-tight mt-2 tabular-nums">
         <AnimatedNumber value={arr} isLoading={isLoading} />
       </p>
-      <p className="text-[11px] text-[#1a1a1a]/40 mt-1">FCFA · annuel projeté</p>
+      <p className="text-[11px] text-foreground/40 mt-1">FCFA · annuel projeté</p>
     </div>
   );
 }
@@ -253,17 +253,17 @@ function ChurnCard({
         : 'bg-red-500/10';
 
   return (
-    <div className="bg-white border border-black/[0.06] rounded-2xl p-4">
-      <p className="text-[10px] tracking-widest uppercase text-[#1a1a1a]/45 font-semibold">
+    <div className="bg-white border border-black/6 rounded-2xl p-4">
+      <p className="text-[10px] tracking-widest uppercase text-foreground/45 font-semibold">
         Taux de churn
       </p>
       <p className="font-extrabold text-[22px] leading-tight mt-2 tabular-nums">
         {isLoading && rate === null ? (
-          <span className="text-[#1a1a1a]/20">·</span>
+          <span className="text-foreground/20">·</span>
         ) : (
           <>
             {rate === null ? '·' : rate}
-            <span className="text-[14px] text-[#1a1a1a]/40 font-medium ml-1">
+            <span className="text-[14px] text-foreground/40 font-medium ml-1">
               %
             </span>
           </>
@@ -271,7 +271,7 @@ function ChurnCard({
       </p>
       <span
         className={[
-          'inline-flex items-center gap-1 text-[11px] font-bold mt-1 px-2 py-0.5 rounded',
+          'inline-flex items-center gap-1 text-[11px] font-bold mt-1 px-2 py-0.5 rounded-sm',
           toneBg,
           toneClass,
         ].join(' ')}
@@ -294,16 +294,16 @@ function LtvCard({
   isLoading: boolean;
 }) {
   return (
-    <div className="col-span-2 bg-white border border-black/[0.06] rounded-2xl p-4">
-      <p className="text-[10px] tracking-widest uppercase text-[#1a1a1a]/45 font-semibold">
+    <div className="col-span-2 bg-white border border-black/6 rounded-2xl p-4">
+      <p className="text-[10px] tracking-widest uppercase text-foreground/45 font-semibold">
         Valeur vie client (LTV)
       </p>
       <div className="flex items-baseline gap-2 mt-2 flex-wrap">
         <span className="font-extrabold text-[22px] leading-tight tabular-nums">
           <AnimatedNumber value={ltv} isLoading={isLoading} />
         </span>
-        <span className="text-[12px] text-[#1a1a1a]/45 font-medium">FCFA</span>
-        <span className="text-[11px] text-[#1a1a1a]/40 ml-1">
+        <span className="text-[12px] text-foreground/45 font-medium">FCFA</span>
+        <span className="text-[11px] text-foreground/40 ml-1">
           en moyenne par abonné
         </span>
       </div>
@@ -327,12 +327,12 @@ function RevenueChartSection({
     <section className="mb-8">
       <div className="flex items-center justify-between mb-3">
         <h2 className="font-bold text-[16px]">Revenu mensuel</h2>
-        <span className="text-[11px] text-[#1a1a1a]/40">6 derniers mois</span>
+        <span className="text-[11px] text-foreground/40">6 derniers mois</span>
       </div>
-      <div className="bg-white border border-black/[0.06] rounded-2xl p-4">
+      <div className="bg-white border border-black/6 rounded-2xl p-4">
         {isLoading && cleaned.length === 0 && <ChartSkeleton />}
         {!isLoading && !hasData && (
-          <div className="text-center py-10 text-[13px] text-[#1a1a1a]/55">
+          <div className="text-center py-10 text-[13px] text-foreground/55">
             Pas encore de revenu enregistré. Le premier paiement Premium fera
             décoller le graphe.
           </div>
@@ -386,7 +386,7 @@ function RevenueTooltip({ active, payload, label }: RevenueTooltipProps) {
   if (!active || !payload || payload.length === 0) return null;
   const value = payload[0]?.value ?? 0;
   return (
-    <div className="bg-[#1a1a1a] text-white rounded-lg px-3 py-2 shadow-lg">
+    <div className="bg-foreground text-white rounded-lg px-3 py-2 shadow-lg">
       <p className="text-[10px] uppercase tracking-widest text-[#d4a843] font-bold">
         {label}
       </p>
@@ -403,7 +403,7 @@ function ChartSkeleton() {
       {[35, 55, 40, 70, 60, 80].map((h, i) => (
         <div
           key={i}
-          className="flex-1 bg-black/[0.06] rounded-t"
+          className="flex-1 bg-black/6 rounded-t"
           style={{ height: `${h}%` }}
         />
       ))}
@@ -445,7 +445,7 @@ function TransactionsSection({
       )}
 
       {!hasError && !isLoading && transactions.length === 0 && (
-        <div className="bg-white border border-black/[0.06] rounded-2xl p-6 text-center text-[13px] text-[#1a1a1a]/55">
+        <div className="bg-white border border-black/6 rounded-2xl p-6 text-center text-[13px] text-foreground/55">
           Aucune transaction pour le moment. Le premier paiement Premium va
           arriver.
         </div>
@@ -464,13 +464,13 @@ function TransactionsSection({
 
 function TransactionRow({ transaction }: { transaction: TransactionItem }) {
   return (
-    <div className="flex items-center gap-3 bg-white border border-black/[0.06] rounded-2xl p-3.5">
+    <div className="flex items-center gap-3 bg-white border border-black/6 rounded-2xl p-3.5">
       <Avatar initials={transaction.user.initials} />
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-semibold leading-tight text-[#1a1a1a] truncate">
+        <p className="text-[13px] font-semibold leading-tight text-foreground truncate">
           {transaction.user.displayName}
         </p>
-        <p className="text-[11px] text-[#1a1a1a]/45 mt-0.5">
+        <p className="text-[11px] text-foreground/45 mt-0.5">
           {transaction.tier} · {getBillingCycleLabel(transaction.billing_cycle)}
           {' · '}
           {transaction.relativeTime}
@@ -480,7 +480,7 @@ function TransactionRow({ transaction }: { transaction: TransactionItem }) {
         <p className="text-[13px] font-bold text-[#d4a843] tabular-nums whitespace-nowrap">
           +{transaction.amount.toLocaleString('fr-FR')}
         </p>
-        <p className="text-[10px] text-[#1a1a1a]/40 mt-0.5">FCFA</p>
+        <p className="text-[10px] text-foreground/40 mt-0.5">FCFA</p>
       </div>
     </div>
   );
@@ -492,14 +492,14 @@ function TransactionsSkeleton() {
       {[0, 1, 2].map((i) => (
         <div
           key={i}
-          className="flex items-center gap-3 bg-white border border-black/[0.06] rounded-2xl p-3.5 animate-pulse"
+          className="flex items-center gap-3 bg-white border border-black/6 rounded-2xl p-3.5 animate-pulse"
         >
-          <div className="w-10 h-10 rounded-full bg-black/[0.06] flex-shrink-0" />
+          <div className="w-10 h-10 rounded-full bg-black/6 shrink-0" />
           <div className="flex-1 space-y-2">
-            <div className="h-3 bg-black/[0.06] rounded w-3/5" />
-            <div className="h-2 bg-black/[0.04] rounded w-2/5" />
+            <div className="h-3 bg-black/6 rounded-sm w-3/5" />
+            <div className="h-2 bg-black/4 rounded-sm w-2/5" />
           </div>
-          <div className="h-3 bg-black/[0.06] rounded w-16" />
+          <div className="h-3 bg-black/6 rounded-sm w-16" />
         </div>
       ))}
     </div>
@@ -508,7 +508,7 @@ function TransactionsSkeleton() {
 
 function Avatar({ initials }: { initials: string }) {
   return (
-    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#d4a843] to-[#ff8c42] flex items-center justify-center text-white font-bold text-[12px] flex-shrink-0">
+    <div className="w-10 h-10 rounded-full bg-linear-to-br from-[#d4a843] to-[#ff8c42] flex items-center justify-center text-white font-bold text-[12px] shrink-0">
       {initials}
     </div>
   );
@@ -596,31 +596,31 @@ function PricingRow({
     <div
       className={[
         'flex items-center justify-between bg-white border rounded-2xl p-4',
-        isPopular ? 'border-[#d4a843]/50 shadow-sm' : 'border-black/[0.06]',
+        isPopular ? 'border-[#d4a843]/50 shadow-xs' : 'border-black/6',
       ].join(' ')}
     >
       <div className="min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <p className="font-bold text-[14px] text-[#1a1a1a]">
+          <p className="font-bold text-[14px] text-foreground">
             {getBillingCycleLabel(cycle)}
           </p>
           {isPopular && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-[#d4a843] bg-[#d4a843]/10 px-2 py-0.5 rounded">
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-[#d4a843] bg-[#d4a843]/10 px-2 py-0.5 rounded-sm">
               <Sparkles className="w-3 h-3" aria-hidden="true" />
               le plus populaire
             </span>
           )}
         </div>
-        <p className="text-[11px] text-[#1a1a1a]/45 mt-0.5">
+        <p className="text-[11px] text-foreground/45 mt-0.5">
           {durationLabel}
           {savings ? ` · ${savings}` : ''}
         </p>
       </div>
       <div className="text-right">
-        <p className="font-extrabold text-[18px] tabular-nums text-[#1a1a1a]">
+        <p className="font-extrabold text-[18px] tabular-nums text-foreground">
           {price.toLocaleString('fr-FR')}
         </p>
-        <p className="text-[10px] text-[#1a1a1a]/40">FCFA</p>
+        <p className="text-[10px] text-foreground/40">FCFA</p>
       </div>
     </div>
   );
@@ -660,21 +660,21 @@ function QuickAccessSection() {
             key={card.href}
             href={card.href}
             prefetch
-            className="group relative bg-white border border-black/[0.06] rounded-2xl p-5 hover:border-[#d4a843]/40 hover:shadow-sm transition"
+            className="group relative bg-white border border-black/6 rounded-2xl p-5 hover:border-[#d4a843]/40 hover:shadow-xs transition"
           >
             <div className="flex items-start justify-between mb-3">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#d4a843]/12 to-[#ff8c42]/8 flex items-center justify-center text-[#d4a843]">
+              <div className="w-11 h-11 rounded-xl bg-linear-to-br from-[#d4a843]/12 to-[#ff8c42]/8 flex items-center justify-center text-[#d4a843]">
                 <card.icon className="w-5 h-5" aria-hidden="true" />
               </div>
               <ArrowUpRight
-                className="w-4 h-4 text-[#1a1a1a]/30 group-hover:text-[#d4a843] transition"
+                className="w-4 h-4 text-foreground/30 group-hover:text-[#d4a843] transition"
                 aria-hidden="true"
               />
             </div>
-            <p className="font-bold text-[16px] text-[#1a1a1a] leading-tight">
+            <p className="font-bold text-[16px] text-foreground leading-tight">
               {card.title}
             </p>
-            <p className="text-[13px] text-[#1a1a1a]/55 leading-relaxed mt-1">
+            <p className="text-[13px] text-foreground/55 leading-relaxed mt-1">
               {card.description}
             </p>
           </Link>
@@ -716,6 +716,6 @@ function AnimatedNumber({
   }, [value]);
 
   if (isLoading && value === null)
-    return <span className="text-[#1a1a1a]/20">·</span>;
+    return <span className="text-foreground/20">·</span>;
   return <>{display.toLocaleString('fr-FR')}</>;
 }

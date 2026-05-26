@@ -177,7 +177,7 @@ export function NigerPresentation({ initialData }: NigerPresentationProps = {}) 
   return (
     <div className="space-y-0">
       {/* Profil Pays */}
-      <section className="border-t border-black/[0.06] pt-14 md:pt-20">
+      <section className="border-t border-black/6 pt-14 md:pt-20">
         <div className="mb-10">
           <div className="flex items-center gap-2.5 mb-3">
             <div className="h-px w-6 bg-gold/60" />
@@ -212,7 +212,7 @@ export function NigerPresentation({ initialData }: NigerPresentationProps = {}) 
         <div className="space-y-10">
           {sortedCategories.map((cat) => (
             <div key={cat}>
-              <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-600 font-semibold mb-4 pb-2 border-b border-black/[0.06]">
+              <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-600 font-semibold mb-4 pb-2 border-b border-black/6">
                 {CATEGORY_LABELS[cat] || cat}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -221,9 +221,9 @@ export function NigerPresentation({ initialData }: NigerPresentationProps = {}) 
                   return (
                     <div
                       key={fact.id}
-                      className="group flex items-start gap-3.5 p-5 rounded-xl bg-white border border-black/[0.06] hover:border-black/[0.1] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+                      className="group flex items-start gap-3.5 p-5 rounded-xl bg-white border border-black/6 hover:border-black/10 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
                     >
-                      <div className="w-9 h-9 rounded-lg bg-[#fafaf9] border border-black/[0.06] flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:bg-[#111] group-hover:border-[#111] transition-colors duration-200">
+                      <div className="w-9 h-9 rounded-lg bg-background border border-black/6 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-[#111] group-hover:border-[#111] transition-colors duration-200">
                         <Icon className="w-4 h-4 text-gray-500 group-hover:text-white transition-colors duration-200" />
                       </div>
                       <div className="min-w-0">

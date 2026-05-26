@@ -27,9 +27,9 @@ export function DynamicLegalPage({ title, introParagraphs, initialSections, fall
     : null;
 
   return (
-    <div className="min-h-screen bg-[#fafaf9]">
+    <div className="min-h-screen bg-background">
       <section className="bg-[#111] text-white py-16 md:py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-br from-white/2 to-transparent" />
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <h1 className="text-3xl md:text-4xl">{title}</h1>
         </div>
@@ -37,7 +37,7 @@ export function DynamicLegalPage({ title, introParagraphs, initialSections, fall
 
       <section className="py-16 md:py-20">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-xl p-7 md:p-10 border border-black/[0.06]">
+          <div className="bg-white rounded-xl p-7 md:p-10 border border-black/6">
             {introParagraphs && introParagraphs.length > 0 && (
               <LegalIntroBlock paragraphs={introParagraphs} />
             )}

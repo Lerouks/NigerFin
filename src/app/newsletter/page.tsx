@@ -44,7 +44,7 @@ const VALUE_PROPS: ValueProp[] = [
 
 export default function NewsletterPage() {
   return (
-    <div className="min-h-screen bg-[#fafaf9]">
+    <div className="min-h-screen bg-background">
       <CategoryHero
         label="Newsletter"
         title="La connaissance, votre meilleur capital."
@@ -73,9 +73,9 @@ export default function NewsletterPage() {
             return (
               <article
                 key={prop.title}
-                className="bg-white rounded-xl border border-black/[0.06] p-6 shadow-[0_4px_40px_-12px_rgba(0,0,0,0.06)]"
+                className="bg-white rounded-xl border border-black/6 p-6 shadow-[0_4px_40px_-12px_rgba(0,0,0,0.06)]"
               >
-                <div className="w-10 h-10 rounded-lg bg-[#fafaf9] flex items-center justify-center mb-4">
+                <div className="w-10 h-10 rounded-lg bg-background flex items-center justify-center mb-4">
                   <Icon className="w-5 h-5 text-[#111]" />
                 </div>
                 <h3 className="text-[16px] font-semibold text-[#111] mb-2">{prop.title}</h3>
@@ -98,7 +98,7 @@ export default function NewsletterPage() {
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <article className="bg-white rounded-xl border border-black/[0.06] p-7">
+          <article className="bg-white rounded-xl border border-black/6 p-7">
             <div className="flex items-center gap-2 mb-4">
               <Mail className="w-5 h-5 text-[#111]" />
               <span className="text-[12px] font-semibold tracking-wide uppercase text-gray-500">Gratuit</span>
@@ -106,22 +106,22 @@ export default function NewsletterPage() {
             <h3 className="text-xl font-bold text-[#111] mb-3">L&apos;essentiel hebdomadaire</h3>
             <ul className="space-y-2.5 text-[14px] text-gray-700">
               <li className="flex items-start gap-2">
-                <span className="mt-2 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
+                <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
                 <span>L&apos;ouverture de l&apos;édition du lundi, soit les 800 premiers mots.</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="mt-2 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
+                <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
                 <span>Le résumé exécutif en 5 points.</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="mt-2 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
+                <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
                 <span>L&apos;accès à toute la rubrique gratuite du site.</span>
               </li>
             </ul>
           </article>
 
           <article className="bg-[#111] text-white rounded-xl p-7 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-gold/[0.05] rounded-full -translate-y-1/2 translate-x-1/2" />
+            <div className="absolute top-0 right-0 w-40 h-40 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2" />
             <div className="flex items-center gap-2 mb-4 relative">
               <Crown className="w-5 h-5 text-gold" />
               <span className="text-[12px] font-semibold tracking-wide uppercase text-gold">Premium</span>
@@ -129,15 +129,15 @@ export default function NewsletterPage() {
             <h3 className="text-xl font-bold mb-3 relative">L&apos;intégralité chaque semaine</h3>
             <ul className="space-y-2.5 text-[14px] text-white/75 relative">
               <li className="flex items-start gap-2">
-                <span className="mt-2 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
+                <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
                 <span>L&apos;édition complète, sans paywall ni teaser.</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="mt-2 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
+                <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
                 <span>Les analyses chiffrées, les graphiques, les comparaisons sectorielles.</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="mt-2 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
+                <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
                 <span>L&apos;accès aux articles Premium et aux outils financiers du site.</span>
               </li>
             </ul>
@@ -145,7 +145,7 @@ export default function NewsletterPage() {
         </div>
       </section>
 
-      <section className="border-t border-black/[0.06] bg-white">
+      <section className="border-t border-black/6 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
           <div className="prose prose-sm sm:prose-base max-w-none">
             <h2 className="text-xl sm:text-2xl font-bold text-[#111] mt-0 mb-3">
@@ -174,19 +174,19 @@ export default function NewsletterPage() {
             </h2>
             <ul className="space-y-2.5 text-[15px] text-gray-700 list-none pl-0">
               <li className="flex items-start gap-3">
-                <Lock className="w-4 h-4 text-gold mt-1 flex-shrink-0" />
+                <Lock className="w-4 h-4 text-gold mt-1 shrink-0" />
                 <span className="leading-relaxed">
                   Vos données restent en Europe, hébergées chez Supabase, jamais revendues à des tiers.
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <Lock className="w-4 h-4 text-gold mt-1 flex-shrink-0" />
+                <Lock className="w-4 h-4 text-gold mt-1 shrink-0" />
                 <span className="leading-relaxed">
                   Désabonnement en un clic depuis chaque email, à tout moment.
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <Lock className="w-4 h-4 text-gold mt-1 flex-shrink-0" />
+                <Lock className="w-4 h-4 text-gold mt-1 shrink-0" />
                 <span className="leading-relaxed">
                   Conformité RGPD intégrale. Vous gardez la main sur vos préférences depuis votre espace compte.
                 </span>

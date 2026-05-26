@@ -30,7 +30,7 @@ export default async function NewsletterPreviewPage({
               href={`/api/newsletter/premium/preview?issue=${slug}`}
               target="_blank"
               rel="noreferrer"
-              className="rounded border border-white/30 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white hover:text-primary"
+              className="rounded-sm border border-white/30 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white hover:text-primary"
             >
               HTML brut ↗
             </a>
@@ -38,7 +38,7 @@ export default async function NewsletterPreviewPage({
               href={`/api/newsletter/premium/preview?issue=${slug}&format=text`}
               target="_blank"
               rel="noreferrer"
-              className="rounded border border-white/30 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white hover:text-primary"
+              className="rounded-sm border border-white/30 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white hover:text-primary"
             >
               Plain text ↗
             </a>
@@ -46,7 +46,7 @@ export default async function NewsletterPreviewPage({
               href={`/api/newsletter/premium/preview?issue=${slug}&format=json`}
               target="_blank"
               rel="noreferrer"
-              className="rounded border border-white/30 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white hover:text-primary"
+              className="rounded-sm border border-white/30 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white hover:text-primary"
             >
               JSON ↗
             </a>

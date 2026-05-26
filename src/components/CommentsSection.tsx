@@ -132,8 +132,8 @@ export function CommentsSection({ articleId }: CommentsSectionProps) {
   }, [comments]);
 
   return (
-    <div className="bg-white border border-black/[0.06] rounded-xl overflow-hidden">
-      <div className="px-7 py-5 border-b border-black/[0.04]">
+    <div className="bg-white border border-black/6 rounded-xl overflow-hidden">
+      <div className="px-7 py-5 border-b border-black/4">
         <h3 className="text-[17px] font-semibold">Discussion ({comments.length})</h3>
       </div>
 
@@ -150,7 +150,7 @@ export function CommentsSection({ articleId }: CommentsSectionProps) {
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
               placeholder="Partagez votre avis..."
-              className="w-full border border-black/[0.06] rounded-lg p-4 focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 bg-[#fafaf9] resize-none text-[14px] transition-all"
+              className="w-full border border-black/6 rounded-lg p-4 focus:outline-hidden focus:border-black/15 focus:ring-1 focus:ring-black/5 bg-background resize-none text-[14px] transition-all"
               rows={3}
             />
             <div className="flex justify-end mt-3">
@@ -165,7 +165,7 @@ export function CommentsSection({ articleId }: CommentsSectionProps) {
             </div>
           </form>
         ) : (
-          <div className="mb-8 p-6 bg-[#fafaf9] rounded-lg text-center border border-black/[0.03]">
+          <div className="mb-8 p-6 bg-background rounded-lg text-center border border-black/3">
             <p className="text-gray-500 text-[14px] mb-4">
               Connectez-vous pour participer à la discussion
             </p>
@@ -201,7 +201,7 @@ export function CommentsSection({ articleId }: CommentsSectionProps) {
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
                       placeholder="Ecrire une réponse..."
-                      className="w-full border border-black/[0.06] rounded-lg p-3 focus:outline-none focus:border-black/15 bg-[#fafaf9] resize-none text-[13px]"
+                      className="w-full border border-black/6 rounded-lg p-3 focus:outline-hidden focus:border-black/15 bg-background resize-none text-[13px]"
                       rows={2}
                     />
                     <div className="flex justify-end gap-2 mt-2">
@@ -218,7 +218,7 @@ export function CommentsSection({ articleId }: CommentsSectionProps) {
                 )}
                 {/* Replies */}
                 {(repliesByParent.get(comment.id) || []).map((reply) => (
-                  <div key={reply.id} className="ml-11 mt-4 pl-4 border-l-2 border-black/[0.04]">
+                  <div key={reply.id} className="ml-11 mt-4 pl-4 border-l-2 border-black/4">
                     <CommentItem
                       comment={reply}
                       isSignedIn={isSignedIn}
@@ -259,9 +259,9 @@ function CommentItem({
   const isOwner = currentUserId === comment.user_id;
 
   return (
-    <div className="border-b border-black/[0.04] pb-6 last:border-0 last:pb-0">
+    <div className="border-b border-black/4 pb-6 last:border-0 last:pb-0">
       <div className="flex items-start gap-3">
-        <div className="w-8 h-8 bg-[#f0efe9] rounded-full flex items-center justify-center flex-shrink-0">
+        <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center shrink-0">
           <span className="text-[12px]">{comment.user_name.charAt(0).toUpperCase()}</span>
         </div>
         <div className="flex-1">

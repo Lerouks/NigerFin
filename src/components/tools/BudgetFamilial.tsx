@@ -212,7 +212,7 @@ export function BudgetFamilial() {
 
   return (
     <div className="space-y-8">
-      <div className="bg-white border border-black/[0.06] rounded-xl p-6">
+      <div className="bg-white border border-black/6 rounded-xl p-6">
         <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-5">
           Revenus du foyer
         </h3>
@@ -229,7 +229,7 @@ export function BudgetFamilial() {
               value={revenus}
               onChange={(e) => setRevenus(e.target.value)}
               placeholder="Ex: 250 000"
-              className="w-full border border-black/[0.08] px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-[#fafaf9] text-[15px]"
+              className="w-full border border-black/8 px-4 py-3 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-black bg-background text-[15px]"
             />
             <p className="text-[11px] text-gray-400 mt-1">Cumulé si plusieurs revenus dans le foyer.</p>
           </div>
@@ -244,14 +244,14 @@ export function BudgetFamilial() {
               value={foyerSize}
               onChange={(e) => setFoyerSize(e.target.value)}
               placeholder="Ex: 5"
-              className="w-full border border-black/[0.08] px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-[#fafaf9] text-[15px]"
+              className="w-full border border-black/8 px-4 py-3 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-black bg-background text-[15px]"
             />
             <p className="text-[11px] text-gray-400 mt-1">Adultes et enfants à charge.</p>
           </div>
         </div>
       </div>
 
-      <div className="bg-white border border-black/[0.06] rounded-xl p-6">
+      <div className="bg-white border border-black/6 rounded-xl p-6">
         <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-5">
           Dépenses mensuelles par poste
         </h3>
@@ -269,7 +269,7 @@ export function BudgetFamilial() {
                 value={expenses[cat.key]}
                 onChange={(e) => setExpenses((prev) => ({ ...prev, [cat.key]: e.target.value }))}
                 placeholder={cat.placeholder}
-                className="w-full border border-black/[0.08] px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-[#fafaf9] text-[15px]"
+                className="w-full border border-black/8 px-4 py-3 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-black bg-background text-[15px]"
               />
               <p className="text-[11px] text-gray-400 mt-1">{cat.hint}</p>
             </div>
@@ -291,7 +291,7 @@ export function BudgetFamilial() {
             </div>
             <div
               className={`p-6 rounded-xl border ${
-                calc.reste >= 0 ? 'bg-white border-black/[0.06]' : 'bg-red-50 border-red-200'
+                calc.reste >= 0 ? 'bg-white border-black/6' : 'bg-red-50 border-red-200'
               }`}
             >
               <p className="text-[12px] text-gray-400 uppercase tracking-wider mb-1">
@@ -302,7 +302,7 @@ export function BudgetFamilial() {
                 {fmt(calc.reste)} FCFA
               </p>
             </div>
-            <div className="bg-white border border-black/[0.06] p-6 rounded-xl">
+            <div className="bg-white border border-black/6 p-6 rounded-xl">
               <p className="text-[12px] text-gray-400 uppercase tracking-wider mb-1">Taux d&rsquo;épargne</p>
               <p className={`text-2xl font-bold ${calc.tauxEpargne >= 10 ? 'text-emerald-600' : 'text-amber-600'}`}>
                 {calc.tauxEpargne.toFixed(1)}%
@@ -319,7 +319,7 @@ export function BudgetFamilial() {
                 capitalLabel="Dépenses"
                 interestLabel="Reste à épargner"
               />
-              <div className="bg-white border border-black/[0.06] rounded-xl p-6">
+              <div className="bg-white border border-black/6 rounded-xl p-6">
                 <h4 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
                   Répartition par poste (% des revenus)
                 </h4>
@@ -379,14 +379,14 @@ export function BudgetFamilial() {
             <AutoAnalysis paragraphs={analysis} />
           </div>
 
-          <div className="bg-[#fafaf9] border border-black/[0.06] rounded-xl p-6">
+          <div className="bg-background border border-black/6 rounded-xl p-6">
             <h4 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
               Recommandations personnalisées ({recommendations.length})
             </h4>
             <ul className="space-y-3">
               {recommendations.map((rec, i) => (
                 <li key={i} className="flex items-start gap-3">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[#111] text-white text-[11px] font-bold flex items-center justify-center mt-0.5">
+                  <span className="shrink-0 w-5 h-5 rounded-full bg-[#111] text-white text-[11px] font-bold flex items-center justify-center mt-0.5">
                     {i + 1}
                   </span>
                   <p className="text-[13px] text-gray-700 leading-relaxed">{rec}</p>

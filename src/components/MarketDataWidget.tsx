@@ -34,15 +34,15 @@ export function MarketDataWidget() {
 
   if (isLoading && items.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-black/[0.06] sticky top-36 overflow-hidden">
-        <div className="border-b border-black/[0.05] px-5 py-4">
+      <div className="bg-white rounded-xl border border-black/6 sticky top-36 overflow-hidden">
+        <div className="border-b border-black/5 px-5 py-4">
           <h3 className="text-[15px] font-semibold">Marchés</h3>
         </div>
         <div className="p-5 space-y-3">
           {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="flex justify-between items-center py-1.5">
-              <div className="h-3 w-24 bg-gray-100 rounded animate-pulse" />
-              <div className="h-3 w-16 bg-gray-100 rounded animate-pulse" />
+              <div className="h-3 w-24 bg-gray-100 rounded-sm animate-pulse" />
+              <div className="h-3 w-16 bg-gray-100 rounded-sm animate-pulse" />
             </div>
           ))}
         </div>
@@ -51,8 +51,8 @@ export function MarketDataWidget() {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-black/[0.06] sticky top-36 overflow-hidden">
-      <div className="border-b border-black/[0.05] px-5 py-4">
+    <div className="bg-white rounded-xl border border-black/6 sticky top-36 overflow-hidden">
+      <div className="border-b border-black/5 px-5 py-4">
         <h3 className="text-[15px] font-semibold">Marchés</h3>
       </div>
       <div className="p-5 space-y-5">
@@ -69,7 +69,7 @@ export function MarketDataWidget() {
                 {group.map((item) => (
                   <div
                     key={item.id}
-                    className="flex justify-between items-center py-1.5 px-2 -mx-2 rounded-lg hover:bg-[#fafaf9] transition-colors cursor-default"
+                    className="flex justify-between items-center py-1.5 px-2 -mx-2 rounded-lg hover:bg-background transition-colors cursor-default"
                   >
                     <div className="flex-1">
                       <div className="text-[13px] font-medium">{item.name}</div>
@@ -100,7 +100,7 @@ export function MarketDataWidget() {
           );
         })}
       </div>
-      <div className="border-t border-black/[0.04] px-5 py-3 bg-[#fafaf9] rounded-b-xl space-y-0.5">
+      <div className="border-t border-black/4 px-5 py-3 bg-background rounded-b-xl space-y-0.5">
         <p className="text-[10px] text-gray-500 text-center">
           Données gérées par l&apos;équipe NFI Report
         </p>

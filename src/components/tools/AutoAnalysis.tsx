@@ -10,7 +10,7 @@ export function AutoAnalysis({ paragraphs }: AutoAnalysisProps) {
   if (paragraphs.length === 0) return null;
 
   return (
-    <div className="bg-white border border-black/[0.06] rounded-xl p-6">
+    <div className="bg-white border border-black/6 rounded-xl p-6">
       <div className="flex items-center gap-2 mb-4">
         <TrendingUp className="w-4 h-4 text-gray-400" aria-hidden="true" />
         <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400">

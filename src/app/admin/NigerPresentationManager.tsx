@@ -171,7 +171,7 @@ export function NigerPresentationManager() {
               className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] transition-all ${
                 subTab === tab.id
                   ? 'bg-[#111] text-white'
-                  : 'bg-white border border-black/[0.06] text-gray-600 hover:bg-gray-50'
+                  : 'bg-white border border-black/6 text-gray-600 hover:bg-gray-50'
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -248,7 +248,7 @@ function PresentationEditor({
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-black/[0.06] p-6 space-y-5">
+    <div className="bg-white rounded-xl border border-black/6 p-6 space-y-5">
       <h3 className="text-sm font-semibold">Carte et introduction</h3>
 
       <div>
@@ -260,7 +260,7 @@ function PresentationEditor({
               value={presentation.map_image_url}
               onChange={(e) => setPresentation((prev) => ({ ...prev, map_image_url: e.target.value }))}
               placeholder="URL de l'image"
-              className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:border-black/15"
+              className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:border-black/15"
             />
             <div className="mt-2">
               <label className="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-[12px] cursor-pointer transition-colors w-fit">
@@ -271,7 +271,7 @@ function PresentationEditor({
             </div>
           </div>
           {presentation.map_image_url && (
-            <div className="w-24 h-20 rounded-lg overflow-hidden bg-gray-100 border border-black/[0.06] flex-shrink-0">
+            <div className="w-24 h-20 rounded-lg overflow-hidden bg-gray-100 border border-black/6 shrink-0">
               <Image src={presentation.map_image_url} alt="Carte du Niger" width={96} height={80} className="w-full h-full object-contain" unoptimized />
             </div>
           )}
@@ -284,7 +284,7 @@ function PresentationEditor({
           type="text"
           value={presentation.map_image_alt}
           onChange={(e) => setPresentation((prev) => ({ ...prev, map_image_alt: e.target.value }))}
-          className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:border-black/15"
+          className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:border-black/15"
         />
       </div>
 
@@ -294,7 +294,7 @@ function PresentationEditor({
           type="text"
           value={presentation.intro_title}
           onChange={(e) => setPresentation((prev) => ({ ...prev, intro_title: e.target.value }))}
-          className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:border-black/15"
+          className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:border-black/15"
         />
       </div>
 
@@ -304,7 +304,7 @@ function PresentationEditor({
           value={presentation.intro_text}
           onChange={(e) => setPresentation((prev) => ({ ...prev, intro_text: e.target.value }))}
           rows={5}
-          className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:border-black/15 resize-y"
+          className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:border-black/15 resize-y"
         />
       </div>
     </div>
@@ -323,17 +323,17 @@ function FactsEditor({ facts, setFacts }: { facts: Fact[]; setFacts: (f: Fact[])
   };
 
   return (
-    <div className="bg-white rounded-xl border border-black/[0.06] p-6 space-y-4">
+    <div className="bg-white rounded-xl border border-black/6 p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-semibold">Données clés</h3>
           <p className="text-[12px] text-gray-500 mt-0.5">Modifiez les labels, valeurs et visibilité des données affichées.</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => toggleAll(true)} className="text-[11px] px-2 py-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
+          <button onClick={() => toggleAll(true)} className="text-[11px] px-2 py-1 rounded-sm bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
             Tout afficher
           </button>
-          <button onClick={() => toggleAll(false)} className="text-[11px] px-2 py-1 rounded bg-red-50 text-red-500 hover:bg-red-100">
+          <button onClick={() => toggleAll(false)} className="text-[11px] px-2 py-1 rounded-sm bg-red-50 text-red-500 hover:bg-red-100">
             Tout masquer
           </button>
         </div>
@@ -344,7 +344,7 @@ function FactsEditor({ facts, setFacts }: { facts: Fact[]; setFacts: (f: Fact[])
           <div
             key={fact.id}
             className={`grid grid-cols-12 gap-3 items-center p-3 rounded-lg border transition-colors ${
-              fact.is_visible ? 'bg-[#fafaf9] border-black/[0.04]' : 'bg-red-50/30 border-red-100/50'
+              fact.is_visible ? 'bg-background border-black/4' : 'bg-red-50/30 border-red-100/50'
             }`}
           >
             <div className="col-span-1">
@@ -361,7 +361,7 @@ function FactsEditor({ facts, setFacts }: { facts: Fact[]; setFacts: (f: Fact[])
                 type="text"
                 value={fact.label}
                 onChange={(e) => update(fact.id, 'label', e.target.value)}
-                className="w-full border border-black/[0.08] rounded px-2 py-1.5 text-[13px] bg-white focus:outline-none focus:border-black/15"
+                className="w-full border border-black/8 rounded-sm px-2 py-1.5 text-[13px] bg-white focus:outline-hidden focus:border-black/15"
                 placeholder="Label"
               />
             </div>
@@ -370,7 +370,7 @@ function FactsEditor({ facts, setFacts }: { facts: Fact[]; setFacts: (f: Fact[])
                 type="text"
                 value={fact.value}
                 onChange={(e) => update(fact.id, 'value', e.target.value)}
-                className="w-full border border-black/[0.08] rounded px-2 py-1.5 text-[13px] bg-white focus:outline-none focus:border-black/15"
+                className="w-full border border-black/8 rounded-sm px-2 py-1.5 text-[13px] bg-white focus:outline-hidden focus:border-black/15"
                 placeholder="Valeur"
               />
             </div>
@@ -378,7 +378,7 @@ function FactsEditor({ facts, setFacts }: { facts: Fact[]; setFacts: (f: Fact[])
               <select
                 value={fact.category}
                 onChange={(e) => update(fact.id, 'category', e.target.value)}
-                className="w-full border border-black/[0.08] rounded px-2 py-1.5 text-[12px] bg-white focus:outline-none"
+                className="w-full border border-black/8 rounded-sm px-2 py-1.5 text-[12px] bg-white focus:outline-hidden"
               >
                 <option value="general">Général</option>
                 <option value="economie">Économie</option>
@@ -391,7 +391,7 @@ function FactsEditor({ facts, setFacts }: { facts: Fact[]; setFacts: (f: Fact[])
                 type="number"
                 value={fact.display_order}
                 onChange={(e) => update(fact.id, 'display_order', parseInt(e.target.value) || 0)}
-                className="w-full border border-black/[0.08] rounded px-2 py-1.5 text-[12px] bg-white focus:outline-none text-center"
+                className="w-full border border-black/8 rounded-sm px-2 py-1.5 text-[12px] bg-white focus:outline-hidden text-center"
                 title="Ordre"
               />
             </div>
@@ -423,17 +423,17 @@ function RegionsEditor({ regions, setRegions }: { regions: Region[]; setRegions:
   };
 
   return (
-    <div className="bg-white rounded-xl border border-black/[0.06] p-6 space-y-4">
+    <div className="bg-white rounded-xl border border-black/6 p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-semibold">Régions du Niger</h3>
           <p className="text-[12px] text-gray-500 mt-0.5">Gérez les informations et la visibilité de chaque région.</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => toggleAll(true)} className="text-[11px] px-2 py-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
+          <button onClick={() => toggleAll(true)} className="text-[11px] px-2 py-1 rounded-sm bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
             Tout afficher
           </button>
-          <button onClick={() => toggleAll(false)} className="text-[11px] px-2 py-1 rounded bg-red-50 text-red-500 hover:bg-red-100">
+          <button onClick={() => toggleAll(false)} className="text-[11px] px-2 py-1 rounded-sm bg-red-50 text-red-500 hover:bg-red-100">
             Tout masquer
           </button>
         </div>
@@ -446,7 +446,7 @@ function RegionsEditor({ regions, setRegions }: { regions: Region[]; setRegions:
             <div
               key={region.id}
               className={`rounded-lg border transition-colors ${
-                !region.is_visible ? 'bg-red-50/30 border-red-100/50' : 'bg-[#fafaf9] border-black/[0.04]'
+                !region.is_visible ? 'bg-red-50/30 border-red-100/50' : 'bg-background border-black/4'
               }`}
             >
               {/* Row header */}
@@ -470,7 +470,7 @@ function RegionsEditor({ regions, setRegions }: { regions: Region[]; setRegions:
                 </span>
                 <button
                   onClick={() => setExpandedId(isExpanded ? null : region.id)}
-                  className="p-1.5 rounded hover:bg-gray-200 text-gray-500 transition-colors"
+                  className="p-1.5 rounded-sm hover:bg-gray-200 text-gray-500 transition-colors"
                 >
                   {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
@@ -478,7 +478,7 @@ function RegionsEditor({ regions, setRegions }: { regions: Region[]; setRegions:
 
               {/* Expanded edit form */}
               {isExpanded && (
-                <div className="px-4 pb-4 space-y-3 border-t border-black/[0.04] pt-3">
+                <div className="px-4 pb-4 space-y-3 border-t border-black/4 pt-3">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div>
                       <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Nom</label>
@@ -486,7 +486,7 @@ function RegionsEditor({ regions, setRegions }: { regions: Region[]; setRegions:
                         type="text"
                         value={region.name}
                         onChange={(e) => update(region.id, 'name', e.target.value)}
-                        className="w-full border border-black/[0.08] rounded px-2 py-1.5 text-[13px] bg-white focus:outline-none"
+                        className="w-full border border-black/8 rounded-sm px-2 py-1.5 text-[13px] bg-white focus:outline-hidden"
                       />
                     </div>
                     <div>
@@ -495,7 +495,7 @@ function RegionsEditor({ regions, setRegions }: { regions: Region[]; setRegions:
                         type="text"
                         value={region.capital}
                         onChange={(e) => update(region.id, 'capital', e.target.value)}
-                        className="w-full border border-black/[0.08] rounded px-2 py-1.5 text-[13px] bg-white focus:outline-none"
+                        className="w-full border border-black/8 rounded-sm px-2 py-1.5 text-[13px] bg-white focus:outline-hidden"
                       />
                     </div>
                     <div>
@@ -504,7 +504,7 @@ function RegionsEditor({ regions, setRegions }: { regions: Region[]; setRegions:
                         type="number"
                         value={region.population}
                         onChange={(e) => update(region.id, 'population', parseInt(e.target.value) || 0)}
-                        className="w-full border border-black/[0.08] rounded px-2 py-1.5 text-[13px] bg-white focus:outline-none"
+                        className="w-full border border-black/8 rounded-sm px-2 py-1.5 text-[13px] bg-white focus:outline-hidden"
                       />
                     </div>
                     <div>
@@ -513,7 +513,7 @@ function RegionsEditor({ regions, setRegions }: { regions: Region[]; setRegions:
                         type="text"
                         value={region.area_km2}
                         onChange={(e) => update(region.id, 'area_km2', e.target.value)}
-                        className="w-full border border-black/[0.08] rounded px-2 py-1.5 text-[13px] bg-white focus:outline-none"
+                        className="w-full border border-black/8 rounded-sm px-2 py-1.5 text-[13px] bg-white focus:outline-hidden"
                       />
                     </div>
                   </div>
@@ -523,7 +523,7 @@ function RegionsEditor({ regions, setRegions }: { regions: Region[]; setRegions:
                       <select
                         value={region.security_level}
                         onChange={(e) => update(region.id, 'security_level', e.target.value)}
-                        className="w-full border border-black/[0.08] rounded px-2 py-1.5 text-[13px] bg-white focus:outline-none"
+                        className="w-full border border-black/8 rounded-sm px-2 py-1.5 text-[13px] bg-white focus:outline-hidden"
                       >
                         <option value="stable">Stable</option>
                         <option value="moderate">Modéré</option>
@@ -537,7 +537,7 @@ function RegionsEditor({ regions, setRegions }: { regions: Region[]; setRegions:
                         type="text"
                         value={region.security_note}
                         onChange={(e) => update(region.id, 'security_note', e.target.value)}
-                        className="w-full border border-black/[0.08] rounded px-2 py-1.5 text-[13px] bg-white focus:outline-none"
+                        className="w-full border border-black/8 rounded-sm px-2 py-1.5 text-[13px] bg-white focus:outline-hidden"
                       />
                     </div>
                   </div>
@@ -548,7 +548,7 @@ function RegionsEditor({ regions, setRegions }: { regions: Region[]; setRegions:
                         type="text"
                         value={region.economic_activities.join(', ')}
                         onChange={(e) => update(region.id, 'economic_activities', e.target.value.split(',').map((s) => s.trim()).filter(Boolean))}
-                        className="w-full border border-black/[0.08] rounded px-2 py-1.5 text-[13px] bg-white focus:outline-none"
+                        className="w-full border border-black/8 rounded-sm px-2 py-1.5 text-[13px] bg-white focus:outline-hidden"
                       />
                     </div>
                     <div>
@@ -557,7 +557,7 @@ function RegionsEditor({ regions, setRegions }: { regions: Region[]; setRegions:
                         type="text"
                         value={region.natural_resources.join(', ')}
                         onChange={(e) => update(region.id, 'natural_resources', e.target.value.split(',').map((s) => s.trim()).filter(Boolean))}
-                        className="w-full border border-black/[0.08] rounded px-2 py-1.5 text-[13px] bg-white focus:outline-none"
+                        className="w-full border border-black/8 rounded-sm px-2 py-1.5 text-[13px] bg-white focus:outline-hidden"
                       />
                     </div>
                   </div>
@@ -594,17 +594,17 @@ function ResourcesEditor({ resources, setResources }: { resources: Resource[]; s
   };
 
   return (
-    <div className="bg-white rounded-xl border border-black/[0.06] p-6 space-y-4">
+    <div className="bg-white rounded-xl border border-black/6 p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-semibold">Ressources stratégiques</h3>
           <p className="text-[12px] text-gray-500 mt-0.5">Gérez les ressources naturelles et leur visibilité.</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => toggleAll(true)} className="text-[11px] px-2 py-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
+          <button onClick={() => toggleAll(true)} className="text-[11px] px-2 py-1 rounded-sm bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
             Tout afficher
           </button>
-          <button onClick={() => toggleAll(false)} className="text-[11px] px-2 py-1 rounded bg-red-50 text-red-500 hover:bg-red-100">
+          <button onClick={() => toggleAll(false)} className="text-[11px] px-2 py-1 rounded-sm bg-red-50 text-red-500 hover:bg-red-100">
             Tout masquer
           </button>
         </div>
@@ -617,7 +617,7 @@ function ResourcesEditor({ resources, setResources }: { resources: Resource[]; s
             <div
               key={res.id}
               className={`rounded-lg border transition-colors ${
-                !res.is_visible ? 'bg-red-50/30 border-red-100/50' : 'bg-[#fafaf9] border-black/[0.04]'
+                !res.is_visible ? 'bg-red-50/30 border-red-100/50' : 'bg-background border-black/4'
               }`}
             >
               <div className="flex items-center gap-3 px-4 py-3">
@@ -639,14 +639,14 @@ function ResourcesEditor({ resources, setResources }: { resources: Resource[]; s
                 <span className="text-[11px] text-gray-500">{res.type}</span>
                 <button
                   onClick={() => setExpandedId(isExpanded ? null : res.id)}
-                  className="p-1.5 rounded hover:bg-gray-200 text-gray-500 transition-colors"
+                  className="p-1.5 rounded-sm hover:bg-gray-200 text-gray-500 transition-colors"
                 >
                   {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
               </div>
 
               {isExpanded && (
-                <div className="px-4 pb-4 space-y-3 border-t border-black/[0.04] pt-3">
+                <div className="px-4 pb-4 space-y-3 border-t border-black/4 pt-3">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div>
                       <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Nom</label>
@@ -654,7 +654,7 @@ function ResourcesEditor({ resources, setResources }: { resources: Resource[]; s
                         type="text"
                         value={res.name}
                         onChange={(e) => update(res.id, 'name', e.target.value)}
-                        className="w-full border border-black/[0.08] rounded px-2 py-1.5 text-[13px] bg-white focus:outline-none"
+                        className="w-full border border-black/8 rounded-sm px-2 py-1.5 text-[13px] bg-white focus:outline-hidden"
                       />
                     </div>
                     <div>
@@ -662,7 +662,7 @@ function ResourcesEditor({ resources, setResources }: { resources: Resource[]; s
                       <select
                         value={res.type}
                         onChange={(e) => update(res.id, 'type', e.target.value)}
-                        className="w-full border border-black/[0.08] rounded px-2 py-1.5 text-[13px] bg-white focus:outline-none"
+                        className="w-full border border-black/8 rounded-sm px-2 py-1.5 text-[13px] bg-white focus:outline-hidden"
                       >
                         <option value="uranium">Uranium</option>
                         <option value="petrole">Pétrole</option>
@@ -677,7 +677,7 @@ function ResourcesEditor({ resources, setResources }: { resources: Resource[]; s
                         type="text"
                         value={res.location_name}
                         onChange={(e) => update(res.id, 'location_name', e.target.value)}
-                        className="w-full border border-black/[0.08] rounded px-2 py-1.5 text-[13px] bg-white focus:outline-none"
+                        className="w-full border border-black/8 rounded-sm px-2 py-1.5 text-[13px] bg-white focus:outline-hidden"
                       />
                     </div>
                     <div>
@@ -685,7 +685,7 @@ function ResourcesEditor({ resources, setResources }: { resources: Resource[]; s
                       <select
                         value={res.economic_importance}
                         onChange={(e) => update(res.id, 'economic_importance', e.target.value)}
-                        className="w-full border border-black/[0.08] rounded px-2 py-1.5 text-[13px] bg-white focus:outline-none"
+                        className="w-full border border-black/8 rounded-sm px-2 py-1.5 text-[13px] bg-white focus:outline-hidden"
                       >
                         <option value="critique">Critique</option>
                         <option value="majeure">Majeure</option>
@@ -700,7 +700,7 @@ function ResourcesEditor({ resources, setResources }: { resources: Resource[]; s
                         type="text"
                         value={res.estimated_production}
                         onChange={(e) => update(res.id, 'estimated_production', e.target.value)}
-                        className="w-full border border-black/[0.08] rounded px-2 py-1.5 text-[13px] bg-white focus:outline-none"
+                        className="w-full border border-black/8 rounded-sm px-2 py-1.5 text-[13px] bg-white focus:outline-hidden"
                       />
                     </div>
                     <div>
@@ -709,7 +709,7 @@ function ResourcesEditor({ resources, setResources }: { resources: Resource[]; s
                         type="text"
                         value={res.production_unit}
                         onChange={(e) => update(res.id, 'production_unit', e.target.value)}
-                        className="w-full border border-black/[0.08] rounded px-2 py-1.5 text-[13px] bg-white focus:outline-none"
+                        className="w-full border border-black/8 rounded-sm px-2 py-1.5 text-[13px] bg-white focus:outline-hidden"
                       />
                     </div>
                     <div>
@@ -718,7 +718,7 @@ function ResourcesEditor({ resources, setResources }: { resources: Resource[]; s
                         type="text"
                         value={res.operating_companies.join(', ')}
                         onChange={(e) => update(res.id, 'operating_companies', e.target.value.split(',').map((s) => s.trim()).filter(Boolean))}
-                        className="w-full border border-black/[0.08] rounded px-2 py-1.5 text-[13px] bg-white focus:outline-none"
+                        className="w-full border border-black/8 rounded-sm px-2 py-1.5 text-[13px] bg-white focus:outline-hidden"
                       />
                     </div>
                   </div>
@@ -728,7 +728,7 @@ function ResourcesEditor({ resources, setResources }: { resources: Resource[]; s
                       value={res.importance_description}
                       onChange={(e) => update(res.id, 'importance_description', e.target.value)}
                       rows={2}
-                      className="w-full border border-black/[0.08] rounded px-2 py-1.5 text-[13px] bg-white focus:outline-none resize-y"
+                      className="w-full border border-black/8 rounded-sm px-2 py-1.5 text-[13px] bg-white focus:outline-hidden resize-y"
                     />
                   </div>
                 </div>

@@ -124,7 +124,7 @@ export function AdminDashboard() {
 
   if (isLoading || userRole !== 'admin') {
     return (
-      <div className="min-h-screen bg-[#fafaf9] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
       </div>
     );
@@ -153,7 +153,7 @@ export function AdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#fafaf9]">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <section className="bg-[#111] text-white py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -191,7 +191,7 @@ export function AdminDashboard() {
               aria-selected={activeTab === tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-[13px] transition-all whitespace-nowrap ${
-                activeTab === tab.id ? 'bg-[#111] text-white' : 'bg-white border border-black/[0.06] text-gray-600 hover:bg-gray-50'
+                activeTab === tab.id ? 'bg-[#111] text-white' : 'bg-white border border-black/6 text-gray-600 hover:bg-gray-50'
               }`}
             >
               <tab.icon className="w-4 h-4" />

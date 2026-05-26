@@ -146,8 +146,8 @@ export function NewsletterPopup() {
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-[90] transition-opacity duration-300 ${
-          animateIn ? 'bg-black/50 backdrop-blur-sm' : 'bg-black/0'
+        className={`fixed inset-0 z-90 transition-opacity duration-300 ${
+          animateIn ? 'bg-black/50 backdrop-blur-xs' : 'bg-black/0'
         }`}
         onClick={handleClose}
         aria-hidden="true"
@@ -159,7 +159,7 @@ export function NewsletterPopup() {
         role="dialog"
         aria-modal="true"
         aria-label="Inscription à la newsletter"
-        className="fixed inset-x-0 bottom-0 sm:inset-0 z-[91] sm:flex sm:items-center sm:justify-center"
+        className="fixed inset-x-0 bottom-0 sm:inset-0 z-91 sm:flex sm:items-center sm:justify-center"
       >
         <div
           className={`
@@ -212,7 +212,7 @@ export function NewsletterPopup() {
             {/* Form */}
             {success ? (
               <div className="flex items-center gap-3 bg-emerald-50 rounded-xl px-4 py-3.5">
-                <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
                   <Check className="w-4 h-4 text-emerald-600" />
                 </div>
                 <p className="text-[14px] text-emerald-700 font-medium">Inscription confirmée !</p>
@@ -226,7 +226,7 @@ export function NewsletterPopup() {
                   placeholder="Votre adresse email"
                   required
                   autoComplete="email"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[14px] text-[#111] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#111] focus:border-transparent transition-shadow bg-[#fafaf9]"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[14px] text-[#111] placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-[#111] focus:border-transparent transition-shadow bg-background"
                 />
                 {error && (
                   <p className="text-[12px] text-red-500">Une erreur est survenue. Réessayez.</p>

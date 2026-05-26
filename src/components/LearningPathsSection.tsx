@@ -43,11 +43,11 @@ const fetcher = (url: string): Promise<LearningPath[]> =>
 
 function SkeletonCard() {
   return (
-    <div className="flex flex-col justify-between rounded-xl p-5 h-[200px] md:h-[220px] border bg-white border-black/[0.06]">
+    <div className="flex flex-col justify-between rounded-xl p-5 h-[200px] md:h-[220px] border bg-white border-black/6">
       <div className="w-9 h-9 rounded-full bg-gray-100 animate-pulse" />
       <div className="space-y-2">
-        <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse" />
-        <div className="h-3 w-1/2 bg-gray-100 rounded animate-pulse" />
+        <div className="h-4 w-3/4 bg-gray-200 rounded-sm animate-pulse" />
+        <div className="h-3 w-1/2 bg-gray-100 rounded-sm animate-pulse" />
       </div>
     </div>
   );
@@ -91,10 +91,10 @@ export function LearningPathsSection() {
                 <Link
                   key={path.id}
                   href={`/education/parcours/${path.slug}`}
-                  className="group flex flex-col justify-between rounded-xl p-5 h-[200px] md:h-[220px] border bg-white border-black/[0.06] hover:border-black/[0.14] hover:shadow-sm transition-all"
+                  className="group flex flex-col justify-between rounded-xl p-5 h-[200px] md:h-[220px] border bg-white border-black/6 hover:border-black/[0.14] hover:shadow-xs transition-all"
                 >
                   <div className="flex items-start justify-between">
-                    <div className="w-9 h-9 rounded-full bg-[#f5f5f0] flex items-center justify-center">
+                    <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center">
                       <Icon className="w-[18px] h-[18px] text-[#111]" />
                     </div>
                     <span className="text-[10px] uppercase tracking-wider text-gray-500 font-medium">
@@ -124,7 +124,7 @@ export function LearningPathsSection() {
                           </span>
                           <span className="tabular-nums">{progressPct}%</span>
                         </div>
-                        <div className="h-1 w-full bg-black/[0.05] rounded-full overflow-hidden">
+                        <div className="h-1 w-full bg-black/5 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-emerald-500 rounded-full transition-all"
                             style={{ width: `${progressPct}%` }}

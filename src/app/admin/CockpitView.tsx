@@ -85,20 +85,20 @@ function CockpitHeader({ greeting, today }: { greeting: ProfileGreeting; today: 
   return (
     <header className="pt-3 pb-5 flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-[#d4a843] to-[#ff8c42] flex items-center justify-center text-white font-bold text-[14px]">
+        <div className="w-11 h-11 rounded-full bg-linear-to-br from-[#d4a843] to-[#ff8c42] flex items-center justify-center text-white font-bold text-[14px]">
           {greeting.initials}
         </div>
         <div>
-          <p className="font-bold text-[22px] text-[#1a1a1a] leading-none tracking-tight">
+          <p className="font-bold text-[22px] text-foreground leading-none tracking-tight">
             Bonjour {greeting.firstName}
           </p>
-          <p className="text-[12px] text-[#1a1a1a]/45 mt-1">{today}</p>
+          <p className="text-[12px] text-foreground/45 mt-1">{today}</p>
         </div>
       </div>
       <button
         type="button"
         aria-label="Notifications"
-        className="relative w-10 h-10 rounded-full bg-black/[0.04] flex items-center justify-center hover:bg-black/[0.06] transition"
+        className="relative w-10 h-10 rounded-full bg-black/4 flex items-center justify-center hover:bg-black/6 transition"
       >
         <Bell className="w-[18px] h-[18px]" />
       </button>
@@ -121,17 +121,17 @@ function HeroCardViews({
   return (
     <section className="mb-3">
       <div
-        className="rounded-3xl p-6 border border-black/[0.04]"
+        className="rounded-3xl p-6 border border-black/4"
         style={{
           background:
             'radial-gradient(circle at 20% 0%, rgba(255,140,66,0.08) 0%, transparent 50%), radial-gradient(circle at 80% 100%, rgba(212,168,67,0.12) 0%, transparent 50%), #ffffff',
         }}
       >
         <div className="flex items-start justify-between mb-1">
-          <p className="text-[11px] tracking-widest uppercase text-[#1a1a1a]/45 font-semibold">
+          <p className="text-[11px] tracking-widest uppercase text-foreground/45 font-semibold">
             Lecteurs aujourd&apos;hui
           </p>
-          <span className="text-[11px] text-[#1a1a1a]/40">en direct</span>
+          <span className="text-[11px] text-foreground/40">en direct</span>
         </div>
         <div className="flex items-baseline gap-2 mt-3">
           <span className="font-black text-[64px] leading-none tracking-tight tabular-nums">
@@ -152,7 +152,7 @@ function HeroCardViews({
             )}
             {growthPercent === null ? '-' : `${positive ? '+' : ''}${growthPercent}%`}
           </span>
-          <span className="text-[12px] text-[#1a1a1a]/45">vs hier</span>
+          <span className="text-[12px] text-foreground/45">vs hier</span>
         </div>
         <Sparkline data={sparkline} className="mt-5 w-full h-[70px]" positive={positive} />
       </div>
@@ -177,8 +177,8 @@ function StatsRow({
   const newUsersPositive = (newUsersGrowth ?? 0) >= 0;
   return (
     <section className="grid grid-cols-2 gap-3 mb-6">
-      <div className="bg-black/[0.025] rounded-2xl p-4">
-        <p className="text-[10px] tracking-widest uppercase text-[#1a1a1a]/45 font-semibold">
+      <div className="bg-black/2.5 rounded-2xl p-4">
+        <p className="text-[10px] tracking-widest uppercase text-foreground/45 font-semibold">
           Nouveaux lecteurs
         </p>
         <p className="font-extrabold text-[28px] leading-tight mt-2 tabular-nums">
@@ -194,13 +194,13 @@ function StatsRow({
           {newUsersGrowth === null ? '-' : `${newUsersPositive ? '+' : ''}${newUsersGrowth}%`}
         </span>
       </div>
-      <div className="rounded-2xl p-4 border border-[#d4a843]/15 bg-gradient-to-br from-[#d4a843]/8 to-[#ff8c42]/4">
+      <div className="rounded-2xl p-4 border border-[#d4a843]/15 bg-linear-to-br from-[#d4a843]/8 to-[#ff8c42]/4">
         <p className="text-[10px] tracking-widest uppercase text-[#d4a843] font-semibold">
           Premium MRR
         </p>
         <p className="font-extrabold text-[22px] leading-tight mt-2 tabular-nums">
           <AnimatedNumber value={mrr} isLoading={isLoading} />
-          <span className="text-[12px] text-[#1a1a1a]/40 font-medium ml-1">FCFA</span>
+          <span className="text-[12px] text-foreground/40 font-medium ml-1">FCFA</span>
         </p>
         <span
           className={[
@@ -233,7 +233,7 @@ const TYPE_VISUAL: Record<
 > = {
   payment: {
     icon: Wallet,
-    bg: 'bg-gradient-to-br from-[#d4a843] to-[#ff8c42]',
+    bg: 'bg-linear-to-br from-[#d4a843] to-[#ff8c42]',
     iconColor: 'text-white',
     label: 'Paiement',
   },
@@ -245,13 +245,13 @@ const TYPE_VISUAL: Record<
   },
   signup: {
     icon: UserPlus,
-    bg: 'bg-[#1a1a1a]/[0.06]',
-    iconColor: 'text-[#1a1a1a]/70',
+    bg: 'bg-foreground/6',
+    iconColor: 'text-foreground/70',
     label: 'Nouvel utilisateur',
   },
   article: {
     icon: Newspaper,
-    bg: 'bg-[#1a1a1a]',
+    bg: 'bg-foreground',
     iconColor: 'text-[#d4a843]',
     label: 'Article',
   },
@@ -278,7 +278,7 @@ function ActivitySection() {
 
       {isLoading && <ActivitySkeleton />}
       {!isLoading && events.length === 0 && (
-        <div className="bg-white border border-black/[0.06] rounded-2xl p-6 text-center text-[13px] text-[#1a1a1a]/55">
+        <div className="bg-white border border-black/6 rounded-2xl p-6 text-center text-[13px] text-foreground/55">
           Aucune activité récente. Profite du calme.
         </div>
       )}
@@ -287,15 +287,15 @@ function ActivitySection() {
           {events.slice(0, 5).map((e) => (
             <div
               key={e.id}
-              className="flex items-center gap-3 bg-white border border-black/[0.06] rounded-2xl p-3.5"
+              className="flex items-center gap-3 bg-white border border-black/6 rounded-2xl p-3.5"
             >
               <EventVisual type={e.type} initials={e.initials} />
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold leading-tight text-[#1a1a1a]">
+                <p className="text-[13px] font-semibold leading-tight text-foreground">
                   {e.label}{' '}
-                  <span className="text-[#1a1a1a]/45 font-normal">{e.detail}</span>
+                  <span className="text-foreground/45 font-normal">{e.detail}</span>
                 </p>
-                <p className="text-[11px] text-[#1a1a1a]/45 mt-0.5">
+                <p className="text-[11px] text-foreground/45 mt-0.5">
                   {e.relativeTime}
                   {e.highlight ? (
                     <>
@@ -319,12 +319,12 @@ function ActivitySkeleton() {
       {[0, 1, 2].map((i) => (
         <div
           key={i}
-          className="flex items-center gap-3 bg-white border border-black/[0.06] rounded-2xl p-3.5 animate-pulse"
+          className="flex items-center gap-3 bg-white border border-black/6 rounded-2xl p-3.5 animate-pulse"
         >
-          <div className="w-10 h-10 rounded-full bg-black/[0.06] flex-shrink-0" />
+          <div className="w-10 h-10 rounded-full bg-black/6 shrink-0" />
           <div className="flex-1 space-y-2">
-            <div className="h-3 bg-black/[0.06] rounded w-3/4" />
-            <div className="h-2 bg-black/[0.04] rounded w-1/2" />
+            <div className="h-3 bg-black/6 rounded-sm w-3/4" />
+            <div className="h-2 bg-black/4 rounded-sm w-1/2" />
           </div>
         </div>
       ))}
@@ -334,7 +334,7 @@ function ActivitySkeleton() {
 
 function Avatar({ initials }: { initials: string }) {
   return (
-    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#d4a843] to-[#ff8c42] flex items-center justify-center text-white font-bold text-[12px] flex-shrink-0">
+    <div className="w-10 h-10 rounded-full bg-linear-to-br from-[#d4a843] to-[#ff8c42] flex items-center justify-center text-white font-bold text-[12px] shrink-0">
       {initials}
     </div>
   );
@@ -350,7 +350,7 @@ function EventVisual({ type, initials }: { type?: ActivityType; initials?: strin
   const Icon = visual.icon;
   return (
     <div
-      className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${visual.bg}`}
+      className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${visual.bg}`}
       aria-label={visual.label}
     >
       <Icon className={`w-[18px] h-[18px] ${visual.iconColor}`} aria-hidden="true" />
@@ -372,7 +372,7 @@ function TopArticleSection({
       <h2 className="font-bold text-[16px] mb-3">Article qui monte</h2>
       <Link
         href={`/admin/legacy?tab=articles&article=${top.id}`}
-        className="block rounded-2xl p-4 text-white bg-gradient-to-br from-black to-[#1a1a1a] hover:from-[#1a1a1a] hover:to-[#2a2a2a] transition"
+        className="block rounded-2xl p-4 text-white bg-linear-to-br from-black to-foreground hover:from-foreground hover:to-[#2a2a2a] transition"
       >
         <div className="text-[10px] tracking-widest uppercase text-[#d4a843] font-semibold mb-2 flex items-center gap-1">
           <Sparkles className="w-3 h-3" aria-hidden="true" /> Top du moment
@@ -398,13 +398,13 @@ function BriefingCard({
   const narrative = buildNarrative({ viewsToday, revenueToday, newUsersToday });
   return (
     <section className="mb-10">
-      <div className="rounded-3xl p-5 text-white bg-gradient-to-br from-[#1a1a1a] to-black">
+      <div className="rounded-3xl p-5 text-white bg-linear-to-br from-foreground to-black">
         <div className="flex items-center gap-4">
           <button
             type="button"
             aria-label="Écouter le briefing (bientôt)"
             disabled
-            className="w-14 h-14 rounded-full bg-gradient-to-br from-[#d4a843] to-[#ff8c42] flex items-center justify-center flex-shrink-0 shadow-lg opacity-70 cursor-not-allowed"
+            className="w-14 h-14 rounded-full bg-linear-to-br from-[#d4a843] to-[#ff8c42] flex items-center justify-center shrink-0 shadow-lg opacity-70 cursor-not-allowed"
           >
             <Play className="w-[18px] h-[18px] text-white fill-current" />
           </button>
@@ -486,7 +486,7 @@ function AnimatedNumber({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
-  if (isLoading && value === null) return <span className="text-[#1a1a1a]/20">-</span>;
+  if (isLoading && value === null) return <span className="text-foreground/20">-</span>;
   return <>{display.toLocaleString('fr-FR')}</>;
 }
 

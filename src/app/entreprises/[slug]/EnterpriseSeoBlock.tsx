@@ -211,7 +211,7 @@ export function EnterpriseSeoBlock({ enterprise }: { enterprise: EnterpriseInfo 
   if (!content) return null;
 
   return (
-    <section className="border-t border-black/[0.06] bg-white">
+    <section className="border-t border-black/6 bg-white">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
         <div className="prose prose-sm sm:prose-base max-w-none">
           <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 mb-10">
@@ -238,7 +238,7 @@ export function EnterpriseSeoBlock({ enterprise }: { enterprise: EnterpriseInfo 
           <ul className="space-y-2.5 text-[15px] text-gray-700">
             {content.keyPoints.bullets.map((b) => (
               <li key={b} className="flex items-start gap-3">
-                <span className="mt-2 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
+                <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
                 <span className="leading-relaxed">{b}</span>
               </li>
             ))}

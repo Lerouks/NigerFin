@@ -180,8 +180,8 @@ function InscriptionContent() {
                     key={opt}
                     className={`flex items-center justify-center gap-2 cursor-pointer border rounded-xl px-4 py-3 text-sm transition-all ${
                       selected
-                        ? 'border-[#111] bg-[#fafaf9] text-[#111]'
-                        : 'border-black/[0.08] bg-white text-gray-600 hover:border-black/[0.16]'
+                        ? 'border-[#111] bg-background text-[#111]'
+                        : 'border-black/8 bg-white text-gray-600 hover:border-black/16'
                     }`}
                   >
                     <input
@@ -212,10 +212,10 @@ function InscriptionContent() {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 aria-invalid={fullName && !isNameValid ? 'true' : undefined}
-                className={`w-full border rounded-xl pl-11 pr-4 py-3 bg-[#fafaf9] focus:outline-none focus:ring-2 transition-all text-base ${
+                className={`w-full border rounded-xl pl-11 pr-4 py-3 bg-background focus:outline-hidden focus:ring-2 transition-all text-base ${
                   fullName && !isNameValid
                     ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                    : 'border-black/[0.08] focus:border-gold/30 focus:ring-gold/10'
+                    : 'border-black/8 focus:border-gold/30 focus:ring-gold/10'
                 }`}
                 placeholder="Prénom et nom"
               />
@@ -236,7 +236,7 @@ function InscriptionContent() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full border border-black/[0.08] rounded-xl pl-11 pr-4 py-3 bg-[#fafaf9] focus:outline-none focus:border-gold/30 focus:ring-2 focus:ring-gold/10 transition-all text-base"
+                className="w-full border border-black/8 rounded-xl pl-11 pr-4 py-3 bg-background focus:outline-hidden focus:border-gold/30 focus:ring-2 focus:ring-gold/10 transition-all text-base"
                 placeholder="votre@email.com"
               />
             </div>
@@ -254,7 +254,7 @@ function InscriptionContent() {
                 autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-black/[0.08] rounded-xl pl-11 pr-11 py-3 bg-[#fafaf9] focus:outline-none focus:border-gold/30 focus:ring-2 focus:ring-gold/10 transition-all text-base"
+                className="w-full border border-black/8 rounded-xl pl-11 pr-11 py-3 bg-background focus:outline-hidden focus:border-gold/30 focus:ring-2 focus:ring-gold/10 transition-all text-base"
                 placeholder="Minimum 8 caractères"
               />
               <button
@@ -291,10 +291,10 @@ function InscriptionContent() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 aria-invalid={confirmPassword && !passwordsMatch ? 'true' : undefined}
-                className={`w-full border rounded-xl pl-11 pr-11 py-3 bg-[#fafaf9] focus:outline-none focus:ring-2 transition-all text-base ${
+                className={`w-full border rounded-xl pl-11 pr-11 py-3 bg-background focus:outline-hidden focus:ring-2 transition-all text-base ${
                   confirmPassword && !passwordsMatch
                     ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                    : 'border-black/[0.08] focus:border-gold/30 focus:ring-gold/10'
+                    : 'border-black/8 focus:border-gold/30 focus:ring-gold/10'
                 }`}
                 placeholder="Confirmez votre mot de passe"
               />
@@ -317,7 +317,7 @@ function InscriptionContent() {
               type="checkbox"
               checked={newsletterOptIn}
               onChange={(e) => setNewsletterOptIn(e.target.checked)}
-              className="mt-0.5 w-4 h-4 rounded border-black/20 text-[#111] focus:ring-2 focus:ring-gold/30 focus:ring-offset-0"
+              className="mt-0.5 w-4 h-4 rounded-sm border-black/20 text-[#111] focus:ring-2 focus:ring-gold/30 focus:ring-offset-0"
             />
             <span className="leading-relaxed">
               Recevoir la newsletter NFI Report (1 édito long par semaine sur l&apos;économie Niger et UEMOA, désabonnement en 1 clic).
@@ -340,7 +340,7 @@ function InscriptionContent() {
 
         <div className="relative my-7">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-black/[0.06]" />
+            <div className="w-full border-t border-black/6" />
           </div>
           <div className="relative flex justify-center text-xs">
             <span className="px-3 bg-white text-gray-500">ou</span>

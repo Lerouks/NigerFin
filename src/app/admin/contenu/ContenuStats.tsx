@@ -49,21 +49,21 @@ function StatCard({
       className={[
         'rounded-2xl p-4',
         accent
-          ? 'bg-gradient-to-br from-[#d4a843]/8 to-[#ff8c42]/4 border border-[#d4a843]/15'
-          : 'bg-black/[0.025]',
+          ? 'bg-linear-to-br from-[#d4a843]/8 to-[#ff8c42]/4 border border-[#d4a843]/15'
+          : 'bg-black/2.5',
       ].join(' ')}
     >
       <p
         className={[
           'text-[10px] tracking-widest uppercase font-semibold',
-          accent ? 'text-[#d4a843]' : 'text-[#1a1a1a]/45',
+          accent ? 'text-[#d4a843]' : 'text-foreground/45',
         ].join(' ')}
       >
         {label}
       </p>
       <p className="font-extrabold text-[24px] leading-tight mt-2 tabular-nums">
         {isLoading || value === undefined ? (
-          <span className="text-[#1a1a1a]/20">-</span>
+          <span className="text-foreground/20">-</span>
         ) : (
           value.toLocaleString('fr-FR')
         )}

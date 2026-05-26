@@ -142,7 +142,7 @@ export function PaywallManager() {
 
           {/* Case breakdown */}
           {analytics.case_breakdown && Object.keys(analytics.case_breakdown).length > 0 && (
-            <div className="bg-white rounded-xl border border-black/[0.06] p-5">
+            <div className="bg-white rounded-xl border border-black/6 p-5">
               <h4 className="text-[11px] uppercase tracking-wider text-gray-500 mb-3">Repartition par cas utilisateur</h4>
               <div className="space-y-2">
                 {Object.entries(analytics.case_breakdown)
@@ -173,7 +173,7 @@ export function PaywallManager() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-black/[0.06] p-6 space-y-6">
+      <div className="bg-white rounded-xl border border-black/6 p-6 space-y-6">
         {/* Enable toggle */}
         <div className="flex items-center justify-between">
           <div>
@@ -187,11 +187,11 @@ export function PaywallManager() {
               onChange={(e) => update('enabled', e.target.checked)}
               className="sr-only peer"
             />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600" />
+            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:rtl:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:inset-s-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600" />
           </label>
         </div>
 
-        <hr className="border-black/[0.04]" />
+        <hr className="border-black/4" />
 
         {/* Trigger settings */}
         <div>
@@ -202,7 +202,7 @@ export function PaywallManager() {
               <select
                 value={config.trigger_type}
                 onChange={(e) => update('trigger_type', e.target.value as PaywallConfig['trigger_type'])}
-                className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none"
+                className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden"
               >
                 <option value="scroll">Scroll uniquement</option>
                 <option value="time">Temps uniquement</option>
@@ -217,7 +217,7 @@ export function PaywallManager() {
                 max={100}
                 value={config.scroll_percent}
                 onChange={(e) => update('scroll_percent', parseInt(e.target.value) || 50)}
-                className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
+                className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
               />
             </div>
             <div>
@@ -228,13 +228,13 @@ export function PaywallManager() {
                 max={60}
                 value={config.delay_seconds}
                 onChange={(e) => update('delay_seconds', parseInt(e.target.value) || 3)}
-                className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
+                className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
               />
             </div>
           </div>
         </div>
 
-        <hr className="border-black/[0.04]" />
+        <hr className="border-black/4" />
 
         {/* Content */}
         <div>
@@ -246,7 +246,7 @@ export function PaywallManager() {
                 type="text"
                 value={config.title}
                 onChange={(e) => update('title', e.target.value)}
-                className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
+                className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
               />
             </div>
             <div>
@@ -255,7 +255,7 @@ export function PaywallManager() {
                 value={config.message}
                 onChange={(e) => update('message', e.target.value)}
                 rows={2}
-                className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black resize-none"
+                className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black resize-none"
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -265,7 +265,7 @@ export function PaywallManager() {
                   type="text"
                   value={config.cta_subscribe_text}
                   onChange={(e) => update('cta_subscribe_text', e.target.value)}
-                  className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
+                  className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
                 />
               </div>
               <div>
@@ -274,7 +274,7 @@ export function PaywallManager() {
                   type="text"
                   value={config.cta_login_text}
                   onChange={(e) => update('cta_login_text', e.target.value)}
-                  className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
+                  className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
                 />
               </div>
               <div>
@@ -283,14 +283,14 @@ export function PaywallManager() {
                   type="text"
                   value={config.cta_dismiss_text}
                   onChange={(e) => update('cta_dismiss_text', e.target.value)}
-                  className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
+                  className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
                 />
               </div>
             </div>
           </div>
         </div>
 
-        <hr className="border-black/[0.04]" />
+        <hr className="border-black/4" />
 
         {/* Counter */}
         <div>
@@ -303,7 +303,7 @@ export function PaywallManager() {
                 onChange={(e) => update('show_article_counter', e.target.checked)}
                 className="sr-only peer"
               />
-              <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600" />
+              <div className="w-9 h-5 bg-gray-200 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:rtl:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:inset-s-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600" />
             </label>
             <span className="text-sm text-gray-600">Afficher le compteur</span>
           </div>
@@ -315,12 +315,12 @@ export function PaywallManager() {
               type="text"
               value={config.counter_message}
               onChange={(e) => update('counter_message', e.target.value)}
-              className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
+              className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
             />
           </div>
         </div>
 
-        <hr className="border-black/[0.04]" />
+        <hr className="border-black/4" />
 
         {/* Appearance */}
         <div>
@@ -339,13 +339,13 @@ export function PaywallManager() {
               max={720}
               value={config.dismiss_cookie_hours}
               onChange={(e) => update('dismiss_cookie_hours', parseInt(e.target.value) || 24)}
-              className="w-40 border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
+              className="w-40 border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
             />
           </div>
         </div>
 
         {/* Premium Overlay info */}
-        <hr className="border-black/[0.04]" />
+        <hr className="border-black/4" />
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
           <h4 className="text-sm font-semibold text-blue-900 mb-2">Systeme d&apos;overlay intelligent</h4>
           <p className="text-[13px] text-blue-700 leading-relaxed mb-3">
@@ -363,7 +363,7 @@ export function PaywallManager() {
         </div>
 
         {/* Preview */}
-        <hr className="border-black/[0.04]" />
+        <hr className="border-black/4" />
         <div>
           <h4 className="text-[11px] uppercase tracking-wider text-gray-500 mb-3">Apercu</h4>
           <div
@@ -410,7 +410,7 @@ export function PaywallManager() {
 
 function StatCard({ icon, label, value, accent }: { icon: React.ReactNode; label: string; value: number | string; accent?: boolean }) {
   return (
-    <div className="bg-white rounded-xl border border-black/[0.06] p-4">
+    <div className="bg-white rounded-xl border border-black/6 p-4">
       <div className="flex items-center gap-2 mb-1">
         <span className={accent ? 'text-emerald-600' : 'text-gray-500'}>{icon}</span>
         <span className="text-[11px] uppercase tracking-wider text-gray-500">{label}</span>
@@ -429,13 +429,13 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
           type="color"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-8 h-8 rounded border border-black/[0.08] cursor-pointer p-0"
+          className="w-8 h-8 rounded-sm border border-black/8 cursor-pointer p-0"
         />
         <input
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="flex-1 border border-black/[0.08] rounded-lg px-3 py-1.5 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black font-mono"
+          className="flex-1 border border-black/8 rounded-lg px-3 py-1.5 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black font-mono"
         />
       </div>
     </div>

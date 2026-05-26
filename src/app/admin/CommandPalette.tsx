@@ -212,26 +212,26 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
       // sont deja filtres cote serveur, on les expose en forcant un score eleve via keywords.
     >
       <div
-        className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm flex items-start sm:items-center justify-center p-4 sm:p-6"
+        className="fixed inset-0 z-100 bg-black/40 backdrop-blur-xs flex items-start sm:items-center justify-center p-4 sm:p-6"
         onClick={(e) => {
           if (e.target === e.currentTarget) onOpenChange(false);
         }}
       >
         <div
-          className="w-full max-w-2xl bg-white rounded-2xl border border-black/[0.08] shadow-2xl overflow-hidden mt-4 sm:mt-0"
+          className="w-full max-w-2xl bg-white rounded-2xl border border-black/8 shadow-2xl overflow-hidden mt-4 sm:mt-0"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-center gap-3 px-4 py-3 border-b border-black/[0.06]">
-            <Search className="w-[18px] h-[18px] text-[#1a1a1a]/45 flex-shrink-0" aria-hidden="true" />
+          <div className="flex items-center gap-3 px-4 py-3 border-b border-black/6">
+            <Search className="w-[18px] h-[18px] text-foreground/45 shrink-0" aria-hidden="true" />
             <Command.Input
               value={query}
               onValueChange={setQuery}
               autoFocus
               placeholder="Cherche un utilisateur, un article, une route..."
-              className="flex-1 bg-transparent outline-none text-[14px] placeholder:text-[#1a1a1a]/35 text-[#1a1a1a]"
+              className="flex-1 bg-transparent outline-hidden text-[14px] placeholder:text-foreground/35 text-foreground"
               aria-label="Recherche du Cockpit"
             />
-            <kbd className="hidden sm:inline-flex items-center text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/[0.05] text-[#1a1a1a]/55 border border-black/[0.06]">
+            <kbd className="hidden sm:inline-flex items-center text-[10px] font-mono px-1.5 py-0.5 rounded-sm bg-black/5 text-foreground/55 border border-black/6">
               ESC
             </kbd>
           </div>
@@ -240,12 +240,12 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             className="max-h-[60vh] sm:max-h-96 overflow-y-auto py-2"
             aria-live="polite"
           >
-            <Command.Empty className="px-4 py-8 text-center text-[13px] text-[#1a1a1a]/50">
+            <Command.Empty className="px-4 py-8 text-center text-[13px] text-foreground/50">
               {loadingRemote ? 'Recherche en cours...' : 'Aucun resultat. Essaye un autre mot.'}
             </Command.Empty>
 
             {showAlwaysSections && (
-              <Command.Group heading="Aller a" className="px-2 [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:tracking-widest [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:text-[#1a1a1a]/45 [&_[cmdk-group-heading]]:font-semibold">
+              <Command.Group heading="Aller a" className="px-2 **:[[cmdk-group-heading]]:px-3 **:[[cmdk-group-heading]]:py-2 **:[[cmdk-group-heading]]:text-[10px] **:[[cmdk-group-heading]]:tracking-widest **:[[cmdk-group-heading]]:uppercase **:[[cmdk-group-heading]]:text-foreground/45 **:[[cmdk-group-heading]]:font-semibold">
                 {ROUTES.map((route) => (
                   <RouteItem
                     key={route.href}
@@ -257,7 +257,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             )}
 
             {!showAlwaysSections && (
-              <Command.Group heading="Routes" className="px-2 [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:tracking-widest [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:text-[#1a1a1a]/45 [&_[cmdk-group-heading]]:font-semibold">
+              <Command.Group heading="Routes" className="px-2 **:[[cmdk-group-heading]]:px-3 **:[[cmdk-group-heading]]:py-2 **:[[cmdk-group-heading]]:text-[10px] **:[[cmdk-group-heading]]:tracking-widest **:[[cmdk-group-heading]]:uppercase **:[[cmdk-group-heading]]:text-foreground/45 **:[[cmdk-group-heading]]:font-semibold">
                 {ROUTES.map((route) => (
                   <RouteItem
                     key={route.href}
@@ -271,7 +271,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             {debouncedQuery.length >= MIN_QUERY && users.length > 0 && (
               <Command.Group
                 heading="Utilisateurs"
-                className="px-2 [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:tracking-widest [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:text-[#1a1a1a]/45 [&_[cmdk-group-heading]]:font-semibold"
+                className="px-2 **:[[cmdk-group-heading]]:px-3 **:[[cmdk-group-heading]]:py-2 **:[[cmdk-group-heading]]:text-[10px] **:[[cmdk-group-heading]]:tracking-widest **:[[cmdk-group-heading]]:uppercase **:[[cmdk-group-heading]]:text-foreground/45 **:[[cmdk-group-heading]]:font-semibold"
               >
                 {users.map((u) => (
                   <UserItem
@@ -288,7 +288,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             {debouncedQuery.length >= MIN_QUERY && articles.length > 0 && (
               <Command.Group
                 heading="Articles"
-                className="px-2 [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:tracking-widest [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:text-[#1a1a1a]/45 [&_[cmdk-group-heading]]:font-semibold"
+                className="px-2 **:[[cmdk-group-heading]]:px-3 **:[[cmdk-group-heading]]:py-2 **:[[cmdk-group-heading]]:text-[10px] **:[[cmdk-group-heading]]:tracking-widest **:[[cmdk-group-heading]]:uppercase **:[[cmdk-group-heading]]:text-foreground/45 **:[[cmdk-group-heading]]:font-semibold"
               >
                 {articles.map((a) => (
                   <ArticleItem
@@ -304,7 +304,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 
             <Command.Group
               heading="Actions"
-              className="px-2 [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:tracking-widest [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:text-[#1a1a1a]/45 [&_[cmdk-group-heading]]:font-semibold"
+              className="px-2 **:[[cmdk-group-heading]]:px-3 **:[[cmdk-group-heading]]:py-2 **:[[cmdk-group-heading]]:text-[10px] **:[[cmdk-group-heading]]:tracking-widest **:[[cmdk-group-heading]]:uppercase **:[[cmdk-group-heading]]:text-foreground/45 **:[[cmdk-group-heading]]:font-semibold"
             >
               <ActionItem
                 icon={Send}
@@ -339,14 +339,14 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             </Command.Group>
           </Command.List>
 
-          <div className="hidden sm:flex items-center justify-between px-4 py-2 border-t border-black/[0.06] text-[11px] text-[#1a1a1a]/45 bg-[#fafaf9]">
+          <div className="hidden sm:flex items-center justify-between px-4 py-2 border-t border-black/6 text-[11px] text-foreground/45 bg-background">
             <div className="flex items-center gap-3">
               <span className="inline-flex items-center gap-1">
                 <CornerDownLeft className="w-3 h-3" aria-hidden="true" /> Selectionner
               </span>
               <span className="inline-flex items-center gap-1">
-                <kbd className="font-mono px-1 rounded bg-white border border-black/[0.08]">Cmd</kbd>
-                <kbd className="font-mono px-1 rounded bg-white border border-black/[0.08]">Enter</kbd>
+                <kbd className="font-mono px-1 rounded-sm bg-white border border-black/8">Cmd</kbd>
+                <kbd className="font-mono px-1 rounded-sm bg-white border border-black/8">Enter</kbd>
                 Nouvel onglet
               </span>
             </div>
@@ -357,7 +357,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             <div
               role="status"
               aria-live="polite"
-              className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[#1a1a1a] text-white text-[12px] px-3 py-2 rounded-lg shadow-lg"
+              className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-foreground text-white text-[12px] px-3 py-2 rounded-lg shadow-lg"
             >
               {toast}
             </div>
@@ -382,7 +382,7 @@ function RouteItem({
     <Command.Item
       value={`${route.label} ${route.group} ${route.keywords} ${route.href}`}
       onSelect={() => onSelect(false)}
-      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] text-[#1a1a1a] cursor-pointer aria-selected:bg-black/[0.04] hover:bg-black/[0.03] transition data-[selected=true]:bg-black/[0.04]"
+      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] text-foreground cursor-pointer aria-selected:bg-black/4 hover:bg-black/3 transition data-[selected=true]:bg-black/4"
       onKeyDown={(e) => {
         if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
           e.preventDefault();
@@ -390,12 +390,12 @@ function RouteItem({
         }
       }}
     >
-      <span className="w-8 h-8 rounded-lg bg-black/[0.04] flex items-center justify-center flex-shrink-0">
-        <Icon className="w-[16px] h-[16px] text-[#1a1a1a]/70" aria-hidden="true" />
+      <span className="w-8 h-8 rounded-lg bg-black/4 flex items-center justify-center shrink-0">
+        <Icon className="w-[16px] h-[16px] text-foreground/70" aria-hidden="true" />
       </span>
       <div className="flex-1 min-w-0">
         <p className="font-medium truncate">{route.label}</p>
-        <p className="text-[11px] text-[#1a1a1a]/45 truncate">{route.group} . {route.href}</p>
+        <p className="text-[11px] text-foreground/45 truncate">{route.group} . {route.href}</p>
       </div>
     </Command.Item>
   );
@@ -415,7 +415,7 @@ function UserItem({
       // Score eleve garanti pour les resultats serveur via le terme exact email+name.
       value={`user ${user.email} ${user.fullName} ${user.id}`}
       onSelect={() => onSelect(false)}
-      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] cursor-pointer aria-selected:bg-black/[0.04] hover:bg-black/[0.03] transition data-[selected=true]:bg-black/[0.04]"
+      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] cursor-pointer aria-selected:bg-black/4 hover:bg-black/3 transition data-[selected=true]:bg-black/4"
       onKeyDown={(e) => {
         if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
           e.preventDefault();
@@ -423,12 +423,12 @@ function UserItem({
         }
       }}
     >
-      <span className="w-8 h-8 rounded-full bg-gradient-to-br from-[#d4a843] to-[#ff8c42] flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0">
+      <span className="w-8 h-8 rounded-full bg-linear-to-br from-[#d4a843] to-[#ff8c42] flex items-center justify-center text-white text-[11px] font-bold shrink-0">
         {user.initials}
       </span>
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-[#1a1a1a] truncate">{user.fullName || 'Sans nom'}</p>
-        <p className="text-[11px] text-[#1a1a1a]/45 truncate">{user.email}</p>
+        <p className="font-medium text-foreground truncate">{user.fullName || 'Sans nom'}</p>
+        <p className="text-[11px] text-foreground/45 truncate">{user.email}</p>
       </div>
       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider ${tierStyle}`}>
         {tierLabel}
@@ -447,13 +447,13 @@ function ArticleItem({
   const status = article.publishedAt ? 'Publie' : 'Brouillon';
   const statusStyle = article.publishedAt
     ? 'bg-[#00c805]/12 text-[#00a004]'
-    : 'bg-black/[0.06] text-[#1a1a1a]/55';
+    : 'bg-black/6 text-foreground/55';
   const relative = formatRelative(article.publishedAt);
   return (
     <Command.Item
       value={`article ${article.title} ${article.slug}`}
       onSelect={() => onSelect(false)}
-      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] cursor-pointer aria-selected:bg-black/[0.04] hover:bg-black/[0.03] transition data-[selected=true]:bg-black/[0.04]"
+      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] cursor-pointer aria-selected:bg-black/4 hover:bg-black/3 transition data-[selected=true]:bg-black/4"
       onKeyDown={(e) => {
         if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
           e.preventDefault();
@@ -461,12 +461,12 @@ function ArticleItem({
         }
       }}
     >
-      <span className="w-8 h-8 rounded-lg bg-black/[0.04] flex items-center justify-center flex-shrink-0">
-        <Newspaper className="w-[16px] h-[16px] text-[#1a1a1a]/70" aria-hidden="true" />
+      <span className="w-8 h-8 rounded-lg bg-black/4 flex items-center justify-center shrink-0">
+        <Newspaper className="w-[16px] h-[16px] text-foreground/70" aria-hidden="true" />
       </span>
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-[#1a1a1a] truncate">{article.title}</p>
-        <p className="text-[11px] text-[#1a1a1a]/45 truncate">{relative}</p>
+        <p className="font-medium text-foreground truncate">{article.title}</p>
+        <p className="text-[11px] text-foreground/45 truncate">{relative}</p>
       </div>
       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider ${statusStyle}`}>
         {status}
@@ -490,10 +490,10 @@ function ActionItem({
     <Command.Item
       value={`action ${label} ${keywords}`}
       onSelect={onSelect}
-      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] text-[#1a1a1a] cursor-pointer aria-selected:bg-black/[0.04] hover:bg-black/[0.03] transition data-[selected=true]:bg-black/[0.04]"
+      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] text-foreground cursor-pointer aria-selected:bg-black/4 hover:bg-black/3 transition data-[selected=true]:bg-black/4"
     >
-      <span className="w-8 h-8 rounded-lg bg-black/[0.04] flex items-center justify-center flex-shrink-0">
-        <Icon className="w-[16px] h-[16px] text-[#1a1a1a]/70" aria-hidden="true" />
+      <span className="w-8 h-8 rounded-lg bg-black/4 flex items-center justify-center shrink-0">
+        <Icon className="w-[16px] h-[16px] text-foreground/70" aria-hidden="true" />
       </span>
       <p className="font-medium truncate">{label}</p>
     </Command.Item>
@@ -572,9 +572,9 @@ function tierLabelFor(role: string): string {
 }
 
 function tierStyleFor(role: string): string {
-  if (role === 'admin') return 'bg-[#1a1a1a] text-[#d4a843]';
-  if (role === 'premium') return 'bg-gradient-to-br from-[#d4a843]/15 to-[#ff8c42]/10 text-[#a07a1f]';
-  return 'bg-black/[0.06] text-[#1a1a1a]/55';
+  if (role === 'admin') return 'bg-foreground text-[#d4a843]';
+  if (role === 'premium') return 'bg-linear-to-br from-[#d4a843]/15 to-[#ff8c42]/10 text-[#a07a1f]';
+  return 'bg-black/6 text-foreground/55';
 }
 
 function formatRelative(iso: string | null): string {

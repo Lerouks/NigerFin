@@ -39,7 +39,7 @@ export default async function EducationPage() {
   const categories = await getCategories();
 
   return (
-    <div className="min-h-screen bg-[#fafaf9]">
+    <div className="min-h-screen bg-background">
       <CategoryHero
         label="Rubrique"
         title="Éducation"

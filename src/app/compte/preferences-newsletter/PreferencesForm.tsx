@@ -97,7 +97,7 @@ export function PreferencesForm({ initial }: { initial: NewsletterPrefs }) {
           >
             <span className="relative mt-0.5 inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors"
                   style={{ backgroundColor: checked ? '#d4a843' : '#d4d4d4' }}>
-              <span className={`inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-5' : 'translate-x-0.5'}`} />
+              <span className={`inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${checked ? 'translate-x-5' : 'translate-x-0.5'}`} />
             </span>
             <input
               type="checkbox"

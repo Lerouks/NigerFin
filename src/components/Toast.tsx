@@ -57,7 +57,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastContext.Provider value={{ show }}>
       {children}
       <div
-        className="fixed bottom-4 right-4 z-[10000] flex flex-col items-end gap-2 pointer-events-none"
+        className="fixed bottom-4 right-4 z-10000 flex flex-col items-end gap-2 pointer-events-none"
         aria-live="polite"
         aria-atomic="true"
       >
@@ -83,11 +83,11 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }
       className={`pointer-events-auto flex items-start gap-3 ${v.bg} ${v.ring} ring-1 ring-inset rounded-2xl shadow-[0_8px_30px_-12px_rgba(0,0,0,0.18)] px-4 py-3 max-w-sm animate-slide-up`}
       role="status"
     >
-      <Icon className={`w-5 h-5 flex-shrink-0 mt-0.5 ${v.iconColor}`} />
+      <Icon className={`w-5 h-5 shrink-0 mt-0.5 ${v.iconColor}`} />
       <p className="text-[13px] text-[#111] leading-snug flex-1">{toast.message}</p>
       <button
         onClick={onDismiss}
-        className="flex-shrink-0 text-gray-500 hover:text-gray-700 transition-colors -mr-1 -mt-0.5"
+        className="shrink-0 text-gray-500 hover:text-gray-700 transition-colors -mr-1 -mt-0.5"
         aria-label="Fermer la notification"
       >
         <X className="w-4 h-4" />

@@ -1,6 +1,6 @@
 export function ContactSeoBlock() {
   return (
-    <section className="bg-white border-t border-black/[0.06]">
+    <section className="bg-white border-t border-black/6">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
         <div className="prose prose-sm sm:prose-base max-w-none">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#111] mb-4">
@@ -25,7 +25,7 @@ export function ContactSeoBlock() {
           </h2>
           <ul className="space-y-3 text-[15px] text-gray-700 mb-10">
             <li className="flex items-start gap-3">
-              <span className="mt-2 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
+              <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
                 <strong>Demandes éditoriales</strong> : suggestions de sujets, signalements
                 d&apos;informations, corrections, droits de réponse, demandes de clarification
@@ -33,7 +33,7 @@ export function ContactSeoBlock() {
               </span>
             </li>
             <li className="flex items-start gap-3">
-              <span className="mt-2 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
+              <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
                 <strong>Partenariats stratégiques</strong> : collaboration éditoriale,
                 co-production de contenus, échange d&apos;expertise sectorielle avec
@@ -41,7 +41,7 @@ export function ContactSeoBlock() {
               </span>
             </li>
             <li className="flex items-start gap-3">
-              <span className="mt-2 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
+              <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
                 <strong>Publicité et sponsoring</strong> : encarts publicitaires display,
                 articles sponsorisés clairement identifiés, newsletters dédiées, partenariats
@@ -49,7 +49,7 @@ export function ContactSeoBlock() {
               </span>
             </li>
             <li className="flex items-start gap-3">
-              <span className="mt-2 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
+              <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
                 <strong>Demandes presse</strong> : sollicitations d&apos;interviews,
                 déclarations officielles, communiqués de presse à diffuser, demandes de
@@ -57,14 +57,14 @@ export function ContactSeoBlock() {
               </span>
             </li>
             <li className="flex items-start gap-3">
-              <span className="mt-2 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
+              <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
                 <strong>Support abonnés Premium</strong> : questions sur l&apos;abonnement,
                 facturation, accès aux contenus payants, résiliation, problèmes techniques.
               </span>
             </li>
             <li className="flex items-start gap-3">
-              <span className="mt-2 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
+              <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
                 <strong>Suggestions et retours</strong> : améliorations à apporter au site,
                 aux outils financiers, à la newsletter, à l&apos;offre éditoriale en général.

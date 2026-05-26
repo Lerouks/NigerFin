@@ -88,7 +88,7 @@ export function CommentsManager() {
 
       {/* Empty state */}
       {!loading && comments.length === 0 && (
-        <div className="text-center py-16 bg-white border border-black/[0.06] rounded-xl">
+        <div className="text-center py-16 bg-white border border-black/6 rounded-xl">
           <MessageSquare className="w-10 h-10 text-gray-300 mx-auto mb-3" />
           <p className="text-gray-500 text-[14px]">Aucun commentaire</p>
         </div>
@@ -100,7 +100,7 @@ export function CommentsManager() {
           {comments.map((comment) => (
             <div
               key={comment.id}
-              className={`bg-white border border-black/[0.06] rounded-xl p-5 transition-all ${
+              className={`bg-white border border-black/6 rounded-xl p-5 transition-all ${
                 comment.parent_comment_id ? 'ml-8 border-l-2 border-l-gray-200' : ''
               }`}
             >
@@ -126,7 +126,7 @@ export function CommentsManager() {
 
                   {/* Article link */}
                   <div className="flex items-center gap-1.5 mb-3">
-                    <FileText className="w-3 h-3 text-gray-300 flex-shrink-0" />
+                    <FileText className="w-3 h-3 text-gray-300 shrink-0" />
                     <span className="text-[11px] text-gray-500 truncate">
                       {comment.article_title}
                     </span>
@@ -139,19 +139,19 @@ export function CommentsManager() {
                 </div>
 
                 {/* Delete action */}
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   {deleteConfirm === comment.id ? (
                     <div className="flex items-center gap-1.5">
                       <button
                         onClick={() => handleDelete(comment.id)}
                         disabled={deleting === comment.id}
-                        className="px-2.5 py-1 bg-red-500 text-white rounded text-[11px] font-medium hover:bg-red-600 disabled:opacity-50"
+                        className="px-2.5 py-1 bg-red-500 text-white rounded-sm text-[11px] font-medium hover:bg-red-600 disabled:opacity-50"
                       >
                         {deleting === comment.id ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Supprimer'}
                       </button>
                       <button
                         onClick={() => setDeleteConfirm(null)}
-                        className="px-2.5 py-1 border border-gray-200 text-gray-600 rounded text-[11px] hover:bg-gray-50"
+                        className="px-2.5 py-1 border border-gray-200 text-gray-600 rounded-sm text-[11px] hover:bg-gray-50"
                       >
                         Non
                       </button>
@@ -178,7 +178,7 @@ export function CommentsManager() {
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
-            className="flex items-center gap-1 px-3 py-2 rounded-lg text-[13px] text-gray-500 hover:bg-[#f5f5f0] disabled:opacity-30 transition-colors min-w-[44px] min-h-[44px] justify-center"
+            className="flex items-center gap-1 px-3 py-2 rounded-lg text-[13px] text-gray-500 hover:bg-secondary disabled:opacity-30 transition-colors min-w-[44px] min-h-[44px] justify-center"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -188,7 +188,7 @@ export function CommentsManager() {
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
-            className="flex items-center gap-1 px-3 py-2 rounded-lg text-[13px] text-gray-500 hover:bg-[#f5f5f0] disabled:opacity-30 transition-colors min-w-[44px] min-h-[44px] justify-center"
+            className="flex items-center gap-1 px-3 py-2 rounded-lg text-[13px] text-gray-500 hover:bg-secondary disabled:opacity-30 transition-colors min-w-[44px] min-h-[44px] justify-center"
           >
             <ChevronRight className="w-4 h-4" />
           </button>

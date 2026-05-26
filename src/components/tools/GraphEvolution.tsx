@@ -29,7 +29,7 @@ export function GraphEvolution({
 
   return (
     <div
-      className="bg-white border border-black/[0.06] rounded-xl p-6"
+      className="bg-white border border-black/6 rounded-xl p-6"
       aria-label={`Graphique d'évolution : ${capitalLabel} et ${interestLabel} dans le temps`}
     >
       <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">

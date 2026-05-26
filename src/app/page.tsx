@@ -43,7 +43,7 @@ export default async function HomePage() {
   const latestFiltered = latestArticles.filter((a) => a._id !== featuredId);
 
   return (
-    <div className="min-h-screen bg-[#fafaf9]">
+    <div className="min-h-screen bg-background">
       <h1 className="sr-only">NFI Report - Actualités économiques et financières du Niger</h1>
 
       {/* Featured Article */}
@@ -55,12 +55,12 @@ export default async function HomePage() {
 
       {/* Market Ticker Bar, contrôlable depuis l'admin (site_features.market_ticker_enabled) */}
       {siteFeatures.marketTickerEnabled && (
-        <div className="bg-[#111] border-b border-white/[0.06] overflow-hidden">
+        <div className="bg-[#111] border-b border-white/6 overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center gap-6 min-w-0">
-            <span className="text-[10px] tracking-[0.2em] uppercase text-gold font-bold flex-shrink-0">
+            <span className="text-[10px] tracking-[0.2em] uppercase text-gold font-bold shrink-0">
               Marchés
             </span>
-            <div className="h-3 w-px bg-white/10 flex-shrink-0" />
+            <div className="h-3 w-px bg-white/10 shrink-0" />
             <MarketMarquee />
           </div>
         </div>
@@ -77,7 +77,7 @@ export default async function HomePage() {
                 <div className="flex items-center gap-4 mb-8">
                   <div className="animate-gold-line h-[2px] bg-gold" />
                   <h2 className="text-xl sm:text-2xl font-semibold whitespace-nowrap">Dernières actualités</h2>
-                  <div className="flex-1 h-px bg-black/[0.06]" />
+                  <div className="flex-1 h-px bg-black/6" />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 stagger-grid">
                   {latestFiltered.map((article, index) => (
@@ -100,7 +100,7 @@ export default async function HomePage() {
                   <div className="flex items-center gap-4 mb-8">
                     <div className="animate-gold-line h-[2px] bg-gold" />
                     <h2 className="text-xl sm:text-2xl font-semibold whitespace-nowrap">{meta.label}</h2>
-                    <div className="flex-1 h-px bg-black/[0.06]" />
+                    <div className="flex-1 h-px bg-black/6" />
                     <Link
                       href={meta.path}
                       className="hidden sm:inline-flex items-center gap-1.5 min-h-[44px] px-2 -mx-2 text-[13px] text-gray-500 hover:text-gold transition-colors group whitespace-nowrap"

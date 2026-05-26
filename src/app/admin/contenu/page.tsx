@@ -62,13 +62,13 @@ export default function ContenuPage() {
   return (
     <div className="max-w-[640px] lg:max-w-[920px] mx-auto px-5 pt-8 pb-6">
       <header className="mb-8">
-        <p className="text-[10px] tracking-widest uppercase text-[#1a1a1a]/45 font-bold">
+        <p className="text-[10px] tracking-widest uppercase text-foreground/45 font-bold">
           Module
         </p>
         <h1 className="font-extrabold text-[32px] leading-tight tracking-tight mt-1">
           Contenu
         </h1>
-        <p className="text-[15px] text-[#1a1a1a]/60 mt-3 leading-relaxed max-w-[560px]">
+        <p className="text-[15px] text-foreground/60 mt-3 leading-relaxed max-w-[560px]">
           La fabrique éditoriale de NFI Report. Articles, modération, newsletter Premium et tout ce qui s&apos;affiche sur le site public.
         </p>
       </header>
@@ -81,10 +81,10 @@ export default function ContenuPage() {
             key={href}
             href={href}
             prefetch
-            className="group relative bg-white border border-black/[0.06] rounded-2xl p-5 hover:border-[#d4a843]/40 hover:shadow-sm transition"
+            className="group relative bg-white border border-black/6 rounded-2xl p-5 hover:border-[#d4a843]/40 hover:shadow-xs transition"
           >
             <div className="flex items-start justify-between mb-3">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#d4a843]/12 to-[#ff8c42]/8 flex items-center justify-center text-[#d4a843]">
+              <div className="w-11 h-11 rounded-xl bg-linear-to-br from-[#d4a843]/12 to-[#ff8c42]/8 flex items-center justify-center text-[#d4a843]">
                 <Icon className="w-5 h-5" aria-hidden="true" />
               </div>
               <div className="flex items-center gap-2">
@@ -95,13 +95,13 @@ export default function ContenuPage() {
                   </span>
                 )}
                 <ArrowUpRight
-                  className="w-4 h-4 text-[#1a1a1a]/30 group-hover:text-[#d4a843] transition"
+                  className="w-4 h-4 text-foreground/30 group-hover:text-[#d4a843] transition"
                   aria-hidden="true"
                 />
               </div>
             </div>
-            <p className="font-bold text-[16px] text-[#1a1a1a] leading-tight">{title}</p>
-            <p className="text-[13px] text-[#1a1a1a]/55 leading-relaxed mt-1">
+            <p className="font-bold text-[16px] text-foreground leading-tight">{title}</p>
+            <p className="text-[13px] text-foreground/55 leading-relaxed mt-1">
               {description}
             </p>
           </Link>

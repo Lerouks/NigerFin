@@ -176,7 +176,7 @@ export function StrategicEnterprisesManager() {
   // ─── Form UI (shared between create & edit) ─────────────────────────────
 
   const renderForm = (onSubmit: () => void, submitLabel: string) => (
-    <div className="bg-white border border-black/[0.06] rounded-xl p-6 space-y-4">
+    <div className="bg-white border border-black/6 rounded-xl p-6 space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-[13px] font-medium text-gray-700 mb-1">Nom *</label>
@@ -185,7 +185,7 @@ export function StrategicEnterprisesManager() {
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             placeholder="Ex : SOMAÏR"
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-hidden focus:ring-2 focus:ring-gray-900"
           />
         </div>
         <div>
@@ -193,7 +193,7 @@ export function StrategicEnterprisesManager() {
           <select
             value={form.sector}
             onChange={(e) => setForm({ ...form, sector: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-hidden focus:ring-2 focus:ring-gray-900 bg-white"
           >
             <option value="">Choisir un secteur</option>
             {SECTORS.map((s) => (
@@ -211,7 +211,7 @@ export function StrategicEnterprisesManager() {
             value={form.full_name || ''}
             onChange={(e) => setForm({ ...form, full_name: e.target.value || null })}
             placeholder="Ex : Societe des Mines de l'Air"
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-hidden focus:ring-2 focus:ring-gray-900"
           />
         </div>
         <div>
@@ -221,7 +221,7 @@ export function StrategicEnterprisesManager() {
             value={form.slug || ''}
             onChange={(e) => setForm({ ...form, slug: e.target.value || null })}
             placeholder="Auto-genere si vide"
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-hidden focus:ring-2 focus:ring-gray-900"
           />
         </div>
       </div>
@@ -233,7 +233,7 @@ export function StrategicEnterprisesManager() {
           onChange={(e) => setForm({ ...form, description: e.target.value })}
           rows={2}
           placeholder="Resume court affiche dans la liste..."
-          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900 resize-none"
+          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-hidden focus:ring-2 focus:ring-gray-900 resize-none"
         />
       </div>
 
@@ -244,7 +244,7 @@ export function StrategicEnterprisesManager() {
           onChange={(e) => setForm({ ...form, detailed_description: e.target.value || null })}
           rows={4}
           placeholder="Description complete affichee sur la page de l'entreprise..."
-          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900 resize-none"
+          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-hidden focus:ring-2 focus:ring-gray-900 resize-none"
         />
       </div>
 
@@ -256,7 +256,7 @@ export function StrategicEnterprisesManager() {
             value={form.headquarters || ''}
             onChange={(e) => setForm({ ...form, headquarters: e.target.value || null })}
             placeholder="Ex : Niamey, Niger"
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-hidden focus:ring-2 focus:ring-gray-900"
           />
         </div>
         <div>
@@ -266,7 +266,7 @@ export function StrategicEnterprisesManager() {
             value={form.founded_year || ''}
             onChange={(e) => setForm({ ...form, founded_year: parseInt(e.target.value) || null })}
             placeholder="Ex : 1968"
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-hidden focus:ring-2 focus:ring-gray-900"
           />
         </div>
         <div>
@@ -276,7 +276,7 @@ export function StrategicEnterprisesManager() {
             value={form.employees || ''}
             onChange={(e) => setForm({ ...form, employees: e.target.value || null })}
             placeholder="Ex : ~1 500"
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-hidden focus:ring-2 focus:ring-gray-900"
           />
         </div>
       </div>
@@ -289,7 +289,7 @@ export function StrategicEnterprisesManager() {
             value={form.ownership || ''}
             onChange={(e) => setForm({ ...form, ownership: e.target.value || null })}
             placeholder="Ex : Etat du Niger 100%"
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-hidden focus:ring-2 focus:ring-gray-900"
           />
         </div>
         <div>
@@ -299,7 +299,7 @@ export function StrategicEnterprisesManager() {
             value={form.revenue || ''}
             onChange={(e) => setForm({ ...form, revenue: e.target.value || null })}
             placeholder="Ex : 150 milliards FCFA"
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-hidden focus:ring-2 focus:ring-gray-900"
           />
         </div>
       </div>
@@ -312,7 +312,7 @@ export function StrategicEnterprisesManager() {
             value={form.website || ''}
             onChange={(e) => setForm({ ...form, website: e.target.value || null })}
             placeholder="https://..."
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-hidden focus:ring-2 focus:ring-gray-900"
           />
         </div>
         <div>
@@ -322,7 +322,7 @@ export function StrategicEnterprisesManager() {
             value={form.logo_url || ''}
             onChange={(e) => setForm({ ...form, logo_url: e.target.value || null })}
             placeholder="https://..."
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-hidden focus:ring-2 focus:ring-gray-900"
           />
         </div>
       </div>
@@ -335,7 +335,7 @@ export function StrategicEnterprisesManager() {
             value={form.image_url || ''}
             onChange={(e) => setForm({ ...form, image_url: e.target.value || null })}
             placeholder="https://..."
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-hidden focus:ring-2 focus:ring-gray-900"
           />
         </div>
       </div>
@@ -347,7 +347,7 @@ export function StrategicEnterprisesManager() {
             type="number"
             value={form.display_order}
             onChange={(e) => setForm({ ...form, display_order: parseInt(e.target.value) || 0 })}
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-hidden focus:ring-2 focus:ring-gray-900"
           />
         </div>
         <div className="flex items-end pb-1">
@@ -356,7 +356,7 @@ export function StrategicEnterprisesManager() {
               type="checkbox"
               checked={form.is_visible}
               onChange={(e) => setForm({ ...form, is_visible: e.target.checked })}
-              className="w-4 h-4 rounded border-gray-300"
+              className="w-4 h-4 rounded-sm border-gray-300"
             />
             <span className="text-[13px] text-gray-700">Visible sur le site</span>
           </label>
@@ -421,7 +421,7 @@ export function StrategicEnterprisesManager() {
 
       {/* List */}
       {!loading && items.length === 0 && !showCreate && (
-        <div className="text-center py-16 bg-white border border-black/[0.06] rounded-xl">
+        <div className="text-center py-16 bg-white border border-black/6 rounded-xl">
           <Building2 className="w-10 h-10 text-gray-300 mx-auto mb-3" />
           <p className="text-gray-500 text-[14px]">Aucune entreprise stratégique</p>
           <p className="text-gray-500 text-[13px]">Cliquez sur &quot;Ajouter&quot; pour commencer.</p>
@@ -433,7 +433,7 @@ export function StrategicEnterprisesManager() {
           {editingId === item.id ? (
             renderForm(handleUpdate, 'Enregistrer')
           ) : (
-            <div className={`bg-white border border-black/[0.06] rounded-xl p-5 flex items-start gap-4 transition-opacity ${!item.is_visible ? 'opacity-60' : ''}`}>
+            <div className={`bg-white border border-black/6 rounded-xl p-5 flex items-start gap-4 transition-opacity ${!item.is_visible ? 'opacity-60' : ''}`}>
               {/* Drag handle + order */}
               <div className="flex flex-col items-center gap-1 pt-1">
                 <GripVertical className="w-4 h-4 text-gray-300" />
@@ -441,7 +441,7 @@ export function StrategicEnterprisesManager() {
               </div>
 
               {/* Logo or placeholder */}
-              <div className="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+              <div className="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center shrink-0 overflow-hidden">
                 {item.logo_url ? (
                   <Image src={item.logo_url} alt={item.name} width={48} height={48} className="w-full h-full object-contain p-1" />
                 ) : (
@@ -470,7 +470,7 @@ export function StrategicEnterprisesManager() {
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-1 flex-shrink-0">
+              <div className="flex items-center gap-1 shrink-0">
                 <button
                   onClick={() => handleToggleVisibility(item)}
                   title={item.is_visible ? 'Masquer' : 'Afficher'}
@@ -489,13 +489,13 @@ export function StrategicEnterprisesManager() {
                     <button
                       onClick={() => handleDelete(item.id)}
                       disabled={saving}
-                      className="px-2 py-1 bg-red-500 text-white rounded text-[11px] hover:bg-red-600 disabled:opacity-50"
+                      className="px-2 py-1 bg-red-500 text-white rounded-sm text-[11px] hover:bg-red-600 disabled:opacity-50"
                     >
                       Supprimer
                     </button>
                     <button
                       onClick={() => setDeleteConfirm(null)}
-                      className="px-2 py-1 border border-gray-200 text-gray-600 rounded text-[11px] hover:bg-gray-50"
+                      className="px-2 py-1 border border-gray-200 text-gray-600 rounded-sm text-[11px] hover:bg-gray-50"
                     >
                       Non
                     </button>

@@ -15,7 +15,7 @@ export function ResultSummary({ title = 'Résumé', items }: ResultSummaryProps)
   if (items.length === 0) return null;
 
   return (
-    <div className="bg-white border border-black/[0.06] rounded-xl p-6">
+    <div className="bg-white border border-black/6 rounded-xl p-6">
       <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
         {title}
       </h3>
@@ -24,7 +24,7 @@ export function ResultSummary({ title = 'Résumé', items }: ResultSummaryProps)
           <div
             key={item.label}
             className={`flex items-center justify-between py-3 px-4 rounded-lg ${
-              item.highlight ? 'bg-[#111] text-white' : 'bg-[#fafaf9]'
+              item.highlight ? 'bg-[#111] text-white' : 'bg-background'
             }`}
           >
             <span className={`text-[13px] ${item.highlight ? 'text-white/60' : 'text-gray-500'}`}>

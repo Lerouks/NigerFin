@@ -50,7 +50,7 @@ export function NigerResources({ resources }: { resources: Resource[] }) {
   if (!resources.length) return null;
 
   return (
-    <section className="border-t border-black/[0.06] pt-14 md:pt-20">
+    <section className="border-t border-black/6 pt-14 md:pt-20">
       <div className="mb-10">
         <span className="text-[11px] tracking-[0.2em] uppercase text-gray-500 block mb-3">Richesses naturelles</span>
         <h2 className="text-2xl md:text-3xl leading-tight">Ressources stratégiques</h2>
@@ -65,7 +65,7 @@ export function NigerResources({ resources }: { resources: Resource[] }) {
           return (
             <div
               key={resource.id}
-              className="group bg-white rounded-xl border border-black/[0.06] p-5 hover:border-black/[0.1] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+              className="group bg-white rounded-xl border border-black/6 p-5 hover:border-black/10 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className={`w-10 h-10 rounded-xl ${config.bg} flex items-center justify-center`}>
@@ -105,7 +105,7 @@ export function NigerResources({ resources }: { resources: Resource[] }) {
                     );
                   }
                   return (
-                    <span key={company} className="text-[11px] px-2 py-0.5 rounded bg-gray-100 text-gray-500">{company}</span>
+                    <span key={company} className="text-[11px] px-2 py-0.5 rounded-sm bg-gray-100 text-gray-500">{company}</span>
                   );
                 })}
               </div>

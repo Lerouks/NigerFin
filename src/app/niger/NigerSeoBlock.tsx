@@ -8,7 +8,7 @@ const PARAGRAPHS = [
 
 export function NigerSeoBlock() {
   return (
-    <section className="bg-white border-t border-black/[0.06]">
+    <section className="bg-white border-t border-black/6">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
         <h2 className="text-2xl sm:text-3xl font-bold text-[#111] mb-6">
           Profil économique du Niger en quelques chiffres

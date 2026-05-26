@@ -242,14 +242,14 @@ export function EducationManager() {
           </button>
         </div>
 
-        <div className="bg-white rounded-xl border border-black/[0.06] p-4">
+        <div className="bg-white rounded-xl border border-black/6 p-4">
           <h3 className="font-semibold text-sm">{selectedCategory.title}</h3>
           <p className="text-[12px] text-gray-500 mt-0.5">{lessons.length} leçon{lessons.length !== 1 ? 's' : ''}</p>
         </div>
 
         {/* Lesson form */}
         {showLessonForm && (
-          <div className="bg-white rounded-xl border border-black/[0.06] p-6">
+          <div className="bg-white rounded-xl border border-black/6 p-6">
             <h3 className="text-sm font-semibold mb-4">{editLessonId ? 'Modifier la leçon' : 'Nouvelle leçon'}</h3>
             <div className="space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -260,7 +260,7 @@ export function EducationManager() {
                     value={lessonForm.title}
                     onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })}
                     placeholder="Ex: Introduction à la finance"
-                    className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
+                    className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
                   />
                 </div>
                 <div>
@@ -270,7 +270,7 @@ export function EducationManager() {
                     value={lessonForm.duration}
                     onChange={(e) => setLessonForm({ ...lessonForm, duration: e.target.value })}
                     placeholder="5 min"
-                    className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
+                    className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
                   />
                 </div>
               </div>
@@ -280,7 +280,7 @@ export function EducationManager() {
                   <select
                     value={lessonForm.access_level}
                     onChange={(e) => setLessonForm({ ...lessonForm, access_level: e.target.value })}
-                    className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none"
+                    className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden"
                   >
                     {ACCESS_LEVELS.map((al) => (
                       <option key={al.value} value={al.value}>{al.label}</option>
@@ -293,7 +293,7 @@ export function EducationManager() {
                     type="number"
                     value={lessonForm.sort_order}
                     onChange={(e) => setLessonForm({ ...lessonForm, sort_order: parseInt(e.target.value) || 0 })}
-                    className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
+                    className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
                   />
                 </div>
               </div>
@@ -304,7 +304,7 @@ export function EducationManager() {
                   onChange={(e) => setLessonForm({ ...lessonForm, content: e.target.value })}
                   rows={6}
                   placeholder="Contenu de la leçon..."
-                  className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black resize-y"
+                  className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black resize-y"
                 />
               </div>
               <div className="flex gap-2 pt-1">
@@ -325,11 +325,11 @@ export function EducationManager() {
         )}
 
         {/* Lessons list */}
-        <div className="bg-white rounded-xl border border-black/[0.06] divide-y divide-black/[0.04]">
+        <div className="bg-white rounded-xl border border-black/6 divide-y divide-black/4">
           {lessons.map((lesson) => (
             <div key={lesson.id} className="flex items-center justify-between p-4">
               <div className="flex items-center gap-3 min-w-0">
-                <span className="w-7 h-7 rounded-full bg-[#f5f5f0] flex items-center justify-center text-[12px] font-medium text-gray-500 flex-shrink-0">
+                <span className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-[12px] font-medium text-gray-500 shrink-0">
                   {lesson.sort_order}
                 </span>
                 <div className="min-w-0">
@@ -337,24 +337,24 @@ export function EducationManager() {
                   <p className="text-[11px] text-gray-500">{lesson.duration}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="flex items-center gap-2 shrink-0">
                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${getAccessBadge(lesson.access_level).color}`}>
                   {getAccessBadge(lesson.access_level).label}
                 </span>
-                <button onClick={() => startEditLesson(lesson)} className="p-1.5 rounded hover:bg-gray-100 text-gray-500 transition-colors" title="Modifier">
+                <button onClick={() => startEditLesson(lesson)} className="p-1.5 rounded-sm hover:bg-gray-100 text-gray-500 transition-colors" title="Modifier">
                   <Pencil className="w-3.5 h-3.5" />
                 </button>
                 {deleteConfirm === lesson.id ? (
                   <div className="flex items-center gap-1">
-                    <button onClick={() => handleDeleteLesson(lesson.id)} className="p-1.5 rounded bg-red-100 text-red-700 hover:bg-red-200 transition-colors">
+                    <button onClick={() => handleDeleteLesson(lesson.id)} className="p-1.5 rounded-sm bg-red-100 text-red-700 hover:bg-red-200 transition-colors">
                       <Check className="w-3.5 h-3.5" />
                     </button>
-                    <button onClick={() => setDeleteConfirm(null)} className="p-1.5 rounded hover:bg-gray-100 text-gray-500 transition-colors">
+                    <button onClick={() => setDeleteConfirm(null)} className="p-1.5 rounded-sm hover:bg-gray-100 text-gray-500 transition-colors">
                       <X className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 ) : (
-                  <button onClick={() => setDeleteConfirm(lesson.id)} className="p-1.5 rounded hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors">
+                  <button onClick={() => setDeleteConfirm(lesson.id)} className="p-1.5 rounded-sm hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 )}
@@ -385,7 +385,7 @@ export function EducationManager() {
 
       {/* Category form */}
       {showCatForm && (
-        <div className="bg-white rounded-xl border border-black/[0.06] p-6">
+        <div className="bg-white rounded-xl border border-black/6 p-6">
           <h3 className="text-sm font-semibold mb-4">{editCatId ? 'Modifier la catégorie' : 'Nouvelle catégorie'}</h3>
           <div className="space-y-3">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
@@ -400,7 +400,7 @@ export function EducationManager() {
                     setCatForm({ ...catForm, title, slug });
                   }}
                   placeholder="Ex: Les bases de la finance"
-                  className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
+                  className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
                 />
               </div>
               <div>
@@ -410,7 +410,7 @@ export function EducationManager() {
                   value={catForm.slug}
                   onChange={(e) => setCatForm({ ...catForm, slug: e.target.value })}
                   placeholder="bases-finance"
-                  className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
+                  className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
                 />
               </div>
               <div>
@@ -419,7 +419,7 @@ export function EducationManager() {
                   type="number"
                   value={catForm.sort_order}
                   onChange={(e) => setCatForm({ ...catForm, sort_order: parseInt(e.target.value) || 0 })}
-                  className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
+                  className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
                 />
               </div>
             </div>
@@ -429,7 +429,7 @@ export function EducationManager() {
                 <select
                   value={catForm.icon}
                   onChange={(e) => setCatForm({ ...catForm, icon: e.target.value })}
-                  className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none"
+                  className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden"
                 >
                   {ICONS.map((ic) => (
                     <option key={ic} value={ic}>{ic}</option>
@@ -442,7 +442,7 @@ export function EducationManager() {
                     type="checkbox"
                     checked={catForm.available}
                     onChange={(e) => setCatForm({ ...catForm, available: e.target.checked })}
-                    className="rounded border-gray-300"
+                    className="rounded-sm border-gray-300"
                   />
                   <span className="text-sm text-gray-700">Visible sur le site</span>
                 </label>
@@ -455,7 +455,7 @@ export function EducationManager() {
                 onChange={(e) => setCatForm({ ...catForm, description: e.target.value })}
                 rows={2}
                 placeholder="Courte description de la catégorie (affichée sur la page du cours)"
-                className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black resize-y"
+                className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black resize-y"
               />
             </div>
             <div className="flex gap-2 pt-1">
@@ -476,7 +476,7 @@ export function EducationManager() {
       )}
 
       {/* Categories grid */}
-      <div className="bg-white rounded-xl border border-black/[0.06] divide-y divide-black/[0.04]">
+      <div className="bg-white rounded-xl border border-black/6 divide-y divide-black/4">
         {categories.map((cat) => (
           <div
             key={cat.id}
@@ -486,7 +486,7 @@ export function EducationManager() {
               onClick={() => setSelectedCategory(cat)}
               className="flex items-center gap-3 min-w-0 text-left flex-1"
             >
-              <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${cat.available ? 'bg-[#111] text-white' : 'bg-gray-100 text-gray-500'}`}>
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${cat.available ? 'bg-[#111] text-white' : 'bg-gray-100 text-gray-500'}`}>
                 <BookOpen className="w-4 h-4" />
               </div>
               <div className="min-w-0">
@@ -495,28 +495,28 @@ export function EducationManager() {
                 {cat.description && <p className="text-[11px] text-gray-500 truncate mt-0.5">{cat.description}</p>}
               </div>
             </button>
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={() => toggleCategoryAvailable(cat)}
-                className={`p-1.5 rounded transition-colors ${cat.available ? 'text-emerald-600 hover:bg-emerald-50' : 'text-gray-500 hover:bg-gray-100'}`}
+                className={`p-1.5 rounded-sm transition-colors ${cat.available ? 'text-emerald-600 hover:bg-emerald-50' : 'text-gray-500 hover:bg-gray-100'}`}
                 title={cat.available ? 'Visible' : 'Masqué'}
               >
                 {cat.available ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
               </button>
-              <button onClick={() => startEditCategory(cat)} className="p-1.5 rounded hover:bg-gray-100 text-gray-500 transition-colors" title="Modifier">
+              <button onClick={() => startEditCategory(cat)} className="p-1.5 rounded-sm hover:bg-gray-100 text-gray-500 transition-colors" title="Modifier">
                 <Pencil className="w-3.5 h-3.5" />
               </button>
               {deleteConfirm === cat.id ? (
                 <div className="flex items-center gap-1">
-                  <button onClick={() => handleDeleteCategory(cat.id)} className="p-1.5 rounded bg-red-100 text-red-700 hover:bg-red-200 transition-colors">
+                  <button onClick={() => handleDeleteCategory(cat.id)} className="p-1.5 rounded-sm bg-red-100 text-red-700 hover:bg-red-200 transition-colors">
                     <Check className="w-3.5 h-3.5" />
                   </button>
-                  <button onClick={() => setDeleteConfirm(null)} className="p-1.5 rounded hover:bg-gray-100 text-gray-500 transition-colors">
+                  <button onClick={() => setDeleteConfirm(null)} className="p-1.5 rounded-sm hover:bg-gray-100 text-gray-500 transition-colors">
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
               ) : (
-                <button onClick={() => setDeleteConfirm(cat.id)} className="p-1.5 rounded hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors">
+                <button onClick={() => setDeleteConfirm(cat.id)} className="p-1.5 rounded-sm hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors">
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
               )}

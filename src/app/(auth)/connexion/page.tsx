@@ -96,7 +96,7 @@ function ConnexionContent() {
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
                 <input id="reset-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-                  className="w-full border border-black/[0.08] rounded-xl pl-12 pr-4 py-3.5 bg-[#fafaf9] focus:outline-none focus:border-gold/30 focus:ring-2 focus:ring-gold/10 transition-all text-base"
+                  className="w-full border border-black/8 rounded-xl pl-12 pr-4 py-3.5 bg-background focus:outline-hidden focus:border-gold/30 focus:ring-2 focus:ring-gold/10 transition-all text-base"
                   placeholder="votre@email.com" />
               </div>
             </div>
@@ -143,7 +143,7 @@ function ConnexionContent() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full border border-black/[0.08] rounded-xl pl-12 pr-4 py-3.5 bg-[#fafaf9] focus:outline-none focus:border-gold/30 focus:ring-2 focus:ring-gold/10 transition-all text-base"
+                className="w-full border border-black/8 rounded-xl pl-12 pr-4 py-3.5 bg-background focus:outline-hidden focus:border-gold/30 focus:ring-2 focus:ring-gold/10 transition-all text-base"
                 placeholder="votre@email.com"
               />
             </div>
@@ -165,7 +165,7 @@ function ConnexionContent() {
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-black/[0.08] rounded-xl pl-12 pr-12 py-3.5 bg-[#fafaf9] focus:outline-none focus:border-gold/30 focus:ring-2 focus:ring-gold/10 transition-all text-base"
+                className="w-full border border-black/8 rounded-xl pl-12 pr-12 py-3.5 bg-background focus:outline-hidden focus:border-gold/30 focus:ring-2 focus:ring-gold/10 transition-all text-base"
                 placeholder="Votre mot de passe"
               />
               <button
@@ -195,7 +195,7 @@ function ConnexionContent() {
 
         <div className="relative my-8">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-black/[0.06]" />
+            <div className="w-full border-t border-black/6" />
           </div>
           <div className="relative flex justify-center text-xs">
             <span className="px-3 bg-white text-gray-500">ou</span>

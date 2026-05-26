@@ -39,7 +39,7 @@ export function BreakingNews({ initialItems = [], initialEnabled = false }: Brea
 
   return (
     <div
-      className="bg-gradient-to-r from-black via-gray-900 to-black text-white overflow-hidden relative"
+      className="bg-linear-to-r from-black via-gray-900 to-black text-white overflow-hidden relative"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -54,7 +54,7 @@ export function BreakingNews({ initialItems = [], initialEnabled = false }: Brea
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center h-10 gap-3">
-          <div className="flex items-center gap-1.5 flex-shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
             <Zap className="w-3.5 h-3.5 text-gold fill-gold" />
             <span
               className="text-[11px] font-black uppercase tracking-[0.15em] text-gold"
@@ -63,9 +63,9 @@ export function BreakingNews({ initialItems = [], initialEnabled = false }: Brea
             </span>
           </div>
 
-          <div className="w-px h-4 bg-gray-600 flex-shrink-0" />
+          <div className="w-px h-4 bg-gray-600 shrink-0" />
 
-          <span className="hidden sm:inline-block text-[10px] font-bold uppercase tracking-wider bg-white/10 px-2 py-0.5 rounded-sm text-gray-300 flex-shrink-0">
+          <span className="hidden sm:inline-block text-[10px] font-bold uppercase tracking-wider bg-white/10 px-2 py-0.5 rounded-xs text-gray-300 shrink-0">
             {item.tag}
           </span>
 
@@ -73,8 +73,8 @@ export function BreakingNews({ initialItems = [], initialEnabled = false }: Brea
             <p key={currentIndex} className="text-xs truncate text-gray-200 animate-slide-in-right">{item.text}</p>
           </div>
 
-          <div className="hidden sm:flex items-center gap-1 flex-shrink-0 ml-2">
-            <button onClick={goPrev} className="p-1 hover:bg-white/10 rounded transition-colors" aria-label="Précédent">
+          <div className="hidden sm:flex items-center gap-1 shrink-0 ml-2">
+            <button onClick={goPrev} className="p-1 hover:bg-white/10 rounded-sm transition-colors" aria-label="Précédent">
               <ChevronLeft className="w-3.5 h-3.5 text-gray-500" />
             </button>
             <div className="flex items-center gap-1 mx-1">
@@ -90,14 +90,14 @@ export function BreakingNews({ initialItems = [], initialEnabled = false }: Brea
                 />
               ))}
             </div>
-            <button onClick={goNext} className="p-1 hover:bg-white/10 rounded transition-colors" aria-label="Suivant">
+            <button onClick={goNext} className="p-1 hover:bg-white/10 rounded-sm transition-colors" aria-label="Suivant">
               <ChevronRight className="w-3.5 h-3.5 text-gray-500" />
             </button>
           </div>
 
           <button
             onClick={() => setDismissed(true)}
-            className="p-1 hover:bg-white/10 rounded transition-colors ml-1 flex-shrink-0"
+            className="p-1 hover:bg-white/10 rounded-sm transition-colors ml-1 shrink-0"
             aria-label="Fermer"
           >
             <X className="w-3.5 h-3.5 text-gray-500" />

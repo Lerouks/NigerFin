@@ -28,7 +28,7 @@ export default async function ArticlesPage() {
   ]);
 
   return (
-    <div className="min-h-screen bg-[#fafaf9]">
+    <div className="min-h-screen bg-background">
       <CategoryHero
         label="Archives"
         title="Tous les articles"

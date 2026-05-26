@@ -17,7 +17,7 @@ export default async function FinancePage() {
     getArticleViewRanking(),
   ]);
   return (
-    <div className="min-h-screen bg-[#fafaf9]">
+    <div className="min-h-screen bg-background">
       <CategoryHero label="Rubrique" title="Finance" description="Analyses bancaires et tendances du secteur financier au Niger et en Afrique de l'Ouest." />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
         <SectionArticlesFiltered articles={articles} total={total} sectionLabel="Finance" sectionPath="/finance" viewRanking={viewRanking} />

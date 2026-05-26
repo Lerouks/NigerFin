@@ -45,7 +45,7 @@ const PRICING_HIGHLIGHTS = [
 
 function Breadcrumb() {
   return (
-    <div className="border-b border-black/[0.06]">
+    <div className="border-b border-black/6">
       <div className="mx-auto max-w-6xl px-4 py-3 sm:px-6 lg:px-8">
         <Link
           href="/premium"
@@ -63,7 +63,7 @@ function Breadcrumb() {
 
 function SubscribedBanner() {
   return (
-    <div className="bg-white border-b border-black/[0.06]">
+    <div className="bg-white border-b border-black/6">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3.5 sm:px-6 lg:px-8">
         <div className="flex items-center gap-3">
           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gold">
@@ -93,7 +93,7 @@ function PricingHero() {
         <p className="mb-3 text-[12px] font-semibold uppercase tracking-wider text-gold">
           Tarifs
         </p>
-        <h1 className="text-[2.25rem] font-bold leading-[1.1] tracking-tight text-[#1a1a1a] sm:text-[3rem]">
+        <h1 className="text-[2.25rem] font-bold leading-[1.1] tracking-tight text-foreground sm:text-[3rem]">
           Choisis le rythme
           <br />
           <span className="text-gold">qui te convient.</span>
@@ -136,8 +136,8 @@ function PlanCard({
   const savedPercent = price < fullPrice ? Math.round((1 - price / fullPrice) * 100) : 0;
   return (
     <div
-      className={`relative rounded-2xl bg-white p-7 shadow-sm transition hover:shadow-md ${
-        isYearly ? 'border-2 border-gold ring-4 ring-gold/10' : 'border border-black/[0.08]'
+      className={`relative rounded-2xl bg-white p-7 shadow-xs transition hover:shadow-md ${
+        isYearly ? 'border-2 border-gold ring-4 ring-gold/10' : 'border border-black/8'
       }`}
     >
       {isYearly && (
@@ -148,7 +148,7 @@ function PlanCard({
       <p className="text-[13px] font-medium uppercase tracking-wider text-gray-500">
         {durationLabel}
       </p>
-      <p className="mt-4 text-[2.25rem] font-bold leading-none text-[#1a1a1a]">
+      <p className="mt-4 text-[2.25rem] font-bold leading-none text-foreground">
         {formatPrice(price)}
       </p>
       {savings && (
@@ -166,7 +166,7 @@ function PlanCard({
         className={`mt-7 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-[14px] font-semibold transition-all duration-300 disabled:opacity-40 ${
           isYearly
             ? 'bg-gold text-white shadow-lg shadow-gold/25 hover:bg-[#b8922f]'
-            : 'border border-black/[0.12] text-[#333] hover:border-[#111] hover:bg-[#111] hover:text-white'
+            : 'border border-black/12 text-[#333] hover:border-[#111] hover:bg-[#111] hover:text-white'
         }`}
       >
         {isLoading ? (
@@ -255,20 +255,20 @@ const PRICING_FAQ = [
 
 function PricingFaq() {
   return (
-    <section className="border-t border-black/[0.05] py-16 sm:py-20">
+    <section className="border-t border-black/5 py-16 sm:py-20">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <FadeUp className="mb-10 text-center">
           <p className="text-[12px] font-semibold uppercase tracking-wider text-gold">
             Questions fréquentes
           </p>
-          <h2 className="mt-3 text-2xl font-bold tracking-tight text-[#1a1a1a] sm:text-3xl">
+          <h2 className="mt-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             On lève les doutes.
           </h2>
         </FadeUp>
-        <FadeUp className="divide-y divide-black/[0.08]" delay={0.1}>
+        <FadeUp className="divide-y divide-black/8" delay={0.1}>
           {PRICING_FAQ.map((item) => (
             <details key={item.q} className="group py-5">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[15.5px] font-semibold text-[#1a1a1a]">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[15.5px] font-semibold text-foreground">
                 {item.q}
                 <span className="text-gold transition group-open:rotate-45">
                   <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
@@ -289,13 +289,13 @@ function PricingFaq() {
 
 function HighlightsCompact() {
   return (
-    <section className="border-t border-black/[0.05] bg-white py-16 sm:py-20">
+    <section className="border-t border-black/5 bg-white py-16 sm:py-20">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <FadeUp className="mb-10 text-center">
           <p className="text-[12px] font-semibold uppercase tracking-wider text-gold">
             Ce que tu obtiens
           </p>
-          <h2 className="mt-3 text-2xl font-bold tracking-tight text-[#1a1a1a] sm:text-3xl">
+          <h2 className="mt-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             L&apos;essentiel en un coup d&apos;&oelig;il.
           </h2>
         </FadeUp>
@@ -303,7 +303,7 @@ function HighlightsCompact() {
           <ul className="mx-auto grid max-w-2xl grid-cols-1 gap-4 sm:grid-cols-2">
             {PRICING_HIGHLIGHTS.map((hl) => (
               <li key={hl} className="flex items-start gap-3">
-                <div className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-gold/15">
+                <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gold/15">
                   <Check className="h-3 w-3 stroke-[2.5] text-gold" />
                 </div>
                 <span className="text-[14.5px] leading-snug text-gray-700">{hl}</span>
@@ -335,27 +335,27 @@ function PaymentMethods() {
           Moyens de paiement acceptés
         </p>
         <div className="flex flex-wrap items-center justify-center gap-4">
-          <div className="flex h-10 items-center gap-2 rounded-md border border-black/[0.06] bg-white px-3">
+          <div className="flex h-10 items-center gap-2 rounded-md border border-black/6 bg-white px-3">
             <Image
               src="/nita-logo.png"
               alt="Nita"
               width={20}
               height={20}
-              className="rounded object-contain"
+              className="rounded-sm object-contain"
             />
             <span className="text-[13px] font-medium text-gray-700">Nita</span>
           </div>
-          <div className="flex h-10 items-center gap-2 rounded-md border border-black/[0.06] bg-white px-3">
+          <div className="flex h-10 items-center gap-2 rounded-md border border-black/6 bg-white px-3">
             <Image
               src="/amana-logo.png"
               alt="Amana"
               width={20}
               height={20}
-              className="rounded object-contain"
+              className="rounded-sm object-contain"
             />
             <span className="text-[13px] font-medium text-gray-700">Amana</span>
           </div>
-          <div className="flex h-10 items-center rounded-md border border-black/[0.06] bg-white px-3">
+          <div className="flex h-10 items-center rounded-md border border-black/6 bg-white px-3">
             <Image
               src="/card-logos.png"
               alt="Visa / Mastercard"
@@ -376,13 +376,13 @@ function FreePlanCard({ isSignedIn }: { isSignedIn: boolean }) {
   return (
     <section className="pb-20">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <div className="rounded-2xl border border-black/[0.06] bg-white p-6 sm:p-8">
+        <div className="rounded-2xl border border-black/6 bg-white p-6 sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="mb-1 text-[12px] font-medium uppercase tracking-wider text-gray-500">
                 Plan gratuit
               </p>
-              <h3 className="mb-2 text-[18px] font-bold text-[#1a1a1a]">
+              <h3 className="mb-2 text-[18px] font-bold text-foreground">
                 Accès limité, 0 {CURRENCY}
               </h3>
               <p className="max-w-md text-[13.5px] text-gray-600">
@@ -391,7 +391,7 @@ function FreePlanCard({ isSignedIn }: { isSignedIn: boolean }) {
             </div>
             <Link
               href={isSignedIn ? '/' : '/inscription'}
-              className="inline-flex flex-shrink-0 items-center justify-center rounded-xl border border-black/[0.12] px-5 py-2.5 text-[13.5px] font-semibold text-[#333] transition-all hover:border-[#111] hover:bg-[#111] hover:text-white"
+              className="inline-flex shrink-0 items-center justify-center rounded-xl border border-black/12 px-5 py-2.5 text-[13.5px] font-semibold text-[#333] transition-all hover:border-[#111] hover:bg-[#111] hover:text-white"
             >
               {isSignedIn ? 'Accueil' : 'Créer un compte'}
             </Link>
@@ -439,7 +439,7 @@ export function PricingContent() {
   };
 
   return (
-    <main className="min-h-screen bg-[#fafaf9]">
+    <main className="min-h-screen bg-background">
       <Breadcrumb />
       {isSubscribed && <SubscribedBanner />}
       <PricingHero />

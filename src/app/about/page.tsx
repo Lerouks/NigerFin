@@ -52,7 +52,7 @@ export default async function AboutPage() {
   const dbSections = await fetchLegalSections('about');
   const sections = dbSections.length > 0 ? dbSections : FALLBACK_SECTIONS;
   return (
-    <div className="min-h-screen bg-[#fafaf9]">
+    <div className="min-h-screen bg-background">
       <AboutHero />
       <AboutContent sections={sections} />
       <AboutSeoBlock />

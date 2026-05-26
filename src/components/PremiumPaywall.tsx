@@ -22,7 +22,7 @@ export function PremiumPaywall({ articleTitle }: PremiumPaywallProps) {
   return (
     <div className="relative">
       {/* Gradient fade over truncated text */}
-      <div className="absolute -top-32 inset-x-0 h-32 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+      <div className="absolute -top-32 inset-x-0 h-32 bg-linear-to-t from-white to-transparent pointer-events-none" />
 
       {/* Paywall content */}
       <div className="flex flex-col items-center text-center pt-8 pb-12 px-4">

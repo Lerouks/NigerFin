@@ -187,19 +187,19 @@ function Header() {
     <header className="space-y-3">
       <Link
         href="/admin/audience"
-        className="inline-flex items-center gap-1.5 text-[12px] text-[#1a1a1a]/55 hover:text-[#1a1a1a] transition"
+        className="inline-flex items-center gap-1.5 text-[12px] text-foreground/55 hover:text-foreground transition"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
         Audience
       </Link>
       <div>
-        <p className="text-[10px] tracking-widest uppercase text-[#1a1a1a]/45 font-bold">
+        <p className="text-[10px] tracking-widest uppercase text-foreground/45 font-bold">
           Audience
         </p>
         <h1 className="font-extrabold text-[28px] sm:text-[32px] leading-tight tracking-tight mt-1">
           Abonnés newsletter
         </h1>
-        <p className="text-[14px] text-[#1a1a1a]/60 mt-3 leading-relaxed max-w-[560px]">
+        <p className="text-[14px] text-foreground/60 mt-3 leading-relaxed max-w-[560px]">
           Liste complète des abonnés, sources d&apos;acquisition, désabonnements et export CSV.
         </p>
       </div>
@@ -220,7 +220,7 @@ function StatsSection({
         {[0, 1, 2, 3].map((i) => (
           <div
             key={i}
-            className="bg-black/[0.025] rounded-2xl p-4 h-[88px] animate-pulse"
+            className="bg-black/2.5 rounded-2xl p-4 h-[88px] animate-pulse"
           />
         ))}
       </section>
@@ -253,20 +253,20 @@ function StatsSection({
         <StatCard
           label="Désabonnés ce mois"
           value={stats.unsubscribedThisMonth}
-          color="text-[#1a1a1a]/80"
+          color="text-foreground/80"
         />
         <StatCard
           label="Taux churn"
           value={churnRate}
           suffix="%"
-          color="text-[#1a1a1a]/80"
+          color="text-foreground/80"
           decimals={1}
         />
       </div>
 
       {stats.bySource.length > 0 && (
-        <div className="bg-white border border-black/[0.06] rounded-2xl p-4">
-          <p className="text-[10px] tracking-widest uppercase text-[#1a1a1a]/45 font-semibold mb-3">
+        <div className="bg-white border border-black/6 rounded-2xl p-4">
+          <p className="text-[10px] tracking-widest uppercase text-foreground/45 font-semibold mb-3">
             Sources d&apos;acquisition (abonnés actifs)
           </p>
           <div className="space-y-2">
@@ -275,17 +275,17 @@ function StatsSection({
               return (
                 <div key={source} className="space-y-1">
                   <div className="flex items-center justify-between text-[13px]">
-                    <span className="text-[#1a1a1a]/75">
+                    <span className="text-foreground/75">
                       {SOURCE_LABELS[source] ?? source}
                     </span>
                     <span className="tabular-nums font-semibold">
                       {count}{' '}
-                      <span className="text-[#1a1a1a]/40 font-normal">
+                      <span className="text-foreground/40 font-normal">
                         ({pct.toFixed(0)}%)
                       </span>
                     </span>
                   </div>
-                  <div className="h-1.5 bg-black/[0.05] rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-black/5 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-[#d4a843] transition-all"
                       style={{ width: `${pct}%` }}
@@ -305,7 +305,7 @@ function StatCard({
   label,
   value,
   suffix,
-  color = 'text-[#1a1a1a]',
+  color = 'text-foreground',
   decimals = 0,
 }: {
   label: string;
@@ -315,8 +315,8 @@ function StatCard({
   decimals?: number;
 }) {
   return (
-    <div className="bg-black/[0.025] rounded-2xl p-4">
-      <p className="text-[10px] tracking-widest uppercase text-[#1a1a1a]/45 font-semibold">
+    <div className="bg-black/2.5 rounded-2xl p-4">
+      <p className="text-[10px] tracking-widest uppercase text-foreground/45 font-semibold">
         {label}
       </p>
       <p className={`font-extrabold text-[28px] leading-tight mt-2 tabular-nums ${color}`}>
@@ -325,7 +325,7 @@ function StatCard({
           maximumFractionDigits: decimals,
         })}
         {suffix && (
-          <span className="text-[18px] text-[#1a1a1a]/40 font-medium ml-0.5">
+          <span className="text-[18px] text-foreground/40 font-medium ml-0.5">
             {suffix}
           </span>
         )}
@@ -369,7 +369,7 @@ function Filters({
             Rechercher un abonné par email
           </label>
           <Search
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#1a1a1a]/35"
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/35"
             aria-hidden="true"
           />
           <input
@@ -379,12 +379,12 @@ function Filters({
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Rechercher par email..."
             aria-label="Rechercher un abonné par email"
-            className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white border border-black/[0.08] focus:border-[#d4a843]/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a843]/30 text-[14px] placeholder:text-[#1a1a1a]/30"
+            className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white border border-black/8 focus:border-[#d4a843]/40 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#d4a843]/30 text-[14px] placeholder:text-foreground/30"
           />
         </div>
         <a
           href={exportHref}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#1a1a1a] text-white text-[13px] font-semibold hover:bg-[#1a1a1a]/90 active:scale-[0.98] transition"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-foreground text-white text-[13px] font-semibold hover:bg-foreground/90 active:scale-[0.98] transition"
         >
           <Download className="w-4 h-4" />
           Exporter CSV
@@ -392,7 +392,7 @@ function Filters({
       </div>
 
       <div className="flex flex-wrap gap-2 items-center">
-        <span className="text-[10px] tracking-widest uppercase text-[#1a1a1a]/45 font-semibold mr-1">
+        <span className="text-[10px] tracking-widest uppercase text-foreground/45 font-semibold mr-1">
           Status
         </span>
         {statusOptions.map((s) => (
@@ -408,7 +408,7 @@ function Filters({
 
       {availableSources.length > 1 && (
         <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-[10px] tracking-widest uppercase text-[#1a1a1a]/45 font-semibold mr-1">
+          <span className="text-[10px] tracking-widest uppercase text-foreground/45 font-semibold mr-1">
             Source
           </span>
           <FilterChip active={source === 'all'} onClick={() => onSourceChange('all')}>
@@ -443,10 +443,10 @@ function FilterChip({
       onClick={onClick}
       aria-pressed={active}
       className={[
-        'px-3 py-1.5 rounded-full text-[12px] font-semibold transition border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a843]/30',
+        'px-3 py-1.5 rounded-full text-[12px] font-semibold transition border focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#d4a843]/30',
         active
-          ? 'bg-[#1a1a1a] text-white border-[#1a1a1a]'
-          : 'bg-white text-[#1a1a1a]/70 border-black/[0.08] hover:border-black/20',
+          ? 'bg-foreground text-white border-foreground'
+          : 'bg-white text-foreground/70 border-black/8 hover:border-black/20',
       ].join(' ')}
     >
       {children}
@@ -467,7 +467,7 @@ function SubscribersTable({
 }) {
   if (isLoading && rows.length === 0) {
     return (
-      <div className="bg-white border border-black/[0.06] rounded-2xl p-8 flex items-center justify-center text-[#1a1a1a]/45 text-[13px]">
+      <div className="bg-white border border-black/6 rounded-2xl p-8 flex items-center justify-center text-foreground/45 text-[13px]">
         <Loader2 className="w-4 h-4 animate-spin mr-2" />
         Chargement des abonnés...
       </div>
@@ -475,9 +475,9 @@ function SubscribersTable({
   }
   if (rows.length === 0) {
     return (
-      <div className="bg-white border border-black/[0.06] rounded-2xl p-10 text-center">
-        <Mail className="w-8 h-8 text-[#1a1a1a]/20 mx-auto mb-3" />
-        <p className="text-[14px] text-[#1a1a1a]/55">
+      <div className="bg-white border border-black/6 rounded-2xl p-10 text-center">
+        <Mail className="w-8 h-8 text-foreground/20 mx-auto mb-3" />
+        <p className="text-[14px] text-foreground/55">
           Aucun abonné ne correspond à ces filtres.
         </p>
       </div>
@@ -486,10 +486,10 @@ function SubscribersTable({
 
   return (
     <>
-      <div className="hidden lg:block bg-white border border-black/[0.06] rounded-2xl overflow-hidden">
+      <div className="hidden lg:block bg-white border border-black/6 rounded-2xl overflow-hidden">
         <table className="w-full text-[13px]">
-          <thead className="bg-black/[0.02]">
-            <tr className="text-left text-[10px] tracking-widest uppercase text-[#1a1a1a]/45 font-semibold">
+          <thead className="bg-black/2">
+            <tr className="text-left text-[10px] tracking-widest uppercase text-foreground/45 font-semibold">
               <th className="px-4 py-3">Email</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Source</th>
@@ -498,17 +498,17 @@ function SubscribersTable({
               <th className="px-4 py-3 text-right">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-black/[0.04]">
+          <tbody className="divide-y divide-black/4">
             {rows.map((row) => (
-              <tr key={row.id} className="hover:bg-black/[0.02] transition">
+              <tr key={row.id} className="hover:bg-black/2 transition">
                 <td className="px-4 py-3 font-medium">{row.email}</td>
                 <td className="px-4 py-3">
                   <StatusBadge status={row.status} />
                 </td>
-                <td className="px-4 py-3 text-[#1a1a1a]/75">
+                <td className="px-4 py-3 text-foreground/75">
                   {SOURCE_LABELS[row.source ?? 'inconnu'] ?? row.source ?? '—'}
                 </td>
-                <td className="px-4 py-3 text-[#1a1a1a]/65 tabular-nums">
+                <td className="px-4 py-3 text-foreground/65 tabular-nums">
                   {formatDate(row.opt_in_at)}
                 </td>
                 <td className="px-4 py-3">
@@ -520,7 +520,7 @@ function SubscribersTable({
                       Voir profil
                     </Link>
                   ) : (
-                    <span className="text-[#1a1a1a]/35 text-[12px]">Aucun</span>
+                    <span className="text-foreground/35 text-[12px]">Aucun</span>
                   )}
                 </td>
                 <td className="px-4 py-3 text-right">
@@ -549,19 +549,19 @@ function SubscribersTable({
         {rows.map((row) => (
           <div
             key={row.id}
-            className="bg-white border border-black/[0.06] rounded-2xl p-4"
+            className="bg-white border border-black/6 rounded-2xl p-4"
           >
             <div className="flex items-start justify-between gap-3 mb-2">
               <p className="font-semibold text-[14px] break-all">{row.email}</p>
               <StatusBadge status={row.status} />
             </div>
-            <div className="grid grid-cols-2 gap-2 text-[12px] text-[#1a1a1a]/65">
+            <div className="grid grid-cols-2 gap-2 text-[12px] text-foreground/65">
               <p>
-                <span className="text-[#1a1a1a]/40">Source :</span>{' '}
+                <span className="text-foreground/40">Source :</span>{' '}
                 {SOURCE_LABELS[row.source ?? 'inconnu'] ?? row.source ?? '—'}
               </p>
               <p>
-                <span className="text-[#1a1a1a]/40">Inscrit :</span>{' '}
+                <span className="text-foreground/40">Inscrit :</span>{' '}
                 {formatDate(row.opt_in_at)}
               </p>
             </div>
@@ -630,9 +630,9 @@ function Pagination({
       aria-label="Pagination des abonnés"
       className="flex items-center justify-between gap-3 pt-2"
     >
-      <p className="text-[12px] text-[#1a1a1a]/55 tabular-nums">
+      <p className="text-[12px] text-foreground/55 tabular-nums">
         Page {page} / {totalPages}{' '}
-        <span className="text-[#1a1a1a]/30">
+        <span className="text-foreground/30">
           ({totalRows.toLocaleString('fr-FR')} au total)
         </span>
       </p>
@@ -640,7 +640,7 @@ function Pagination({
         <button
           onClick={() => onPage(Math.max(1, page - 1))}
           disabled={page === 1}
-          className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-black/[0.08] text-[#1a1a1a]/70 hover:border-black/20 disabled:opacity-40 disabled:cursor-not-allowed transition"
+          className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-black/8 text-foreground/70 hover:border-black/20 disabled:opacity-40 disabled:cursor-not-allowed transition"
           aria-label="Page précédente"
         >
           <ChevronLeft className="w-4 h-4" />
@@ -648,7 +648,7 @@ function Pagination({
         <button
           onClick={() => onPage(Math.min(totalPages, page + 1))}
           disabled={page >= totalPages}
-          className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-black/[0.08] text-[#1a1a1a]/70 hover:border-black/20 disabled:opacity-40 disabled:cursor-not-allowed transition"
+          className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-black/8 text-foreground/70 hover:border-black/20 disabled:opacity-40 disabled:cursor-not-allowed transition"
           aria-label="Page suivante"
         >
           <ChevronRight className="w-4 h-4" />

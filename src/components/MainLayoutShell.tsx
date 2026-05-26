@@ -27,7 +27,7 @@ export function MainLayoutShell({ children, initialFlashBanner }: MainLayoutShel
     <>
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:bg-white focus:px-4 focus:py-2 focus:text-black focus:shadow-lg focus:rounded"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-100 focus:bg-white focus:px-4 focus:py-2 focus:text-black focus:shadow-lg focus:rounded-sm"
       >
         Aller au contenu principal
       </a>
@@ -36,7 +36,7 @@ export function MainLayoutShell({ children, initialFlashBanner }: MainLayoutShel
         initialEnabled={initialFlashBanner.enabled}
       />
       <Header />
-      <main id="main-content" className="flex-1 bg-[#fafaf9]">
+      <main id="main-content" className="flex-1 bg-background">
         {children}
       </main>
       <Footer />

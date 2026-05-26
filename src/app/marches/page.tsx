@@ -20,7 +20,7 @@ export default async function MarchesPage() {
     getArticleViewRanking(),
   ]);
   return (
-    <div className="min-h-screen bg-[#fafaf9]">
+    <div className="min-h-screen bg-background">
       <CategoryHero
         label="Rubrique"
         title="Marchés"
@@ -56,7 +56,7 @@ export default async function MarchesPage() {
           <div className="flex items-center gap-4 mb-8">
             <div className="w-12 h-[2px] bg-gold/40" />
             <h2 className="text-2xl font-bold">Articles Marchés</h2>
-            <div className="flex-1 h-px bg-black/[0.06]" />
+            <div className="flex-1 h-px bg-black/6" />
           </div>
           <SectionArticlesFiltered articles={articles} total={total} sectionLabel="Marchés" sectionPath="/marches" viewRanking={viewRanking} />
         </div>

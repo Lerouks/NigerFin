@@ -18,7 +18,7 @@ export default function PreviewSwitcher({ slug }: { slug: string }) {
   return (
     <section>
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <div className="inline-flex rounded-lg border border-foreground/10 bg-white p-1 shadow-sm">
+        <div className="inline-flex rounded-lg border border-foreground/10 bg-white p-1 shadow-xs">
           {VIEWPORTS.map((v) => (
             <button
               key={v.id}

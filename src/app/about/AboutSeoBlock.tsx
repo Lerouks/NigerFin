@@ -3,7 +3,7 @@ import { ArrowRight } from 'lucide-react';
 
 export function AboutSeoBlock() {
   return (
-    <section className="bg-white border-t border-black/[0.06]">
+    <section className="bg-white border-t border-black/6">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
         <div className="prose prose-sm sm:prose-base max-w-none">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#111] mb-4">
@@ -32,7 +32,7 @@ export function AboutSeoBlock() {
           </h2>
           <ul className="space-y-3 text-[15px] sm:text-[16px] text-gray-700 mb-10">
             <li className="flex items-start gap-3">
-              <span className="mt-2 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
+              <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
                 <strong>Économie nigérienne</strong> : croissance du PIB, inflation, dette
                 publique, balance commerciale, secteurs stratégiques (agriculture, mines,
@@ -40,28 +40,28 @@ export function AboutSeoBlock() {
               </span>
             </li>
             <li className="flex items-start gap-3">
-              <span className="mt-2 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
+              <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
                 <strong>Finance et marchés</strong> : BRVM, banques nigériennes, microfinance,
                 Mobile Money, fintechs, taux directeurs BCEAO, politiques monétaires UEMOA.
               </span>
             </li>
             <li className="flex items-start gap-3">
-              <span className="mt-2 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
+              <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
                 <strong>Entreprises stratégiques</strong> : SOMAÏR, COMINAK, NIGELEC, SONIBANK,
                 SONIDEP, BAGRI, SOPAMIN, Niger Telecoms et le tissu des PME locales.
               </span>
             </li>
             <li className="flex items-start gap-3">
-              <span className="mt-2 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
+              <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
                 <strong>Éducation financière</strong> : cours et leçons gratuits adaptés au
                 contexte nigérien et UEMOA, du débutant à l&apos;investisseur averti.
               </span>
             </li>
             <li className="flex items-start gap-3">
-              <span className="mt-2 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
+              <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
                 <strong>Outils pratiques</strong> : simulateurs financiers (emprunt, salaire,
                 budget familial, intérêts) calibrés sur les réalités du Niger.

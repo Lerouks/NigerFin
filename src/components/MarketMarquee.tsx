@@ -15,8 +15,8 @@ export function MarketMarquee() {
         <div className="inline-flex items-center gap-8 whitespace-nowrap">
           {[1, 2, 3, 4, 5].map((i) => (
             <span key={i} className="inline-flex items-center gap-2 text-[12px]">
-              <span className="h-3 w-12 bg-white/10 rounded animate-pulse" />
-              <span className="h-3 w-16 bg-white/10 rounded animate-pulse" />
+              <span className="h-3 w-12 bg-white/10 rounded-sm animate-pulse" />
+              <span className="h-3 w-16 bg-white/10 rounded-sm animate-pulse" />
             </span>
           ))}
         </div>
@@ -35,7 +35,7 @@ export function MarketMarquee() {
         {doubled.map((item, i) => (
           <span
             key={`${item.id}-${i}`}
-            className="inline-flex items-center gap-2 text-[12px] flex-shrink-0"
+            className="inline-flex items-center gap-2 text-[12px] shrink-0"
           >
             <span className="text-white/50 font-medium">{item.symbol}</span>
             <span className="text-white/80 tabular-nums">

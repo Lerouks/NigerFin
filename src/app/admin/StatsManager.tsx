@@ -95,7 +95,7 @@ export function StatsManager() {
       </div>
 
       {/* Revenue this month */}
-      <div className="bg-white rounded-xl border border-black/[0.06] p-5">
+      <div className="bg-white rounded-xl border border-black/6 p-5">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-[12px] text-gray-500 uppercase tracking-wider mb-1">Revenus du mois en cours</p>
@@ -108,7 +108,7 @@ export function StatsManager() {
       </div>
 
       {/* Daily views chart */}
-      <div className="bg-white rounded-xl border border-black/[0.06] p-6">
+      <div className="bg-white rounded-xl border border-black/6 p-6">
         <h3 className="font-semibold mb-4 flex items-center gap-2">
           <BarChart3 className="w-4 h-4 text-gray-500" />
           Vues par jour (30 derniers jours)
@@ -118,7 +118,7 @@ export function StatsManager() {
             const height = (d.views / maxDaily) * 100;
             return (
               <div key={d.date} className="flex-1 flex flex-col items-center gap-1 group relative">
-                <div className="opacity-0 group-hover:opacity-100 absolute -top-6 bg-[#111] text-white text-[10px] px-1.5 py-0.5 rounded whitespace-nowrap transition-opacity">
+                <div className="opacity-0 group-hover:opacity-100 absolute -top-6 bg-[#111] text-white text-[10px] px-1.5 py-0.5 rounded-sm whitespace-nowrap transition-opacity">
                   {d.views} vues
                 </div>
                 <div
@@ -138,7 +138,7 @@ export function StatsManager() {
       {/* Two columns: top articles + top pages */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Top Articles */}
-        <div className="bg-white rounded-xl border border-black/[0.06] p-5">
+        <div className="bg-white rounded-xl border border-black/6 p-5">
           <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
             <FileText className="w-4 h-4 text-gray-500" />
             Articles les plus lus (30j)
@@ -148,12 +148,12 @@ export function StatsManager() {
           ) : (
             <div className="space-y-2">
               {data.topArticles.map((article, i) => (
-                <div key={article.id} className="flex items-center gap-3 py-2 border-b border-black/[0.03] last:border-0">
-                  <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[11px] font-bold text-gray-500 flex-shrink-0">
+                <div key={article.id} className="flex items-center gap-3 py-2 border-b border-black/3 last:border-0">
+                  <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[11px] font-bold text-gray-500 shrink-0">
                     {i + 1}
                   </span>
                   <span className="text-[13px] flex-1 line-clamp-1">{article.title}</span>
-                  <span className="text-[12px] font-medium text-gray-500 flex-shrink-0">{article.views} vues</span>
+                  <span className="text-[12px] font-medium text-gray-500 shrink-0">{article.views} vues</span>
                 </div>
               ))}
             </div>
@@ -161,7 +161,7 @@ export function StatsManager() {
         </div>
 
         {/* Top Pages */}
-        <div className="bg-white rounded-xl border border-black/[0.06] p-5">
+        <div className="bg-white rounded-xl border border-black/6 p-5">
           <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
             <Eye className="w-4 h-4 text-gray-500" />
             Pages les plus visitées (30j)
@@ -171,12 +171,12 @@ export function StatsManager() {
           ) : (
             <div className="space-y-2">
               {data.topPages.map((page, i) => (
-                <div key={page.path} className="flex items-center gap-3 py-2 border-b border-black/[0.03] last:border-0">
-                  <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[11px] font-bold text-gray-500 flex-shrink-0">
+                <div key={page.path} className="flex items-center gap-3 py-2 border-b border-black/3 last:border-0">
+                  <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[11px] font-bold text-gray-500 shrink-0">
                     {i + 1}
                   </span>
                   <span className="text-[13px] font-mono flex-1 line-clamp-1">{page.path}</span>
-                  <span className="text-[12px] font-medium text-gray-500 flex-shrink-0">{page.views} vues</span>
+                  <span className="text-[12px] font-medium text-gray-500 shrink-0">{page.views} vues</span>
                 </div>
               ))}
             </div>
@@ -195,7 +195,7 @@ function KpiCard({ icon, label, value, color, bg }: {
   bg: string;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-black/[0.06] p-5">
+    <div className="bg-white rounded-xl border border-black/6 p-5">
       <div className="flex items-center justify-between mb-2">
         <p className="text-[12px] text-gray-500 uppercase tracking-wider">{label}</p>
         <div className={`w-8 h-8 rounded-lg ${bg} flex items-center justify-center`}>

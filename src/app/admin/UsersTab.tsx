@@ -94,13 +94,13 @@ export function UsersTab({ onStatsRefresh }: UsersTabProps) {
             placeholder="Rechercher par nom ou email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-white border border-black/[0.06] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black"
+            className="w-full pl-10 pr-4 py-3 bg-white border border-black/6 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-black"
           />
         </div>
         <select
           value={roleFilter}
           onChange={(e) => setRoleFilter(e.target.value)}
-          className="px-4 py-3 bg-white border border-black/[0.06] rounded-lg text-sm focus:outline-none"
+          className="px-4 py-3 bg-white border border-black/6 rounded-lg text-sm focus:outline-hidden"
         >
           <option value="">Tous les rôles</option>
           <option value="reader">Lecteur</option>
@@ -116,10 +116,10 @@ export function UsersTab({ onStatsRefresh }: UsersTabProps) {
           <Loader2 className="w-6 h-6 animate-spin text-gray-500 mx-auto" />
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-black/[0.06] overflow-hidden">
+        <div className="bg-white rounded-xl border border-black/6 overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-black/[0.04]">
+              <tr className="border-b border-black/4">
                 <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Utilisateur</th>
                 <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Rôle</th>
                 <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Statut</th>
@@ -205,7 +205,7 @@ function UserRow({ user, expanded, processing, onToggle, onAction, deleteConfirm
 
   return (
     <>
-      <tr className="border-b border-black/[0.03] last:border-0 hover:bg-gray-50/50 transition-colors">
+      <tr className="border-b border-black/3 last:border-0 hover:bg-gray-50/50 transition-colors">
         <td className="px-4 py-3">
           <div className="flex items-center gap-2">
             <div>
@@ -213,7 +213,7 @@ function UserRow({ user, expanded, processing, onToggle, onAction, deleteConfirm
               <p className="text-[12px] text-gray-500">{user.email}</p>
             </div>
             {user.blocked && (
-              <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded">Bloqué</span>
+              <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded-sm">Bloqué</span>
             )}
           </div>
         </td>
@@ -260,7 +260,7 @@ function UserRow({ user, expanded, processing, onToggle, onAction, deleteConfirm
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Left: Current status + role management */}
               <div className="space-y-3">
-                <div className={`${statusBg} rounded-lg p-4 border border-black/[0.04]`}>
+                <div className={`${statusBg} rounded-lg p-4 border border-black/4`}>
                   <div className="flex items-center gap-2 mb-2">
                     {isActive ? <Crown className="w-4 h-4 text-amber-500" /> : <Users className="w-4 h-4 text-gray-500" />}
                     <span className="text-[11px] uppercase tracking-wider text-gray-500 font-medium">Statut actuel</span>
@@ -287,7 +287,7 @@ function UserRow({ user, expanded, processing, onToggle, onAction, deleteConfirm
                       defaultValue={user.role}
                       onChange={(e) => onAction('changeRole', { role: e.target.value })}
                       disabled={processing}
-                      className="text-[12px] border border-gray-200 rounded px-2 py-1.5 bg-white"
+                      className="text-[12px] border border-gray-200 rounded-sm px-2 py-1.5 bg-white"
                     >
                       <option value="reader">Lecteur</option>
                       <option value="premium">Premium</option>
@@ -297,12 +297,12 @@ function UserRow({ user, expanded, processing, onToggle, onAction, deleteConfirm
 
                   {user.blocked ? (
                     <button onClick={() => onAction('unblock')} disabled={processing}
-                      className="text-[12px] bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded hover:bg-emerald-100 transition-colors disabled:opacity-50 flex items-center gap-1">
+                      className="text-[12px] bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-sm hover:bg-emerald-100 transition-colors disabled:opacity-50 flex items-center gap-1">
                       <Unlock className="w-3 h-3" /> Débloquer
                     </button>
                   ) : (
                     <button onClick={() => onAction('block')} disabled={processing}
-                      className="text-[12px] bg-red-50 text-red-700 px-3 py-1.5 rounded hover:bg-red-100 transition-colors disabled:opacity-50 flex items-center gap-1">
+                      className="text-[12px] bg-red-50 text-red-700 px-3 py-1.5 rounded-sm hover:bg-red-100 transition-colors disabled:opacity-50 flex items-center gap-1">
                       <Ban className="w-3 h-3" /> Bloquer
                     </button>
                   )}
@@ -310,7 +310,7 @@ function UserRow({ user, expanded, processing, onToggle, onAction, deleteConfirm
               </div>
 
               {/* Right: Subscription management */}
-              <div className="bg-white rounded-lg border border-black/[0.06] p-4 space-y-3">
+              <div className="bg-white rounded-lg border border-black/6 p-4 space-y-3">
                 <div className="flex items-center gap-2">
                   <CreditCard className="w-4 h-4 text-gray-500" />
                   <span className="text-[11px] uppercase tracking-wider text-gray-500 font-medium">Gestion abonnement</span>
@@ -361,13 +361,13 @@ function UserRow({ user, expanded, processing, onToggle, onAction, deleteConfirm
                   {showCustom && (
                     <div className="mt-2 flex items-center gap-2">
                       <input type="number" placeholder="Nombre de jours" value={customDays} onChange={(e) => setCustomDays(e.target.value)} min={1}
-                        className="flex-1 text-[12px] border border-gray-200 rounded px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-black" />
+                        className="flex-1 text-[12px] border border-gray-200 rounded-sm px-2 py-1.5 bg-white focus:outline-hidden focus:ring-1 focus:ring-black" />
                       <span className="text-[11px] text-gray-500">jours</span>
                     </div>
                   )}
                 </div>
 
-                <div className="bg-[#fafaf9] rounded-lg p-3 border border-black/[0.04]">
+                <div className="bg-background rounded-lg p-3 border border-black/4">
                   <div className="flex items-center gap-1.5 mb-1">
                     <Calendar className="w-3.5 h-3.5 text-gray-500" />
                     <span className="text-[11px] text-gray-500">Date de fin calculée</span>
@@ -393,9 +393,9 @@ function UserRow({ user, expanded, processing, onToggle, onAction, deleteConfirm
                     <p className="text-[12px] text-red-700 mb-2 font-medium">Confirmer la rétrogradation en Lecteur gratuit ?</p>
                     <p className="text-[11px] text-red-600 mb-3">L&apos;utilisateur perdra immédiatement l&apos;accès premium et recevra un email de notification.</p>
                     <div className="flex gap-2">
-                      <button onClick={() => setShowDowngradeConfirm(false)} className="flex-1 text-[12px] px-3 py-1.5 rounded bg-white border border-gray-200 text-gray-600 hover:bg-gray-50">Annuler</button>
+                      <button onClick={() => setShowDowngradeConfirm(false)} className="flex-1 text-[12px] px-3 py-1.5 rounded-sm bg-white border border-gray-200 text-gray-600 hover:bg-gray-50">Annuler</button>
                       <button onClick={handleDeactivate} disabled={processing}
-                        className="flex-1 text-[12px] px-3 py-1.5 rounded bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50">
+                        className="flex-1 text-[12px] px-3 py-1.5 rounded-sm bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50">
                         {processing ? <Loader2 className="w-3 h-3 animate-spin inline" /> : 'Confirmer'}
                       </button>
                     </div>
@@ -417,9 +417,9 @@ function UserRow({ user, expanded, processing, onToggle, onAction, deleteConfirm
                   <p className="text-[12px] text-red-700 mb-1 font-medium">Supprimer définitivement {user.full_name || user.email} ?</p>
                   <p className="text-[11px] text-red-600 mb-3">Cette action supprimera définitivement toutes les données de cet utilisateur.</p>
                   <div className="flex gap-2">
-                    <button onClick={() => setDeleteConfirmUser(null)} className="flex-1 text-[12px] px-3 py-1.5 rounded bg-white border border-gray-200 text-gray-600 hover:bg-gray-50">Annuler</button>
+                    <button onClick={() => setDeleteConfirmUser(null)} className="flex-1 text-[12px] px-3 py-1.5 rounded-sm bg-white border border-gray-200 text-gray-600 hover:bg-gray-50">Annuler</button>
                     <button onClick={() => handleDeleteUser(user.id)} disabled={processing}
-                      className="flex-1 text-[12px] px-3 py-1.5 rounded bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50">
+                      className="flex-1 text-[12px] px-3 py-1.5 rounded-sm bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50">
                       {processing ? <Loader2 className="w-3 h-3 animate-spin inline" /> : 'Supprimer définitivement'}
                     </button>
                   </div>

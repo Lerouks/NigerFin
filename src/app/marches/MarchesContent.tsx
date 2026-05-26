@@ -44,14 +44,14 @@ export function MarchesContent() {
         {TYPE_ORDER.map((type) => (
           <div key={type}>
             <div className="mb-4">
-              <div className="h-5 w-40 bg-gray-200 rounded animate-pulse" />
-              <div className="h-3 w-64 bg-gray-100 rounded animate-pulse mt-2" />
+              <div className="h-5 w-40 bg-gray-200 rounded-sm animate-pulse" />
+              <div className="h-3 w-64 bg-gray-100 rounded-sm animate-pulse mt-2" />
             </div>
-            <div className="bg-white rounded-xl border border-black/[0.06] divide-y divide-black/[0.04] overflow-hidden">
+            <div className="bg-white rounded-xl border border-black/6 divide-y divide-black/4 overflow-hidden">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="flex items-center justify-between px-5 py-4">
-                  <div className="h-4 w-32 bg-gray-100 rounded animate-pulse" />
-                  <div className="h-4 w-20 bg-gray-100 rounded animate-pulse" />
+                  <div className="h-4 w-32 bg-gray-100 rounded-sm animate-pulse" />
+                  <div className="h-4 w-20 bg-gray-100 rounded-sm animate-pulse" />
                 </div>
               ))}
             </div>
@@ -74,7 +74,7 @@ export function MarchesContent() {
               <h2 className="text-lg font-semibold">{TYPE_LABELS[type]}</h2>
               <p className="text-[13px] text-gray-500 mt-0.5">{TYPE_DESCRIPTIONS[type]}</p>
             </div>
-            <div className="bg-white rounded-xl border border-black/[0.06] divide-y divide-black/[0.04] overflow-hidden">
+            <div className="bg-white rounded-xl border border-black/6 divide-y divide-black/4 overflow-hidden">
               {group.map((item) => (
                 <QuoteRow
                   key={item.id}
@@ -169,7 +169,7 @@ function QuoteRow({
             )}
           </div>
         </div>
-        <div className="flex items-center gap-6 flex-shrink-0">
+        <div className="flex items-center gap-6 shrink-0">
           <div className="text-right">
             <div className="text-[15px] font-semibold tabular-nums">
               {item.value.toLocaleString('fr-FR', {
@@ -206,7 +206,7 @@ function QuoteRow({
       {/* Pedagogical expansion panel */}
       {isExpanded && hasEducation && (
         <div className="px-5 pb-4 -mt-1">
-          <div className="bg-[#fafaf9] rounded-lg border border-black/[0.04] px-4 py-3">
+          <div className="bg-background rounded-lg border border-black/4 px-4 py-3">
             {item.description && (
               <p className="text-[13px] text-gray-600 leading-relaxed">{item.description}</p>
             )}

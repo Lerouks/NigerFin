@@ -51,15 +51,15 @@ export function StrategicEnterprisesSection() {
     return (
       <section>
         <div className="animate-pulse space-y-6">
-          <div className="h-8 w-64 bg-black/[0.04] rounded-lg" />
+          <div className="h-8 w-64 bg-black/4 rounded-lg" />
           <div className="flex gap-3">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-9 w-28 bg-black/[0.04] rounded-full" />
+              <div key={i} className="h-9 w-28 bg-black/4 rounded-full" />
             ))}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="h-44 bg-black/[0.04] rounded-xl" />
+              <div key={i} className="h-44 bg-black/4 rounded-xl" />
             ))}
           </div>
         </div>
@@ -98,7 +98,7 @@ export function StrategicEnterprisesSection() {
           className={`px-4 py-2 rounded-full text-[12px] font-medium transition-colors duration-200 ${
             activeSector === null
               ? 'bg-[#111] text-white'
-              : 'bg-white text-gray-700 border border-black/[0.08] hover:border-black/20 hover:bg-gray-50'
+              : 'bg-white text-gray-700 border border-black/8 hover:border-black/20 hover:bg-gray-50'
           }`}
         >
           Tous les secteurs
@@ -114,7 +114,7 @@ export function StrategicEnterprisesSection() {
               className={`flex items-center gap-2 px-4 py-2 rounded-full text-[12px] font-medium transition-colors duration-200 ${
                 isActive
                   ? 'bg-[#111] text-white'
-                  : 'bg-white text-gray-700 border border-black/[0.08] hover:border-black/20 hover:bg-gray-50'
+                  : 'bg-white text-gray-700 border border-black/8 hover:border-black/20 hover:bg-gray-50'
               }`}
             >
               <Icon
@@ -136,7 +136,7 @@ export function StrategicEnterprisesSection() {
 
           const cardContent = (
             <article
-              className={`group relative h-full bg-white rounded-xl border border-black/[0.06] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:border-black/[0.12] ${
+              className={`group relative h-full bg-white rounded-xl border border-black/6 p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:border-black/12 ${
                 visible
                   ? 'opacity-100 translate-y-0'
                   : 'opacity-0 translate-y-2'
@@ -151,7 +151,7 @@ export function StrategicEnterprisesSection() {
                 style={{ backgroundColor: accent }}
               />
               <div className="flex items-start gap-4 mb-4">
-                <div className="w-12 h-12 rounded-lg bg-gray-50 border border-black/[0.06] flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <div className="w-12 h-12 rounded-lg bg-gray-50 border border-black/6 flex items-center justify-center shrink-0 overflow-hidden">
                   {enterprise.logo_url ? (
                     <Image
                       src={enterprise.logo_url}
@@ -171,7 +171,7 @@ export function StrategicEnterprisesSection() {
                     {enterprise.name}
                   </h3>
                   <span
-                    className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-0.5 text-[10px] font-semibold tracking-wider uppercase rounded"
+                    className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-0.5 text-[10px] font-semibold tracking-wider uppercase rounded-sm"
                     style={{
                       color: accent,
                       backgroundColor: `${accent}14`,
@@ -193,7 +193,7 @@ export function StrategicEnterprisesSection() {
             <Link
               key={enterprise.id}
               href={`/entreprises/${enterprise.slug}`}
-              className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 rounded-xl"
+              className="block focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 rounded-xl"
               style={{ ['--tw-ring-color' as string]: accent }}
             >
               {cardContent}

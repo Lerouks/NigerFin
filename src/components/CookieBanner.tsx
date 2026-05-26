@@ -83,17 +83,17 @@ export function CookieBanner() {
     <aside
       aria-live="polite"
       aria-label="Consentement aux cookies"
-      className="fixed z-[100] inset-x-0 bottom-0 sm:inset-x-auto sm:bottom-4 sm:left-4 sm:max-w-sm pointer-events-none"
+      className="fixed z-100 inset-x-0 bottom-0 sm:inset-x-auto sm:bottom-4 sm:left-4 sm:max-w-sm pointer-events-none"
     >
       <div
-        className="pointer-events-auto bg-white border-t sm:border border-black/[0.08] sm:rounded-xl shadow-2xl p-4 sm:p-5 transition-all duration-300 ease-out"
+        className="pointer-events-auto bg-white border-t sm:border border-black/8 sm:rounded-xl shadow-2xl p-4 sm:p-5 transition-all duration-300 ease-out"
         style={{
           transform: animate ? 'translateY(0)' : 'translateY(20px)',
           opacity: animate ? 1 : 0,
         }}
       >
         <div className="flex items-start gap-3">
-          <div className="hidden sm:flex w-8 h-8 rounded-lg bg-[#fafaf9] items-center justify-center flex-shrink-0">
+          <div className="hidden sm:flex w-8 h-8 rounded-lg bg-background items-center justify-center shrink-0">
             <Cookie className="w-4 h-4 text-gold" aria-hidden="true" />
           </div>
           <div className="flex-1 min-w-0">
@@ -118,7 +118,7 @@ export function CookieBanner() {
               <button
                 type="button"
                 onClick={handleReject}
-                className="inline-flex items-center justify-center min-h-[36px] px-3 py-1.5 rounded-md border border-black/[0.1] text-gray-700 text-[12px] font-medium hover:bg-gray-50 transition-colors"
+                className="inline-flex items-center justify-center min-h-[36px] px-3 py-1.5 rounded-md border border-black/10 text-gray-700 text-[12px] font-medium hover:bg-gray-50 transition-colors"
               >
                 Refuser
               </button>
@@ -128,7 +128,7 @@ export function CookieBanner() {
             type="button"
             onClick={handleReject}
             aria-label="Fermer et refuser les cookies non essentiels"
-            className="flex-shrink-0 inline-flex items-center justify-center w-7 h-7 rounded hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
+            className="shrink-0 inline-flex items-center justify-center w-7 h-7 rounded-sm hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>

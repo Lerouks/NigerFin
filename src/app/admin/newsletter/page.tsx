@@ -59,7 +59,7 @@ function IssueSection({
             <Link
               key={iss.id}
               href={`/admin/newsletter/${iss.id}/edit`}
-              className="group block rounded-2xl border border-foreground/10 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-gold hover:shadow-md"
+              className="group block rounded-2xl border border-foreground/10 bg-white p-5 shadow-xs transition hover:-translate-y-0.5 hover:border-gold hover:shadow-md"
             >
               <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-gold">
                 N°{String(iss.number).padStart(2, '0')} · {iss.audience} · {iss.status}

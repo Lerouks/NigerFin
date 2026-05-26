@@ -16,7 +16,7 @@ jobs:
     steps:
       # Note : actions épinglées par majeure (v4). Dependabot (.github/dependabot.yml)
       # surveille hebdomadairement les patches de sécurité et propose les bumps via PR.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-node@v4
         with:

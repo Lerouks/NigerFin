@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Facebook, Twitter, Linkedin, Instagram, Mail, Youtube, Phone, MapPin } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
+import { Facebook, Twitter, Linkedin, Instagram, Youtube } from '@/components/icons/social';
 import { defaultSocialLinks, defaultContactEmail } from '@/lib/site-data';
 
 function TikTokIcon({ className }: { className?: string }) {

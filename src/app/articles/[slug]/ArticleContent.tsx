@@ -3,7 +3,8 @@
 import { useState, useEffect, type ReactNode } from 'react';
 import { sanitizeHtml } from '@/lib/sanitize-html';
 import { ReadingProgressBar } from '@/components/ReadingProgressBar';
-import { Facebook, Linkedin, Link2, Check } from 'lucide-react';
+import { Link2, Check } from 'lucide-react';
+import { Facebook, Linkedin } from '@/components/icons/social';
 import { useAuth } from '@/lib/auth-context';
 import { CommentsSection } from '@/components/CommentsSection';
 import { MarketDataWidget } from '@/components/MarketDataWidget';

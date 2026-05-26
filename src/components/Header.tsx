@@ -40,7 +40,7 @@ export function Header({ navigation: navigationProp }: HeaderProps = {}) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-black/[0.06]">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-black/6">
         {/* Main header */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16 relative">
@@ -83,8 +83,8 @@ export function Header({ navigation: navigationProp }: HeaderProps = {}) {
                   </Link>
                 )}
                 {userMenuOpen && isSignedIn && (
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-black/[0.06] py-1 z-50 animate-scale-in origin-top-right" role="menu">
-                    <div className="px-4 py-2 border-b border-black/[0.04]">
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-black/6 py-1 z-50 animate-scale-in origin-top-right" role="menu">
+                    <div className="px-4 py-2 border-b border-black/4">
                       <p className="text-[12px] font-medium truncate">{user?.user_metadata?.full_name || user?.email?.split('@')[0]}</p>
                       <p className="text-[11px] text-gray-500 truncate">{user?.email}</p>
                     </div>
@@ -181,7 +181,7 @@ export function Header({ navigation: navigationProp }: HeaderProps = {}) {
               <Link
                 key={section.path}
                 href={section.path}
-                className="flex items-center justify-between min-h-[44px] py-3 px-3 text-[15px] text-gray-700 hover:bg-black/[0.03] rounded-lg transition-colors"
+                className="flex items-center justify-between min-h-[44px] py-3 px-3 text-[15px] text-gray-700 hover:bg-black/3 rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
                 tabIndex={mobileMenuOpen ? 0 : -1}
                 style={{ animationDelay: mobileMenuOpen ? `${i * 50}ms` : '0ms' }}
@@ -196,7 +196,7 @@ export function Header({ navigation: navigationProp }: HeaderProps = {}) {
                   setMobileMenuOpen(false);
                   setSearchOpen(true);
                 }}
-                className="sm:hidden flex items-center justify-between w-full py-2.5 px-3 text-[15px] text-gray-700 hover:bg-black/[0.03] rounded-lg transition-colors text-left"
+                className="sm:hidden flex items-center justify-between w-full py-2.5 px-3 text-[15px] text-gray-700 hover:bg-black/3 rounded-lg transition-colors text-left"
                 tabIndex={mobileMenuOpen ? 0 : -1}
               >
                 <span className="flex items-center gap-2"><Search className="w-4 h-4" /> Rechercher</span>
@@ -205,7 +205,7 @@ export function Header({ navigation: navigationProp }: HeaderProps = {}) {
               {!isAuthLoading && !isSignedIn && (
                 <Link
                   href="/connexion"
-                  className="sm:hidden flex items-center justify-between py-2.5 px-3 text-[15px] text-gray-700 hover:bg-black/[0.03] rounded-lg transition-colors"
+                  className="sm:hidden flex items-center justify-between py-2.5 px-3 text-[15px] text-gray-700 hover:bg-black/3 rounded-lg transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                   tabIndex={mobileMenuOpen ? 0 : -1}
                 >
@@ -216,18 +216,18 @@ export function Header({ navigation: navigationProp }: HeaderProps = {}) {
               {!isAuthLoading && !isSignedIn && (
                 <Link
                   href="/premium"
-                  className="flex items-center justify-between py-2.5 px-3 text-[15px] font-semibold text-[#1a1a1a] bg-gold/15 hover:bg-gold/25 rounded-lg transition-colors"
+                  className="flex items-center justify-between py-2.5 px-3 text-[15px] font-semibold text-foreground bg-gold/15 hover:bg-gold/25 rounded-lg transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                   tabIndex={mobileMenuOpen ? 0 : -1}
                 >
                   S&apos;abonner
-                  <ChevronRight className="w-4 h-4 text-[#1a1a1a]/50" />
+                  <ChevronRight className="w-4 h-4 text-foreground/50" />
                 </Link>
               )}
               {!isAuthLoading && isSignedIn && (
                 <Link
                   href="/compte"
-                  className="flex items-center justify-between py-2.5 px-3 text-[15px] text-gray-700 hover:bg-black/[0.03] rounded-lg transition-colors"
+                  className="flex items-center justify-between py-2.5 px-3 text-[15px] text-gray-700 hover:bg-black/3 rounded-lg transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                   tabIndex={mobileMenuOpen ? 0 : -1}
                 >

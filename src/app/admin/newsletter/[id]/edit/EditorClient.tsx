@@ -115,7 +115,7 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
 
   return (
     <div className="min-h-screen bg-muted pb-24">
-      <header className="sticky top-0 z-20 border-b border-foreground/10 bg-white shadow-sm">
+      <header className="sticky top-0 z-20 border-b border-foreground/10 bg-white shadow-xs">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-3 px-6 py-3">
           <Link href="/admin/newsletter" className="text-xs text-foreground/55 hover:text-foreground">← Retour</Link>
           <span className="text-xs font-bold uppercase tracking-wider text-gold">N°{String(issue.number).padStart(2, '0')}</span>
@@ -302,7 +302,7 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
                       summary: (content.intro.summary ?? []).map((it, i) => i === idx ? { ...it, number: e.target.value } : it),
                     },
                   })}
-                  className="rounded border border-foreground/15 bg-white px-2 py-1 text-sm font-mono"
+                  className="rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm font-mono"
                 />
                 <input
                   type="text"
@@ -313,7 +313,7 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
                       summary: (content.intro.summary ?? []).map((it, i) => i === idx ? { ...it, label: e.target.value } : it),
                     },
                   })}
-                  className="rounded border border-foreground/15 bg-white px-2 py-1 text-sm"
+                  className="rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm"
                 />
               </div>
             )}
@@ -372,19 +372,19 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
                   placeholder="Nom (ex: BRVM Composite)"
                   value={row.label}
                   onChange={(e) => patchContent({ market: { ...content.market, rows: content.market.rows.map((r, i) => i === idx ? { ...r, label: e.target.value } : r) } })}
-                  className="rounded border border-foreground/15 bg-white px-2 py-1 text-sm"
+                  className="rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm"
                 />
                 <input
                   placeholder="Valeur"
                   value={row.value}
                   onChange={(e) => patchContent({ market: { ...content.market, rows: content.market.rows.map((r, i) => i === idx ? { ...r, value: e.target.value } : r) } })}
-                  className="rounded border border-foreground/15 bg-white px-2 py-1 text-sm font-mono"
+                  className="rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm font-mono"
                 />
                 <input
                   placeholder="Unité (pts, USD, %)"
                   value={row.unit ?? ''}
                   onChange={(e) => patchContent({ market: { ...content.market, rows: content.market.rows.map((r, i) => i === idx ? { ...r, unit: e.target.value } : r) } })}
-                  className="rounded border border-foreground/15 bg-white px-2 py-1 text-sm"
+                  className="rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm"
                 />
                 <input
                   type="number"
@@ -392,7 +392,7 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
                   placeholder="Variation %"
                   value={row.changePercent}
                   onChange={(e) => patchContent({ market: { ...content.market, rows: content.market.rows.map((r, i) => i === idx ? { ...r, changePercent: Number(e.target.value) } : r) } })}
-                  className="rounded border border-foreground/15 bg-white px-2 py-1 text-sm font-mono"
+                  className="rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm font-mono"
                 />
               </div>
             )}
@@ -441,33 +441,33 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
                   placeholder="Label (ex: Croissance PIB 2026)"
                   value={it.label}
                   onChange={(e) => patchContent({ nigerKpi: { ...(content.nigerKpi ?? { items: [] }), items: (content.nigerKpi?.items ?? []).map((x, i) => i === idx ? { ...x, label: e.target.value } : x) } })}
-                  className="w-full rounded border border-foreground/15 bg-white px-2 py-1 text-sm font-semibold"
+                  className="w-full rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm font-semibold"
                 />
                 <div className="grid grid-cols-2 gap-2">
                   <input
                     placeholder="Valeur (ex: +6,2)"
                     value={it.value}
                     onChange={(e) => patchContent({ nigerKpi: { ...(content.nigerKpi ?? { items: [] }), items: (content.nigerKpi?.items ?? []).map((x, i) => i === idx ? { ...x, value: e.target.value } : x) } })}
-                    className="rounded border border-foreground/15 bg-white px-2 py-1 text-sm font-mono"
+                    className="rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm font-mono"
                   />
                   <input
                     placeholder="Unité (%, FCFA, $)"
                     value={it.unit ?? ''}
                     onChange={(e) => patchContent({ nigerKpi: { ...(content.nigerKpi ?? { items: [] }), items: (content.nigerKpi?.items ?? []).map((x, i) => i === idx ? { ...x, unit: e.target.value } : x) } })}
-                    className="rounded border border-foreground/15 bg-white px-2 py-1 text-sm"
+                    className="rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm"
                   />
                 </div>
                 <input
                   placeholder="Précision / delta (ex: projection FMI · article IV)"
                   value={it.delta ?? ''}
                   onChange={(e) => patchContent({ nigerKpi: { ...(content.nigerKpi ?? { items: [] }), items: (content.nigerKpi?.items ?? []).map((x, i) => i === idx ? { ...x, delta: e.target.value } : x) } })}
-                  className="w-full rounded border border-foreground/15 bg-white px-2 py-1 text-sm"
+                  className="w-full rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm"
                 />
                 <input
                   placeholder="Source (ex: FMI, avril 2026)"
                   value={it.source ?? ''}
                   onChange={(e) => patchContent({ nigerKpi: { ...(content.nigerKpi ?? { items: [] }), items: (content.nigerKpi?.items ?? []).map((x, i) => i === idx ? { ...x, source: e.target.value } : x) } })}
-                  className="w-full rounded border border-foreground/15 bg-white px-2 py-1 text-sm italic text-foreground/70"
+                  className="w-full rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm italic text-foreground/70"
                 />
               </div>
             )}
@@ -485,11 +485,11 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
             renderItem={(h, idx) => (
               <div className="space-y-3">
                 <div className="grid gap-2 sm:grid-cols-3">
-                  <input placeholder="Eyebrow (ex: Analyse · Industrie)" value={h.eyebrow ?? ''} onChange={(e) => patchContent({ headlines: content.headlines.map((x, i) => i === idx ? { ...x, eyebrow: e.target.value } : x) })} className="rounded border border-foreground/15 bg-white px-2 py-1 text-sm" />
-                  <input placeholder="Emoji (🪙 📈 🌾)" value={h.emoji ?? ''} onChange={(e) => patchContent({ headlines: content.headlines.map((x, i) => i === idx ? { ...x, emoji: e.target.value } : x) })} className="rounded border border-foreground/15 bg-white px-2 py-1 text-sm" />
-                  <input placeholder="Numéro section (III, IV)" value={h.sectionNumeral ?? ''} onChange={(e) => patchContent({ headlines: content.headlines.map((x, i) => i === idx ? { ...x, sectionNumeral: e.target.value } : x) })} className="rounded border border-foreground/15 bg-white px-2 py-1 text-sm font-mono" />
+                  <input placeholder="Eyebrow (ex: Analyse · Industrie)" value={h.eyebrow ?? ''} onChange={(e) => patchContent({ headlines: content.headlines.map((x, i) => i === idx ? { ...x, eyebrow: e.target.value } : x) })} className="rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm" />
+                  <input placeholder="Emoji (🪙 📈 🌾)" value={h.emoji ?? ''} onChange={(e) => patchContent({ headlines: content.headlines.map((x, i) => i === idx ? { ...x, emoji: e.target.value } : x) })} className="rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm" />
+                  <input placeholder="Numéro section (III, IV)" value={h.sectionNumeral ?? ''} onChange={(e) => patchContent({ headlines: content.headlines.map((x, i) => i === idx ? { ...x, sectionNumeral: e.target.value } : x) })} className="rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm font-mono" />
                 </div>
-                <input placeholder="Titre de l'analyse" value={h.title} onChange={(e) => patchContent({ headlines: content.headlines.map((x, i) => i === idx ? { ...x, title: e.target.value } : x) })} className="w-full rounded border border-foreground/15 bg-white px-3 py-2 text-base font-semibold" />
+                <input placeholder="Titre de l'analyse" value={h.title} onChange={(e) => patchContent({ headlines: content.headlines.map((x, i) => i === idx ? { ...x, title: e.target.value } : x) })} className="w-full rounded-sm border border-foreground/15 bg-white px-3 py-2 text-base font-semibold" />
                 <Field label="Ce qui se passe" hint="Gras/italique/lien">
                   <MiniRichTextEditor value={h.whatHappening} onChange={(html) => patchContent({ headlines: content.headlines.map((x, i) => i === idx ? { ...x, whatHappening: html } : x) })} />
                 </Field>
@@ -500,7 +500,7 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
                   <MiniRichTextEditor value={h.whyCare} onChange={(html) => patchContent({ headlines: content.headlines.map((x, i) => i === idx ? { ...x, whyCare: html } : x) })} />
                 </Field>
                 <div className="grid gap-2 sm:grid-cols-2">
-                  <input placeholder="Texte du bouton CTA" value={h.ctaLabel ?? ''} onChange={(e) => patchContent({ headlines: content.headlines.map((x, i) => i === idx ? { ...x, ctaLabel: e.target.value } : x) })} className="rounded border border-foreground/15 bg-white px-2 py-1 text-sm" />
+                  <input placeholder="Texte du bouton CTA" value={h.ctaLabel ?? ''} onChange={(e) => patchContent({ headlines: content.headlines.map((x, i) => i === idx ? { ...x, ctaLabel: e.target.value } : x) })} className="rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm" />
                   <ArticlePicker
                     value={h.ctaUrl}
                     onChange={(url) => patchContent({ headlines: content.headlines.map((x, i) => i === idx ? { ...x, ctaUrl: url } : x) })}
@@ -570,8 +570,8 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
             renderItem={(it, idx) => (
               <div className="space-y-2">
                 <div className="grid gap-2 sm:grid-cols-[60px_1fr]">
-                  <input placeholder="🌾" value={it.emoji ?? ''} onChange={(e) => patchContent({ digest: { ...(content.digest ?? { items: [] }), items: (content.digest?.items ?? []).map((x, i) => i === idx ? { ...x, emoji: e.target.value } : x) } })} className="rounded border border-foreground/15 bg-white px-2 py-1 text-sm" />
-                  <input placeholder="Titre" value={it.title} onChange={(e) => patchContent({ digest: { ...(content.digest ?? { items: [] }), items: (content.digest?.items ?? []).map((x, i) => i === idx ? { ...x, title: e.target.value } : x) } })} className="rounded border border-foreground/15 bg-white px-2 py-1 text-sm font-semibold" />
+                  <input placeholder="🌾" value={it.emoji ?? ''} onChange={(e) => patchContent({ digest: { ...(content.digest ?? { items: [] }), items: (content.digest?.items ?? []).map((x, i) => i === idx ? { ...x, emoji: e.target.value } : x) } })} className="rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm" />
+                  <input placeholder="Titre" value={it.title} onChange={(e) => patchContent({ digest: { ...(content.digest ?? { items: [] }), items: (content.digest?.items ?? []).map((x, i) => i === idx ? { ...x, title: e.target.value } : x) } })} className="rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm font-semibold" />
                 </div>
                 <MiniRichTextEditor
                   value={it.body}
@@ -599,8 +599,8 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
             onRemove={(idx) => patchContent({ radar: { ...(content.radar ?? { items: [] }), items: (content.radar?.items ?? []).filter((_, i) => i !== idx) } })}
             renderItem={(it, idx) => (
               <div className="space-y-2">
-                <input placeholder="Titre" value={it.title} onChange={(e) => patchContent({ radar: { ...(content.radar ?? { items: [] }), items: (content.radar?.items ?? []).map((x, i) => i === idx ? { ...x, title: e.target.value } : x) } })} className="w-full rounded border border-foreground/15 bg-white px-2 py-1 text-sm font-semibold" />
-                <input placeholder="Indication courte" value={it.hint ?? ''} onChange={(e) => patchContent({ radar: { ...(content.radar ?? { items: [] }), items: (content.radar?.items ?? []).map((x, i) => i === idx ? { ...x, hint: e.target.value } : x) } })} className="w-full rounded border border-foreground/15 bg-white px-2 py-1 text-sm" />
+                <input placeholder="Titre" value={it.title} onChange={(e) => patchContent({ radar: { ...(content.radar ?? { items: [] }), items: (content.radar?.items ?? []).map((x, i) => i === idx ? { ...x, title: e.target.value } : x) } })} className="w-full rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm font-semibold" />
+                <input placeholder="Indication courte" value={it.hint ?? ''} onChange={(e) => patchContent({ radar: { ...(content.radar ?? { items: [] }), items: (content.radar?.items ?? []).map((x, i) => i === idx ? { ...x, hint: e.target.value } : x) } })} className="w-full rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm" />
                 <ArticlePicker
                   value={it.url}
                   onChange={(url) => patchContent({ radar: { ...(content.radar ?? { items: [] }), items: (content.radar?.items ?? []).map((x, i) => i === idx ? { ...x, url } : x) } })}
@@ -687,20 +687,20 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
                     placeholder="📈"
                     value={it.emoji ?? ''}
                     onChange={(e) => patchContent({ toolsPromo: { ...(content.toolsPromo ?? { items: [] }), items: (content.toolsPromo?.items ?? []).map((x, i) => i === idx ? { ...x, emoji: e.target.value } : x) } })}
-                    className="rounded border border-foreground/15 bg-white px-2 py-1 text-base"
+                    className="rounded-sm border border-foreground/15 bg-white px-2 py-1 text-base"
                   />
                   <input
                     placeholder="Nom de l'outil"
                     value={it.title}
                     onChange={(e) => patchContent({ toolsPromo: { ...(content.toolsPromo ?? { items: [] }), items: (content.toolsPromo?.items ?? []).map((x, i) => i === idx ? { ...x, title: e.target.value } : x) } })}
-                    className="rounded border border-foreground/15 bg-white px-2 py-1 text-sm font-semibold"
+                    className="rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm font-semibold"
                   />
                 </div>
                 <input
                   placeholder="1 ligne d'accroche (ex: Mensualités, coût total, capacité d'endettement)"
                   value={it.description}
                   onChange={(e) => patchContent({ toolsPromo: { ...(content.toolsPromo ?? { items: [] }), items: (content.toolsPromo?.items ?? []).map((x, i) => i === idx ? { ...x, description: e.target.value } : x) } })}
-                  className="w-full rounded border border-foreground/15 bg-white px-2 py-1 text-sm"
+                  className="w-full rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm"
                 />
                 <ArticlePicker
                   value={it.url}
@@ -778,7 +778,7 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
       {previewOpen ? (
         <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4" onClick={() => setPreviewOpen(false)}>
           <div className="relative h-[90vh] w-full max-w-3xl overflow-hidden rounded-lg bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <button type="button" onClick={() => setPreviewOpen(false)} className="absolute right-2 top-2 z-10 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold shadow">Fermer</button>
+            <button type="button" onClick={() => setPreviewOpen(false)} className="absolute right-2 top-2 z-10 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold shadow-sm">Fermer</button>
             <iframe src={`/api/admin/newsletter/${issue.id}/preview`} title="Aperçu newsletter" className="h-full w-full border-0" />
           </div>
         </div>

@@ -10,16 +10,16 @@ const HIGHLIGHTS = [
 
 export function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-[85vh] flex bg-[#fafaf9]">
+    <div className="min-h-[85vh] flex bg-background">
       {/* Brand Panel - hidden on mobile */}
       <div className="hidden lg:flex lg:w-[480px] xl:w-[520px] bg-[#0d0d0d] relative overflow-hidden flex-col justify-between p-12">
         {/* Grid pattern */}
         <div className="absolute inset-0 hero-grid-pattern" />
         {/* Gold accent line at top */}
-        <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
+        <div className="absolute top-0 inset-x-0 h-[2px] bg-linear-to-r from-transparent via-gold/40 to-transparent" />
         {/* Subtle glow */}
-        <div className="absolute -top-32 -right-32 w-80 h-80 bg-gold/[0.04] rounded-full blur-3xl" />
-        <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-gold/[0.03] rounded-full blur-2xl" />
+        <div className="absolute -top-32 -right-32 w-80 h-80 bg-gold/4 rounded-full blur-3xl" />
+        <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-gold/3 rounded-full blur-2xl" />
 
         <div className="relative z-10">
           <Link href="/" className="inline-block mb-16">
@@ -42,7 +42,7 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
           <div className="space-y-5">
             {HIGHLIGHTS.map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-white/4 border border-white/6 flex items-center justify-center">
                   <Icon className="w-4.5 h-4.5 text-gold" />
                 </div>
                 <span className="text-[14px] text-white/50 font-medium">{text}</span>
@@ -51,7 +51,7 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
-        <div className="relative z-10 pt-8 border-t border-white/[0.06]">
+        <div className="relative z-10 pt-8 border-t border-white/6">
           <p className="text-[12px] text-white/20">
             &copy; {new Date().getFullYear()} NFI Report. Tous droits réservés.
           </p>

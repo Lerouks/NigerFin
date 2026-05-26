@@ -78,7 +78,7 @@ export default async function EducationCategoryPage({ params }: { params: Promis
   };
 
   return (
-    <div className="min-h-screen bg-[#fafaf9]">
+    <div className="min-h-screen bg-background">
       <script
         type="application/ld+json"
         nonce={nonce}

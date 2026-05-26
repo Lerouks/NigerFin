@@ -48,14 +48,14 @@ function FilterOption({
       className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 text-left ${
         active
           ? golden
-            ? 'bg-[#d4a843] text-white shadow-sm'
-            : 'bg-[#111] text-white shadow-sm'
+            ? 'bg-[#d4a843] text-white shadow-xs'
+            : 'bg-[#111] text-white shadow-xs'
           : golden
             ? 'text-[#d4a843] hover:bg-[#d4a843]/10'
-            : 'text-gray-500 hover:bg-[#f5f5f0] hover:text-gray-700'
+            : 'text-gray-500 hover:bg-secondary hover:text-gray-700'
       }`}
     >
-      {Icon && <Icon className="w-3.5 h-3.5 flex-shrink-0" />}
+      {Icon && <Icon className="w-3.5 h-3.5 shrink-0" />}
       {label}
     </button>
   );
@@ -163,7 +163,7 @@ export function SectionArticlesFiltered({
         )}
       </div>
 
-      <div className="h-px bg-black/[0.06]" />
+      <div className="h-px bg-black/6" />
 
       {/* Type */}
       <FilterGroup label="Type d'article">
@@ -172,7 +172,7 @@ export function SectionArticlesFiltered({
         <FilterOption active={contentFilter === 'premium'} onClick={() => applyFilter(setContentFilter, 'premium')} icon={Crown} label="Premium" golden />
       </FilterGroup>
 
-      <div className="h-px bg-black/[0.06]" />
+      <div className="h-px bg-black/6" />
 
       {/* Sort */}
       <FilterGroup label="Trier par">
@@ -181,7 +181,7 @@ export function SectionArticlesFiltered({
         <FilterOption active={sortOrder === 'popular'} onClick={() => applyFilter(setSortOrder, 'popular')} icon={TrendingUp} label="Les plus lus" />
       </FilterGroup>
 
-      <div className="h-px bg-black/[0.06]" />
+      <div className="h-px bg-black/6" />
 
       {/* Read time */}
       <FilterGroup label="Durée de lecture">
@@ -198,7 +198,7 @@ export function SectionArticlesFiltered({
       {/* Mobile: filter toggle button */}
       <button
         onClick={() => setMobileFiltersOpen(true)}
-        className="lg:hidden flex items-center gap-2 px-4 py-2.5 mb-6 bg-white border border-black/[0.06] rounded-xl text-[13px] font-medium text-gray-600 hover:border-black/[0.12] transition-colors w-full justify-center"
+        className="lg:hidden flex items-center gap-2 px-4 py-2.5 mb-6 bg-white border border-black/6 rounded-xl text-[13px] font-medium text-gray-600 hover:border-black/12 transition-colors w-full justify-center"
       >
         <SlidersHorizontal className="w-4 h-4" />
         Filtres
@@ -217,17 +217,17 @@ export function SectionArticlesFiltered({
             type="button"
             aria-label="Fermer les filtres"
             onClick={() => setMobileFiltersOpen(false)}
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm cursor-default"
+            className="absolute inset-0 bg-black/40 backdrop-blur-xs cursor-default"
           />
           <div className="absolute inset-x-0 bottom-0 max-h-[85vh] bg-white rounded-t-2xl shadow-2xl overflow-y-auto overscroll-contain animate-slide-up">
             {/* Drag handle */}
-            <div className="sticky top-0 bg-white pt-3 pb-2 px-6 border-b border-black/[0.04] z-10">
+            <div className="sticky top-0 bg-white pt-3 pb-2 px-6 border-b border-black/4 z-10">
               <div className="w-10 h-1 rounded-full bg-gray-200 mx-auto mb-3" />
               <div className="flex items-center justify-between">
                 <h3 className="text-[16px] font-semibold">Filtres</h3>
                 <button
                   onClick={() => setMobileFiltersOpen(false)}
-                  className="w-8 h-8 rounded-lg bg-[#f5f5f0] flex items-center justify-center hover:bg-[#eee] transition-colors"
+                  className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-[#eee] transition-colors"
                 >
                   <X className="w-4 h-4 text-gray-500" />
                 </button>
@@ -236,7 +236,7 @@ export function SectionArticlesFiltered({
             <div className="p-6">
               {filtersContent}
             </div>
-            <div className="sticky bottom-0 bg-white border-t border-black/[0.04] p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <div className="sticky bottom-0 bg-white border-t border-black/4 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
               <button
                 onClick={() => setMobileFiltersOpen(false)}
                 className="w-full py-3.5 bg-[#111] text-white rounded-xl text-[14px] font-medium hover:bg-[#333] transition-colors"
@@ -250,8 +250,8 @@ export function SectionArticlesFiltered({
 
       <div className="flex gap-8">
         {/* Desktop: sidebar filters */}
-        <aside className="hidden lg:block w-[220px] flex-shrink-0">
-          <div className="sticky top-24 bg-white rounded-xl border border-black/[0.06] p-5 shadow-[0_2px_20px_-6px_rgba(0,0,0,0.06)]">
+        <aside className="hidden lg:block w-[220px] shrink-0">
+          <div className="sticky top-24 bg-white rounded-xl border border-black/6 p-5 shadow-[0_2px_20px_-6px_rgba(0,0,0,0.06)]">
             {filtersContent}
           </div>
         </aside>
@@ -319,7 +319,7 @@ export function SectionArticlesFiltered({
                       className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-[13px] font-medium transition-all ${
                         page === safePage
                           ? 'bg-[#111] text-white'
-                          : 'text-gray-500 hover:bg-[#f5f5f0] hover:text-gray-700'
+                          : 'text-gray-500 hover:bg-secondary hover:text-gray-700'
                       }`}
                     >
                       {page}

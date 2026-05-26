@@ -118,7 +118,7 @@ export function MessagesManager() {
               className={`px-4 py-2 rounded-lg text-[13px] transition-all ${
                 statusFilter === f.value
                   ? 'bg-[#111] text-white'
-                  : 'bg-white border border-black/[0.06] text-gray-600 hover:bg-gray-50'
+                  : 'bg-white border border-black/6 text-gray-600 hover:bg-gray-50'
               }`}
             >
               {f.label}
@@ -127,7 +127,7 @@ export function MessagesManager() {
         </div>
         <button
           onClick={handleExport}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] bg-white border border-black/[0.06] hover:bg-gray-50 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] bg-white border border-black/6 hover:bg-gray-50 transition-colors"
         >
           <Download className="w-3.5 h-3.5" />
           Export Excel
@@ -139,7 +139,7 @@ export function MessagesManager() {
           <Loader2 className="w-6 h-6 animate-spin text-gray-500 mx-auto" />
         </div>
       ) : messages.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-xl border border-black/[0.06]">
+        <div className="text-center py-16 bg-white rounded-xl border border-black/6">
           <Mail className="w-8 h-8 text-gray-300 mx-auto mb-3" />
           <p className="text-sm text-gray-500">Aucun message</p>
         </div>
@@ -152,7 +152,7 @@ export function MessagesManager() {
             const isProcessing = processingId === msg.id;
 
             return (
-              <div key={msg.id} className="bg-white rounded-xl border border-black/[0.06] overflow-hidden">
+              <div key={msg.id} className="bg-white rounded-xl border border-black/6 overflow-hidden">
                 {/* Header row */}
                 <div
                   onClick={() => handleExpand(msg)}
@@ -161,7 +161,7 @@ export function MessagesManager() {
                   }`}
                 >
                   <div className="flex items-center gap-4 flex-1 min-w-0">
-                    <StatusIcon className={`w-4 h-4 flex-shrink-0 ${
+                    <StatusIcon className={`w-4 h-4 shrink-0 ${
                       msg.status === 'unread' ? 'text-red-500' :
                       msg.status === 'read' ? 'text-amber-500' : 'text-emerald-500'
                     }`} />
@@ -175,7 +175,7 @@ export function MessagesManager() {
                       <p className="text-[13px] text-gray-600 truncate">{msg.subject}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 flex-shrink-0 ml-4">
+                  <div className="flex items-center gap-3 shrink-0 ml-4">
                     <span className={`text-[10px] px-2 py-0.5 rounded-full ${config.color}`}>
                       {config.label}
                     </span>
@@ -190,12 +190,12 @@ export function MessagesManager() {
 
                 {/* Expanded content */}
                 {isOpen && (
-                  <div className="border-t border-black/[0.06] px-5 py-4">
+                  <div className="border-t border-black/6 px-5 py-4">
                     <div className="text-[13px] text-gray-500 mb-3 flex items-center gap-4">
                       <span>IP: {msg.ip_address}</span>
                       <span>Reçu le {new Date(msg.created_at).toLocaleString('fr-FR')}</span>
                     </div>
-                    <div className="bg-[#fafaf9] rounded-lg p-4 mb-4 text-[14px] text-gray-700 whitespace-pre-wrap leading-relaxed">
+                    <div className="bg-background rounded-lg p-4 mb-4 text-[14px] text-gray-700 whitespace-pre-wrap leading-relaxed">
                       {msg.message}
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
@@ -203,7 +203,7 @@ export function MessagesManager() {
                         <button
                           onClick={() => updateStatus(msg.id, 'read')}
                           disabled={isProcessing}
-                          className="text-[12px] bg-amber-50 text-amber-700 px-3 py-1.5 rounded hover:bg-amber-100 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                          className="text-[12px] bg-amber-50 text-amber-700 px-3 py-1.5 rounded-sm hover:bg-amber-100 transition-colors disabled:opacity-50 flex items-center gap-1.5"
                         >
                           <MailOpen className="w-3.5 h-3.5" />
                           Marquer comme lu
@@ -213,7 +213,7 @@ export function MessagesManager() {
                         <button
                           onClick={() => updateStatus(msg.id, 'replied')}
                           disabled={isProcessing}
-                          className="text-[12px] bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded hover:bg-emerald-100 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                          className="text-[12px] bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-sm hover:bg-emerald-100 transition-colors disabled:opacity-50 flex items-center gap-1.5"
                         >
                           <CheckCircle className="w-3.5 h-3.5" />
                           Marquer comme répondu
@@ -221,7 +221,7 @@ export function MessagesManager() {
                       )}
                       <button
                         onClick={() => handleReply(msg)}
-                        className="text-[12px] bg-blue-50 text-blue-700 px-3 py-1.5 rounded hover:bg-blue-100 transition-colors flex items-center gap-1.5"
+                        className="text-[12px] bg-blue-50 text-blue-700 px-3 py-1.5 rounded-sm hover:bg-blue-100 transition-colors flex items-center gap-1.5"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
                         Répondre par email
@@ -229,7 +229,7 @@ export function MessagesManager() {
                       <button
                         onClick={() => deleteMessage(msg.id)}
                         disabled={isProcessing}
-                        className="text-[12px] bg-red-50 text-red-700 px-3 py-1.5 rounded hover:bg-red-100 transition-colors disabled:opacity-50 flex items-center gap-1.5 ml-auto"
+                        className="text-[12px] bg-red-50 text-red-700 px-3 py-1.5 rounded-sm hover:bg-red-100 transition-colors disabled:opacity-50 flex items-center gap-1.5 ml-auto"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                         Supprimer

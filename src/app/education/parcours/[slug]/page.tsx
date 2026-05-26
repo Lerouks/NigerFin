@@ -54,7 +54,7 @@ export default async function ParcoursPage({ params }: PageProps) {
     notFound();
   }
   return (
-    <div className="min-h-screen bg-[#fafaf9]">
+    <div className="min-h-screen bg-background">
       <PathContent slug={slug} />
     </div>
   );

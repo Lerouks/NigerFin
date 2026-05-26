@@ -145,17 +145,17 @@ export function FlashBannerManager() {
       )}
 
       {/* Items list */}
-      <div className="bg-white rounded-xl border border-black/[0.06] divide-y divide-black/[0.04]">
+      <div className="bg-white rounded-xl border border-black/6 divide-y divide-black/4">
         {data.items.map((item, index) => (
           <div key={index} className="p-4 flex gap-3 items-start">
-            <div className="w-24 flex-shrink-0">
+            <div className="w-24 shrink-0">
               <label className="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">Tag</label>
               <input
                 type="text"
                 value={item.tag}
                 onChange={(e) => updateItem(index, 'tag', e.target.value)}
                 placeholder="MARCHÉS"
-                className="w-full border border-black/[0.08] rounded-lg px-2.5 py-1.5 text-[12px] font-bold uppercase bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
+                className="w-full border border-black/8 rounded-lg px-2.5 py-1.5 text-[12px] font-bold uppercase bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
               />
             </div>
             <div className="flex-1">
@@ -165,12 +165,12 @@ export function FlashBannerManager() {
                 value={item.text}
                 onChange={(e) => updateItem(index, 'text', e.target.value)}
                 placeholder="Texte du flash info..."
-                className="w-full border border-black/[0.08] rounded-lg px-3 py-1.5 text-[13px] bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
+                className="w-full border border-black/8 rounded-lg px-3 py-1.5 text-[13px] bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
               />
             </div>
             <button
               onClick={() => removeItem(index)}
-              className="mt-5 p-1.5 rounded hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors flex-shrink-0"
+              className="mt-5 p-1.5 rounded-sm hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors shrink-0"
               title="Supprimer"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -186,7 +186,7 @@ export function FlashBannerManager() {
       <div className="flex items-center gap-2">
         <button
           onClick={addItem}
-          className="flex items-center gap-1.5 px-4 py-2.5 bg-white border border-black/[0.06] rounded-lg text-[13px] text-gray-600 hover:bg-gray-50 transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2.5 bg-white border border-black/6 rounded-lg text-[13px] text-gray-600 hover:bg-gray-50 transition-colors"
         >
           <Plus className="w-4 h-4" />
           Ajouter un flash

@@ -107,7 +107,7 @@ export function GraphRepartition({
   return (
     <div
       ref={containerRef}
-      className="relative bg-white border border-black/[0.06] rounded-xl p-5 sm:p-6"
+      className="relative bg-white border border-black/6 rounded-xl p-5 sm:p-6"
       aria-label={`Graphique de répartition : ${capitalLabel} vs ${interestLabel}`}
       onMouseMove={handleMouseMove}
       onMouseLeave={() => { setActiveIndex(-1); setTooltip(null); }}
@@ -119,7 +119,7 @@ export function GraphRepartition({
       {/* Layout: col on mobile, row on sm+ */}
       <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
         {/* Chart */}
-        <div className="w-36 h-36 sm:w-40 sm:h-40 flex-shrink-0 cursor-pointer">
+        <div className="w-36 h-36 sm:w-40 sm:h-40 shrink-0 cursor-pointer">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               {/* LOW-QUAL-1 : Recharts Pie types restreignent activeIndex
@@ -150,17 +150,17 @@ export function GraphRepartition({
               <div
                 key={index}
                 className={`flex items-center gap-3 cursor-pointer transition-opacity duration-200 rounded-lg px-3 py-2 -mx-3 ${
-                  isActive ? 'bg-[#fafaf9]' : ''
+                  isActive ? 'bg-background' : ''
                 } ${isDimmed ? 'opacity-40' : ''}`}
                 onMouseEnter={() => setActiveIndex(index)}
                 onMouseLeave={() => setActiveIndex(-1)}
                 onClick={() => setActiveIndex((p) => p === index ? -1 : index)}
               >
-                <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: COLORS[index] }} />
+                <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: COLORS[index] }} />
                 <div className="min-w-0 flex-1">
                   <p className="text-[13px] text-gray-600 truncate">{item.name}</p>
                 </div>
-                <div className="text-right flex-shrink-0">
+                <div className="text-right shrink-0">
                   <p className="text-[14px] font-semibold tabular-nums">{fmt(item.value)}</p>
                   <p className="text-[11px] text-gray-400">{pct}%</p>
                 </div>
@@ -173,7 +173,7 @@ export function GraphRepartition({
       {/* Floating tooltip */}
       {tooltip && (
         <div
-          className="absolute z-10 pointer-events-none bg-white border border-black/[0.08] rounded-lg shadow-lg px-3 py-2.5"
+          className="absolute z-10 pointer-events-none bg-white border border-black/8 rounded-lg shadow-lg px-3 py-2.5"
           style={{ left: tooltip.x, top: tooltip.y, minWidth: 140 }}
         >
           <p className="text-[13px] font-semibold text-[#111]">{tooltip.name}</p>

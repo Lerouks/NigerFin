@@ -61,7 +61,7 @@ export function NewsletterForm() {
 
   return (
     <div id="newsletter" className="relative overflow-hidden rounded-xl bg-[#111] p-8 md:p-10 scroll-mt-[180px]">
-      <div className="absolute top-0 right-0 w-64 h-64 bg-white/[0.02] rounded-full -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute top-0 right-0 w-64 h-64 bg-white/2 rounded-full -translate-y-1/2 translate-x-1/2" />
       <h3 className="text-[22px] md:text-[26px] text-white mb-2 leading-tight font-semibold">
         Ne manquez rien de l&apos;actualité économique
       </h3>
@@ -71,7 +71,7 @@ export function NewsletterForm() {
 
       {alreadySubscribed ? (
         <div className="flex items-center gap-3 bg-white/10 rounded-lg px-5 py-4">
-          <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+          <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
             <Check className="w-4 h-4 text-emerald-400" />
           </div>
           <p className="text-[14px] text-white/80">Vous êtes déjà inscrit à la newsletter</p>
@@ -82,7 +82,7 @@ export function NewsletterForm() {
         </div>
       ) : subscribed ? (
         <div className="flex items-center gap-3 bg-white/10 rounded-lg px-5 py-4">
-          <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+          <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
             <Check className="w-4 h-4 text-emerald-400" />
           </div>
           <p className="text-[14px] text-white/80">Inscription confirmée !</p>
@@ -97,13 +97,13 @@ export function NewsletterForm() {
             placeholder="Votre adresse email"
             aria-label="Adresse email pour la newsletter"
             autoComplete="email"
-            className="flex-1 px-4 py-3 rounded-lg bg-white/[0.08] border border-white/[0.08] text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 transition-all text-[14px]"
+            className="flex-1 px-4 py-3 rounded-lg bg-white/8 border border-white/8 text-white placeholder:text-white/30 focus:outline-hidden focus:border-white/20 transition-all text-[14px]"
             required
           />
           <button
             type="submit"
             disabled={loading}
-            className="bg-white text-black px-6 py-3 rounded-lg hover:bg-white/90 transition-all duration-200 flex items-center justify-center gap-2 text-[14px] flex-shrink-0 disabled:opacity-50 active:scale-[0.97] font-medium"
+            className="bg-white text-black px-6 py-3 rounded-lg hover:bg-white/90 transition-all duration-200 flex items-center justify-center gap-2 text-[14px] shrink-0 disabled:opacity-50 active:scale-[0.97] font-medium"
           >
             {loading ? 'Envoi...' : 'S\'inscrire'}
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}

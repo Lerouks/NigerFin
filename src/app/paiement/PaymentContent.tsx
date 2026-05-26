@@ -101,7 +101,7 @@ export function PaymentContent() {
   // Validate params
   if (tierParam !== 'premium') {
     return (
-      <div className="min-h-screen bg-[#fafaf9] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
           <h2 className="text-xl font-bold mb-2">Plan invalide</h2>
@@ -281,7 +281,7 @@ export function PaymentContent() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#fafaf9] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
       </div>
     );
@@ -290,7 +290,7 @@ export function PaymentContent() {
   // Submitted state - full width success
   if (paymentStep === 'submitted') {
     return (
-      <div className="min-h-screen bg-[#fafaf9]">
+      <div className="min-h-screen bg-background">
         <div className="bg-[#111] py-5">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <Link href="/" className="text-xl font-bold text-white">NFI Report</Link>
@@ -315,7 +315,7 @@ export function PaymentContent() {
             </Link>
             <Link
               href="/"
-              className="border border-black/[0.1] px-8 py-3 rounded-lg text-[14px] hover:bg-gray-50 transition-colors"
+              className="border border-black/10 px-8 py-3 rounded-lg text-[14px] hover:bg-gray-50 transition-colors"
             >
               Retour à l&apos;accueil
             </Link>
@@ -326,7 +326,7 @@ export function PaymentContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fafaf9]">
+    <div className="min-h-screen bg-background">
       {/* Header bar */}
       <div className="bg-[#111] py-5">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
@@ -351,8 +351,8 @@ export function PaymentContent() {
           <div className="space-y-6">
 
             {/* ─── STEP 1: Account ─── */}
-            <div className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden">
-              <div className="px-7 py-5 border-b border-black/[0.04] flex items-center gap-3">
+            <div className="bg-white rounded-2xl border border-black/6 overflow-hidden">
+              <div className="px-7 py-5 border-b border-black/4 flex items-center gap-3">
                 <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[13px] font-bold ${
                   isSignedIn
                     ? 'bg-emerald-50 text-emerald-600'
@@ -367,7 +367,7 @@ export function PaymentContent() {
                 {isSignedIn ? (
                   /* Signed in state */
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-[#f0efe9] flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                       <User className="w-5 h-5 text-[#888]" />
                     </div>
                     <div>
@@ -436,7 +436,7 @@ export function PaymentContent() {
                           required
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="w-full border border-black/[0.08] rounded-xl pl-11 pr-4 py-3 bg-[#fafaf9] focus:outline-none focus:border-[#d4a843]/30 focus:ring-2 focus:ring-[#d4a843]/10 transition-all text-[14px]"
+                          className="w-full border border-black/8 rounded-xl pl-11 pr-4 py-3 bg-background focus:outline-hidden focus:border-[#d4a843]/30 focus:ring-2 focus:ring-[#d4a843]/10 transition-all text-[14px]"
                           placeholder="votre@email.com"
                         />
                       </div>
@@ -477,7 +477,7 @@ export function PaymentContent() {
                             required
                             value={fullName}
                             onChange={(e) => setFullName(e.target.value)}
-                            className="w-full border border-black/[0.08] rounded-xl pl-11 pr-4 py-3 bg-[#fafaf9] focus:outline-none focus:border-[#d4a843]/30 focus:ring-2 focus:ring-[#d4a843]/10 transition-all text-[14px]"
+                            className="w-full border border-black/8 rounded-xl pl-11 pr-4 py-3 bg-background focus:outline-hidden focus:border-[#d4a843]/30 focus:ring-2 focus:ring-[#d4a843]/10 transition-all text-[14px]"
                             placeholder="Nom complet"
                             autoComplete="name"
                           />
@@ -491,7 +491,7 @@ export function PaymentContent() {
                           required
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="w-full border border-black/[0.08] rounded-xl pl-11 pr-4 py-3 bg-[#fafaf9] focus:outline-none focus:border-[#d4a843]/30 focus:ring-2 focus:ring-[#d4a843]/10 transition-all text-[14px]"
+                          className="w-full border border-black/8 rounded-xl pl-11 pr-4 py-3 bg-background focus:outline-hidden focus:border-[#d4a843]/30 focus:ring-2 focus:ring-[#d4a843]/10 transition-all text-[14px]"
                           placeholder="Entrez votre email"
                           autoComplete="email"
                         />
@@ -505,7 +505,7 @@ export function PaymentContent() {
                           minLength={authMode === 'signup' ? 8 : undefined}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className="w-full border border-black/[0.08] rounded-xl pl-11 pr-11 py-3 bg-[#fafaf9] focus:outline-none focus:border-[#d4a843]/30 focus:ring-2 focus:ring-[#d4a843]/10 transition-all text-[14px]"
+                          className="w-full border border-black/8 rounded-xl pl-11 pr-11 py-3 bg-background focus:outline-hidden focus:border-[#d4a843]/30 focus:ring-2 focus:ring-[#d4a843]/10 transition-all text-[14px]"
                           placeholder={authMode === 'signup' ? 'Minimum 8 caractères' : 'Mot de passe'}
                           autoComplete={authMode === 'login' ? 'current-password' : 'new-password'}
                         />
@@ -527,10 +527,10 @@ export function PaymentContent() {
                             required
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
-                            className={`w-full border rounded-xl pl-11 pr-4 py-3 bg-[#fafaf9] focus:outline-none focus:ring-2 transition-all text-[14px] ${
+                            className={`w-full border rounded-xl pl-11 pr-4 py-3 bg-background focus:outline-hidden focus:ring-2 transition-all text-[14px] ${
                               confirmPassword && password !== confirmPassword
                                 ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                                : 'border-black/[0.08] focus:border-[#d4a843]/30 focus:ring-[#d4a843]/10'
+                                : 'border-black/8 focus:border-[#d4a843]/30 focus:ring-[#d4a843]/10'
                             }`}
                             placeholder="Confirmez le mot de passe"
                             autoComplete="new-password"
@@ -564,7 +564,7 @@ export function PaymentContent() {
 
                     <div className="relative my-5">
                       <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-black/[0.06]" />
+                        <div className="w-full border-t border-black/6" />
                       </div>
                       <div className="relative flex justify-center text-xs">
                         <span className="px-3 bg-white text-gray-500">ou</span>
@@ -590,10 +590,10 @@ export function PaymentContent() {
             </div>
 
             {/* ─── STEP 2: Payment ─── */}
-            <div className={`bg-white rounded-2xl border border-black/[0.06] overflow-hidden transition-opacity duration-300 ${
+            <div className={`bg-white rounded-2xl border border-black/6 overflow-hidden transition-opacity duration-300 ${
               !isSignedIn ? 'opacity-50 pointer-events-none' : ''
             }`}>
-              <div className="px-7 py-5 border-b border-black/[0.04] flex items-center gap-3">
+              <div className="px-7 py-5 border-b border-black/4 flex items-center gap-3">
                 <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[13px] font-bold ${
                   isSignedIn
                     ? 'bg-[#111] text-white'
@@ -617,7 +617,7 @@ export function PaymentContent() {
                           className={`p-3 rounded-xl border-2 text-left transition-all ${
                             billingCycle === opt.cycle
                               ? 'border-[#111] bg-[#111]/5'
-                              : 'border-black/[0.06] hover:border-black/15'
+                              : 'border-black/6 hover:border-black/15'
                           }`}
                         >
                           <p className="font-bold text-[14px]">{formatPrice(opt.price)}</p>
@@ -643,7 +643,7 @@ export function PaymentContent() {
                           <button
                             key={m.id}
                             onClick={() => { setSelectedMethod(m.id); setPaymentStep('instructions'); }}
-                            className="p-4 rounded-xl border-2 border-black/[0.06] hover:border-black/20 text-left transition-all flex items-center gap-3"
+                            className="p-4 rounded-xl border-2 border-black/6 hover:border-black/20 text-left transition-all flex items-center gap-3"
                           >
                             <Image
                               src={m.logo}
@@ -664,7 +664,7 @@ export function PaymentContent() {
                       <button
                         onClick={handleIPayMoneyPayment}
                         disabled={ipaymoneyLoading}
-                        className="w-full p-4 rounded-xl border-2 border-black/[0.06] hover:border-black/20 text-left transition-all flex items-center gap-3 disabled:opacity-60"
+                        className="w-full p-4 rounded-xl border-2 border-black/6 hover:border-black/20 text-left transition-all flex items-center gap-3 disabled:opacity-60"
                       >
                         <Image
                           src="/ipaymoney-logo.png"
@@ -682,7 +682,7 @@ export function PaymentContent() {
 
                       {paymentError && (
                         <div role="alert" className="bg-red-50 border border-red-200 rounded-lg p-3 mt-3 flex items-start gap-2">
-                          <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                          <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                           <p className="text-red-700 text-[13px]">{paymentError}</p>
                         </div>
                       )}
@@ -719,7 +719,7 @@ export function PaymentContent() {
                       <div className="flex gap-3">
                         <button
                           onClick={() => { setPaymentStep('choose-method'); setSelectedMethod(null); }}
-                          className="px-4 py-2.5 rounded-lg border border-black/[0.1] text-[13px] hover:bg-gray-50 transition-colors"
+                          className="px-4 py-2.5 rounded-lg border border-black/10 text-[13px] hover:bg-gray-50 transition-colors"
                         >
                           Changer
                         </button>
@@ -749,7 +749,7 @@ export function PaymentContent() {
                           value={transactionNumber}
                           onChange={(e) => setTransactionNumber(e.target.value)}
                           placeholder="Ex: TXN123456789"
-                          className="w-full border border-black/[0.08] rounded-lg px-4 py-3 bg-[#fafaf9] focus:outline-none focus:border-black/15 focus:ring-1 focus:ring-black/5 transition-all text-[14px] font-mono"
+                          className="w-full border border-black/8 rounded-lg px-4 py-3 bg-background focus:outline-hidden focus:border-black/15 focus:ring-1 focus:ring-black/5 transition-all text-[14px] font-mono"
                         />
                         <p className="text-[11px] text-gray-500 mt-1.5">
                           Entrez le numéro reçu après votre transfert {method.shortName}.
@@ -758,7 +758,7 @@ export function PaymentContent() {
 
                       {paymentError && (
                         <div role="alert" className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 flex items-start gap-2">
-                          <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                          <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                           <p className="text-red-700 text-[13px]">{paymentError}</p>
                         </div>
                       )}
@@ -766,7 +766,7 @@ export function PaymentContent() {
                       <div className="flex gap-3">
                         <button
                           onClick={() => { setPaymentStep('instructions'); setPaymentError(''); }}
-                          className="px-4 py-2.5 rounded-lg border border-black/[0.1] text-[13px] hover:bg-gray-50 transition-colors"
+                          className="px-4 py-2.5 rounded-lg border border-black/10 text-[13px] hover:bg-gray-50 transition-colors"
                         >
                           Retour
                         </button>
@@ -794,7 +794,7 @@ export function PaymentContent() {
 
           {/* ── RIGHT COLUMN: Plan Summary (sticky) ── */}
           <div className="lg:sticky lg:top-8">
-            <div className="bg-white rounded-2xl border border-black/[0.06] p-7">
+            <div className="bg-white rounded-2xl border border-black/6 p-7">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-[16px] font-bold text-[#111]">
                   Accès {billingOption.durationLabel === '1 an' ? 'Annuel' : billingOption.durationLabel === '3 mois' ? 'Trimestriel' : 'Mensuel'}
@@ -811,15 +811,15 @@ export function PaymentContent() {
                 </span>
               </p>
 
-              <div className="border-t border-black/[0.04] pt-5">
+              <div className="border-t border-black/4 pt-5">
                 <h4 className="text-[12px] text-gray-500 uppercase tracking-wider font-semibold mb-4">
                   Ce que vous obtenez :
                 </h4>
                 <ul className="space-y-3">
                   {PREMIUM_TIER.features.map((feature) => (
                     <li key={feature} className="flex items-start gap-2.5">
-                      <div className="w-4 h-4 rounded-full bg-emerald-50 flex items-center justify-center mt-0.5 flex-shrink-0">
-                        <Check className="w-2.5 h-2.5 text-emerald-600 stroke-[3]" />
+                      <div className="w-4 h-4 rounded-full bg-emerald-50 flex items-center justify-center mt-0.5 shrink-0">
+                        <Check className="w-2.5 h-2.5 text-emerald-600 stroke-3" />
                       </div>
                       <span className="text-[13px] text-gray-600 leading-snug">{feature}</span>
                     </li>

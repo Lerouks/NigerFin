@@ -108,7 +108,7 @@ export function CivilityPrompt() {
   return (
     <aside
       aria-label="Indiquer votre civilité"
-      className="fixed bottom-4 right-4 z-50 max-w-sm bg-white rounded-2xl shadow-[0_10px_60px_-10px_rgba(0,0,0,0.18)] border border-black/[0.06] p-5 animate-fade-in-up"
+      className="fixed bottom-4 right-4 z-50 max-w-sm bg-white rounded-2xl shadow-[0_10px_60px_-10px_rgba(0,0,0,0.18)] border border-black/6 p-5 animate-fade-in-up"
     >
       <div className="flex items-start gap-3 mb-3">
         <div className="w-9 h-9 bg-gold/10 rounded-full flex items-center justify-center shrink-0">
@@ -140,8 +140,8 @@ export function CivilityPrompt() {
               onClick={() => setSelected(opt)}
               className={`text-sm rounded-lg px-3 py-2 border transition-all ${
                 isSel
-                  ? 'border-[#111] bg-[#fafaf9] text-[#111] font-medium'
-                  : 'border-black/[0.08] bg-white text-gray-600 hover:border-black/[0.16]'
+                  ? 'border-[#111] bg-background text-[#111] font-medium'
+                  : 'border-black/8 bg-white text-gray-600 hover:border-black/16'
               }`}
             >
               {opt === 'M.' ? 'Monsieur' : 'Madame'}

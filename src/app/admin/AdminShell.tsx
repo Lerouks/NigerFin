@@ -37,7 +37,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   useCommandPaletteShortcut(setPaletteOpen);
 
   return (
-    <div className="min-h-screen bg-[#fafaf9] text-[#1a1a1a]">
+    <div className="min-h-screen bg-background text-foreground">
       <AdminSidebar pathname={pathname} onOpenPalette={() => setPaletteOpen(true)} />
       <div className="lg:pl-64">
         <main className="pb-24 lg:pb-12">{children}</main>
@@ -98,11 +98,11 @@ function AdminSidebar({
   return (
     <aside
       aria-label="Navigation administration"
-      className="hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col bg-white border-r border-black/[0.06] z-30"
+      className="hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col bg-white border-r border-black/6 z-30"
     >
       <div className="px-6 pt-8 pb-6">
-        <p className="font-serif italic text-[20px] leading-none text-[#1a1a1a]">NFI Cockpit</p>
-        <p className="text-[11px] tracking-widest uppercase text-[#1a1a1a]/45 mt-2 font-medium">
+        <p className="font-serif italic text-[20px] leading-none text-foreground">NFI Cockpit</p>
+        <p className="text-[11px] tracking-widest uppercase text-foreground/45 mt-2 font-medium">
           Administration
         </p>
       </div>
@@ -112,11 +112,11 @@ function AdminSidebar({
           type="button"
           onClick={onOpenPalette}
           aria-label="Ouvrir la recherche du Cockpit (Cmd + K)"
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-[#1a1a1a]/55 bg-black/[0.03] hover:bg-black/[0.05] hover:text-[#1a1a1a] transition"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-foreground/55 bg-black/3 hover:bg-black/5 hover:text-foreground transition"
         >
           <Search className="w-[16px] h-[16px]" aria-hidden="true" />
           <span className="flex-1 text-left font-medium">Rechercher</span>
-          <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white text-[#1a1a1a]/55 border border-black/[0.06]">
+          <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded-sm bg-white text-foreground/55 border border-black/6">
             <span aria-hidden="true">{getCommandKeyLabel()}</span>
             <span className="sr-only">{getCommandKeyAriaLabel()}</span>
             K
@@ -136,8 +136,8 @@ function AdminSidebar({
               className={[
                 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] font-medium transition',
                 isActive
-                  ? 'bg-gradient-to-br from-[#d4a843]/12 to-[#ff8c42]/8 text-[#1a1a1a] border border-[#d4a843]/30'
-                  : 'text-[#1a1a1a]/60 hover:bg-black/[0.03] hover:text-[#1a1a1a]',
+                  ? 'bg-linear-to-br from-[#d4a843]/12 to-[#ff8c42]/8 text-foreground border border-[#d4a843]/30'
+                  : 'text-foreground/60 hover:bg-black/3 hover:text-foreground',
               ].join(' ')}
             >
               <Icon className={`w-[18px] h-[18px] ${isActive ? 'text-[#d4a843]' : ''}`} aria-hidden="true" />
@@ -147,10 +147,10 @@ function AdminSidebar({
         })}
       </nav>
 
-      <div className="px-6 pb-8 pt-4 border-t border-black/[0.06]">
+      <div className="px-6 pb-8 pt-4 border-t border-black/6">
         <Link
           href="/"
-          className="text-[12px] text-[#1a1a1a]/45 hover:text-[#1a1a1a]/80 transition"
+          className="text-[12px] text-foreground/45 hover:text-foreground/80 transition"
         >
           ← Retour au site
         </Link>
@@ -163,7 +163,7 @@ function AdminBottomNav({ pathname }: { pathname: string }) {
   return (
     <nav
       aria-label="Navigation administration mobile"
-      className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur-md border-t border-black/[0.06] pb-[env(safe-area-inset-bottom)]"
+      className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur-md border-t border-black/6 pb-[env(safe-area-inset-bottom)]"
     >
       <div className="grid grid-cols-5 max-w-[640px] mx-auto">
         {NAV.map(({ href, label, icon: Icon, match }) => {
@@ -176,7 +176,7 @@ function AdminBottomNav({ pathname }: { pathname: string }) {
               aria-current={isActive ? 'page' : undefined}
               className={[
                 'flex flex-col items-center gap-0.5 py-2.5 transition',
-                isActive ? 'text-[#d4a843]' : 'text-[#1a1a1a]/45',
+                isActive ? 'text-[#d4a843]' : 'text-foreground/45',
               ].join(' ')}
             >
               <Icon className="w-[22px] h-[22px]" aria-hidden="true" />

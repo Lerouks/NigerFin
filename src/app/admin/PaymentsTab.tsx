@@ -92,7 +92,7 @@ export function PaymentsTab({ onStatsRefresh }: PaymentsTabProps) {
               key={s}
               onClick={() => fetchPayments(s)}
               className={`px-4 py-2 rounded-lg text-[13px] transition-all ${
-                paymentFilter === s ? 'bg-[#111] text-white' : 'bg-white border border-black/[0.06] text-gray-600 hover:bg-gray-50'
+                paymentFilter === s ? 'bg-[#111] text-white' : 'bg-white border border-black/6 text-gray-600 hover:bg-gray-50'
               }`}
             >
               {s === 'pending' && <Clock className="w-3.5 h-3.5 inline mr-1.5" />}
@@ -103,7 +103,7 @@ export function PaymentsTab({ onStatsRefresh }: PaymentsTabProps) {
           ))}
         </div>
         <button onClick={handleExport}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] bg-white border border-black/[0.06] hover:bg-gray-50 transition-colors">
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] bg-white border border-black/6 hover:bg-gray-50 transition-colors">
           <Download className="w-3.5 h-3.5" /> Excel
         </button>
       </div>
@@ -119,10 +119,10 @@ export function PaymentsTab({ onStatsRefresh }: PaymentsTabProps) {
           <Loader2 className="w-6 h-6 animate-spin text-gray-500 mx-auto" />
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-black/[0.06] overflow-hidden">
+        <div className="bg-white rounded-xl border border-black/6 overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-black/[0.04]">
+              <tr className="border-b border-black/4">
                 <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Utilisateur</th>
                 <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Plan</th>
                 <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Montant</th>
@@ -136,13 +136,13 @@ export function PaymentsTab({ onStatsRefresh }: PaymentsTabProps) {
             </thead>
             <tbody>
               {payments.map((p) => (
-                <tr key={p.id} className="border-b border-black/[0.03] last:border-0">
+                <tr key={p.id} className="border-b border-black/3 last:border-0">
                   <td className="px-4 py-3">
                     <p className="text-sm font-medium">{p.user_profiles?.full_name || '-'}</p>
                     <p className="text-[12px] text-gray-500">{p.user_profiles?.email || p.user_id}</p>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="text-[11px] uppercase tracking-wider px-2 py-1 rounded bg-amber-100 text-amber-700">{p.tier}</span>
+                    <span className="text-[11px] uppercase tracking-wider px-2 py-1 rounded-sm bg-amber-100 text-amber-700">{p.tier}</span>
                     <span className="text-[10px] text-gray-500 ml-1">{getBillingCycleLabel(p.billing_cycle)}</span>
                   </td>
                   <td className="px-4 py-3 text-sm font-medium">{formatPrice(p.amount)}</td>
@@ -153,11 +153,11 @@ export function PaymentsTab({ onStatsRefresh }: PaymentsTabProps) {
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
                         <button onClick={() => handlePaymentAction(p.id, 'verify')} disabled={processingPayment === p.id}
-                          className="text-[12px] bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded hover:bg-emerald-100 transition-colors disabled:opacity-50">
+                          className="text-[12px] bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-sm hover:bg-emerald-100 transition-colors disabled:opacity-50">
                           {processingPayment === p.id ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Valider'}
                         </button>
                         <button onClick={() => handlePaymentAction(p.id, 'reject')} disabled={processingPayment === p.id}
-                          className="text-[12px] bg-red-50 text-red-700 px-3 py-1.5 rounded hover:bg-red-100 transition-colors disabled:opacity-50">
+                          className="text-[12px] bg-red-50 text-red-700 px-3 py-1.5 rounded-sm hover:bg-red-100 transition-colors disabled:opacity-50">
                           Rejeter
                         </button>
                       </div>

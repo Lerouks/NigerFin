@@ -17,7 +17,7 @@ export default async function EntreprisesPage() {
     getArticleViewRanking(),
   ]);
   return (
-    <div className="min-h-screen bg-[#fafaf9]">
+    <div className="min-h-screen bg-background">
       <CategoryHero
         label="Rubrique"
         title="Entreprises"

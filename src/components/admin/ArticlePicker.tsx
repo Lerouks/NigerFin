@@ -83,7 +83,7 @@ export function ArticlePicker({ value, onChange, label, placeholder }: ArticlePi
           onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           placeholder={placeholder ?? 'Tapez un mot-clé ou collez une URL…'}
-          className="w-full rounded-md border border-foreground/15 bg-white py-1.5 pl-8 pr-7 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
+          className="w-full rounded-md border border-foreground/15 bg-white py-1.5 pl-8 pr-7 text-sm focus:outline-hidden focus:ring-2 focus:ring-gold"
         />
         {query ? (
           <button

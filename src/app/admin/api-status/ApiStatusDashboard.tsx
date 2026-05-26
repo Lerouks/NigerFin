@@ -70,7 +70,7 @@ export function ApiStatusDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#fafaf9] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="w-6 h-6 border-2 border-gray-200 border-t-gray-600 rounded-full animate-spin" />
       </div>
     );
@@ -81,7 +81,7 @@ export function ApiStatusDashboard() {
   const StatusIcon = health?.status === 'healthy' ? CheckCircle : health?.status === 'degraded' ? AlertTriangle : XCircle;
 
   return (
-    <div className="min-h-screen bg-[#fafaf9]">
+    <div className="min-h-screen bg-background">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -101,7 +101,7 @@ export function ApiStatusDashboard() {
 
         {/* Global Status */}
         {health && (
-          <div className={`${statusBg} rounded-xl border border-black/[0.06] p-6 mb-8`}>
+          <div className={`${statusBg} rounded-xl border border-black/6 p-6 mb-8`}>
             <div className="flex items-center gap-3">
               <StatusIcon className={`w-6 h-6 ${statusColor}`} />
               <div>
@@ -127,7 +127,7 @@ export function ApiStatusDashboard() {
               const isOk = service.status === 'ok';
 
               return (
-                <div key={key} className="bg-white rounded-xl border border-black/[0.06] p-5">
+                <div key={key} className="bg-white rounded-xl border border-black/6 p-5">
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <div className="flex items-center gap-2">
@@ -190,7 +190,7 @@ export function ApiStatusDashboard() {
 
                   {/* Last successful fetch */}
                   {service.lastSuccessful && (
-                    <p className="text-[10px] text-gray-500 mt-3 pt-2 border-t border-black/[0.04]">
+                    <p className="text-[10px] text-gray-500 mt-3 pt-2 border-t border-black/4">
                       Dernier succès : {new Date(service.lastSuccessful).toLocaleString('fr-FR', {
                         day: '2-digit', month: '2-digit', year: 'numeric',
                         hour: '2-digit', minute: '2-digit',

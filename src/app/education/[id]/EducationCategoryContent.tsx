@@ -71,14 +71,14 @@ const ACCESS_CONFIG: Record<string, { label: string; color: string; bg: string; 
 function LessonsSkeleton() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <div className="h-5 w-24 bg-gray-200 rounded animate-pulse mb-6" />
+      <div className="h-5 w-24 bg-gray-200 rounded-sm animate-pulse mb-6" />
       <div className="space-y-3">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="flex items-center gap-4 p-5 rounded-xl border border-black/[0.06] bg-white">
+          <div key={i} className="flex items-center gap-4 p-5 rounded-xl border border-black/6 bg-white">
             <div className="w-9 h-9 rounded-full bg-gray-100 animate-pulse" />
             <div className="flex-1 space-y-2">
-              <div className="h-4 w-3/5 bg-gray-200 rounded animate-pulse" />
-              <div className="h-3 w-20 bg-gray-100 rounded animate-pulse" />
+              <div className="h-4 w-3/5 bg-gray-200 rounded-sm animate-pulse" />
+              <div className="h-3 w-20 bg-gray-100 rounded-sm animate-pulse" />
             </div>
             <div className="h-6 w-16 bg-gray-100 rounded-full animate-pulse" />
           </div>
@@ -107,18 +107,18 @@ function LessonRow({
         onClick={onToggle}
         className={`w-full text-left flex items-center gap-4 p-5 rounded-xl border transition-all duration-200 ${
           isOpen
-            ? 'bg-white border-black/[0.12] shadow-sm rounded-b-none'
+            ? 'bg-white border-black/12 shadow-xs rounded-b-none'
             : isCompleted && accessible
               ? 'bg-emerald-50/60 border-emerald-100 hover:border-emerald-200'
               : accessible
-                ? 'bg-white border-black/[0.06] hover:border-black/[0.12] hover:shadow-sm'
-                : 'bg-white/60 border-black/[0.04] hover:border-black/[0.08]'
+                ? 'bg-white border-black/6 hover:border-black/12 hover:shadow-xs'
+                : 'bg-white/60 border-black/4 hover:border-black/8'
         }`}
       >
         <span className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-[13px] font-semibold transition-colors ${
           isCompleted && accessible
             ? 'bg-emerald-500 text-white'
-            : isOpen ? 'bg-[#111] text-white' : 'bg-[#f5f5f0] text-gray-500'
+            : isOpen ? 'bg-[#111] text-white' : 'bg-secondary text-gray-500'
         }`}>
           {isCompleted && accessible ? <CheckCircle2 className="w-4 h-4" /> : index}
         </span>
@@ -147,11 +147,11 @@ function LessonRow({
         )}
       </button>
       {isOpen && accessible && lesson.content && (
-        <div className="px-6 py-6 bg-white border-x border-b border-black/[0.12] rounded-b-xl">
+        <div className="px-6 py-6 bg-white border-x border-b border-black/12 rounded-b-xl">
           <div className="prose prose-sm max-w-none text-gray-700 prose-headings:text-[#111] prose-h2:text-lg prose-h2:mt-0 prose-h3:text-base prose-strong:text-gray-800 prose-a:text-blue-600 prose-table:text-sm prose-img:rounded-lg">
             <ReactMarkdown rehypePlugins={[rehypeRaw]}>{lesson.content}</ReactMarkdown>
           </div>
-          <div className="mt-6 pt-5 border-t border-black/[0.06] flex items-center justify-between gap-4 flex-wrap">
+          <div className="mt-6 pt-5 border-t border-black/6 flex items-center justify-between gap-4 flex-wrap">
             {isSignedIn ? (
               <button
                 onClick={onToggleComplete}
@@ -255,7 +255,7 @@ function renderLessons(
           <div key={sub.title}>
             <div className="flex items-center gap-3 mb-4">
               <h3 className="text-[14px] font-semibold text-[#111]">{sub.title}</h3>
-              <div className="flex-1 h-px bg-black/[0.06]" />
+              <div className="flex-1 h-px bg-black/6" />
               <span className="text-[11px] text-gray-500">{subLessons.length} leçon{subLessons.length !== 1 ? 's' : ''}</span>
             </div>
             <div className="space-y-3">
@@ -382,7 +382,7 @@ export function EducationCategoryContent({ slug }: { slug: string }) {
       <section className="bg-[#111] text-white pb-8 -mt-2">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap gap-3">
-            <span className="text-[12px] bg-white/[0.08] text-white/60 px-3 py-1.5 rounded-full">
+            <span className="text-[12px] bg-white/8 text-white/60 px-3 py-1.5 rounded-full">
               {lessons.length} leçon{lessons.length !== 1 ? 's' : ''}
             </span>
             {freeLessons > 0 && (
@@ -404,7 +404,7 @@ export function EducationCategoryContent({ slug }: { slug: string }) {
         {/* Section header */}
         <div className="flex items-center gap-3 mb-8">
           <h2 className="text-[15px] font-semibold text-[#111]">Programme</h2>
-          <div className="flex-1 h-px bg-black/[0.06]" />
+          <div className="flex-1 h-px bg-black/6" />
           <span className="text-[12px] text-gray-500">{lessons.length} leçon{lessons.length !== 1 ? 's' : ''}</span>
         </div>
 
@@ -413,7 +413,7 @@ export function EducationCategoryContent({ slug }: { slug: string }) {
 
         {/* Empty state */}
         {lessons.length === 0 && (
-          <div className="text-center py-16 bg-white border border-black/[0.06] rounded-xl">
+          <div className="text-center py-16 bg-white border border-black/6 rounded-xl">
             <BookOpen className="w-10 h-10 text-gray-200 mx-auto mb-3" />
             <p className="text-[15px] font-medium text-gray-500">Aucune leçon pour le moment</p>
             <p className="text-[13px] text-gray-500 mt-1">Le contenu sera bientôt disponible.</p>
@@ -422,7 +422,7 @@ export function EducationCategoryContent({ slug }: { slug: string }) {
 
         {/* Upsell */}
         {hasPremium && lessons.some((l) => !canAccess(l.access_level)) && (
-          <div className="mt-10 p-8 bg-gradient-to-br from-[#111] to-[#1a1a1a] text-white rounded-2xl">
+          <div className="mt-10 p-8 bg-linear-to-br from-[#111] to-foreground text-white rounded-2xl">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">

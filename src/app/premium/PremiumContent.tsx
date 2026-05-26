@@ -120,7 +120,7 @@ function IPhoneMockup({
 }) {
   return (
     <div
-      className={`relative h-[600px] w-[280px] flex-shrink-0 sm:h-[680px] sm:w-[320px] ${className}`}
+      className={`relative h-[600px] w-[280px] shrink-0 sm:h-[680px] sm:w-[320px] ${className}`}
     >
       {/* Outer titanium frame (iPhone 16 Pro style) */}
       <div
@@ -136,7 +136,7 @@ function IPhoneMockup({
           <div className="relative h-full w-full overflow-hidden rounded-[2.4rem] bg-white">
             {/* Dynamic Island */}
             <div className="absolute left-1/2 top-2 z-20 flex h-[26px] w-[100px] -translate-x-1/2 items-center justify-end rounded-full bg-black pr-2.5">
-              <div className="h-2 w-2 rounded-full bg-[#1a1a1a] ring-[1px] ring-[#3a3a3a]/60" />
+              <div className="h-2 w-2 rounded-full bg-foreground ring-[1px] ring-[#3a3a3a]/60" />
             </div>
             {/* Screenshot */}
             <Image
@@ -194,7 +194,7 @@ function IPhoneMockup({
 
 function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-[#fafaf9] pb-20 pt-10 sm:pt-16 lg:pt-20">
+    <section className="relative overflow-hidden bg-background pb-20 pt-10 sm:pt-16 lg:pt-20">
       <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 sm:px-6 lg:grid-cols-12 lg:gap-8 lg:px-8">
         {/* Text column */}
         <div className="lg:col-span-7 lg:pr-8">
@@ -203,7 +203,7 @@ function HeroSection() {
             Membres Premium NFI Report
           </div>
 
-          <h1 className="text-[2.5rem] font-bold leading-[1.05] tracking-tight text-[#1a1a1a] sm:text-[3.5rem] lg:text-[4.5rem]">
+          <h1 className="text-[2.5rem] font-bold leading-[1.05] tracking-tight text-foreground sm:text-[3.5rem] lg:text-[4.5rem]">
             La connaissance,
             <br />
             <span className="text-gold">votre meilleur capital.</span>
@@ -217,7 +217,7 @@ function HeroSection() {
           <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
             <Link
               href="/pricing"
-              className="group inline-flex items-center gap-2 rounded-full bg-[#1a1a1a] px-7 py-4 text-[15px] font-semibold text-white shadow-lg transition hover:bg-black hover:shadow-xl"
+              className="group inline-flex items-center gap-2 rounded-full bg-foreground px-7 py-4 text-[15px] font-semibold text-white shadow-lg transition hover:bg-black hover:shadow-xl"
             >
               Devenir Premium
               <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
@@ -285,7 +285,7 @@ function BenefitsSection() {
           <p className="text-[12px] font-semibold uppercase tracking-wider text-gold">
             Ce que tu débloques
           </p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#1a1a1a] sm:text-4xl">
+          <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Tout ce qu&rsquo;il te faut pour comprendre, décider et agir.
           </h2>
         </FadeUp>
@@ -298,7 +298,7 @@ function BenefitsSection() {
                 <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gold/10 text-gold transition group-hover:bg-gold group-hover:text-white">
                   <Icon className="h-5 w-5" />
                 </div>
-                <h3 className="text-[17px] font-semibold text-[#1a1a1a]">{b.title}</h3>
+                <h3 className="text-[17px] font-semibold text-foreground">{b.title}</h3>
                 <p className="mt-2 text-[14.5px] leading-relaxed text-gray-600">{b.desc}</p>
               </FadeUp>
             );
@@ -313,12 +313,12 @@ function BenefitsSection() {
 
 function ManifestoBanner() {
   return (
-    <section className="bg-[#f5f5f0] py-20 sm:py-28">
+    <section className="bg-secondary py-20 sm:py-28">
       <FadeUp className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
         <p className="text-[12px] font-semibold uppercase tracking-wider text-gold">
           Notre raison d&rsquo;être
         </p>
-        <h2 className="mt-4 text-3xl font-bold leading-tight tracking-tight text-[#1a1a1a] sm:text-4xl md:text-5xl">
+        <h2 className="mt-4 text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl md:text-5xl">
           Pour les jeunes qui veulent
           <br className="hidden sm:block" />
           <span className="text-gold"> savoir, agir et investir.</span>
@@ -349,7 +349,7 @@ function PreviewSection() {
           <p className="text-[12px] font-semibold uppercase tracking-wider text-gold">
             Aperçu en direct
           </p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#1a1a1a] sm:text-4xl">
+          <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Ce que tu reçois, dès ton inscription.
           </h2>
           <p className="mt-5 text-[16px] leading-relaxed text-gray-600">
@@ -366,12 +366,12 @@ function PreviewSection() {
                   onClick={() => setIndex(i)}
                   className={`flex w-full items-start gap-3 rounded-xl border px-5 py-4 text-left transition ${
                     active
-                      ? 'border-gold bg-gold/5 shadow-sm'
-                      : 'border-black/[0.08] bg-white hover:border-black/20'
+                      ? 'border-gold bg-gold/5 shadow-xs'
+                      : 'border-black/8 bg-white hover:border-black/20'
                   }`}
                 >
                   <span
-                    className={`mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-[13px] font-semibold transition ${
+                    className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[13px] font-semibold transition ${
                       active ? 'bg-gold text-white' : 'bg-gray-100 text-gray-500'
                     }`}
                   >
@@ -380,7 +380,7 @@ function PreviewSection() {
                   <div className="min-w-0 flex-1">
                     <span
                       className={`block text-[15px] transition ${
-                        active ? 'font-semibold text-[#1a1a1a]' : 'text-gray-700'
+                        active ? 'font-semibold text-foreground' : 'text-gray-700'
                       }`}
                     >
                       {item.label}
@@ -419,13 +419,13 @@ function PreviewSection() {
 
 function PricingTeaser() {
   return (
-    <section className="bg-[#f5f5f0] py-20 sm:py-28">
+    <section className="bg-secondary py-20 sm:py-28">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <FadeUp className="text-center">
           <p className="text-[12px] font-semibold uppercase tracking-wider text-gold">
             Tarifs
           </p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#1a1a1a] sm:text-4xl">
+          <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Choisis le rythme qui te convient.
           </h2>
         </FadeUp>
@@ -437,8 +437,8 @@ function PricingTeaser() {
               <FadeUp
                 key={opt.cycle}
                 delay={i * 0.1}
-                className={`relative rounded-2xl border bg-white p-7 shadow-sm transition hover:shadow-md ${
-                  isYearly ? 'border-gold ring-2 ring-gold/20' : 'border-black/[0.08]'
+                className={`relative rounded-2xl border bg-white p-7 shadow-xs transition hover:shadow-md ${
+                  isYearly ? 'border-gold ring-2 ring-gold/20' : 'border-black/8'
                 }`}
               >
                 {isYearly && (
@@ -449,7 +449,7 @@ function PricingTeaser() {
                 <p className="text-[13px] font-medium uppercase tracking-wider text-gray-500">
                   {opt.durationLabel}
                 </p>
-                <p className="mt-3 text-3xl font-bold text-[#1a1a1a]">
+                <p className="mt-3 text-3xl font-bold text-foreground">
                   {formatPrice(opt.price)}
                 </p>
                 {opt.savings && (
@@ -466,7 +466,7 @@ function PricingTeaser() {
         <FadeUp className="mt-10 flex flex-col items-center gap-4">
           <Link
             href="/pricing"
-            className="group inline-flex items-center gap-2 rounded-full bg-[#1a1a1a] px-7 py-4 text-[15px] font-semibold text-white shadow-lg transition hover:bg-black hover:shadow-xl"
+            className="group inline-flex items-center gap-2 rounded-full bg-foreground px-7 py-4 text-[15px] font-semibold text-white shadow-lg transition hover:bg-black hover:shadow-xl"
           >
             Voir tous les détails et s&rsquo;abonner
             <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
@@ -490,15 +490,15 @@ function FaqSection() {
           <p className="text-[12px] font-semibold uppercase tracking-wider text-gold">
             Questions fréquentes
           </p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#1a1a1a] sm:text-4xl">
+          <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             On a la réponse.
           </h2>
         </FadeUp>
 
-        <FadeUp className="mt-12 divide-y divide-black/[0.08]" delay={0.15}>
+        <FadeUp className="mt-12 divide-y divide-black/8" delay={0.15}>
           {FAQ.map((item) => (
             <details key={item.q} className="group py-6">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[16px] font-semibold text-[#1a1a1a]">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[16px] font-semibold text-foreground">
                 {item.q}
                 <span className="text-gold transition group-open:rotate-45">
                   <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -519,7 +519,7 @@ function FaqSection() {
 
 function FinalCta() {
   return (
-    <section className="bg-[#1a1a1a] py-24 sm:py-32">
+    <section className="bg-foreground py-24 sm:py-32">
       <FadeUp className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
         <h2 className="text-balance text-3xl font-bold leading-[1.15] tracking-tight text-white sm:text-5xl">
           Investis dans ce que personne ne peut te prendre :
@@ -533,7 +533,7 @@ function FinalCta() {
         <div className="mt-10 flex flex-col items-center gap-4">
           <Link
             href="/pricing"
-            className="group inline-flex items-center gap-2 rounded-full bg-gold px-8 py-4 text-[16px] font-semibold text-[#1a1a1a] shadow-2xl transition hover:bg-[#c79a3b] hover:shadow-gold/30"
+            className="group inline-flex items-center gap-2 rounded-full bg-gold px-8 py-4 text-[16px] font-semibold text-foreground shadow-2xl transition hover:bg-[#c79a3b] hover:shadow-gold/30"
           >
             Devenir Premium maintenant
             <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
@@ -551,7 +551,7 @@ function FinalCta() {
 
 export function PremiumContent() {
   return (
-    <main className="bg-[#fafaf9]">
+    <main className="bg-background">
       <HeroSection />
       <BenefitsSection />
       <ManifestoBanner />

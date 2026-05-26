@@ -23,7 +23,7 @@ function SectionBadges({ sections, category, variant = 'light' }: { sections?: s
     <div className="flex flex-wrap items-center gap-1.5">
       {items.map((s, i) => (
         <span key={s}>
-          <span className={`text-[11px] tracking-[0.1em] uppercase ${
+          <span className={`text-[11px] tracking-widest uppercase ${
             variant === 'dark' ? 'text-white/50' : 'text-gray-500'
           }`}>
             {SECTION_META[s]?.label || s}
@@ -54,7 +54,7 @@ export function ArticleCard({ article, featured = false, priority = false }: Art
             className="w-full h-[300px] md:h-[500px] object-cover opacity-70 group-hover:opacity-60 group-hover:scale-[1.02] transition-all duration-700"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 text-white">
             <div className="max-w-7xl mx-auto">
               <SectionBadges sections={article.sections} category={article.category} variant="dark" />
@@ -85,7 +85,7 @@ export function ArticleCard({ article, featured = false, priority = false }: Art
 
   return (
     <Link href={`/articles/${article.slug.current}`} className="group block">
-      <article className="bg-white rounded-xl border border-black/[0.06] overflow-hidden hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] hover:border-black/[0.1] transition-all duration-300 hover:-translate-y-0.5">
+      <article className="bg-white rounded-xl border border-black/6 overflow-hidden hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] hover:border-black/10 transition-all duration-300 hover:-translate-y-0.5">
         <div className="relative overflow-hidden">
           <Image
             src={imageUrl}
@@ -98,7 +98,7 @@ export function ArticleCard({ article, featured = false, priority = false }: Art
             priority={priority}
           />
           {article.isPremium && (
-            <div className="absolute top-3 left-3 bg-[#d4a843]/90 backdrop-blur-sm text-white text-[10px] font-semibold tracking-[0.12em] uppercase px-2.5 py-1 rounded-full shadow-sm">
+            <div className="absolute top-3 left-3 bg-[#d4a843]/90 backdrop-blur-xs text-white text-[10px] font-semibold tracking-[0.12em] uppercase px-2.5 py-1 rounded-full shadow-xs">
               Premium
             </div>
           )}

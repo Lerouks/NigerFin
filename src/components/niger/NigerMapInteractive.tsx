@@ -41,7 +41,7 @@ export function NigerMapInteractive({ className }: NigerMapInteractiveProps) {
 
   return (
     <div className={`relative w-full ${className ?? ''}`}>
-      <div className="relative aspect-[3/2] w-full">
+      <div className="relative aspect-3/2 w-full">
         <Image
           src="/carte-niger.webp"
           alt="Carte du Niger avec ses 7 principales villes : Niamey (capitale), Tillabéri, Tahoua, Agadez, Maradi, Zinder, Diffa"
@@ -67,7 +67,7 @@ export function NigerMapInteractive({ className }: NigerMapInteractiveProps) {
                 setActiveCity((curr) => (curr?.name === c.name ? null : curr))
               }
               onClick={() => setActiveCity((curr) => (curr?.name === c.name ? null : c))}
-              className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a843] focus-visible:ring-offset-2"
+              className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#d4a843] focus-visible:ring-offset-2"
               style={{ left: `${c.x}%`, top: `${c.y}%`, width: '44px', height: '44px' }}
               aria-label={`${c.name}, ${c.role}`}
             />
@@ -98,12 +98,12 @@ function Tooltip({ city }: { city: City }) {
           : 'translate(-50%, calc(-100% - 32px))',
       }}
     >
-      <div className="relative bg-white rounded-xl shadow-[0_8px_30px_-8px_rgba(15,23,42,0.25)] ring-1 ring-black/[0.06] px-3.5 py-2.5 min-w-[160px] animate-fade-in-up">
+      <div className="relative bg-white rounded-xl shadow-[0_8px_30px_-8px_rgba(15,23,42,0.25)] ring-1 ring-black/6 px-3.5 py-2.5 min-w-[160px] animate-fade-in-up">
         <p className="text-[13px] font-bold text-[#111] leading-tight">{city.name}</p>
         <p className="text-[11px] text-gray-500 mt-0.5 leading-snug">{city.role}</p>
         {/* Petite flèche du tooltip */}
         <div
-          className={`absolute left-1/2 -translate-x-1/2 w-2 h-2 bg-white rotate-45 ring-1 ring-black/[0.06] ${
+          className={`absolute left-1/2 -translate-x-1/2 w-2 h-2 bg-white rotate-45 ring-1 ring-black/6 ${
             flipBelow ? '-top-1 ring-l-0 ring-t-0' : '-bottom-1 ring-r-0 ring-b-0'
           }`}
         />

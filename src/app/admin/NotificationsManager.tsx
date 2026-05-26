@@ -210,7 +210,7 @@ export function NotificationsManager() {
   return (
     <section className="mb-6">
       <h2 className="font-bold text-[16px] mb-3">Notifications push</h2>
-      <div className="bg-white border border-black/[0.06] rounded-2xl p-5">
+      <div className="bg-white border border-black/6 rounded-2xl p-5">
         <NotificationsBody
           status={status}
           busy={busy}
@@ -239,7 +239,7 @@ function NotificationsBody({
 }) {
   if (status === 'loading') {
     return (
-      <div className="flex items-center gap-3 text-[#1a1a1a]/55 text-[13px]">
+      <div className="flex items-center gap-3 text-foreground/55 text-[13px]">
         <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
         Vérification de la configuration...
       </div>
@@ -249,7 +249,7 @@ function NotificationsBody({
   if (status === 'unsupported') {
     return (
       <Empty
-        icon={<BellOff className="w-5 h-5 text-[#1a1a1a]/50" aria-hidden="true" />}
+        icon={<BellOff className="w-5 h-5 text-foreground/50" aria-hidden="true" />}
         title="Notifications indisponibles sur ce navigateur"
         description="Pour activer les notifications sur iPhone, ajoute le Cockpit à l'écran d'accueil via Safari : icône Partager puis Sur l'écran d'accueil. Rouvre ensuite l'app installée."
       />
@@ -259,7 +259,7 @@ function NotificationsBody({
   if (status === 'unconfigured') {
     return (
       <Empty
-        icon={<BellOff className="w-5 h-5 text-[#1a1a1a]/50" aria-hidden="true" />}
+        icon={<BellOff className="w-5 h-5 text-foreground/50" aria-hidden="true" />}
         title="Configuration en cours"
         description="Le service Web Push n'est pas encore branché côté serveur. Reviens plus tard, ce module sera actif dès que les clés VAPID seront en place."
       />
@@ -279,14 +279,14 @@ function NotificationsBody({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#d4a843] to-[#ff8c42] flex items-center justify-center flex-shrink-0 shadow-sm">
+        <div className="w-10 h-10 rounded-full bg-linear-to-br from-[#d4a843] to-[#ff8c42] flex items-center justify-center shrink-0 shadow-xs">
           <BellRing className="w-[18px] h-[18px] text-white" aria-hidden="true" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-[14px] text-[#1a1a1a] leading-tight">
+          <p className="font-semibold text-[14px] text-foreground leading-tight">
             {status === 'subscribed' ? 'Notifications actives' : 'Activer les notifications'}
           </p>
-          <p className="text-[12px] text-[#1a1a1a]/55 mt-1 leading-relaxed">
+          <p className="text-[12px] text-foreground/55 mt-1 leading-relaxed">
             Tu seras notifié quand un nouveau paiement Premium arrive, quand le site
             rencontre un problème, ou quand un commentaire attend ta modération.
           </p>
@@ -298,7 +298,7 @@ function NotificationsBody({
           type="button"
           onClick={onSubscribe}
           disabled={busy === 'subscribe'}
-          className="w-full rounded-xl px-4 py-3 text-[13px] font-semibold text-white bg-gradient-to-br from-[#d4a843] to-[#ff8c42] shadow-sm hover:opacity-95 active:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
+          className="w-full rounded-xl px-4 py-3 text-[13px] font-semibold text-white bg-linear-to-br from-[#d4a843] to-[#ff8c42] shadow-xs hover:opacity-95 active:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
         >
           {busy === 'subscribe' ? (
             <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
@@ -315,7 +315,7 @@ function NotificationsBody({
             type="button"
             onClick={onTest}
             disabled={busy === 'test'}
-            className="rounded-xl px-3 py-2.5 text-[13px] font-semibold text-white bg-gradient-to-br from-[#d4a843] to-[#ff8c42] shadow-sm hover:opacity-95 active:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
+            className="rounded-xl px-3 py-2.5 text-[13px] font-semibold text-white bg-linear-to-br from-[#d4a843] to-[#ff8c42] shadow-xs hover:opacity-95 active:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
           >
             {busy === 'test' ? (
               <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
@@ -328,7 +328,7 @@ function NotificationsBody({
             type="button"
             onClick={onUnsubscribe}
             disabled={busy === 'unsubscribe'}
-            className="rounded-xl px-3 py-2.5 text-[13px] font-semibold text-[#1a1a1a] bg-black/[0.05] hover:bg-black/[0.08] active:bg-black/[0.1] transition disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
+            className="rounded-xl px-3 py-2.5 text-[13px] font-semibold text-foreground bg-black/5 hover:bg-black/8 active:bg-black/10 transition disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
           >
             {busy === 'unsubscribe' ? (
               <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
@@ -354,12 +354,12 @@ function Empty({
 }) {
   return (
     <div className="flex items-start gap-3">
-      <div className="w-10 h-10 rounded-full bg-black/[0.04] flex items-center justify-center flex-shrink-0">
+      <div className="w-10 h-10 rounded-full bg-black/4 flex items-center justify-center shrink-0">
         {icon}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-[14px] text-[#1a1a1a] leading-tight">{title}</p>
-        <p className="text-[12px] text-[#1a1a1a]/55 mt-1 leading-relaxed">{description}</p>
+        <p className="font-semibold text-[14px] text-foreground leading-tight">{title}</p>
+        <p className="text-[12px] text-foreground/55 mt-1 leading-relaxed">{description}</p>
       </div>
     </div>
   );
@@ -371,7 +371,7 @@ function FeedbackBlock({ feedback }: { feedback: Feedback }) {
       ? 'bg-[#00c805]/10 text-[#007a04] border-[#00c805]/20'
       : feedback.tone === 'error'
         ? 'bg-red-50 text-red-700 border-red-200'
-        : 'bg-black/[0.04] text-[#1a1a1a]/70 border-black/[0.06]';
+        : 'bg-black/4 text-foreground/70 border-black/6';
   return (
     <div
       className={`mt-4 rounded-xl border px-3 py-2.5 text-[12px] font-medium ${palette}`}

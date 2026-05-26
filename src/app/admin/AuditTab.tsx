@@ -28,10 +28,10 @@ export function AuditTab() {
 
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-xl border border-black/[0.06] overflow-hidden">
+      <div className="bg-white rounded-xl border border-black/6 overflow-hidden">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-black/[0.04]">
+            <tr className="border-b border-black/4">
               <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Date</th>
               <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Admin</th>
               <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Action</th>
@@ -41,7 +41,7 @@ export function AuditTab() {
           </thead>
           <tbody>
             {auditLog.map((entry) => (
-              <tr key={entry.id} className="border-b border-black/[0.03] last:border-0">
+              <tr key={entry.id} className="border-b border-black/3 last:border-0">
                 <td className="px-4 py-3 text-[12px] text-gray-500 whitespace-nowrap">
                   {new Date(entry.created_at).toLocaleString('fr-FR')}
                 </td>
@@ -97,7 +97,7 @@ function AuditActionBadge({ action }: { action: string }) {
   };
 
   return (
-    <span className={`text-[11px] px-2 py-1 rounded ${colors[action] || 'bg-gray-100 text-gray-600'}`}>
+    <span className={`text-[11px] px-2 py-1 rounded-sm ${colors[action] || 'bg-gray-100 text-gray-600'}`}>
       {labels[action] || action}
     </span>
   );

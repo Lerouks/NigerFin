@@ -30,7 +30,7 @@ export function NigerRegions({ regions }: { regions: Region[] }) {
   const selectedRegion = regions.find((r) => r.id === selected);
 
   return (
-    <section className="border-t border-black/[0.06] pt-14 md:pt-20">
+    <section className="border-t border-black/6 pt-14 md:pt-20">
       <div className="mb-10">
         <span className="text-[11px] tracking-[0.2em] uppercase text-gray-500 block mb-3">Géographie</span>
         <h2 className="text-2xl md:text-3xl leading-tight">Régions du Niger</h2>
@@ -49,7 +49,7 @@ export function NigerRegions({ regions }: { regions: Region[] }) {
               className={`text-left p-4 rounded-xl border transition-all duration-200 ${
                 isSelected
                   ? 'border-black/20 bg-[#111] text-white shadow-lg -translate-y-0.5'
-                  : 'border-black/[0.06] bg-white hover:border-black/10 hover:shadow-md hover:-translate-y-0.5'
+                  : 'border-black/6 bg-white hover:border-black/10 hover:shadow-md hover:-translate-y-0.5'
               }`}
             >
               <div className="flex items-center gap-2 mb-2">
@@ -65,7 +65,7 @@ export function NigerRegions({ regions }: { regions: Region[] }) {
       </div>
 
       {selectedRegion && (
-        <div className="bg-white rounded-xl border border-black/[0.06] p-6 md:p-8 animate-in fade-in duration-200">
+        <div className="bg-white rounded-xl border border-black/6 p-6 md:p-8 animate-in fade-in duration-200">
           <div className="flex items-start justify-between mb-6">
             <div>
               <h3 className="text-xl font-medium">{selectedRegion.name}</h3>
@@ -99,7 +99,7 @@ export function NigerRegions({ regions }: { regions: Region[] }) {
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {selectedRegion.economic_activities.map((a) => (
-                  <span key={a} className="text-[12px] px-2.5 py-1 rounded-full bg-gray-50 border border-black/[0.04] text-gray-600">{a}</span>
+                  <span key={a} className="text-[12px] px-2.5 py-1 rounded-full bg-gray-50 border border-black/4 text-gray-600">{a}</span>
                 ))}
               </div>
             </div>
@@ -122,7 +122,7 @@ export function NigerRegions({ regions }: { regions: Region[] }) {
           </div>
 
           {selectedRegion.security_note && (
-            <p className="text-[12px] text-gray-500 mt-5 pt-4 border-t border-black/[0.04]">
+            <p className="text-[12px] text-gray-500 mt-5 pt-4 border-t border-black/4">
               {selectedRegion.security_note}
             </p>
           )}

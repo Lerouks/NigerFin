@@ -260,7 +260,7 @@ export function MarketDataManager() {
           <button
             onClick={() => setFilterType('')}
             className={`px-3 py-2 rounded-lg text-[13px] transition-all ${
-              !filterType ? 'bg-[#111] text-white' : 'bg-white border border-black/[0.06] text-gray-600 hover:bg-gray-50'
+              !filterType ? 'bg-[#111] text-white' : 'bg-white border border-black/6 text-gray-600 hover:bg-gray-50'
             }`}
           >
             Tous ({entries.length})
@@ -272,7 +272,7 @@ export function MarketDataManager() {
                 key={t.value}
                 onClick={() => setFilterType(t.value)}
                 className={`px-3 py-2 rounded-lg text-[13px] transition-all ${
-                  filterType === t.value ? 'bg-[#111] text-white' : 'bg-white border border-black/[0.06] text-gray-600 hover:bg-gray-50'
+                  filterType === t.value ? 'bg-[#111] text-white' : 'bg-white border border-black/6 text-gray-600 hover:bg-gray-50'
                 }`}
               >
                 {t.label} ({count})
@@ -323,7 +323,7 @@ export function MarketDataManager() {
 
       {/* Create form */}
       {showCreate && (
-        <div className="bg-white rounded-xl border border-black/[0.06] p-6">
+        <div className="bg-white rounded-xl border border-black/6 p-6">
           <h3 className="text-sm font-semibold mb-4">Nouvelle donnée de marché</h3>
           <MarketForm
             form={form}
@@ -341,10 +341,10 @@ export function MarketDataManager() {
           <Loader2 className="w-6 h-6 animate-spin text-gray-500 mx-auto" />
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-black/[0.06] overflow-hidden">
+        <div className="bg-white rounded-xl border border-black/6 overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-black/[0.04]">
+              <tr className="border-b border-black/4">
                 <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Nom</th>
                 <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Type</th>
                 <th className="text-right text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Valeur</th>
@@ -369,7 +369,7 @@ export function MarketDataManager() {
                     </td>
                   </tr>
                 ) : (
-                  <tr key={entry.id} className="border-b border-black/[0.03] last:border-0 hover:bg-gray-50/50">
+                  <tr key={entry.id} className="border-b border-black/3 last:border-0 hover:bg-gray-50/50">
                     <td className="px-4 py-3">
                       <p className="text-sm font-medium">{entry.name}</p>
                       <p className="text-[11px] text-gray-500">{entry.symbol}</p>
@@ -411,7 +411,7 @@ export function MarketDataManager() {
                       <div className="flex gap-1.5">
                         <button
                           onClick={() => startEdit(entry)}
-                          className="p-1.5 rounded hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
+                          className="p-1.5 rounded-sm hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
                           title="Modifier"
                         >
                           <Pencil className="w-3.5 h-3.5" />
@@ -420,14 +420,14 @@ export function MarketDataManager() {
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => handleDelete(entry.id)}
-                              className="p-1.5 rounded bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
+                              className="p-1.5 rounded-sm bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
                               title="Confirmer"
                             >
                               <Check className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={() => setDeleteConfirm(null)}
-                              className="p-1.5 rounded hover:bg-gray-100 text-gray-500 transition-colors"
+                              className="p-1.5 rounded-sm hover:bg-gray-100 text-gray-500 transition-colors"
                               title="Annuler"
                             >
                               <X className="w-3.5 h-3.5" />
@@ -436,7 +436,7 @@ export function MarketDataManager() {
                         ) : (
                           <button
                             onClick={() => setDeleteConfirm(entry.id)}
-                            className="p-1.5 rounded hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors"
+                            className="p-1.5 rounded-sm hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors"
                             title="Supprimer"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -460,7 +460,7 @@ export function MarketDataManager() {
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40" onClick={() => setShowFailedPopup(false)} />
           <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
-            <div className="px-6 py-4 border-b border-black/[0.06]">
+            <div className="px-6 py-4 border-b border-black/6">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-base font-semibold">Données non récupérées</h3>
@@ -490,7 +490,7 @@ export function MarketDataManager() {
                         if (isValidNumberInput(e.target.value)) handleManualUpdate(item.symbol, e.target.value);
                       }}
                       placeholder="Valeur"
-                      className="w-32 border border-black/[0.08] rounded-lg px-3 py-2 text-sm text-right bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black tabular-nums"
+                      className="w-32 border border-black/8 rounded-lg px-3 py-2 text-sm text-right bg-background focus:outline-hidden focus:ring-1 focus:ring-black tabular-nums"
                     />
                     {item.unit && (
                       <span className="text-[11px] text-gray-500 w-10">{item.unit}</span>
@@ -499,7 +499,7 @@ export function MarketDataManager() {
                 </div>
               ))}
             </div>
-            <div className="px-6 py-4 border-t border-black/[0.06] flex gap-2 justify-end">
+            <div className="px-6 py-4 border-t border-black/6 flex gap-2 justify-end">
               <button
                 onClick={() => setShowFailedPopup(false)}
                 className="px-4 py-2.5 text-[13px] text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
@@ -543,7 +543,7 @@ function MarketForm({ form, setForm, onSave, onCancel, saving }: {
             value={form.name}
             onChange={(e) => update('name', e.target.value)}
             placeholder="Ex: EUR/XOF"
-            className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
+            className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
           />
         </div>
         <div>
@@ -553,7 +553,7 @@ function MarketForm({ form, setForm, onSave, onCancel, saving }: {
             value={form.symbol}
             onChange={(e) => update('symbol', e.target.value)}
             placeholder="Ex: EUR/XOF"
-            className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
+            className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
           />
         </div>
         <div>
@@ -561,7 +561,7 @@ function MarketForm({ form, setForm, onSave, onCancel, saving }: {
           <select
             value={form.type}
             onChange={(e) => update('type', e.target.value)}
-            className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none"
+            className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden"
           >
             {TYPES.map((t) => (
               <option key={t.value} value={t.value}>{t.label}</option>
@@ -580,7 +580,7 @@ function MarketForm({ form, setForm, onSave, onCancel, saving }: {
               if (isValidNumberInput(e.target.value)) update('value', e.target.value);
             }}
             placeholder="Ex: 655,96"
-            className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black tabular-nums"
+            className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black tabular-nums"
           />
           <p className="text-[10px] text-gray-500 mt-1">La variation sera calculée automatiquement (virgule ou point accepté)</p>
         </div>
@@ -591,7 +591,7 @@ function MarketForm({ form, setForm, onSave, onCancel, saving }: {
             value={form.unit}
             onChange={(e) => update('unit', e.target.value)}
             placeholder="Ex: FCFA, USD, pts"
-            className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
+            className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
           />
         </div>
         <div>
@@ -601,7 +601,7 @@ function MarketForm({ form, setForm, onSave, onCancel, saving }: {
             value={form.source}
             onChange={(e) => update('source', e.target.value)}
             placeholder="Ex: BCEAO"
-            className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
+            className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
           />
         </div>
       </div>
@@ -613,7 +613,7 @@ function MarketForm({ form, setForm, onSave, onCancel, saving }: {
             value={form.description}
             onChange={(e) => update('description', e.target.value)}
             placeholder="Ex: Indice des 40 plus grandes entreprises françaises"
-            className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
+            className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
           />
         </div>
         <div>
@@ -623,7 +623,7 @@ function MarketForm({ form, setForm, onSave, onCancel, saving }: {
             value={form.education_link}
             onChange={(e) => update('education_link', e.target.value)}
             placeholder="Ex: /education/bourse-marches"
-            className="w-full border border-black/[0.08] rounded-lg px-3 py-2 text-sm bg-[#fafaf9] focus:outline-none focus:ring-1 focus:ring-black"
+            className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
           />
           <p className="text-[10px] text-gray-500 mt-1">Lien vers la page éducation correspondante</p>
         </div>

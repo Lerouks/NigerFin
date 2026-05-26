@@ -88,13 +88,13 @@ export function AudienceView() {
 function AudienceHeader() {
   return (
     <header className="mb-8">
-      <p className="text-[10px] tracking-widest uppercase text-[#1a1a1a]/45 font-bold">
+      <p className="text-[10px] tracking-widest uppercase text-foreground/45 font-bold">
         Module
       </p>
       <h1 className="font-extrabold text-[32px] leading-tight tracking-tight mt-1">
         Audience
       </h1>
-      <p className="text-[15px] text-[#1a1a1a]/60 mt-3 leading-relaxed max-w-[560px]">
+      <p className="text-[15px] text-foreground/60 mt-3 leading-relaxed max-w-[560px]">
         Qui sont vos lecteurs, comment ils interagissent, et où vous perdez ou
         gagnez.
       </p>
@@ -162,12 +162,12 @@ function StatCard({
 }) {
   const positive = (growth ?? 0) >= 0;
   return (
-    <div className="bg-black/[0.025] rounded-2xl p-4">
+    <div className="bg-black/2.5 rounded-2xl p-4">
       <div className="flex items-center justify-between mb-2">
-        <p className="text-[10px] tracking-widest uppercase text-[#1a1a1a]/45 font-semibold">
+        <p className="text-[10px] tracking-widest uppercase text-foreground/45 font-semibold">
           {label}
         </p>
-        <Icon className="w-4 h-4 text-[#1a1a1a]/30" aria-hidden="true" />
+        <Icon className="w-4 h-4 text-foreground/30" aria-hidden="true" />
       </div>
       <p className="font-extrabold text-[28px] leading-tight mt-1 tabular-nums">
         <AnimatedNumber value={value} isLoading={isLoading} />
@@ -186,7 +186,7 @@ function StatCard({
           )}
           {`${positive ? '+' : ''}${growth}%`}
           {growthLabel && (
-            <span className="text-[#1a1a1a]/40 font-normal ml-1">
+            <span className="text-foreground/40 font-normal ml-1">
               {growthLabel}
             </span>
           )}
@@ -206,7 +206,7 @@ function ConversionCard({
   isLoading: boolean;
 }) {
   return (
-    <div className="rounded-2xl p-4 border border-[#d4a843]/15 bg-gradient-to-br from-[#d4a843]/8 to-[#ff8c42]/4">
+    <div className="rounded-2xl p-4 border border-[#d4a843]/15 bg-linear-to-br from-[#d4a843]/8 to-[#ff8c42]/4">
       <div className="flex items-center justify-between mb-2">
         <p className="text-[10px] tracking-widest uppercase text-[#d4a843] font-semibold">
           Taux de conversion
@@ -215,18 +215,18 @@ function ConversionCard({
       </div>
       <p className="font-extrabold text-[28px] leading-tight mt-1 tabular-nums">
         {isLoading || rate === null ? (
-          <span className="text-[#1a1a1a]/20">-</span>
+          <span className="text-foreground/20">-</span>
         ) : (
           <>
             <AnimatedNumber value={rate} isLoading={false} decimals={1} />
-            <span className="text-[18px] text-[#1a1a1a]/40 font-medium ml-1">
+            <span className="text-[18px] text-foreground/40 font-medium ml-1">
               %
             </span>
           </>
         )}
       </p>
       {churnRate !== null && churnRate !== undefined && (
-        <span className="inline-flex items-center gap-1 text-[11px] font-medium mt-1 text-[#1a1a1a]/55">
+        <span className="inline-flex items-center gap-1 text-[11px] font-medium mt-1 text-foreground/55">
           Churn {churnRate}% ce mois
         </span>
       )}
@@ -259,7 +259,7 @@ function FunnelSection({
     <section className="mb-10">
       <div className="flex items-center justify-between mb-3">
         <h2 className="font-bold text-[16px]">Funnel de conversion</h2>
-        <span className="text-[11px] text-[#1a1a1a]/45">ce mois</span>
+        <span className="text-[11px] text-foreground/45">ce mois</span>
       </div>
 
       {isLoading ? (
@@ -270,8 +270,8 @@ function FunnelSection({
             label="Visiteurs"
             sublabel="Pages vues ce mois"
             value={visitors}
-            color="bg-[#1a1a1a]/[0.06]"
-            textColor="text-[#1a1a1a]"
+            color="bg-foreground/6"
+            textColor="text-foreground"
             barWidth="100%"
           />
           <FunnelArrow percent={visitorToRegisteredPercent} stage="inscrits" />
@@ -295,7 +295,7 @@ function FunnelSection({
             label="Premium"
             sublabel="Abonnements actifs"
             value={premium}
-            color="bg-gradient-to-br from-[#d4a843]/20 to-[#ff8c42]/10"
+            color="bg-linear-to-br from-[#d4a843]/20 to-[#ff8c42]/10"
             textColor="text-[#d4a843]"
             barWidth={
               registered && premium && registered > 0
@@ -325,7 +325,7 @@ function FunnelStep({
   barWidth: string;
 }) {
   return (
-    <div className="bg-white border border-black/[0.06] rounded-2xl p-4 relative overflow-hidden">
+    <div className="bg-white border border-black/6 rounded-2xl p-4 relative overflow-hidden">
       <div
         className={`absolute inset-y-0 left-0 ${color} transition-all`}
         style={{ width: barWidth }}
@@ -334,11 +334,11 @@ function FunnelStep({
       <div className="relative flex items-center justify-between">
         <div>
           <p className={`font-bold text-[14px] ${textColor}`}>{label}</p>
-          <p className="text-[11px] text-[#1a1a1a]/55 mt-0.5">{sublabel}</p>
+          <p className="text-[11px] text-foreground/55 mt-0.5">{sublabel}</p>
         </div>
-        <p className="font-extrabold text-[22px] tabular-nums text-[#1a1a1a]">
+        <p className="font-extrabold text-[22px] tabular-nums text-foreground">
           {value === null ? (
-            <span className="text-[#1a1a1a]/20">-</span>
+            <span className="text-foreground/20">-</span>
           ) : (
             value.toLocaleString('fr-FR')
           )}
@@ -357,15 +357,15 @@ function FunnelArrow({
 }) {
   return (
     <div className="flex items-center gap-2 pl-4">
-      <div className="w-px h-3 bg-[#1a1a1a]/15" />
-      <p className="text-[11px] text-[#1a1a1a]/55">
+      <div className="w-px h-3 bg-foreground/15" />
+      <p className="text-[11px] text-foreground/55">
         {percent === null ? (
-          <span className="text-[#1a1a1a]/30">
+          <span className="text-foreground/30">
             Conversion vers {stage} non calculable
           </span>
         ) : (
           <>
-            <span className="font-bold tabular-nums text-[#1a1a1a]">
+            <span className="font-bold tabular-nums text-foreground">
               {percent}%
             </span>{' '}
             convertis en {stage}
@@ -382,14 +382,14 @@ function FunnelSkeleton() {
       {[0, 1, 2].map((i) => (
         <div
           key={i}
-          className="bg-white border border-black/[0.06] rounded-2xl p-4 animate-pulse"
+          className="bg-white border border-black/6 rounded-2xl p-4 animate-pulse"
         >
           <div className="flex items-center justify-between">
             <div className="space-y-2 flex-1">
-              <div className="h-3 bg-black/[0.06] rounded w-1/3" />
-              <div className="h-2 bg-black/[0.04] rounded w-1/2" />
+              <div className="h-3 bg-black/6 rounded-sm w-1/3" />
+              <div className="h-2 bg-black/4 rounded-sm w-1/2" />
             </div>
-            <div className="h-6 bg-black/[0.06] rounded w-16" />
+            <div className="h-6 bg-black/6 rounded-sm w-16" />
           </div>
         </div>
       ))}
@@ -411,18 +411,18 @@ function GrowthChartSection({
     <section className="mb-10">
       <div className="flex items-center justify-between mb-3">
         <h2 className="font-bold text-[16px]">Croissance utilisateurs</h2>
-        <span className="text-[11px] text-[#1a1a1a]/45">6 derniers mois</span>
+        <span className="text-[11px] text-foreground/45">6 derniers mois</span>
       </div>
 
-      <div className="bg-white border border-black/[0.06] rounded-2xl p-4 sm:p-5">
+      <div className="bg-white border border-black/6 rounded-2xl p-4 sm:p-5">
         {isLoading ? (
           <div className="h-[220px] flex items-center justify-center">
-            <div className="w-full h-full bg-black/[0.03] rounded-xl animate-pulse" />
+            <div className="w-full h-full bg-black/3 rounded-xl animate-pulse" />
           </div>
         ) : !hasData ? (
           <div className="h-[220px] flex flex-col items-center justify-center text-center px-4">
-            <UserPlus className="w-8 h-8 text-[#1a1a1a]/20 mb-3" aria-hidden="true" />
-            <p className="text-[13px] text-[#1a1a1a]/55">
+            <UserPlus className="w-8 h-8 text-foreground/20 mb-3" aria-hidden="true" />
+            <p className="text-[13px] text-foreground/55">
               Pas encore assez de données pour tracer la croissance. Les
               premières inscriptions apparaîtront ici.
             </p>
@@ -545,10 +545,10 @@ function QuickAccessSection({
             key={href}
             href={href}
             prefetch
-            className="group relative bg-white border border-black/[0.06] rounded-2xl p-5 hover:border-[#d4a843]/40 hover:shadow-sm transition"
+            className="group relative bg-white border border-black/6 rounded-2xl p-5 hover:border-[#d4a843]/40 hover:shadow-xs transition"
           >
             <div className="flex items-start justify-between mb-3">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#d4a843]/12 to-[#ff8c42]/8 flex items-center justify-center text-[#d4a843]">
+              <div className="w-11 h-11 rounded-xl bg-linear-to-br from-[#d4a843]/12 to-[#ff8c42]/8 flex items-center justify-center text-[#d4a843]">
                 <Icon className="w-5 h-5" aria-hidden="true" />
               </div>
               <div className="flex items-center gap-2">
@@ -558,15 +558,15 @@ function QuickAccessSection({
                   </span>
                 )}
                 <ArrowUpRight
-                  className="w-4 h-4 text-[#1a1a1a]/30 group-hover:text-[#d4a843] transition"
+                  className="w-4 h-4 text-foreground/30 group-hover:text-[#d4a843] transition"
                   aria-hidden="true"
                 />
               </div>
             </div>
-            <p className="font-bold text-[16px] text-[#1a1a1a] leading-tight">
+            <p className="font-bold text-[16px] text-foreground leading-tight">
               {title}
             </p>
-            <p className="text-[13px] text-[#1a1a1a]/55 leading-relaxed mt-1">
+            <p className="text-[13px] text-foreground/55 leading-relaxed mt-1">
               {description}
             </p>
           </Link>
@@ -608,7 +608,7 @@ function AnimatedNumber({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
-  if (isLoading && value === null) return <span className="text-[#1a1a1a]/20">-</span>;
+  if (isLoading && value === null) return <span className="text-foreground/20">-</span>;
   return (
     <>
       {display.toLocaleString('fr-FR', {

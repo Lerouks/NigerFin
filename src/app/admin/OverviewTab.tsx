@@ -59,7 +59,7 @@ function KpiCard({ label, value, sub, variation, icon: Icon, color, bg }: {
   bg: string;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-black/[0.06] p-5">
+    <div className="bg-white rounded-xl border border-black/6 p-5">
       <div className="flex items-center justify-between mb-2">
         <p className="text-[12px] text-gray-500 uppercase tracking-wider">{label}</p>
         <div className={`w-8 h-8 rounded-lg ${bg} flex items-center justify-center`}>
@@ -86,7 +86,7 @@ export function OverviewTab({ overview, stats }: OverviewTabProps) {
 
       {/* Hero KPIs: MRR, Abonnés actifs, Churn */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl border border-black/[0.06] p-6">
+        <div className="bg-white rounded-xl border border-black/6 p-6">
           <div className="flex items-center justify-between mb-2">
             <p className="text-[12px] text-gray-500 uppercase tracking-wider">MRR</p>
             <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
@@ -96,7 +96,7 @@ export function OverviewTab({ overview, stats }: OverviewTabProps) {
           <p className="text-4xl font-bold text-emerald-600">{overview ? formatPrice(overview.mrr) : '-'}</p>
           <p className="text-[11px] text-gray-500 mt-1">Monthly Recurring Revenue</p>
         </div>
-        <div className="bg-white rounded-xl border border-black/[0.06] p-6">
+        <div className="bg-white rounded-xl border border-black/6 p-6">
           <div className="flex items-center justify-between mb-2">
             <p className="text-[12px] text-gray-500 uppercase tracking-wider">Abonnés actifs</p>
             <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
@@ -111,7 +111,7 @@ export function OverviewTab({ overview, stats }: OverviewTabProps) {
             </div>
           )}
         </div>
-        <div className="bg-white rounded-xl border border-black/[0.06] p-6">
+        <div className="bg-white rounded-xl border border-black/6 p-6">
           <div className="flex items-center justify-between mb-2">
             <p className="text-[12px] text-gray-500 uppercase tracking-wider">Churn Rate</p>
             <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center">
@@ -168,7 +168,7 @@ export function OverviewTab({ overview, stats }: OverviewTabProps) {
       {/* Charts: MRR + Inscrits (6 mois) */}
       {overview && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-white rounded-xl border border-black/[0.06] p-6">
+          <div className="bg-white rounded-xl border border-black/6 p-6">
             <h3 className="font-semibold mb-4 flex items-center gap-2 text-sm">
               <Activity className="w-4 h-4 text-gray-500" />
               Revenus mensuels (6 derniers mois)
@@ -193,7 +193,7 @@ export function OverviewTab({ overview, stats }: OverviewTabProps) {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-black/[0.06] p-6">
+          <div className="bg-white rounded-xl border border-black/6 p-6">
             <h3 className="font-semibold mb-4 flex items-center gap-2 text-sm">
               <Users className="w-4 h-4 text-gray-500" />
               Nouveaux inscrits (6 derniers mois)
@@ -233,7 +233,7 @@ export function OverviewTab({ overview, stats }: OverviewTabProps) {
         </div>
 
         {overview?.topArticle && (
-          <div className="mt-4 bg-white rounded-xl border border-black/[0.06] p-5">
+          <div className="mt-4 bg-white rounded-xl border border-black/6 p-5">
             <p className="text-[12px] text-gray-500 uppercase tracking-wider mb-2">Article le plus lu ce mois</p>
             <div className="flex items-center justify-between">
               <p className="font-semibold text-sm truncate mr-4">{overview.topArticle.title}</p>

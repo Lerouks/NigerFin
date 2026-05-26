@@ -99,13 +99,13 @@ export function SiteView() {
 function SiteHeader() {
   return (
     <header className="mb-8">
-      <p className="text-[10px] tracking-widest uppercase text-[#1a1a1a]/45 font-bold">
+      <p className="text-[10px] tracking-widest uppercase text-foreground/45 font-bold">
         Module
       </p>
       <h1 className="font-extrabold text-[32px] leading-tight tracking-tight mt-1">
         Site
       </h1>
-      <p className="text-[15px] text-[#1a1a1a]/60 mt-3 leading-relaxed max-w-[560px]">
+      <p className="text-[15px] text-foreground/60 mt-3 leading-relaxed max-w-[560px]">
         La santé technique et les données référentielles qui alimentent NFI
         Report.
       </p>
@@ -127,7 +127,7 @@ function HealthSection() {
     <section className="mb-10">
       <div className="flex items-center justify-between mb-3">
         <h2 className="font-bold text-[16px]">Santé du site</h2>
-        <span className="text-[11px] text-[#1a1a1a]/45">
+        <span className="text-[11px] text-foreground/45">
           {lastCheckedRelative
             ? `Dernière vérif ${lastCheckedRelative}`
             : 'rafraichi chaque minute'}
@@ -214,10 +214,10 @@ function HealthCard({
 }) {
   if (isLoading && status === null) {
     return (
-      <div className="bg-white border border-black/[0.06] rounded-2xl p-4 animate-pulse min-h-[120px]">
-        <div className="w-9 h-9 rounded-xl bg-black/[0.06] mb-3" />
-        <div className="h-3 bg-black/[0.06] rounded w-2/3 mb-2" />
-        <div className="h-2 bg-black/[0.04] rounded w-1/2" />
+      <div className="bg-white border border-black/6 rounded-2xl p-4 animate-pulse min-h-[120px]">
+        <div className="w-9 h-9 rounded-xl bg-black/6 mb-3" />
+        <div className="h-3 bg-black/6 rounded-sm w-2/3 mb-2" />
+        <div className="h-2 bg-black/4 rounded-sm w-1/2" />
       </div>
     );
   }
@@ -233,7 +233,7 @@ function HealthCard({
           : 'Inconnu';
 
   return (
-    <div className="bg-white border border-black/[0.06] rounded-2xl p-4 flex flex-col gap-2 min-h-[120px]">
+    <div className="bg-white border border-black/6 rounded-2xl p-4 flex flex-col gap-2 min-h-[120px]">
       <div className="flex items-center justify-between">
         <div
           className={`w-9 h-9 rounded-xl flex items-center justify-center ${visual.bg}`}
@@ -248,19 +248,19 @@ function HealthCard({
           aria-hidden="true"
         />
       </div>
-      <p className="text-[10px] tracking-widest uppercase text-[#1a1a1a]/45 font-semibold mt-1">
+      <p className="text-[10px] tracking-widest uppercase text-foreground/45 font-semibold mt-1">
         {label}
       </p>
       <p className={`font-bold text-[14px] leading-tight ${visual.statusColor}`}>
         {statusLabel}
       </p>
       {message && (
-        <p className="text-[11px] text-[#1a1a1a]/55 leading-snug line-clamp-2">
+        <p className="text-[11px] text-foreground/55 leading-snug line-clamp-2">
           {message}
         </p>
       )}
       {lastChecked && (
-        <p className="text-[10px] text-[#1a1a1a]/35 mt-auto">
+        <p className="text-[10px] text-foreground/35 mt-auto">
           Dernière vérif {relativeTime(lastChecked)}
         </p>
       )}
@@ -298,10 +298,10 @@ function getStatusVisual(status: HealthStatus | null): {
       };
     default:
       return {
-        bg: 'bg-black/[0.06]',
-        iconColor: 'text-[#1a1a1a]/50',
+        bg: 'bg-black/6',
+        iconColor: 'text-foreground/50',
         statusIcon: AlertTriangle,
-        statusColor: 'text-[#1a1a1a]/50',
+        statusColor: 'text-foreground/50',
       };
   }
 }
@@ -337,7 +337,7 @@ function ActivitySection() {
       {!error && isLoading && events.length === 0 && <ActivitySkeleton />}
 
       {!error && !isLoading && events.length === 0 && (
-        <div className="bg-white border border-black/[0.06] rounded-2xl p-6 text-center text-[13px] text-[#1a1a1a]/55">
+        <div className="bg-white border border-black/6 rounded-2xl p-6 text-center text-[13px] text-foreground/55">
           Aucune action admin enregistrée pour le moment. Les futures
           modifications apparaîtront ici.
         </div>
@@ -363,9 +363,9 @@ function AuditRow({ entry }: { entry: AuditEntry }) {
   const entityLabel = formatEntity(entry.entity_type);
 
   return (
-    <div className="flex items-center gap-3 bg-white border border-black/[0.06] rounded-2xl p-3.5">
+    <div className="flex items-center gap-3 bg-white border border-black/6 rounded-2xl p-3.5">
       <div
-        className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${visual.bg}`}
+        className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${visual.bg}`}
       >
         <visual.icon
           className={`w-[18px] h-[18px] ${visual.iconColor}`}
@@ -373,19 +373,19 @@ function AuditRow({ entry }: { entry: AuditEntry }) {
         />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-semibold leading-tight text-[#1a1a1a] truncate">
+        <p className="text-[13px] font-semibold leading-tight text-foreground truncate">
           {adminLabel}
-          <span className="text-[#1a1a1a]/45 font-normal">
+          <span className="text-foreground/45 font-normal">
             {' '}
             {visual.verb} {entityLabel}
           </span>
         </p>
-        <p className="text-[11px] text-[#1a1a1a]/45 mt-0.5">
+        <p className="text-[11px] text-foreground/45 mt-0.5">
           {relativeTime(entry.created_at)}
           {entry.entity_id ? (
             <>
               {' · '}
-              <span className="font-mono text-[10px] text-[#1a1a1a]/40">
+              <span className="font-mono text-[10px] text-foreground/40">
                 {entry.entity_id.slice(0, 8)}
               </span>
             </>
@@ -402,12 +402,12 @@ function ActivitySkeleton() {
       {[0, 1, 2].map((i) => (
         <div
           key={i}
-          className="flex items-center gap-3 bg-white border border-black/[0.06] rounded-2xl p-3.5 animate-pulse"
+          className="flex items-center gap-3 bg-white border border-black/6 rounded-2xl p-3.5 animate-pulse"
         >
-          <div className="w-10 h-10 rounded-full bg-black/[0.06] flex-shrink-0" />
+          <div className="w-10 h-10 rounded-full bg-black/6 shrink-0" />
           <div className="flex-1 space-y-2">
-            <div className="h-3 bg-black/[0.06] rounded w-3/4" />
-            <div className="h-2 bg-black/[0.04] rounded w-1/2" />
+            <div className="h-3 bg-black/6 rounded-sm w-3/4" />
+            <div className="h-2 bg-black/4 rounded-sm w-1/2" />
           </div>
         </div>
       ))}
@@ -453,15 +453,15 @@ function getAuditVisual(action: string): {
   if (normalized.includes('publish')) {
     return {
       icon: FileText,
-      bg: 'bg-[#1a1a1a]',
+      bg: 'bg-foreground',
       iconColor: 'text-[#d4a843]',
       verb: 'a publié',
     };
   }
   return {
     icon: Settings,
-    bg: 'bg-black/[0.06]',
-    iconColor: 'text-[#1a1a1a]/70',
+    bg: 'bg-black/6',
+    iconColor: 'text-foreground/70',
     verb: 'a agi sur',
   };
 }
@@ -556,21 +556,21 @@ function ReferenceDataSection() {
             key={card.href}
             href={card.href}
             prefetch
-            className="group relative bg-white border border-black/[0.06] rounded-2xl p-5 hover:border-[#d4a843]/40 hover:shadow-sm transition"
+            className="group relative bg-white border border-black/6 rounded-2xl p-5 hover:border-[#d4a843]/40 hover:shadow-xs transition"
           >
             <div className="flex items-start justify-between mb-3">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#d4a843]/12 to-[#ff8c42]/8 flex items-center justify-center text-[#d4a843]">
+              <div className="w-11 h-11 rounded-xl bg-linear-to-br from-[#d4a843]/12 to-[#ff8c42]/8 flex items-center justify-center text-[#d4a843]">
                 <card.icon className="w-5 h-5" aria-hidden="true" />
               </div>
               <ArrowUpRight
-                className="w-4 h-4 text-[#1a1a1a]/30 group-hover:text-[#d4a843] transition"
+                className="w-4 h-4 text-foreground/30 group-hover:text-[#d4a843] transition"
                 aria-hidden="true"
               />
             </div>
-            <p className="font-bold text-[16px] text-[#1a1a1a] leading-tight">
+            <p className="font-bold text-[16px] text-foreground leading-tight">
               {card.title}
             </p>
-            <p className="text-[13px] text-[#1a1a1a]/55 leading-relaxed mt-1">
+            <p className="text-[13px] text-foreground/55 leading-relaxed mt-1">
               {card.description}
             </p>
           </Link>
@@ -619,15 +619,15 @@ function MarketTickerInlineToggle() {
   };
 
   return (
-    <div className="mt-4 bg-white border border-black/[0.06] rounded-2xl p-4 flex items-center gap-3">
-      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#d4a843]/12 to-[#ff8c42]/8 flex items-center justify-center text-[#d4a843] flex-shrink-0">
+    <div className="mt-4 bg-white border border-black/6 rounded-2xl p-4 flex items-center gap-3">
+      <div className="w-10 h-10 rounded-xl bg-linear-to-br from-[#d4a843]/12 to-[#ff8c42]/8 flex items-center justify-center text-[#d4a843] shrink-0">
         <LineChart className="w-5 h-5" aria-hidden="true" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-bold text-[14px] text-[#1a1a1a] leading-tight">
+        <p className="font-bold text-[14px] text-foreground leading-tight">
           Bandeau Marchés BRVM
         </p>
-        <p className="text-[11px] text-[#1a1a1a]/55 mt-0.5">
+        <p className="text-[11px] text-foreground/55 mt-0.5">
           {isLoading
             ? 'Chargement de l\'état...'
             : enabled
@@ -646,14 +646,14 @@ function MarketTickerInlineToggle() {
             : 'Activer le bandeau Marchés BRVM'
         }
         className={[
-          'relative inline-flex h-7 w-12 items-center rounded-full transition flex-shrink-0',
-          enabled ? 'bg-[#00c805]' : 'bg-black/[0.12]',
+          'relative inline-flex h-7 w-12 items-center rounded-full transition shrink-0',
+          enabled ? 'bg-[#00c805]' : 'bg-black/12',
           isLoading || !data ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
         ].join(' ')}
       >
         <span
           className={[
-            'inline-block h-5 w-5 transform rounded-full bg-white shadow transition',
+            'inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition',
             enabled ? 'translate-x-6' : 'translate-x-1',
           ].join(' ')}
         />

@@ -44,7 +44,7 @@ export default async function NigerPage() {
   const data = await getNigerPresentationData();
 
   return (
-    <div className="min-h-screen bg-[#fafaf9]">
+    <div className="min-h-screen bg-background">
       <CategoryHero
         label="Découvrir"
         title="Niger"

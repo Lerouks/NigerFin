@@ -126,7 +126,7 @@ export function Footer() {
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-9 h-9 bg-white/[0.06] rounded-full flex items-center justify-center hover:bg-gold/20 hover:text-gold transition-all duration-200 hover:scale-110"
+                    className="w-9 h-9 bg-white/6 rounded-full flex items-center justify-center hover:bg-gold/20 hover:text-gold transition-all duration-200 hover:scale-110"
                     aria-label={label}
                   >
                     <Icon className="w-4 h-4" />
@@ -150,14 +150,14 @@ export function Footer() {
                 +227&nbsp;97&nbsp;76&nbsp;91&nbsp;31
               </a>
               <p className="text-white/40 text-[13px] flex items-start gap-2">
-                <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>Niamey, Niger<br />Plateau, BP&nbsp;800</span>
               </p>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-white/[0.06] pt-8">
+        <div className="border-t border-white/6 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-[12px] text-white/25">
             <p>&copy; 2026 NFI Report. Tous droits réservés.</p>
             <div className="flex gap-6">

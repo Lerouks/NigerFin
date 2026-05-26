@@ -307,7 +307,7 @@ export function ArticlesManager() {
           </button>
           <div className="flex gap-2">
             <button onClick={() => handleSave(false)} disabled={saving}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-black/[0.08] rounded-lg text-[13px] hover:bg-gray-50 disabled:opacity-50">
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-black/8 rounded-lg text-[13px] hover:bg-gray-50 disabled:opacity-50">
               {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
               Sauvegarder brouillon
             </button>
@@ -334,7 +334,7 @@ export function ArticlesManager() {
                   title: e.target.value,
                   slug: f.id ? f.slug : slugify(e.target.value),
                 }))}
-                className="w-full px-4 py-3 border border-black/[0.08] rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-black bg-white"
+                className="w-full px-4 py-3 border border-black/8 rounded-lg text-lg focus:outline-hidden focus:ring-2 focus:ring-black bg-white"
                 placeholder="Titre de l'article"
               />
             </div>
@@ -344,7 +344,7 @@ export function ArticlesManager() {
               <label className="text-[11px] uppercase tracking-wider text-gray-500 block mb-1.5">Sous-titre</label>
               <input type="text" value={form.subtitle}
                 onChange={(e) => setForm((f) => ({ ...f, subtitle: e.target.value }))}
-                className="w-full px-4 py-2.5 border border-black/[0.08] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black bg-white"
+                className="w-full px-4 py-2.5 border border-black/8 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-black bg-white"
                 placeholder="Sous-titre (optionnel)"
               />
             </div>
@@ -355,7 +355,7 @@ export function ArticlesManager() {
               <textarea value={form.excerpt}
                 onChange={(e) => setForm((f) => ({ ...f, excerpt: e.target.value }))}
                 rows={2}
-                className="w-full px-4 py-2.5 border border-black/[0.08] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black bg-white resize-none"
+                className="w-full px-4 py-2.5 border border-black/8 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-black bg-white resize-none"
                 placeholder="Court résumé de l'article..."
               />
             </div>
@@ -364,7 +364,7 @@ export function ArticlesManager() {
             <div>
               <label className="text-[11px] uppercase tracking-wider text-gray-500 block mb-1.5">Image principale</label>
               {form.main_image_url ? (
-                <div className="relative rounded-lg overflow-hidden border border-black/[0.08]">
+                <div className="relative rounded-lg overflow-hidden border border-black/8">
                   <Image src={form.main_image_url} alt={form.main_image_alt || form.title} width={600} height={192} className="w-full h-48 object-cover" unoptimized />
                   <button onClick={() => setForm((f) => ({ ...f, main_image_url: '' }))}
                     className="absolute top-2 right-2 bg-black/60 text-white p-1.5 rounded-full hover:bg-black/80">
@@ -372,7 +372,7 @@ export function ArticlesManager() {
                   </button>
                 </div>
               ) : (
-                <label className="flex flex-col items-center justify-center h-40 border-2 border-dashed border-black/[0.1] rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                <label className="flex flex-col items-center justify-center h-40 border-2 border-dashed border-black/10 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                   {uploading ? (
                     <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
                   ) : (
@@ -387,17 +387,17 @@ export function ArticlesManager() {
               )}
               <input type="text" value={form.main_image_alt}
                 onChange={(e) => setForm((f) => ({ ...f, main_image_alt: e.target.value }))}
-                className="w-full px-3 py-2 border border-black/[0.08] rounded-lg text-[12px] focus:outline-none bg-white mt-2"
+                className="w-full px-3 py-2 border border-black/8 rounded-lg text-[12px] focus:outline-hidden bg-white mt-2"
                 placeholder="Texte alternatif de l'image (SEO)"
               />
               <input type="text" value={form.main_image_caption}
                 onChange={(e) => setForm((f) => ({ ...f, main_image_caption: e.target.value }))}
-                className="w-full px-3 py-2 border border-black/[0.08] rounded-lg text-[12px] focus:outline-none bg-white mt-2"
+                className="w-full px-3 py-2 border border-black/8 rounded-lg text-[12px] focus:outline-hidden bg-white mt-2"
                 placeholder="Légende de l'image (optionnel, visible sous l'image)"
               />
               <input type="text" value={form.main_image_source}
                 onChange={(e) => setForm((f) => ({ ...f, main_image_source: e.target.value }))}
-                className="w-full px-3 py-2 border border-black/[0.08] rounded-lg text-[12px] focus:outline-none bg-white mt-2"
+                className="w-full px-3 py-2 border border-black/8 rounded-lg text-[12px] focus:outline-hidden bg-white mt-2"
                 placeholder="Source de l'image (ex: Reuters, AFP, DR)"
               />
             </div>
@@ -423,7 +423,7 @@ export function ArticlesManager() {
           {/* Sidebar */}
           <div className="space-y-4">
             {/* Status */}
-            <div className="bg-white border border-black/[0.06] rounded-xl p-4">
+            <div className="bg-white border border-black/6 rounded-xl p-4">
               <label className="text-[11px] uppercase tracking-wider text-gray-500 block mb-2">Statut</label>
               <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-medium ${
                 form.status === 'published' ? 'bg-green-100 text-green-700' :
@@ -446,17 +446,17 @@ export function ArticlesManager() {
             </div>
 
             {/* Slug */}
-            <div className="bg-white border border-black/[0.06] rounded-xl p-4">
+            <div className="bg-white border border-black/6 rounded-xl p-4">
               <label className="text-[11px] uppercase tracking-wider text-gray-500 block mb-1.5">Slug (URL)</label>
               <div className="flex items-center gap-1 text-[12px] text-gray-500 mb-1">/articles/</div>
               <input type="text" value={form.slug}
                 onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
-                className="w-full px-3 py-2 border border-black/[0.08] rounded-lg text-[13px] focus:outline-none bg-white font-mono"
+                className="w-full px-3 py-2 border border-black/8 rounded-lg text-[13px] focus:outline-hidden bg-white font-mono"
               />
             </div>
 
             {/* Sections (multi-select) */}
-            <div className="bg-white border border-black/[0.06] rounded-xl p-4">
+            <div className="bg-white border border-black/6 rounded-xl p-4">
               <label className="text-[11px] uppercase tracking-wider text-gray-500 block mb-2">Sections</label>
               <div className="space-y-1.5">
                 {SECTIONS.map((s) => {
@@ -474,7 +474,7 @@ export function ArticlesManager() {
                             return { ...f, sections: next, category: next[0] || 'economie' };
                           });
                         }}
-                        className="w-4 h-4 rounded border-gray-300 text-black focus:ring-black" />
+                        className="w-4 h-4 rounded-sm border-gray-300 text-black focus:ring-black" />
                       <span className="text-sm">{s.label}</span>
                     </label>
                   );
@@ -486,7 +486,7 @@ export function ArticlesManager() {
             </div>
 
             {/* Content type */}
-            <div className="bg-white border border-black/[0.06] rounded-xl p-4">
+            <div className="bg-white border border-black/6 rounded-xl p-4">
               <label className="text-[11px] uppercase tracking-wider text-gray-500 block mb-2">Niveau d&apos;accès</label>
               <div className="space-y-1.5">
                 {CONTENT_TYPES.map((ct) => (
@@ -504,11 +504,11 @@ export function ArticlesManager() {
             </div>
 
             {/* Featured */}
-            <div className="bg-white border border-black/[0.06] rounded-xl p-4">
+            <div className="bg-white border border-black/6 rounded-xl p-4">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" checked={form.is_featured}
                   onChange={(e) => setForm((f) => ({ ...f, is_featured: e.target.checked }))}
-                  className="w-4 h-4 rounded border-gray-300" />
+                  className="w-4 h-4 rounded-sm border-gray-300" />
                 <div>
                   <span className="text-sm font-medium flex items-center gap-1.5">
                     <Star className="w-4 h-4 text-amber-500" /> A la une
@@ -519,25 +519,25 @@ export function ArticlesManager() {
             </div>
 
             {/* Author & Read time */}
-            <div className="bg-white border border-black/[0.06] rounded-xl p-4 space-y-3">
+            <div className="bg-white border border-black/6 rounded-xl p-4 space-y-3">
               <div>
                 <label className="text-[11px] uppercase tracking-wider text-gray-500 block mb-1.5">Auteur</label>
                 <input type="text" value={form.author_name}
                   onChange={(e) => setForm((f) => ({ ...f, author_name: e.target.value }))}
-                  className="w-full px-3 py-2 border border-black/[0.08] rounded-lg text-sm focus:outline-none bg-white"
+                  className="w-full px-3 py-2 border border-black/8 rounded-lg text-sm focus:outline-hidden bg-white"
                 />
               </div>
               <div>
                 <label className="text-[11px] uppercase tracking-wider text-gray-500 block mb-1.5">Temps de lecture (min)</label>
                 <input type="number" value={form.read_time} min={1}
                   onChange={(e) => setForm((f) => ({ ...f, read_time: parseInt(e.target.value) || 3 }))}
-                  className="w-full px-3 py-2 border border-black/[0.08] rounded-lg text-sm focus:outline-none bg-white"
+                  className="w-full px-3 py-2 border border-black/8 rounded-lg text-sm focus:outline-hidden bg-white"
                 />
               </div>
             </div>
 
             {/* Tags */}
-            <div className="bg-white border border-black/[0.06] rounded-xl p-4">
+            <div className="bg-white border border-black/6 rounded-xl p-4">
               <label className="text-[11px] uppercase tracking-wider text-gray-500 block mb-1.5">Tags</label>
               <div className="flex gap-1.5 flex-wrap mb-2">
                 {form.tags.map((tag) => (
@@ -553,7 +553,7 @@ export function ArticlesManager() {
                 <input type="text" value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddTag(); } }}
-                  className="flex-1 px-3 py-1.5 border border-black/[0.08] rounded-lg text-[12px] focus:outline-none bg-white"
+                  className="flex-1 px-3 py-1.5 border border-black/8 rounded-lg text-[12px] focus:outline-hidden bg-white"
                   placeholder="Ajouter un tag..."
                 />
                 <button onClick={handleAddTag}
@@ -564,13 +564,13 @@ export function ArticlesManager() {
             </div>
 
             {/* SEO */}
-            <div className="bg-white border border-black/[0.06] rounded-xl p-4 space-y-3">
+            <div className="bg-white border border-black/6 rounded-xl p-4 space-y-3">
               <p className="text-[11px] uppercase tracking-wider text-gray-500">SEO</p>
               <div>
                 <label className="text-[11px] text-gray-500 block mb-1">Titre SEO</label>
                 <input type="text" value={form.seo_title}
                   onChange={(e) => setForm((f) => ({ ...f, seo_title: e.target.value }))}
-                  className="w-full px-3 py-2 border border-black/[0.08] rounded-lg text-[12px] focus:outline-none bg-white"
+                  className="w-full px-3 py-2 border border-black/8 rounded-lg text-[12px] focus:outline-hidden bg-white"
                   placeholder="Laisser vide pour utiliser le titre"
                 />
               </div>
@@ -579,7 +579,7 @@ export function ArticlesManager() {
                 <textarea value={form.seo_description}
                   onChange={(e) => setForm((f) => ({ ...f, seo_description: e.target.value }))}
                   rows={2}
-                  className="w-full px-3 py-2 border border-black/[0.08] rounded-lg text-[12px] focus:outline-none bg-white resize-none"
+                  className="w-full px-3 py-2 border border-black/8 rounded-lg text-[12px] focus:outline-hidden bg-white resize-none"
                   placeholder="Laisser vide pour utiliser l'extrait"
                 />
               </div>
@@ -605,7 +605,7 @@ export function ArticlesManager() {
           {(['all', 'published', 'draft'] as const).map((f) => (
             <button key={f} onClick={() => setFilter(f)}
               className={`px-3 py-1.5 rounded-lg text-[13px] transition-all ${
-                filter === f ? 'bg-[#111] text-white' : 'bg-white border border-black/[0.06] text-gray-600 hover:bg-gray-50'
+                filter === f ? 'bg-[#111] text-white' : 'bg-white border border-black/6 text-gray-600 hover:bg-gray-50'
               }`}>
               {f === 'all' ? `Tous (${articles.length})` : f === 'published' ? `Publies (${articles.filter((a) => a.status === 'published').length})` : `Brouillons (${articles.filter((a) => a.status === 'draft').length})`}
             </button>
@@ -619,7 +619,7 @@ export function ArticlesManager() {
 
       {featuredWarning && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-700 flex items-center gap-2">
-          <Star className="w-4 h-4 text-amber-500 flex-shrink-0" />
+          <Star className="w-4 h-4 text-amber-500 shrink-0" />
           {featuredWarning}
         </div>
       )}
@@ -635,10 +635,10 @@ export function ArticlesManager() {
           </button>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-black/[0.06] overflow-hidden">
+        <div className="bg-white rounded-xl border border-black/6 overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-black/[0.04]">
+              <tr className="border-b border-black/4">
                 <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Article</th>
                 <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Sections</th>
                 <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Statut</th>
@@ -649,20 +649,20 @@ export function ArticlesManager() {
             </thead>
             <tbody>
               {filteredArticles.map((a) => (
-                <tr key={a.id} className="border-b border-black/[0.03] last:border-0 hover:bg-gray-50/50">
+                <tr key={a.id} className="border-b border-black/3 last:border-0 hover:bg-gray-50/50">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       {a.main_image_url ? (
-                        <Image src={a.main_image_url} alt={a.title || 'Article'} width={48} height={32} className="w-12 h-8 rounded object-cover flex-shrink-0" unoptimized />
+                        <Image src={a.main_image_url} alt={a.title || 'Article'} width={48} height={32} className="w-12 h-8 rounded-sm object-cover shrink-0" unoptimized />
                       ) : (
-                        <div className="w-12 h-8 rounded bg-gray-100 flex items-center justify-center flex-shrink-0">
+                        <div className="w-12 h-8 rounded-sm bg-gray-100 flex items-center justify-center shrink-0">
                           <ImageIcon className="w-4 h-4 text-gray-300" />
                         </div>
                       )}
                       <div>
                         <p className="text-sm font-medium line-clamp-1 flex items-center gap-1.5">
                           {a.is_featured && (
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[10px] uppercase tracking-wider rounded font-bold flex-shrink-0">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[10px] uppercase tracking-wider rounded-sm font-bold shrink-0">
                               <Star className="w-3 h-3 fill-amber-500 text-amber-500" /> À la une
                             </span>
                           )}
@@ -675,7 +675,7 @@ export function ArticlesManager() {
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-1">
                       {(a.sections || [a.category]).map((s) => (
-                        <span key={s} className="text-[10px] uppercase tracking-wider text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded">{s}</span>
+                        <span key={s} className="text-[10px] uppercase tracking-wider text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded-sm">{s}</span>
                       ))}
                     </div>
                   </td>
@@ -718,16 +718,16 @@ export function ArticlesManager() {
                           <StarOff className="w-3.5 h-3.5 text-gray-500" />
                         )}
                       </button>
-                      <button onClick={() => handleEdit(a)} className="p-1.5 hover:bg-gray-100 rounded transition-colors" title="Modifier">
+                      <button onClick={() => handleEdit(a)} className="p-1.5 hover:bg-gray-100 rounded-sm transition-colors" title="Modifier">
                         <Edit3 className="w-3.5 h-3.5 text-gray-500" />
                       </button>
                       {a.status === 'published' && (
                         <a href={`/articles/${a.slug}`} target="_blank" rel="noopener noreferrer"
-                          className="p-1.5 hover:bg-gray-100 rounded transition-colors" title="Voir">
+                          className="p-1.5 hover:bg-gray-100 rounded-sm transition-colors" title="Voir">
                           <Eye className="w-3.5 h-3.5 text-gray-500" />
                         </a>
                       )}
-                      <button onClick={() => handleDelete(a.id)} className="p-1.5 hover:bg-red-50 rounded transition-colors" title="Supprimer">
+                      <button onClick={() => handleDelete(a.id)} className="p-1.5 hover:bg-red-50 rounded-sm transition-colors" title="Supprimer">
                         <Trash2 className="w-3.5 h-3.5 text-red-400" />
                       </button>
                     </div>

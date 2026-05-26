@@ -62,33 +62,33 @@ export function EditorDiscoverSection({ content, patchContent }: EditorDiscoverS
                 placeholder="🎓"
                 value={it.emoji ?? ''}
                 onChange={(e) => patchContent({ discover: { ...discover, items: items.map((x, i) => i === idx ? { ...x, emoji: e.target.value } : x) } })}
-                className="rounded border border-foreground/15 bg-white px-2 py-1 text-base"
+                className="rounded-sm border border-foreground/15 bg-white px-2 py-1 text-base"
               />
               <input
                 placeholder="Rubrique (ex: Éducation financière)"
                 value={it.rubric}
                 onChange={(e) => patchContent({ discover: { ...discover, items: items.map((x, i) => i === idx ? { ...x, rubric: e.target.value } : x) } })}
-                className="rounded border border-foreground/15 bg-white px-2 py-1 text-sm uppercase tracking-wider"
+                className="rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm uppercase tracking-wider"
               />
               <input
                 placeholder="CTA (ex: Commencer le parcours)"
                 value={it.ctaLabel ?? ''}
                 onChange={(e) => patchContent({ discover: { ...discover, items: items.map((x, i) => i === idx ? { ...x, ctaLabel: e.target.value } : x) } })}
-                className="rounded border border-foreground/15 bg-white px-2 py-1 text-sm"
+                className="rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm"
               />
             </div>
             <input
               placeholder="Titre accrocheur (ex: Comprendre la BRVM en 6 leçons)"
               value={it.title}
               onChange={(e) => patchContent({ discover: { ...discover, items: items.map((x, i) => i === idx ? { ...x, title: e.target.value } : x) } })}
-              className="w-full rounded border border-foreground/15 bg-white px-2 py-1 text-sm font-semibold"
+              className="w-full rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm font-semibold"
             />
             <textarea
               placeholder="1 à 2 lignes d'accroche pour donner envie de cliquer"
               value={it.description}
               onChange={(e) => patchContent({ discover: { ...discover, items: items.map((x, i) => i === idx ? { ...x, description: e.target.value } : x) } })}
               rows={2}
-              className="w-full rounded border border-foreground/15 bg-white px-2 py-1 text-sm"
+              className="w-full rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm"
             />
             <ArticlePicker
               value={it.url}

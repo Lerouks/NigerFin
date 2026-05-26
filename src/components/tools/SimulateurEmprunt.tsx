@@ -116,7 +116,7 @@ export function SimulateurEmprunt() {
   return (
     <div className="space-y-8">
       {/* Input fields */}
-      <div className="bg-white border border-black/[0.06] rounded-xl p-6">
+      <div className="bg-white border border-black/6 rounded-xl p-6">
         <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-5">
           Paramètres de l&apos;emprunt
         </h3>
@@ -133,7 +133,7 @@ export function SimulateurEmprunt() {
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="Ex: 5 000 000"
-              className="w-full border border-black/[0.08] px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-[#fafaf9] text-[15px]"
+              className="w-full border border-black/8 px-4 py-3 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-black bg-background text-[15px]"
             />
           </div>
           <div>
@@ -147,7 +147,7 @@ export function SimulateurEmprunt() {
               value={rate}
               onChange={(e) => setRate(e.target.value)}
               placeholder="Ex: 8"
-              className="w-full border border-black/[0.08] px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-[#fafaf9] text-[15px]"
+              className="w-full border border-black/8 px-4 py-3 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-black bg-background text-[15px]"
             />
           </div>
           <div>
@@ -160,7 +160,7 @@ export function SimulateurEmprunt() {
               value={duration}
               onChange={(e) => setDuration(e.target.value)}
               placeholder="Ex: 24"
-              className="w-full border border-black/[0.08] px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-[#fafaf9] text-[15px]"
+              className="w-full border border-black/8 px-4 py-3 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-black bg-background text-[15px]"
             />
           </div>
         </div>
@@ -177,11 +177,11 @@ export function SimulateurEmprunt() {
               <p className="text-[12px] text-white/40 uppercase tracking-wider mb-1">Mensualité</p>
               <p className="text-2xl font-bold">{fmt(calc.monthly)} FCFA</p>
             </div>
-            <div className="bg-white border border-black/[0.06] p-6 rounded-xl">
+            <div className="bg-white border border-black/6 p-6 rounded-xl">
               <p className="text-[12px] text-gray-400 uppercase tracking-wider mb-1">Coût total du crédit</p>
               <p className="text-2xl font-bold">{fmt(calc.totalCost)} FCFA</p>
             </div>
-            <div className="bg-white border border-black/[0.06] p-6 rounded-xl">
+            <div className="bg-white border border-black/6 p-6 rounded-xl">
               <p className="text-[12px] text-gray-400 uppercase tracking-wider mb-1">Total des intérêts</p>
               <p className="text-2xl font-bold">{fmt(calc.totalInterest)} FCFA</p>
             </div>

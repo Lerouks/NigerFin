@@ -84,9 +84,9 @@ export function SiteFeaturesManager() {
       </div>
 
       {/* Market ticker toggle */}
-      <article className="bg-white border border-black/[0.08] rounded-2xl p-6 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.08)]">
+      <article className="bg-white border border-black/8 rounded-2xl p-6 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.08)]">
         <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center shrink-0">
             <TrendingUp className="w-5 h-5 text-gold" />
           </div>
           <div className="flex-1 min-w-0">
@@ -102,19 +102,19 @@ export function SiteFeaturesManager() {
             onClick={toggleMarketTicker}
             disabled={saving}
             aria-pressed={data.market_ticker_enabled}
-            className={`relative inline-flex h-7 w-12 flex-shrink-0 items-center rounded-full transition-colors duration-200 disabled:opacity-50 ${
+            className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors duration-200 disabled:opacity-50 ${
               data.market_ticker_enabled ? 'bg-emerald-500' : 'bg-gray-300'
             }`}
           >
             <span
-              className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
+              className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-xs transition-transform duration-200 ${
                 data.market_ticker_enabled ? 'translate-x-6' : 'translate-x-1'
               }`}
             />
           </button>
         </div>
 
-        <div className="mt-4 pt-4 border-t border-black/[0.05] flex items-center justify-between gap-3 text-[12px]">
+        <div className="mt-4 pt-4 border-t border-black/5 flex items-center justify-between gap-3 text-[12px]">
           <span className="inline-flex items-center gap-1.5 text-gray-500">
             {data.market_ticker_enabled ? (
               <>

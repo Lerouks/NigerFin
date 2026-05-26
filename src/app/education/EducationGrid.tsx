@@ -33,7 +33,7 @@ export function EducationGrid({ categories }: { categories: Category[] }) {
             <Link
               key={cat.id}
               href={`/education/${cat.slug}`}
-              className="group relative flex flex-col justify-between rounded-xl p-5 h-[160px] md:h-[180px] text-left transition-all duration-150 border bg-[#1a1a1a] border-white/[0.06] text-white hover:border-white/20 hover:bg-[#222] hover:shadow-lg hover:-translate-y-0.5"
+              className="group relative flex flex-col justify-between rounded-xl p-5 h-[160px] md:h-[180px] text-left transition-all duration-150 border bg-foreground border-white/6 text-white hover:border-white/20 hover:bg-[#222] hover:shadow-lg hover:-translate-y-0.5"
             >
               <Icon className="w-7 h-7 text-white/70 group-hover:text-white transition-colors" aria-hidden="true" />
               <div>
@@ -50,7 +50,7 @@ export function EducationGrid({ categories }: { categories: Category[] }) {
           <div
             key={cat.id}
             aria-disabled="true"
-            className="relative flex flex-col justify-between rounded-xl p-5 h-[160px] md:h-[180px] text-left border bg-[#1a1a1a] border-white/[0.06] text-white/55 cursor-not-allowed"
+            className="relative flex flex-col justify-between rounded-xl p-5 h-[160px] md:h-[180px] text-left border bg-foreground border-white/6 text-white/55 cursor-not-allowed"
           >
             <Icon className="w-7 h-7 text-white/55" aria-hidden="true" />
             <div>

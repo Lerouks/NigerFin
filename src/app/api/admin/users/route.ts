@@ -8,13 +8,13 @@ import { parsePagination, paginatedResponse } from '@/lib/pagination';
 import { deleteUserCompletely } from '@/lib/delete-user';
 import * as Sentry from '@sentry/nextjs';
 
-const SUPER_ADMIN_EMAIL: string = (() => {
+function getSuperAdminEmail(): string {
   const value = process.env.SUPER_ADMIN_EMAIL;
   if (!value) {
     throw new Error('SUPER_ADMIN_EMAIL env var is required');
   }
   return value;
-})();
+}
 
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin();
@@ -119,7 +119,7 @@ export async function PUT(request: NextRequest) {
 
     // Super admin: only the owner can manage other admins
     const isSelf = userId === user.id;
-    const isSuperAdmin = user.email === SUPER_ADMIN_EMAIL;
+    const isSuperAdmin = user.email === getSuperAdminEmail();
     const targetIsAdmin = targetUser.role === 'admin';
 
     switch (action) {
@@ -142,7 +142,7 @@ export async function PUT(request: NextRequest) {
           return NextResponse.json({ error: 'Seul l\'administrateur principal peut nommer un admin' }, { status: 400 });
         }
         // Nobody can demote the super admin
-        if (targetUser.email === SUPER_ADMIN_EMAIL && role !== 'admin') {
+        if (targetUser.email === getSuperAdminEmail() && role !== 'admin') {
           return NextResponse.json({ error: 'Impossible de modifier le role de l\'administrateur principal' }, { status: 400 });
         }
         // Sync subscription_status + subscriptions table with role
@@ -191,7 +191,7 @@ export async function PUT(request: NextRequest) {
           return NextResponse.json({ error: 'Seul l\'administrateur principal peut bloquer un admin' }, { status: 400 });
         }
         // Nobody can block the super admin
-        if (targetUser.email === SUPER_ADMIN_EMAIL) {
+        if (targetUser.email === getSuperAdminEmail()) {
           return NextResponse.json({ error: 'Impossible de bloquer l\'administrateur principal' }, { status: 400 });
         }
         await serviceClient
@@ -363,7 +363,7 @@ export async function DELETE(request: NextRequest) {
   }
 
   // Cannot delete super admin
-  if (targetUser.email === SUPER_ADMIN_EMAIL) {
+  if (targetUser.email === getSuperAdminEmail()) {
     return NextResponse.json({ error: 'Impossible de supprimer l\'administrateur principal' }, { status: 400 });
   }
 

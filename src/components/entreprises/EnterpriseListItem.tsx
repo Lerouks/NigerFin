@@ -21,11 +21,11 @@ export function EnterpriseListItem({ enterprise, rank }: EnterpriseListItemProps
   const detailHref = enterprise.slug ? `/entreprises/${enterprise.slug}` : null;
 
   const inner = (
-    <article className="group flex items-start gap-4 md:gap-6 py-6 border-b border-black/8 hover:bg-secondary/40 transition-colors -mx-4 px-4 sm:-mx-6 sm:px-6 md:-mx-8 md:px-8">
-      {/* Rang */}
+    <article className="group flex items-start gap-5 md:gap-8 py-8 md:py-10 border-b border-black/8 hover:bg-secondary/40 transition-colors -mx-4 px-4 sm:-mx-6 sm:px-6 md:-mx-8 md:px-8">
+      {/* Rang FT-style : chiffre enorme opacity-20, scroll-anchor visuel */}
       <span
         aria-hidden
-        className="shrink-0 font-mono text-[18px] md:text-[22px] font-bold tabular-nums text-gray-500 leading-none mt-1"
+        className="shrink-0 w-[60px] md:w-[100px] lg:w-[120px] font-black tabular-nums text-foreground/15 group-hover:text-gold/40 transition-colors leading-[0.85] text-[clamp(2.5rem,5vw,4.5rem)] tracking-tight mt-1"
       >
         {String(rank).padStart(2, '0')}
       </span>

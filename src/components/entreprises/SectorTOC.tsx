@@ -60,7 +60,7 @@ export function SectorTOC({ sectors }: SectorTOCProps) {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <ul className="flex items-center gap-0 overflow-x-auto py-3 -mx-1 scrollbar-thin scroll-smooth">
-          <li className="shrink-0 px-3 py-1 text-[10px] uppercase tracking-[0.22em] text-gray-400 font-semibold border-r border-black/10">
+          <li className="shrink-0 px-3 py-1 text-[10px] uppercase tracking-[0.22em] text-gray-600 font-semibold border-r border-black/10">
             Secteurs
           </li>
           {sectors.map((sector, idx) => {

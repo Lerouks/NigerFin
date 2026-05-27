@@ -29,10 +29,10 @@ export function EnterpriseSectorBlock({
     >
       <header className="mb-2 md:mb-4 pt-10 md:pt-14 border-t border-black/10">
         <div className="flex items-baseline gap-3 mb-1">
-          <span className="font-mono text-[12px] tracking-tight text-gold">
+          <span className="font-mono text-[12px] font-bold tracking-tight text-foreground/70">
             {String(enterprises.length).padStart(2, '0')}
           </span>
-          <span className="text-[10px] uppercase tracking-[0.22em] text-gray-400 font-semibold">
+          <span className="text-[10px] uppercase tracking-[0.22em] text-gray-600 font-semibold">
             {enterprises.length === 1 ? 'Entreprise' : 'Entreprises'}
           </span>
         </div>

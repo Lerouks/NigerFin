@@ -74,11 +74,11 @@ export function FeaturedEnterprise({
       {/* Texte */}
       <div>
         <div className="flex items-center gap-3 mb-5">
-          <span className="font-mono text-[13px] tracking-tight text-gold">
+          <span className="font-mono text-[13px] font-bold tracking-tight text-foreground/70">
             {String(rank).padStart(2, '0')} / 08
           </span>
-          <span className="h-px w-6 bg-gray-300" />
-          <span className="text-[11px] uppercase tracking-[0.22em] font-semibold text-gray-500">
+          <span className="h-px w-6 bg-gold" />
+          <span className="text-[11px] uppercase tracking-[0.22em] font-semibold text-gray-600">
             Vedette &middot; {enterprise.sector}
           </span>
         </div>
@@ -140,7 +140,7 @@ export function FeaturedEnterprise({
           <div className="mt-8">
             <Link
               href={detailHref}
-              className="inline-flex items-center gap-2 text-[14px] font-semibold text-gold hover:text-foreground transition-colors border-b border-gold/40 hover:border-foreground pb-0.5"
+              className="inline-flex items-center gap-2 text-[14px] font-bold text-foreground hover:text-foreground transition-colors border-b-2 border-gold hover:border-foreground pb-1"
             >
               Lire le dossier complet
               <svg

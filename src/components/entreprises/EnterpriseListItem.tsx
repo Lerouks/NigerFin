@@ -25,7 +25,7 @@ export function EnterpriseListItem({ enterprise, rank }: EnterpriseListItemProps
       {/* Rang */}
       <span
         aria-hidden
-        className="shrink-0 font-mono text-[18px] md:text-[22px] font-bold tabular-nums text-gray-300 leading-none mt-1"
+        className="shrink-0 font-mono text-[18px] md:text-[22px] font-bold tabular-nums text-gray-500 leading-none mt-1"
       >
         {String(rank).padStart(2, '0')}
       </span>
@@ -54,7 +54,7 @@ export function EnterpriseListItem({ enterprise, rank }: EnterpriseListItemProps
             {enterprise.name}
           </h3>
           {enterprise.full_name && enterprise.full_name !== enterprise.name ? (
-            <span className="text-[12px] text-gray-400 italic">
+            <span className="text-[12px] text-gray-600 italic">
               {enterprise.full_name}
             </span>
           ) : null}
@@ -64,7 +64,7 @@ export function EnterpriseListItem({ enterprise, rank }: EnterpriseListItemProps
           <span>{enterprise.sector}</span>
           {enterprise.founded_year ? (
             <>
-              <span aria-hidden className="text-gray-300">
+              <span aria-hidden className="text-gray-400">
                 &middot;
               </span>
               <span className="font-normal">Fondee {enterprise.founded_year}</span>
@@ -72,7 +72,7 @@ export function EnterpriseListItem({ enterprise, rank }: EnterpriseListItemProps
           ) : null}
           {enterprise.headquarters ? (
             <>
-              <span aria-hidden className="text-gray-300">
+              <span aria-hidden className="text-gray-400">
                 &middot;
               </span>
               <span className="font-normal">{enterprise.headquarters}</span>
@@ -107,7 +107,7 @@ export function EnterpriseListItem({ enterprise, rank }: EnterpriseListItemProps
           height="14"
           viewBox="0 0 14 14"
           fill="none"
-          className="shrink-0 self-center text-gray-300 group-hover:text-gold transition-colors"
+          className="shrink-0 self-center text-gray-400 group-hover:text-gold transition-colors"
         >
           <path
             d="M2 7h10m0 0L8 3m4 4L8 11"

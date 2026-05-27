@@ -33,14 +33,14 @@ export function StatsBand({ stats, lastUpdated }: StatsBandProps) {
                 {stat.label}
               </div>
               {stat.source ? (
-                <div className="mt-1 text-[10px] uppercase tracking-wider text-gray-400">
+                <div className="mt-1 text-[10px] uppercase tracking-wider text-gray-600">
                   {stat.source}
                 </div>
               ) : null}
             </div>
           ))}
         </div>
-        <p className="mt-6 text-[11px] uppercase tracking-wider text-gray-400">
+        <p className="mt-6 text-[11px] uppercase tracking-wider text-gray-600">
           Donnees agregees, derniere mise a jour : {formatDateFr(lastUpdated)}
         </p>
       </div>

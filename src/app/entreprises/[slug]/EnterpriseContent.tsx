@@ -163,10 +163,10 @@ export function EnterpriseContent({
                 className="border-l-4 border-gold bg-gradient-to-br from-secondary to-background p-6 sm:p-8 rounded-r-xl"
               >
                 <div className="flex items-baseline gap-3 mb-4">
-                  <span className="text-[10px] uppercase tracking-[0.22em] text-gold font-bold">
+                  <span className="text-[11px] uppercase tracking-[0.22em] text-foreground font-extrabold">
                     A retenir
                   </span>
-                  <span className="h-px flex-1 bg-black/10" />
+                  <span className="h-px flex-1 bg-gold" />
                 </div>
                 <ul
                   id="takeaways-title"
@@ -309,7 +309,7 @@ export function EnterpriseContent({
                           href={enterprise.website}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 text-[13px] font-semibold text-gold hover:text-foreground transition-colors"
+                          className="inline-flex items-center gap-2 text-[13px] font-bold text-foreground hover:text-foreground/70 transition-colors border-b-2 border-gold pb-0.5"
                         >
                           <Globe className="w-4 h-4" />
                           Site officiel

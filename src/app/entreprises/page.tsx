@@ -32,7 +32,7 @@ export default async function EntreprisesPage() {
         <div className="pt-10 border-t border-black/10">
           <div className="flex items-baseline gap-3 mb-2">
             <span className="h-px w-6 bg-gold" />
-            <span className="text-[10px] uppercase tracking-[0.22em] text-gold font-semibold">
+            <span className="text-[11px] uppercase tracking-[0.22em] text-foreground font-extrabold">
               Actualite
             </span>
           </div>

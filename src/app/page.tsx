@@ -1,12 +1,14 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
-import { ArticleCard } from '@/components/ArticleCard';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
 import { MarketMarquee } from '@/components/MarketMarquee';
 import { NewsletterForm } from '@/components/NewsletterForm';
 import { PracticalTools } from '@/components/PracticalTools';
 import { HomeHero } from '@/components/home/HomeHero';
 import { HomeRubriqueSection } from '@/components/home/HomeRubriqueSection';
+import { formatDate } from '@/lib/utils';
+import { fallbackImageUrl } from '@/data/mock-data';
 import { getAllArticles, getFeaturedArticles, getLatestBySection } from '@/lib/articles';
 import { SECTION_META } from '@/lib/sections';
 import { getSiteFeatures } from '@/lib/site-data';
@@ -84,11 +86,13 @@ export default async function HomePage() {
         </div>
       )}
 
-      {/* Chapitre "Dernieres actualites" : vedette + secondaires en grid editoriale */}
+      {/* Chapitre "Dernieres actualites" : meme pattern magazine que les
+          rubriques (vedette grande + liste secondaires FT-style). Anti-clash
+          avec le hero, on garde la qualite premium jusqu'au scroll. */}
       {recentVedette ? (
         <section
           aria-labelledby="home-latest-heading"
-          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 md:pt-20 pb-4"
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 md:pt-20 pb-2"
         >
           <header className="mb-8 md:mb-10">
             <div className="flex items-center gap-3 mb-3">
@@ -115,16 +119,101 @@ export default async function HomePage() {
               </Link>
             </div>
           </header>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Vedette du moment, 1 grosse card */}
-            <div className="lg:col-span-2">
-              <ArticleCard article={recentVedette} priority />
-            </div>
-            {/* Secondaires en colonne */}
-            <div className="lg:col-span-1 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-1 gap-6">
-              {recentSecondary.map((article) => (
-                <ArticleCard key={article._id} article={article} />
-              ))}
+
+          {/* Vedette grande (gauche) + liste secondaires FT-style (droite) */}
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-8 lg:gap-12">
+            {/* Vedette */}
+            <Link
+              href={`/articles/${recentVedette.slug.current}`}
+              className="group block"
+            >
+              <article>
+                <div className="relative aspect-[16/10] overflow-hidden bg-secondary mb-5">
+                  <Image
+                    src={recentVedette.mainImage?.url || fallbackImageUrl}
+                    alt={recentVedette.mainImage?.alt || recentVedette.title}
+                    fill
+                    sizes="(min-width: 1024px) 720px, 100vw"
+                    quality={85}
+                    priority
+                    className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                  />
+                </div>
+                <div className="flex items-center gap-2 mb-3 text-[11px] uppercase tracking-[0.18em] text-gray-600 font-semibold">
+                  {recentVedette.isPremium ? (
+                    <>
+                      <span className="text-gold font-bold">Premium</span>
+                      <span aria-hidden className="text-gray-300">·</span>
+                    </>
+                  ) : null}
+                  <span>{SECTION_META[recentVedette.sections?.[0] ?? recentVedette.category]?.label ?? 'Actualite'}</span>
+                </div>
+                <h3 className="text-[clamp(1.5rem,2.5vw,2rem)] font-black tracking-tight leading-[1.1] text-foreground group-hover:text-foreground/75 transition-colors">
+                  {recentVedette.title}
+                </h3>
+                {recentVedette.excerpt ? (
+                  <p className="mt-3 text-[15px] md:text-[16px] leading-relaxed text-gray-700 line-clamp-3">
+                    {recentVedette.excerpt}
+                  </p>
+                ) : null}
+                <div className="mt-4 flex items-center gap-3 text-[12px] text-gray-600">
+                  {recentVedette.author?.name ? (
+                    <span className="font-semibold">{recentVedette.author.name}</span>
+                  ) : null}
+                  {recentVedette.publishedAt ? (
+                    <>
+                      <span aria-hidden className="w-1 h-1 rounded-full bg-gray-400" />
+                      <span>{formatDate(recentVedette.publishedAt)}</span>
+                    </>
+                  ) : null}
+                </div>
+              </article>
+            </Link>
+
+            {/* Secondaires liste dense */}
+            <div>
+              {recentSecondary.length > 0 ? (
+                <ul>
+                  {recentSecondary.map((a, idx) => (
+                    <li
+                      key={a._id}
+                      className={
+                        'group ' +
+                        (idx < recentSecondary.length - 1 ? 'border-b border-black/8' : '')
+                      }
+                    >
+                      <Link
+                        href={`/articles/${a.slug.current}`}
+                        className="flex items-start gap-4 py-5 first:pt-0 last:pb-0"
+                      >
+                        <div className="relative w-28 h-28 md:w-32 md:h-32 shrink-0 overflow-hidden bg-secondary">
+                          <Image
+                            src={a.mainImage?.url || fallbackImageUrl}
+                            alt={a.mainImage?.alt || a.title}
+                            fill
+                            sizes="128px"
+                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-[10px] uppercase tracking-[0.16em] text-gray-600 font-bold mb-1.5">
+                            {a.isPremium ? (
+                              <span className="text-gold mr-2">Premium</span>
+                            ) : null}
+                            {SECTION_META[a.sections?.[0] ?? a.category]?.label ?? 'Actualite'}
+                          </div>
+                          <h4 className="text-[15px] md:text-[16px] font-bold leading-snug text-foreground group-hover:text-foreground/70 transition-colors line-clamp-3">
+                            {a.title}
+                          </h4>
+                          <div className="mt-2 text-[11px] text-gray-500">
+                            {a.publishedAt ? formatDate(a.publishedAt) : ''}
+                          </div>
+                        </div>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
             </div>
           </div>
         </section>

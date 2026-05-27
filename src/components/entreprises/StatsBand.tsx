@@ -7,8 +7,8 @@ interface StatsBandProps {
 
 /**
  * Bandeau de stats cumulees affiche sous le hero de /entreprises.
- * Format magazine economique : chiffre Inter Black tres gros + label gris,
- * separateurs verticaux discrets. Sobriete graphique stricte.
+ * Format World Bank country page : chiffres ENORMES Inter Black, filet or
+ * signature sous chaque, source en petits caps, padding genereux.
  */
 export function StatsBand({ stats, lastUpdated }: StatsBandProps) {
   return (
@@ -19,28 +19,32 @@ export function StatsBand({ stats, lastUpdated }: StatsBandProps) {
       <h2 id="atlas-stats-heading" className="sr-only">
         Chiffres cles de l&apos;atlas
       </h2>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-x-2 gap-y-6 md:divide-x md:divide-black/10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-x-6 gap-y-12">
           {stats.map((stat) => (
             <div
               key={stat.label}
-              className="px-2 md:px-6 first:pl-0 md:first:pl-0 md:last:pr-0"
+              className="flex flex-col"
             >
-              <div className="text-[clamp(1.75rem,4vw,2.5rem)] font-black tracking-tight text-foreground leading-none">
+              <div className="text-[clamp(2.5rem,5vw,3.5rem)] font-black tracking-tight text-foreground leading-none tabular-nums">
                 {stat.value}
               </div>
-              <div className="mt-2 text-[12px] md:text-[13px] font-medium text-gray-600 leading-snug">
+              <div
+                aria-hidden
+                className="mt-4 h-px w-12 bg-gold"
+              />
+              <div className="mt-3 text-[11px] md:text-[12px] font-semibold uppercase tracking-[0.14em] text-gray-700 leading-tight">
                 {stat.label}
               </div>
               {stat.source ? (
-                <div className="mt-1 text-[10px] uppercase tracking-wider text-gray-600">
+                <div className="mt-2 text-[10px] uppercase tracking-wider text-gray-500 italic">
                   {stat.source}
                 </div>
               ) : null}
             </div>
           ))}
         </div>
-        <p className="mt-6 text-[11px] uppercase tracking-wider text-gray-600">
+        <p className="mt-12 pt-6 border-t border-black/8 text-[11px] uppercase tracking-[0.18em] text-gray-500">
           Donnees agregees, derniere mise a jour : {formatDateFr(lastUpdated)}
         </p>
       </div>

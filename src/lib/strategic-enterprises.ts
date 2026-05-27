@@ -162,14 +162,6 @@ export function getSectorList(enterprises: StrategicEnterprise[]): string[] {
   return ordered;
 }
 
-/**
- * Renvoie un slug d'ancre stable pour un nom de secteur (utilise par SectorTOC + section ID).
- */
-export function getSectorAnchor(sector: string): string {
-  return `sector-${sector
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')}`;
-}
+// Re-export pour compat ascendante. La fonction vit dans sector-anchor.ts
+// pour pouvoir etre importee depuis des Client Components sans tirer supabase.
+export { getSectorAnchor } from './sector-anchor';

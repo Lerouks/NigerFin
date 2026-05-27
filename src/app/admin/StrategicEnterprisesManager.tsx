@@ -17,6 +17,7 @@ interface Enterprise {
   image_url: string | null;
   display_order: number;
   is_visible: boolean;
+  is_featured?: boolean;
   full_name: string | null;
   founded_year: number | null;
   headquarters: string | null;
@@ -55,6 +56,7 @@ const emptyForm: FormData = {
   image_url: null,
   display_order: 0,
   is_visible: true,
+  is_featured: false,
   full_name: null,
   founded_year: null,
   headquarters: null,
@@ -156,6 +158,7 @@ export function StrategicEnterprisesManager() {
       image_url: item.image_url,
       display_order: item.display_order,
       is_visible: item.is_visible,
+      is_featured: item.is_featured ?? false,
       full_name: item.full_name,
       founded_year: item.founded_year,
       headquarters: item.headquarters,
@@ -350,7 +353,7 @@ export function StrategicEnterprisesManager() {
             className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-hidden focus:ring-2 focus:ring-gray-900"
           />
         </div>
-        <div className="flex items-end pb-1">
+        <div className="flex items-end pb-1 gap-6 flex-wrap">
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -359,6 +362,15 @@ export function StrategicEnterprisesManager() {
               className="w-4 h-4 rounded-sm border-gray-300"
             />
             <span className="text-[13px] text-gray-700">Visible sur le site</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.is_featured ?? false}
+              onChange={(e) => setForm({ ...form, is_featured: e.target.checked })}
+              className="w-4 h-4 rounded-sm border-gray-300 accent-[#d4a843]"
+            />
+            <span className="text-[13px] text-gray-700">Vedette de l&apos;atlas (1 seule a la fois)</span>
           </label>
         </div>
       </div>
@@ -451,8 +463,13 @@ export function StrategicEnterprisesManager() {
 
               {/* Info */}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <h3 className="text-[15px] font-semibold text-gray-900 truncate">{item.name}</h3>
+                  {item.is_featured && (
+                    <span className="px-2 py-0.5 bg-[#d4a843]/15 text-[#8a6b1f] text-[11px] font-bold rounded-full uppercase tracking-wider">
+                      Vedette
+                    </span>
+                  )}
                   <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-[11px] rounded-full whitespace-nowrap">
                     {item.sector}
                   </span>

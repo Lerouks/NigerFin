@@ -9,6 +9,22 @@ import { EnterpriseSeoBlock } from './EnterpriseSeoBlock';
 
 export const revalidate = 300;
 
+/**
+ * Echappe les caracteres dangereux dans une serialisation JSON destinee a etre
+ * injectee dans un <script type="application/ld+json">. JSON.stringify natif
+ * ne transforme PAS "</script>" en sequence safe : un attaquant qui controle
+ * un champ peut casser le tag et injecter du HTML/JS. Pattern utilise par Next.js
+ * en interne pour ses propres blocs JSON-LD.
+ */
+function safeJsonLd(obj: unknown): string {
+  return JSON.stringify(obj)
+    .replace(/</g, '\u003C')
+    .replace(/>/g, '\u003E')
+    .replace(/&/g, '\u0026')
+    .replace(/[\u2028]/g, '\u2028')
+    .replace(/[\u2029]/g, '\u2029');
+}
+
 interface EnterprisePageProps {
   params: Promise<{ slug: string }>;
 }
@@ -123,12 +139,12 @@ export default async function EnterprisePage({ params }: EnterprisePageProps) {
       <script
         type="application/ld+json"
         nonce={nonce}
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
       <script
         type="application/ld+json"
         nonce={nonce}
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }}
       />
       <EnterpriseContent enterprise={enterprise} relatedArticles={relatedArticles} />
       <EnterpriseSeoBlock enterprise={enterprise} />

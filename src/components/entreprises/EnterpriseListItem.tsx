@@ -87,7 +87,7 @@ export function EnterpriseListItem({ enterprise, rank }: EnterpriseListItemProps
         {/* Pied : drapeau + stats facultatives */}
         <div className="mt-3 flex items-center gap-4 flex-wrap text-[12px] text-gray-500">
           <span className="inline-flex items-center gap-1.5">
-            <CountryFlag country={majorityCountry} size={14} monochrome />
+            <CountryFlag country={majorityCountry} size={16} />
             <span className="font-medium">Controle majoritaire</span>
           </span>
           {enterprise.employees ? (

@@ -122,7 +122,7 @@ export function FeaturedEnterprise({
                   key={`${share.label}-${idx}`}
                   className="flex items-center gap-2 text-[14px] text-foreground/85"
                 >
-                  <CountryFlag country={share.country} size={18} monochrome />
+                  <CountryFlag country={share.country} size={20} />
                   <span className="font-medium">{share.label}</span>
                   {share.share != null ? (
                     <span className="text-gray-500 tabular-nums">

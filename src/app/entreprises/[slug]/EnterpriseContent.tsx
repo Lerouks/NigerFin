@@ -3,28 +3,20 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import {
-  ArrowLeft, MapPin, Calendar, Users, Globe, DollarSign,
-  Landmark, ExternalLink, ChevronRight,
+  ArrowLeft,
+  MapPin,
+  Calendar,
+  Users,
+  Globe,
+  DollarSign,
+  Landmark,
+  ExternalLink,
+  ChevronRight,
 } from 'lucide-react';
 import { ArticleCard } from '@/components/ArticleCard';
-import { getSector } from '@/lib/sectors';
+import { CountryFlag } from '@/components/entreprises/CountryFlag';
+import { parseOwnership } from '@/lib/ownership';
 import type { Article } from '@/types';
-
-/**
- * Eclaircit un hex en le melangeant avec du blanc.
- * amount entre 0 (couleur originale) et 1 (blanc pur).
- * Garantit que la couleur reste lisible sur fond noir meme pour des
- * brand colors tres sombres (ex: #8B1A2B bordeaux COMINAK -> rose-saumon).
- */
-function lightenHex(hex: string, amount: number): string {
-  const clean = hex.replace('#', '');
-  const r = parseInt(clean.slice(0, 2), 16);
-  const g = parseInt(clean.slice(2, 4), 16);
-  const b = parseInt(clean.slice(4, 6), 16);
-  const mix = (channel: number) => Math.round(channel + (255 - channel) * amount);
-  const toHex = (n: number) => n.toString(16).padStart(2, '0');
-  return `#${toHex(mix(r))}${toHex(mix(g))}${toHex(mix(b))}`;
-}
 
 interface Enterprise {
   id: string;
@@ -51,50 +43,60 @@ interface EnterpriseContentProps {
   relatedArticles: Article[];
 }
 
-function InfoRow({ icon: Icon, label, value, color }: { icon: React.ElementType; label: string; value: string; color: string }) {
+function InfoRow({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: React.ReactNode;
+}) {
   return (
     <div className="flex items-start gap-3 py-3">
-      <div
-        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-        style={{ backgroundColor: `${color}14` }}
-      >
-        <Icon className="w-4 h-4" style={{ color }} />
+      <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 bg-secondary border border-black/6">
+        <Icon className="w-4 h-4 text-foreground/70" />
       </div>
       <div className="min-w-0">
-        <p className="text-[11px] uppercase tracking-[0.12em] text-gray-500">{label}</p>
-        <p className="text-[14px] text-gray-900 mt-0.5">{value}</p>
+        <p className="text-[11px] uppercase tracking-[0.14em] text-gray-500 font-semibold">
+          {label}
+        </p>
+        <div className="text-[14px] text-foreground mt-0.5">{value}</div>
       </div>
     </div>
   );
 }
 
-export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseContentProps) {
-  const hasInfo = enterprise.full_name || enterprise.founded_year || enterprise.headquarters
-    || enterprise.ownership || enterprise.employees || enterprise.revenue || enterprise.website;
-  const sector = getSector(enterprise.sector);
-  const SectorIcon = sector.icon;
-  // Couleur de la SOCIETE (brand_color DB), fallback sur couleur secteur si null.
-  // accentLight = version eclaircie programmatique pour rester lisible sur fond noir
-  // meme quand brand_color est tres sombre (ex bordeaux COMINAK).
-  const accent = enterprise.brand_color || sector.hex;
-  const accentLight = lightenHex(accent, 0.45);
-  const logoFallbackColor = accent;
+export function EnterpriseContent({
+  enterprise,
+  relatedArticles,
+}: EnterpriseContentProps) {
+  const hasInfo =
+    enterprise.full_name ||
+    enterprise.founded_year ||
+    enterprise.headquarters ||
+    enterprise.ownership ||
+    enterprise.employees ||
+    enterprise.revenue ||
+    enterprise.website;
+  const ownership = parseOwnership(enterprise.ownership);
+  const takeaways = (enterprise.key_facts ?? []).slice(0, 3);
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header noir sobre, sans halos colores derriere le logo */}
-      <div className="relative bg-[#111] text-white overflow-hidden">
+      {/* Header noir, charte unique (gold accent uniquement) */}
+      <div className="relative bg-[#0a0a0a] text-white overflow-hidden">
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
           <Link
             href="/entreprises"
             className="inline-flex items-center gap-1.5 text-[13px] text-white/60 hover:text-white transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
-            Entreprises
+            Retour a l&apos;atlas
           </Link>
 
           <div className="flex items-start gap-5">
-            {/* Logo - white background for clarity */}
+            {/* Logo - fond blanc, couleur marque preservee (D3=A) */}
             <div className="w-18 h-18 sm:w-24 sm:h-24 rounded-2xl bg-white flex items-center justify-center shrink-0 shadow-xl p-2.5 sm:p-3">
               {enterprise.logo_url ? (
                 <Image
@@ -105,37 +107,37 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
                   className="w-full h-full object-contain"
                 />
               ) : (
-                <span className="text-2xl sm:text-3xl font-bold" style={{ color: logoFallbackColor }}>
+                <span className="text-2xl sm:text-3xl font-bold text-foreground">
                   {enterprise.name.charAt(0)}
                 </span>
               )}
             </div>
 
             <div className="min-w-0 flex-1">
-              <h1 className="text-3xl sm:text-5xl font-bold leading-[1.05] tracking-tight">{enterprise.name}</h1>
-              {enterprise.full_name && enterprise.full_name !== enterprise.name && (
-                <p className="text-[14px] sm:text-[16px] text-white/65 mt-2">{enterprise.full_name}</p>
-              )}
+              <p className="text-[10px] uppercase tracking-[0.22em] text-gold font-semibold mb-2">
+                Dossier entreprise
+              </p>
+              <h1 className="text-3xl sm:text-5xl font-black leading-[1.05] tracking-tight">
+                {enterprise.name}
+              </h1>
+              {enterprise.full_name &&
+                enterprise.full_name !== enterprise.name && (
+                  <p className="text-[14px] sm:text-[16px] text-white/65 mt-2 italic">
+                    {enterprise.full_name}
+                  </p>
+                )}
               <div className="flex flex-wrap items-center gap-2 mt-4">
-                <span
-                  className="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-semibold tracking-wide rounded-full"
-                  style={{
-                    backgroundColor: `${accentLight}22`,
-                    color: accentLight,
-                    boxShadow: `inset 0 0 0 1px ${accentLight}40`,
-                  }}
-                >
-                  <SectorIcon className="w-3.5 h-3.5" />
-                  {sector.label}
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-semibold tracking-wide rounded-full bg-white/10 text-white ring-1 ring-inset ring-white/20">
+                  {enterprise.sector}
                 </span>
                 {enterprise.founded_year && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] text-white/60 rounded-full ring-1 ring-inset ring-white/15">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] text-white/65 rounded-full ring-1 ring-inset ring-white/15">
                     <Calendar className="w-3 h-3" />
                     Depuis {enterprise.founded_year}
                   </span>
                 )}
                 {enterprise.headquarters && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] text-white/60 rounded-full ring-1 ring-inset ring-white/15">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] text-white/65 rounded-full ring-1 ring-inset ring-white/15">
                     <MapPin className="w-3 h-3" />
                     {enterprise.headquarters}
                   </span>
@@ -145,8 +147,8 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
           </div>
         </div>
 
-        {/* Sector accent bottom bar */}
-        <div className="h-1.5" style={{ backgroundColor: accent }} />
+        {/* Filet or signature */}
+        <div className="h-[3px] bg-gold" />
       </div>
 
       {/* Content */}
@@ -154,27 +156,66 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main content */}
           <div className="lg:col-span-2 space-y-8">
+            {/* Section "A retenir" - bullets copy-paste friendly */}
+            {takeaways.length > 0 && (
+              <section
+                aria-labelledby="takeaways-title"
+                className="border-l-4 border-gold bg-gradient-to-br from-secondary to-background p-6 sm:p-8 rounded-r-xl"
+              >
+                <div className="flex items-baseline gap-3 mb-4">
+                  <span className="text-[10px] uppercase tracking-[0.22em] text-gold font-bold">
+                    A retenir
+                  </span>
+                  <span className="h-px flex-1 bg-black/10" />
+                </div>
+                <ul
+                  id="takeaways-title"
+                  className="space-y-3 text-[15px] leading-relaxed text-foreground"
+                >
+                  {takeaways.map((fact, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <span
+                        aria-hidden
+                        className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold"
+                      />
+                      <span>
+                        <strong className="font-semibold">{fact.label} :</strong>{' '}
+                        {fact.value}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
             {/* Description */}
-            <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] p-6 sm:p-8">
-              <h2 className="text-[12px] uppercase tracking-[0.15em] text-gray-500 mb-4">Présentation</h2>
-              <p className="text-[15px] leading-relaxed text-gray-800">
+            <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.06)] border border-black/4 p-6 sm:p-8">
+              <h2 className="text-[11px] uppercase tracking-[0.18em] text-gray-500 font-bold mb-4">
+                Presentation
+              </h2>
+              <p className="text-[16px] leading-relaxed text-foreground/90">
                 {enterprise.detailed_description || enterprise.description}
               </p>
             </div>
 
-            {/* Key facts */}
-            {enterprise.key_facts && enterprise.key_facts.length > 0 && (
-              <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] p-6 sm:p-8">
-                <h2 className="text-[12px] uppercase tracking-[0.15em] text-gray-500 mb-4">Points clés</h2>
+            {/* Key facts (complementaires si plus de 3) */}
+            {enterprise.key_facts && enterprise.key_facts.length > 3 && (
+              <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.06)] border border-black/4 p-6 sm:p-8">
+                <h2 className="text-[11px] uppercase tracking-[0.18em] text-gray-500 font-bold mb-4">
+                  Points cles
+                </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {enterprise.key_facts.map((fact, i) => (
+                  {enterprise.key_facts.slice(3).map((fact, i) => (
                     <div
                       key={i}
-                      className="p-4 rounded-lg border border-black/5"
-                      style={{ backgroundColor: `${accent}0D`, borderLeftColor: accent, borderLeftWidth: '2px' }}
+                      className="p-4 rounded-lg bg-secondary border border-black/5 border-l-2 border-l-gold"
                     >
-                      <p className="text-[11px] uppercase tracking-widest mb-1 font-semibold" style={{ color: accent }}>{fact.label}</p>
-                      <p className="text-[14px] font-medium text-gray-900">{fact.value}</p>
+                      <p className="text-[10px] uppercase tracking-widest mb-1 font-semibold text-gray-500">
+                        {fact.label}
+                      </p>
+                      <p className="text-[14px] font-medium text-foreground">
+                        {fact.value}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -185,8 +226,8 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
             {relatedArticles.length > 0 && (
               <div>
                 <div className="flex items-center gap-4 mb-6">
-                  <h2 className="text-lg font-semibold">Articles liés</h2>
-                  <div className="flex-1 h-px bg-black/6" />
+                  <h2 className="text-lg font-bold">Articles lies</h2>
+                  <div className="flex-1 h-px bg-black/8" />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {relatedArticles.map((article) => (
@@ -201,23 +242,66 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
           <div className="lg:col-span-1">
             <div className="lg:sticky lg:top-24 space-y-6">
               {hasInfo && (
-                <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] p-6">
-                  <h2 className="text-[12px] uppercase tracking-[0.15em] text-gray-500 mb-3">Fiche d&apos;identité</h2>
+                <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.06)] border border-black/4 p-6">
+                  <h2 className="text-[11px] uppercase tracking-[0.18em] text-gray-500 font-bold mb-3">
+                    Fiche d&apos;identite
+                  </h2>
                   <div className="divide-y divide-black/5">
                     {enterprise.headquarters && (
-                      <InfoRow icon={MapPin} label="Siège" value={enterprise.headquarters} color={accent} />
+                      <InfoRow
+                        icon={MapPin}
+                        label="Siege"
+                        value={enterprise.headquarters}
+                      />
                     )}
                     {enterprise.founded_year && (
-                      <InfoRow icon={Calendar} label="Fondation" value={String(enterprise.founded_year)} color={accent} />
+                      <InfoRow
+                        icon={Calendar}
+                        label="Fondation"
+                        value={String(enterprise.founded_year)}
+                      />
                     )}
-                    {enterprise.ownership && (
-                      <InfoRow icon={Landmark} label="Actionnariat" value={enterprise.ownership} color={accent} />
+                    {ownership.length > 0 && (
+                      <InfoRow
+                        icon={Landmark}
+                        label="Actionnariat"
+                        value={
+                          <ul className="space-y-1.5">
+                            {ownership.map((share, idx) => (
+                              <li
+                                key={`${share.label}-${idx}`}
+                                className="flex items-center gap-2"
+                              >
+                                <CountryFlag
+                                  country={share.country}
+                                  size={16}
+                                  monochrome
+                                />
+                                <span>{share.label}</span>
+                                {share.share != null && (
+                                  <span className="text-gray-500 tabular-nums text-[13px]">
+                                    {share.share}%
+                                  </span>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        }
+                      />
                     )}
                     {enterprise.employees && (
-                      <InfoRow icon={Users} label="Employés" value={enterprise.employees} color={accent} />
+                      <InfoRow
+                        icon={Users}
+                        label="Effectifs"
+                        value={enterprise.employees}
+                      />
                     )}
                     {enterprise.revenue && (
-                      <InfoRow icon={DollarSign} label="Chiffre d'affaires" value={enterprise.revenue} color={accent} />
+                      <InfoRow
+                        icon={DollarSign}
+                        label="Chiffre d'affaires"
+                        value={enterprise.revenue}
+                      />
                     )}
                     {enterprise.website && (
                       <div className="py-3">
@@ -225,8 +309,7 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
                           href={enterprise.website}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 text-[13px] font-semibold transition-opacity hover:opacity-75"
-                          style={{ color: accent }}
+                          className="inline-flex items-center gap-2 text-[13px] font-semibold text-gold hover:text-foreground transition-colors"
                         >
                           <Globe className="w-4 h-4" />
                           Site officiel
@@ -238,17 +321,16 @@ export function EnterpriseContent({ enterprise, relatedArticles }: EnterpriseCon
                 </div>
               )}
 
-              {/* CTA sobre, sans halo */}
-              <div className="bg-[#111] text-white rounded-xl p-6">
+              {/* CTA retour atlas */}
+              <div className="bg-[#0a0a0a] text-white rounded-xl p-6">
                 <p className="text-[13px] text-white/70 mb-3">
-                  Vous souhaitez suivre l&apos;actualité de cette entreprise ?
+                  Explorer les autres piliers de l&apos;economie nigerienne
                 </p>
                 <Link
                   href="/entreprises"
-                  className="inline-flex items-center gap-2 text-[13px] font-semibold transition-opacity hover:opacity-80"
-                  style={{ color: accentLight }}
+                  className="inline-flex items-center gap-2 text-[13px] font-semibold text-gold hover:text-white transition-colors"
                 >
-                  Voir toutes les entreprises
+                  Atlas economique du Niger
                   <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>

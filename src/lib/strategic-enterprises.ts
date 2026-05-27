@@ -45,15 +45,15 @@ export const AGGREGATED_STATS: AggregatedStat[] = [
     // Source : agrégation interne ITIE Niger 2020-2022 + rapports d'entreprise consultes
     // (SONIDEP 270 Mds + NIGELEC 125 Mds + SONIBANK 28,8 Mds PNB + SOPAMIN 56 Mds 2015
     // + autres ND). Ordre de grandeur conservateur, a affiner avec donnees post-2024.
-    value: '~480 Mds',
-    label: 'FCFA cumules (CA estim.)',
+    value: '~480 Mds FCFA',
+    label: 'Chiffre d\'affaires cumule estime',
     source: 'ITIE Niger, rapports entreprises 2020-2023',
   },
   {
     // Source : Wikipedia + sites officiels (SOMAIR ~1000, NIGELEC ~1800, Niger Telecoms 782,
     // SONIBANK 424, SONIDEP 395, COMINAK 0 depuis 2021, BAGRI/SOPAMIN ND).
     value: '~4 400',
-    label: 'Emplois directs',
+    label: 'Emplois directs identifies',
     source: 'Sites officiels entreprises, ARCEP 2024',
   },
   {

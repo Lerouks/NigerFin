@@ -274,8 +274,7 @@ export function EnterpriseContent({
                               >
                                 <CountryFlag
                                   country={share.country}
-                                  size={16}
-                                  monochrome
+                                  size={18}
                                 />
                                 <span>{share.label}</span>
                                 {share.share != null && (

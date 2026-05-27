@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { requireAdmin } from '@/lib/admin-auth';
 import { serverError } from '@/lib/api-error';
+import { STRATEGIC_ENTERPRISES_CACHE_TAG } from '@/lib/strategic-enterprises';
+
+function purgeAtlasCache(slug?: string | null) {
+  revalidateTag(STRATEGIC_ENTERPRISES_CACHE_TAG, 'max');
+  revalidatePath('/entreprises');
+  if (slug) revalidatePath(`/entreprises/${slug}`);
+}
 
 // GET: list all strategic enterprises (admin)
 export async function GET() {
@@ -60,8 +67,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) return serverError(error, 'admin-strategic-enterprises');
-  revalidatePath('/entreprises');
-  if (data?.slug) revalidatePath(`/entreprises/${data.slug}`);
+  purgeAtlasCache(data?.slug);
   return NextResponse.json(data);
 }
 
@@ -79,6 +85,17 @@ export async function PUT(request: NextRequest) {
 
   updates.updated_at = new Date().toISOString();
 
+  // is_featured exclusif : si on set true, on unset toutes les autres avant
+  // (l'index unique partial Postgres bloquerait sinon).
+  if (updates.is_featured === true) {
+    const { error: unsetError } = await auth.serviceClient
+      .from('strategic_enterprises')
+      .update({ is_featured: false })
+      .eq('is_featured', true)
+      .neq('id', id);
+    if (unsetError) return serverError(unsetError, 'admin-strategic-enterprises-unset-featured');
+  }
+
   const { data, error } = await auth.serviceClient
     .from('strategic_enterprises')
     .update(updates)
@@ -87,8 +104,7 @@ export async function PUT(request: NextRequest) {
     .single();
 
   if (error) return serverError(error, 'admin-strategic-enterprises');
-  revalidatePath('/entreprises');
-  if (data?.slug) revalidatePath(`/entreprises/${data.slug}`);
+  purgeAtlasCache(data?.slug);
   return NextResponse.json(data);
 }
 
@@ -110,6 +126,6 @@ export async function DELETE(request: NextRequest) {
     .eq('id', id);
 
   if (error) return serverError(error, 'admin-strategic-enterprises');
-  revalidatePath('/entreprises');
+  purgeAtlasCache(null);
   return NextResponse.json({ success: true });
 }

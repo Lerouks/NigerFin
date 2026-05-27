@@ -4,26 +4,11 @@ import { notFound } from 'next/navigation';
 import { createServiceClient } from '@/lib/supabase';
 import { SITE_URL, truncateSeoDescription } from '@/lib/config';
 import { searchArticles } from '@/lib/articles';
+import { safeJsonLd } from '@/lib/seo';
 import { EnterpriseContent } from './EnterpriseContent';
 import { EnterpriseSeoBlock } from './EnterpriseSeoBlock';
 
 export const revalidate = 300;
-
-/**
- * Echappe les caracteres dangereux dans une serialisation JSON destinee a etre
- * injectee dans un <script type="application/ld+json">. JSON.stringify natif
- * ne transforme PAS "</script>" en sequence safe : un attaquant qui controle
- * un champ peut casser le tag et injecter du HTML/JS. Pattern utilise par Next.js
- * en interne pour ses propres blocs JSON-LD.
- */
-function safeJsonLd(obj: unknown): string {
-  return JSON.stringify(obj)
-    .replace(/</g, '\u003C')
-    .replace(/>/g, '\u003E')
-    .replace(/&/g, '\u0026')
-    .replace(/[\u2028]/g, '\u2028')
-    .replace(/[\u2029]/g, '\u2029');
-}
 
 interface EnterprisePageProps {
   params: Promise<{ slug: string }>;
@@ -136,14 +121,19 @@ export default async function EnterprisePage({ params }: EnterprisePageProps) {
 
   return (
     <>
+      {/* suppressHydrationWarning : le browser efface l'attribut nonce apres
+          lecture pour la securite CSP, donc React voit un mismatch server vs
+          client. Difference attendue, pattern Next.js officiel. */}
       <script
         type="application/ld+json"
         nonce={nonce}
+        suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
       <script
         type="application/ld+json"
         nonce={nonce}
+        suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }}
       />
       <EnterpriseContent enterprise={enterprise} relatedArticles={relatedArticles} />

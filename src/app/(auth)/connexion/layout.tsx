@@ -7,10 +7,8 @@ export const metadata: Metadata = {
 };
 
 export default function ConnexionLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <>
-      <h1 className="sr-only">Connexion à NFI Report</h1>
-      {children}
-    </>
-  );
+  // Le H1 visible vit dans page.tsx (variantes Connexion / Mot de passe oublie /
+  // Email envoye selon l'etat du formulaire). Le layout ne doit PAS dupliquer
+  // un H1 sr-only, sinon WCAG signale "2 H1 par page" (audit QA 2026-05-27).
+  return <>{children}</>;
 }

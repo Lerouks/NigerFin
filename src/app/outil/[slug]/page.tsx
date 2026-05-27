@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { SITE_URL } from '@/lib/config';
+import { safeJsonLd } from '@/lib/seo';
 import { ToolContent } from './ToolContent';
 import { ToolSeoContent } from './ToolSeoContent';
 
@@ -101,15 +102,20 @@ export default async function ToolPage({ params }: ToolPageProps) {
 
   return (
     <>
+      {/* suppressHydrationWarning : le browser efface l'attribut nonce apres
+          lecture pour la securite CSP. safeJsonLd pour bloquer XSS via
+          champs admin-edited (HIGH-1 audit security-reviewer 2026-05-27). */}
       <script
         type="application/ld+json"
         nonce={nonce}
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareLd) }}
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(softwareLd) }}
       />
       <script
         type="application/ld+json"
         nonce={nonce}
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }}
       />
       <ToolContent
         slug={slug}

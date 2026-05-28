@@ -3,6 +3,7 @@
 import { useState, useEffect, type ReactNode } from 'react';
 import { sanitizeHtml } from '@/lib/sanitize-html';
 import { ReadingProgressBar } from '@/components/ReadingProgressBar';
+import { BackToTop } from '@/components/BackToTop';
 import { Link2, Check } from 'lucide-react';
 import { Facebook, Linkedin } from '@/components/icons/social';
 import { useAuth } from '@/lib/auth-context';
@@ -144,7 +145,14 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [], header
     };
   };
 
-  const progressBar = <ReadingProgressBar targetId="article-main" />;
+  // Chrome de lecture commun aux deux rendus (article complet / paywall) :
+  // barre de progression en haut + bouton "remonter en haut" flottant.
+  const progressBar = (
+    <>
+      <ReadingProgressBar targetId="article-main" />
+      <BackToTop />
+    </>
+  );
 
   const isPremiumContent = contentType === 'premium';
   const authResolved = accessResult !== null;

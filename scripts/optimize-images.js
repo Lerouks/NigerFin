@@ -17,8 +17,6 @@ const TARGETS = [
   { src: 'premium/outil-budget.png', maxWidth: 900 },
   { src: 'premium/marches.png', maxWidth: 900 },
   { src: 'images/mockup-phone.png', maxWidth: 800 },
-  { src: 'nita.png' },
-  { src: 'amana.png' },
   { src: 'newsletter/citation-001-schweitzer.jpeg', maxWidth: 1080 },
   { src: 'og-image.png', maxWidth: 1200 },
   { src: 'logo-white.png' },

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Filter, Clock, Crown, Unlock, ArrowUpDown, ChevronLeft, ChevronRight, SlidersHorizontal, X, TrendingUp } from 'lucide-react';
+import { Clock, Crown, Unlock, ArrowUpDown, ChevronLeft, ChevronRight, SlidersHorizontal, X, TrendingUp } from 'lucide-react';
 import { ArticleCard } from '@/components/ArticleCard';
 import type { Article } from '@/types';
 
@@ -20,10 +20,14 @@ interface SectionArticlesFilteredProps {
   viewRanking?: string[];
 }
 
+/** Label de groupe facon eyebrow editorial NFI : filet dore + majuscules espacees. */
 function FilterGroup({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="space-y-2">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-gray-500">{label}</p>
+    <div className="space-y-3">
+      <div className="flex items-center gap-2.5">
+        <span aria-hidden className="h-px w-6 bg-gold" />
+        <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-foreground">{label}</p>
+      </div>
       <div className="space-y-1">{children}</div>
     </div>
   );
@@ -44,19 +48,27 @@ function FilterOption({
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
-      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 text-left ${
+      aria-pressed={active}
+      className={`group/opt w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] transition-all duration-200 text-left ${
         active
           ? golden
-            ? 'bg-[#d4a843] text-white shadow-xs'
-            : 'bg-[#111] text-white shadow-xs'
+            ? 'bg-gold text-white font-semibold shadow-xs'
+            : 'bg-[#111] text-white font-semibold shadow-xs'
           : golden
-            ? 'text-[#d4a843] hover:bg-[#d4a843]/10'
-            : 'text-gray-500 hover:bg-secondary hover:text-gray-700'
+            ? 'text-gold font-medium hover:bg-gold/10'
+            : 'text-gray-600 font-medium hover:bg-secondary hover:text-foreground'
       }`}
     >
-      {Icon && <Icon className="w-3.5 h-3.5 shrink-0" />}
-      {label}
+      {Icon && (
+        <Icon
+          className={`w-3.5 h-3.5 shrink-0 transition-colors ${
+            active || golden ? '' : 'text-gray-400 group-hover/opt:text-gray-600'
+          }`}
+        />
+      )}
+      <span className="flex-1">{label}</span>
     </button>
   );
 }
@@ -123,6 +135,35 @@ export function SectionArticlesFiltered({
     setCurrentPage(1);
   };
 
+  // Puces de filtres actifs supprimables (pattern editorial FT/Bloomberg).
+  const activeChips: { key: string; label: string; clear: () => void }[] = [];
+  if (contentFilter !== 'all') {
+    activeChips.push({
+      key: 'content',
+      label: contentFilter === 'free' ? 'Gratuit' : 'Premium',
+      clear: () => applyFilter(setContentFilter, 'all'),
+    });
+  }
+  if (sortOrder !== 'recent') {
+    activeChips.push({
+      key: 'sort',
+      label: sortOrder === 'oldest' ? 'Plus anciens' : 'Les plus lus',
+      clear: () => applyFilter(setSortOrder, 'recent'),
+    });
+  }
+  if (readTimeFilter !== 'all') {
+    activeChips.push({
+      key: 'time',
+      label:
+        readTimeFilter === 'short'
+          ? 'Moins de 5 min'
+          : readTimeFilter === 'medium'
+            ? '5 à 10 min'
+            : 'Plus de 10 min',
+      clear: () => applyFilter(setReadTimeFilter, 'all'),
+    });
+  }
+
   const goToPage = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -141,30 +182,7 @@ export function SectionArticlesFiltered({
   };
 
   const filtersContent = (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-[#d4a843]" />
-          <span className="text-[13px] font-semibold text-gray-800">Filtres</span>
-          {activeCount > 0 && (
-            <span className="w-5 h-5 rounded-full bg-[#d4a843] text-white text-[10px] font-bold flex items-center justify-center">
-              {activeCount}
-            </span>
-          )}
-        </div>
-        {hasActiveFilters && (
-          <button
-            onClick={resetFilters}
-            className="text-[11px] text-[#d4a843] hover:text-[#c49a3a] font-medium transition-colors"
-          >
-            Tout effacer
-          </button>
-        )}
-      </div>
-
-      <div className="h-px bg-black/6" />
-
+    <div className="space-y-7">
       {/* Type */}
       <FilterGroup label="Type d'article">
         <FilterOption active={contentFilter === 'all'} onClick={() => applyFilter(setContentFilter, 'all')} label="Tous les articles" />
@@ -172,7 +190,7 @@ export function SectionArticlesFiltered({
         <FilterOption active={contentFilter === 'premium'} onClick={() => applyFilter(setContentFilter, 'premium')} icon={Crown} label="Premium" golden />
       </FilterGroup>
 
-      <div className="h-px bg-black/6" />
+      <div className="h-px bg-black/8" />
 
       {/* Sort */}
       <FilterGroup label="Trier par">
@@ -181,7 +199,7 @@ export function SectionArticlesFiltered({
         <FilterOption active={sortOrder === 'popular'} onClick={() => applyFilter(setSortOrder, 'popular')} icon={TrendingUp} label="Les plus lus" />
       </FilterGroup>
 
-      <div className="h-px bg-black/6" />
+      <div className="h-px bg-black/8" />
 
       {/* Read time */}
       <FilterGroup label="Durée de lecture">
@@ -197,13 +215,14 @@ export function SectionArticlesFiltered({
     <div>
       {/* Mobile: filter toggle button */}
       <button
+        type="button"
         onClick={() => setMobileFiltersOpen(true)}
-        className="lg:hidden flex items-center gap-2 px-4 py-2.5 mb-6 bg-white border border-black/6 rounded-xl text-[13px] font-medium text-gray-600 hover:border-black/12 transition-colors w-full justify-center"
+        className="lg:hidden flex items-center gap-2 px-4 py-3 mb-6 bg-white border border-black/8 rounded-xl text-[13px] font-semibold text-foreground hover:border-gold transition-colors w-full justify-center"
       >
-        <SlidersHorizontal className="w-4 h-4" />
+        <SlidersHorizontal className="w-4 h-4 text-gold" />
         Filtres
         {activeCount > 0 && (
-          <span className="w-5 h-5 rounded-full bg-[#d4a843] text-white text-[10px] font-bold flex items-center justify-center">
+          <span className="w-5 h-5 rounded-full bg-gold text-white text-[10px] font-bold flex items-center justify-center">
             {activeCount}
           </span>
         )}
@@ -221,25 +240,47 @@ export function SectionArticlesFiltered({
           />
           <div className="absolute inset-x-0 bottom-0 max-h-[85vh] bg-white rounded-t-2xl shadow-2xl overflow-y-auto overscroll-contain animate-slide-up">
             {/* Drag handle */}
-            <div className="sticky top-0 bg-white pt-3 pb-2 px-6 border-b border-black/4 z-10">
+            <div className="sticky top-0 bg-white pt-3 pb-3 px-6 border-b border-black/6 z-10">
               <div className="w-10 h-1 rounded-full bg-gray-200 mx-auto mb-3" />
               <div className="flex items-center justify-between">
-                <h3 className="text-[16px] font-semibold">Filtres</h3>
-                <button
-                  onClick={() => setMobileFiltersOpen(false)}
-                  className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-[#eee] transition-colors"
-                >
-                  <X className="w-4 h-4 text-gray-500" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <SlidersHorizontal className="w-4 h-4 text-gold" />
+                  <h3 className="text-[16px] font-bold tracking-tight text-foreground">Filtres</h3>
+                  {activeCount > 0 && (
+                    <span className="w-5 h-5 rounded-full bg-gold text-white text-[10px] font-bold flex items-center justify-center">
+                      {activeCount}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  {hasActiveFilters && (
+                    <button
+                      type="button"
+                      onClick={resetFilters}
+                      className="text-[12px] text-gold hover:text-[#c49a3a] font-semibold transition-colors"
+                    >
+                      Tout effacer
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setMobileFiltersOpen(false)}
+                    className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-[#eee] transition-colors"
+                    aria-label="Fermer"
+                  >
+                    <X className="w-4 h-4 text-gray-500" />
+                  </button>
+                </div>
               </div>
             </div>
             <div className="p-6">
               {filtersContent}
             </div>
-            <div className="sticky bottom-0 bg-white border-t border-black/4 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <div className="sticky bottom-0 bg-white border-t border-black/6 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
               <button
+                type="button"
                 onClick={() => setMobileFiltersOpen(false)}
-                className="w-full py-3.5 bg-[#111] text-white rounded-xl text-[14px] font-medium hover:bg-[#333] transition-colors"
+                className="w-full py-3.5 bg-[#111] text-white rounded-xl text-[14px] font-semibold hover:bg-[#333] transition-colors"
               >
                 Voir les résultats ({filtered.length})
               </button>
@@ -248,22 +289,68 @@ export function SectionArticlesFiltered({
         </div>
       )}
 
-      <div className="flex gap-8">
+      <div className="flex gap-8 lg:gap-10">
         {/* Desktop: sidebar filters */}
-        <aside className="hidden lg:block w-[220px] shrink-0">
-          <div className="sticky top-24 bg-white rounded-xl border border-black/6 p-5 shadow-[0_2px_20px_-6px_rgba(0,0,0,0.06)]">
+        <aside className="hidden lg:block w-[240px] shrink-0">
+          <div className="sticky top-24 bg-white rounded-2xl border border-black/8 p-6 shadow-[0_4px_30px_-14px_rgba(0,0,0,0.1)]">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <SlidersHorizontal className="w-4 h-4 text-gold" />
+                <span className="text-[13px] font-bold tracking-tight text-foreground">Filtres</span>
+                {activeCount > 0 && (
+                  <span className="w-5 h-5 rounded-full bg-gold text-white text-[10px] font-bold flex items-center justify-center">
+                    {activeCount}
+                  </span>
+                )}
+              </div>
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  className="text-[11px] text-gold hover:text-[#c49a3a] font-semibold transition-colors"
+                >
+                  Tout effacer
+                </button>
+              )}
+            </div>
+            <div className="h-px bg-black/8 my-6" />
             {filtersContent}
           </div>
         </aside>
 
         {/* Articles */}
         <div className="flex-1 min-w-0">
-          {/* Results count */}
-          <p className="text-[13px] text-gray-500 mb-6">
-            {filtered.length} article{filtered.length !== 1 ? 's' : ''}
-            {hasActiveFilters ? ' (filtré)' : ''}
-            {totalPages > 1 && ` · Page ${safePage} sur ${totalPages}`}
-          </p>
+          {/* Results count + active filter chips */}
+          <div className="mb-7 space-y-3">
+            <p className="text-[13px] text-gray-500">
+              <span className="font-bold text-foreground">{filtered.length}</span> article{filtered.length !== 1 ? 's' : ''}
+              {hasActiveFilters ? (filtered.length !== 1 ? ' filtrés' : ' filtré') : ''}
+              {totalPages > 1 && ` · Page ${safePage} sur ${totalPages}`}
+            </p>
+            {activeChips.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2">
+                {activeChips.map((chip) => (
+                  <button
+                    key={chip.key}
+                    type="button"
+                    onClick={chip.clear}
+                    aria-label={`Retirer le filtre ${chip.label}`}
+                    className="group inline-flex items-center gap-1.5 rounded-full border border-black/10 bg-white pl-3 pr-2 py-1 text-[12px] font-medium text-gray-700 hover:border-gold hover:text-foreground transition-colors"
+                  >
+                    {chip.label}
+                    <X className="w-3 h-3 text-gray-400 group-hover:text-gold transition-colors" />
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  className="text-[12px] font-semibold text-gold hover:text-[#c49a3a] transition-colors"
+                >
+                  Tout effacer
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* Articles grid : 1 colonne si peu d'articles pour ne pas laisser de vide */}
           <div className={`grid gap-6 stagger-grid ${paginatedArticles.length === 1 ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
@@ -277,8 +364,9 @@ export function SectionArticlesFiltered({
             <div className="text-center py-16">
               <p className="text-gray-500 text-lg mb-2">Aucun article ne correspond aux filtres</p>
               <button
+                type="button"
                 onClick={resetFilters}
-                className="text-[13px] text-[#d4a843] hover:text-[#c49a3a] font-medium transition-colors"
+                className="text-[13px] text-gold hover:text-[#c49a3a] font-semibold transition-colors"
               >
                 Réinitialiser les filtres
               </button>
@@ -298,6 +386,7 @@ export function SectionArticlesFiltered({
             <nav className="mt-10 flex items-center justify-center" aria-label="Pagination">
               <div className="flex flex-wrap items-center gap-1.5">
                 <button
+                  type="button"
                   onClick={() => goToPage(safePage - 1)}
                   disabled={safePage <= 1}
                   aria-label="Page précédente"
@@ -312,6 +401,7 @@ export function SectionArticlesFiltered({
                     <span key={`ellipsis-${i}`} className="px-2 text-gray-300 text-[13px]">...</span>
                   ) : (
                     <button
+                      type="button"
                       key={page}
                       onClick={() => goToPage(page)}
                       aria-label={`Page ${page}`}
@@ -328,6 +418,7 @@ export function SectionArticlesFiltered({
                 )}
 
                 <button
+                  type="button"
                   onClick={() => goToPage(safePage + 1)}
                   disabled={safePage >= totalPages}
                   aria-label="Page suivante"

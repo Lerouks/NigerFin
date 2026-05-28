@@ -48,20 +48,32 @@ export default async function HomePage() {
     getSiteFeatures(),
   ]);
 
-  // Hero : featured si dispo, sinon le tout 1er article recent (fallback robuste)
-  const heroArticle = featured[0] ?? latestArticles[0] ?? null;
+  // "La une" = uniquement un article explicitement mis en avant (is_featured).
+  // Aucun fallback automatique : si rien n'est a la une, pas de hero du tout,
+  // la home attaque directement les "Dernieres actualites" (le plus recent
+  // devient alors la grande vedette). Comportement aligne sur l'intention
+  // documentee de /api/admin/articles/featured (zero featured = pas de hero).
+  const heroArticle = featured[0] ?? null;
   const heroId = heroArticle?._id;
 
-  // Articles restants pour la section "Dernieres actualites" (exclu le hero)
+  // Articles restants pour la section "Dernieres actualites" (exclu le hero
+  // s'il existe ; sinon le plus recent reste la vedette de la section)
   const latestFiltered = latestArticles.filter((a) => a._id !== heroId);
   const recentVedette = latestFiltered[0] ?? null;
   const recentSecondary = latestFiltered.slice(1, 4);
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero magazine plein largeur */}
+      {/* Une magazine plein largeur. Sans article a la une : pas de hero, on
+          garde juste un H1 invisible (SEO + a11y) et on enchaine directement
+          sur les actualites. Le bloc de marque est reserve au site reellement
+          vide (aucune une ET aucune actualite). */}
       {heroArticle ? (
         <HomeHero article={heroArticle} />
+      ) : recentVedette ? (
+        <h1 className="sr-only">
+          NFI Report, actualités économiques et financières du Niger
+        </h1>
       ) : (
         <div className="border-b border-black/10 py-20 text-center">
           <p className="text-[14px] uppercase tracking-[0.22em] text-gray-500">
@@ -135,7 +147,7 @@ export default async function HomePage() {
                     fill
                     sizes="(min-width: 1024px) 720px, 100vw"
                     quality={85}
-                    priority
+                    priority={!heroArticle}
                     className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
                   />
                 </div>

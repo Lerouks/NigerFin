@@ -243,6 +243,11 @@
   animation: subtlePulse 3s ease-in-out infinite;
 }
 
+/* Halo dore pulsant (ex: capitale sur la carte du Niger) */
+.animate-pulse-gold {
+  animation: pulse-gold 2.6s ease-in-out infinite;
+}
+
 /* Hero grid pattern overlay */
 .hero-grid-pattern {
   background-image:

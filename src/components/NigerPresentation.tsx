@@ -198,9 +198,8 @@ export function NigerPresentation({ initialData }: NigerPresentationProps = {}) 
           </div>
         )}
 
-        {/* Carte du Niger custom (PNG public/carte-niger.png) avec tooltips villes au survol */}
-        {/* Pas de container card : la PNG est rendue directement sur le fond ivoire,
-            mix-blend-mode darken rend le fond blanc de la PNG transparent. */}
+        {/* Carte vectorielle du Niger (SVG, frontieres officielles) avec tooltips
+            villes au survol. Rendue directement sur le fond ivoire, sans container. */}
         <div className="mb-14">
           <NigerMapInteractive />
           <p className="text-[11px] text-gray-500 mt-3 text-center">

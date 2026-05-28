@@ -53,6 +53,10 @@ export default async function NigerPage() {
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 md:pt-16">
+        <NigerPresentation initialData={data} />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16">
         <MacroIndicatorsBlock
           eyebrow="Niger en chiffres"
           title="Indicateurs macroéconomiques officiels"
@@ -61,10 +65,6 @@ export default async function NigerPage() {
           columns={3}
           asOf={INS_LAST_UPDATE}
         />
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16">
-        <NigerPresentation initialData={data} />
       </div>
 
       <NigerSeoBlock />

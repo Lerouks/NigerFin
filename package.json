@@ -62,7 +62,7 @@
     "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.2.6",
-    "knip": "^6.6.2",
+    "knip": "^6.15.0",
     "postcss": "^8.4.49",
     "tailwindcss": "^4.3.0",
     "typescript": "^5.7.2",

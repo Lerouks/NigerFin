@@ -805,9 +805,9 @@ export function PaymentContent() {
               </div>
 
               <p className="text-[13px] text-gray-500 leading-relaxed mb-5">
-                Renouvellement automatique à {formatPrice(price)}/{billingOption.durationLabel === '1 an' ? 'an' : billingOption.durationLabel === '3 mois' ? 'trimestre' : 'mois'}.{' '}
+                Paiement unique, accès Premium pour {billingOption.durationLabel}.{' '}
                 <span className="font-medium text-gray-700">
-                  Résiliable en ligne avant le renouvellement.
+                  Aucun prélèvement automatique : à la fin, vous choisissez de renouveler ou non.
                 </span>
               </p>
 

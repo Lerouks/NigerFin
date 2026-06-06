@@ -353,7 +353,7 @@ function PreviewSection() {
             Ce que tu reçois, dès ton inscription.
           </h2>
           <p className="mt-5 text-[16px] leading-relaxed text-gray-600">
-            Pas de promesse en l&rsquo;air. Voici exactement ce que les membres Premium consultent en ce moment.
+            Voici ce que les membres Premium consultent en ce moment.
           </p>
 
           <div className="mt-8 space-y-3">

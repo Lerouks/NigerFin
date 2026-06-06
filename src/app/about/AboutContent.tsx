@@ -91,7 +91,7 @@ export function AboutContent({ sections }: { sections: Section[] }) {
                 <span className="text-[11px] tracking-[0.15em] uppercase text-gold font-semibold">Fondateurs</span>
                 <div className="h-px w-10 bg-gold/30" />
               </div>
-              <h2 className="text-3xl mb-8">Les visionnaires derrière NFI Report</h2>
+              <h2 className="text-3xl mb-8">Qui est derrière NFI Report</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 {founders.map((f) => (
                   <div key={f.id} className="bg-white rounded-xl border border-black/6 p-7 text-left hover:shadow-lg transition-all duration-300 group">

@@ -101,9 +101,9 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
               placeholder="Rechercher un article, un sujet, une catégorie..."
               aria-label="Rechercher un article"
               autoComplete="off"
-              className="flex-1 text-[16px] bg-transparent border-none outline-hidden placeholder:text-gray-300"
+              className="flex-1 text-[16px] bg-transparent border-none outline-hidden placeholder:text-gray-500"
             />
-            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <button onClick={onClose} aria-label="Fermer la recherche" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
               <X className="w-6 h-6" />
             </button>
           </div>

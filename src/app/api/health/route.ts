@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { verifyBearerSecret } from '@/lib/secret-compare';
 import { dataOrchestrator } from '@/lib/services';
 import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase';
 import * as Sentry from '@sentry/nextjs';
@@ -11,7 +12,7 @@ export async function GET(request: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;
 
   // Allow access from admin or cron
-  const isCron = !!(cronSecret && authHeader === `Bearer ${cronSecret}`);
+  const isCron = verifyBearerSecret(authHeader, cronSecret);
 
   // Sec M-9 : sans auth (ni cron ni admin), on retourne uniquement un
   // statut binaire. Avant, l'endpoint exposait noms de services, success rates,

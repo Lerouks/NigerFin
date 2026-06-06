@@ -18,6 +18,25 @@ export const metadata: Metadata = {
   description:
     "Magazine economique premium dedie au Niger et a l'Afrique de l'Ouest : analyses, donnees de marche, dossiers d'entreprises strategiques, outils financiers.",
   alternates: { canonical: '/' },
+  // Bloc OG complet : dans Next, le openGraph d'une page remplace celui du
+  // layout (pas de fusion profonde), il faut donc redonner l'image ici.
+  openGraph: {
+    type: 'website',
+    locale: 'fr_FR',
+    siteName: 'NFI Report',
+    url: '/',
+    title: 'NFI Report - Actualités économiques et financières du Niger',
+    description:
+      "Magazine economique premium dedie au Niger et a l'Afrique de l'Ouest : analyses, donnees de marche, dossiers d'entreprises strategiques, outils financiers.",
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'NFI Report - Actualités économiques et financières du Niger',
+      },
+    ],
+  },
 };
 
 // ISR: page régénérée toutes les heures. Articles n'évoluent pas à la minute,

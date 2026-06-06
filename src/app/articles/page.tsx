@@ -17,7 +17,17 @@ export const metadata: Metadata = {
     description:
       'L’ensemble des analyses et actualités économiques et financières du Niger et de l’Afrique de l’Ouest.',
     type: 'website',
+    locale: 'fr_FR',
+    siteName: 'NFI Report',
     url: '/articles',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'NFI Report - Actualités économiques et financières du Niger',
+      },
+    ],
   },
 };
 

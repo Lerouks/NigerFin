@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
+import { verifyBearerSecret } from '@/lib/secret-compare';
 import { createServiceClient } from '@/lib/supabase';
 import { sendNewsletterIssue } from '@/lib/newsletter/send';
 
@@ -13,7 +14,7 @@ export async function GET(req: NextRequest) {
   // Fail-closed : sans CRON_SECRET configure, l'endpoint refuse toutes les requetes (securite C-2).
   const cronSecret = process.env.CRON_SECRET;
   const auth = req.headers.get('authorization');
-  if (!cronSecret || auth !== `Bearer ${cronSecret}`) {
+  if (!verifyBearerSecret(auth, cronSecret)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

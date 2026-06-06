@@ -6,6 +6,8 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   trailingSlash: false,
+  // Masque l'entete `x-powered-by: Next.js` (information disclosure mineure).
+  poweredByHeader: false,
   transpilePackages: [
     'react-markdown',
     'rehype-raw',

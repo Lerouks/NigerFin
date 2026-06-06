@@ -1,5 +1,6 @@
 import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
+import { verifyBearerSecret } from '@/lib/secret-compare';
 
 // On-demand cache revalidation endpoint
 // Called after article creation/update/deletion from admin
@@ -8,11 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 // Le secret n'est PLUS accepte en query string, qui etait logge en clair
 // par Vercel function logs (durcissement audit securite 2026-05-20).
 export async function POST(request: NextRequest) {
-  const authHeader = request.headers.get('authorization') ?? '';
-  const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
-  const expected = process.env.REVALIDATE_SECRET;
-
-  if (!bearer || !expected || bearer !== expected) {
+  if (!verifyBearerSecret(request.headers.get('authorization'), process.env.REVALIDATE_SECRET)) {
     return NextResponse.json({ message: 'Invalid secret' }, { status: 401 });
   }
 

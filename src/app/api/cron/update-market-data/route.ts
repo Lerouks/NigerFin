@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
+import { verifyBearerSecret } from '@/lib/secret-compare';
 import { createServiceClient } from '@/lib/supabase';
 import { dataOrchestrator } from '@/lib/services/data-orchestrator';
 import * as Sentry from '@sentry/nextjs';
@@ -22,7 +23,7 @@ export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
 
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+  if (!verifyBearerSecret(authHeader, cronSecret)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

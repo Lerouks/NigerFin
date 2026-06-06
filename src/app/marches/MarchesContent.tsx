@@ -120,7 +120,7 @@ export function MarchesContent() {
         </h3>
         <p className="text-white/50 text-[14px] mb-4 max-w-md mx-auto">
           Accédez à nos cours pour comprendre les indices, devises, matières premières et
-          cryptomonnaies en profondeur.
+          cryptomonnaies.
         </p>
         <Link
           href="/education"

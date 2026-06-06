@@ -10,9 +10,9 @@ import {
 
 export const revalidate = 3600;
 export const metadata: Metadata = {
-  title: 'Atlas economique du Niger',
+  title: 'Atlas économique du Niger',
   description:
-    "Les entreprises strategiques du Niger : mines, energie, telecommunications, banque, agriculture. Cartographie editoriale du tissu economique nigerien par NFI Report.",
+    "Les entreprises stratégiques du Niger par secteur : mines, énergie, télécoms, banque, agriculture. Le panorama économique du pays par la rédaction NFI Report.",
   alternates: { canonical: '/entreprises' },
 };
 
@@ -41,19 +41,19 @@ export default async function EntreprisesPage() {
               <div className="flex items-baseline gap-3 mb-3">
                 <span className="h-px w-8 bg-gold" />
                 <span className="text-[11px] uppercase tracking-[0.22em] text-foreground font-extrabold">
-                  Actualite
+                  Actualité
                 </span>
               </div>
               <h2
                 id="atlas-news-heading"
                 className="text-[clamp(2rem,4.5vw,2.75rem)] font-black tracking-tight text-foreground leading-[1.05]"
               >
-                Articles recents sur les entreprises
+                Articles récents sur les entreprises
               </h2>
               <div aria-hidden className="mt-5 h-px w-16 bg-gold" />
               <p className="mt-5 text-[15px] md:text-[16px] italic text-gray-700 max-w-2xl leading-relaxed">
-                Couverture editoriale en continu des acteurs strategiques nigeriens
-                et de leur environnement regional.
+                Notre couverture des acteurs stratégiques nigériens et de leur
+                environnement régional.
               </p>
             </header>
 

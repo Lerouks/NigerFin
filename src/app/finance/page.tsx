@@ -26,7 +26,7 @@ export default async function FinancePage() {
         paragraphs={[
           "La rubrique Finance de NFI Report regroupe les actualités, analyses et décryptages du secteur financier au Niger, dans la zone UEMOA et plus largement en Afrique de l'Ouest. Banques commerciales, microfinance, marchés de capitaux, paiements numériques, inclusion financière : nous couvrons tous les sujets qui façonnent l'accès au crédit, à l'épargne et à l'investissement pour les particuliers comme pour les entreprises.",
           "L'écosystème financier nigérien évolue rapidement, porté par l'essor du Mobile Money, la modernisation des services bancaires, l'arrivée de fintechs innovantes et l'intégration croissante avec les marchés régionaux. Les décisions de la BCEAO (Banque Centrale des États de l'Afrique de l'Ouest), les politiques du FMI et les mouvements des grandes banques panafricaines impactent directement le pouvoir d'achat, le coût du crédit et les opportunités d'investissement disponibles localement.",
-          "Que vous soyez professionnel du secteur, dirigeant d'entreprise, investisseur particulier ou simple curieux, nos articles vous donnent les clés pour comprendre les enjeux et anticiper les évolutions du paysage financier ouest-africain.",
+          "Professionnels du secteur, dirigeants d'entreprise, investisseurs particuliers : nos articles éclairent les évolutions du système financier nigérien et ouest-africain.",
         ]}
         highlights={[
           { title: 'Banques au Niger', body: 'Suivi des établissements de crédit (SONIBANK, BAGRI, BOA, Ecobank, Atlantique) et de leur stratégie face à la transition numérique.' },

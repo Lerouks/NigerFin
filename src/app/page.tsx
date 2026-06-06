@@ -16,7 +16,7 @@ import { getSiteFeatures } from '@/lib/site-data';
 export const metadata: Metadata = {
   title: 'NFI Report - Actualités économiques et financières du Niger',
   description:
-    "Magazine economique premium dedie au Niger et a l'Afrique de l'Ouest : analyses, donnees de marche, dossiers d'entreprises strategiques, outils financiers.",
+    "Magazine économique premium dédié au Niger et à l'Afrique de l'Ouest : analyses, données de marché, dossiers d'entreprises stratégiques, outils financiers.",
   alternates: { canonical: '/' },
   // Bloc OG complet : dans Next, le openGraph d'une page remplace celui du
   // layout (pas de fusion profonde), il faut donc redonner l'image ici.
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     url: '/',
     title: 'NFI Report - Actualités économiques et financières du Niger',
     description:
-      "Magazine economique premium dedie au Niger et a l'Afrique de l'Ouest : analyses, donnees de marche, dossiers d'entreprises strategiques, outils financiers.",
+      "Magazine économique premium dédié au Niger et à l'Afrique de l'Ouest : analyses, données de marché, dossiers d'entreprises stratégiques, outils financiers.",
     images: [
       {
         url: '/og-image.png',
@@ -47,13 +47,13 @@ export const revalidate = 3600;
 const HOME_SECTIONS = ['economie', 'finance', 'marches', 'entreprises'] as const;
 const SECTION_INTROS: Record<string, string> = {
   economie:
-    "Conjoncture, politiques publiques et grands equilibres macroeconomiques du Niger et de la zone UEMOA.",
+    "Conjoncture, politiques publiques et grands équilibres macroéconomiques du Niger et de la zone UEMOA.",
   finance:
-    "Banques, microfinance, marche du credit, regulation BCEAO et inclusion financiere.",
+    "Banques, microfinance, marché du crédit, régulation BCEAO et inclusion financière.",
   marches:
-    "Cours BRVM, devises, matieres premieres et indices qui pesent sur l'economie nigerienne.",
+    "Cours BRVM, devises, matières premières et indices clés pour l'économie nigérienne.",
   entreprises:
-    "Acteurs strategiques nigeriens et regionaux : resultats, strategies, opportunites.",
+    "Acteurs stratégiques nigériens et régionaux : résultats, stratégies, opportunités.",
 };
 
 const LATEST_COUNT = 8; // 1 hero + 1 vedette + 6 secondaires
@@ -96,7 +96,7 @@ export default async function HomePage() {
       ) : (
         <div className="border-b border-black/10 py-20 text-center">
           <p className="text-[14px] uppercase tracking-[0.22em] text-gray-500">
-            Atlas economique du Niger
+            Atlas économique du Niger
           </p>
           <h1 className="mt-3 text-[clamp(2rem,4vw,3rem)] font-black text-foreground">
             NFI Report
@@ -281,18 +281,18 @@ export default async function HomePage() {
             <div className="flex items-center gap-3 mb-3">
               <span className="h-px w-10 bg-gold" />
               <span className="text-[11px] uppercase tracking-[0.24em] text-foreground font-extrabold">
-                Donnees de marche
+                Données de marché
               </span>
             </div>
             <h2
               id="home-marches-heading"
               className="font-black tracking-tight leading-[1.05] text-[clamp(1.75rem,3vw,2.25rem)] text-foreground"
             >
-              Le pouls economique
+              Le pouls économique
             </h2>
             <p className="mt-3 text-[15px] md:text-[16px] italic text-gray-700 max-w-2xl">
-              Cours BRVM, devises, matieres premieres et indices qui structurent
-              l&apos;economie nigerienne.
+              Les chiffres à suivre au quotidien : cours BRVM, devises, matières
+              premières et indices.
             </p>
           </header>
           <MarketDataWidget />

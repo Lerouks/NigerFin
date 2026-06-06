@@ -15,7 +15,7 @@ interface InvoiceRow {
 }
 
 function formatDateFr(iso: string | null): string {
-  if (!iso) return '—';
+  if (!iso) return 'Non renseignée';
   return new Date(iso).toLocaleDateString('fr-FR', {
     day: 'numeric',
     month: 'long',
@@ -79,7 +79,7 @@ export function InvoicesList({ invoices }: { invoices: InvoiceRow[] }) {
             const badge = statusBadge(inv.status);
             const period = inv.period_start && inv.period_end
               ? `${formatDateFr(inv.period_start)} → ${formatDateFr(inv.period_end)}`
-              : '—';
+              : 'Non renseignée';
             return (
               <tr key={inv.id} className="hover:bg-neutral-50/50">
                 <td className="px-5 py-4 font-mono text-sm font-medium text-foreground tabular-nums">{inv.invoice_number}</td>

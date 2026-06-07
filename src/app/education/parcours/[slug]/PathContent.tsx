@@ -212,8 +212,8 @@ export function PathContent({ slug }: { slug: string }) {
           {!data.is_signed_in && (
             <div className="mt-8 max-w-md p-4 rounded-xl bg-white/5 border border-white/8">
               <p className="text-[13px] text-white/70">
-                Crée un compte gratuit pour suivre ton avancement, reprendre où tu t&apos;étais arrêté et
-                débloquer tes succès.
+                Créez un compte gratuit pour suivre votre avancement, reprendre où vous vous étiez arrêté et
+                débloquer vos succès.
               </p>
               <div className="flex gap-2 mt-3">
                 <Link

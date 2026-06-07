@@ -175,7 +175,7 @@ function LessonRow({
                 className="inline-flex items-center gap-2 text-[13px] font-medium text-[#111] hover:underline"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                Crée un compte pour suivre ton avancement
+                Créez un compte pour suivre votre avancement
               </Link>
             )}
           </div>

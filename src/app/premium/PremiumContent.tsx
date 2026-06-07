@@ -14,7 +14,7 @@ const SCREENSHOTS = [
     src: '/premium/marches.webp',
     alt: 'Page Marchés - cours BRVM, devises, matières premières',
     label: 'Cours marchés',
-    desc: 'Cours BRVM, devises FCFA / EUR / USD et matières premières (or, pétrole, uranium) mis à jour plusieurs fois par jour. Les chiffres qui pèsent réellement sur ton pouvoir d’achat et tes placements.',
+    desc: 'Cours BRVM, devises FCFA / EUR / USD et matières premières (or, pétrole, uranium) mis à jour plusieurs fois par jour. Les chiffres qui pèsent sur votre pouvoir d’achat et vos placements.',
   },
   {
     src: '/premium/article-premium.webp',
@@ -26,7 +26,7 @@ const SCREENSHOTS = [
     src: '/premium/outil-budget.webp',
     alt: 'Outil Budget - taux d’épargne, répartition des dépenses',
     label: 'Outil Budget',
-    desc: 'Entre tes revenus et dépenses. Obtiens ton taux d’épargne, ta répartition par poste et des recommandations concrètes pour passer à 15-20 % d’épargne. Export PDF inclus.',
+    desc: 'Entrez vos revenus et dépenses. Obtenez votre taux d’épargne, votre répartition par poste et des recommandations concrètes pour passer à 15-20 % d’épargne. Export PDF inclus.',
   },
 ];
 
@@ -49,17 +49,17 @@ const BENEFITS = [
   {
     icon: Download,
     title: 'Téléchargement PDF des analyses',
-    desc: 'Emporte tes analyses budget, salaire et investissement en PDF, prêtes à imprimer ou partager.',
+    desc: 'Emportez vos analyses budget, salaire et investissement en PDF, prêtes à imprimer ou partager.',
   },
   {
     icon: GraduationCap,
     title: 'Cours d’éducation financière',
-    desc: 'Modules complets : épargne, investissement, BRVM, crypto, devises. Apprends à ton rythme.',
+    desc: 'Modules complets : épargne, investissement, BRVM, crypto, devises. Apprenez à votre rythme.',
   },
   {
     icon: Bell,
     title: 'Alertes temps réel',
-    desc: 'Notifications sur les actus économiques majeures qui impactent ton portefeuille.',
+    desc: 'Notifications sur les actus économiques majeures qui impactent votre portefeuille.',
   },
 ];
 
@@ -69,12 +69,12 @@ const FAQ = [
     a: 'Mobile Money (Airtel, Moov) ou Visa, Mastercard, American Express via iPayMoney. Paiement sécurisé, en quelques secondes.',
   },
   {
-    q: 'Je peux annuler quand ?',
-    a: 'Quand tu veux, en 1 clic depuis ton compte. Tu gardes l’accès jusqu’à la fin de la période payée.',
+    q: 'Y a-t-il un engagement ?',
+    a: 'Aucun. Vous payez une seule fois pour la durée choisie : pas d’abonnement à résilier. L’accès prend fin à l’échéance, sauf si vous le renouvelez vous-même.',
   },
   {
     q: 'Y a-t-il un essai gratuit ?',
-    a: 'Pas pour le moment. Mais tu peux lire 3 articles Premium par mois gratuitement pour tester la qualité.',
+    a: 'Pas pour le moment. Mais vous pouvez lire 3 articles Premium par mois gratuitement pour tester la qualité.',
   },
   {
     q: 'Que recouvre exactement Premium ?',
@@ -283,7 +283,7 @@ function BenefitsSection() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <FadeUp className="mx-auto max-w-2xl text-center">
           <p className="text-[12px] font-semibold uppercase tracking-wider text-gold">
-            Ce que tu débloques
+            Ce que vous débloquez
           </p>
           <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Tout ce qu&rsquo;il te faut pour comprendre, décider et agir.
@@ -350,7 +350,7 @@ function PreviewSection() {
             Aperçu en direct
           </p>
           <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Ce que tu reçois, dès ton inscription.
+            Ce que vous recevez, dès votre inscription.
           </h2>
           <p className="mt-5 text-[16px] leading-relaxed text-gray-600">
             Voici ce que les membres Premium consultent en ce moment.
@@ -522,13 +522,13 @@ function FinalCta() {
     <section className="bg-foreground py-24 sm:py-32">
       <FadeUp className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
         <h2 className="text-balance text-3xl font-bold leading-[1.15] tracking-tight text-white sm:text-5xl">
-          Investis dans ce que personne ne peut te prendre :
+          Investissez dans ce que personne ne peut vous prendre :
           <br />
-          <span className="text-gold">ta connaissance.</span>
+          <span className="text-gold">votre connaissance.</span>
         </h2>
         <p className="mx-auto mt-6 max-w-xl text-[16px] leading-relaxed text-gray-300">
-          Rejoins les membres Premium de NFI Report et reçois dès aujourd&rsquo;hui
-          ton premier briefing économique ouest-africain.
+          Rejoignez les membres Premium de NFI Report et recevez dès aujourd&rsquo;hui
+          votre premier briefing économique ouest-africain.
         </p>
         <div className="mt-10 flex flex-col items-center gap-4">
           <Link

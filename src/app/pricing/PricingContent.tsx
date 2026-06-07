@@ -240,16 +240,16 @@ const PRICING_FAQ = [
     a: 'Mobile Money (Airtel, Moov) ou par carte Visa, Mastercard, American Express via iPayMoney. Le paiement est sécurisé et prend quelques secondes.',
   },
   {
-    q: 'Je peux annuler quand ?',
-    a: 'À tout moment, en 1 clic depuis ton compte. Tu conserves l’accès Premium jusqu’à la fin de la période déjà payée.',
+    q: 'Y a-t-il un engagement ?',
+    a: 'Aucun. Vous payez une seule fois pour la durée choisie. Il n’y a pas d’abonnement à résilier : l’accès Premium prend fin à l’échéance, sauf si vous le renouvelez vous-même.',
   },
   {
-    q: 'Puis-je changer de formule plus tard ?',
-    a: 'Oui. Tu peux passer d’une formule mensuelle à trimestrielle ou annuelle depuis ton compte. Le changement s’applique au prochain renouvellement.',
+    q: 'Puis-je changer de formule ?',
+    a: 'Oui. À chaque paiement, vous choisissez la durée qui vous convient : 1 mois, 3 mois ou 1 an. Vous pouvez prendre une autre formule lors de votre prochain achat.',
   },
   {
     q: 'Que se passe-t-il à la fin de ma période ?',
-    a: 'Ton abonnement se renouvelle automatiquement, sauf si tu l’as annulé avant. Tu reçois toujours un rappel par email quelques jours avant.',
+    a: 'Votre accès Premium prend fin et votre compte revient en lecture gratuite. Vous recevez un rappel par email quelques jours avant l’échéance, pour renouveler si vous le souhaitez.',
   },
 ];
 
@@ -293,7 +293,7 @@ function HighlightsCompact() {
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <FadeUp className="mb-10 text-center">
           <p className="text-[12px] font-semibold uppercase tracking-wider text-gold">
-            Ce que tu obtiens
+            Ce que vous obtenez
           </p>
           <h2 className="mt-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             L&apos;essentiel en un coup d&apos;&oelig;il.

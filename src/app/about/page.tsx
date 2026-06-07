@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   alternates: { canonical: '/about' },
   openGraph: {
     title: 'À propos : notre mission et notre équipe',
-    description: "Découvrez NFI Report, votre source d'information économique et financière de référence pour le Niger et l'Afrique.",
+    description: "Découvrez NFI Report, votre source d'information économique et financière pour le Niger et l'Afrique de l'Ouest.",
     type: 'website',
   },
 };

@@ -25,7 +25,7 @@ export function AboutHero() {
           L&apos;information économique qui fait avancer l&apos;Afrique
         </h1>
         <p className="text-[17px] text-white/45 max-w-2xl mx-auto leading-relaxed animate-fade-in-up delay-200">
-          Votre source d&apos;information économique et financière de référence pour le Niger et l&apos;Afrique.
+          Votre source d&apos;information économique et financière pour le Niger et l&apos;Afrique de l&apos;Ouest.
         </p>
       </div>
     </section>

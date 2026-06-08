@@ -63,7 +63,7 @@
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.2.6",
     "knip": "^6.6.2",
-    "postcss": "^8.4.49",
+    "postcss": "^8.5.15",
     "tailwindcss": "^4.3.0",
     "typescript": "^5.7.2",
     "vitest": "^4.1.7"

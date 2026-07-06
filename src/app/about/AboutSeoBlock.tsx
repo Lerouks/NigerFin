@@ -9,7 +9,7 @@ export function AboutSeoBlock() {
           <h2 className="text-2xl sm:text-3xl font-bold text-[#111] mb-4">
             Pourquoi NFI Report existe
           </h2>
-          <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-justify hyphens-auto mb-6">
+          <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-pretty mb-6">
             Le Niger figure parmi les pays les moins couverts médiatiquement au monde. Les
             informations économiques et financières disponibles sur le pays restent rares,
             fragmentées, souvent en anglais ou pensées pour un lectorat international. Côté
@@ -18,7 +18,7 @@ export function AboutSeoBlock() {
             qui cherchent à se financer, cadres qui veulent comprendre la conjoncture, diaspora
             qui suit le pays depuis l&apos;étranger.
           </p>
-          <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-justify hyphens-auto mb-10">
+          <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-pretty mb-10">
             NFI Report a été lancé pour combler ce manque. Chaque jour, nous publions des
             analyses contextualisées sur l&apos;économie nigérienne, les marchés financiers
             ouest-africains, les entreprises stratégiques du pays, l&apos;actualité de la zone
@@ -72,7 +72,7 @@ export function AboutSeoBlock() {
           <h2 className="text-2xl sm:text-3xl font-bold text-[#111] mt-10 mb-4">
             Pour qui écrivons-nous
           </h2>
-          <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-justify hyphens-auto mb-6">
+          <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-pretty mb-6">
             Notre audience est large mais nos lecteurs partagent un point commun : ils veulent
             comprendre l&apos;économie pour mieux décider. Cela inclut des étudiants en
             économie ou finance qui préparent leur entrée dans la vie active, des jeunes
@@ -82,7 +82,7 @@ export function AboutSeoBlock() {
             institutionnels qui s&apos;intéressent au marché ouest-africain, et des membres
             de la diaspora nigérienne qui suivent le pays depuis l&apos;étranger.
           </p>
-          <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-justify hyphens-auto mb-8">
+          <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-pretty mb-8">
             Nous écrivons aussi pour les journalistes, chercheurs et organisations
             internationales qui ont besoin d&apos;analyses contextualisées et fiables sur le
             Niger et la zone UEMOA. Notre objectif : démocratiser l&apos;accès à

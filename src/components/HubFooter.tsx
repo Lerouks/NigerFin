@@ -26,7 +26,7 @@ export function HubFooter({
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-12">
-          <div className="lg:col-span-2 space-y-4 text-[14px] sm:text-[15px] leading-relaxed text-gray-600 text-justify hyphens-auto">
+          <div className="lg:col-span-2 space-y-4 text-[14px] sm:text-[15px] leading-relaxed text-gray-600 text-pretty">
             {paragraphs.map((p, idx) => (
               <p key={`${idx}-${p.slice(0, 24)}`}>{p}</p>
             ))}

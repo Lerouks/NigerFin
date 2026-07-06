@@ -15,7 +15,7 @@ export function NigerSeoBlock() {
         </h2>
         <div className="prose prose-sm sm:prose-base max-w-none space-y-5">
           {PARAGRAPHS.map((p) => (
-            <p key={p.slice(0, 32)} className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-justify hyphens-auto">
+            <p key={p.slice(0, 32)} className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-pretty">
               {p}
             </p>
           ))}

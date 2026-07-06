@@ -15,7 +15,6 @@ export default async function MentionsLegalesPage() {
   return (
     <DynamicLegalPage
       title="Mentions Légales"
-      justify
       initialSections={initialSections}
       introParagraphs={[
         "Les présentes mentions légales identifient l'éditeur du site nfireport.com, son hébergeur, ses responsables éditoriaux et les conditions juridiques générales d'utilisation du service. Elles sont rédigées conformément aux exigences de transparence du droit nigérien et aux standards internationaux applicables aux services de presse en ligne et d'information économique et financière.",

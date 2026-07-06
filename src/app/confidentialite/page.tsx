@@ -15,7 +15,6 @@ export default async function ConfidentialitePage() {
   return (
     <DynamicLegalPage
       title="Politique de Confidentialité"
-      justify
       initialSections={initialSections}
       introParagraphs={[
         "NFI Report attache une importance fondamentale à la protection des données personnelles de ses utilisateurs. La présente politique de confidentialité décrit de manière transparente la nature des informations collectées sur le site nfireport.com, les finalités pour lesquelles elles sont traitées, leur durée de conservation, leurs destinataires éventuels et les droits que l'utilisateur peut exercer à tout moment.",

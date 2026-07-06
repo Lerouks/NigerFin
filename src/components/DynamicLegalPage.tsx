@@ -11,15 +11,13 @@ interface DynamicLegalPageProps {
   introParagraphs?: string[];
   initialSections?: LegalSection[];
   fallbackSections?: FallbackSection[];
-  /** Texte pleinement justifié (bords alignés + césure). Activé au cas par cas, ex. /publicite. */
-  justify?: boolean;
 }
 
-export function DynamicLegalPage({ title, introParagraphs, initialSections, fallbackSections, justify }: DynamicLegalPageProps) {
+export function DynamicLegalPage({ title, introParagraphs, initialSections, fallbackSections }: DynamicLegalPageProps) {
   const sections = initialSections && initialSections.length > 0 ? initialSections : null;
   const useFallback = !sections && fallbackSections && fallbackSections.length > 0;
 
-  const bodyClass = `text-gray-600 text-[15px] leading-[1.8] whitespace-pre-line${justify ? ' text-justify' : ''}`;
+  const bodyClass = 'text-gray-600 text-[15px] leading-[1.8] whitespace-pre-line text-pretty';
 
   const lastUpdated = sections && sections.length > 0
     ? (() => {
@@ -43,7 +41,7 @@ export function DynamicLegalPage({ title, introParagraphs, initialSections, fall
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-xl p-7 md:p-10 border border-black/6">
             {introParagraphs && introParagraphs.length > 0 && (
-              <LegalIntroBlock paragraphs={introParagraphs} justify={justify} />
+              <LegalIntroBlock paragraphs={introParagraphs} />
             )}
             {sections ? (
               <div className="space-y-10 max-w-prose">

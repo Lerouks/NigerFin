@@ -15,7 +15,6 @@ export default async function CookiesPage() {
   return (
     <DynamicLegalPage
       title="Politique de Cookies"
-      justify
       initialSections={initialSections}
       introParagraphs={[
         "La présente politique de cookies explique l'usage des traceurs déposés sur votre terminal lors de votre navigation sur nfireport.com. Un cookie est un petit fichier texte enregistré par votre navigateur qui permet à un site web de vous reconnaître, de mémoriser vos préférences ou de mesurer son audience. Les cookies sont indispensables au fonctionnement de la majorité des sites modernes et leur usage est strictement encadré par la législation nigérienne sur la protection des données personnelles.",

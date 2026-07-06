@@ -15,7 +15,6 @@ export default async function CGUPage() {
   return (
     <DynamicLegalPage
       title="Conditions Générales d'Utilisation"
-      justify
       initialSections={initialSections}
       introParagraphs={[
         "Les présentes conditions générales d'utilisation (CGU) régissent l'accès et l'usage du site NFI Report (https://nfireport.com), édité par NFI Report, média d'information économique et financière dédié au Niger et à l'Afrique de l'Ouest. En accédant au site, en créant un compte ou en souscrivant à un abonnement Premium, l'utilisateur reconnaît avoir pris connaissance des présentes conditions et les accepter sans réserve.",

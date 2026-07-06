@@ -33,6 +33,15 @@
   ::file-selector-button {
     border-color: var(--color-gray-200, currentcolor);
   }
+
+  /* Typographie FR: anti-orphelin/veuve sur le corps (progressif, ignore par Firefox).
+     Empeche un mot de rester seul en fin/derniere ligne. Corps ferre a gauche. */
+  p,
+  li,
+  dd,
+  figcaption {
+    text-wrap: pretty;
+  }
 }
 
 @utility line-clamp-1 {

@@ -296,7 +296,7 @@ export function EducationSeoBlock({ slug }: { slug: string }) {
     <section className="border-t border-black/6 bg-white">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
         <div className="prose prose-sm sm:prose-base max-w-none">
-          <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-justify hyphens-auto mb-10">
+          <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-pretty mb-10">
             {content.intro}
           </p>
 
@@ -315,7 +315,7 @@ export function EducationSeoBlock({ slug }: { slug: string }) {
           <h2 className="text-xl sm:text-2xl font-bold text-[#111] mt-10 mb-3">
             {content.whyImportant.title}
           </h2>
-          <p className="text-[15px] leading-relaxed text-gray-700 text-justify hyphens-auto mb-10">
+          <p className="text-[15px] leading-relaxed text-gray-700 text-pretty mb-10">
             {content.whyImportant.body}
           </p>
 

@@ -20,8 +20,8 @@ test.describe('Inscription : radio civilité obligatoire', () => {
 
       // Sans civilite : le bouton submit doit etre disabled
       const submit = page.locator('button[type="submit"]');
-      await page.fill('input[id="name"]', 'NFI Report');
-      await page.fill('input[id="email"]', 'test@example.com');
+      await page.fill('input[id="name"]', 'Amadou Diallo');
+      await page.fill('input[id="email"]', 'amadou.test@example.com');
       await page.fill('input[id="password"]', 'TestPass2026!');
       await page.fill('input[id="confirmPassword"]', 'TestPass2026!');
 

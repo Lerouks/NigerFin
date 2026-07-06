@@ -26,7 +26,7 @@ const baseData = {
 };
 
 const variants = {
-  'avec-monsieur': { ...baseData, recipientCivility: 'M.', recipientName: 'NFI Report' },
+  'avec-monsieur': { ...baseData, recipientCivility: 'M.', recipientName: 'Amadou Diallo' },
   'avec-madame': { ...baseData, recipientCivility: 'Mme', recipientName: 'Aïcha Mounkaila' },
   'sans-civilite': { ...baseData, recipientCivility: null, recipientName: 'Mohamed Issoufou' },
   'sans-info': { ...baseData },

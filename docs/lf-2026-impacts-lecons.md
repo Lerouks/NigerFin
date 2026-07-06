@@ -2,13 +2,13 @@
 
 Source : `ORDONNANCE-N-2025-44 LOI DE FINANCES 2026.pdf`, signée 31/12/2025 par Général Abdourahamane Tiani, entrée en vigueur 1er janvier 2026.
 
-À traiter en passe de correction de contenu après la feature parcours (décision NFI 2026-04-17).
+À traiter en passe de correction de contenu après la feature parcours (décision fondateur 2026-04-17).
 
 ## Règles d'application
 
 - Ne pas toucher aux simulateurs (/outil/*) même si les taux semblent obsolètes
 - Ajouter un disclaimer "tarifs et conditions peuvent évoluer, consulter un conseiller" sur toute leçon touchant aux chiffres fiscaux
-- Faire valider par NFI chaque leçon avant écriture en DB
+- Faire valider par le fondateur chaque leçon avant écriture en DB
 
 ## Leçons à mettre à jour
 
@@ -95,8 +95,8 @@ Source : `ORDONNANCE-N-2025-44 LOI DE FINANCES 2026.pdf`, signée 31/12/2025 par
 
 ## TODO après feature parcours
 
-1. Valider avec NFI la liste des leçons à mettre à jour
+1. Valider avec le fondateur la liste des leçons à mettre à jour
 2. Rédiger une version corrigée de chaque leçon (draft markdown)
-3. Faire valider à NFI chaque draft avant insertion DB
+3. Faire valider au fondateur chaque draft avant insertion DB
 4. Insérer via Supabase MCP avec idempotence (UPDATE sur id existant, pas INSERT)
 5. Ajouter disclaimer systématique

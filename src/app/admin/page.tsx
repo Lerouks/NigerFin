@@ -11,8 +11,8 @@ export const metadata: Metadata = {
 export default async function AdminPage() {
   const supabase = await createServerSupabaseClient();
   const service = createServiceClient();
-  let firstName = 'NFI';
-  let initials = 'RB';
+  let firstName = 'Admin';
+  let initials = 'AD';
 
   if (supabase && service) {
     const { data: { user } } = await supabase.auth.getUser();

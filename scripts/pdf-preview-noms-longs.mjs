@@ -38,7 +38,7 @@ const baseData = {
 
 // Profils realistes : ce que l'API recoit, et ce qu'elle derive
 const profiles = [
-  { name: 'court-1mot',         civility: 'M.',  full_name: 'NFI Report',                          last_name: null },
+  { name: 'court-1mot',         civility: 'M.',  full_name: 'Amadou Diallo',                          last_name: null },
   { name: 'avec-last-name',     civility: 'Mme', full_name: 'Aïcha Mounkaila',                        last_name: 'Mounkaila' },
   { name: 'tres-long-fullname', civility: 'M.',  full_name: 'Almoustafa Mohamadou Ibrahim Diallo Sow', last_name: null },
   { name: 'nom-compose',        civility: 'Mme', full_name: 'Aïssatou Diallo',                        last_name: 'Diallo-Sow' },

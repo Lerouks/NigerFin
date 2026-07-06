@@ -13,7 +13,7 @@ const data = {
   generatedAt: 'Généré le 20 mai 2026 à 04h45',
   reference: 'NFI-2026-0042',
   recipientCivility: 'M.',
-  recipientName: 'NFI',
+  recipientName: 'Diallo',
   params: [
     { label: 'Montant emprunté', value: '25 000 000 FCFA' },
     { label: 'Durée', value: '15 ans' },

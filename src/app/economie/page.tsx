@@ -24,7 +24,7 @@ export default async function EconomiePage() {
       </div>
       <HubFooter
         paragraphs={[
-          "La rubrique Économie de NFI Report couvre l'actualité, les analyses et les indicateurs qui façonnent la trajectoire économique du Niger et de l'Afrique de l'Ouest. Croissance du PIB, inflation, balance commerciale, dette publique, secteurs stratégiques (agriculture, mines, énergie, services) : nous décryptons les chiffres et les politiques qui impactent le quotidien des Nigériens et les perspectives de développement régional.",
+          "La rubrique Économie de NFI Report couvre l'actualité, les analyses et les indicateurs qui façonnent la trajectoire économique du Niger et de l'Afrique de l'Ouest. Croissance\u00A0du\u00A0PIB, inflation, balance commerciale, dette publique, secteurs stratégiques (agriculture, mines, énergie, services) : nous décryptons les chiffres et les politiques qui impactent le quotidien des Nigériens et les perspectives de développement régional.",
           "Le Niger affiche des fondamentaux économiques particuliers : une économie agricole dominante (40% du PIB), une dépendance forte aux matières premières exportées (uranium, pétrole, or), une démographie jeune et croissante, et une intégration profonde dans la zone UEMOA grâce au franc CFA. Les politiques de la BCEAO, du FMI, de la Banque Mondiale et l'évolution du contexte géopolitique régional (sécurité au Sahel, partenariats internationaux) influencent directement les conditions de croissance et d'investissement.",
           "Décideurs, investisseurs, étudiants en sciences économiques : nos analyses donnent une grille de lecture rigoureuse pour suivre la conjoncture nigérienne et anticiper ses tendances.",
         ]}

@@ -100,7 +100,7 @@ export function AboutContent({ sections }: { sections: Section[] }) {
                     </div>
                     <h3 className="text-xl font-semibold mb-1 text-center">{getFounderName(f.heading)}</h3>
                     <p className="text-[13px] text-gold mb-3 text-center">{getFounderRole(f.heading)}</p>
-                    <p className="text-gray-600 text-[15px] leading-relaxed">{f.text}</p>
+                    <p className="text-gray-600 text-[15px] leading-relaxed text-justify hyphens-auto">{f.text}</p>
                   </div>
                 ))}
               </div>

@@ -15,6 +15,7 @@ export default async function PublicitePage() {
   return (
     <DynamicLegalPage
       title="Publicité & Partenariats"
+      justify
       initialSections={initialSections}
       introParagraphs={[
         "NFI Report couvre l'économie et la finance du Niger et de l'Afrique de l'Ouest en français. Notre audience se compose principalement de cadres dirigeants, entrepreneurs, investisseurs particuliers et institutionnels, professionnels du secteur bancaire et financier, jeunes diplômés en quête de culture financière, et membres de la diaspora nigérienne dans le monde. Cette audience qualifiée constitue un canal premium pour les annonceurs cherchant à toucher les décideurs économiques de la sous-région.",

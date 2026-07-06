@@ -42,6 +42,13 @@
   figcaption {
     text-wrap: pretty;
   }
+
+  /* Titres: equilibrage des lignes -> jamais un seul mot seul sur la derniere ligne. */
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
 }
 
 @utility line-clamp-1 {

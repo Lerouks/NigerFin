@@ -29,10 +29,6 @@ export function StatsBand({ stats, lastUpdated }: StatsBandProps) {
               <div className="text-[clamp(2.5rem,5vw,3.5rem)] font-black tracking-tight text-foreground leading-none tabular-nums">
                 {stat.value}
               </div>
-              <div
-                aria-hidden
-                className="mt-4 h-px w-12 bg-gold"
-              />
               <div className="mt-3 text-[11px] md:text-[12px] font-semibold uppercase tracking-[0.14em] text-gray-700 leading-tight">
                 {stat.label}
               </div>

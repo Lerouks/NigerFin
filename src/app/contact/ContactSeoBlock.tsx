@@ -6,7 +6,7 @@ export function ContactSeoBlock() {
           <h2 className="text-2xl sm:text-3xl font-bold text-[#111] mb-4">
             Comment nous joindre
           </h2>
-          <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-pretty mb-6">
+          <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-pretty mb-6 text-justify hyphens-auto">
             L&apos;équipe NFI Report est joignable directement depuis ce formulaire pour toute
             demande relative à notre couverture éditoriale, nos analyses, nos outils financiers
             ou notre offre Premium. Nous nous efforçons de répondre à chaque message dans un
@@ -14,7 +14,7 @@ export function ContactSeoBlock() {
             marché ou à une publication imminente, mentionnez-le clairement dans l&apos;objet
             de votre message.
           </p>
-          <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-pretty mb-10">
+          <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-pretty mb-10 text-justify hyphens-auto">
             Pour les demandes professionnelles structurées (partenariats stratégiques,
             interviews, prises de parole, reconnaissance de presse), n&apos;hésitez pas à
             joindre votre organisation, votre fonction et un descriptif précis du projet.
@@ -75,7 +75,7 @@ export function ContactSeoBlock() {
           <h2 className="text-2xl sm:text-3xl font-bold text-[#111] mt-10 mb-4">
             Confidentialité de vos messages
           </h2>
-          <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-pretty">
+          <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-pretty text-justify hyphens-auto">
             Toutes les communications adressées à NFI Report sont traitées de manière
             confidentielle. Vos données personnelles (nom, email, téléphone) sont conservées
             uniquement pour répondre à votre demande, pendant une durée maximale de 12&nbsp;mois.

@@ -59,7 +59,6 @@ export function MacroIndicatorsBlock({
       <div className="flex items-end justify-between mb-8 flex-wrap gap-4">
         <div>
           <div className="flex items-center gap-2.5 mb-3">
-            <div className="h-px w-6 bg-gold/60" />
             <span className="text-[11px] font-semibold tracking-[0.18em] uppercase text-gold">
               {eyebrow}
             </span>

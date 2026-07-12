@@ -102,7 +102,7 @@ export default function PlanDuSitePage() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
           <div className="prose prose-sm sm:prose-base max-w-none">
             <h2 className="text-2xl sm:text-3xl font-bold text-[#111] mb-4">À propos de ce plan du site</h2>
-            <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 mb-6">
+            <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 mb-6 text-justify hyphens-auto">
               Ce plan du site recense l&apos;ensemble des pages publiques de NFI Report,
               organisées par thématique pour faciliter votre navigation. Il couvre nos cinq
               rubriques éditoriales principales (Économie, Finance, Marchés, Entreprises,
@@ -111,7 +111,7 @@ export default function PlanDuSitePage() {
               de salaire, budget familial, indices économiques), ainsi que toutes les pages
               transactionnelles et institutionnelles du site.
             </p>
-            <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 mb-10">
+            <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 mb-10 text-justify hyphens-auto">
               Pour les moteurs de recherche, nous publions également un sitemap XML complet à
               l&apos;adresse{' '}
               <Link href="/sitemap.xml" className="text-[#111] underline underline-offset-2">
@@ -128,14 +128,14 @@ export default function PlanDuSitePage() {
             </p>
 
             <h2 className="text-2xl sm:text-3xl font-bold text-[#111] mt-10 mb-4">Comment naviguer efficacement</h2>
-            <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 mb-6">
+            <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 mb-6 text-justify hyphens-auto">
               Si vous découvrez NFI Report, nous vous recommandons de commencer par la page
               d&apos;accueil pour découvrir nos derniers articles, puis d&apos;explorer la
               rubrique qui correspond le plus à vos centres d&apos;intérêt. Pour aller plus
               loin, nos parcours pédagogiques d&apos;éducation financière vous accompagnent du
               débutant à l&apos;investisseur autonome, à votre rythme.
             </p>
-            <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700">
+            <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-justify hyphens-auto">
               Si vous cherchez une information précise (un indicateur économique, un cours de
               marché, une analyse spécifique), utilisez la barre de recherche en haut du site
               ou consultez directement le sitemap XML qui liste l&apos;ensemble des articles

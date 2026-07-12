@@ -306,7 +306,7 @@ export function ToolContent({ slug, title, description, isPremium }: ToolContent
               {education.sections.map((sec, i) => (
                 <div key={i} className="px-6 sm:px-8 py-8">
                   <h2 className="text-xl font-bold text-[#111] mb-4">{sec.heading}</h2>
-                  <div className="text-[15px] text-[#374151] leading-[1.8] whitespace-pre-line [&>p]:mb-4">
+                  <div className="text-[15px] text-[#374151] leading-[1.8] whitespace-pre-line [&>p]:mb-4 text-justify hyphens-auto">
                     {sec.body.split('\n\n').map((paragraph, j) => (
                       <p key={j}>
                         {paragraph.split(/(\*\*[^*]+\*\*)/).map((part, k) =>

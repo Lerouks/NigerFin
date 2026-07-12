@@ -39,7 +39,6 @@ export default async function EntreprisesPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
             <header className="mb-10 md:mb-14">
               <div className="flex items-baseline gap-3 mb-3">
-                <span className="h-px w-8 bg-gold" />
                 <span className="text-[11px] uppercase tracking-[0.22em] text-foreground font-extrabold">
                   Actualité
                 </span>
@@ -50,7 +49,6 @@ export default async function EntreprisesPage() {
               >
                 Articles récents sur les entreprises
               </h2>
-              <div aria-hidden className="mt-5 h-px w-16 bg-gold" />
               <p className="mt-5 text-[15px] md:text-[16px] italic text-gray-700 max-w-2xl leading-relaxed">
                 Notre couverture des acteurs stratégiques nigériens et de leur
                 environnement régional.

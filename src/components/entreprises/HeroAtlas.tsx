@@ -55,7 +55,6 @@ export function HeroAtlas({ eyebrow, title, lead }: HeroAtlasProps) {
       <div className="relative flex-1 flex flex-col justify-between max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-24 lg:py-28">
         <div className="max-w-3xl">
           <div className="flex items-center gap-3 mb-6">
-            <span className="h-px w-10 bg-gold" />
             <span className="text-[11px] md:text-[12px] font-semibold tracking-[0.24em] uppercase text-gold">
               {eyebrow}
             </span>

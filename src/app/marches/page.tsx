@@ -54,7 +54,6 @@ export default async function MarchesPage() {
       {(articles.length > 0 || total > 0) && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14 md:pb-20">
           <div className="flex items-center gap-4 mb-8">
-            <div className="w-12 h-[2px] bg-gold/40" />
             <h2 className="text-2xl font-bold">Articles Marchés</h2>
             <div className="flex-1 h-px bg-black/6" />
           </div>

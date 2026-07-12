@@ -127,7 +127,6 @@ export default async function HomePage() {
         >
           <header className="mb-8 md:mb-10">
             <div className="flex items-center gap-3 mb-3">
-              <span className="h-px w-10 bg-gold" />
               <span className="text-[11px] uppercase tracking-[0.24em] text-foreground font-extrabold">
                 Actualite
               </span>
@@ -279,7 +278,6 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
           <header className="mb-8">
             <div className="flex items-center gap-3 mb-3">
-              <span className="h-px w-10 bg-gold" />
               <span className="text-[11px] uppercase tracking-[0.24em] text-foreground font-extrabold">
                 Données de marché
               </span>

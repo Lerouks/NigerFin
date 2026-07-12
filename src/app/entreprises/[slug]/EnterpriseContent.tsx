@@ -166,7 +166,6 @@ export function EnterpriseContent({
                   <span className="text-[11px] uppercase tracking-[0.22em] text-foreground font-extrabold">
                     A retenir
                   </span>
-                  <span className="h-px flex-1 bg-gold" />
                 </div>
                 <ul
                   id="takeaways-title"
@@ -193,7 +192,7 @@ export function EnterpriseContent({
               <h2 className="text-[11px] uppercase tracking-[0.18em] text-gray-500 font-bold mb-4">
                 Presentation
               </h2>
-              <p className="text-[16px] leading-relaxed text-foreground/90">
+              <p className="text-[16px] leading-relaxed text-foreground/90 text-justify hyphens-auto">
                 {enterprise.detailed_description || enterprise.description}
               </p>
             </div>

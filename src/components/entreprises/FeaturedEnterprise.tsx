@@ -82,7 +82,6 @@ export function FeaturedEnterprise({
             <span className="font-mono text-[13px] font-bold tracking-tight text-foreground/70">
               {String(rank).padStart(2, '0')} / 08
             </span>
-            <span aria-hidden className="h-px w-6 bg-gold" />
             <span className="text-[11px] uppercase tracking-[0.22em] font-semibold text-gray-600">
               Vedette &middot; {enterprise.sector}
             </span>

@@ -37,7 +37,6 @@ export function HomeRubriqueSection({
     >
       <header className="mb-8 md:mb-10">
         <div className="flex items-center gap-3 mb-3">
-          <span className="h-px w-10 bg-gold" />
           <span className="text-[11px] uppercase tracking-[0.24em] text-foreground font-extrabold">
             Rubrique
           </span>

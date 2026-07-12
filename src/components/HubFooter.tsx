@@ -18,7 +18,6 @@ export function HubFooter({
     <section className="bg-white border-t border-black/6">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-16">
         <div className="flex items-center gap-4 mb-8">
-          <div className="w-10 h-[2px] bg-gold/40" />
           <h2 className="text-[13px] tracking-[0.18em] uppercase font-semibold text-[#111]">
             {heading}
           </h2>
@@ -26,7 +25,7 @@ export function HubFooter({
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-12">
-          <div className="lg:col-span-2 space-y-4 text-[14px] sm:text-[15px] leading-relaxed text-gray-600 text-pretty">
+          <div className="lg:col-span-2 space-y-4 text-[14px] sm:text-[15px] leading-relaxed text-gray-600 text-pretty text-justify hyphens-auto">
             {paragraphs.map((p, idx) => (
               <p key={`${idx}-${p.slice(0, 24)}`}>{p}</p>
             ))}

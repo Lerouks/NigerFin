@@ -8,7 +8,7 @@ interface LegalIntroBlockProps {
  */
 export function LegalIntroBlock({ paragraphs }: LegalIntroBlockProps) {
   return (
-    <div className="space-y-5 text-[15px] leading-[1.8] text-gray-600 mb-12 pb-12 border-b border-black/4 text-pretty">
+    <div className="space-y-5 text-[15px] leading-[1.8] text-gray-600 mb-12 pb-12 border-b border-black/4 text-pretty text-justify hyphens-auto">
       {paragraphs.map((p) => (
         <p key={p.slice(0, 32)}>{p}</p>
       ))}

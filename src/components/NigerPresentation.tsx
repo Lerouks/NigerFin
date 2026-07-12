@@ -180,7 +180,6 @@ export function NigerPresentation({ initialData }: NigerPresentationProps = {}) 
       <section className="border-t border-black/6 pt-14 md:pt-20">
         <div className="mb-10">
           <div className="flex items-center gap-2.5 mb-3">
-            <div className="h-px w-6 bg-gold/60" />
             <span className="text-[11px] tracking-[0.2em] uppercase text-gold font-semibold">Profil pays</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-semibold tracking-tight leading-[1.1]">{presentation.intro_title}</h2>

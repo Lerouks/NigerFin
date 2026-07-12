@@ -75,9 +75,7 @@ export function ContactForm() {
 
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="inline-flex items-center gap-2.5 mb-4 animate-fade-in">
-            <div className="h-px w-8 bg-gold/50" />
             <span className="text-[11px] tracking-[0.2em] uppercase text-gold/60 font-semibold">Contact</span>
-            <div className="h-px w-8 bg-gold/50" />
           </div>
           <h1 className="text-4xl md:text-5xl mb-4 leading-[1.1] animate-fade-in-up delay-100">Parlons ensemble</h1>
           <p className="text-[16px] text-white/40 max-w-xl leading-relaxed animate-fade-in-up delay-150">

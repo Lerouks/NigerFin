@@ -49,9 +49,7 @@ export function AboutContent({ sections }: { sections: Section[] }) {
           {mission && (
             <div className="mb-20 text-center">
               <div className="inline-flex items-center gap-3 mb-4">
-                <div className="h-px w-10 bg-gold/30" />
                 <span className="text-[11px] tracking-[0.15em] uppercase text-gold font-semibold">Notre mission</span>
-                <div className="h-px w-10 bg-gold/30" />
               </div>
               <h2 className="text-3xl mb-6">Éclairer les décisions</h2>
               {mission.text.split('\n').filter(Boolean).length > 1
@@ -66,9 +64,7 @@ export function AboutContent({ sections }: { sections: Section[] }) {
           {values.length > 0 && (
             <div className="mb-20 text-center">
               <div className="inline-flex items-center gap-3 mb-4">
-                <div className="h-px w-10 bg-gold/30" />
                 <span className="text-[11px] tracking-[0.15em] uppercase text-gold font-semibold">Nos valeurs</span>
-                <div className="h-px w-10 bg-gold/30" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-8">
                 {values.map((v, i) => (
@@ -87,9 +83,7 @@ export function AboutContent({ sections }: { sections: Section[] }) {
           {founders.length > 0 && (
             <div className="mb-20 text-center">
               <div className="inline-flex items-center gap-3 mb-4">
-                <div className="h-px w-10 bg-gold/30" />
                 <span className="text-[11px] tracking-[0.15em] uppercase text-gold font-semibold">Fondateurs</span>
-                <div className="h-px w-10 bg-gold/30" />
               </div>
               <h2 className="text-3xl mb-8">Qui est derrière NFI Report</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">

@@ -53,7 +53,6 @@ export function HomeHero({ article }: HomeHeroProps) {
             <div className="max-w-4xl">
               {/* Eyebrow rubrique */}
               <div className="flex items-center gap-3 mb-5">
-                <span className="h-px w-10 bg-gold" />
                 <span className="text-[11px] md:text-[12px] font-semibold tracking-[0.24em] uppercase text-gold">
                   {article.isPremium ? 'Premium · ' : ''}
                   {sectionLabel}

@@ -25,7 +25,6 @@ function FilterGroup({ label, children }: { label: string; children: React.React
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2.5">
-        <span aria-hidden className="h-px w-6 bg-gold" />
         <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-foreground">{label}</p>
       </div>
       <div className="space-y-1">{children}</div>

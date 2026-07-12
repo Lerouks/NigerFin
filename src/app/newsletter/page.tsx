@@ -58,7 +58,6 @@ export default function NewsletterPage() {
 
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
         <div className="flex items-center gap-2.5 mb-3">
-          <div className="h-px w-6 bg-gold/60" />
           <span className="text-[11px] font-semibold tracking-[0.18em] uppercase text-gold">
             Ce que vous recevez
           </span>
@@ -88,7 +87,6 @@ export default function NewsletterPage() {
 
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
         <div className="flex items-center gap-2.5 mb-3">
-          <div className="h-px w-6 bg-gold/60" />
           <span className="text-[11px] font-semibold tracking-[0.18em] uppercase text-gold">
             Deux niveaux d&apos;accès
           </span>
@@ -151,7 +149,7 @@ export default function NewsletterPage() {
             <h2 className="text-xl sm:text-2xl font-bold text-[#111] mt-0 mb-3">
               Pourquoi une newsletter dédiée au Niger et à l&apos;Afrique de l&apos;Ouest ?
             </h2>
-            <p className="text-[15px] leading-relaxed text-gray-700 mb-10">
+            <p className="text-[15px] leading-relaxed text-gray-700 mb-10 text-justify hyphens-auto">
               L&apos;information économique et financière sur le Niger est rare, fragmentée et souvent traduite avec
               retard depuis l&apos;anglais. La newsletter NFI Report comble ce vide : une lecture longue par semaine,
               écrite directement à Niamey, pour des lecteurs qui veulent comprendre la BRVM, l&apos;UEMOA, les
@@ -162,7 +160,7 @@ export default function NewsletterPage() {
             <h2 className="text-xl sm:text-2xl font-bold text-[#111] mt-10 mb-3">
               À qui s&apos;adresse cette newsletter ?
             </h2>
-            <p className="text-[15px] leading-relaxed text-gray-700 mb-10">
+            <p className="text-[15px] leading-relaxed text-gray-700 mb-10 text-justify hyphens-auto">
               Aux décideurs économiques, dirigeants d&apos;entreprise, analystes et investisseurs qui couvrent
               l&apos;Afrique de l&apos;Ouest. Aux étudiants en finance, en économie ou en école de commerce qui veulent
               une lecture sérieuse en français. Aux entrepreneurs nigériens qui pilotent une PME et veulent suivre

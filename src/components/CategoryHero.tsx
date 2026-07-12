@@ -14,7 +14,6 @@ export function CategoryHero({ label, title, description, accentGold = false }: 
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="inline-flex items-center gap-2.5 mb-4 animate-fade-in">
-          <div className="h-px w-6 bg-gold/40" />
           <span className={`text-[11px] tracking-[0.2em] uppercase font-semibold ${accentGold ? 'text-gold/60' : 'text-white/40'}`}>
             {label}
           </span>

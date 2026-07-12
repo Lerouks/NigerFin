@@ -17,9 +17,7 @@ export function AboutHero() {
           priority
         />
         <div className="inline-flex items-center gap-2.5 mb-4 animate-fade-in delay-100">
-          <div className="h-px w-8 bg-gold/50" />
           <span className="text-[11px] tracking-[0.2em] uppercase text-gold/60 font-semibold">À propos</span>
-          <div className="h-px w-8 bg-gold/50" />
         </div>
         <h1 className="text-4xl md:text-5xl mb-5 leading-[1.1] animate-fade-in-up delay-150">
           L&apos;information économique qui fait avancer l&apos;Afrique

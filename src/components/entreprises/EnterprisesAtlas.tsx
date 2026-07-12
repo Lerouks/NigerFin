@@ -37,9 +37,9 @@ export function EnterprisesAtlas({ enterprises, featured }: EnterprisesAtlasProp
   return (
     <div className="min-h-screen bg-background">
       <HeroAtlas
-        eyebrow="Atlas economique du Niger"
-        title="Les piliers de l'economie nigerienne"
-        lead="Cartographie editoriale des entreprises strategiques qui structurent l'economie du Niger : mines, energie, telecommunications, banque, agriculture. Donnees publiques, actualisees, sourcees."
+        eyebrow="Atlas économique du Niger"
+        title="Les piliers de l'économie nigérienne"
+        lead="Cartographie éditoriale des entreprises stratégiques qui structurent l'économie du Niger : mines, énergie, télécommunications, banque, agriculture. Données publiques, actualisées, sourcées."
       />
 
       <StatsBand

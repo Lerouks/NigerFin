@@ -17,7 +17,7 @@ export function StatsBand({ stats, lastUpdated }: StatsBandProps) {
       className="border-y border-black/8 bg-secondary"
     >
       <h2 id="atlas-stats-heading" className="sr-only">
-        Chiffres cles de l&apos;atlas
+        Chiffres clés de l&apos;atlas
       </h2>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-x-6 gap-y-12">
@@ -41,7 +41,7 @@ export function StatsBand({ stats, lastUpdated }: StatsBandProps) {
           ))}
         </div>
         <p className="mt-12 pt-6 border-t border-black/8 text-[11px] uppercase tracking-[0.18em] text-gray-500">
-          Donnees agregees, derniere mise a jour : {formatDateFr(lastUpdated)}
+          Données agrégées, dernière mise à jour : {formatDateFr(lastUpdated)}
         </p>
       </div>
     </section>

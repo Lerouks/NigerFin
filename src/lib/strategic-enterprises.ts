@@ -35,7 +35,7 @@ export interface AggregatedStat {
 export const AGGREGATED_STATS: AggregatedStat[] = [
   {
     value: '8',
-    label: 'Entreprises strategiques',
+    label: 'Entreprises stratégiques',
   },
   {
     value: '6',
@@ -46,14 +46,14 @@ export const AGGREGATED_STATS: AggregatedStat[] = [
     // (SONIDEP 270 Mds + NIGELEC 125 Mds + SONIBANK 28,8 Mds PNB + SOPAMIN 56 Mds 2015
     // + autres ND). Ordre de grandeur conservateur, a affiner avec donnees post-2024.
     value: '~480 Mds FCFA',
-    label: 'Chiffre d\'affaires cumule estime',
+    label: 'Chiffre d\'affaires cumulé estimé',
     source: 'ITIE Niger, rapports entreprises 2020-2023',
   },
   {
     // Source : Wikipedia + sites officiels (SOMAIR ~1000, NIGELEC ~1800, Niger Telecoms 782,
     // SONIBANK 424, SONIDEP 395, COMINAK 0 depuis 2021, BAGRI/SOPAMIN ND).
     value: '~4 400',
-    label: 'Emplois directs identifies',
+    label: 'Emplois directs identifiés',
     source: 'Sites officiels entreprises, ARCEP 2024',
   },
   {
@@ -61,8 +61,8 @@ export const AGGREGATED_STATS: AggregatedStat[] = [
     // Niger Telecoms, SOPAMIN, BAGRI). SOMAIR nationalisee depuis juin 2025.
     // SONIBANK = participation Etat minoritaire. COMINAK dissoute.
     value: '75%',
-    label: 'Sous controle public majoritaire',
-    source: 'Decrets gouvernementaux Niger 2025',
+    label: 'Sous contrôle public majoritaire',
+    source: 'Décrets gouvernementaux Niger 2025',
   },
 ];
 

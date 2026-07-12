@@ -17,23 +17,23 @@ export const METHODOLOGY_SECTIONS: MethodologySection[] = [
   {
     title: 'Pourquoi ces entreprises',
     paragraphs: [
-      "Les entreprises retenues dans cet atlas le sont selon trois criteres cumulatifs : un poids macro-economique mesurable (contribution au PIB, aux recettes d'exportation ou aux recettes fiscales du Niger), une empreinte sociale significative (effectif employeur de premier rang dans leur secteur), et un role strategique sur une infrastructure essentielle (energie, mines, telecommunications, finance, agriculture).",
-      "Cette selection privilegie les acteurs structurels de l'economie nigerienne plutot que les acteurs emergents ou les filiales locales d'entreprises etrangeres sans assise nationale.",
+      "Les entreprises retenues dans cet atlas le sont selon trois critères cumulatifs : un poids macro-économique mesurable (contribution au PIB, aux recettes d'exportation ou aux recettes fiscales du Niger), une empreinte sociale significative (effectif employeur de premier rang dans leur secteur), et un rôle stratégique sur une infrastructure essentielle (énergie, mines, télécommunications, finance, agriculture).",
+      "Cette sélection privilégie les acteurs structurels de l'économie nigérienne plutôt que les acteurs émergents ou les filiales locales d'entreprises étrangères sans assise nationale.",
     ],
   },
   {
-    title: 'Sources et donnees',
+    title: 'Sources et données',
     paragraphs: [
-      "Les chiffres affiches (effectifs, chiffres d'affaires, actionnariat, fondation) proviennent exclusivement de sources publiques : rapports d'entreprise, communications officielles du gouvernement nigerien, publications de l'Institut National de la Statistique (INS Niger), de la Banque Centrale des Etats de l'Afrique de l'Ouest (BCEAO), de la Banque mondiale, du FMI (rapports Article IV) et de la presse economique africaine.",
-      "Quand une donnee est contradictoire entre plusieurs sources, nous retenons la plus recente et la plus officielle. Quand une donnee n'est pas disponible publiquement, nous le signalons par la mention ND (non disponible) plutot que de proposer une estimation.",
+      "Les chiffres affichés (effectifs, chiffres d'affaires, actionnariat, fondation) proviennent exclusivement de sources publiques : rapports d'entreprise, communications officielles du gouvernement nigérien, publications de l'Institut National de la Statistique (INS Niger), de la Banque Centrale des États de l'Afrique de l'Ouest (BCEAO), de la Banque mondiale, du FMI (rapports Article IV) et de la presse économique africaine.",
+      "Quand une donnée est contradictoire entre plusieurs sources, nous retenons la plus récente et la plus officielle. Quand une donnée n'est pas disponible publiquement, nous le signalons par la mention ND (non disponible) plutôt que de proposer une estimation.",
     ],
   },
   {
-    title: 'Mise a jour et signalements',
+    title: 'Mise à jour et signalements',
     paragraphs: [
-      "Cet atlas est revu trimestriellement par la redaction NFI Report. Les entreprises ajoutees, retirees ou completees le sont selon les memes criteres. Toute correction factuelle peut etre signalee a l'adresse contact@nfireport.com avec la source documentaire correspondante.",
+      "Cet atlas est revu trimestriellement par la rédaction NFI Report. Les entreprises ajoutées, retirées ou complétées le sont selon les mêmes critères. Toute correction factuelle peut être signalée à l'adresse contact@nfireport.com avec la source documentaire correspondante.",
     ],
   },
 ];
 
-export const METHODOLOGY_SIGNATURE = 'La redaction NFI Report';
+export const METHODOLOGY_SIGNATURE = 'La rédaction NFI Report';

@@ -128,7 +128,7 @@ export default async function HomePage() {
           <header className="mb-8 md:mb-10">
             <div className="flex items-center gap-3 mb-3">
               <span className="text-[11px] uppercase tracking-[0.24em] text-foreground font-extrabold">
-                Actualite
+                Actualité
               </span>
             </div>
             <div className="flex items-end justify-between gap-4 flex-wrap">
@@ -136,7 +136,7 @@ export default async function HomePage() {
                 id="home-latest-heading"
                 className="font-black tracking-tight leading-[1.05] text-[clamp(1.875rem,3.5vw,2.5rem)] text-foreground"
               >
-                Dernieres actualites
+                Dernières actualités
               </h2>
               <Link
                 href="/articles"
@@ -176,7 +176,7 @@ export default async function HomePage() {
                       <span aria-hidden className="text-gray-300">·</span>
                     </>
                   ) : null}
-                  <span>{SECTION_META[recentVedette.sections?.[0] ?? recentVedette.category]?.label ?? 'Actualite'}</span>
+                  <span>{SECTION_META[recentVedette.sections?.[0] ?? recentVedette.category]?.label ?? 'Actualité'}</span>
                 </div>
                 <h3 className="text-[clamp(1.5rem,2.5vw,2rem)] font-black tracking-tight leading-[1.1] text-foreground group-hover:text-foreground/75 transition-colors">
                   {recentVedette.title}
@@ -230,7 +230,7 @@ export default async function HomePage() {
                             {a.isPremium ? (
                               <span className="text-gold mr-2">Premium</span>
                             ) : null}
-                            {SECTION_META[a.sections?.[0] ?? a.category]?.label ?? 'Actualite'}
+                            {SECTION_META[a.sections?.[0] ?? a.category]?.label ?? 'Actualité'}
                           </div>
                           <h4 className="text-[15px] md:text-[16px] font-bold leading-snug text-foreground group-hover:text-foreground/70 transition-colors line-clamp-3">
                             {a.title}

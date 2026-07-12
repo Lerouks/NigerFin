@@ -52,7 +52,7 @@ export function FeaturedEnterprise({
           ) : hasLogo ? (
             <div className="absolute inset-0 flex flex-col items-center justify-between p-8 bg-gradient-to-br from-secondary to-muted">
               <span className="self-start text-[10px] uppercase tracking-[0.22em] text-gray-500 font-semibold">
-                Acteur strategique
+                Acteur stratégique
               </span>
               <Image
                 src={enterprise.logo_url!}
@@ -104,10 +104,10 @@ export function FeaturedEnterprise({
           {/* Mini-stats */}
           <dl className="mt-7 grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4">
             {enterprise.founded_year ? (
-              <Stat label="Fondee" value={String(enterprise.founded_year)} />
+              <Stat label="Fondée" value={String(enterprise.founded_year)} />
             ) : null}
             {enterprise.headquarters ? (
-              <Stat label="Siege" value={enterprise.headquarters} />
+              <Stat label="Siège" value={enterprise.headquarters} />
             ) : null}
             {enterprise.employees ? (
               <Stat label="Effectif" value={enterprise.employees} />

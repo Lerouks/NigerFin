@@ -4,7 +4,7 @@ import { getStrategicEnterprises, AGGREGATED_STATS } from '@/lib/strategic-enter
 export const runtime = 'nodejs';
 export const revalidate = 3600;
 
-export const alt = 'Atlas economique du Niger - NFI Report';
+export const alt = 'Atlas économique du Niger - NFI Report';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -39,7 +39,7 @@ export default async function EnterprisesAtlasOgImage() {
               fontWeight: 700,
             }}
           >
-            Atlas economique du Niger
+            Atlas économique du Niger
           </div>
         </div>
 
@@ -54,7 +54,7 @@ export default async function EnterprisesAtlasOgImage() {
               letterSpacing: '-0.025em',
             }}
           >
-            Les piliers de l&apos;economie nigerienne
+            Les piliers de l&apos;économie nigérienne
           </div>
           <div
             style={{
@@ -68,7 +68,7 @@ export default async function EnterprisesAtlasOgImage() {
           >
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
               <span style={{ color: '#ffffff', fontSize: '48px', fontWeight: 900 }}>{count}</span>
-              <span>entreprises strategiques</span>
+              <span>entreprises stratégiques</span>
             </div>
             <span style={{ color: '#4b5563' }}>·</span>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>

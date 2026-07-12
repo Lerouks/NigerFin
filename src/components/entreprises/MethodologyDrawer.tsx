@@ -20,7 +20,7 @@ interface MethodologyDrawerProps {
  */
 export function MethodologyDrawer({
   triggerClassName = 'text-[13px] font-medium text-gold underline underline-offset-4 hover:text-foreground transition-colors',
-  triggerLabel = 'Methodologie',
+  triggerLabel = 'Méthodologie',
 }: MethodologyDrawerProps) {
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
@@ -108,7 +108,7 @@ export function MethodologyDrawer({
                 id="methodology-title"
                 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground"
               >
-                Methodologie editoriale
+                Méthodologie éditoriale
               </h2>
             </div>
             <button
@@ -161,7 +161,7 @@ export function MethodologyDrawer({
               {METHODOLOGY_SIGNATURE}
             </p>
             <p className="mt-1 text-[11px] uppercase tracking-wider text-gray-500">
-              Derniere mise a jour : {formatDateFr(METHODOLOGY_LAST_UPDATED)}
+              Dernière mise à jour : {formatDateFr(METHODOLOGY_LAST_UPDATED)}
             </p>
           </div>
         </div>

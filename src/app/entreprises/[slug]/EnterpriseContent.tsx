@@ -92,7 +92,7 @@ export function EnterpriseContent({
             className="inline-flex items-center gap-1.5 text-[13px] text-white/60 hover:text-white transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
-            Retour a l&apos;atlas
+            Retour à l&apos;atlas
           </Link>
 
           <div className="flex items-start gap-5">
@@ -164,7 +164,7 @@ export function EnterpriseContent({
               >
                 <div className="flex items-baseline gap-3 mb-4">
                   <span className="text-[11px] uppercase tracking-[0.22em] text-foreground font-extrabold">
-                    A retenir
+                    À retenir
                   </span>
                 </div>
                 <ul
@@ -190,7 +190,7 @@ export function EnterpriseContent({
             {/* Description */}
             <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.06)] border border-black/4 p-6 sm:p-8">
               <h2 className="text-[11px] uppercase tracking-[0.18em] text-gray-500 font-bold mb-4">
-                Presentation
+                Présentation
               </h2>
               <p className="text-[16px] leading-relaxed text-foreground/90 text-justify hyphens-auto">
                 {enterprise.detailed_description || enterprise.description}
@@ -201,7 +201,7 @@ export function EnterpriseContent({
             {enterprise.key_facts && enterprise.key_facts.length > 3 && (
               <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.06)] border border-black/4 p-6 sm:p-8">
                 <h2 className="text-[11px] uppercase tracking-[0.18em] text-gray-500 font-bold mb-4">
-                  Points cles
+                  Points clés
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {enterprise.key_facts.slice(3).map((fact, i) => (
@@ -225,7 +225,7 @@ export function EnterpriseContent({
             {relatedArticles.length > 0 && (
               <div>
                 <div className="flex items-center gap-4 mb-6">
-                  <h2 className="text-lg font-bold">Articles lies</h2>
+                  <h2 className="text-lg font-bold">Articles liés</h2>
                   <div className="flex-1 h-px bg-black/8" />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -243,13 +243,13 @@ export function EnterpriseContent({
               {hasInfo && (
                 <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.06)] border border-black/4 p-6">
                   <h2 className="text-[11px] uppercase tracking-[0.18em] text-gray-500 font-bold mb-3">
-                    Fiche d&apos;identite
+                    Fiche d&apos;identité
                   </h2>
                   <div className="divide-y divide-black/5">
                     {enterprise.headquarters && (
                       <InfoRow
                         icon={MapPin}
-                        label="Siege"
+                        label="Siège"
                         value={enterprise.headquarters}
                       />
                     )}
@@ -322,13 +322,13 @@ export function EnterpriseContent({
               {/* CTA retour atlas */}
               <div className="bg-[#0a0a0a] text-white rounded-xl p-6">
                 <p className="text-[13px] text-white/70 mb-3">
-                  Explorer les autres piliers de l&apos;economie nigerienne
+                  Explorer les autres piliers de l&apos;économie nigérienne
                 </p>
                 <Link
                   href="/entreprises"
                   className="inline-flex items-center gap-2 text-[13px] font-semibold text-gold hover:text-white transition-colors"
                 >
-                  Atlas economique du Niger
+                  Atlas économique du Niger
                   <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>

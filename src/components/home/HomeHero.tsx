@@ -20,7 +20,7 @@ export function HomeHero({ article }: HomeHeroProps) {
   const href = `/articles/${article.slug.current}`;
   const imageUrl = article.mainImage?.url ?? fallbackImageUrl;
   const sectionLabel =
-    SECTION_META[article.sections?.[0] ?? article.category]?.label ?? 'Actualite';
+    SECTION_META[article.sections?.[0] ?? article.category]?.label ?? 'Actualité';
 
   return (
     <section className="relative isolate overflow-hidden bg-[#0a0a0a]">

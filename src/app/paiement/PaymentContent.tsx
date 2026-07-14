@@ -253,10 +253,19 @@ export function PaymentContent() {
         return;
       }
 
+      // Environnement iPay dynamique : 'live' uniquement si explicitement
+      // configuré (NEXT_PUBLIC_IPAYMONEY_ENV=live), sinon 'sandbox' par défaut.
+      // Évite tout paiement réel accidentel tant que le compte n'est pas validé.
+      const ipayEnv =
+        process.env.NEXT_PUBLIC_IPAYMONEY_ENV === 'live' ? 'live' : 'sandbox';
+
       const btn = document.createElement('button');
       btn.className = 'ipaymoney-button';
       btn.setAttribute('data-amount', data.amount);
-      btn.setAttribute('data-environement', 'live');
+      // NB : 'data-environement' est bien l'orthographe attendue par le SDK
+      // iPayMoney (faute côté fournisseur). Ne pas « corriger » en 'environment',
+      // cela casserait l'intégration.
+      btn.setAttribute('data-environement', ipayEnv);
       btn.setAttribute('data-key', publicKey);
       btn.setAttribute('data-transaction-id', data.transactionId);
       btn.setAttribute('data-redirect-url', data.redirectUrl);
@@ -273,6 +282,18 @@ export function PaymentContent() {
           try { document.body.removeChild(btn); } catch { /* already removed */ }
         }, 2000);
       }, 300);
+
+      // Filet de sécurité : si le SDK n'a pas redirigé après 10s (script non
+      // chargé, réseau lent), on évite un spinner bloqué à l'infini. Si le SDK a
+      // redirigé, le composant est démonté et ce setState est un no-op.
+      setTimeout(() => {
+        setIpaymoneyLoading((loading) => {
+          if (loading) {
+            setPaymentError('Le paiement n\'a pas pu démarrer. Vérifiez votre connexion et réessayez.');
+          }
+          return false;
+        });
+      }, 10000);
     } catch {
       setPaymentError('Erreur de connexion. Veuillez réessayer.');
       setIpaymoneyLoading(false);

@@ -4,16 +4,33 @@ Liste des actions sécurité en attente, identifiées par audits successifs.
 
 ---
 
-## 🚨 CRITIQUE, à fixer dès que l'API iPayMoney complète sera disponible
+## ✅ RÉSOLU (2026-07-14), iPayMoney callback : vérification serveur-à-serveur
 
 ### iPayMoney callback sans signature verification
 
-**Fichier** : `src/app/api/ipaymoney/callback/route.ts` (POST handler)
+**Fichier** : `src/app/api/ipaymoney/callback/route.ts` (POST handler) + `src/lib/ipaymoney.ts`
 **Identifié** : audit /cso du 2026-04-27
-**Statut** : EN ATTENTE de l'API complète iPayMoney
-**Risque** : CRITIQUE une fois en production avec des paiements réels
+**Résolu** : 2026-07-14, dès obtention des clés API iPay (sandbox)
+**Risque (avant correctif)** : CRITIQUE une fois en production avec des paiements réels
 
-**Le problème** : le endpoint POST accepte n'importe quelle requête contenant un `transaction_id` et `status: "success"` sans vérifier la signature ni confirmer auprès des serveurs iPayMoney que le paiement a vraiment été reçu. Un attaquant authentifié peut activer un Premium sans payer.
+**Correctif livré** :
+- Le callback ne fait plus confiance au statut envoyé par le webhook. Avant toute
+  activation, il reconfirme le paiement directement auprès d'iPay via
+  `GET https://i-pay.money/api/v1/payments/{reference}` (header `Authorization: Bearer
+  IPAYMONEY_SECRET_KEY`) — helper `verifyIPayPayment()` dans `src/lib/ipaymoney.ts`.
+  C'est la « Couche 2 » décrite plus bas, la plus robuste : un attaquant qui forge
+  un webhook ne peut plus activer un Premium, iPay renverra un statut ≠ `succeeded`.
+- Le vrai format iPay est géré : corps `{ data: { external_reference, reference,
+  status } }`, statut `succeeded`/`failed`, header d'authenticité `x-iPayMoney-secret`.
+- Le montant est re-validé contre le pricing canonique avant activation (anti-tampering).
+- Environnement `sandbox`/`live` dynamique (fini le « live » forcé en dur).
+- Tests : `src/__tests__/ipaymoney-callback.test.ts`.
+
+**Reste avant lancement public (non bloquant côté code)** : validation du KYC iPay,
+configuration du webhook (URL + secret) dans le dashboard iPay, et rotation des clés
+au passage en `live`.
+
+**Le problème (archive)** : le endpoint POST acceptait n'importe quelle requête contenant un `transaction_id` et `status: "success"` sans vérifier la signature ni confirmer auprès des serveurs iPayMoney que le paiement a vraiment été reçu. Un attaquant authentifié pouvait activer un Premium sans payer.
 
 **Scénario d'exploit** :
 1. User auth fait `POST /api/ipaymoney/checkout` → reçoit un `transactionId` au format `NFI-XXXXXXXXXXXX`
@@ -71,12 +88,58 @@ if (verified.status !== 'success' || verified.amount !== paymentRequest.amount) 
 - Test unitaire : POST avec signature OK + transaction vérifiée → 200 + activation
 - Test e2e Playwright : flow complet checkout → paiement réel sandbox iPayMoney → activation
 
-**Statut actuel (2026-04-27)** : sans l'API iPayMoney en main, on **NE TOUCHE PAS** le code de la route. Le risque est connu et accepté temporairement parce que :
-1. L'intégration iPayMoney n'est pas encore active en production
-2. Aucun paiement réel n'est traité
-3. Pas d'attaquant motivé à découvrir la faille tant que le site n'est pas connu
+**Statut final (2026-07-14)** : ✅ Couche 2 (vérification serveur-à-serveur) implémentée et testée. La Couche 1 (HMAC de signature) n'est pas proposée par iPay — leur seul mécanisme d'authenticité de webhook est le header partagé `x-iPayMoney-secret`, désormais géré. La Couche 2 rend de toute façon le trou inexploitable (impossible d'activer un Premium sans un paiement réellement `succeeded` côté iPay). Le lancement public reste conditionné à la validation KYC iPay et à la configuration du webhook dans le dashboard.
 
-**Dès que l'API iPayMoney est disponible** : ce TODO devient bloquant. Aucun lancement public de la fonctionnalité paiement Premium tant que les couches 1 + 2 ne sont pas en place.
+---
+
+## ⚠️ À TRAITER AVANT LE LANCEMENT LIVE, iPayMoney (audit 2026-07-14)
+
+Corrections déjà appliquées le 2026-07-14 (callback réécrit + `src/lib/ipaymoney.ts`) :
+timeout réseau sur la vérification, claim atomique anti-double-activation, gestion
+d'erreur DB (500 rejouable vs 404), validation Zod de la réponse iPay, insert
+`checkout` vérifié, messages FR, refacto en fonctions < 50 lignes, tests unitaires
+(`ipaymoney.test.ts` + `ipaymoney-callback.test.ts`).
+
+Restent, par ordre de priorité :
+
+### 🔴 CRITIQUE, montant réellement encaissé non vérifié (amount tampering)
+
+Le flux actuel utilise le SDK JS iPay (`checkout.js`) : le montant est posé en
+attribut DOM `data-amount` côté client (`PaymentContent.tsx`), donc modifiable par
+l'utilisateur avant paiement. L'endpoint de vérification `GET /payments/{reference}`
+ne renvoie PAS de champ `amount` : impossible de comparer après coup le montant
+réellement payé au prix attendu. Un utilisateur pourrait payer 100 FCFA et activer un
+Premium à 50 000. Non exploitable aujourd'hui (compte en sandbox, live bloqué par le
+KYC), mais BLOQUANT avant tout lancement public.
+
+**Solutions (à trancher avec iPay)** :
+1. Préféré : initier le paiement côté SERVEUR via `POST https://i-pay.money/api/v1/payments`
+   (clé secrète + montant verrouillé côté serveur), au lieu du bouton SDK client. Le
+   `data-amount` ne serait alors plus une source de vérité.
+2. Sinon : demander à iPay un champ `amount` sur `GET /payments/{reference}` (ou un
+   endpoint de transactions réglées) et comparer `verified.amount === paymentRequest.amount`
+   avant activation.
+3. En attendant : ne pas lancer publiquement le checkout iPay, ou mettre en revue
+   manuelle tout paiement au lieu d'auto-activer.
+
+### 🟠 Réconciliation des paiements restés `pending`
+
+Le webhook iPay peut ne jamais arriver (la doc iPay note « l'utilisateur doit rester
+sur la page »). Ajouter : (a) une colonne `ipay_reference` sur `payment_requests`,
+persistée dès qu'elle est connue ; (b) un cron `reconcile-ipaymoney-pending` qui
+rappelle `verifyIPayPayment` pour les lignes `pending` de plus de N minutes.
+
+### 🟠 Atomicité transactionnelle de l'activation
+
+Les 3 écritures d'activation (`payment_requests`, `subscriptions`, `user_profiles`)
+ne sont pas dans une transaction. Le claim atomique empêche déjà la double-exécution ;
+pour un état 100 % cohérent, les regrouper dans une fonction Postgres `SECURITY DEFINER`
+appelée en RPC (cf. règle RPC du CLAUDE.md).
+
+### 🟡 Dette technique, `PaymentContent.tsx` (841 lignes > 800 max du repo)
+
+Extraire les étapes (compte / méthode / instructions / confirmation / résumé) en
+composants dans `src/components/`. Pré-existant, à planifier hors du flux paiement.
 
 ---
 

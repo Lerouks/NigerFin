@@ -55,19 +55,28 @@ export async function POST(request: NextRequest) {
 
     const siteUrl = SITE_URL;
 
-    // Store the pending transaction in payment_requests for tracking
+    // La ligne payment_requests DOIT exister avant d'ouvrir le paiement : le
+    // callback iPay la retrouve par transaction_number. Si elle manque, un
+    // paiement réel arriverait sur une transaction « introuvable » (argent
+    // encaissé, aucune activation). On échoue donc explicitement plutôt que de
+    // renvoyer un transactionId sans ligne DB correspondante.
     const { createServiceClient } = await import('@/lib/supabase');
     const serviceClient = createServiceClient();
-    if (serviceClient) {
-      await serviceClient.from('payment_requests').insert({
-        user_id: user.id,
-        tier: 'premium',
-        billing_cycle: billingCycle,
-        amount,
-        payment_method: 'ipaymoney',
-        transaction_number: transactionId,
-        status: 'pending',
-      });
+    if (!serviceClient) {
+      return NextResponse.json({ error: 'Service indisponible' }, { status: 503 });
+    }
+    const { error: insertErr } = await serviceClient.from('payment_requests').insert({
+      user_id: user.id,
+      tier: 'premium',
+      billing_cycle: billingCycle,
+      amount,
+      payment_method: 'ipaymoney',
+      transaction_number: transactionId,
+      status: 'pending',
+    });
+    if (insertErr) {
+      Sentry.captureException(insertErr, { tags: { context: 'ipaymoney-checkout-insert' } });
+      return NextResponse.json({ error: 'Impossible d\'initialiser le paiement. Réessayez.' }, { status: 500 });
     }
 
     // Return the details needed by the iPayMoney JS SDK

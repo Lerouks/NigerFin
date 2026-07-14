@@ -2,31 +2,44 @@ import crypto from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { logAuditEvent } from '@/lib/audit';
-import { getBillingOption, type BillingCycle } from '@/config/pricing';
+import { getBillingOption, getBillingCycleLabel, type BillingCycle } from '@/config/pricing';
 import { sendTransactionalEmail } from '@/lib/email';
 import { paymentConfirmationEmail } from '@/lib/email-templates';
 import { upsertNewsletterSubscriber } from '@/lib/newsletter/subscribers';
 import { issueInvoice } from '@/lib/invoices/issue';
-import { getBillingCycleLabel } from '@/config/pricing';
 import { SITE_URL } from '@/lib/config';
 import { checkRateLimit, getClientIP, RATE_LIMITS } from '@/lib/rate-limit';
+import { verifyIPayPayment, isIPaySucceeded, isIPayFailed } from '@/lib/ipaymoney';
 import * as Sentry from '@sentry/nextjs';
+
+type ServiceClient = NonNullable<ReturnType<typeof createServiceClient>>;
+
+interface PaymentRow {
+  id: string;
+  user_id: string;
+  billing_cycle: string | null;
+  amount: number;
+  status: string;
+}
 
 const WEBHOOK_SECRET = process.env.IPAYMONEY_WEBHOOK_SECRET;
 
 /**
  * Vérifie qu'un callback iPayMoney provient bien d'une source autorisée.
  *
- * Sec H-6 : on n'accepte plus le secret dans le body JSON (avant : fallback
- * `payload.webhook_secret`). Le body est loggé/persiste plus facilement que
- * les headers => risque de fuite en cas de log applicatif un peu trop verbeux.
+ * iPay signe ses webhooks avec un header contenant le « secret hash » du marchand
+ * (configuré dans le dashboard iPay > Développeurs > Webhook). Sources acceptées :
+ *  1. `x-iPayMoney-secret: <secret>` (format officiel iPay)
+ *  2. `secret-hash: <secret>` (alias documenté par iPay)
+ *  3. `X-Webhook-Secret` / `Authorization: Bearer` (compat. legacy interne)
  *
- * Sources acceptées (header uniquement) :
- *  1. `X-Webhook-Secret: <secret>` (recommandé)
- *  2. `Authorization: Bearer <secret>` (compat. SDK legacy)
+ * Ce header n'est qu'une PREMIÈRE barrière. La garantie de sécurité réelle est
+ * la vérification serveur-à-serveur (verifyIPayPayment) faite plus bas : on ne
+ * fait confiance à aucun statut reçu par webhook, on reconfirme toujours le
+ * paiement directement auprès d'iPay avec la clé secrète.
  *
- * Quand Ifutur livrera leur SDK avec signature HMAC native, ajouter ici la
- * vérification `X-Signature` via crypto.timingSafeEqual(hmacSha256(rawBody, secret), provided).
+ * Sec H-6 : on n'accepte jamais le secret dans le body JSON (risque de fuite
+ * via un log applicatif un peu trop verbeux).
  *
  * En l'absence de IPAYMONEY_WEBHOOK_SECRET :
  *  - production : refuser tous les callbacks et alerter Sentry (faille critique)
@@ -42,6 +55,8 @@ function verifyWebhookAuth(request: NextRequest): boolean {
   }
 
   const provided =
+    request.headers.get('x-ipaymoney-secret') ||
+    request.headers.get('secret-hash') ||
     request.headers.get('x-webhook-secret') ||
     request.headers.get('authorization')?.replace(/^Bearer\s+/i, '').trim() ||
     null;
@@ -58,24 +73,28 @@ function verifyWebhookAuth(request: NextRequest): boolean {
   }
 }
 
-/**
- * Activate subscription for a user after successful iPayMoney payment.
- */
-async function activateSubscription(
-  serviceClient: NonNullable<ReturnType<typeof createServiceClient>>,
-  paymentRequestId: string,
-  userId: string,
-  billingCycle: BillingCycle,
-  amount: number,
-  iPayMoneyRef: string,
-) {
-  const billingOption = getBillingOption(billingCycle);
+/** Date d'expiration de l'abonnement pour un cycle de facturation donné. */
+function computeExpiry(billingCycle: BillingCycle): Date {
+  const { durationMonths } = getBillingOption(billingCycle);
   const expiresAt = new Date();
-  expiresAt.setMonth(expiresAt.getMonth() + billingOption.durationMonths);
-  const now = new Date().toISOString();
+  expiresAt.setMonth(expiresAt.getMonth() + durationMonths);
+  return expiresAt;
+}
 
-  // Update payment request to verified
-  const { error: payErr } = await serviceClient
+/**
+ * Claim atomique : passe la transaction de 'pending' à 'verified' en UNE seule
+ * opération conditionnelle (`... WHERE id = X AND status = 'pending'`). Retourne
+ * true si CETTE exécution a gagné le claim (elle seule exécute les effets
+ * d'activation), false si une autre l'avait déjà fait (webhook rejoué / livré en
+ * double). Empêche toute double-activation et toute facture dupliquée.
+ */
+async function claimPaymentVerified(
+  serviceClient: ServiceClient,
+  paymentRequestId: string,
+  expiresAt: Date,
+  now: string,
+): Promise<boolean> {
+  const { data, error } = await serviceClient
     .from('payment_requests')
     .update({
       status: 'verified',
@@ -83,76 +102,97 @@ async function activateSubscription(
       subscription_expires_at: expiresAt.toISOString(),
       updated_at: now,
     })
-    .eq('id', paymentRequestId);
+    .eq('id', paymentRequestId)
+    .eq('status', 'pending')
+    .select('id')
+    .maybeSingle();
 
-  if (payErr) {
-    Sentry.captureException(payErr, { tags: { context: 'ipaymoney-payment-update' } });
+  if (error) {
+    Sentry.captureException(error, { tags: { context: 'ipaymoney-claim' } });
+    return false;
   }
+  return data !== null;
+}
 
-  // Preserve admin role
-  const { data: targetProfile } = await serviceClient
+/** Préserve le rôle admin, sinon promeut l'utilisateur en 'premium'. */
+async function resolvePremiumRole(
+  serviceClient: ServiceClient,
+  userId: string,
+): Promise<'admin' | 'premium'> {
+  const { data } = await serviceClient
     .from('user_profiles')
     .select('role')
     .eq('id', userId)
     .single();
+  return data?.role === 'admin' ? 'admin' : 'premium';
+}
 
-  const role = targetProfile?.role === 'admin' ? 'admin' : 'premium';
+/** Upsert de la ligne subscriptions (une par utilisateur). */
+async function upsertPremiumSubscription(
+  serviceClient: ServiceClient,
+  userId: string,
+  billingCycle: BillingCycle,
+  amount: number,
+  now: string,
+  expiresAt: Date,
+): Promise<void> {
+  const { error } = await serviceClient.from('subscriptions').upsert(
+    {
+      user_id: userId,
+      tier: 'premium',
+      status: 'active',
+      billing_cycle: billingCycle,
+      current_period_start: now,
+      current_period_end: expiresAt.toISOString(),
+      price_amount: amount,
+    },
+    { onConflict: 'user_id' },
+  );
+  if (error) Sentry.captureException(error, { tags: { context: 'ipaymoney-subscription-upsert' } });
+}
 
-  // Upsert subscription
-  const { error: subErr } = await serviceClient
-    .from('subscriptions')
-    .upsert(
-      {
-        user_id: userId,
-        tier: 'premium',
-        status: 'active',
-        billing_cycle: billingCycle,
-        current_period_start: now,
-        current_period_end: expiresAt.toISOString(),
-        price_amount: amount,
-      },
-      { onConflict: 'user_id' }
-    );
+/** Bascule le profil utilisateur en Premium actif (champ qui gate l'accès). */
+async function activatePremiumProfile(
+  serviceClient: ServiceClient,
+  userId: string,
+  role: 'admin' | 'premium',
+  now: string,
+  expiresAt: Date,
+): Promise<void> {
+  const patch = {
+    role,
+    subscription_status: 'active',
+    subscription_start: now,
+    subscription_end: expiresAt.toISOString(),
+    subscription_updated_at: now,
+    expiration_warning_sent: false,
+    updated_at: now,
+  };
+  const { error } = await serviceClient.from('user_profiles').update(patch).eq('id', userId);
+  if (!error) return;
 
-  if (subErr) {
-    Sentry.captureException(subErr, { tags: { context: 'ipaymoney-subscription-upsert' } });
+  // Champ critique : un unique retry, dont on vérifie explicitement l'échec.
+  Sentry.captureException(error, { tags: { context: 'ipaymoney-profile-update' } });
+  const { error: retryErr } = await serviceClient.from('user_profiles').update(patch).eq('id', userId);
+  if (retryErr) {
+    Sentry.captureException(retryErr, {
+      level: 'fatal',
+      tags: { context: 'ipaymoney-profile-update-retry' },
+      extra: { userId },
+    });
   }
+}
 
-  // Update user profile
-  const { error: profileErr } = await serviceClient
-    .from('user_profiles')
-    .update({
-      role,
-      subscription_status: 'active',
-      subscription_start: now,
-      subscription_end: expiresAt.toISOString(),
-      subscription_updated_at: now,
-      expiration_warning_sent: false,
-      updated_at: now,
-    })
-    .eq('id', userId);
-
-  if (profileErr) {
-    Sentry.captureException(profileErr, { tags: { context: 'ipaymoney-profile-update' } });
-    // Critical: retry profile update once
-    await serviceClient.from('user_profiles').update({
-      role, subscription_status: 'active', subscription_start: now,
-      subscription_end: expiresAt.toISOString(), subscription_updated_at: now,
-      expiration_warning_sent: false, updated_at: now,
-    }).eq('id', userId);
-  }
-
-  // Audit log
-  await logAuditEvent('system', 'ipaymoney_payment_verified', 'payment', paymentRequestId, {
-    user_id: userId,
-    tier: 'premium',
-    billing_cycle: billingCycle,
-    amount,
-    ipaymoney_ref: iPayMoneyRef,
-    expiresAt: expiresAt.toISOString(),
-  });
-
-  // Send confirmation email
+/** Email de confirmation + auto-abo newsletter + émission de la facture. */
+async function notifyAndInvoicePremium(
+  serviceClient: ServiceClient,
+  userId: string,
+  billingCycle: BillingCycle,
+  amount: number,
+  iPayReference: string,
+  now: string,
+  expiresAt: Date,
+): Promise<void> {
   const { data: profile } = await serviceClient
     .from('user_profiles')
     .select('email, full_name')
@@ -166,29 +206,17 @@ async function activateSubscription(
       billingCycle,
       expiresAt.toISOString(),
     );
-    await sendTransactionalEmail({ to: profile.email, ...confirmation }).catch((err) => {
-      Sentry.captureException(err, {
-        tags: { context: 'ipaymoney-confirmation-email' },
-        extra: { userId },
-      });
-    });
-
-    // Auto-abo newsletter pour tout nouveau Premium (cohérent positionnement
-    // produit). Idempotent : no-op si déjà abonné.
-    await upsertNewsletterSubscriber({
-      email: profile.email,
-      source: 'premium_upgrade',
-      userId,
-    }).catch((err) => {
-      Sentry.captureException(err, {
-        tags: { context: 'ipaymoney-newsletter-auto-sub' },
-        extra: { userId },
-      });
-    });
+    await sendTransactionalEmail({ to: profile.email, ...confirmation }).catch((err) =>
+      Sentry.captureException(err, { tags: { context: 'ipaymoney-confirmation-email' }, extra: { userId } }),
+    );
+    // Auto-abo newsletter pour tout nouveau Premium (idempotent : no-op si déjà abonné).
+    await upsertNewsletterSubscriber({ email: profile.email, source: 'premium_upgrade', userId }).catch((err) =>
+      Sentry.captureException(err, { tags: { context: 'ipaymoney-newsletter-auto-sub' }, extra: { userId } }),
+    );
   }
 
-  // Issue an invoice (fire-and-forget).
   const cycleLabelLower = getBillingCycleLabel(billingCycle).toLowerCase();
+  // Émission de facture (fire-and-forget : ne doit pas bloquer l'ACK au webhook).
   issueInvoice({
     userId,
     amountXof: amount,
@@ -202,30 +230,65 @@ async function activateSubscription(
       },
     ],
     paymentMethod: 'iPayMoney',
-    paymentReference: iPayMoneyRef,
+    paymentReference: iPayReference,
     billingCycle,
     periodStart: now,
     periodEnd: expiresAt.toISOString(),
-  }).catch((err) => {
+  }).catch((err) =>
     Sentry.captureException(err, {
       tags: { context: 'invoice-issue-after-ipaymoney' },
-      extra: { userId, iPayMoneyRef },
-    });
+      extra: { userId, iPayReference },
+    }),
+  );
+}
+
+/**
+ * Active l'abonnement Premium après un paiement iPay CONFIRMÉ.
+ * Retourne false si la transaction avait déjà été activée ailleurs (idempotence).
+ */
+async function activatePremium(
+  serviceClient: ServiceClient,
+  paymentRequest: PaymentRow,
+  iPayReference: string,
+): Promise<boolean> {
+  const billingCycle = (paymentRequest.billing_cycle || 'monthly') as BillingCycle;
+  const { amount, user_id: userId } = paymentRequest;
+  const now = new Date().toISOString();
+  const expiresAt = computeExpiry(billingCycle);
+
+  // Verrou d'idempotence atomique : une seule exécution passe les effets de bord.
+  const won = await claimPaymentVerified(serviceClient, paymentRequest.id, expiresAt, now);
+  if (!won) return false;
+
+  const role = await resolvePremiumRole(serviceClient, userId);
+  await upsertPremiumSubscription(serviceClient, userId, billingCycle, amount, now, expiresAt);
+  await activatePremiumProfile(serviceClient, userId, role, now, expiresAt);
+
+  await logAuditEvent('system', 'ipaymoney_payment_verified', 'payment', paymentRequest.id, {
+    user_id: userId,
+    tier: 'premium',
+    billing_cycle: billingCycle,
+    amount,
+    ipaymoney_ref: iPayReference,
+    expiresAt: expiresAt.toISOString(),
   });
+
+  await notifyAndInvoicePremium(serviceClient, userId, billingCycle, amount, iPayReference, now, expiresAt);
+  return true;
 }
 
 /**
  * POST, Callback from iPayMoney SDK / server.
- * Receives payment status, verifies transaction, activates subscription.
+ * Receives payment status, verifies transaction server-side, activates subscription.
  */
 export async function POST(request: NextRequest) {
   try {
-    // 1) Rate-limit par IP pour empêcher le brute-force de transaction_id
+    // 1) Rate-limit par IP (anti brute-force sur le transaction_number).
     const ip = getClientIP(request);
     const rl = await checkRateLimit(`ipaymoney-callback:${ip}`, RATE_LIMITS.paymentCallback.limit, RATE_LIMITS.paymentCallback.windowMs);
     if (rl.limited) {
       Sentry.captureMessage('iPayMoney callback rate-limited', { level: 'warning', extra: { ip } });
-      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+      return NextResponse.json({ error: 'Trop de requêtes' }, { status: 429 });
     }
 
     const serviceClient = createServiceClient();
@@ -233,73 +296,117 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Service indisponible' }, { status: 503 });
     }
 
-    const rawBody = await request.text();
-    let payload: Record<string, string | number | undefined>;
-
-    // iPayMoney may send form-encoded or JSON data
-    const contentType = request.headers.get('content-type') || '';
-    if (contentType.includes('application/json')) {
-      payload = JSON.parse(rawBody);
-    } else {
-      // Parse URL-encoded form data
-      const params = new URLSearchParams(rawBody);
-      payload = Object.fromEntries(params.entries());
-    }
-
-    // 2) Vérification de l'authenticité du callback (shared secret en attendant HMAC Ifutur)
+    // 2) Authenticité AVANT toute autre opération (defense-in-depth) : un appelant
+    //    non authentifié n'obtient aucune information, pas même sur son propre body.
     if (!verifyWebhookAuth(request)) {
       Sentry.captureMessage('iPayMoney callback unauthorized', {
         level: 'warning',
         extra: { ip, hasSecret: !!WEBHOOK_SECRET },
       });
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
     }
 
-    // iPayMoney SDK sends: transaction_id, status, amount, etc.
-    const transactionId =
-      (payload.transaction_id as string) ||
-      (payload.transaction_ref as string) ||
-      (payload.transactionId as string);
-    const status = payload.status as string | undefined;
+    // 3) Lire le corps. iPay envoie du JSON au format :
+    //    { "data": { "external_reference", "reference", "status", "msisdn" } }
+    //    On garde un fallback form-encoded par robustesse.
+    const rawBody = await request.text();
+    let payload: Record<string, unknown>;
+    const contentType = request.headers.get('content-type') || '';
+    try {
+      if (contentType.includes('application/json') || rawBody.trimStart().startsWith('{')) {
+        payload = JSON.parse(rawBody);
+      } else {
+        payload = Object.fromEntries(new URLSearchParams(rawBody).entries());
+      }
+    } catch {
+      return NextResponse.json({ error: 'Corps de requête invalide' }, { status: 400 });
+    }
 
-    if (!transactionId) {
-      Sentry.captureMessage('iPayMoney callback missing transaction ID', {
+    // 4) Extraire les champs (format iPay imbriqué dans `data`, fallback plat).
+    const data: Record<string, unknown> =
+      payload.data && typeof payload.data === 'object'
+        ? (payload.data as Record<string, unknown>)
+        : payload;
+    // `external_reference` = NOTRE référence (transaction_number, ex. NFI-XXXX).
+    const externalRef =
+      (data.external_reference as string) ||
+      (data.transaction_id as string) ||
+      (data.transactionId as string) ||
+      '';
+    // `reference` = référence propre à iPay, requise pour la vérification serveur.
+    const iPayReference = (data.reference as string) || '';
+    const notifiedStatus = data.status as string | undefined;
+
+    if (!externalRef) {
+      Sentry.captureMessage('iPayMoney callback missing external_reference', {
         level: 'warning',
-        extra: { payloadKeys: Object.keys(payload), payloadHasStatus: !!payload.status },
+        extra: { payloadKeys: Object.keys(data) },
       });
-      return NextResponse.json({ error: 'transaction_id manquant' }, { status: 400 });
+      return NextResponse.json({ error: 'external_reference manquant' }, { status: 400 });
     }
 
-    // Find the matching payment request
-    const { data: paymentRequest } = await serviceClient
+    // 5) Retrouver la transaction locale. On distingue « pas de ligne » (404, normal)
+    //    d'une vraie panne DB (500) : un 404 n'est en général pas rejoué par iPay,
+    //    alors qu'un 5xx l'est — on veut donc un 500 en cas d'erreur transitoire.
+    const { data: paymentRequest, error: lookupErr } = await serviceClient
       .from('payment_requests')
       .select('*')
-      .eq('transaction_number', transactionId)
+      .eq('transaction_number', externalRef)
       .eq('payment_method', 'ipaymoney')
-      .single();
+      .maybeSingle();
 
+    if (lookupErr) {
+      Sentry.captureException(lookupErr, {
+        tags: { context: 'ipaymoney-callback-lookup' },
+        extra: { externalRef },
+      });
+      return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
+    }
     if (!paymentRequest) {
       return NextResponse.json({ error: 'Transaction introuvable' }, { status: 404 });
     }
 
+    // 6) Idempotence : déjà traité => on acquitte sans rien refaire.
     if (paymentRequest.status === 'verified') {
-      // Already processed, idempotent
       return NextResponse.json({ success: true, message: 'Déjà traité' });
     }
 
-    if (status === 'success' || status === 'completed' || status === 'successful') {
-      // 3) Re-valider amount/billing_cycle contre le pricing canonique
-      // Protège contre une manipulation de la table payment_requests qui aurait
-      // mis un amount inférieur (race condition, compte service compromis, etc.)
+    // 7) Sans référence iPay, aucune vérification serveur possible => en attente.
+    if (!iPayReference) {
+      Sentry.captureMessage('iPayMoney callback sans reference iPay, vérification impossible', {
+        level: 'warning',
+        extra: { externalRef, notifiedStatus },
+      });
+      return NextResponse.json({ success: true, pending: true });
+    }
+
+    // 8) VÉRIFICATION SERVEUR-À-SERVEUR (verrou de sécurité central) : on ne fait
+    //    JAMAIS confiance au statut du webhook, on reconfirme auprès d'iPay avec la
+    //    clé secrète l'état réel du paiement.
+    const verified = await verifyIPayPayment(iPayReference);
+
+    if (verified && isIPaySucceeded(verified.status)) {
+      // Fail-closed sur le lien de référence :
+      //  - présente mais différente => incohérence/attaque => 400
+      //  - absente => impossible de lier avec certitude => on laisse en attente
+      if (verified.external_reference && verified.external_reference !== externalRef) {
+        Sentry.captureMessage('iPayMoney verify external_reference mismatch', {
+          level: 'error',
+          extra: { externalRef, got: verified.external_reference, iPayReference },
+        });
+        return NextResponse.json({ error: 'reference mismatch' }, { status: 400 });
+      }
+      if (!verified.external_reference) {
+        Sentry.captureMessage('iPayMoney verify sans external_reference, non activé', {
+          level: 'warning',
+          extra: { externalRef, iPayReference },
+        });
+        return NextResponse.json({ success: true, pending: true });
+      }
+
+      // Anti-tampering DB : le montant stocké doit égaler le prix canonique.
       const billingCycle = (paymentRequest.billing_cycle || 'monthly') as BillingCycle;
       const billingOption = getBillingOption(billingCycle);
-      if (!billingOption) {
-        Sentry.captureMessage('iPayMoney callback unknown billing cycle', {
-          level: 'error',
-          extra: { billingCycle, transactionId },
-        });
-        return NextResponse.json({ error: 'billing_cycle inconnu' }, { status: 400 });
-      }
       if (paymentRequest.amount !== billingOption.price) {
         Sentry.captureMessage('iPayMoney callback amount mismatch', {
           level: 'error',
@@ -307,53 +414,56 @@ export async function POST(request: NextRequest) {
             expected: billingOption.price,
             got: paymentRequest.amount,
             billingCycle,
-            transactionId,
+            externalRef,
             userId: paymentRequest.user_id,
           },
         });
         return NextResponse.json({ error: 'amount mismatch' }, { status: 400 });
       }
 
-      await activateSubscription(
-        serviceClient,
-        paymentRequest.id,
-        paymentRequest.user_id,
-        billingCycle,
-        paymentRequest.amount,
-        transactionId,
-      );
-
+      await activatePremium(serviceClient, paymentRequest as PaymentRow, iPayReference);
       return NextResponse.json({ success: true });
     }
 
-    if (status === 'failed' || status === 'cancelled') {
-      await serviceClient
+    // 9) Échec confirmé par iPay (ou notifié comme tel) => rejeter proprement.
+    if ((verified && isIPayFailed(verified.status)) || isIPayFailed(notifiedStatus)) {
+      const reason = verified?.status || notifiedStatus || 'failed';
+      const { error: rejErr } = await serviceClient
         .from('payment_requests')
         .update({
           status: 'rejected',
-          rejection_reason: `iPayMoney: ${status}`,
+          rejection_reason: `iPayMoney: ${reason}`,
           updated_at: new Date().toISOString(),
         })
-        .eq('id', paymentRequest.id);
+        .eq('id', paymentRequest.id)
+        .eq('status', 'pending');
+      if (rejErr) Sentry.captureException(rejErr, { tags: { context: 'ipaymoney-reject' } });
 
       await logAuditEvent('system', 'ipaymoney_payment_failed', 'payment', paymentRequest.id, {
         user_id: paymentRequest.user_id,
-        status,
-        transaction_id: transactionId,
+        status: reason,
+        external_reference: externalRef,
+        ipay_reference: iPayReference,
       });
 
-      return NextResponse.json({ success: true, status });
+      return NextResponse.json({ success: true, status: reason });
     }
 
-    // Unknown status, log and acknowledge. On NE log PAS le payload brut
-    // (contient telephone, nom client = PII). Si un debug pousse est requis,
-    // utiliser les logs Vercel en mode "Function logs" temporairement.
-    Sentry.captureMessage('iPayMoney callback with unknown status', {
-      level: 'warning',
-      extra: { status, transactionId, payloadKeys: Object.keys(payload) },
+    // 10) Statut non confirmé (vérif indisponible, ou paiement encore 'pending').
+    //     Sécurité : aucune activation sans confirmation. On acquitte (2xx) et la
+    //     transaction reste 'pending' (un prochain webhook confirmé la finalisera).
+    //     On NE log PAS le payload brut (téléphone/nom = PII).
+    Sentry.captureMessage('iPayMoney callback non confirmé, laissé en attente', {
+      level: 'info',
+      extra: {
+        externalRef,
+        iPayReference,
+        notifiedStatus,
+        verifiedStatus: verified?.status ?? null,
+        verifyReachable: verified !== null,
+      },
     });
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, pending: true });
   } catch (err) {
     Sentry.captureException(err, { tags: { context: 'ipaymoney-callback' } });
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });

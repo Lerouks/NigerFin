@@ -96,11 +96,13 @@ const nextConfig = {
             value: 'strict-origin-when-cross-origin',
           },
           {
-            // LOW-SEC-1 : push=(self) requis pour Web Push (admin Cockpit
-            // notifications). Sans, l'API navigator.serviceWorker.pushManager
-            // sera bloquee par certains navigateurs.
+            // NB : ne PAS ajouter de directive `push`. `push` n'existe pas dans
+            // la spec Permissions-Policy, les navigateurs la rejettent
+            // ("Unrecognized feature: 'push'"). Le Web Push du Cockpit admin ne
+            // depend pas de cet en-tete (il repose sur le service worker + la
+            // permission de notification + HTTPS, same-origin par defaut).
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), push=(self)',
+            value: 'camera=(), microphone=(), geolocation=()',
           },
           // Content-Security-Policy gere dynamiquement avec un nonce par
           // requete dans src/proxy.ts (middleware) pour CSP nonce-based.

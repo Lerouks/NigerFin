@@ -21,10 +21,13 @@ function buildCspHeader(nonce: string): string {
     // fuiter un URL d'image vers nos pages.
     "img-src 'self' data: blob: https://images.unsplash.com https://golrvonbqivqzywprjoo.supabase.co",
     "font-src 'self'",
-    // Sec M-2 : iPayMoney (checkout SDK + callback endpoints) doit etre dans
-    // connect-src sinon les paiements echouent en mode CSP strict.
-    `connect-src 'self' data: https://*.supabase.co https://*.sentry.io https://*.posthog.com https://*.ipaymoney.com https://*.ifutur.com${isDev ? ' ws://localhost:* http://localhost:*' : ''}`,
-    "frame-src 'none'",
+    // Sec M-2 : iPayMoney (SDK checkout.js). Domaine reel = i-pay.money (pas
+    // ipaymoney.com). Le SDK fait un fetch POST vers
+    // https://i-pay.money/api/sdk/payment_pages (=> connect-src) ET affiche la
+    // page de paiement dans une iframe i-pay.money (=> frame-src). Sans ces deux
+    // autorisations, le paiement echoue silencieusement en CSP stricte.
+    `connect-src 'self' data: https://*.supabase.co https://*.sentry.io https://*.posthog.com https://i-pay.money https://*.ipaymoney.com https://*.ifutur.com${isDev ? ' ws://localhost:* http://localhost:*' : ''}`,
+    "frame-src https://i-pay.money https://*.ipaymoney.com https://*.ifutur.com",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",

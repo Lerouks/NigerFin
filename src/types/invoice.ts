@@ -77,7 +77,7 @@ export const NFI_GROUP_ISSUER: InvoiceIssuer = {
   city: 'Niamey',
   country: 'Niger',
   email: 'contact@nfireport.com',
-  phone: '+227 97 76 91 31',
+  phone: '+227 91 70 71 94',
   rccm: 'NE-NIM-01-2026-B12-00204',
   nif: '164936/R',
 };

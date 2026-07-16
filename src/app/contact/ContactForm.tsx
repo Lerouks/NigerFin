@@ -34,7 +34,7 @@ export function ContactForm() {
 
   const address = getInfo(1, 'Niamey, Niger\nPlateau, BP 800');
   const email = getInfo(2, 'contact@nfireport.com');
-  const phone = getInfo(3, '+227 97 76 91 31');
+  const phone = getInfo(3, '+227 91 70 71 94');
   const hoursText = getInfo(4, 'Lundi au vendredi : 08h00 à 18h00 | Samedi : 09h00 à 13h00 | Dimanche : fermé');
 
   const handleSubmit = async (e: React.FormEvent) => {

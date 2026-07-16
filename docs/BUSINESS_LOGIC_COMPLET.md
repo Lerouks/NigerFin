@@ -110,7 +110,7 @@ export const PAYMENT_METHODS: Record<PaymentMethodId, PaymentMethod> = {
     shortName: 'Nita',
     logo: '/nita-logo.png',
     instructions: 'Effectuez votre transfert via Nita au numero ci-dessous...',
-    recipientNumber: '+227 97 76 91 31',
+    recipientNumber: '+227 91 70 71 94',
     recipientName: 'NFI REPORT',
   },
   amana: {
@@ -119,7 +119,7 @@ export const PAYMENT_METHODS: Record<PaymentMethodId, PaymentMethod> = {
     shortName: 'Amana',
     logo: '/amana-logo.png',
     instructions: 'Effectuez votre transfert via Amana au numero ci-dessous...',
-    recipientNumber: '+227 97 76 91 31',
+    recipientNumber: '+227 91 70 71 94',
     recipientName: 'NFI REPORT',
   },
   card: {
@@ -899,7 +899,7 @@ Via Stripe (carte bancaire) :
 Via mobile money (Nita/Amana) :
 
 1. Utilisateur choisit Nita ou Amana sur /pricing
-2. Effectue le transfert manuellement au numero +227 97 76 91 31
+2. Effectue le transfert manuellement au numero +227 91 70 71 94
 3. Soumet le numero de transaction via POST /api/payment/submit
 4. La demande est stockee en status: 'pending' dans payment_requests
 5. Un admin verifie via POST /api/payment/verify -> status: 'verified'

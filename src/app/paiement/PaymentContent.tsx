@@ -67,20 +67,6 @@ export function PaymentContent() {
       .catch(() => {});
   }, []);
 
-  // Load iPayMoney SDK script
-  useEffect(() => {
-    if (!isSignedIn) return;
-    const existing = document.querySelector('script[src="https://i-pay.money/checkout.js"]');
-    if (existing) return;
-    const script = document.createElement('script');
-    script.src = 'https://i-pay.money/checkout.js';
-    script.async = true;
-    document.body.appendChild(script);
-    return () => {
-      try { document.body.removeChild(script); } catch { /* already removed */ }
-    };
-  }, [isSignedIn]);
-
   const getPrice = (cycle: BillingCycle) => {
     const opt = BILLING_OPTIONS.find((b) => b.cycle === cycle)!;
     return dynamicPrices[`premium_${cycle}`] ?? opt.price;
@@ -167,18 +153,88 @@ export function PaymentContent() {
   };
 
   // Payment handlers
+  //
+  // NB : le SDK iPay (checkout.js) n'attache ses handlers qu'au DOMContentLoaded
+  // initial, sur les .ipaymoney-button déjà présents. Incompatible avec notre SPA
+  // (script chargé après le load, bouton créé au clic) : le bouton n'était jamais
+  // « armé ». On reproduit donc nous-mêmes la logique publique du SDK
+  // (create_payment_token -> iframe -> postMessage), avec un contrôle total.
+
+  /** Ouvre la page de paiement iPay en iframe plein écran et gère son retour. */
+  const openIPayOverlay = (token: string, redirectUrl: string) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'ipaymoney-payment-page';
+    overlay.style.cssText =
+      'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:999999;';
+
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://i-pay.money/api/sdk/payment_pages?token=${encodeURIComponent(token)}`;
+    iframe.setAttribute('allow', 'payment');
+    iframe.style.cssText = 'border:0;width:100%;height:100%;display:block;';
+
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.setAttribute('aria-label', 'Fermer');
+    closeBtn.textContent = '✕';
+    closeBtn.style.cssText =
+      'position:absolute;top:14px;right:16px;z-index:1000000;width:38px;height:38px;border-radius:9999px;border:0;background:rgba(255,255,255,0.92);color:#111;font-size:18px;line-height:1;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);';
+
+    const cleanup = () => {
+      window.removeEventListener('message', onMessage);
+      try { overlay.remove(); } catch { /* déjà retiré */ }
+    };
+
+    function onMessage(event: MessageEvent) {
+      // Sécurité : n'accepter que les messages émis par le domaine iPay.
+      let host = '';
+      try { host = new URL(event.origin).hostname; } catch { return; }
+      if (host !== 'i-pay.money' && !host.endsWith('.i-pay.money')) return;
+
+      const payload = event.data as {
+        type?: string;
+        other?: { status?: string; reference?: string; amount?: string | number };
+      } | null;
+      if (!payload || typeof payload !== 'object') return;
+
+      if (payload.type === 'closeModal') {
+        cleanup();
+        setIpaymoneyLoading(false);
+        return;
+      }
+      if (payload.type === 'payment.response') {
+        const o = payload.other || {};
+        if (o.status === 'succeeded') {
+          // L'activation Premium est faite par le webhook serveur (source de
+          // vérité). Ici on redirige juste l'utilisateur vers notre page de retour.
+          window.location.replace(
+            `${redirectUrl}&transactionId=${encodeURIComponent(o.reference || '')}&status=${encodeURIComponent(o.status || '')}&amount=${encodeURIComponent(String(o.amount ?? ''))}`,
+          );
+        } else {
+          cleanup();
+          setIpaymoneyLoading(false);
+          setPaymentError('Le paiement n\'a pas abouti. Vous pouvez réessayer.');
+        }
+      }
+    }
+
+    closeBtn.onclick = () => { cleanup(); setIpaymoneyLoading(false); };
+    overlay.append(iframe, closeBtn);
+    document.body.appendChild(overlay);
+    window.addEventListener('message', onMessage);
+    // L'iframe prend le relais visuellement : on relâche le spinner du bouton.
+    setIpaymoneyLoading(false);
+  };
+
   const handleIPayMoneyPayment = async () => {
     setIpaymoneyLoading(true);
     setPaymentError('');
     try {
-      // 1. Create payment request on our server to get a unique transaction ID
+      // 1. Créer la demande de paiement côté serveur (montant canonique) et
+      //    récupérer transactionId + URLs de retour.
       const res = await fetch('/api/ipaymoney/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tier: 'premium',
-          billingCycle,
-        }),
+        body: JSON.stringify({ tier: 'premium', billingCycle }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -187,55 +243,41 @@ export function PaymentContent() {
         return;
       }
 
-      // 2. Create a temporary iPayMoney SDK button and trigger checkout
       const publicKey = process.env.NEXT_PUBLIC_IPAYMONEY_PUBLIC_KEY;
       if (!publicKey) {
         setPaymentError('Configuration iPayMoney manquante.');
         setIpaymoneyLoading(false);
         return;
       }
-
-      // Environnement iPay dynamique : 'live' uniquement si explicitement
-      // configuré (NEXT_PUBLIC_IPAYMONEY_ENV=live), sinon 'sandbox' par défaut.
-      // Évite tout paiement réel accidentel tant que le compte n'est pas validé.
+      // 'live' seulement si explicitement configuré, sinon 'sandbox' (sécurité).
       const ipayEnv =
         process.env.NEXT_PUBLIC_IPAYMONEY_ENV === 'live' ? 'live' : 'sandbox';
 
-      const btn = document.createElement('button');
-      btn.className = 'ipaymoney-button';
-      btn.setAttribute('data-amount', data.amount);
-      // NB : 'data-environement' est bien l'orthographe attendue par le SDK
-      // iPayMoney (faute côté fournisseur). Ne pas « corriger » en 'environment',
-      // cela casserait l'intégration.
-      btn.setAttribute('data-environement', ipayEnv);
-      btn.setAttribute('data-key', publicKey);
-      btn.setAttribute('data-transaction-id', data.transactionId);
-      btn.setAttribute('data-redirect-url', data.redirectUrl);
-      btn.setAttribute('data-callback-url', data.callbackUrl);
-      btn.style.position = 'fixed';
-      btn.style.opacity = '0';
-      btn.style.pointerEvents = 'none';
-      document.body.appendChild(btn);
+      // 2. Créer le token de paiement iPay (endpoint public du SDK ; la clé
+      //    publique va dans le corps). 'environement' = orthographe VOULUE par iPay.
+      const tokenRes = await fetch(
+        'https://i-pay.money/api/sdk/payment_pages/create_payment_token',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            key: publicKey,
+            amount: data.amount,
+            environement: ipayEnv,
+            transaction_id: data.transactionId,
+            parent_domaine: window.location.origin,
+          }),
+        },
+      );
+      const tokenData = (await tokenRes.json().catch(() => null)) as { token?: string } | null;
+      if (!tokenRes.ok || !tokenData?.token) {
+        setPaymentError('Le paiement n\'a pas pu démarrer. Réessayez dans un instant.');
+        setIpaymoneyLoading(false);
+        return;
+      }
 
-      // Give the SDK a moment to bind to the new button, then click
-      setTimeout(() => {
-        btn.click();
-        setTimeout(() => {
-          try { document.body.removeChild(btn); } catch { /* already removed */ }
-        }, 2000);
-      }, 300);
-
-      // Filet de sécurité : si le SDK n'a pas redirigé après 10s (script non
-      // chargé, réseau lent), on évite un spinner bloqué à l'infini. Si le SDK a
-      // redirigé, le composant est démonté et ce setState est un no-op.
-      setTimeout(() => {
-        setIpaymoneyLoading((loading) => {
-          if (loading) {
-            setPaymentError('Le paiement n\'a pas pu démarrer. Vérifiez votre connexion et réessayez.');
-          }
-          return false;
-        });
-      }, 10000);
+      // 3. Ouvrir la page de paiement iPay dans une iframe et écouter son retour.
+      openIPayOverlay(tokenData.token, data.redirectUrl);
     } catch {
       setPaymentError('Erreur de connexion. Veuillez réessayer.');
       setIpaymoneyLoading(false);

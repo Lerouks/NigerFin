@@ -160,17 +160,29 @@ export function PaymentContent() {
   // « armé ». On reproduit donc nous-mêmes la logique publique du SDK
   // (create_payment_token -> iframe -> postMessage), avec un contrôle total.
 
-  /** Ouvre la page de paiement iPay en iframe plein écran et gère son retour. */
-  const openIPayOverlay = (token: string, redirectUrl: string) => {
+  /**
+   * Ouvre IMMÉDIATEMENT un overlay plein écran avec un loader (retour visuel
+   * instantané au clic), puis charge l'iframe iPay une fois le token prêt.
+   * Retourne un contrôleur { loadPayment, close }.
+   */
+  const openIPayOverlay = () => {
+    // Keyframes du spinner, injectées une seule fois.
+    if (!document.getElementById('nfi-ipay-spin')) {
+      const style = document.createElement('style');
+      style.id = 'nfi-ipay-spin';
+      style.textContent = '@keyframes nfi-ipay-spin{to{transform:rotate(360deg)}}';
+      document.head.appendChild(style);
+    }
+
     const overlay = document.createElement('div');
     overlay.className = 'ipaymoney-payment-page';
     overlay.style.cssText =
-      'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:999999;';
+      'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:999999;display:flex;align-items:center;justify-content:center;';
 
-    const iframe = document.createElement('iframe');
-    iframe.src = `https://i-pay.money/api/sdk/payment_pages?token=${encodeURIComponent(token)}`;
-    iframe.setAttribute('allow', 'payment');
-    iframe.style.cssText = 'border:0;width:100%;height:100%;display:block;';
+    const loader = document.createElement('div');
+    loader.style.cssText =
+      'width:48px;height:48px;border:4px solid rgba(255,255,255,0.35);border-top-color:#fff;border-radius:9999px;animation:nfi-ipay-spin 0.8s linear infinite;';
+    overlay.appendChild(loader);
 
     const closeBtn = document.createElement('button');
     closeBtn.type = 'button';
@@ -178,56 +190,75 @@ export function PaymentContent() {
     closeBtn.textContent = '✕';
     closeBtn.style.cssText =
       'position:absolute;top:14px;right:16px;z-index:1000000;width:38px;height:38px;border-radius:9999px;border:0;background:rgba(255,255,255,0.92);color:#111;font-size:18px;line-height:1;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);';
+    overlay.appendChild(closeBtn);
 
+    document.body.appendChild(overlay);
+
+    let onMessage: ((event: MessageEvent) => void) | null = null;
     const cleanup = () => {
-      window.removeEventListener('message', onMessage);
+      if (onMessage) window.removeEventListener('message', onMessage);
       try { overlay.remove(); } catch { /* déjà retiré */ }
     };
-
-    function onMessage(event: MessageEvent) {
-      // Sécurité : n'accepter que les messages émis par le domaine iPay.
-      let host = '';
-      try { host = new URL(event.origin).hostname; } catch { return; }
-      if (host !== 'i-pay.money' && !host.endsWith('.i-pay.money')) return;
-
-      const payload = event.data as {
-        type?: string;
-        other?: { status?: string; reference?: string; amount?: string | number };
-      } | null;
-      if (!payload || typeof payload !== 'object') return;
-
-      if (payload.type === 'closeModal') {
-        cleanup();
-        setIpaymoneyLoading(false);
-        return;
-      }
-      if (payload.type === 'payment.response') {
-        const o = payload.other || {};
-        if (o.status === 'succeeded') {
-          // L'activation Premium est faite par le webhook serveur (source de
-          // vérité). Ici on redirige juste l'utilisateur vers notre page de retour.
-          window.location.replace(
-            `${redirectUrl}&transactionId=${encodeURIComponent(o.reference || '')}&status=${encodeURIComponent(o.status || '')}&amount=${encodeURIComponent(String(o.amount ?? ''))}`,
-          );
-        } else {
-          cleanup();
-          setIpaymoneyLoading(false);
-          setPaymentError('Le paiement n\'a pas abouti. Vous pouvez réessayer.');
-        }
-      }
-    }
-
     closeBtn.onclick = () => { cleanup(); setIpaymoneyLoading(false); };
-    overlay.append(iframe, closeBtn);
-    document.body.appendChild(overlay);
-    window.addEventListener('message', onMessage);
-    // L'iframe prend le relais visuellement : on relâche le spinner du bouton.
-    setIpaymoneyLoading(false);
+
+    return {
+      close: cleanup,
+      loadPayment(token: string, redirectUrl: string) {
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://i-pay.money/api/sdk/payment_pages?token=${encodeURIComponent(token)}`;
+        iframe.setAttribute('allow', 'payment');
+        iframe.style.cssText = 'border:0;width:100%;height:100%;display:none;';
+        // Le loader reste visible tant que l'iframe n'a pas fini de charger.
+        iframe.onload = () => {
+          iframe.style.display = 'block';
+          loader.style.display = 'none';
+        };
+        overlay.style.display = 'block';
+        overlay.insertBefore(iframe, closeBtn);
+
+        onMessage = (event: MessageEvent) => {
+          // Sécurité : n'accepter que les messages émis par le domaine iPay.
+          let host = '';
+          try { host = new URL(event.origin).hostname; } catch { return; }
+          if (host !== 'i-pay.money' && !host.endsWith('.i-pay.money')) return;
+
+          const payload = event.data as {
+            type?: string;
+            other?: { status?: string; reference?: string; amount?: string | number };
+          } | null;
+          if (!payload || typeof payload !== 'object') return;
+
+          if (payload.type === 'closeModal') {
+            cleanup();
+            setIpaymoneyLoading(false);
+            return;
+          }
+          if (payload.type === 'payment.response') {
+            const o = payload.other || {};
+            if (o.status === 'succeeded') {
+              // L'activation Premium est faite par le webhook serveur (source de
+              // vérité). Ici on redirige juste vers notre page de retour.
+              window.location.replace(
+                `${redirectUrl}&transactionId=${encodeURIComponent(o.reference || '')}&status=${encodeURIComponent(o.status || '')}&amount=${encodeURIComponent(String(o.amount ?? ''))}`,
+              );
+            } else {
+              cleanup();
+              setIpaymoneyLoading(false);
+              setPaymentError('Le paiement n\'a pas abouti. Vous pouvez réessayer.');
+            }
+          }
+        };
+        window.addEventListener('message', onMessage);
+      },
+    };
   };
 
   const handleIPayMoneyPayment = async () => {
-    setIpaymoneyLoading(true);
     setPaymentError('');
+    setIpaymoneyLoading(true);
+    // Retour visuel instantané : l'overlay + loader s'affichent dès le clic,
+    // pendant que l'on prépare le paiement en arrière-plan.
+    const overlay = openIPayOverlay();
     try {
       // 1. Créer la demande de paiement côté serveur (montant canonique) et
       //    récupérer transactionId + URLs de retour.
@@ -238,6 +269,7 @@ export function PaymentContent() {
       });
       const data = await res.json();
       if (!res.ok) {
+        overlay.close();
         setPaymentError(data.error || 'Erreur lors de l\'initialisation du paiement.');
         setIpaymoneyLoading(false);
         return;
@@ -245,6 +277,7 @@ export function PaymentContent() {
 
       const publicKey = process.env.NEXT_PUBLIC_IPAYMONEY_PUBLIC_KEY;
       if (!publicKey) {
+        overlay.close();
         setPaymentError('Configuration iPayMoney manquante.');
         setIpaymoneyLoading(false);
         return;
@@ -271,14 +304,16 @@ export function PaymentContent() {
       );
       const tokenData = (await tokenRes.json().catch(() => null)) as { token?: string } | null;
       if (!tokenRes.ok || !tokenData?.token) {
+        overlay.close();
         setPaymentError('Le paiement n\'a pas pu démarrer. Réessayez dans un instant.');
         setIpaymoneyLoading(false);
         return;
       }
 
-      // 3. Ouvrir la page de paiement iPay dans une iframe et écouter son retour.
-      openIPayOverlay(tokenData.token, data.redirectUrl);
+      // 3. Charger la page de paiement iPay dans l'overlay déjà ouvert.
+      overlay.loadPayment(tokenData.token, data.redirectUrl);
     } catch {
+      overlay.close();
       setPaymentError('Erreur de connexion. Veuillez réessayer.');
       setIpaymoneyLoading(false);
     }
@@ -294,6 +329,9 @@ export function PaymentContent() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Préconnexion à iPay : rabote le délai réseau (DNS + TLS) au clic « Payer ». */}
+      <link rel="preconnect" href="https://i-pay.money" crossOrigin="anonymous" />
+      <link rel="dns-prefetch" href="https://i-pay.money" />
       {/* Header bar */}
       <div className="bg-[#111] py-5">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">

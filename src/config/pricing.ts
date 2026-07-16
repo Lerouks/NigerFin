@@ -138,12 +138,6 @@ export const PAYMENT_METHODS: Record<PaymentMethodId, PaymentMethod> = {
   },
 };
 
-/** Mobile money methods only (Nita & Amana) used for manual payment flow */
-export const MOBILE_PAYMENT_METHODS = {
-  nita: PAYMENT_METHODS.nita,
-  amana: PAYMENT_METHODS.amana,
-} as const;
-
 // ─── Payment request status ─────────────────────────────────────────────────
 
 export type PaymentStatus = 'pending' | 'verified' | 'rejected';

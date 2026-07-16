@@ -6,10 +6,8 @@ import {
   Check,
   Loader2,
   ArrowLeft,
-  Copy,
   CheckCircle,
   AlertCircle,
-  Clock,
   Mail,
   Lock,
   User,
@@ -22,17 +20,12 @@ import { useAuth } from '@/lib/auth-context';
 import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import {
   PREMIUM_TIER,
-  PAYMENT_METHODS,
-  MOBILE_PAYMENT_METHODS,
   BILLING_OPTIONS,
   formatPrice,
   getBillingOption,
   isValidBillingCycle,
-  type PaymentMethodId,
   type BillingCycle,
 } from '@/config/pricing';
-
-type PaymentStep = 'choose-method' | 'instructions' | 'confirm' | 'submitted';
 
 export function PaymentContent() {
   const searchParams = useSearchParams();
@@ -62,12 +55,7 @@ export function PaymentContent() {
   const [resetLoading, setResetLoading] = useState(false);
 
   // Payment state
-  const [paymentStep, setPaymentStep] = useState<PaymentStep>('choose-method');
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethodId | null>(null);
-  const [transactionNumber, setTransactionNumber] = useState('');
-  const [submitting, setSubmitting] = useState(false);
   const [paymentError, setPaymentError] = useState('');
-  const [copied, setCopied] = useState(false);
   const [ipaymoneyLoading, setIpaymoneyLoading] = useState(false);
 
   // Dynamic prices
@@ -116,7 +104,6 @@ export function PaymentContent() {
 
   const billingOption = getBillingOption(billingCycle);
   const price = getPrice(billingCycle);
-  const method = selectedMethod ? PAYMENT_METHODS[selectedMethod] : null;
 
   // Auth handlers
   const handleLogin = async (e: React.FormEvent) => {
@@ -180,51 +167,6 @@ export function PaymentContent() {
   };
 
   // Payment handlers
-  const handleCopyNumber = async () => {
-    if (!method) return;
-    try {
-      await navigator.clipboard.writeText(method.recipientNumber.replace(/\s/g, ''));
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Fallback
-    }
-  };
-
-  const handleSubmitPayment = async () => {
-    if (!selectedMethod || !transactionNumber.trim()) return;
-
-    setPaymentError('');
-    setSubmitting(true);
-
-    try {
-      const res = await fetch('/api/payment/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tier: 'premium',
-          billingCycle,
-          paymentMethod: selectedMethod,
-          transactionNumber: transactionNumber.trim(),
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setPaymentError(data.error || 'Erreur lors de la soumission');
-        setSubmitting(false);
-        return;
-      }
-
-      setPaymentStep('submitted');
-    } catch {
-      setPaymentError('Erreur de connexion. Veuillez réessayer.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
   const handleIPayMoneyPayment = async () => {
     setIpaymoneyLoading(true);
     setPaymentError('');
@@ -304,44 +246,6 @@ export function PaymentContent() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
-      </div>
-    );
-  }
-
-  // Submitted state - full width success
-  if (paymentStep === 'submitted') {
-    return (
-      <div className="min-h-screen bg-background">
-        <div className="bg-[#111] py-5">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <Link href="/" className="text-xl font-bold text-white">NFI Report</Link>
-          </div>
-        </div>
-        <div className="max-w-lg mx-auto px-4 py-20 text-center">
-          <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-5">
-            <CheckCircle className="w-8 h-8 text-emerald-500" />
-          </div>
-          <h2 className="text-2xl font-bold mb-3">Paiement soumis</h2>
-          <p className="text-gray-600 mb-2">Votre paiement est en cours de vérification.</p>
-          <div className="inline-flex items-center gap-2 text-amber-600 bg-amber-50 px-4 py-2 rounded-lg text-[13px] mb-8">
-            <Clock className="w-4 h-4" />
-            Délai de vérification : sous 24h
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link
-              href="/compte"
-              className="bg-[#111] text-white px-8 py-3 rounded-lg text-[14px] hover:bg-[#333] transition-colors"
-            >
-              Mon compte
-            </Link>
-            <Link
-              href="/"
-              className="border border-black/10 px-8 py-3 rounded-lg text-[14px] hover:bg-gray-50 transition-colors"
-            >
-              Retour à l&apos;accueil
-            </Link>
-          </div>
-        </div>
       </div>
     );
   }
@@ -651,163 +555,42 @@ export function PaymentContent() {
                     </div>
                   </div>
 
-                  {/* Step 1: Choose method */}
-                  {paymentStep === 'choose-method' && (
-                    <div>
-                      <p className="text-[12px] text-gray-500 uppercase tracking-wider font-semibold mb-3">
-                        Méthode de paiement
-                      </p>
+                  {/* Paiement via iPayMoney (regroupe Mobile Money Airtel, Moov, Nita, Amana + cartes) */}
+                  <div>
+                    <p className="text-[12px] text-gray-500 uppercase tracking-wider font-semibold mb-3">
+                      Moyen de paiement
+                    </p>
 
-                      {/* Mobile money methods */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                        {Object.values(MOBILE_PAYMENT_METHODS).map((m) => (
-                          <button
-                            key={m.id}
-                            onClick={() => { setSelectedMethod(m.id); setPaymentStep('instructions'); }}
-                            className="p-4 rounded-xl border-2 border-black/6 hover:border-black/20 text-left transition-all flex items-center gap-3"
-                          >
-                            <Image
-                              src={m.logo}
-                              alt={m.shortName}
-                              width={36}
-                              height={36}
-                              className="rounded-lg object-contain"
-                            />
-                            <div>
-                              <h3 className="font-bold text-[15px]">{m.shortName}</h3>
-                              <p className="text-gray-500 text-[12px]">{m.name}</p>
-                            </div>
-                          </button>
-                        ))}
+                    <button
+                      onClick={handleIPayMoneyPayment}
+                      disabled={ipaymoneyLoading}
+                      className="w-full p-4 rounded-xl border-2 border-black/6 hover:border-black/20 text-left transition-all flex items-center gap-3 disabled:opacity-60"
+                    >
+                      <Image
+                        src="/ipaymoney-logo.png"
+                        alt="iPayMoney"
+                        width={40}
+                        height={40}
+                        className="rounded-lg object-contain"
+                      />
+                      <div className="flex-1">
+                        <h3 className="font-bold text-[15px]">Payer avec iPayMoney</h3>
+                        <p className="text-gray-500 text-[12px]">Mobile Money (Airtel, Moov, Nita, Amana) · Visa, Mastercard, American Express</p>
                       </div>
+                      {ipaymoneyLoading && <Loader2 className="w-5 h-5 animate-spin text-gray-500" />}
+                    </button>
 
-                      {/* iPayMoney */}
-                      <button
-                        onClick={handleIPayMoneyPayment}
-                        disabled={ipaymoneyLoading}
-                        className="w-full p-4 rounded-xl border-2 border-black/6 hover:border-black/20 text-left transition-all flex items-center gap-3 disabled:opacity-60"
-                      >
-                        <Image
-                          src="/ipaymoney-logo.png"
-                          alt="iPayMoney"
-                          width={36}
-                          height={36}
-                          className="rounded-lg object-contain"
-                        />
-                        <div className="flex-1">
-                          <h3 className="font-bold text-[15px]">iPayMoney</h3>
-                          <p className="text-gray-500 text-[12px]">Mobile Money (Airtel, Moov) · Visa, Mastercard, Amex</p>
-                        </div>
-                        {ipaymoneyLoading && <Loader2 className="w-5 h-5 animate-spin text-gray-500" />}
-                      </button>
+                    <p className="text-[12px] text-gray-500 mt-3 leading-relaxed">
+                      Vous serez redirigé vers la page sécurisée iPayMoney pour finaliser votre paiement. Aucune donnée bancaire n&apos;est stockée sur nos serveurs.
+                    </p>
 
-                      {paymentError && (
-                        <div role="alert" className="bg-red-50 border border-red-200 rounded-lg p-3 mt-3 flex items-start gap-2">
-                          <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-                          <p className="text-red-700 text-[13px]">{paymentError}</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Step 2: Instructions */}
-                  {paymentStep === 'instructions' && method && (
-                    <div>
-                      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-5">
-                        <p className="text-amber-800 text-[13px] leading-relaxed">{method.instructions}</p>
+                    {paymentError && (
+                      <div role="alert" className="bg-red-50 border border-red-200 rounded-lg p-3 mt-3 flex items-start gap-2">
+                        <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                        <p className="text-red-700 text-[13px]">{paymentError}</p>
                       </div>
-
-                      <div className="space-y-4 mb-5">
-                        <div>
-                          <span className="text-[11px] text-gray-500 uppercase tracking-wider">Montant exact</span>
-                          <p className="text-xl font-bold mt-0.5">{formatPrice(price)}</p>
-                        </div>
-                        <div>
-                          <span className="text-[11px] text-gray-500 uppercase tracking-wider">Numéro du destinataire</span>
-                          <div className="flex items-center gap-3 mt-0.5">
-                            <p className="text-lg font-bold font-mono">{method.recipientNumber}</p>
-                            <button onClick={handleCopyNumber} className="text-gray-500 hover:text-gray-700 transition-colors" title="Copier">
-                              {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
-                            </button>
-                          </div>
-                        </div>
-                        <div>
-                          <span className="text-[11px] text-gray-500 uppercase tracking-wider">Bénéficiaire</span>
-                          <p className="text-base font-semibold mt-0.5">{method.recipientName}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => { setPaymentStep('choose-method'); setSelectedMethod(null); }}
-                          className="px-4 py-2.5 rounded-lg border border-black/10 text-[13px] hover:bg-gray-50 transition-colors"
-                        >
-                          Changer
-                        </button>
-                        <button
-                          onClick={() => setPaymentStep('confirm')}
-                          className="flex-1 bg-[#111] text-white px-6 py-2.5 rounded-lg text-[13px] hover:bg-[#333] transition-colors"
-                        >
-                          J&apos;ai effectué le transfert
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Step 3: Confirm */}
-                  {paymentStep === 'confirm' && method && (
-                    <div>
-                      <div className="mb-4">
-                        <p className="text-[12px] text-gray-500 mb-3">
-                          <span className="font-semibold text-gray-600">{method.name}</span> &middot; {billingOption.durationLabel} &middot; {formatPrice(price)}
-                        </p>
-                        <label htmlFor="txn" className="block text-sm font-medium mb-2">
-                          Numéro de transaction
-                        </label>
-                        <input
-                          id="txn"
-                          type="text"
-                          value={transactionNumber}
-                          onChange={(e) => setTransactionNumber(e.target.value)}
-                          placeholder="Ex: TXN123456789"
-                          className="w-full border border-black/8 rounded-lg px-4 py-3 bg-background focus:outline-hidden focus:border-black/15 focus:ring-1 focus:ring-black/5 transition-all text-[14px] font-mono"
-                        />
-                        <p className="text-[11px] text-gray-500 mt-1.5">
-                          Entrez le numéro reçu après votre transfert {method.shortName}.
-                        </p>
-                      </div>
-
-                      {paymentError && (
-                        <div role="alert" className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 flex items-start gap-2">
-                          <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-                          <p className="text-red-700 text-[13px]">{paymentError}</p>
-                        </div>
-                      )}
-
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => { setPaymentStep('instructions'); setPaymentError(''); }}
-                          className="px-4 py-2.5 rounded-lg border border-black/10 text-[13px] hover:bg-gray-50 transition-colors"
-                        >
-                          Retour
-                        </button>
-                        <button
-                          onClick={handleSubmitPayment}
-                          disabled={submitting || !transactionNumber.trim()}
-                          className="flex-1 bg-[#111] text-white px-6 py-2.5 rounded-lg text-[13px] hover:bg-[#333] transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-                        >
-                          {submitting ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <>
-                              <Check className="w-4 h-4" />
-                              Soumettre le paiement
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               )}
             </div>

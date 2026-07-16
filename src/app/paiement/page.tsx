@@ -4,7 +4,7 @@ import { PaymentContent } from './PaymentContent';
 
 export const metadata: Metadata = {
   title: 'Paiement - NFI Report',
-  description: 'Finalisez votre abonnement NFI Report via Nita ou Amana Transfert d\'Argent.',
+  description: 'Finalisez votre abonnement NFI Report par Mobile Money ou carte bancaire, en toute sécurité.',
   robots: { index: false },
 };
 

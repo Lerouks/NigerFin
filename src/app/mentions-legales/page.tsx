@@ -53,7 +53,7 @@ export default async function MentionsLegalesPage() {
         },
         {
           heading: '8. Abonnements et paiements',
-          text: "Les abonnements premium sont régis par les conditions générales de vente accessibles lors du processus de souscription. Les paiements sont traités de manière sécurisée par iPayMoney (Mobile Money et carte bancaire) ainsi que par les services Nita et Amana pour les transferts locaux. NFI Report ne stocke aucune donnée bancaire sur ses serveurs. Les tarifs sont indiqués en francs CFA (XOF) et sont susceptibles de modification avec un préavis raisonnable communiqué aux abonnés.",
+          text: "Les abonnements premium sont régis par les conditions générales de vente accessibles lors du processus de souscription. Les paiements sont traités de manière sécurisée par iPayMoney, qui regroupe le Mobile Money (Airtel, Moov, Nita, Amana) et les cartes bancaires (Visa, Mastercard, American Express). NFI Report ne stocke aucune donnée bancaire sur ses serveurs. Les tarifs sont indiqués en francs CFA (XOF) et sont susceptibles de modification avec un préavis raisonnable communiqué aux abonnés.",
         },
         {
           heading: '9. Protection des données personnelles',

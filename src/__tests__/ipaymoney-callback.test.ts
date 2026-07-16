@@ -169,27 +169,30 @@ describe('POST /api/ipaymoney/callback', () => {
     expect(auditCalledWith(VERIFIED)).toBe(false);
   });
 
-  it("n'active PAS si iPay ne confirme pas (verify indisponible => null)", async () => {
+  it("n'active PAS et demande un réessai (503) si iPay ne confirme pas (verify indisponible => null)", async () => {
     mockVerify.mockResolvedValue(null);
     const { POST } = await import('@/app/api/ipaymoney/callback/route');
     const res = await POST(
       ipayRequest({ data: { external_reference: 'NFI-1', reference: 'ipayref', status: 'succeeded' } }, AUTH),
     );
     const json = await res.json();
-    expect(res.status).toBe(200);
+    // 503 => iPay réessaiera le webhook ; aucune activation tant que non confirmé.
+    expect(res.status).toBe(503);
     expect(json.pending).toBe(true);
+    expect(json.retry).toBe(true);
     expect(auditCalledWith(VERIFIED)).toBe(false);
   });
 
-  it("laisse en attente si iPay répond 'pending'", async () => {
+  it("demande un réessai (503) si iPay répond 'pending'", async () => {
     mockVerify.mockResolvedValue({ external_reference: 'NFI-1', reference: 'ipayref', status: 'pending' });
     const { POST } = await import('@/app/api/ipaymoney/callback/route');
     const res = await POST(
       ipayRequest({ data: { external_reference: 'NFI-1', reference: 'ipayref', status: 'pending' } }, AUTH),
     );
     const json = await res.json();
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(503);
     expect(json.pending).toBe(true);
+    expect(json.retry).toBe(true);
     expect(auditCalledWith(VERIFIED)).toBe(false);
   });
 

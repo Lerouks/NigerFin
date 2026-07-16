@@ -449,11 +449,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, status: reason });
     }
 
-    // 10) Statut non confirmé (vérif indisponible, ou paiement encore 'pending').
-    //     Sécurité : aucune activation sans confirmation. On acquitte (2xx) et la
-    //     transaction reste 'pending' (un prochain webhook confirmé la finalisera).
-    //     On NE log PAS le payload brut (téléphone/nom = PII).
-    Sentry.captureMessage('iPayMoney callback non confirmé, laissé en attente', {
+    // 10) Statut non confirmé (vérif serveur momentanément injoignable, ou paiement
+    //     encore 'pending' côté iPay). Sécurité : aucune activation sans confirmation.
+    //     iPay réessaie le webhook (jusqu'à 5 fois, ~500ms d'intervalle) sur toute
+    //     réponse NON-2xx : on renvoie donc un 503 pour PROVOQUER ces réessais. Si
+    //     notre vérification serveur-à-serveur était juste indisponible à l'instant du
+    //     webhook, un prochain essai la confirmera et activera le Premium, au lieu de
+    //     laisser un client qui a payé bloqué en 'pending'. La transaction reste
+    //     'pending' d'ici là. On NE log PAS le payload brut (téléphone/nom = PII).
+    Sentry.captureMessage('iPayMoney callback non confirmé, réessai iPay demandé (503)', {
       level: 'info',
       extra: {
         externalRef,
@@ -463,7 +467,7 @@ export async function POST(request: NextRequest) {
         verifyReachable: verified !== null,
       },
     });
-    return NextResponse.json({ success: true, pending: true });
+    return NextResponse.json({ success: false, pending: true, retry: true }, { status: 503 });
   } catch (err) {
     Sentry.captureException(err, { tags: { context: 'ipaymoney-callback' } });
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });

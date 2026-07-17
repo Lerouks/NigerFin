@@ -213,7 +213,7 @@ export function BudgetFamilial() {
   return (
     <div className="space-y-8">
       <div className="bg-white border border-black/6 rounded-xl p-6">
-        <h2 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-5">
+        <h2 className="text-[11px] tracking-[0.15em] uppercase text-gray-600 mb-5">
           Revenus du foyer
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -231,7 +231,7 @@ export function BudgetFamilial() {
               placeholder="Ex: 250 000"
               className="w-full border border-black/8 px-4 py-3 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-black bg-background text-[15px]"
             />
-            <p className="text-[11px] text-gray-400 mt-1">Cumulé si plusieurs revenus dans le foyer.</p>
+            <p className="text-[11px] text-gray-600 mt-1">Cumulé si plusieurs revenus dans le foyer.</p>
           </div>
           <div>
             <label htmlFor="bf-foyer" className="block text-[13px] font-medium text-gray-700 mb-2">
@@ -246,13 +246,13 @@ export function BudgetFamilial() {
               placeholder="Ex: 5"
               className="w-full border border-black/8 px-4 py-3 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-black bg-background text-[15px]"
             />
-            <p className="text-[11px] text-gray-400 mt-1">Adultes et enfants à charge.</p>
+            <p className="text-[11px] text-gray-600 mt-1">Adultes et enfants à charge.</p>
           </div>
         </div>
       </div>
 
       <div className="bg-white border border-black/6 rounded-xl p-6">
-        <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-5">
+        <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-600 mb-5">
           Dépenses mensuelles par poste
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -271,7 +271,7 @@ export function BudgetFamilial() {
                 placeholder={cat.placeholder}
                 className="w-full border border-black/8 px-4 py-3 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-black bg-background text-[15px]"
               />
-              <p className="text-[11px] text-gray-400 mt-1">{cat.hint}</p>
+              <p className="text-[11px] text-gray-600 mt-1">{cat.hint}</p>
             </div>
           ))}
         </div>
@@ -294,7 +294,7 @@ export function BudgetFamilial() {
                 calc.reste >= 0 ? 'bg-white border-black/6' : 'bg-red-50 border-red-200'
               }`}
             >
-              <p className="text-[12px] text-gray-400 uppercase tracking-wider mb-1">
+              <p className="text-[12px] text-gray-600 uppercase tracking-wider mb-1">
                 {calc.reste >= 0 ? 'Reste à épargner' : 'Déficit'}
               </p>
               <p className={`text-2xl font-bold ${calc.reste >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
@@ -303,7 +303,7 @@ export function BudgetFamilial() {
               </p>
             </div>
             <div className="bg-white border border-black/6 p-6 rounded-xl">
-              <p className="text-[12px] text-gray-400 uppercase tracking-wider mb-1">Taux d&rsquo;épargne</p>
+              <p className="text-[12px] text-gray-600 uppercase tracking-wider mb-1">Taux d&rsquo;épargne</p>
               <p className={`text-2xl font-bold ${calc.tauxEpargne >= 10 ? 'text-emerald-600' : 'text-amber-600'}`}>
                 {calc.tauxEpargne.toFixed(1)}%
               </p>
@@ -320,7 +320,7 @@ export function BudgetFamilial() {
                 interestLabel="Reste à épargner"
               />
               <div className="bg-white border border-black/6 rounded-xl p-6">
-                <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
+                <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-600 mb-4">
                   Répartition par poste (% des revenus)
                 </h3>
                 <div className="space-y-3">
@@ -349,7 +349,7 @@ export function BudgetFamilial() {
                             style={{ width: `${Math.min(share, 100)}%` }}
                           />
                         </div>
-                        <p className="text-[10px] text-gray-400 mt-1">
+                        <p className="text-[10px] text-gray-600 mt-1">
                           Repère : {benchmark.min}-{benchmark.max === Infinity ? '∞' : benchmark.max}%
                         </p>
                       </div>
@@ -380,7 +380,7 @@ export function BudgetFamilial() {
           </div>
 
           <div className="bg-background border border-black/6 rounded-xl p-6">
-            <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
+            <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-600 mb-4">
               Recommandations personnalisées ({recommendations.length})
             </h3>
             <ul className="space-y-3">

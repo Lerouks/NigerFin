@@ -81,7 +81,7 @@ export function InteretSimple() {
   return (
     <div className="space-y-8">
       <div className="bg-white border border-black/6 rounded-xl p-6">
-        <h2 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-5">
+        <h2 className="text-[11px] tracking-[0.15em] uppercase text-gray-600 mb-5">
           Paramètres du placement
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -113,7 +113,7 @@ export function InteretSimple() {
               <p className="text-2xl font-bold">{fmt(calc.interest)} FCFA</p>
             </div>
             <div className="bg-white border border-black/6 p-6 rounded-xl">
-              <p className="text-[12px] text-gray-400 uppercase tracking-wider mb-1">Montant total</p>
+              <p className="text-[12px] text-gray-600 uppercase tracking-wider mb-1">Montant total</p>
               <p className="text-2xl font-bold">{fmt(calc.total)} FCFA</p>
             </div>
           </div>

@@ -23,7 +23,7 @@ export function ChartTooltip({
       style={{ minWidth: 120 }}
     >
       {label && (
-        <p className="text-[11px] text-gray-400 mb-1.5 font-medium">{label}</p>
+        <p className="text-[11px] text-gray-600 mb-1.5 font-medium">{label}</p>
       )}
       {payload.map((entry, i) => (
         <div key={i} className="flex items-center gap-2 py-0.5">

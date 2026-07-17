@@ -397,7 +397,7 @@ export function SectionArticlesFiltered({
 
                 {getPageNumbers().map((page, i) =>
                   page === 'ellipsis' ? (
-                    <span key={`ellipsis-${i}`} className="px-2 text-gray-300 text-[13px]">...</span>
+                    <span key={`ellipsis-${i}`} className="px-2 text-gray-500 text-[13px]">...</span>
                   ) : (
                     <button
                       type="button"

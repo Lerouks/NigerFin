@@ -226,7 +226,7 @@ export function IndicesEconomiques() {
     <div className="space-y-8">
       {/* Graphique d'évolution du PIB */}
       <div className="bg-white border border-black/6 rounded-xl p-6">
-        <h2 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
+        <h2 className="text-[11px] tracking-[0.15em] uppercase text-gray-600 mb-4">
           Évolution du PIB du Niger (Mrd FCFA)
         </h2>
         {isLoading ? (
@@ -272,7 +272,7 @@ export function IndicesEconomiques() {
             </ResponsiveContainer>
           </div>
         ) : (
-          <div className="h-64 flex items-center justify-center text-[13px] text-gray-400">
+          <div className="h-64 flex items-center justify-center text-[13px] text-gray-600">
             Données indisponibles
           </div>
         )}
@@ -320,11 +320,11 @@ export function IndicesEconomiques() {
       )}
 
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <p className="text-[12px] text-gray-400">
+        <p className="text-[12px] text-gray-600">
           Sources : Banque mondiale, FMI{source ? ` (${source})` : ''}. Parité XOF/USD fixe à 655,957.
         </p>
         {lastUpdated && (
-          <p className="text-[10px] text-gray-400">
+          <p className="text-[10px] text-gray-600">
             Mis à jour : {new Date(lastUpdated).toLocaleDateString('fr-FR')}
           </p>
         )}

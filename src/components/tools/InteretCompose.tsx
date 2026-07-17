@@ -156,7 +156,7 @@ export function InteretCompose() {
   return (
     <div className="space-y-8">
       <div className="bg-white border border-black/6 rounded-xl p-6">
-        <h2 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-5">
+        <h2 className="text-[11px] tracking-[0.15em] uppercase text-gray-600 mb-5">
           Paramètres du placement
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -185,7 +185,7 @@ export function InteretCompose() {
         </div>
 
         <div className="mt-6 pt-6 border-t border-black/6">
-          <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-5">
+          <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-600 mb-5">
             Versements périodiques (optionnel)
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -216,7 +216,7 @@ export function InteretCompose() {
               </select>
             </div>
           </div>
-          <p className="text-[11px] text-gray-400 mt-3">
+          <p className="text-[11px] text-gray-600 mt-3">
             Les versements sont ajoutés en fin de période et génèrent des intérêts à partir de la période suivante.
           </p>
         </div>
@@ -232,11 +232,11 @@ export function InteretCompose() {
               <p className="text-2xl font-bold">{fmt(calc.interest)} FCFA</p>
             </div>
             <div className="bg-white border border-black/6 p-6 rounded-xl">
-              <p className="text-[12px] text-gray-400 uppercase tracking-wider mb-1">Montant final</p>
+              <p className="text-[12px] text-gray-600 uppercase tracking-wider mb-1">Montant final</p>
               <p className="text-2xl font-bold">{fmt(calc.total)} FCFA</p>
             </div>
             <div className="bg-white border border-black/6 p-6 rounded-xl">
-              <p className="text-[12px] text-gray-400 uppercase tracking-wider mb-1">
+              <p className="text-[12px] text-gray-600 uppercase tracking-wider mb-1">
                 {hasContrib ? 'Total investi' : 'Bonus vs intérêt simple'}
               </p>
               <p className={`text-2xl font-bold ${hasContrib ? '' : 'text-emerald-600'}`}>

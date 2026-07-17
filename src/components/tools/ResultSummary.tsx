@@ -16,7 +16,7 @@ export function ResultSummary({ title = 'Résumé', items }: ResultSummaryProps)
 
   return (
     <div className="bg-white border border-black/6 rounded-xl p-6">
-      <h2 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
+      <h2 className="text-[11px] tracking-[0.15em] uppercase text-gray-600 mb-4">
         {title}
       </h2>
       <div className="space-y-3">

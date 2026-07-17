@@ -262,7 +262,7 @@ export function ToolContent({ slug, title, description, isPremium }: ToolContent
     <div className="min-h-screen bg-background">
       <section className="bg-[#111] text-white py-10 md:py-14">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Link href="/#outils" className="inline-flex items-center gap-1.5 text-[13px] text-white/40 hover:text-white/70 transition-colors mb-6"><ArrowLeft className="w-4 h-4" />Retour aux outils</Link>
+          <Link href="/#outils" className="inline-flex items-center gap-1.5 text-[13px] text-white/70 hover:text-white/70 transition-colors mb-6"><ArrowLeft className="w-4 h-4" />Retour aux outils</Link>
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-white/8 rounded-xl flex items-center justify-center"><Icon className="w-6 h-6 text-white/70" /></div>
             <div>
@@ -270,7 +270,7 @@ export function ToolContent({ slug, title, description, isPremium }: ToolContent
                 <h1 className="text-3xl font-bold">{title}</h1>
                 {isPremium && <span className="text-[10px] bg-white/10 text-white/60 px-2.5 py-1 rounded-full tracking-wider uppercase">Premium</span>}
               </div>
-              <p className="text-white/40 text-[14px] mt-1">{description}</p>
+              <p className="text-white/70 text-[14px] mt-1">{description}</p>
             </div>
           </div>
         </div>

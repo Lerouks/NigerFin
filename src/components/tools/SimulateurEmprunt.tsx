@@ -117,7 +117,7 @@ export function SimulateurEmprunt() {
     <div className="space-y-8">
       {/* Input fields */}
       <div className="bg-white border border-black/6 rounded-xl p-6">
-        <h2 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-5">
+        <h2 className="text-[11px] tracking-[0.15em] uppercase text-gray-600 mb-5">
           Paramètres de l&apos;emprunt
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -174,15 +174,15 @@ export function SimulateurEmprunt() {
           {/* KPI cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-[#111] text-white p-6 rounded-xl">
-              <p className="text-[12px] text-white/40 uppercase tracking-wider mb-1">Mensualité</p>
+              <p className="text-[12px] text-white/70 uppercase tracking-wider mb-1">Mensualité</p>
               <p className="text-2xl font-bold">{fmt(calc.monthly)} FCFA</p>
             </div>
             <div className="bg-white border border-black/6 p-6 rounded-xl">
-              <p className="text-[12px] text-gray-400 uppercase tracking-wider mb-1">Coût total du crédit</p>
+              <p className="text-[12px] text-gray-600 uppercase tracking-wider mb-1">Coût total du crédit</p>
               <p className="text-2xl font-bold">{fmt(calc.totalCost)} FCFA</p>
             </div>
             <div className="bg-white border border-black/6 p-6 rounded-xl">
-              <p className="text-[12px] text-gray-400 uppercase tracking-wider mb-1">Total des intérêts</p>
+              <p className="text-[12px] text-gray-600 uppercase tracking-wider mb-1">Total des intérêts</p>
               <p className="text-2xl font-bold">{fmt(calc.totalInterest)} FCFA</p>
             </div>
           </div>

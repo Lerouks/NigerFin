@@ -178,7 +178,7 @@ export function EnterpriseContent({
                         className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold"
                       />
                       <span>
-                        <strong className="font-semibold">{fact.label} :</strong>{' '}
+                        <strong className="font-semibold">{fact.label}&nbsp;:</strong>{' '}
                         {fact.value}
                       </span>
                     </li>
@@ -278,7 +278,7 @@ export function EnterpriseContent({
                                 <span>{share.label}</span>
                                 {share.share != null && (
                                   <span className="text-gray-500 tabular-nums text-[13px]">
-                                    {share.share}%
+                                    {share.share}&nbsp;%
                                   </span>
                                 )}
                               </li>

@@ -14,7 +14,7 @@ export function AboutSeoBlock() {
             informations économiques et financières disponibles sur le pays restent rares,
             fragmentées, souvent en anglais ou pensées pour un lectorat international. Côté
             local, les ressources éditoriales spécialisées en économie sont limitées, alors
-            même que la demande explose : jeunes diplômés qui veulent investir, entrepreneurs
+            même que la demande explose : jeunes diplômés qui veulent investir, entrepreneurs
             qui cherchent à se financer, cadres qui veulent comprendre la conjoncture, diaspora
             qui suit le pays depuis l&apos;étranger.
           </p>
@@ -23,7 +23,7 @@ export function AboutSeoBlock() {
             analyses contextualisées sur l&apos;économie nigérienne, les marchés financiers
             ouest-africains, les entreprises stratégiques du pays, l&apos;actualité de la zone
             UEMOA et les grandes tendances qui façonnent l&apos;Afrique de l&apos;Ouest. Notre
-            ambition : devenir la référence francophone de l&apos;information économique et
+            ambition : devenir la référence francophone de l&apos;information économique et
             financière sur le Niger et la sous-région.
           </p>
 
@@ -34,7 +34,7 @@ export function AboutSeoBlock() {
             <li className="flex items-start gap-3">
               <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
-                <strong>Économie nigérienne</strong> : croissance du PIB, inflation, dette
+                <strong>Économie nigérienne</strong> : croissance du PIB, inflation, dette
                 publique, balance commerciale, secteurs stratégiques (agriculture, mines,
                 énergie, services).
               </span>
@@ -42,28 +42,28 @@ export function AboutSeoBlock() {
             <li className="flex items-start gap-3">
               <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
-                <strong>Finance et marchés</strong> : BRVM, banques nigériennes, microfinance,
+                <strong>Finance et marchés</strong> : BRVM, banques nigériennes, microfinance,
                 Mobile Money, fintechs, taux directeurs BCEAO, politiques monétaires UEMOA.
               </span>
             </li>
             <li className="flex items-start gap-3">
               <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
-                <strong>Entreprises stratégiques</strong> : SOMAÏR, COMINAK, NIGELEC, SONIBANK,
+                <strong>Entreprises stratégiques</strong> : SOMAÏR, COMINAK, NIGELEC, SONIBANK,
                 SONIDEP, BAGRI, SOPAMIN, Niger Telecoms et le tissu des PME locales.
               </span>
             </li>
             <li className="flex items-start gap-3">
               <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
-                <strong>Éducation financière</strong> : cours et leçons gratuits adaptés au
+                <strong>Éducation financière</strong> : cours et leçons gratuits adaptés au
                 contexte nigérien et UEMOA, du débutant à l&apos;investisseur averti.
               </span>
             </li>
             <li className="flex items-start gap-3">
               <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
-                <strong>Outils pratiques</strong> : simulateurs financiers (emprunt, salaire,
+                <strong>Outils pratiques</strong> : simulateurs financiers (emprunt, salaire,
                 budget familial, intérêts) calibrés sur les réalités du Niger.
               </span>
             </li>
@@ -73,7 +73,7 @@ export function AboutSeoBlock() {
             Pour qui écrivons-nous
           </h2>
           <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-pretty mb-6 text-justify hyphens-auto">
-            Notre audience est large mais nos lecteurs partagent un point commun : ils veulent
+            Notre audience est large mais nos lecteurs partagent un point commun : ils veulent
             comprendre l&apos;économie pour mieux décider. Cela inclut des étudiants en
             économie ou finance qui préparent leur entrée dans la vie active, des jeunes
             diplômés qui veulent investir leur première épargne, des cadres et dirigeants
@@ -85,7 +85,7 @@ export function AboutSeoBlock() {
           <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-pretty mb-8 text-justify hyphens-auto">
             Nous écrivons aussi pour les journalistes, chercheurs et organisations
             internationales qui ont besoin d&apos;analyses contextualisées et fiables sur le
-            Niger et la zone UEMOA. Notre objectif : démocratiser l&apos;accès à
+            Niger et la zone UEMOA. Notre objectif : démocratiser l&apos;accès à
             l&apos;information économique de qualité, sans jargon inutile, sans simplification
             excessive.
           </p>

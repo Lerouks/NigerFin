@@ -155,7 +155,7 @@ export function PathContent({ slug }: { slug: string }) {
           <h1 className="text-3xl md:text-4xl font-bold mb-3">{data.title}</h1>
           <p className="text-white/60 text-[15px] max-w-2xl mb-4">{data.description}</p>
           <p className="text-white/40 text-[13px] max-w-2xl mb-6">
-            Objectif : {data.goal_label}
+            Objectif&nbsp;: {data.goal_label}
           </p>
 
           <div className="flex flex-wrap gap-3">
@@ -189,12 +189,12 @@ export function PathContent({ slug }: { slug: string }) {
                 <span>
                   {data.completed_count}/{data.step_count} terminées
                 </span>
-                <span className="tabular-nums">{progressPct}%</span>
+                <span className="tabular-nums">{progressPct}&nbsp;%</span>
               </div>
               <div className="h-1.5 w-full bg-white/8 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-emerald-400 rounded-full transition-all"
-                  style={{ width: `${progressPct}%` }}
+                  style={{ width: `${progressPct}&nbsp;%` }}
                 />
               </div>
               {continueTarget && (
@@ -202,7 +202,7 @@ export function PathContent({ slug }: { slug: string }) {
                   href={continueTarget}
                   className="mt-4 inline-flex items-center gap-2 bg-white text-[#111] px-5 py-2.5 rounded-lg text-[13px] font-semibold hover:bg-white/90 transition-colors"
                 >
-                  Continuer : {firstIncomplete?.title}
+                  Continuer&nbsp;: {firstIncomplete?.title}
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               )}

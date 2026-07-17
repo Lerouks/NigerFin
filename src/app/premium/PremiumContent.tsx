@@ -20,13 +20,13 @@ const SCREENSHOTS = [
     src: '/premium/article-premium.webp',
     alt: 'Article Premium - Banques nigériennes sous pression',
     label: 'Article Premium',
-    desc: 'Analyses inédites : banques nigériennes, matières premières stratégiques, stratégies d’investissement en Afrique de l’Ouest. Écrites pour être lues en 5 minutes, pas pour remplir un site.',
+    desc: 'Analyses inédites : banques nigériennes, matières premières stratégiques, stratégies d’investissement en Afrique de l’Ouest. Écrites pour être lues en 5 minutes, pas pour remplir un site.',
   },
   {
     src: '/premium/outil-budget.webp',
     alt: 'Outil Budget - taux d’épargne, répartition des dépenses',
     label: 'Outil Budget',
-    desc: 'Entrez vos revenus et dépenses. Obtenez votre taux d’épargne, votre répartition par poste et des recommandations concrètes pour passer à 15-20 % d’épargne. Export PDF inclus.',
+    desc: 'Entrez vos revenus et dépenses. Obtenez votre taux d’épargne, votre répartition par poste et des recommandations concrètes pour passer à 15-20 % d’épargne. Export PDF inclus.',
   },
 ];
 
@@ -54,7 +54,7 @@ const BENEFITS = [
   {
     icon: GraduationCap,
     title: 'Cours d’éducation financière',
-    desc: 'Modules complets : épargne, investissement, BRVM, crypto, devises. Apprenez à votre rythme.',
+    desc: 'Modules complets : épargne, investissement, BRVM, crypto, devises. Apprenez à votre rythme.',
   },
   {
     icon: Bell,
@@ -65,20 +65,20 @@ const BENEFITS = [
 
 const FAQ = [
   {
-    q: 'Comment je paie ?',
+    q: 'Comment je paie ?',
     a: 'Mobile Money (Airtel, Moov) ou Visa, Mastercard, American Express via iPayMoney. Paiement sécurisé, en quelques secondes.',
   },
   {
-    q: 'Y a-t-il un engagement ?',
-    a: 'Aucun. Vous payez une seule fois pour la durée choisie : pas d’abonnement à résilier. L’accès prend fin à l’échéance, sauf si vous le renouvelez vous-même.',
+    q: 'Y a-t-il un engagement ?',
+    a: 'Aucun. Vous payez une seule fois pour la durée choisie : pas d’abonnement à résilier. L’accès prend fin à l’échéance, sauf si vous le renouvelez vous-même.',
   },
   {
-    q: 'Y a-t-il un essai gratuit ?',
+    q: 'Y a-t-il un essai gratuit ?',
     a: 'Pas pour le moment. Mais vous pouvez lire 3 articles Premium par mois gratuitement pour tester la qualité.',
   },
   {
-    q: 'Que recouvre exactement Premium ?',
-    a: 'Tout : 2 newsletters/semaine, articles & analyses illimités, outils Premium avec PDF, cours d’éducation financière, alertes.',
+    q: 'Que recouvre exactement Premium ?',
+    a: 'Tout : 2 newsletters/semaine, articles & analyses illimités, outils Premium avec PDF, cours d’éducation financière, alertes.',
   },
 ];
 
@@ -228,7 +228,7 @@ function HeroSection() {
           </div>
 
           <p className="mt-4 text-[13px] text-gray-500">
-            Déjà abonné ?{' '}
+            Déjà abonné ?{' '}
             <Link
               href="/connexion"
               className="font-medium text-gray-700 underline underline-offset-2 transition-colors hover:text-gold"
@@ -522,7 +522,7 @@ function FinalCta() {
     <section className="bg-foreground py-24 sm:py-32">
       <FadeUp className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
         <h2 className="text-balance text-3xl font-bold leading-[1.15] tracking-tight text-white sm:text-5xl">
-          Investissez dans ce que personne ne peut vous prendre :
+          Investissez dans ce que personne ne peut vous prendre :
           <br />
           <span className="text-gold">votre connaissance.</span>
         </h2>

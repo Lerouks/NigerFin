@@ -8,7 +8,7 @@ import { createServiceClient } from '@/lib/supabase';
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: 'Éducation financière : cours et ressources',
+  title: 'Éducation financière : cours et ressources',
   description: 'Apprenez la finance, l\'économie et les marchés à votre rythme grâce à nos cours et ressources pédagogiques gratuits, adaptés au contexte africain.',
   alternates: { canonical: '/education' },
 };
@@ -62,11 +62,11 @@ export default async function EducationPage() {
       <HubFooter
         paragraphs={[
           "L'éducation financière reste l'un des piliers de l'autonomie économique et de la réussite patrimoniale, en particulier dans un contexte ouest-africain où l'inclusion financière progresse mais où la culture financière demeure peu démocratisée. La section Éducation de NFI Report propose des cours, leçons et parcours guidés gratuits, conçus pour tous les niveaux, du débutant complet à l'investisseur averti.",
-          "Notre pédagogie s'appuie sur des cas concrets adaptés au Niger et à la zone UEMOA : choix d'une banque locale, ouverture d'un compte titres BRVM via une SGI, calcul de l'ITS sur votre fiche de paie, gestion d'un budget familial en FCFA, comparaison entre Mobile Money et compte bancaire, fiscalité OHADA pour les entrepreneurs. Chaque catégorie regroupe une série de leçons progressives, courtes et accessibles, avec des exemples chiffrés et des conseils pratiques.",
-          "Nos parcours s'adressent aussi bien à l'étudiant qu'au salarié, à l'entrepreneur ou à l'investisseur particulier. Les leçons gratuites posent les bases ; les leçons Premium creusent chaque sujet avec des études de cas et des calculs détaillés.",
+          "Notre pédagogie s'appuie sur des cas concrets adaptés au Niger et à la zone UEMOA : choix d'une banque locale, ouverture d'un compte titres BRVM via une SGI, calcul de l'ITS sur votre fiche de paie, gestion d'un budget familial en FCFA, comparaison entre Mobile Money et compte bancaire, fiscalité OHADA pour les entrepreneurs. Chaque catégorie regroupe une série de leçons progressives, courtes et accessibles, avec des exemples chiffrés et des conseils pratiques.",
+          "Nos parcours s'adressent aussi bien à l'étudiant qu'au salarié, à l'entrepreneur ou à l'investisseur particulier. Les leçons gratuites posent les bases ; les leçons Premium creusent chaque sujet avec des études de cas et des calculs détaillés.",
         ]}
         highlights={[
-          { title: 'Catégories thématiques', body: 'Budget, banque, bourse, immobilier, crypto, fiscalité, assurance, entrepreneuriat : un panorama complet.' },
+          { title: 'Catégories thématiques', body: 'Budget, banque, bourse, immobilier, crypto, fiscalité, assurance, entrepreneuriat : un panorama complet.' },
           { title: 'Parcours guidés', body: 'Suivez des séquences pédagogiques structurées du débutant à l\'investisseur autonome.' },
           { title: 'Cas concrets Niger', body: 'Exemples chiffrés, comparaisons de banques locales, fiscalité OHADA, paiements mobile money.' },
           { title: 'Leçons gratuites', body: 'Une bonne partie du contenu est accessible sans abonnement, pour démocratiser la culture financière.' },

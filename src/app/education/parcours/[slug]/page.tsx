@@ -39,10 +39,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return { title: 'Parcours introuvable', robots: { index: false } };
   }
   return {
-    title: `Parcours : ${path.title}`,
+    title: `Parcours : ${path.title}`,
     description:
       path.description ||
-      `Parcours guidé NFI Report sur ${path.title.toLowerCase()} : leçons progressives pour maîtriser le sujet à votre rythme.`,
+      `Parcours guidé NFI Report sur ${path.title.toLowerCase()} : leçons progressives pour maîtriser le sujet à votre rythme.`,
     alternates: { canonical: `/education/parcours/${slug}` },
   };
 }

@@ -91,7 +91,7 @@ export function ArticleHeader({ article }: ArticleHeaderProps) {
               )}
               {article.mainImage?.source && (
                 <span className="text-[11px] text-gray-500 ml-auto whitespace-nowrap">
-                  Source : {article.mainImage.source}
+                  Source : {article.mainImage.source}
                 </span>
               )}
             </figcaption>

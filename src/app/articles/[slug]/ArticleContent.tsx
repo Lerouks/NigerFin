@@ -269,7 +269,7 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [], header
                     </a>
                     <button onClick={handleCopyLink} className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-[13px] hover:bg-gray-200 transition-colors">
                       {linkCopied ? <Check className="w-4 h-4 text-green-600" /> : <Link2 className="w-4 h-4" />}
-                      {linkCopied ? 'Copié !' : 'Copier le lien'}
+                      {linkCopied ? 'Copié !' : 'Copier le lien'}
                     </button>
                   </div>
                 </div>

@@ -563,7 +563,7 @@ export function PaymentContent() {
                         onClick={() => { setForgotMode(true); setAuthError(''); }}
                         className="block w-full text-center text-[13px] text-gray-500 hover:text-gray-600 mt-3 transition-colors"
                       >
-                        Mot de passe oublié ?
+                        Mot de passe oublié ?
                       </button>
                     )}
 
@@ -584,9 +584,9 @@ export function PaymentContent() {
                       className="w-full text-center text-[14px] text-gray-500"
                     >
                       {authMode === 'login' ? (
-                        <>Pas encore de compte ? <span className="text-[#111] font-semibold hover:underline">Créer un compte</span></>
+                        <>Pas encore de compte ? <span className="text-[#111] font-semibold hover:underline">Créer un compte</span></>
                       ) : (
-                        <>Déjà un compte ? <span className="text-[#111] font-semibold hover:underline">Se connecter</span></>
+                        <>Déjà un compte ? <span className="text-[#111] font-semibold hover:underline">Se connecter</span></>
                       )}
                     </button>
                   </div>
@@ -691,13 +691,13 @@ export function PaymentContent() {
               <p className="text-[13px] text-gray-500 leading-relaxed mb-5">
                 Paiement unique, accès Premium pour {billingOption.durationLabel}.{' '}
                 <span className="font-medium text-gray-700">
-                  Aucun prélèvement automatique : à la fin, vous choisissez de renouveler ou non.
+                  Aucun prélèvement automatique : à la fin, vous choisissez de renouveler ou non.
                 </span>
               </p>
 
               <div className="border-t border-black/4 pt-5">
                 <h4 className="text-[12px] text-gray-500 uppercase tracking-wider font-semibold mb-4">
-                  Ce que vous obtenez :
+                  Ce que vous obtenez :
                 </h4>
                 <ul className="space-y-3">
                   {PREMIUM_TIER.features.map((feature) => (

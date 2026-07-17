@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     notFound();
   }
 
-  const seoTitle = `${category.title} : cours gratuits | NFI Report`;
+  const seoTitle = `${category.title} : cours gratuits | NFI Report`;
   const description = `Cours et leçons gratuits sur ${category.title.toLowerCase()} adaptés au Niger et à l'UEMOA. Formation pas-à-pas.`;
 
   return {
@@ -50,7 +50,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     description,
     alternates: { canonical: `/education/${id}` },
     openGraph: {
-      title: `${category.title} : cours et leçons gratuits`,
+      title: `${category.title} : cours et leçons gratuits`,
       description,
       type: 'website',
     },

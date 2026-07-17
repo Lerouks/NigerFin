@@ -6,14 +6,14 @@ import { getAllArticles, getArticleViewRanking } from '@/lib/articles';
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: 'Tous les articles : actualités et analyses',
+  title: 'Tous les articles : actualités et analyses',
   description:
-    'Retrouvez l’ensemble des articles de NFI Report : économie, finance, marchés, Niger, éducation et entreprises. Analyses, actualités et décryptages.',
+    'Retrouvez l’ensemble des articles de NFI Report : économie, finance, marchés, Niger, éducation et entreprises. Analyses, actualités et décryptages.',
   alternates: {
     canonical: '/articles',
   },
   openGraph: {
-    title: 'Tous les articles : actualités et analyses',
+    title: 'Tous les articles : actualités et analyses',
     description:
       'L’ensemble des analyses et actualités économiques et financières du Niger et de l’Afrique de l’Ouest.',
     type: 'website',

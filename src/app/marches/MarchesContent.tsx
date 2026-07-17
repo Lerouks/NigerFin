@@ -97,7 +97,7 @@ export function MarchesContent() {
         </p>
         {lastUpdated && (
           <p className="text-[11px] text-gray-500">
-            Dernière mise à jour :{' '}
+            Dernière mise à jour&nbsp;:{' '}
             {new Date(lastUpdated).toLocaleString('fr-FR', {
               day: '2-digit',
               month: '2-digit',
@@ -197,7 +197,7 @@ function QuoteRow({
                 <TrendingDown className="w-3.5 h-3.5" />
               )}
               {item.changePercent > 0 ? '+' : ''}
-              {item.changePercent.toFixed(2)}%
+              {item.changePercent.toFixed(2)}&nbsp;%
             </div>
           )}
         </div>

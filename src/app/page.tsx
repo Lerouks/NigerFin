@@ -16,7 +16,7 @@ import { getSiteFeatures } from '@/lib/site-data';
 export const metadata: Metadata = {
   title: 'NFI Report - Actualités économiques et financières du Niger',
   description:
-    "Magazine économique premium dédié au Niger et à l'Afrique de l'Ouest : analyses, données de marché, dossiers d'entreprises stratégiques, outils financiers.",
+    "Magazine économique premium dédié au Niger et à l'Afrique de l'Ouest : analyses, données de marché, dossiers d'entreprises stratégiques, outils financiers.",
   alternates: { canonical: '/' },
   // Bloc OG complet : dans Next, le openGraph d'une page remplace celui du
   // layout (pas de fusion profonde), il faut donc redonner l'image ici.
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     url: '/',
     title: 'NFI Report - Actualités économiques et financières du Niger',
     description:
-      "Magazine économique premium dédié au Niger et à l'Afrique de l'Ouest : analyses, données de marché, dossiers d'entreprises stratégiques, outils financiers.",
+      "Magazine économique premium dédié au Niger et à l'Afrique de l'Ouest : analyses, données de marché, dossiers d'entreprises stratégiques, outils financiers.",
     images: [
       {
         url: '/og-image.png',
@@ -53,7 +53,7 @@ const SECTION_INTROS: Record<string, string> = {
   marches:
     "Cours BRVM, devises, matières premières et indices clés pour l'économie nigérienne.",
   entreprises:
-    "Acteurs stratégiques nigériens et régionaux : résultats, stratégies, opportunités.",
+    "Acteurs stratégiques nigériens et régionaux : résultats, stratégies, opportunités.",
 };
 
 const LATEST_COUNT = 8; // 1 hero + 1 vedette + 6 secondaires
@@ -109,7 +109,7 @@ export default async function HomePage() {
         <div className="bg-[#0a0a0a] border-b border-white/8 overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center gap-6 min-w-0">
             <span className="text-[10px] tracking-[0.22em] uppercase text-gold font-bold shrink-0">
-              Marches
+              Marchés
             </span>
             <div className="h-3 w-px bg-white/10 shrink-0" />
             <MarketMarquee />
@@ -289,7 +289,7 @@ export default async function HomePage() {
               Le pouls économique
             </h2>
             <p className="mt-3 text-[15px] md:text-[16px] italic text-gray-700 max-w-2xl">
-              Les chiffres à suivre au quotidien : cours BRVM, devises, matières
+              Les chiffres à suivre au quotidien : cours BRVM, devises, matières
               premières et indices.
             </p>
           </header>

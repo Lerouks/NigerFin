@@ -84,7 +84,7 @@ export default async function UnsubscribePage({
           </Link>
           {tone === 'success' ? (
             <Link href="/" className="text-foreground/70 underline-offset-2 hover:underline">
-              Vous changez d&apos;avis ? Réabonnez-vous
+              Vous changez d&apos;avis ? Réabonnez-vous
             </Link>
           ) : (
             <a href="mailto:contact@nfireport.com" className="text-foreground/70 underline-offset-2 hover:underline">

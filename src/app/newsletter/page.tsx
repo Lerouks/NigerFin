@@ -147,18 +147,18 @@ export default function NewsletterPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
           <div className="prose prose-sm sm:prose-base max-w-none">
             <h2 className="text-xl sm:text-2xl font-bold text-[#111] mt-0 mb-3">
-              Pourquoi une newsletter dédiée au Niger et à l&apos;Afrique de l&apos;Ouest ?
+              Pourquoi une newsletter dédiée au Niger et à l&apos;Afrique de l&apos;Ouest ?
             </h2>
             <p className="text-[15px] leading-relaxed text-gray-700 mb-10 text-justify hyphens-auto">
               L&apos;information économique et financière sur le Niger est rare, fragmentée et souvent traduite avec
-              retard depuis l&apos;anglais. La newsletter NFI Report comble ce vide : une lecture longue par semaine,
+              retard depuis l&apos;anglais. La newsletter NFI Report comble ce vide : une lecture longue par semaine,
               écrite directement à Niamey, pour des lecteurs qui veulent comprendre la BRVM, l&apos;UEMOA, les
               entreprises stratégiques nigériennes (SOMAÏR, SONIDEP, NIGELEC, SOPAMIN, etc.) et les dynamiques
               macroéconomiques sous-régionales.
             </p>
 
             <h2 className="text-xl sm:text-2xl font-bold text-[#111] mt-10 mb-3">
-              À qui s&apos;adresse cette newsletter ?
+              À qui s&apos;adresse cette newsletter ?
             </h2>
             <p className="text-[15px] leading-relaxed text-gray-700 mb-10 text-justify hyphens-auto">
               Aux décideurs économiques, dirigeants d&apos;entreprise, analystes et investisseurs qui couvrent

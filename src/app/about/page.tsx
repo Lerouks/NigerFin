@@ -7,11 +7,11 @@ import { fetchLegalSections } from '@/lib/legal-sections';
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: 'À propos : notre mission et notre équipe',
+  title: 'À propos : notre mission et notre équipe',
   description: "Découvrez la mission, les valeurs et les fondateurs de NFI Report, source d'information économique et financière du Niger et de l'Afrique.",
   alternates: { canonical: '/about' },
   openGraph: {
-    title: 'À propos : notre mission et notre équipe',
+    title: 'À propos : notre mission et notre équipe',
     description: "Découvrez NFI Report, votre source d'information économique et financière pour le Niger et l'Afrique de l'Ouest.",
     type: 'website',
     images: ['/og-image.png'],
@@ -22,7 +22,7 @@ const FALLBACK_SECTIONS = [
   {
     id: 'fallback-1',
     heading: 'Notre mission',
-    text: "NFI Report a été fondé pour combler un manque criant : l'accès à une information économique et financière fiable, contextualisée et exploitable pour le Niger et l'Afrique de l'Ouest. Trop souvent, les médias internationaux survolent la région ou en présentent une vision simpliste, et les sources locales manquent de moyens pour proposer des analyses approfondies. Nous voulons changer cela en proposant chaque jour des décryptages rigoureux, des données vérifiées et des outils pratiques qui aident les Nigériens à comprendre leur économie, à protéger leur patrimoine et à saisir les opportunités.",
+    text: "NFI Report a été fondé pour combler un manque criant : l'accès à une information économique et financière fiable, contextualisée et exploitable pour le Niger et l'Afrique de l'Ouest. Trop souvent, les médias internationaux survolent la région ou en présentent une vision simpliste, et les sources locales manquent de moyens pour proposer des analyses approfondies. Nous voulons changer cela en proposant chaque jour des décryptages rigoureux, des données vérifiées et des outils pratiques qui aident les Nigériens à comprendre leur économie, à protéger leur patrimoine et à saisir les opportunités.",
     display_order: 1,
     updated_at: new Date().toISOString(),
   },
@@ -43,7 +43,7 @@ const FALLBACK_SECTIONS = [
   {
     id: 'fallback-4',
     heading: 'Ancrage régional, ouverture mondiale',
-    text: "Notre cœur de couverture est le Niger et la zone UEMOA, mais nous gardons toujours un regard sur l'écosystème mondial qui influence notre région : décisions des grandes banques centrales, mouvements des matières premières, géopolitique, transition énergétique. Comprendre l'ailleurs aide à mieux comprendre ici.",
+    text: "Notre cœur de couverture est le Niger et la zone UEMOA, mais nous gardons toujours un regard sur l'écosystème mondial qui influence notre région : décisions des grandes banques centrales, mouvements des matières premières, géopolitique, transition énergétique. Comprendre l'ailleurs aide à mieux comprendre ici.",
     display_order: 4,
     updated_at: new Date().toISOString(),
   },

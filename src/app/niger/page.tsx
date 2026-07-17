@@ -10,12 +10,12 @@ import { NigerSeoBlock } from './NigerSeoBlock';
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: 'Niger : profil économique, régions et ressources',
-  description: 'Profil économique du Niger : chiffres clés (PIB, population), 7 régions, ressources naturelles (uranium, pétrole, or) et secteurs stratégiques.',
+  title: 'Niger : profil économique, régions et ressources',
+  description: 'Profil économique du Niger : chiffres clés (PIB, population), 7 régions, ressources naturelles (uranium, pétrole, or) et secteurs stratégiques.',
   alternates: { canonical: `${SITE_URL}/niger` },
   openGraph: {
-    title: 'Niger : profil économique, régions et ressources',
-    description: 'Profil économique du Niger : chiffres clés, régions, ressources naturelles et cadre UEMOA/CEDEAO.',
+    title: 'Niger : profil économique, régions et ressources',
+    description: 'Profil économique du Niger : chiffres clés, régions, ressources naturelles et cadre UEMOA/CEDEAO.',
     url: `${SITE_URL}/niger`,
     type: 'website',
   },

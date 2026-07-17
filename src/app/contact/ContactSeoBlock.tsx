@@ -27,7 +27,7 @@ export function ContactSeoBlock() {
             <li className="flex items-start gap-3">
               <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
-                <strong>Demandes éditoriales</strong> : suggestions de sujets, signalements
+                <strong>Demandes éditoriales</strong>&nbsp;: suggestions de sujets, signalements
                 d&apos;informations, corrections, droits de réponse, demandes de clarification
                 sur un article publié.
               </span>
@@ -35,7 +35,7 @@ export function ContactSeoBlock() {
             <li className="flex items-start gap-3">
               <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
-                <strong>Partenariats stratégiques</strong> : collaboration éditoriale,
+                <strong>Partenariats stratégiques</strong>&nbsp;: collaboration éditoriale,
                 co-production de contenus, échange d&apos;expertise sectorielle avec
                 institutions, banques, entreprises et ONG actives au Niger ou en UEMOA.
               </span>
@@ -43,7 +43,7 @@ export function ContactSeoBlock() {
             <li className="flex items-start gap-3">
               <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
-                <strong>Publicité et sponsoring</strong> : encarts publicitaires display,
+                <strong>Publicité et sponsoring</strong>&nbsp;: encarts publicitaires display,
                 articles sponsorisés clairement identifiés, newsletters dédiées, partenariats
                 événementiels (consultez aussi notre page Publicité).
               </span>
@@ -51,22 +51,22 @@ export function ContactSeoBlock() {
             <li className="flex items-start gap-3">
               <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
-                <strong>Demandes presse</strong> : sollicitations d&apos;interviews,
+                <strong>Demandes presse</strong>&nbsp;: sollicitations d&apos;interviews,
                 déclarations officielles, communiqués de presse à diffuser, demandes de
-                citations pour autres médias.
+                citations pour d&apos;autres médias.
               </span>
             </li>
             <li className="flex items-start gap-3">
               <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
-                <strong>Support abonnés Premium</strong> : questions sur l&apos;abonnement,
+                <strong>Support abonnés Premium</strong>&nbsp;: questions sur l&apos;abonnement,
                 facturation, accès aux contenus payants, renouvellement, problèmes techniques.
               </span>
             </li>
             <li className="flex items-start gap-3">
               <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
-                <strong>Suggestions et retours</strong> : améliorations à apporter au site,
+                <strong>Suggestions et retours</strong>&nbsp;: améliorations à apporter au site,
                 aux outils financiers, à la newsletter, à l&apos;offre éditoriale en général.
               </span>
             </li>

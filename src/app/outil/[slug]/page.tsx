@@ -10,7 +10,7 @@ export const revalidate = 86400;
 
 const toolsMeta: Record<string, { title: string; description: string; premium: boolean }> = {
   'simulateur-emprunt': {
-    title: "Simulateur d'emprunt : mensualités et coût",
+    title: "Simulateur d'emprunt : mensualités et coût",
     description: 'Calculez vos mensualités, le coût total et les intérêts de votre emprunt selon les taux pratiqués au Niger et dans l\'UEMOA.',
     premium: false,
   },
@@ -20,13 +20,13 @@ const toolsMeta: Record<string, { title: string; description: string; premium: b
     premium: false,
   },
   'simulateur-salaire': {
-    title: 'Simulateur salaire Niger : net depuis brut',
+    title: 'Simulateur salaire Niger : net depuis brut',
     description: 'Estimez votre salaire net mensuel à partir du brut selon les barèmes CNSS et l\'impôt sur les traitements et salaires (ITS) en vigueur au Niger.',
     premium: true,
   },
   'indices-economiques': {
     title: 'Indices économiques Niger et UEMOA',
-    description: 'Consultez les principaux indicateurs économiques du Niger et de la zone UEMOA : PIB, inflation, taux directeur BCEAO, dette, réserves de change.',
+    description: 'Consultez les principaux indicateurs économiques du Niger et de la zone UEMOA : PIB, inflation, taux directeur BCEAO, dette, réserves de change.',
     premium: false,
   },
   'interet-compose': {

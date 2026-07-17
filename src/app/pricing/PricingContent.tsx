@@ -99,8 +99,8 @@ function PricingHero() {
           <span className="text-gold">qui te convient.</span>
         </h1>
         <p className="mx-auto mt-5 max-w-xl text-[16px] leading-relaxed text-gray-600 sm:text-[17px]">
-          À partir de {formatPrice(PREMIUM_MONTHLY_PRICE)}/mois. Résiliable en ligne à
-          tout moment, sans engagement.
+          À partir de {formatPrice(PREMIUM_MONTHLY_PRICE)}/mois. Paiement unique,
+          sans engagement ni prélèvement automatique.
         </p>
       </div>
     </section>
@@ -190,7 +190,7 @@ interface PricingPlansProps {
 
 function TrustStrip() {
   const items = [
-    { icon: XCircle, label: 'Annulable en 1 clic' },
+    { icon: XCircle, label: 'Aucun prélèvement auto' },
     { icon: RefreshCw, label: 'Sans engagement' },
     { icon: ShieldCheck, label: 'Paiement sécurisé iPayMoney' },
   ];
@@ -236,19 +236,19 @@ function PricingPlans({ getPrice, loadingPlan, onSubscribe }: PricingPlansProps)
 
 const PRICING_FAQ = [
   {
-    q: 'Comment je paie ?',
+    q: 'Comment je paie ?',
     a: 'Mobile Money (Airtel, Moov) ou par carte Visa, Mastercard, American Express via iPayMoney. Le paiement est sécurisé et prend quelques secondes.',
   },
   {
-    q: 'Y a-t-il un engagement ?',
-    a: 'Aucun. Vous payez une seule fois pour la durée choisie. Il n’y a pas d’abonnement à résilier : l’accès Premium prend fin à l’échéance, sauf si vous le renouvelez vous-même.',
+    q: 'Y a-t-il un engagement ?',
+    a: 'Aucun. Vous payez une seule fois pour la durée choisie. Il n’y a pas d’abonnement à résilier : l’accès Premium prend fin à l’échéance, sauf si vous le renouvelez vous-même.',
   },
   {
-    q: 'Puis-je changer de formule ?',
-    a: 'Oui. À chaque paiement, vous choisissez la durée qui vous convient : 1 mois, 3 mois ou 1 an. Vous pouvez prendre une autre formule lors de votre prochain achat.',
+    q: 'Puis-je changer de formule ?',
+    a: 'Oui. À chaque paiement, vous choisissez la durée qui vous convient : 1 mois, 3 mois ou 1 an. Vous pouvez prendre une autre formule lors de votre prochain achat.',
   },
   {
-    q: 'Que se passe-t-il à la fin de ma période ?',
+    q: 'Que se passe-t-il à la fin de ma période ?',
     a: 'Votre accès Premium prend fin et votre compte revient en lecture gratuite. Vous recevez un rappel par email quelques jours avant l’échéance, pour renouveler si vous le souhaitez.',
   },
 ];

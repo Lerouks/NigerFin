@@ -12,7 +12,7 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: 'Atlas économique du Niger',
   description:
-    "Les entreprises stratégiques du Niger par secteur : mines, énergie, télécoms, banque, agriculture. Le panorama économique du pays par la rédaction NFI Report.",
+    "Les entreprises stratégiques du Niger par secteur : mines, énergie, télécoms, banque, agriculture. Le panorama économique du pays par la rédaction NFI Report.",
   alternates: { canonical: '/entreprises' },
 };
 

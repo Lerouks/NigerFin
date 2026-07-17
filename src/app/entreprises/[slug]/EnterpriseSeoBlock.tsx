@@ -65,7 +65,7 @@ const SEO_CONTENT: Record<string, EnterpriseSeoContent> = {
     importance: {
       title: 'Rôle dans l\'économie nigérienne',
       body:
-        "SONIBANK contribue au financement des entreprises nigériennes (PME, grandes entreprises, secteur public) et propose des solutions d'épargne et de crédit aux particuliers. Dans un contexte d'inclusion financière croissante au Niger, où le taux de bancarisation reste sous 20% de la population adulte, les banques comme SONIBANK jouent un rôle central pour rapprocher les services financiers des populations.",
+        "SONIBANK contribue au financement des entreprises nigériennes (PME, grandes entreprises, secteur public) et propose des solutions d'épargne et de crédit aux particuliers. Dans un contexte d'inclusion financière croissante au Niger, où le taux de bancarisation reste sous 20 % de la population adulte, les banques comme SONIBANK jouent un rôle central pour rapprocher les services financiers des populations.",
     },
     keyPoints: {
       title: 'Points clés à retenir',
@@ -108,7 +108,7 @@ const SEO_CONTENT: Record<string, EnterpriseSeoContent> = {
     context: {
       title: 'NIGELEC et le défi de l\'électrification',
       body:
-        "Le Niger affiche l'un des taux d'accès à l'électricité parmi les plus bas d'Afrique de l'Ouest, autour de 20% au niveau national et nettement plus faible en zone rurale. NIGELEC importe historiquement une part significative de son électricité depuis le Nigeria voisin, ce qui crée une vulnérabilité face aux délestages dans le pays voisin. Plusieurs projets de centrales solaires et de centrale au charbon (Salkadamna) visent à renforcer la souveraineté énergétique.",
+        "Le Niger affiche l'un des taux d'accès à l'électricité parmi les plus bas d'Afrique de l'Ouest, autour de 20 % au niveau national et nettement plus faible en zone rurale. NIGELEC importe historiquement une part significative de son électricité depuis le Nigeria voisin, ce qui crée une vulnérabilité face aux délestages dans le pays voisin. Plusieurs projets de centrales solaires et de centrale au charbon (Salkadamna) visent à renforcer la souveraineté énergétique.",
     },
     importance: {
       title: 'Transition énergétique et investissements',
@@ -121,8 +121,8 @@ const SEO_CONTENT: Record<string, EnterpriseSeoContent> = {
         "Entreprise publique de production, transport et distribution d'électricité, créée en 1968.",
         "Dessert les grandes villes (Niamey, Maradi, Zinder, Tahoua, Agadez) et zones rurales.",
         "Importation historique d'électricité depuis le Nigeria voisin.",
-        "Projets en cours : centrale solaire, centrale charbon de Salkadamna, interconnexion UEMOA.",
-        "Enjeu majeur d'élargissement de l'accès à l'électricité (taux <25% en zone rurale).",
+        "Projets en cours : centrale solaire, centrale charbon de Salkadamna, interconnexion UEMOA.",
+        "Enjeu majeur d'élargissement de l'accès à l'électricité (taux <25 % en zone rurale).",
       ],
     },
   },
@@ -132,7 +132,7 @@ const SEO_CONTENT: Record<string, EnterpriseSeoContent> = {
     context: {
       title: 'Le marché des télécoms au Niger',
       body:
-        "Le marché nigérien des télécommunications est concurrentiel avec quatre opérateurs principaux : Niger Telecoms, Airtel, Moov Africa (Maroc Telecom) et Zamani. Le taux de pénétration mobile dépasse 50% mais l'internet à haut débit reste limité par les infrastructures et le pouvoir d'achat. Niger Telecoms se distingue par son monopole sur la fibre optique nationale et son rôle dans les services régaliens (administration, ministères, ambassades).",
+        "Le marché nigérien des télécommunications est concurrentiel avec quatre opérateurs principaux : Niger Telecoms, Airtel, Moov Africa (Maroc Telecom) et Zamani. Le taux de pénétration mobile dépasse 50 % mais l'internet à haut débit reste limité par les infrastructures et le pouvoir d'achat. Niger Telecoms se distingue par son monopole sur la fibre optique nationale et son rôle dans les services régaliens (administration, ministères, ambassades).",
     },
     importance: {
       title: 'Numérisation et souveraineté digitale',
@@ -145,18 +145,18 @@ const SEO_CONTENT: Record<string, EnterpriseSeoContent> = {
         "Opérateur public issu de la fusion SONITEL et SAHELCOM en 2017.",
         "Exploite le réseau de fibre optique national et les liaisons internationales.",
         "Propose téléphonie fixe, mobile, internet, data et services entreprises.",
-        "Concurrence : Airtel, Moov Africa (Maroc Telecom), Zamani.",
+        "Concurrence : Airtel, Moov Africa (Maroc Telecom), Zamani.",
         "Acteur clé de la souveraineté numérique et de l'administration électronique.",
       ],
     },
   },
   'bagri': {
     intro:
-      "La Banque Agricole du Niger (BAGRI) est une banque spécialisée dans le financement du secteur agricole et rural, secteur clé de l'économie nigérienne représentant environ 40% du PIB et employant la majorité de la population active. Créée pour combler le déficit de financement de l'agriculture, elle propose des crédits adaptés aux producteurs, aux coopératives et aux entreprises agro-industrielles.",
+      "La Banque Agricole du Niger (BAGRI) est une banque spécialisée dans le financement du secteur agricole et rural, secteur clé de l'économie nigérienne représentant environ 40 % du PIB et employant la majorité de la population active. Créée pour combler le déficit de financement de l'agriculture, elle propose des crédits adaptés aux producteurs, aux coopératives et aux entreprises agro-industrielles.",
     context: {
       title: 'Le défi du financement agricole au Niger',
       body:
-        "L'agriculture nigérienne reste largement traditionnelle, dominée par les cultures vivrières (mil, sorgho, niébé, arachide), l'élevage et le maraîchage. Le secteur souffre historiquement d'un sous-financement structurel : les banques classiques considèrent le risque agricole trop élevé (aléas climatiques, faible rentabilité unitaire, absence de garanties). BAGRI a été créée pour combler ce vide et proposer des produits adaptés aux cycles agricoles.",
+        "L'agriculture nigérienne reste largement traditionnelle, dominée par les cultures vivrières (mil, sorgho, niébé, arachide), l'élevage et le maraîchage. Le secteur souffre historiquement d'un sous-financement structurel : les banques classiques considèrent le risque agricole trop élevé (aléas climatiques, faible rentabilité unitaire, absence de garanties). BAGRI a été créée pour combler ce vide et proposer des produits adaptés aux cycles agricoles.",
     },
     importance: {
       title: 'Mission et impact',
@@ -168,7 +168,7 @@ const SEO_CONTENT: Record<string, EnterpriseSeoContent> = {
       bullets: [
         "Banque spécialisée dans le financement agricole et rural au Niger.",
         "Cible les producteurs, coopératives, entreprises agro-industrielles, micro-entrepreneurs.",
-        "Produits adaptés aux cycles agricoles : crédit campagne, équipement, intrants.",
+        "Produits adaptés aux cycles agricoles : crédit campagne, équipement, intrants.",
         "Contribue à l'inclusion financière des populations rurales.",
         "Acteur clé de la sécurité alimentaire et de la souveraineté agricole nationale.",
       ],
@@ -180,7 +180,7 @@ const SEO_CONTENT: Record<string, EnterpriseSeoContent> = {
     context: {
       title: 'SOPAMIN, gardien des intérêts miniers de l\'État',
       body:
-        "Le sous-sol nigérien recèle d'importantes ressources : uranium (Arlit, Akouta, Imouraren), or (Liptako-Gourma), charbon (Salkadamna), pétrole (Agadem) et minerais divers. SOPAMIN détient et gère les participations étatiques dans les sociétés d'exploitation, percevant dividendes et royalties qui alimentent le budget national. Elle joue aussi un rôle dans la négociation des conventions minières et la défense des intérêts publics.",
+        "Le sous-sol nigérien recèle d'importantes ressources : uranium (Arlit, Akouta, Imouraren), or (Liptako-Gourma), charbon (Salkadamna), pétrole (Agadem) et minerais divers. SOPAMIN détient et gère les participations étatiques dans les sociétés d'exploitation, percevant dividendes et royalties qui alimentent le budget national. Elle joue aussi un rôle dans la négociation des conventions minières et la défense des intérêts publics.",
     },
     importance: {
       title: 'Souveraineté minière et nouveaux partenariats',

@@ -79,7 +79,7 @@ export function ContactForm() {
           </div>
           <h1 className="text-4xl md:text-5xl mb-4 leading-[1.1] animate-fade-in-up delay-100">Parlons ensemble</h1>
           <p className="text-[16px] text-white/40 max-w-xl leading-relaxed animate-fade-in-up delay-150">
-            Une question, une suggestion ou une opportunité de partenariat ? Notre équipe est à votre écoute.
+            Une question, une suggestion ou une opportunité de partenariat ? Notre équipe est à votre écoute.
           </p>
         </div>
       </section>

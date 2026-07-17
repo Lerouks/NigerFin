@@ -110,7 +110,7 @@ export function AboutContent({ sections }: { sections: Section[] }) {
           {coverage && (
             <div>
               <h2 className="text-3xl mb-6">{coverage.heading}</h2>
-              <p className="text-gray-600 text-lg leading-relaxed mb-6">Nous couvrons l&apos;ensemble des secteurs économiques clés :</p>
+              <p className="text-gray-600 text-lg leading-relaxed mb-6">Nous couvrons l&apos;ensemble des secteurs économiques clés :</p>
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {coverageSectors.map((sector) => (
                   <li key={sector} className="flex items-center gap-3 py-2.5 px-4 bg-white rounded-lg border border-black/4 hover:border-gold/20 hover:bg-gold/2 transition-all duration-200">

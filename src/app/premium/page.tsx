@@ -4,7 +4,7 @@ import { PremiumContent } from './PremiumContent';
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: 'Devenir Premium : analyses et outils exclusifs',
+  title: 'Devenir Premium : analyses et outils exclusifs',
   description:
     'Newsletters, articles et outils financiers exclusifs pour décider et investir en Afrique de l’Ouest. À partir de 5 000 FCFA/mois.',
   keywords: [

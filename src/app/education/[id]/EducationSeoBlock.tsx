@@ -21,7 +21,7 @@ const SEO_CONTENT: Record<string, EducationSeoContent> = {
     whyImportant: {
       title: 'Pourquoi maîtriser son budget et sa banque',
       body:
-        "Au Niger, le taux d'épargne reste faible et beaucoup de ménages vivent au mois le mois. Comprendre les mécanismes bancaires de base (compte courant, livret, virement, prélèvement, frais d'agios) et structurer un budget familial avec la méthode 50/30/20 permet de dégager de l'épargne, d'éviter le découvert et de constituer un matelas de sécurité face aux imprévus médicaux ou professionnels.",
+        "Au Niger, le taux d'épargne reste faible et beaucoup de ménages vivent au jour le jour. Comprendre les mécanismes bancaires de base (compte courant, livret, virement, prélèvement, frais d'agios) et structurer un budget familial avec la méthode 50/30/20 permet de dégager de l'épargne, d'éviter le découvert et de constituer un matelas de sécurité face aux imprévus médicaux ou professionnels.",
     },
     whatYouLearn: {
       title: 'Ce que vous apprendrez',
@@ -105,7 +105,7 @@ const SEO_CONTENT: Record<string, EducationSeoContent> = {
     whyImportant: {
       title: 'Pourquoi l\'immobilier est stratégique au Niger',
       body:
-        "Avec une population qui croît rapidement, une urbanisation accélérée et une jeunesse qui rentre progressivement dans la vie active, la demande de logements à Niamey reste structurellement supérieure à l'offre. L'immobilier offre une protection contre l'inflation, des revenus locatifs récurrents et une transmission patrimoniale facilitée par le droit OHADA, sous réserve de bien sécuriser le titre foncier et la conformité administrative.",
+        "Avec une population qui croît rapidement, une urbanisation accélérée et une jeunesse qui entre progressivement dans la vie active, la demande de logements à Niamey reste structurellement supérieure à l'offre. L'immobilier offre une protection contre l'inflation, des revenus locatifs récurrents et une transmission patrimoniale facilitée par le droit OHADA, sous réserve de bien sécuriser le titre foncier et la conformité administrative.",
     },
     whatYouLearn: {
       title: 'Ce que vous apprendrez',
@@ -133,7 +133,7 @@ const SEO_CONTENT: Record<string, EducationSeoContent> = {
     whyImportant: {
       title: 'L\'entrepreneuriat, moteur de l\'économie nigérienne',
       body:
-        "Le Niger compte une majorité d'entreprises informelles et un tissu d'auto-entrepreneurs et de PME en pleine structuration. Les politiques d'inclusion économique de la CEDEAO et de l'UEMOA encouragent la formalisation, l'accès au crédit et l'export régional. Bien lancer son entreprise demande de connaître les démarches RCCM, le code des impôts nigérien, les obligations CNSS et les opportunités de financement locales (BAGRI, BIA, microfinance).",
+        "Le Niger compte une majorité d'entreprises informelles et un tissu d'auto-entrepreneurs et de PME en pleine structuration. Les politiques d'inclusion économique de l'UEMOA encouragent la formalisation, l'accès au crédit et l'export régional. Bien lancer son entreprise demande de connaître les démarches RCCM, le code des impôts nigérien, les obligations CNSS et les opportunités de financement locales (BAGRI, BIA, microfinance).",
     },
     whatYouLearn: {
       title: 'Ce que vous apprendrez',
@@ -204,7 +204,7 @@ const SEO_CONTENT: Record<string, EducationSeoContent> = {
   },
   'bases-finance': {
     intro:
-      "Cette formation pose les fondations de toute culture financière solide : comprendre comment fonctionnent les revenus, l'épargne, l'investissement, le crédit, l'inflation et le temps en finance. C'est le point de départ idéal pour quiconque veut prendre le contrôle de ses finances personnelles et naviguer sereinement dans le monde économique.",
+      "Cette formation pose les fondations de toute culture financière solide : comprendre comment fonctionnent les revenus, l'épargne, l'investissement, le crédit, l'inflation et le temps en finance. C'est le point de départ idéal pour quiconque veut prendre le contrôle de ses finances personnelles et naviguer sereinement dans le monde économique.",
     whoFor: {
       title: 'Pour qui est cette formation',
       bullets: [
@@ -217,7 +217,7 @@ const SEO_CONTENT: Record<string, EducationSeoContent> = {
     whyImportant: {
       title: 'Pourquoi commencer par les bases',
       body:
-        "Trop d'erreurs financières découlent d'une mauvaise compréhension des concepts fondamentaux : confondre épargne et investissement, sous-estimer l'inflation, surévaluer le risque ou ignorer la puissance des intérêts composés. Maîtriser les bases permet ensuite d'aborder les sujets plus avancés (bourse, immobilier, fiscalité) avec confiance et discernement.",
+        "Trop d'erreurs financières découlent d'une mauvaise compréhension des concepts fondamentaux : confondre épargne et investissement, sous-estimer l'inflation, surévaluer le risque ou ignorer la puissance des intérêts composés. Maîtriser les bases permet ensuite d'aborder les sujets plus avancés (bourse, immobilier, fiscalité) avec confiance et discernement.",
     },
     whatYouLearn: {
       title: 'Ce que vous apprendrez',
@@ -245,7 +245,7 @@ const SEO_CONTENT: Record<string, EducationSeoContent> = {
     whyImportant: {
       title: 'Pourquoi investir depuis le Niger',
       body:
-        "La BRVM, basée à Abidjan, regroupe les sociétés cotées des 8 pays UEMOA et reste accessible aux Nigériens via les SGI (Sociétés de Gestion et d'Intermédiation) agréées. Sur le long terme, les marchés actions historiquement délivrent des rendements supérieurs à l'inflation, à condition d'accepter la volatilité court terme et de diversifier intelligemment. Investir tôt et régulièrement reste la stratégie la plus efficace pour la majorité des investisseurs particuliers.",
+        "La BRVM, basée à Abidjan, regroupe les sociétés cotées des 8 pays UEMOA et reste accessible aux Nigériens via les SGI (Sociétés de Gestion et d'Intermédiation) agréées. Sur le long terme, les marchés actions offrent historiquement des rendements supérieurs à l'inflation, à condition d'accepter la volatilité court terme et de diversifier intelligemment. Investir tôt et régulièrement reste la stratégie la plus efficace pour la majorité des investisseurs particuliers.",
     },
     whatYouLearn: {
       title: 'Ce que vous apprendrez',
@@ -260,7 +260,7 @@ const SEO_CONTENT: Record<string, EducationSeoContent> = {
   },
   'economie-niger': {
     intro:
-      "Comprendre l'économie nigérienne est essentiel pour quiconque vit, investit ou travaille au Niger. Cette catégorie offre une vision panoramique des fondamentaux macroéconomiques (PIB, inflation, dette, balance commerciale), des secteurs stratégiques (agriculture, mines, énergie) et de l'intégration régionale du Niger au sein de l'UEMOA et de la CEDEAO.",
+      "Comprendre l'économie nigérienne est essentiel pour quiconque vit, investit ou travaille au Niger. Cette catégorie offre une vision panoramique des fondamentaux macroéconomiques (PIB, inflation, dette, balance commerciale), des secteurs stratégiques (agriculture, mines, énergie) et de l'intégration régionale du Niger au sein de l'UEMOA.",
     whoFor: {
       title: 'Pour qui est cette formation',
       bullets: [
@@ -273,7 +273,7 @@ const SEO_CONTENT: Record<string, EducationSeoContent> = {
     whyImportant: {
       title: 'Pourquoi l\'économie du Niger est unique',
       body:
-        "Le Niger combine plusieurs caractéristiques économiques particulières : un secteur informel dominant, une dépendance forte aux matières premières (uranium, pétrole, or), une démographie jeune et croissante, et une intégration profonde dans l'UEMOA grâce au FCFA. Les défis (sécurité régionale, accès au financement, diversification) côtoient des opportunités majeures dans l'agro-industrie, les mines, l'énergie et les services financiers numériques.",
+        "Le Niger combine plusieurs caractéristiques économiques particulières : un secteur informel dominant, une dépendance forte aux matières premières (uranium, pétrole, or), une démographie jeune et croissante, et une intégration profonde dans l'UEMOA grâce au FCFA. Les défis (accès au financement, diversification, formalisation de l'économie) côtoient des opportunités majeures dans l'agro-industrie, les mines, l'énergie et les services financiers numériques.",
     },
     whatYouLearn: {
       title: 'Ce que vous apprendrez',
@@ -282,7 +282,7 @@ const SEO_CONTENT: Record<string, EducationSeoContent> = {
         "Comprendre la balance commerciale, les exportations et la dépendance aux matières premières.",
         "Analyser les politiques de la BCEAO et leur impact sur l'économie nigérienne.",
         "Identifier les secteurs porteurs et les opportunités d'investissement.",
-        "Comprendre l'intégration régionale UEMOA et CEDEAO dans la pratique.",
+        "Comprendre l'intégration régionale UEMOA dans la pratique.",
       ],
     },
   },

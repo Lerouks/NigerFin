@@ -122,12 +122,13 @@ export function PhoneField({ value, onChange, disabled }: PhoneFieldProps) {
 
   return (
     <div>
-      <label className="block text-[13px] font-medium text-gray-700 mb-1.5">Téléphone</label>
+      <label htmlFor="phone-number" className="block text-[13px] font-medium text-gray-700 mb-1.5">Téléphone</label>
       <div className="flex gap-2">
         {/* Country code selector */}
         <select
           value={countryCode}
           onChange={(e) => handleCountryChange(e.target.value)}
+          aria-label="Indicatif pays"
           disabled={disabled}
           className="border border-black/8 rounded-lg px-2 py-3 text-[13px] bg-background disabled:text-gray-500 min-w-0 w-[120px] sm:w-[140px] shrink-0"
         >
@@ -149,6 +150,7 @@ export function PhoneField({ value, onChange, disabled }: PhoneFieldProps) {
 
         {/* Number input */}
         <input
+          id="phone-number"
           type="tel"
           inputMode="numeric"
           value={formatNumber(number)}

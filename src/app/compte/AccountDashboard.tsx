@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useId } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -499,8 +499,8 @@ export function AccountDashboard() {
                   <h3 className="text-lg font-semibold mb-6">Vos identifiants</h3>
                   <div className="space-y-5">
                     <div>
-                      <label className="block text-[13px] font-medium text-gray-700 mb-1.5">E-mail</label>
-                      <input type="email" value={user?.email || ''} disabled className="w-full border border-black/8 rounded-lg px-4 py-3 text-[14px] bg-background text-gray-500" />
+                      <label htmlFor="account-email" className="block text-[13px] font-medium text-gray-700 mb-1.5">E-mail</label>
+                      <input id="account-email" type="email" value={user?.email || ''} disabled className="w-full border border-black/8 rounded-lg px-4 py-3 text-[14px] bg-background text-gray-500" />
                       <p className="text-[11px] text-gray-500 mt-1.5">Pour changer votre e-mail, <Link href="/contact" className="underline hover:text-gray-600">contactez-nous</Link>.</p>
                     </div>
                     <button onClick={() => setActiveSection('securite')} className="flex items-center gap-2 border border-black/8 px-4 py-2.5 rounded-xl text-[13px] font-medium text-gray-700 hover:bg-secondary transition-colors">
@@ -517,15 +517,15 @@ export function AccountDashboard() {
                     <div>
                       <label className="block text-[13px] font-medium text-gray-700 mb-1.5">Date de naissance</label>
                       <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                        <select value={birthDay} onChange={(e) => setBirthDay(e.target.value)} disabled={!editingProfile} className="border border-black/8 rounded-lg px-2 sm:px-3 py-3 text-[13px] sm:text-[14px] bg-background disabled:text-gray-500 w-full min-w-0">
+                        <select aria-label="Jour de naissance" value={birthDay} onChange={(e) => setBirthDay(e.target.value)} disabled={!editingProfile} className="border border-black/8 rounded-lg px-2 sm:px-3 py-3 text-[13px] sm:text-[14px] bg-background disabled:text-gray-500 w-full min-w-0">
                           <option value="">Jour</option>
                           {Array.from({ length: 31 }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}</option>)}
                         </select>
-                        <select value={birthMonth} onChange={(e) => setBirthMonth(e.target.value)} disabled={!editingProfile} className="border border-black/8 rounded-lg px-2 sm:px-3 py-3 text-[13px] sm:text-[14px] bg-background disabled:text-gray-500 w-full min-w-0">
+                        <select aria-label="Mois de naissance" value={birthMonth} onChange={(e) => setBirthMonth(e.target.value)} disabled={!editingProfile} className="border border-black/8 rounded-lg px-2 sm:px-3 py-3 text-[13px] sm:text-[14px] bg-background disabled:text-gray-500 w-full min-w-0">
                           <option value="">Mois</option>
                           {['Jan.','Fév.','Mars','Avr.','Mai','Juin','Juil.','Août','Sep.','Oct.','Nov.','Déc.'].map((m, i) => <option key={i + 1} value={i + 1}>{m}</option>)}
                         </select>
-                        <select value={birthYear} onChange={(e) => setBirthYear(e.target.value)} disabled={!editingProfile} className="border border-black/8 rounded-lg px-2 sm:px-3 py-3 text-[13px] sm:text-[14px] bg-background disabled:text-gray-500 w-full min-w-0">
+                        <select aria-label="Année de naissance" value={birthYear} onChange={(e) => setBirthYear(e.target.value)} disabled={!editingProfile} className="border border-black/8 rounded-lg px-2 sm:px-3 py-3 text-[13px] sm:text-[14px] bg-background disabled:text-gray-500 w-full min-w-0">
                           <option value="">Année</option>
                           {Array.from({ length: 80 }, (_, i) => new Date().getFullYear() - 13 - i).map((y) => <option key={y} value={y}>{y}</option>)}
                         </select>
@@ -546,8 +546,8 @@ export function AccountDashboard() {
 
                     {/* Pays */}
                     <div>
-                      <label className="block text-[13px] font-medium text-gray-700 mb-1.5">Pays</label>
-                      <select value={country} onChange={(e) => setCountry(e.target.value)} disabled={!editingProfile} className="w-full border border-black/8 rounded-lg px-4 py-3 text-[14px] bg-background disabled:text-gray-500">
+                      <label htmlFor="account-country" className="block text-[13px] font-medium text-gray-700 mb-1.5">Pays</label>
+                      <select id="account-country" value={country} onChange={(e) => setCountry(e.target.value)} disabled={!editingProfile} className="w-full border border-black/8 rounded-lg px-4 py-3 text-[14px] bg-background disabled:text-gray-500">
                         <optgroup label="Afrique de l'Ouest">
                           {WEST_AFRICA_COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
                         </optgroup>
@@ -559,8 +559,8 @@ export function AccountDashboard() {
 
                     {/* Profession */}
                     <div>
-                      <label className="block text-[13px] font-medium text-gray-700 mb-1.5">Profession</label>
-                      <select value={profession} onChange={(e) => setProfession(e.target.value)} disabled={!editingProfile} className="w-full border border-black/8 rounded-lg px-4 py-3 text-[14px] bg-background disabled:text-gray-500">
+                      <label htmlFor="account-profession" className="block text-[13px] font-medium text-gray-700 mb-1.5">Profession</label>
+                      <select id="account-profession" value={profession} onChange={(e) => setProfession(e.target.value)} disabled={!editingProfile} className="w-full border border-black/8 rounded-lg px-4 py-3 text-[14px] bg-background disabled:text-gray-500">
                         <option value="">Sélectionner</option>
                         {PROFESSIONS.map((p2) => <option key={p2} value={p2}>{p2}</option>)}
                       </select>
@@ -645,12 +645,14 @@ const PROFESSIONS = [
 function ProfileField({ label, value, onChange, disabled, required, placeholder, type }: {
   label: string; value: string; onChange: (v: string) => void; disabled?: boolean; required?: boolean; placeholder?: string; type?: string;
 }) {
+  const fieldId = useId();
   return (
     <div>
-      <label className="block text-[13px] font-medium text-gray-700 mb-1.5">
+      <label htmlFor={fieldId} className="block text-[13px] font-medium text-gray-700 mb-1.5">
         {label}{required && <span className="text-red-400 ml-0.5">*</span>}
       </label>
       <input
+        id={fieldId}
         type={type || 'text'}
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -783,7 +785,7 @@ function PasswordField({ id, label, value, onChange, show, onToggle, placeholder
       <div className="relative">
         <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
         <input id={id} type={show ? 'text' : 'password'} value={value} onChange={(e) => onChange(e.target.value)} className={`w-full border rounded-lg pl-10 pr-10 py-3 bg-background focus:outline-hidden focus:ring-1 transition-all text-[14px] ${className || 'border-black/8 focus:ring-black/5'}`} placeholder={placeholder} required={required} minLength={minLength} />
-        <button type="button" onClick={onToggle} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600">
+        <button type="button" onClick={onToggle} aria-label={show ? 'Masquer le mot de passe' : 'Afficher le mot de passe'} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600">
           {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
         </button>
       </div>
@@ -843,10 +845,11 @@ function DeleteAccountSection() {
               Cette action est irréversible. Toutes vos données seront supprimées immédiatement : profil, abonnement, commentaires, likes, historique de lecture, préférences newsletter.
             </p>
             <div className="mb-4">
-              <label className="block text-[13px] font-medium text-gray-700 mb-1.5">
+              <label htmlFor="delete-confirm" className="block text-[13px] font-medium text-gray-700 mb-1.5">
                 Tapez <strong className="text-red-600">SUPPRIMER</strong> pour confirmer
               </label>
               <input
+                id="delete-confirm"
                 type="text"
                 value={confirmText}
                 onChange={(e) => setConfirmText(e.target.value)}

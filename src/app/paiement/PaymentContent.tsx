@@ -442,7 +442,7 @@ export function PaymentContent() {
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           className="w-full border border-black/8 rounded-xl pl-11 pr-4 py-3 bg-background focus:outline-hidden focus:border-[#d4a843]/30 focus:ring-2 focus:ring-[#d4a843]/10 transition-all text-[14px]"
-                          placeholder="votre@email.com"
+                          aria-label="Adresse email" placeholder="votre@email.com"
                         />
                       </div>
                       <button
@@ -483,7 +483,7 @@ export function PaymentContent() {
                             value={fullName}
                             onChange={(e) => setFullName(e.target.value)}
                             className="w-full border border-black/8 rounded-xl pl-11 pr-4 py-3 bg-background focus:outline-hidden focus:border-[#d4a843]/30 focus:ring-2 focus:ring-[#d4a843]/10 transition-all text-[14px]"
-                            placeholder="Nom complet"
+                            aria-label="Nom complet" placeholder="Nom complet"
                             autoComplete="name"
                           />
                         </div>
@@ -497,7 +497,7 @@ export function PaymentContent() {
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           className="w-full border border-black/8 rounded-xl pl-11 pr-4 py-3 bg-background focus:outline-hidden focus:border-[#d4a843]/30 focus:ring-2 focus:ring-[#d4a843]/10 transition-all text-[14px]"
-                          placeholder="Entrez votre email"
+                          aria-label="Adresse email" placeholder="Entrez votre email"
                           autoComplete="email"
                         />
                       </div>
@@ -511,7 +511,7 @@ export function PaymentContent() {
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           className="w-full border border-black/8 rounded-xl pl-11 pr-11 py-3 bg-background focus:outline-hidden focus:border-[#d4a843]/30 focus:ring-2 focus:ring-[#d4a843]/10 transition-all text-[14px]"
-                          placeholder={authMode === 'signup' ? 'Minimum 8 caractères' : 'Mot de passe'}
+                          aria-label="Mot de passe" placeholder={authMode === 'signup' ? 'Minimum 8 caractères' : 'Mot de passe'}
                           autoComplete={authMode === 'login' ? 'current-password' : 'new-password'}
                         />
                         <button
@@ -537,7 +537,7 @@ export function PaymentContent() {
                                 ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
                                 : 'border-black/8 focus:border-[#d4a843]/30 focus:ring-[#d4a843]/10'
                             }`}
-                            placeholder="Confirmez le mot de passe"
+                            aria-label="Confirmer le mot de passe" placeholder="Confirmez le mot de passe"
                             autoComplete="new-password"
                           />
                         </div>

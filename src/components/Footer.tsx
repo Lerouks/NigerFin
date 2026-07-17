@@ -159,7 +159,7 @@ export function Footer() {
 
         <div className="border-t border-white/6 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-[12px] text-white/25">
-            <p>&copy; 2026 NFI Report. Tous droits réservés.</p>
+            <p>&copy; {new Date().getFullYear()} NFI Report. Tous droits réservés.</p>
             <div className="flex gap-6">
               <Link href="/confidentialite" className="hover:text-white/50 transition-colors">
                 Confidentialité

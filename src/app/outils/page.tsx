@@ -13,6 +13,7 @@ export const metadata: Metadata = {
     title: 'Outils financiers : simulateurs gratuits Niger',
     description: 'Simulateurs et calculateurs financiers gratuits adaptés au Niger et à l\'UEMOA : emprunt, intérêts, salaire, budget familial.',
     type: 'website',
+    images: ['/og-image.png'],
   },
 };
 

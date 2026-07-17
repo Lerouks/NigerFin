@@ -149,7 +149,7 @@ export function CommentsSection({ articleId }: CommentsSectionProps) {
             <textarea
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
-              placeholder="Partagez votre avis..."
+              aria-label="Votre commentaire" placeholder="Partagez votre avis..."
               className="w-full border border-black/6 rounded-lg p-4 focus:outline-hidden focus:border-black/15 focus:ring-1 focus:ring-black/5 bg-background resize-none text-[14px] transition-all"
               rows={3}
             />
@@ -200,7 +200,7 @@ export function CommentsSection({ articleId }: CommentsSectionProps) {
                     <textarea
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
-                      placeholder="Ecrire une réponse..."
+                      aria-label="Votre réponse" placeholder="Écrire une réponse..."
                       className="w-full border border-black/6 rounded-lg p-3 focus:outline-hidden focus:border-black/15 bg-background resize-none text-[13px]"
                       rows={2}
                     />

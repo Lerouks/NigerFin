@@ -612,7 +612,7 @@ function MarketForm({ form, setForm, onSave, onCancel, saving }: {
             type="text"
             value={form.description}
             onChange={(e) => update('description', e.target.value)}
-            placeholder="Ex: Indice des 40 plus grandes entreprises françaises"
+            placeholder="Ex: Indice regroupant les plus grandes capitalisations d'une place boursière"
             className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
           />
         </div>

@@ -406,7 +406,7 @@ export function InvoicePdf({ invoice }: InvoicePdfProps) {
           </View>
           <View style={styles.metaItem}>
             <Text style={styles.metaLabel}>Mode</Text>
-            <Text style={styles.metaValue}>{invoice.paymentMethod ?? '—'}</Text>
+            <Text style={styles.metaValue}>{invoice.paymentMethod ?? 'Non précisé'}</Text>
           </View>
         </View>
 

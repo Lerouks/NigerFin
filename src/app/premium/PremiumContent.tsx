@@ -20,7 +20,7 @@ const SCREENSHOTS = [
     src: '/premium/article-premium.webp',
     alt: 'Article Premium - Banques nigériennes sous pression',
     label: 'Article Premium',
-    desc: 'Analyses inédites : banques nigériennes, géopolitique sahélienne, stratégies d’investissement en Afrique de l’Ouest. Écrites pour être lues en 5 minutes, pas pour remplir un site.',
+    desc: 'Analyses inédites : banques nigériennes, matières premières stratégiques, stratégies d’investissement en Afrique de l’Ouest. Écrites pour être lues en 5 minutes, pas pour remplir un site.',
   },
   {
     src: '/premium/outil-budget.webp',
@@ -39,7 +39,7 @@ const BENEFITS = [
   {
     icon: FileText,
     title: 'Articles & analyses illimités',
-    desc: 'Toute la rubrique Premium débloquée. Décryptages bancaires, géopolitique, marchés africains.',
+    desc: 'Toute la rubrique Premium débloquée. Décryptages bancaires, dynamiques économiques régionales, marchés africains.',
   },
   {
     icon: Wrench,

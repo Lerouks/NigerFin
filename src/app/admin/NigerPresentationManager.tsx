@@ -64,7 +64,7 @@ export function NigerPresentationManager() {
   const [presentation, setPresentation] = useState<Presentation>({
     map_image_url: '',
     map_image_alt: 'Carte du Niger',
-    intro_title: 'Republique du Niger',
+    intro_title: 'République du Niger',
     intro_text: '',
   });
   const [facts, setFacts] = useState<Fact[]>([]);

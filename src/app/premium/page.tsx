@@ -23,6 +23,7 @@ export const metadata: Metadata = {
       'Newsletters exclusives, articles Premium illimités, outils financiers avancés et téléchargement PDF des analyses. À partir de 5 000 FCFA/mois.',
     type: 'website',
     url: '/premium',
+    images: ['/og-image.png'],
   },
 };
 

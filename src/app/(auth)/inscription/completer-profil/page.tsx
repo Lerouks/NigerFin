@@ -127,15 +127,15 @@ export default function CompleterProfilPage() {
             <div>
               <label className="block text-[13px] font-medium text-gray-700 mb-1.5">Date de naissance</label>
               <div className="grid grid-cols-3 gap-2">
-                <select value={birthDay} onChange={(e) => setBirthDay(e.target.value)} className={selectClass}>
+                <select aria-label="Jour de naissance" value={birthDay} onChange={(e) => setBirthDay(e.target.value)} className={selectClass}>
                   <option value="">Jour</option>
                   {Array.from({ length: 31 }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}</option>)}
                 </select>
-                <select value={birthMonth} onChange={(e) => setBirthMonth(e.target.value)} className={selectClass}>
+                <select aria-label="Mois de naissance" value={birthMonth} onChange={(e) => setBirthMonth(e.target.value)} className={selectClass}>
                   <option value="">Mois</option>
                   {['Jan.','Fév.','Mars','Avr.','Mai','Juin','Juil.','Août','Sep.','Oct.','Nov.','Déc.'].map((m, i) => <option key={i + 1} value={i + 1}>{m}</option>)}
                 </select>
-                <select value={birthYear} onChange={(e) => setBirthYear(e.target.value)} className={selectClass}>
+                <select aria-label="Année de naissance" value={birthYear} onChange={(e) => setBirthYear(e.target.value)} className={selectClass}>
                   <option value="">Année</option>
                   {Array.from({ length: 80 }, (_, i) => new Date().getFullYear() - 13 - i).map((y) => <option key={y} value={y}>{y}</option>)}
                 </select>
@@ -144,26 +144,26 @@ export default function CompleterProfilPage() {
 
             {/* Adresse */}
             <div>
-              <label className="block text-[13px] font-medium text-gray-700 mb-1.5">Adresse</label>
-              <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Votre adresse" className={inputClass} />
+              <label htmlFor="cp-address" className="block text-[13px] font-medium text-gray-700 mb-1.5">Adresse</label>
+              <input id="cp-address" type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Votre adresse" className={inputClass} />
             </div>
 
             {/* Ville / Code postal */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[13px] font-medium text-gray-700 mb-1.5">Ville</label>
-                <input type="text" value={city} onChange={(e) => setCity(e.target.value)} placeholder="Votre ville" className={inputClass} />
+                <label htmlFor="cp-city" className="block text-[13px] font-medium text-gray-700 mb-1.5">Ville</label>
+                <input id="cp-city" type="text" value={city} onChange={(e) => setCity(e.target.value)} placeholder="Votre ville" className={inputClass} />
               </div>
               <div>
-                <label className="block text-[13px] font-medium text-gray-700 mb-1.5">Code postal</label>
-                <input type="text" value={postalCode} onChange={(e) => setPostalCode(e.target.value)} placeholder="Code postal" className={inputClass} />
+                <label htmlFor="cp-postal" className="block text-[13px] font-medium text-gray-700 mb-1.5">Code postal</label>
+                <input id="cp-postal" type="text" value={postalCode} onChange={(e) => setPostalCode(e.target.value)} placeholder="Code postal" className={inputClass} />
               </div>
             </div>
 
             {/* Pays */}
             <div>
-              <label className="block text-[13px] font-medium text-gray-700 mb-1.5">Pays</label>
-              <select value={country} onChange={(e) => setCountry(e.target.value)} className={selectClass}>
+              <label htmlFor="cp-country" className="block text-[13px] font-medium text-gray-700 mb-1.5">Pays</label>
+              <select id="cp-country" value={country} onChange={(e) => setCountry(e.target.value)} className={selectClass}>
                 <optgroup label="Afrique de l'Ouest">
                   {WEST_AFRICA_COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
                 </optgroup>
@@ -175,8 +175,8 @@ export default function CompleterProfilPage() {
 
             {/* Profession */}
             <div>
-              <label className="block text-[13px] font-medium text-gray-700 mb-1.5">Profession</label>
-              <select value={profession} onChange={(e) => setProfession(e.target.value)} className={selectClass}>
+              <label htmlFor="cp-profession" className="block text-[13px] font-medium text-gray-700 mb-1.5">Profession</label>
+              <select id="cp-profession" value={profession} onChange={(e) => setProfession(e.target.value)} className={selectClass}>
                 <option value="">Sélectionner</option>
                 {PROFESSIONS.map((p) => <option key={p} value={p}>{p}</option>)}
               </select>

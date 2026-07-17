@@ -56,7 +56,7 @@ export function EditoNote({
           letterSpacing: '0.3px',
         }}
       >
-        — {signature}
+        {signature}
       </Text>
     </Section>
   );

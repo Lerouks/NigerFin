@@ -60,7 +60,7 @@ export function ContactSeoBlock() {
               <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
                 <strong>Support abonnés Premium</strong> : questions sur l&apos;abonnement,
-                facturation, accès aux contenus payants, résiliation, problèmes techniques.
+                facturation, accès aux contenus payants, renouvellement, problèmes techniques.
               </span>
             </li>
             <li className="flex items-start gap-3">

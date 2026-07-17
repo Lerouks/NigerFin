@@ -8,7 +8,7 @@ interface EnterpriseSeoContent {
 const SEO_CONTENT: Record<string, EnterpriseSeoContent> = {
   'somair': {
     intro:
-      "La Société des Mines de l'Aïr (SOMAÏR) est l'une des entreprises les plus emblématiques du Niger, exploitant le gisement uranifère d'Arlit dans la région d'Agadez depuis 1971. Filiale du groupe Orano (anciennement Areva) et de l'État nigérien, elle a longtemps fait du Niger l'un des principaux producteurs mondiaux d'uranium, alimentant notamment les centrales nucléaires françaises.",
+      "La Société des Mines de l'Aïr (SOMAÏR) est l'une des entreprises les plus emblématiques du Niger, exploitant le gisement uranifère d'Arlit dans la région d'Agadez depuis 1971. Filiale du groupe Orano (anciennement Areva) et de l'État nigérien, elle a longtemps fait du Niger l'un des principaux producteurs mondiaux d'uranium, alimentant la filière nucléaire civile mondiale.",
     context: {
       title: 'Le rôle stratégique de SOMAÏR au Niger',
       body:
@@ -17,16 +17,16 @@ const SEO_CONTENT: Record<string, EnterpriseSeoContent> = {
     importance: {
       title: 'Enjeux actuels et perspectives',
       body:
-        "Depuis le coup d'État de juillet 2023 et les tensions diplomatiques avec la France, l'avenir de SOMAÏR est devenu un enjeu géopolitique majeur. Les autorités nigériennes ont retiré le permis d'exploitation à Orano, ouvrant la voie à une potentielle nationalisation ou un nouveau partenariat avec d'autres puissances comme la Russie ou la Chine. La transition énergétique mondiale et la demande croissante d'uranium pour le nucléaire civil renforcent l'importance stratégique de ces gisements.",
+        "L'uranium demeure une ressource stratégique pour le Niger. L'exploitation d'Arlit traverse depuis 2023 une phase de reconfiguration de son actionnariat et de ses partenariats industriels. La demande mondiale d'uranium, portée par le nucléaire civil et la transition énergétique, renforce l'importance stratégique de ces gisements pour l'économie nationale.",
     },
     keyPoints: {
       title: 'Points clés à retenir',
       bullets: [
         "Implantation à Arlit (région d'Agadez) depuis 1971, exploitation à ciel ouvert.",
-        "Capital partagé entre Orano (filiale française) et l'État nigérien.",
+        "Capital partagé entre le groupe Orano et l'État nigérien.",
         "Le Niger figure historiquement parmi les 5 premiers producteurs mondiaux d'uranium.",
         "Contribue significativement aux exportations et aux recettes fiscales du pays.",
-        "Avenir incertain depuis 2023 avec le retrait du permis d'exploitation d'Orano.",
+        "Reconfiguration de l'actionnariat et des partenariats industriels depuis 2023.",
       ],
     },
   },
@@ -80,7 +80,7 @@ const SEO_CONTENT: Record<string, EnterpriseSeoContent> = {
   },
   'sonidep': {
     intro:
-      "La Société Nigérienne des Produits Pétroliers (SONIDEP) est l'entreprise publique nigérienne en charge de l'importation, du stockage, du transport et de la distribution des produits pétroliers raffinés au Niger. Elle joue un rôle stratégique dans la sécurité énergétique du pays, notamment depuis la mise en service du pipeline tchado-nigérien et de la raffinerie de Zinder.",
+      "La Société Nigérienne des Produits Pétroliers (SONIDEP) est l'entreprise publique nigérienne en charge de l'importation, du stockage, du transport et de la distribution des produits pétroliers raffinés au Niger. Elle joue un rôle stratégique dans la sécurité énergétique du pays, notamment depuis la mise en service du pipeline d'export Niger-Bénin et de la raffinerie de Zinder.",
     context: {
       title: 'SONIDEP et la souveraineté énergétique',
       body:
@@ -185,7 +185,7 @@ const SEO_CONTENT: Record<string, EnterpriseSeoContent> = {
     importance: {
       title: 'Souveraineté minière et nouveaux partenariats',
       body:
-        "Avec l'évolution géopolitique récente (coup d'État de 2023, tensions avec la France, rapprochement avec la Russie et la Chine), SOPAMIN est au cœur des négociations sur l'avenir des concessions minières et la révision des partenariats. Le projet d'Imouraren (gisement uranifère majeur jamais exploité), l'or, le pétrole et les minerais critiques pour la transition énergétique (lithium, cobalt) représentent des enjeux stratégiques pour la prochaine décennie.",
+        "Avec l'évolution récente du secteur minier nigérien, SOPAMIN est au cœur des négociations sur l'avenir des concessions minières et la révision des partenariats industriels. Le projet d'Imouraren (gisement uranifère majeur jamais exploité), l'or, le pétrole et les minerais critiques pour la transition énergétique (lithium, cobalt) représentent des enjeux stratégiques pour la prochaine décennie.",
     },
     keyPoints: {
       title: 'Points clés à retenir',

@@ -34,14 +34,24 @@ function fmtFCFA(n: number): string {
   return Math.round(n).toLocaleString('fr-FR');
 }
 
-/** Dernier point non-null d'une série year/value. */
+// Regle NFI "donnees <= 2025" : le FMI (WEO) publie des PROJECTIONS jusqu'en
+// 2031. On ne selectionne jamais un point au-dela de cette annee, pour ne pas
+// afficher une prevision future comme un chiffre courant. A relever quand les
+// actualisations officielles 2026 seront publiees.
+const MAX_INDICATOR_YEAR = 2025;
+
+/** Dernier point non-null d'une série year/value, plafonné à MAX_INDICATOR_YEAR. */
 function latestValue<T extends { year: number; value: number | null }>(arr: T[]): T | null {
-  const sorted = [...arr].filter((x) => x.value !== null).sort((a, b) => b.year - a.year);
+  const sorted = [...arr]
+    .filter((x) => x.value !== null && x.year <= MAX_INDICATOR_YEAR)
+    .sort((a, b) => b.year - a.year);
   return sorted[0] ?? null;
 }
 
 function prevValue<T extends { year: number; value: number | null }>(arr: T[]): T | null {
-  const sorted = [...arr].filter((x) => x.value !== null).sort((a, b) => b.year - a.year);
+  const sorted = [...arr]
+    .filter((x) => x.value !== null && x.year <= MAX_INDICATOR_YEAR)
+    .sort((a, b) => b.year - a.year);
   return sorted[1] ?? null;
 }
 

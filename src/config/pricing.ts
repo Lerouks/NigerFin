@@ -71,6 +71,19 @@ export const PREMIUM_TIER: PremiumTier = {
   ],
 };
 
+// ─── Frais iPayMoney ────────────────────────────────────────────────────────
+// iPayMoney preleve ~3% au moment du paiement, a la charge du client par defaut
+// (iPay calcule frais = arrondi(montant x 3%) puis les ajoute : 5 000 -> 5 150).
+// Pour que le CLIENT paie le prix ROND affiche, on envoie a iPay un montant
+// reduit tel que montant + arrondi(montant x 3%) retombe sur le prix affiche.
+// Ex : 4 854 + arrondi(145,62) = 4 854 + 146 = 5 000. NFI absorbe donc les ~3%
+// (choix Raouf : le client paie un montant rond, pas de frais visibles).
+export const IPAYMONEY_FEE_RATE = 0.03;
+
+export function getIPayChargeAmount(displayPrice: number): number {
+  return Math.round(displayPrice / (1 + IPAYMONEY_FEE_RATE));
+}
+
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 export function formatPrice(amount: number): string {

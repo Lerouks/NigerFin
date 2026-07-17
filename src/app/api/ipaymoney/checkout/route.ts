@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase';
 import { safeParseJSON } from '@/lib/validation';
 import { checkRateLimit } from '@/lib/rate-limit';
-import { isValidBillingCycle, getBillingOption } from '@/config/pricing';
+import { isValidBillingCycle, getBillingOption, getIPayChargeAmount } from '@/config/pricing';
 import { SITE_URL } from '@/lib/config';
 import * as Sentry from '@sentry/nextjs';
 import crypto from 'crypto';
@@ -49,6 +49,9 @@ export async function POST(request: NextRequest) {
 
     const billingOption = getBillingOption(billingCycle);
     const amount = billingOption.price;
+    // Montant envoye a iPay, reduit pour que le client paie EXACTEMENT le prix
+    // rond affiche une fois les ~3% iPayMoney ajoutes (voir getIPayChargeAmount).
+    const ipayAmount = getIPayChargeAmount(amount);
 
     // Generate a unique transaction reference
     const transactionId = `NFI-${crypto.randomBytes(8).toString('hex').toUpperCase()}`;
@@ -82,7 +85,8 @@ export async function POST(request: NextRequest) {
     // Return the details needed by the iPayMoney JS SDK
     return NextResponse.json({
       transactionId,
-      amount: String(amount),
+      // On envoie le montant reduit : + les 3% iPay, le client paie le prix rond.
+      amount: String(ipayAmount),
       redirectUrl: `${siteUrl}/api/ipaymoney/callback?ref=${transactionId}`,
       callbackUrl: `${siteUrl}/api/ipaymoney/callback`,
     });

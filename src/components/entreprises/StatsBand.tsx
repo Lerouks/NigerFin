@@ -20,7 +20,7 @@ export function StatsBand({ stats, lastUpdated }: StatsBandProps) {
         Chiffres clés de l&apos;atlas
       </h2>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-x-6 gap-y-12">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-12">
           {stats.map((stat) => (
             <div
               key={stat.label}

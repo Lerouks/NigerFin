@@ -291,7 +291,7 @@ export function StrategicEnterprisesManager() {
             type="text"
             value={form.ownership || ''}
             onChange={(e) => setForm({ ...form, ownership: e.target.value || null })}
-            placeholder="Ex : Etat du Niger 100%"
+            placeholder="Ex : État du Niger 100%"
             className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[14px] focus:outline-hidden focus:ring-2 focus:ring-gray-900"
           />
         </div>

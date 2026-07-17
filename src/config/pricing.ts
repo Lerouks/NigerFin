@@ -72,16 +72,41 @@ export const PREMIUM_TIER: PremiumTier = {
 };
 
 // ─── Frais iPayMoney ────────────────────────────────────────────────────────
-// iPayMoney preleve ~3% au moment du paiement, a la charge du client par defaut
-// (iPay calcule frais = arrondi(montant x 3%) puis les ajoute : 5 000 -> 5 150).
-// Pour que le CLIENT paie le prix ROND affiche, on envoie a iPay un montant
-// reduit tel que montant + arrondi(montant x 3%) retombe sur le prix affiche.
-// Ex : 4 854 + arrondi(145,62) = 4 854 + 146 = 5 000. NFI absorbe donc les ~3%
-// (choix Raouf : le client paie un montant rond, pas de frais visibles).
+// iPayMoney facture ~3 % au client EN PLUS du montant qu'on lui envoie, et
+// ARRONDIT ces frais A L'ENTIER SUPERIEUR (ceil), pas au plus proche. Le total
+// reellement debite au client est donc :
+//     total = X + Math.ceil(X x 0,03)
+// Verifie en production : envoyer 48 544 fait payer 50 001, car
+//     ceil(48 544 x 0,03) = ceil(1 456,32) = 1 457  ->  48 544 + 1 457 = 50 001.
+// (Pour un entier X, X + ceil(0,03 X) = ceil(1,03 X) : les deux formulations
+//  coincident, l'observation ci-dessus fixe le modele sans ambiguite.)
+//
+// Pour que le CLIENT paie EXACTEMENT le prix rond affiche (NFI absorbe les
+// frais, pas de frais visibles), on cherche le plus grand entier X tel que le
+// total debite ne DEPASSE JAMAIS le prix affiche, et l'atteigne pile quand
+// c'est possible. Garantie forte : quel que soit l'arrondi reel d'iPay (ceil
+// etant le pire cas), le client ne paie jamais plus que le prix rond.
 export const IPAYMONEY_FEE_RATE = 0.03;
 
+/** Total reellement debite au client par iPay pour un montant `sent` envoye. */
+export function ipayCustomerTotal(sent: number): number {
+  return sent + Math.ceil(sent * IPAYMONEY_FEE_RATE);
+}
+
+/**
+ * Montant a envoyer a iPay pour que le client paie EXACTEMENT `displayPrice`.
+ * Renvoie le plus grand entier X tel que ipayCustomerTotal(X) <= displayPrice
+ * (et = displayPrice quand c'est atteignable). Ne depasse jamais displayPrice.
+ */
 export function getIPayChargeAmount(displayPrice: number): number {
-  return Math.round(displayPrice / (1 + IPAYMONEY_FEE_RATE));
+  if (!Number.isFinite(displayPrice) || displayPrice <= 0) return 0;
+  // Estimation analytique (plancher), puis ajustement a la frontiere exacte.
+  let sent = Math.floor(displayPrice / (1 + IPAYMONEY_FEE_RATE));
+  // Monte tant qu'on peut sans depasser le prix affiche...
+  while (ipayCustomerTotal(sent + 1) <= displayPrice) sent++;
+  // ...et redescend si l'estimation de depart depassait deja (securite).
+  while (sent > 0 && ipayCustomerTotal(sent) > displayPrice) sent--;
+  return sent;
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────

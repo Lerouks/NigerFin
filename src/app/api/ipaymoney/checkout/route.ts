@@ -50,7 +50,8 @@ export async function POST(request: NextRequest) {
     const billingOption = getBillingOption(billingCycle);
     const amount = billingOption.price;
     // Montant envoye a iPay, reduit pour que le client paie EXACTEMENT le prix
-    // rond affiche une fois les ~3% iPayMoney ajoutes (voir getIPayChargeAmount).
+    // rond affiche une fois les ~3% iPayMoney (arrondis a l'entier superieur)
+    // ajoutes. NFI absorbe les frais. Voir getIPayChargeAmount / ipayCustomerTotal.
     const ipayAmount = getIPayChargeAmount(amount);
 
     // Generate a unique transaction reference

@@ -45,10 +45,10 @@ async function maybeSyncMarketRows(issue: NewsletterIssue): Promise<NewsletterIs
  */
 export function renderPremiumBriefingText(issue: NewsletterIssue, siteUrl: string): string {
   const lines: string[] = [];
-  lines.push('NFI REPORT — PREMIUM BRIEFING');
-  lines.push(`Édition n°${String(issue.number).padStart(2, '0')} — ${issue.issueDateLabel}`);
+  lines.push('NFI REPORT - PREMIUM BRIEFING');
+  lines.push(`Édition n°${String(issue.number).padStart(2, '0')} - ${issue.issueDateLabel}`);
   lines.push('');
-  lines.push('— ' + issue.intro.heading.toUpperCase() + ' —');
+  lines.push('- ' + issue.intro.heading.toUpperCase() + ' -');
   lines.push('');
   lines.push(issue.intro.paragraph);
   if (issue.intro.summary?.length) {
@@ -66,8 +66,8 @@ export function renderPremiumBriefingText(issue: NewsletterIssue, siteUrl: strin
   lines.push('');
 
   if (issue.nigerKpi?.items?.length) {
-    lines.push('—————————————————');
-    lines.push(`II · NIGER EN CHIFFRES — ${issue.nigerKpi.title ?? ''}`);
+    lines.push('-----------------');
+    lines.push(`II · NIGER EN CHIFFRES - ${issue.nigerKpi.title ?? ''}`);
     issue.nigerKpi.items.forEach((k) => {
       lines.push(`  ${k.label.padEnd(28)} ${k.value}${k.unit ? ' ' + k.unit : ''}${k.delta ? '   (' + k.delta + ')' : ''}`);
     });
@@ -75,8 +75,8 @@ export function renderPremiumBriefingText(issue: NewsletterIssue, siteUrl: strin
   }
 
   issue.headlines.forEach((h, idx) => {
-    lines.push('—————————————————');
-    lines.push(`ANALYSE ${idx + 1} — ${stripHtml(h.title)}`);
+    lines.push('-----------------');
+    lines.push(`ANALYSE ${idx + 1} - ${stripHtml(h.title)}`);
     lines.push('');
     lines.push('Ce qu’il se passe : ' + stripHtml(h.whatHappening));
     lines.push('');
@@ -91,39 +91,39 @@ export function renderPremiumBriefingText(issue: NewsletterIssue, siteUrl: strin
   });
 
   if (issue.chart) {
-    lines.push('—————————————————');
+    lines.push('-----------------');
     lines.push(`GRAPHIQUE : ${issue.chart.title}`);
     if (issue.chart.caption) lines.push(stripHtml(issue.chart.caption));
     lines.push('');
   }
 
   if (issue.digest?.items?.length) {
-    lines.push('—————————————————');
-    lines.push(`EN BREF — ${issue.digest.title ?? 'Le digest'}`);
+    lines.push('-----------------');
+    lines.push(`EN BREF - ${issue.digest.title ?? 'Le digest'}`);
     issue.digest.items.forEach((d) => {
-      lines.push(`  • ${stripHtml(d.title)} — ${stripHtml(d.body)}`);
+      lines.push(`  • ${stripHtml(d.title)} - ${stripHtml(d.body)}`);
     });
     lines.push('');
   }
 
   if (issue.quote) {
-    lines.push('—————————————————');
+    lines.push('-----------------');
     lines.push(`« ${stripHtml(issue.quote.text)} »`);
-    lines.push(`— ${issue.quote.author}${issue.quote.role ? ', ' + issue.quote.role : ''}`);
+    lines.push(`- ${issue.quote.author}${issue.quote.role ? ', ' + issue.quote.role : ''}`);
     lines.push('');
   }
 
   if (issue.radar?.items?.length) {
-    lines.push('—————————————————');
-    lines.push(`SUR NOTRE RADAR — ${issue.radar.title ?? 'À retenir'}`);
+    lines.push('-----------------');
+    lines.push(`SUR NOTRE RADAR - ${issue.radar.title ?? 'À retenir'}`);
     issue.radar.items.forEach((r, idx) => {
-      lines.push(`  ${idx + 1}. ${stripHtml(r.title)}${r.hint ? ' — ' + stripHtml(r.hint) : ''}`);
+      lines.push(`  ${idx + 1}. ${stripHtml(r.title)}${r.hint ? ' - ' + stripHtml(r.hint) : ''}`);
     });
     lines.push('');
   }
 
-  lines.push('—————————————————');
-  lines.push(`NFI Report — Niamey, Niger — ${siteUrl}`);
+  lines.push('-----------------');
+  lines.push(`NFI Report - Niamey, Niger - ${siteUrl}`);
   lines.push('Cet e-mail vous est envoyé en tant qu’abonné Premium NFI Report.');
 
   return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();

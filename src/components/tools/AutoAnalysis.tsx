@@ -13,9 +13,9 @@ export function AutoAnalysis({ paragraphs }: AutoAnalysisProps) {
     <div className="bg-white border border-black/6 rounded-xl p-6">
       <div className="flex items-center gap-2 mb-4">
         <TrendingUp className="w-4 h-4 text-gray-400" aria-hidden="true" />
-        <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400">
+        <h2 className="text-[11px] tracking-[0.15em] uppercase text-gray-400">
           Analyse automatique
-        </h3>
+        </h2>
       </div>
       <div className="space-y-3">
         {paragraphs.map((p, i) => (

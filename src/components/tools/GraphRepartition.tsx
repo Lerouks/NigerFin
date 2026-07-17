@@ -112,9 +112,9 @@ export function GraphRepartition({
       onMouseMove={handleMouseMove}
       onMouseLeave={() => { setActiveIndex(-1); setTooltip(null); }}
     >
-      <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
+      <h2 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
         {title}
-      </h3>
+      </h2>
 
       {/* Layout: col on mobile, row on sm+ */}
       <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">

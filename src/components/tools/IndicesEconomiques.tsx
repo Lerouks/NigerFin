@@ -226,9 +226,9 @@ export function IndicesEconomiques() {
     <div className="space-y-8">
       {/* Graphique d'évolution du PIB */}
       <div className="bg-white border border-black/6 rounded-xl p-6">
-        <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
+        <h2 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
           Évolution du PIB du Niger (Mrd FCFA)
-        </h3>
+        </h2>
         {isLoading ? (
           <div className="h-64 flex items-center justify-center">
             <div className="w-5 h-5 border-2 border-gray-200 border-t-gray-600 rounded-full animate-spin" />

@@ -175,7 +175,7 @@ Où :
         heading: 'Comprendre le coût total d\'un emprunt',
         body: `Le coût total d'un emprunt ne se limite pas au montant emprunté. Il inclut l'ensemble des intérêts versés sur toute la durée du prêt. Plus la durée est longue, plus les intérêts cumulés sont importants.
 
-**Exemple** : un emprunt de 5 000 000 F CFA à 8% sur 5 ans coûte environ 1 066 000 F CFA d'intérêts. Le même emprunt sur 10 ans coûterait environ 2 280 000 F CFA d'intérêts — plus du double.
+**Exemple** : un emprunt de 5 000 000 F CFA à 8% sur 5 ans coûte environ 1 066 000 F CFA d'intérêts. Le même emprunt sur 10 ans coûterait environ 2 280 000 F CFA d'intérêts, soit plus du double.
 
 C'est pourquoi il est souvent préférable de choisir la durée la plus courte que votre budget peut supporter. Utilisez ce simulateur pour trouver le bon équilibre entre mensualité supportable et coût total maîtrisé.`,
       },

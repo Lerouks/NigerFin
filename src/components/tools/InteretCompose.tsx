@@ -156,9 +156,9 @@ export function InteretCompose() {
   return (
     <div className="space-y-8">
       <div className="bg-white border border-black/6 rounded-xl p-6">
-        <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-5">
+        <h2 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-5">
           Paramètres du placement
-        </h3>
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
             <label htmlFor="ic-capital" className="block text-[13px] font-medium text-gray-700 mb-2">Capital initial (FCFA)</label>

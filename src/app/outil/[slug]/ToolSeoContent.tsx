@@ -112,7 +112,7 @@ const SEO_CONTENT: Record<string, ToolSeoBlock> = {
     context: {
       title: 'Comprendre l\'économie nigérienne',
       body:
-        "L'économie du Niger repose sur l'agriculture (40% du PIB), l'élevage, l'uranium (2e producteur mondial historique avec SOMAÏR et COMINAK), le pétrole exporté via le pipeline tchado-nigérien et un secteur informel important. Le pays bénéficie de l'ancrage du FCFA à l'euro (parité fixe à 655,957 FCFA/EUR) et de la stabilité monétaire qui en découle, gérée par la BCEAO.",
+        "L'économie du Niger repose sur l'agriculture (40% du PIB), l'élevage, l'uranium (2e producteur mondial historique avec SOMAÏR et COMINAK), le pétrole exporté via le pipeline Niger-Bénin et un secteur informel important. Le pays bénéficie de l'ancrage du FCFA à l'euro (parité fixe à 655,957 FCFA/EUR) et de la stabilité monétaire qui en découle, gérée par la BCEAO.",
     },
     tips: {
       title: 'Utiliser les indicateurs pour décider',

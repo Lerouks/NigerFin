@@ -115,7 +115,7 @@ export function BudgetFamilial() {
     // ─── Alimentation ───
     if (shares.alimentation > BENCHMARKS.alimentation.max) {
       recs.push(
-        `Le poste alimentation représente ${shares.alimentation.toFixed(0)}% de vos revenus, c'est nettement au-dessus de la fourchette saine (${BENCHMARKS.alimentation.min}–${BENCHMARKS.alimentation.max}%). Pour réduire : privilégier les marchés de gros (Katako, Grand Marché) en début de mois pour les denrées non périssables (riz, mil, huile), cuisiner en grandes quantités, limiter la restauration à l'extérieur, acheter les produits de saison plutôt que les importations.`,
+        `Le poste alimentation représente ${shares.alimentation.toFixed(0)}% de vos revenus, c'est nettement au-dessus de la fourchette saine (${BENCHMARKS.alimentation.min}-${BENCHMARKS.alimentation.max}%). Pour réduire : privilégier les marchés de gros (Katako, Grand Marché) en début de mois pour les denrées non périssables (riz, mil, huile), cuisiner en grandes quantités, limiter la restauration à l'extérieur, acheter les produits de saison plutôt que les importations.`,
       );
     } else if (shares.alimentation < BENCHMARKS.alimentation.min && shares.alimentation > 0) {
       recs.push(
@@ -133,7 +133,7 @@ export function BudgetFamilial() {
     // ─── Transport ───
     if (shares.transport > BENCHMARKS.transport.max) {
       recs.push(
-        `Les dépenses de transport atteignent ${shares.transport.toFixed(0)}% de vos revenus. Pistes concrètes : privilégier la moto-taxi (kabou-kabou) pour les courts trajets, regrouper les déplacements, envisager le covoiturage avec des collègues, ou investir dans un deux-roues personnel si les trajets quotidiens le justifient (rentabilité en 8–18 mois typiquement).`,
+        `Les dépenses de transport atteignent ${shares.transport.toFixed(0)}% de vos revenus. Pistes concrètes : privilégier la moto-taxi (kabou-kabou) pour les courts trajets, regrouper les déplacements, envisager le covoiturage avec des collègues, ou investir dans un deux-roues personnel si les trajets quotidiens le justifient (rentabilité en 8-18 mois typiquement).`,
       );
     }
 
@@ -158,7 +158,7 @@ export function BudgetFamilial() {
     // ─── Autres ───
     if (shares.autres > BENCHMARKS.autres.max) {
       recs.push(
-        `Le poste "autres dépenses" (${shares.autres.toFixed(0)}%) est significatif et mal identifié. Pendant un mois, notez chaque dépense de cette catégorie dans un carnet ou une appli : vous découvrirez souvent 2–3 postes cachés (abonnements, achats impulsifs, contributions familiales) qu'on peut optimiser sans sacrifice ressenti.`,
+        `Le poste "autres dépenses" (${shares.autres.toFixed(0)}%) est significatif et mal identifié. Pendant un mois, notez chaque dépense de cette catégorie dans un carnet ou une appli : vous découvrirez souvent 2-3 postes cachés (abonnements, achats impulsifs, contributions familiales) qu'on peut optimiser sans sacrifice ressenti.`,
       );
     }
 
@@ -213,9 +213,9 @@ export function BudgetFamilial() {
   return (
     <div className="space-y-8">
       <div className="bg-white border border-black/6 rounded-xl p-6">
-        <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-5">
+        <h2 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-5">
           Revenus du foyer
-        </h3>
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
             <label htmlFor="bf-revenus" className="block text-[13px] font-medium text-gray-700 mb-2">
@@ -320,9 +320,9 @@ export function BudgetFamilial() {
                 interestLabel="Reste à épargner"
               />
               <div className="bg-white border border-black/6 rounded-xl p-6">
-                <h4 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
+                <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
                   Répartition par poste (% des revenus)
-                </h4>
+                </h3>
                 <div className="space-y-3">
                   {EXPENSE_CATEGORIES.map((cat) => {
                     const share = calc.shares[cat.key];
@@ -350,7 +350,7 @@ export function BudgetFamilial() {
                           />
                         </div>
                         <p className="text-[10px] text-gray-400 mt-1">
-                          Repère : {benchmark.min}–{benchmark.max === Infinity ? '∞' : benchmark.max}%
+                          Repère : {benchmark.min}-{benchmark.max === Infinity ? '∞' : benchmark.max}%
                         </p>
                       </div>
                     );
@@ -380,9 +380,9 @@ export function BudgetFamilial() {
           </div>
 
           <div className="bg-background border border-black/6 rounded-xl p-6">
-            <h4 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
+            <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
               Recommandations personnalisées ({recommendations.length})
-            </h4>
+            </h3>
             <ul className="space-y-3">
               {recommendations.map((rec, i) => (
                 <li key={i} className="flex items-start gap-3">

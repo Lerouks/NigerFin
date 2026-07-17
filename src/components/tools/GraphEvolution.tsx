@@ -32,9 +32,9 @@ export function GraphEvolution({
       className="bg-white border border-black/6 rounded-xl p-6"
       aria-label={`Graphique d'évolution : ${capitalLabel} et ${interestLabel} dans le temps`}
     >
-      <h3 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
+      <h2 className="text-[11px] tracking-[0.15em] uppercase text-gray-400 mb-4">
         {title}
-      </h3>
+      </h2>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>

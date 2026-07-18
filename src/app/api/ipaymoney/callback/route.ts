@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { logAuditEvent } from '@/lib/audit';
-import { getBillingOption, getBillingCycleLabel, MAX_DYNAMIC_PRICE, type BillingCycle } from '@/config/pricing';
+import { getBillingOption, getBillingCycleLabel, getIPayChargeAmount, MAX_DYNAMIC_PRICE, type BillingCycle } from '@/config/pricing';
 import { sendTransactionalEmail } from '@/lib/email';
 import { paymentConfirmationEmail } from '@/lib/email-templates';
 import { upsertNewsletterSubscriber } from '@/lib/newsletter/subscribers';
@@ -432,6 +432,49 @@ export async function POST(request: NextRequest) {
           },
         });
         return NextResponse.json({ error: 'amount invalid' }, { status: 400 });
+      }
+
+      // Anti SOUS-PAIEMENT (verrou central) : le montant que le client fixe cote
+      // navigateur au moment de creer le jeton iPay n'est PAS de confiance. Un
+      // fraudeur peut forger un jeton a 100 FCFA pour un abonnement a 50 000.
+      // iPay renvoie `amount` = montant de BASE reellement encaisse (ce qu'on lui
+      // envoie normalement, ex. 48 543 pour 50 000). On exige que le paye soit au
+      // moins le montant attendu ; sinon on REFUSE d'activer (fraude probable).
+      const expectedIpayAmount = getIPayChargeAmount(paymentRequest.amount);
+      const paidAmount = verified.amount;
+      if (typeof paidAmount !== 'number' || !Number.isFinite(paidAmount)) {
+        // Montant introuvable dans la verif => on NE peut PAS confirmer => on
+        // laisse en attente et on demande a iPay de reessayer (jamais d'activation
+        // sans montant confirme). Alerte pour investigation.
+        Sentry.captureMessage('iPayMoney: montant paye absent de la verification, activation differee', {
+          level: 'warning',
+          extra: { externalRef, iPayReference, expectedIpayAmount },
+        });
+        return NextResponse.json({ success: false, pending: true, retry: true }, { status: 503 });
+      }
+      if (paidAmount < expectedIpayAmount) {
+        Sentry.captureMessage('iPayMoney: SOUS-PAIEMENT detecte, activation refusee', {
+          level: 'error',
+          extra: {
+            externalRef,
+            iPayReference,
+            expectedIpayAmount,
+            paidAmount,
+            displayPrice: paymentRequest.amount,
+            billingCycle,
+            userId: paymentRequest.user_id,
+          },
+        });
+        await serviceClient
+          .from('payment_requests')
+          .update({
+            status: 'rejected',
+            rejection_reason: `Sous-paiement iPay : paye ${paidAmount}, attendu >= ${expectedIpayAmount}`,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', paymentRequest.id)
+          .eq('status', 'pending');
+        return NextResponse.json({ error: 'underpayment' }, { status: 400 });
       }
 
       await activatePremium(serviceClient, paymentRequest as PaymentRow, iPayReference);

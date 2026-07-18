@@ -208,7 +208,8 @@ describe('POST /api/ipaymoney/callback', () => {
   });
 
   it('active le Premium quand iPay confirme succeeded + montant correct', async () => {
-    mockVerify.mockResolvedValue({ external_reference: 'NFI-1', reference: 'ipayref', status: 'succeeded' });
+    // amount = montant de base attendu pour 50 000 (getIPayChargeAmount(50000) = 48 543).
+    mockVerify.mockResolvedValue({ external_reference: 'NFI-1', reference: 'ipayref', status: 'succeeded', amount: 48543 });
     const { POST } = await import('@/app/api/ipaymoney/callback/route');
     const res = await POST(
       ipayRequest({ data: { external_reference: 'NFI-1', reference: 'ipayref', status: 'succeeded' } }, AUTH),
@@ -217,6 +218,27 @@ describe('POST /api/ipaymoney/callback', () => {
     expect(res.status).toBe(200);
     expect(json.success).toBe(true);
     expect(auditCalledWith(VERIFIED)).toBe(true);
+  });
+
+  it('REFUSE d\'activer si le client a paye MOINS que du (anti sous-paiement)', async () => {
+    // iPay confirme "succeeded" mais le montant reellement paye est 100 au lieu de 48 543.
+    mockVerify.mockResolvedValue({ external_reference: 'NFI-1', reference: 'ipayref', status: 'succeeded', amount: 100 });
+    const { POST } = await import('@/app/api/ipaymoney/callback/route');
+    const res = await POST(
+      ipayRequest({ data: { external_reference: 'NFI-1', reference: 'ipayref', status: 'succeeded' } }, AUTH),
+    );
+    expect(res.status).toBe(400);
+    expect(auditCalledWith(VERIFIED)).toBe(false);
+  });
+
+  it('ne s\'active PAS (503, reessai) si iPay confirme succeeded mais SANS montant (fail-closed)', async () => {
+    mockVerify.mockResolvedValue({ external_reference: 'NFI-1', reference: 'ipayref', status: 'succeeded' });
+    const { POST } = await import('@/app/api/ipaymoney/callback/route');
+    const res = await POST(
+      ipayRequest({ data: { external_reference: 'NFI-1', reference: 'ipayref', status: 'succeeded' } }, AUTH),
+    );
+    expect(res.status).toBe(503);
+    expect(auditCalledWith(VERIFIED)).toBe(false);
   });
 
   it('rejette si le montant stocké est SOUS le plancher config (anti-fraude « payer moins »)', async () => {
@@ -232,7 +254,8 @@ describe('POST /api/ipaymoney/callback', () => {
 
   it('accepte un prix dynamique SUPERIEUR au config (pricing dynamique wired de bout en bout)', async () => {
     paymentRow = { ...(paymentRow as object), amount: 60_000 }; // annuel, >= plancher 50 000
-    mockVerify.mockResolvedValue({ external_reference: 'NFI-1', reference: 'ipayref', status: 'succeeded' });
+    // amount = base attendu pour 60 000 (getIPayChargeAmount(60000) = 58 252).
+    mockVerify.mockResolvedValue({ external_reference: 'NFI-1', reference: 'ipayref', status: 'succeeded', amount: 58252 });
     const { POST } = await import('@/app/api/ipaymoney/callback/route');
     const res = await POST(
       ipayRequest({ data: { external_reference: 'NFI-1', reference: 'ipayref', status: 'succeeded' } }, AUTH),

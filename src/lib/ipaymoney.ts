@@ -39,6 +39,13 @@ const ipayPaymentStatusSchema = z.object({
   reference: z.string().optional(),
   status: z.string().optional(),
   msisdn: z.string().optional(),
+  // `amount` = montant de BASE réellement encaissé (ce qu'on a envoyé à iPay ;
+  // iPay ajoute ses ~3 % par-dessus). Présent et fiable en LIVE (vaut 0 en
+  // sandbox). C'est le verrou anti sous-paiement : on compare ce montant au
+  // montant attendu au callback (un fraudeur qui paie 100 au lieu de 48 543 est
+  // rejeté). La doc iPay ne le mentionne pas, mais l'API le renvoie bien.
+  amount: z.number().nullable().optional(),
+  validated_at: z.string().nullable().optional(),
 });
 export type IPayPaymentStatus = z.infer<typeof ipayPaymentStatusSchema>;
 

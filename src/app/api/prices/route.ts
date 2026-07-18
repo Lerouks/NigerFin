@@ -1,14 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
-import { BILLING_OPTIONS } from '@/config/pricing';
+import { resolvePrice, isValidBillingCycle } from '@/config/pricing';
 
-// Build a map of minimum prices from config defaults
-const CONFIG_MINIMUMS: Record<string, number> = {};
-for (const opt of BILLING_OPTIONS) {
-  CONFIG_MINIMUMS[`premium_${opt.cycle}`] = opt.price;
-}
-
-// Public endpoint: returns current prices (dynamic overrides + defaults)
+// Endpoint public : prix affiches (override admin plafonne/planche, sinon config).
+// Delegue le calcul a resolvePrice (MEME source de verite que la facturation
+// getServerPrice) pour que l'affiche colle toujours au debite : plancher = prix
+// config, plafond = MAX_DYNAMIC_PRICE. Ne renvoie une cle que pour les cycles
+// ayant un override ; le client retombe sinon sur le prix config.
 export async function GET() {
   const serviceClient = createServiceClient();
   if (!serviceClient) {
@@ -22,14 +20,14 @@ export async function GET() {
   const priceMap: Record<string, number> = {};
   if (data) {
     for (const row of data) {
-      const key = `${row.tier}_${row.billing_cycle}`;
-      const minimum = CONFIG_MINIMUMS[key] ?? 0;
-      // Never return a price below the configured default
-      priceMap[key] = Math.max(row.amount, minimum);
+      if (row.tier !== 'premium' || !isValidBillingCycle(row.billing_cycle)) continue;
+      priceMap[`premium_${row.billing_cycle}`] = resolvePrice(row.billing_cycle, row.amount);
     }
   }
 
+  // Fenetre de cache courte : borne l'ecart affiche/debite juste apres un
+  // changement de prix admin (le prix DEBITE, lui, est toujours resolu en direct).
   return NextResponse.json(priceMap, {
-    headers: { 'Cache-Control': 's-maxage=60, stale-while-revalidate=300' },
+    headers: { 'Cache-Control': 's-maxage=15, stale-while-revalidate=60' },
   });
 }

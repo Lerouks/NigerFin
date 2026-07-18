@@ -3,7 +3,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { requireAdmin } from '@/lib/admin-auth';
 import { logAuditEvent } from '@/lib/audit';
-import { BILLING_OPTIONS } from '@/config/pricing';
+import { BILLING_OPTIONS, MAX_DYNAMIC_PRICE } from '@/config/pricing';
 import { serverError } from '@/lib/api-error';
 import { parseJsonBody } from '@/lib/validation';
 
@@ -17,7 +17,7 @@ for (const opt of BILLING_OPTIONS) {
 const PriceUpdate = z.object({
   tier: z.enum(['premium']),
   billingCycle: z.enum(['monthly', 'quarterly', 'yearly']),
-  amount: z.number().int().min(100).max(10_000_000),
+  amount: z.number().int().min(100).max(MAX_DYNAMIC_PRICE),
 });
 
 // GET: Read current dynamic prices

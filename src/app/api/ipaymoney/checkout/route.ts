@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase';
 import { safeParseJSON } from '@/lib/validation';
 import { checkRateLimit } from '@/lib/rate-limit';
-import { isValidBillingCycle, getBillingOption, getIPayChargeAmount } from '@/config/pricing';
+import { isValidBillingCycle, getIPayChargeAmount } from '@/config/pricing';
+import { getServerPrice } from '@/lib/pricing-server';
 import { SITE_URL } from '@/lib/config';
 import * as Sentry from '@sentry/nextjs';
 import crypto from 'crypto';
@@ -47,11 +48,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Durée invalide' }, { status: 400 });
     }
 
-    const billingOption = getBillingOption(billingCycle);
-    const amount = billingOption.price;
+    // Prix canonique resolu COTE SERVEUR (override admin dynamic_pricing sinon
+    // config). C'est ce prix qui est affiche, gele dans payment_requests, facture
+    // et re-valide au callback : une seule et meme valeur de bout en bout.
+    const amount = await getServerPrice(billingCycle);
     // Montant envoye a iPay, reduit pour que le client paie EXACTEMENT le prix
-    // rond affiche une fois les ~3% iPayMoney (arrondis a l'entier superieur)
-    // ajoutes. NFI absorbe les frais. Voir getIPayChargeAmount / ipayCustomerTotal.
+    // affiche une fois les ~3% iPayMoney (arrondis a l'entier superieur) ajoutes.
+    // NFI absorbe les frais. Voir getIPayChargeAmount / ipayCustomerTotal.
     const ipayAmount = getIPayChargeAmount(amount);
 
     // Generate a unique transaction reference

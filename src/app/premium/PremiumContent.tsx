@@ -418,6 +418,17 @@ function PreviewSection() {
 // ─── Pricing teaser ───────────────────────────────────────────────────────────
 
 function PricingTeaser() {
+  // Prix dynamiques (override admin) pour rester cohérent avec /pricing, /paiement
+  // et le montant réellement débité. Retombe sur le prix config si pas d'override.
+  const [dynamicPrices, setDynamicPrices] = useState<Record<string, number>>({});
+  useEffect(() => {
+    fetch('/api/prices')
+      .then((r) => r.json())
+      .then((data) => setDynamicPrices(data))
+      .catch(() => {});
+  }, []);
+  const priceOf = (cycle: string, fallback: number) => dynamicPrices[`premium_${cycle}`] ?? fallback;
+
   return (
     <section className="bg-secondary py-20 sm:py-28">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
@@ -433,6 +444,7 @@ function PricingTeaser() {
         <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
           {BILLING_OPTIONS.map((opt, i) => {
             const isYearly = opt.cycle === 'yearly';
+            const price = priceOf(opt.cycle, opt.price);
             return (
               <FadeUp
                 key={opt.cycle}
@@ -450,13 +462,13 @@ function PricingTeaser() {
                   {opt.durationLabel}
                 </p>
                 <p className="mt-3 text-3xl font-bold text-foreground">
-                  {formatPrice(opt.price)}
+                  {formatPrice(price)}
                 </p>
                 {opt.savings && (
                   <p className="mt-1 text-[13px] text-gold">{opt.savings}</p>
                 )}
                 <p className="mt-4 text-[13px] text-gray-500">
-                  Soit {formatPrice(Math.round(opt.price / opt.durationMonths))} / mois
+                  Soit {formatPrice(Math.round(price / opt.durationMonths))} / mois
                 </p>
               </FadeUp>
             );

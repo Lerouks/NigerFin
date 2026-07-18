@@ -625,7 +625,7 @@ export function PaymentContent() {
                               : 'border-black/6 hover:border-black/15'
                           }`}
                         >
-                          <p className="font-bold text-[14px]">{formatPrice(opt.price)}</p>
+                          <p className="font-bold text-[14px]">{formatPrice(getPrice(opt.cycle))}</p>
                           <p className="text-[11px] text-gray-500">{opt.durationLabel}</p>
                           {opt.savings && (
                             <p className="text-emerald-600 text-[10px] font-medium mt-0.5">{opt.savings}</p>

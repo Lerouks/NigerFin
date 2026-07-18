@@ -219,8 +219,30 @@ describe('POST /api/ipaymoney/callback', () => {
     expect(auditCalledWith(VERIFIED)).toBe(true);
   });
 
-  it('rejette si le montant stocké ne correspond pas au pricing (anti-tampering)', async () => {
-    paymentRow = { ...(paymentRow as object), amount: 100 };
+  it('rejette si le montant stocké est SOUS le plancher config (anti-fraude « payer moins »)', async () => {
+    paymentRow = { ...(paymentRow as object), amount: 100 }; // annuel, plancher 50 000
+    mockVerify.mockResolvedValue({ external_reference: 'NFI-1', reference: 'ipayref', status: 'succeeded' });
+    const { POST } = await import('@/app/api/ipaymoney/callback/route');
+    const res = await POST(
+      ipayRequest({ data: { external_reference: 'NFI-1', reference: 'ipayref', status: 'succeeded' } }, AUTH),
+    );
+    expect(res.status).toBe(400);
+    expect(auditCalledWith(VERIFIED)).toBe(false);
+  });
+
+  it('accepte un prix dynamique SUPERIEUR au config (pricing dynamique wired de bout en bout)', async () => {
+    paymentRow = { ...(paymentRow as object), amount: 60_000 }; // annuel, >= plancher 50 000
+    mockVerify.mockResolvedValue({ external_reference: 'NFI-1', reference: 'ipayref', status: 'succeeded' });
+    const { POST } = await import('@/app/api/ipaymoney/callback/route');
+    const res = await POST(
+      ipayRequest({ data: { external_reference: 'NFI-1', reference: 'ipayref', status: 'succeeded' } }, AUTH),
+    );
+    expect(res.status).toBe(200);
+    expect(auditCalledWith(VERIFIED)).toBe(true);
+  });
+
+  it('rejette un montant aberrant au-dessus du plafond', async () => {
+    paymentRow = { ...(paymentRow as object), amount: 20_000_000 }; // > MAX_DYNAMIC_PRICE
     mockVerify.mockResolvedValue({ external_reference: 'NFI-1', reference: 'ipayref', status: 'succeeded' });
     const { POST } = await import('@/app/api/ipaymoney/callback/route');
     const res = await POST(

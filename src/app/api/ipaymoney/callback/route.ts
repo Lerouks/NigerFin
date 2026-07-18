@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { logAuditEvent } from '@/lib/audit';
-import { getBillingOption, getBillingCycleLabel, type BillingCycle } from '@/config/pricing';
+import { getBillingOption, getBillingCycleLabel, MAX_DYNAMIC_PRICE, type BillingCycle } from '@/config/pricing';
 import { sendTransactionalEmail } from '@/lib/email';
 import { paymentConfirmationEmail } from '@/lib/email-templates';
 import { upsertNewsletterSubscriber } from '@/lib/newsletter/subscribers';
@@ -404,21 +404,34 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: true, pending: true });
       }
 
-      // Anti-tampering DB : le montant stocké doit égaler le prix canonique.
+      // Anti-fraude DB : le montant gele doit etre un entier dans la plage
+      // legitime pour ce cycle. Un prix dynamique (override admin) ne descend
+      // jamais sous le prix config (plancher) et ne depasse jamais le plafond.
+      // Borne basse = defense contre « payer moins » ; borne haute = anti-aberration.
+      // On ne recompare PAS a un prix « live » recalcule : le montant a ete resolu
+      // et GELE cote serveur au checkout (getServerPrice), donc un changement de
+      // prix admin entre le checkout et le callback ne doit pas rejeter a tort un
+      // paiement legitime deja engage par le client.
       const billingCycle = (paymentRequest.billing_cycle || 'monthly') as BillingCycle;
       const billingOption = getBillingOption(billingCycle);
-      if (paymentRequest.amount !== billingOption.price) {
-        Sentry.captureMessage('iPayMoney callback amount mismatch', {
+      const priceFloor = billingOption.price;
+      if (
+        !Number.isInteger(paymentRequest.amount) ||
+        paymentRequest.amount < priceFloor ||
+        paymentRequest.amount > MAX_DYNAMIC_PRICE
+      ) {
+        Sentry.captureMessage('iPayMoney callback amount hors plage legitime', {
           level: 'error',
           extra: {
-            expected: billingOption.price,
+            floor: priceFloor,
+            max: MAX_DYNAMIC_PRICE,
             got: paymentRequest.amount,
             billingCycle,
             externalRef,
             userId: paymentRequest.user_id,
           },
         });
-        return NextResponse.json({ error: 'amount mismatch' }, { status: 400 });
+        return NextResponse.json({ error: 'amount invalid' }, { status: 400 });
       }
 
       await activatePremium(serviceClient, paymentRequest as PaymentRow, iPayReference);

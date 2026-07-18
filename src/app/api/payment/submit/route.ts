@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase';
-import { PAYMENT_METHODS, isValidBillingCycle, getBillingOption } from '@/config/pricing';
+import { createServerSupabaseClient } from '@/lib/supabase';
+import { PAYMENT_METHODS, isValidBillingCycle } from '@/config/pricing';
+import { getServerPrice } from '@/lib/pricing-server';
 import { safeParseJSON } from '@/lib/validation';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import * as Sentry from '@sentry/nextjs';
@@ -55,19 +56,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Numéro de transaction requis (min 3 caractères)' }, { status: 400 });
     }
 
-    // Get the correct amount: check dynamic pricing first, then fallback to config
-    const billingOption = getBillingOption(billingCycle);
-    let amount = billingOption.price;
-    const serviceClient = createServiceClient();
-    if (serviceClient) {
-      const { data: dp } = await serviceClient
-        .from('dynamic_pricing')
-        .select('amount')
-        .eq('tier', 'premium')
-        .eq('billing_cycle', billingCycle)
-        .single();
-      if (dp?.amount) amount = dp.amount;
-    }
+    // Prix canonique cote serveur (override admin dynamic_pricing sinon config,
+    // avec plancher/plafond). Identique a l'affichage et au flux iPay : une
+    // seule source de verite pour tous les moyens de paiement.
+    const amount = await getServerPrice(billingCycle);
 
     // Insert payment request
     const { data, error } = await supabase

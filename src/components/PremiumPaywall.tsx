@@ -62,7 +62,7 @@ export function PremiumPaywall({ articleTitle }: PremiumPaywallProps) {
           href="/pricing"
           className="inline-flex items-center gap-2 bg-[#111] text-white px-8 py-3.5 rounded-lg text-[15px] font-semibold hover:bg-black active:scale-[0.98] transition-all"
         >
-          {`S'abonner : ${PREMIUM_MONTHLY_PRICE.toLocaleString('fr-FR')} ${CURRENCY}/mois`}
+          {`S'abonner : à partir de ${PREMIUM_MONTHLY_PRICE.toLocaleString('fr-FR')} ${CURRENCY}/mois`}
         </Link>
 
         {/* Secondary links */}

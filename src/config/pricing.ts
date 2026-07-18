@@ -46,6 +46,10 @@ export const BILLING_OPTIONS: BillingOption[] = [
 
 export const PREMIUM_MONTHLY_PRICE = 5_000;
 
+// Plafond d'un prix dynamique (override admin). Partage entre la validation
+// admin (dynamic_pricing) et le controle anti-fraude du callback iPay.
+export const MAX_DYNAMIC_PRICE = 10_000_000;
+
 // ─── Premium tier ───────────────────────────────────────────────────────────
 
 export interface PremiumTier {
@@ -117,6 +121,21 @@ export function formatPrice(amount: number): string {
 
 export function getBillingOption(cycle: BillingCycle): BillingOption {
   return BILLING_OPTIONS.find((b) => b.cycle === cycle) || BILLING_OPTIONS[0]!;
+}
+
+// ─── Prix canonique (source de verite unique) ───────────────────────────────
+// Prix reellement en vigueur pour un cycle = override admin (dynamic_pricing)
+// s'il existe, sinon le prix du config. Regle metier : un prix dynamique ne
+// peut JAMAIS descendre sous le prix du config (plancher) — garanti ici aussi,
+// pas seulement a l'ecriture. Fonction PURE (pas d'I/O) : la lecture DB vit
+// dans getServerPrice (src/lib/pricing-server.ts) qui delegue le calcul ici.
+// Utiliser partout ou un prix est AFFICHE, ENCAISSE, FACTURE ou VALIDE, pour
+// que ces quatre valeurs soient toujours identiques.
+export function resolvePrice(cycle: BillingCycle, dynamicAmount?: number | null): number {
+  const floor = getBillingOption(cycle).price;
+  if (typeof dynamicAmount !== 'number' || !Number.isFinite(dynamicAmount)) return floor;
+  // Plancher = prix config ; plafond = MAX_DYNAMIC_PRICE (coherence anti-aberration).
+  return Math.min(Math.max(Math.round(dynamicAmount), floor), MAX_DYNAMIC_PRICE);
 }
 
 export function isValidBillingCycle(cycle: string): cycle is BillingCycle {

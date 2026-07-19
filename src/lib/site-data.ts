@@ -47,10 +47,13 @@ const EMPTY_BANNER: FlashBannerData = { enabled: false, items: [] };
 export interface SiteFeatures {
   /** Bandeau marche defilant en haut de la home */
   marketTickerEnabled: boolean;
+  /** Mode pre-lancement : le public voit la page « Prochainement », les admins voient le site complet. */
+  prelaunchEnabled: boolean;
 }
 
 const DEFAULT_FEATURES: SiteFeatures = {
   marketTickerEnabled: true,
+  prelaunchEnabled: false,
 };
 
 /**
@@ -71,7 +74,7 @@ export const getSiteFeatures = unstable_cache(
       });
       const { data, error } = await supabase
         .from('site_features')
-        .select('market_ticker_enabled')
+        .select('market_ticker_enabled, prelaunch_enabled')
         .eq('id', 1)
         .maybeSingle();
 
@@ -79,6 +82,7 @@ export const getSiteFeatures = unstable_cache(
 
       return {
         marketTickerEnabled: data.market_ticker_enabled !== false,
+        prelaunchEnabled: data.prelaunch_enabled === true,
       };
     } catch {
       return DEFAULT_FEATURES;

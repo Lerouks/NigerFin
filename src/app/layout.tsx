@@ -7,7 +7,9 @@ import { ViewTracker } from '@/components/ViewTracker';
 import { CookieBanner } from '@/components/CookieBanner';
 import { CivilityPrompt } from '@/components/CivilityPrompt';
 import { SITE_URL } from '@/lib/config';
-import { getFlashBanner } from '@/lib/site-data';
+import { getFlashBanner, getSiteFeatures } from '@/lib/site-data';
+import { isAdminViewer } from '@/lib/viewer';
+import { ComingSoon } from '@/components/coming-soon/ComingSoon';
 import './globals.css';
 
 const inter = localFont({
@@ -43,7 +45,7 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default: 'NFI Report - Actualités économiques et financières du Niger',
@@ -91,6 +93,16 @@ export const metadata: Metadata = {
   },
 };
 
+export async function generateMetadata(): Promise<Metadata> {
+  const { prelaunchEnabled } = await getSiteFeatures();
+  // En pré-lancement, tout le site passe en noindex : Googlebot est anonyme,
+  // il voit donc la page « Prochainement ». Retour à l'indexation au lancement.
+  return {
+    ...baseMetadata,
+    robots: { index: !prelaunchEnabled, follow: !prelaunchEnabled },
+  };
+}
+
 const organizationJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'NewsMediaOrganization',
@@ -135,9 +147,30 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const initialFlashBanner = await getFlashBanner();
+  const headerList = await headers();
   // Recupere le nonce CSP injecte par src/proxy.ts pour les scripts inline.
-  const nonce = (await headers()).get('x-nonce') ?? undefined;
+  const nonce = headerList.get('x-nonce') ?? undefined;
+  const pathname = headerList.get('x-pathname') ?? '/';
+
+  // Mode pré-lancement : le public voit « Prochainement », les admins connectés
+  // voient le site complet. On laisse toujours passer /connexion, /auth et /admin
+  // pour que l'admin puisse se connecter puis basculer le mode.
+  const { prelaunchEnabled } = await getSiteFeatures();
+  let showComingSoon = false;
+  if (prelaunchEnabled) {
+    const isBypassPath =
+      pathname === '/connexion' ||
+      pathname.startsWith('/connexion/') ||
+      pathname.startsWith('/auth') ||
+      pathname.startsWith('/admin');
+    if (!isBypassPath) {
+      showComingSoon = !(await isAdminViewer());
+    }
+  }
+
+  const initialFlashBanner = showComingSoon
+    ? { enabled: false as const, items: [] }
+    : await getFlashBanner();
 
   return (
     <html lang="fr" dir="ltr" className={`${inter.variable}`} suppressHydrationWarning>
@@ -156,12 +189,16 @@ export default async function RootLayout({
         />
       </head>
       <body className="min-h-screen flex flex-col">
-        <Providers>
-          <ViewTracker />
-          <MainLayoutShell initialFlashBanner={initialFlashBanner}>{children}</MainLayoutShell>
-          <CookieBanner />
-          <CivilityPrompt />
-        </Providers>
+        {showComingSoon ? (
+          <ComingSoon />
+        ) : (
+          <Providers>
+            <ViewTracker />
+            <MainLayoutShell initialFlashBanner={initialFlashBanner}>{children}</MainLayoutShell>
+            <CookieBanner />
+            <CivilityPrompt />
+          </Providers>
+        )}
       </body>
     </html>
   );

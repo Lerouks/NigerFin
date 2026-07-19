@@ -1,6 +1,8 @@
 import { Facebook, Instagram, Youtube } from '@/components/icons/social';
 import { defaultSocialLinks } from '@/lib/site-data';
 import { WaitlistForm } from './WaitlistForm';
+import { IndexChart } from './IndexChart';
+import { Ticker } from './Ticker';
 
 /** Icône TikTok (identique à celle du Footer, non fournie par le pack lucide). */
 function TikTokIcon({ className }: { className?: string }) {
@@ -19,51 +21,65 @@ const SOCIALS = [
 ].filter((s) => Boolean(s.url));
 
 /**
- * Page publique du mode pré-lancement. Parti pris : couverture éditoriale claire
- * (le vrai site NFI est clair), calée à gauche et asymétrique, typographie
- * confiante. Signature : un surlignage doré « au marqueur » qui balaie le
- * mot-clé au chargement (langage visuel des reels NFI). Les admins connectés ne
- * voient jamais cette page (bypass dans le layout).
+ * Page publique du mode pré-lancement. Couverture éditoriale plein écran d'un
+ * média financier : titre à gauche en révélation cinétique + surlignage marqueur
+ * (signature NFI), graphe d'indice ascendant animé à droite, fil d'actualité
+ * défilant en bas. Les admins connectés ne voient jamais cette page (bypass layout).
  */
 export function ComingSoon() {
   return (
     <main
-      className="flex min-h-[100svh] flex-col px-6 py-10 text-[#16130d] sm:px-10 sm:py-14 lg:px-20"
+      className="relative flex min-h-svh w-full flex-col overflow-hidden text-[#16130d]"
       style={{ backgroundColor: '#f6f4ee' }}
     >
       {/* Masthead */}
-      <header className="nfi-rise" style={{ animationDelay: '60ms' }}>
+      <header className="nfi-rise px-6 pt-8 sm:px-10 lg:px-16 lg:pt-10" style={{ animationDelay: '40ms' }}>
         <p className="text-[22px] font-bold tracking-[-0.03em]">NFI&nbsp;REPORT</p>
         <p className="mt-1 text-[12px] text-[#16130d]/45">Niger Financial Insights</p>
       </header>
 
-      {/* Hero éditorial */}
-      <div className="my-auto max-w-[48rem] py-14">
-        <h1 className="nfi-rise text-[clamp(2.5rem,6.4vw,4.9rem)] font-bold leading-[1.02] tracking-[-0.038em]" style={{ animationDelay: '160ms' }}>
-          <span className="relative inline-block">
-            <span
-              aria-hidden="true"
-              className="nfi-sweep absolute inset-x-[-0.08em] bottom-[0.08em] top-[0.14em] bg-gold/40"
-              style={{ animationDelay: '880ms' }}
-            />
-            <span className="relative">L&apos;intelligence économique</span>
-          </span>{' '}
-          du Niger arrive.
-        </h1>
+      {/* Hero : remplit la hauteur */}
+      <section className="flex flex-1 items-center px-6 py-10 sm:px-10 lg:px-16">
+        <div className="grid w-full items-center gap-12 lg:grid-cols-[1.02fr_0.98fr] lg:gap-10">
+          {/* Texte */}
+          <div className="max-w-[42rem]">
+            <h1 className="text-[clamp(2.6rem,6.5vw,5.15rem)] font-bold leading-[1.04] tracking-[-0.04em]">
+              <span className="nfi-reveal">
+                <span style={{ animationDelay: '180ms' }}>
+                  <span className="nfi-marker" style={{ animationDelay: '1050ms' }}>
+                    L&apos;intelligence économique
+                  </span>{' '}
+                  du Niger arrive.
+                </span>
+              </span>
+            </h1>
 
-        <p className="nfi-rise mt-7 max-w-[35rem] text-[clamp(1rem,1.6vw,1.15rem)] leading-relaxed text-[#16130d]/65" style={{ animationDelay: '300ms' }}>
-          Analyses, données de marché et décryptages, pour comprendre l&apos;économie du Niger
-          et de l&apos;Afrique de l&apos;Ouest.
-        </p>
+            <p
+              className="nfi-rise mt-7 max-w-[34rem] text-[clamp(1rem,1.5vw,1.15rem)] leading-relaxed text-[#16130d]/72"
+              style={{ animationDelay: '520ms' }}
+            >
+              Analyses, données de marché et décryptages, pour comprendre l&apos;économie du Niger
+              et de l&apos;Afrique de l&apos;Ouest.
+            </p>
 
-        <div className="nfi-rise mt-11 max-w-[30rem]" style={{ animationDelay: '440ms' }}>
-          <p className="mb-3 text-[14px] text-[#16130d]/55">Recevez le signal du lancement.</p>
-          <WaitlistForm />
+            <div className="nfi-rise mt-10 max-w-[30rem]" style={{ animationDelay: '640ms' }}>
+              <p className="mb-3 text-[14px] text-[#16130d]/60">Recevez le signal du lancement.</p>
+              <WaitlistForm />
+            </div>
+          </div>
+
+          {/* Graphe */}
+          <div className="flex w-full items-end self-stretch lg:pl-6">
+            <IndexChart />
+          </div>
         </div>
-      </div>
+      </section>
 
       {/* Pied éditorial */}
-      <footer className="nfi-rise flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between" style={{ animationDelay: '580ms' }}>
+      <footer
+        className="nfi-rise flex flex-col gap-5 px-6 pb-7 sm:flex-row sm:items-end sm:justify-between sm:px-10 lg:px-16"
+        style={{ animationDelay: '760ms' }}
+      >
         <div>
           <p className="text-[15px] font-medium text-gold">La connaissance, votre meilleur capital.</p>
           <div className="mt-4 flex items-center gap-1.5">
@@ -86,6 +102,9 @@ export function ComingSoon() {
         </div>
         <p className="text-[13px] text-[#16130d]/40">Niamey&nbsp;· 2026</p>
       </footer>
+
+      {/* Fil d'actualité */}
+      <Ticker />
     </main>
   );
 }

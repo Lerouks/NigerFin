@@ -104,11 +104,7 @@ export function WaitlistForm() {
         aria-live="polite"
         role={status === 'error' ? 'alert' : undefined}
       >
-        {status === 'error' ? (
-          <span className="text-[#b0402f]">{message}</span>
-        ) : (
-          <span className="text-[#16130d]/40">Un seul message : le jour du lancement. Rien d&apos;autre.</span>
-        )}
+        {status === 'error' && <span className="text-[#b0402f]">{message}</span>}
       </p>
     </form>
   );

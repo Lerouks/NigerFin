@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
+import { Playfair_Display } from 'next/font/google';
 import { headers } from 'next/headers';
 import { Providers } from './providers';
 import { MainLayoutShell } from '@/components/MainLayoutShell';
@@ -36,6 +37,16 @@ const inter = localFont({
     },
   ],
   variable: '--font-inter',
+  display: 'swap',
+});
+
+// Serif de marque (charte NFI) : réservée au wordmark et au slogan/citation.
+// Auto-hébergée par next/font au build (aucune requête externe au runtime, compatible CSP).
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  weight: ['500', '700'],
+  style: ['normal'],
+  variable: '--font-playfair',
   display: 'swap',
 });
 
@@ -173,7 +184,7 @@ export default async function RootLayout({
     : await getFlashBanner();
 
   return (
-    <html lang="fr" dir="ltr" className={`${inter.variable}`} suppressHydrationWarning>
+    <html lang="fr" dir="ltr" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"

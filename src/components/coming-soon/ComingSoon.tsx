@@ -34,7 +34,7 @@ export function ComingSoon() {
     >
       {/* Masthead */}
       <header className="nfi-rise px-6 pt-8 sm:px-10 lg:px-16 lg:pt-10" style={{ animationDelay: '40ms' }}>
-        <p className="text-[22px] font-bold tracking-[-0.03em]">NFI&nbsp;REPORT</p>
+        <p className="font-[family-name:var(--font-playfair)] text-[22px] font-bold tracking-[0.01em]">NFI&nbsp;REPORT</p>
         <p className="mt-1 text-[12px] text-[#16130d]/45">Niger Financial Insights</p>
       </header>
 
@@ -81,7 +81,7 @@ export function ComingSoon() {
         style={{ animationDelay: '760ms' }}
       >
         <div>
-          <p className="text-[15px] font-medium text-gold">La connaissance, votre meilleur capital.</p>
+          <p className="font-[family-name:var(--font-playfair)] text-[15px] font-medium text-gold">La connaissance, votre meilleur capital.</p>
           <div className="mt-4 flex items-center gap-1.5">
             {SOCIALS.map(({ label, Icon, url }) => (
               <a
@@ -90,7 +90,7 @@ export function ComingSoon() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={label}
-                className="group relative -ml-2 flex h-10 w-10 items-center justify-center rounded-full text-[#16130d]/55 transition-colors duration-200 first:ml-0 hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-[#f6f4ee]"
+                className="group relative -ml-2 flex h-11 w-11 items-center justify-center rounded-full text-[#16130d]/55 transition-colors duration-200 first:ml-0 hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-[#f6f4ee]"
               >
                 <span className="pointer-events-none absolute -top-7 whitespace-nowrap rounded bg-[#16130d] px-2 py-1 text-[11px] font-medium text-[#f6f4ee] opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                   {label}

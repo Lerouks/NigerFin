@@ -83,7 +83,7 @@ export function WaitlistForm() {
         <button
           type="submit"
           disabled={status === 'loading'}
-          className="inline-flex shrink-0 items-center gap-1.5 text-[15px] font-semibold text-[#16130d] transition-colors duration-200 hover:text-gold focus-visible:text-gold focus-visible:outline-none disabled:opacity-60"
+          className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 text-[15px] font-semibold text-[#16130d] transition-colors duration-200 hover:text-gold focus-visible:text-gold focus-visible:outline-none disabled:opacity-60"
         >
           {status === 'loading' ? (
             <>

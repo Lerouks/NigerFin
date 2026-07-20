@@ -726,8 +726,8 @@ export type Database = {
       }
       market_data: {
         Row: {
-          change: number
-          change_percent: number
+          change: number | null
+          change_percent: number | null
           created_at: string | null
           description: string | null
           education_link: string | null
@@ -742,8 +742,8 @@ export type Database = {
           value: number
         }
         Insert: {
-          change?: number
-          change_percent?: number
+          change?: number | null
+          change_percent?: number | null
           created_at?: string | null
           description?: string | null
           education_link?: string | null
@@ -758,8 +758,8 @@ export type Database = {
           value: number
         }
         Update: {
-          change?: number
-          change_percent?: number
+          change?: number | null
+          change_percent?: number | null
           created_at?: string | null
           description?: string | null
           education_link?: string | null

@@ -46,8 +46,11 @@ export async function GET() {
     id: item.id,
     name: item.name,
     value: Number(item.value),
-    change: Number(item.change),
-    changePercent: Number(item.change_percent),
+    // `Number(null)` vaut 0 : convertir sans precaution transformait une
+    // variation NON RENSEIGNEE en une variation MESUREE a zero, que l'interface
+    // affichait ensuite comme « Stable ». On preserve l'absence telle quelle.
+    change: item.change === null ? null : Number(item.change),
+    changePercent: item.change_percent === null ? null : Number(item.change_percent),
     type: item.type as 'currency' | 'commodity' | 'index' | 'crypto',
     symbol: item.symbol,
     unit: item.unit || '',

@@ -91,25 +91,38 @@ export function MarchesContent() {
       })}
 
       {/* Footer */}
+      {/*
+        Meme inversion que dans MarketDataWidget : la caution editoriale et la
+        mention des variations s'affichaient sans condition, la date seulement si
+        elle existait. On pouvait donc lire « Variations par rapport a la derniere
+        mise a jour » sans qu'aucune date de mise a jour ne soit donnee. C'est la
+        date qui commande le bloc.
+      */}
       <div className="text-center space-y-1 pt-2">
-        <p className="text-[11px] text-gray-500">
-          Variations par rapport à la dernière mise à jour
-        </p>
-        {lastUpdated && (
+        {lastUpdated ? (
+          <>
+            <p className="text-[11px] text-gray-500 tabular-nums">
+              Dernière mise à jour&nbsp;:{' '}
+              {new Date(lastUpdated).toLocaleString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </p>
+            <p className="text-[11px] text-gray-500">
+              Variations depuis la clôture précédente
+            </p>
+            <p className="text-[11px] text-gray-500">
+              Données gérées par l&apos;équipe NFI Report
+            </p>
+          </>
+        ) : (
           <p className="text-[11px] text-gray-500">
-            Dernière mise à jour&nbsp;:{' '}
-            {new Date(lastUpdated).toLocaleString('fr-FR', {
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
+            Date de mise à jour non disponible
           </p>
         )}
-        <p className="text-[11px] text-gray-500">
-          Données gérées par l&apos;équipe NFI Report
-        </p>
       </div>
 
       {/* Education CTA */}
@@ -185,6 +198,15 @@ function QuoteRow({
             <div className="flex items-center gap-1 min-w-[80px] justify-end text-[13px] font-medium text-gray-500">
               Taux fixe
             </div>
+          ) : item.changePercent === null || item.change === null ? (
+            // Variation non mesuree : tiret neutre, ni fleche ni couleur, qui
+            // affirmeraient toutes deux un sens de marche jamais constate.
+            <div
+              className="flex items-center gap-1 min-w-[80px] justify-end text-[13px] font-medium text-gray-400"
+              title="Variation non disponible"
+            >
+              &ndash;
+            </div>
           ) : (
             <div
               className={`flex items-center gap-1 min-w-[80px] justify-end text-[13px] font-medium ${
@@ -197,7 +219,7 @@ function QuoteRow({
                 <TrendingDown className="w-3.5 h-3.5" />
               )}
               {item.changePercent > 0 ? '+' : ''}
-              {item.changePercent.toFixed(2)}&nbsp;%
+              {item.changePercent.toFixed(2).replace('.', ',')}&nbsp;%
             </div>
           )}
         </div>

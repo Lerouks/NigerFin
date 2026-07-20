@@ -34,8 +34,16 @@ export interface MarketData {
   id: string;
   name: string;
   value: number;
-  change: number;
-  changePercent: number;
+  /**
+   * Variation absolue, `null` si elle n'a pas ete mesuree.
+   * `null` et `0` ne veulent PAS dire la meme chose : `0` affirme une mesure
+   * (le cours n'a pas bouge), `null` dit qu'on ne sait pas. Les confondre a
+   * conduit le site a afficher « Stable » sur des lignes que personne n'avait
+   * jamais renseignees.
+   */
+  change: number | null;
+  /** Variation en pourcentage, `null` si non mesuree. Voir `change`. */
+  changePercent: number | null;
   type: 'currency' | 'commodity' | 'index' | 'crypto';
   symbol: string;
   unit?: string;

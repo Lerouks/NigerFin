@@ -32,6 +32,14 @@ export function MarketDataWidget() {
     return latest;
   }, [items]);
 
+  // Aucune donnee et plus rien en cours de chargement : le bloc ne s'affiche pas
+  // du tout. Un cadre « Marches » vide, ou pire accompagne d'une phrase
+  // rassurante sans le moindre chiffre, laisserait croire a une panne d'affichage
+  // alors qu'il s'agit d'une absence assumee de donnee.
+  if (!isLoading && items.length === 0) {
+    return null;
+  }
+
   if (isLoading && items.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-black/6 sticky top-36 overflow-hidden">
@@ -100,20 +108,33 @@ export function MarketDataWidget() {
           );
         })}
       </div>
+      {/*
+        La condition etait inversee : la phrase rassurante « Donnees gerees par
+        l'equipe NFI Report » s'affichait TOUJOURS, et la date seulement si elle
+        existait. En mode repli, la caution editoriale restait donc seule, sans
+        aucune date, ce qui est la pire combinaison possible. C'est la date qui
+        engage, pas la formule : elle passe en premier et commande le bloc.
+      */}
       <div className="border-t border-black/4 px-5 py-3 bg-background rounded-b-xl space-y-0.5">
-        <p className="text-[10px] text-gray-500 text-center">
-          Données gérées par l&apos;équipe NFI Report
-        </p>
-        {lastUpdated && (
+        {lastUpdated ? (
+          <>
+            <p className="text-[10px] text-gray-500 text-center tabular-nums">
+              Dernière mise à jour :{' '}
+              {new Date(lastUpdated).toLocaleString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </p>
+            <p className="text-[10px] text-gray-500 text-center">
+              Données gérées par l&apos;équipe NFI Report
+            </p>
+          </>
+        ) : (
           <p className="text-[10px] text-gray-500 text-center">
-            Dernière mise à jour :{' '}
-            {new Date(lastUpdated).toLocaleString('fr-FR', {
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
+            Date de mise à jour non disponible
           </p>
         )}
       </div>

@@ -194,6 +194,45 @@ describe('Le cache perime ne peut plus etre republie comme donnee du jour', () =
   });
 });
 
+describe('Une variation non mesuree s\'affiche comme absente', () => {
+  const rendu = async (value: number | null) => {
+    const { renderToStaticMarkup } = await import('react-dom/server');
+    const { createElement } = await import('react');
+    const { VariationBadge } = await import('@/components/data/VariationBadge');
+    return renderToStaticMarkup(createElement(VariationBadge, { value }));
+  };
+
+  /** Texte reellement lu par l'utilisateur, hors balises et classes CSS. */
+  const texteVisible = (html: string) => html.replace(/<[^>]*>/g, '');
+
+  it('affiche un tiret, sans aucun chiffre, quand la variation est inconnue', async () => {
+    const html = await rendu(null);
+    expect(texteVisible(html)).toContain('–');
+    expect(texteVisible(html)).not.toMatch(/\d/);
+  });
+
+  it('n\'ecrit JAMAIS le mot « Stable », qui affirmait un marche sans mouvement', async () => {
+    // Vecteur reel du bug : toute ligne creee par l'admin naissait a
+    // change_percent = 0 (defaut SQL), et le site annoncait « Stable » sur une
+    // variation que personne n'avait mesuree.
+    for (const v of [null, 0, 0.0]) {
+      expect(await rendu(v)).not.toContain('Stable');
+    }
+  });
+
+  it('affiche une vraie variation nulle comme 0,00 %, en typographie francaise', async () => {
+    const html = await rendu(0);
+    expect(html).toContain('0,00');
+    expect(html).not.toContain('0.00'); // point decimal anglais
+  });
+
+  it('utilise la virgule decimale et une espace insecable avant le pourcent', async () => {
+    const html = await rendu(2.5);
+    expect(html).toContain('+2,50');
+    expect(html).toContain(' %'); // U+00A0, jamais une espace ordinaire
+  });
+});
+
 describe('Aucune valeur de marche codee en dur ne subsiste dans les services', () => {
   // Verrou de non-regression le plus important du fichier : il interdit de
   // REINTRODUIRE une valeur de repli, meme des mois plus tard, meme par un autre

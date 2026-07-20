@@ -43,6 +43,12 @@ export function MarketMarquee() {
             </span>
             {item.symbol === 'EUR/XOF' ? (
               <span className="text-[11px] text-white/30">fixe</span>
+            ) : item.changePercent === null ? (
+              // Variation non mesuree : un tiret neutre. Ne jamais afficher
+              // « +0,00 % », qui affirmerait une seance sans mouvement.
+              <span className="text-[11px] text-white/30" title="Variation non disponible">
+                &ndash;
+              </span>
             ) : (
               <span
                 className={`text-[11px] tabular-nums ${
@@ -50,7 +56,7 @@ export function MarketMarquee() {
                 }`}
               >
                 {item.changePercent >= 0 ? '+' : ''}
-                {item.changePercent.toFixed(2)}%
+                {item.changePercent.toFixed(2).replace('.', ',')}&nbsp;%
               </span>
             )}
           </span>

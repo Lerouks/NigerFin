@@ -75,8 +75,13 @@ export async function POST(request: NextRequest) {
       symbol,
       type,
       value: typeof value === 'string' ? parseFloat(value.replace(',', '.')) || 0 : Number(value) || 0,
-      change: 0,
-      change_percent: 0,
+      // Une ligne qui vient d'etre creee n'a AUCUNE variation mesuree : on laisse
+      // NULL. Ecrire 0 ici faisait naitre chaque nouvel indicateur avec une
+      // variation « nulle » que l'interface presentait ensuite comme « Stable »,
+      // c'est-a-dire une affirmation de marche que personne n'avait mesuree.
+      change: null,
+      change_percent: null,
+      previous_close: null,
       unit: unit || '',
       source: source || '',
       description: description || '',
@@ -133,12 +138,22 @@ export async function PUT(request: NextRequest) {
         .eq('id', id)
         .single();
 
+      // La variation n'est calculee que si une cloture precedente EXISTE
+      // reellement. Sans elle, on laisse NULL : autrefois le code retombait sur
+      // la valeur courante, ce qui donnait mecaniquement une variation de 0
+      // affichee comme « Stable », alors qu'aucune comparaison n'avait eu lieu.
       if (current) {
-        const refPrice = Number(current.previous_close) || Number(current.value);
-        updates.change = v - refPrice;
-        updates.change_percent = refPrice !== 0
-          ? ((v - refPrice) / refPrice) * 100
-          : 0;
+        const cloturePrecedente =
+          current.previous_close === null ? null : Number(current.previous_close);
+
+        if (cloturePrecedente !== null && cloturePrecedente !== 0) {
+          updates.change = Math.round((v - cloturePrecedente) * 100) / 100;
+          updates.change_percent =
+            Math.round(((v - cloturePrecedente) / cloturePrecedente) * 10000) / 100;
+        } else {
+          updates.change = null;
+          updates.change_percent = null;
+        }
       }
     }
   }

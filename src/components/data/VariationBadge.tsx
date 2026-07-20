@@ -3,8 +3,15 @@
 import { TrendingUp, TrendingDown, Minus, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface VariationBadgeProps {
-  /** Percentage change value */
-  value: number;
+  /**
+   * Variation en pourcentage, ou `null` quand elle n'a pas ete mesuree.
+   *
+   * `null` est un etat de premiere classe, et non un cas limite : une variation
+   * inconnue doit se lire comme inconnue. Le composant affirmait auparavant
+   * « Stable » des que la valeur valait 0, ce qui transformait une donnee non
+   * renseignee en affirmation editoriale sur l'etat du marche.
+   */
+  value: number | null;
   /** Number of decimal places (default: 2) */
   decimals?: number;
   /** Display size variant */
@@ -49,6 +56,20 @@ export function VariationBadge({
   suffix = '%',
   absolute = false,
 }: VariationBadgeProps) {
+  // Variation non mesuree : un tiret neutre, sans couleur, sans fleche, sans mot.
+  // Ne jamais rendre ici un 0, ni « Stable » : ce serait affirmer une mesure.
+  if (value === null || !Number.isFinite(value)) {
+    const textSizeVide = size === 'sm' ? 'text-[11px]' : 'text-[12px]';
+    return (
+      <span
+        className={`inline-flex items-center font-medium text-gray-400 ${textSizeVide}`}
+        title="Variation non disponible"
+      >
+        &ndash;
+      </span>
+    );
+  }
+
   const intensity = getIntensity(value);
   const isUp = value > 0;
   const isNeutral = intensity === 'neutral';
@@ -68,11 +89,16 @@ export function VariationBadge({
       ? isUp ? ArrowUp : ArrowDown
       : isUp ? TrendingUp : TrendingDown;
 
+  // Typographie francaise : virgule decimale, et espace insecable avant le %.
+  const nombre = value.toFixed(decimals).replace('.', ',');
   const displayValue = absolute
-    ? `${isUp ? '+' : ''}${value.toFixed(decimals)}`
-    : `${isUp ? '+' : ''}${value.toFixed(decimals)}${suffix}`;
+    ? `${isUp ? '+' : ''}${nombre}`
+    : `${isUp ? '+' : ''}${nombre} ${suffix}`;
 
-  const label = isNeutral ? 'Stable' : null;
+  // Le mot « Stable » a ete retire : une variation mesuree a 0,00 % s'ecrit
+  // 0,00 %. Le mot etait affiche des que la valeur valait 0, y compris quand ce
+  // 0 etait un defaut d'insertion jamais renseigne, ce qui faisait dire au site
+  // que le marche etait stable alors que personne n'avait rien mesure.
 
   return (
     <span
@@ -86,7 +112,7 @@ export function VariationBadge({
         .join(' ')}
     >
       <Icon className={iconSize} />
-      {label ?? displayValue}
+      {displayValue}
     </span>
   );
 }

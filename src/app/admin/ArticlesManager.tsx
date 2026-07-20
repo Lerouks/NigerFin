@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
+import { EDITORIAL_ENTRIES } from '@/lib/navigation';
 
 const RichTextEditor = dynamic(
   () => import('@/components/RichTextEditor').then(m => ({ default: m.RichTextEditor })),
@@ -79,14 +80,19 @@ const EMPTY_FORM: ArticleForm = {
   published_at: '',
 };
 
-const SECTIONS = [
-  { value: 'economie', label: 'Économie' },
-  { value: 'finance', label: 'Finance' },
-  { value: 'marches', label: 'Marchés' },
-  { value: 'entreprises', label: 'Entreprises' },
-  { value: 'niger', label: 'Niger' },
-  { value: 'education', label: 'Éducation' },
-];
+/**
+ * Sections assignables a un article, DERIVEES de la source unique navigation.ts
+ * (drapeau isEditorial).
+ *
+ * « Marches » ne fait plus partie des choix de redaction : la rubrique sort de la
+ * barre de navigation et ses articles remontent dans Finance, en facette
+ * « Marches & BRVM ». La cle reste reconnue en base et en affichage pour ne
+ * casser aucun article deja publie, mais on n'en cree plus de nouveaux.
+ */
+const SECTIONS = EDITORIAL_ENTRIES.map((entry) => ({
+  value: entry.key,
+  label: entry.label,
+}));
 
 const CONTENT_TYPES = [
   { value: 'free', label: 'Gratuit', icon: Globe, color: 'text-green-600' },

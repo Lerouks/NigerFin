@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { createServiceClient } from '@/lib/supabase';
 import { SITE_URL } from '@/lib/config';
+import { SITEMAP_ENTRIES } from '@/lib/navigation';
 
 export const revalidate = 3600;
 
@@ -46,12 +47,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // robots.txt Disallow (Perf H-5). Les pages auth sont noindex en plus.
   const staticPages: MetadataRoute.Sitemap = [
     '',
-    '/economie',
-    '/finance',
-    '/entreprises',
-    '/marches',
-    '/education',
-    '/outils',
+    // Rubriques DERIVEES de la source unique : plus aucun risque qu'une rubrique
+    // ajoutee a la barre soit oubliee ici, ce qui etait deja arrive.
+    ...SITEMAP_ENTRIES.map((entry) => entry.path),
+    // Pages transactionnelles et editoriales, listees a la main car ce ne sont
+    // pas des rubriques.
+    // /premium etait ABSENTE alors que c'est la destination du bouton principal
+    // « S'abonner » du Header, desktop comme mobile, et qu'elle declare son
+    // propre canonical : la page de conversion la plus mise en avant du site
+    // n'etait pas soumise a l'indexation. /articles et /newsletter manquaient
+    // egalement, sans etre bloquees par robots.txt ni marquees noindex.
+    '/premium',
+    '/articles',
+    '/newsletter',
     '/pricing',
     '/contact',
     '/cgu',
@@ -61,7 +69,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/plan-du-site',
     '/about',
     '/publicite',
-    '/niger',
   ].map((path) => ({
     url: `${SITE_URL}${path}`,
     lastModified: new Date(),

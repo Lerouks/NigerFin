@@ -18,9 +18,22 @@ export default async function FinancePage() {
   ]);
   return (
     <div className="min-h-screen bg-background">
-      <CategoryHero label="Rubrique" title="Finance" description="Analyses bancaires et tendances du secteur financier au Niger et en Afrique de l'Ouest." />
+      <CategoryHero label="Rubrique" title="Finance" description="Votre argent : banques, crédit, épargne, placements et marchés au Niger et en Afrique de l'Ouest." />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
-        <SectionArticlesFiltered articles={articles} total={total} sectionLabel="Finance" sectionPath="/finance" viewRanking={viewRanking} />
+        {/*
+          Facette « Marchés & BRVM » : la rubrique Marchés est sortie de la barre
+          de navigation et ses articles ont rejoint Finance. La facette leur rend
+          une porte d'entree directe, sans recreer une rubrique entiere. La page
+          /marches reste, elle, accessible et n'est jamais redirigee.
+        */}
+        <SectionArticlesFiltered
+          articles={articles}
+          total={total}
+          sectionLabel="Finance"
+          sectionPath="/finance"
+          viewRanking={viewRanking}
+          facets={[{ key: 'marches', label: 'Marchés & BRVM' }]}
+        />
       </div>
       <HubFooter
         paragraphs={[

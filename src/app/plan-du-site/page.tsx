@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { SITEMAP_ENTRIES } from '@/lib/navigation';
 
 export const revalidate = 86400;
 
@@ -12,14 +13,11 @@ export const metadata: Metadata = {
 const sections = [
   {
     title: 'Rubriques',
+    // Rubriques DERIVEES de la source unique navigation.ts. « Accueil » est
+    // conserve a la main : c'est une page, pas une rubrique.
     links: [
       { label: 'Accueil', href: '/' },
-      { label: 'Économie', href: '/economie' },
-      { label: 'Finance', href: '/finance' },
-      { label: 'Marchés', href: '/marches' },
-      { label: 'Entreprises', href: '/entreprises' },
-      { label: 'Niger', href: '/niger' },
-      { label: 'Éducation financière', href: '/education' },
+      ...SITEMAP_ENTRIES.map((entry) => ({ label: entry.label, href: entry.path })),
     ],
   },
   {

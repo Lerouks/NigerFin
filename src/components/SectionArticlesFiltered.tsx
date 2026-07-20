@@ -11,6 +11,22 @@ type ReadTimeFilter = 'all' | 'short' | 'medium' | 'long';
 
 const PER_PAGE = 20;
 
+/**
+ * Facette thematique optionnelle : restreint la liste aux articles portant une
+ * cle de section donnee.
+ *
+ * Sert a accueillir dans Finance les articles de l'ancienne rubrique Marches
+ * sans les y noyer : le lecteur qui cherche la BRVM la trouve d'un clic. Passee
+ * en DONNEES et non en fonction, pour rester serialisable depuis un composant
+ * serveur.
+ */
+export interface SectionFacet {
+  /** Cle presente dans `article.sections` (ex. « marches »). */
+  key: string;
+  /** Libelle affiche (ex. « Marches & BRVM »). */
+  label: string;
+}
+
 interface SectionArticlesFilteredProps {
   articles: Article[];
   total: number;
@@ -18,6 +34,8 @@ interface SectionArticlesFilteredProps {
   sectionPath: string;
   /** Article IDs ordered by view count (most viewed first). Never exposed to user. */
   viewRanking?: string[];
+  /** Facettes thematiques proposees en plus des filtres habituels. */
+  facets?: SectionFacet[];
 }
 
 /** Label de groupe facon eyebrow editorial NFI : filet dore + majuscules espacees. */
@@ -77,7 +95,9 @@ export function SectionArticlesFiltered({
   total: _total,
   sectionLabel: _sectionLabel,
   viewRanking = [],
+  facets = [],
 }: SectionArticlesFilteredProps) {
+  const [facetKey, setFacetKey] = useState<string | null>(null);
   const [contentFilter, setContentFilter] = useState<ContentFilter>('all');
   const [sortOrder, setSortOrder] = useState<SortOrder>('recent');
   const [readTimeFilter, setReadTimeFilter] = useState<ReadTimeFilter>('all');
@@ -86,6 +106,10 @@ export function SectionArticlesFiltered({
 
   const filtered = useMemo(() => {
     let result = [...articles];
+
+    if (facetKey) {
+      result = result.filter((a) => a.sections?.includes(facetKey));
+    }
 
     if (contentFilter === 'free') {
       result = result.filter((a) => !a.isPremium);
@@ -113,16 +137,23 @@ export function SectionArticlesFiltered({
     }
 
     return result;
-  }, [articles, contentFilter, sortOrder, readTimeFilter, viewRanking]);
+  }, [articles, facetKey, contentFilter, sortOrder, readTimeFilter, viewRanking]);
 
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
   const safePage = Math.min(currentPage, Math.max(1, totalPages));
   const paginatedArticles = filtered.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE);
 
-  const hasActiveFilters = contentFilter !== 'all' || sortOrder !== 'recent' || readTimeFilter !== 'all';
-  const activeCount = [contentFilter !== 'all', sortOrder !== 'recent', readTimeFilter !== 'all'].filter(Boolean).length;
+  const hasActiveFilters =
+    facetKey !== null || contentFilter !== 'all' || sortOrder !== 'recent' || readTimeFilter !== 'all';
+  const activeCount = [
+    facetKey !== null,
+    contentFilter !== 'all',
+    sortOrder !== 'recent',
+    readTimeFilter !== 'all',
+  ].filter(Boolean).length;
 
   const resetFilters = () => {
+    setFacetKey(null);
     setContentFilter('all');
     setSortOrder('recent');
     setReadTimeFilter('all');
@@ -136,6 +167,13 @@ export function SectionArticlesFiltered({
 
   // Puces de filtres actifs supprimables (pattern editorial FT/Bloomberg).
   const activeChips: { key: string; label: string; clear: () => void }[] = [];
+  if (facetKey) {
+    activeChips.push({
+      key: 'facet',
+      label: facets.find((f) => f.key === facetKey)?.label ?? facetKey,
+      clear: () => applyFilter(setFacetKey, null),
+    });
+  }
   if (contentFilter !== 'all') {
     activeChips.push({
       key: 'content',
@@ -182,6 +220,34 @@ export function SectionArticlesFiltered({
 
   const filtersContent = (
     <div className="space-y-7">
+      {/*
+        Facette thematique. Presente uniquement quand la rubrique en declare une,
+        elle apparait EN PREMIER car c'est le tri le plus structurant : sur
+        Finance, elle isole en un clic les articles de marches et BRVM, qui
+        avaient auparavant leur propre rubrique.
+      */}
+      {facets.length > 0 && (
+        <>
+          <FilterGroup label="Thème">
+            <FilterOption
+              active={facetKey === null}
+              onClick={() => applyFilter(setFacetKey, null)}
+              label="Tous les thèmes"
+            />
+            {facets.map((facet) => (
+              <FilterOption
+                key={facet.key}
+                active={facetKey === facet.key}
+                onClick={() => applyFilter(setFacetKey, facet.key)}
+                label={facet.label}
+              />
+            ))}
+          </FilterGroup>
+
+          <div className="h-px bg-black/8" />
+        </>
+      )}
+
       {/* Type */}
       <FilterGroup label="Type d'article">
         <FilterOption active={contentFilter === 'all'} onClick={() => applyFilter(setContentFilter, 'all')} label="Tous les articles" />

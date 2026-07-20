@@ -6,14 +6,16 @@ import { Menu, Search, X, ChevronRight, LogOut } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { SearchOverlay } from './SearchOverlay';
-import { defaultNavigation, type NavItem } from '@/lib/site-data';
+import { NAV_GROUPS } from '@/lib/navigation';
 
-interface HeaderProps {
-  navigation?: NavItem[];
-}
-
-export function Header({ navigation: navigationProp }: HeaderProps = {}) {
-  const navigation = navigationProp ?? defaultNavigation;
+/**
+ * Le Header exposait une prop `navigation` qu'AUCUN appelant ne passait : un
+ * grep sur tout src ne trouvait aucun `navigation=`, et le seul point de montage
+ * (MainLayoutShell) rendait `<Header />` sans argument. Cette prop morte laissait
+ * croire a une navigation configurable qui n'existait pas. Le Header lit
+ * desormais directement la source unique de verite.
+ */
+export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -140,29 +142,57 @@ export function Header({ navigation: navigationProp }: HeaderProps = {}) {
           </div>
         </div>
 
-        {/* Navigation */}
-        <nav className="bg-[#111] text-white">
+        {/*
+          Barre de rubriques sur fond CLAIR.
+
+          Elle etait sur fond noir plein, qui est le marqueur numero un du theme
+          de presse generique. Le noir est desormais reserve aux donnees : la
+          seule surface noire permanente du site est le rail de donnees. Ici, un
+          simple filet de 1 px suffit a poser la barre.
+
+          Deux registres separes par un filet vertical : « comprendre » (le
+          contexte) puis « agir » (les ressources). Les sous-titres permanents
+          sont ce qui rend Economie et Finance enfin distinguables l'une de
+          l'autre, sans avoir a les fusionner.
+        */}
+        <nav
+          className="hidden lg:block bg-white border-t border-black/6"
+          aria-label="Rubriques"
+        >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="hidden lg:flex items-center h-11">
-              <div className="flex items-center gap-1">
-                {navigation.map((section) => {
-                  const isActive = pathname === section.path || pathname.startsWith(section.path + '/');
-                  return (
-                    <Link
-                      key={section.path}
-                      href={section.path}
-                      className={`text-[13px] px-3 inline-flex items-center h-11 rounded-md transition-all relative ${
-                        isActive
-                          ? 'text-white bg-white/10'
-                          : 'text-white/80 hover:bg-white/10 hover:text-white'
-                      }`}
-                      aria-current={isActive ? 'page' : undefined}
-                    >
-                      {section.label}
-                    </Link>
-                  );
-                })}
-              </div>
+            <div className="flex items-stretch h-14">
+              {NAV_GROUPS.map((groupe, indexGroupe) => (
+                <div key={groupe.register} className="flex items-stretch">
+                  {indexGroupe > 0 && (
+                    <div className="self-center h-8 w-px bg-black/12 mx-4" aria-hidden="true" />
+                  )}
+                  {groupe.entries.map((entry) => {
+                    const isActive =
+                      pathname === entry.path || pathname.startsWith(entry.path + '/');
+                    return (
+                      <Link
+                        key={entry.path}
+                        href={entry.path}
+                        className={`group flex flex-col justify-center px-3.5 border-b-2 transition-colors ${
+                          isActive
+                            ? 'border-foreground text-foreground'
+                            : 'border-transparent text-foreground/75 hover:text-foreground hover:border-black/20'
+                        }`}
+                        aria-current={isActive ? 'page' : undefined}
+                      >
+                        <span className="text-[14px] font-semibold leading-tight">
+                          {entry.label}
+                        </span>
+                        {entry.subtitle && (
+                          <span className="text-[11px] text-gray-500 leading-tight mt-0.5">
+                            {entry.subtitle}
+                          </span>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              ))}
             </div>
           </div>
         </nav>
@@ -177,18 +207,34 @@ export function Header({ navigation: navigationProp }: HeaderProps = {}) {
           aria-hidden={!mobileMenuOpen}
         >
           <nav className="px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] space-y-1" aria-label="Menu mobile">
-            {navigation.map((section, i) => (
-              <Link
-                key={section.path}
-                href={section.path}
-                className="flex items-center justify-between min-h-[44px] py-3 px-3 text-[15px] text-gray-700 hover:bg-black/3 rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-                tabIndex={mobileMenuOpen ? 0 : -1}
-                style={{ animationDelay: mobileMenuOpen ? `${i * 50}ms` : '0ms' }}
+            {NAV_GROUPS.map((groupe, indexGroupe) => (
+              <div
+                key={groupe.register}
+                className={indexGroupe > 0 ? 'pt-2 mt-2 border-t border-black/6' : ''}
               >
-                {section.label}
-                <ChevronRight className="w-4 h-4 text-gray-300 transition-transform group-hover:translate-x-0.5" />
-              </Link>
+                {groupe.entries.map((entry, i) => (
+                  <Link
+                    key={entry.path}
+                    href={entry.path}
+                    className="flex items-center justify-between min-h-[44px] py-3 px-3 hover:bg-black/3 rounded-lg transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                    tabIndex={mobileMenuOpen ? 0 : -1}
+                    style={{ animationDelay: mobileMenuOpen ? `${i * 50}ms` : '0ms' }}
+                  >
+                    <span className="flex flex-col">
+                      <span className="text-[15px] text-gray-800 font-medium leading-tight">
+                        {entry.label}
+                      </span>
+                      {entry.subtitle && (
+                        <span className="text-[12px] text-gray-500 leading-tight mt-0.5">
+                          {entry.subtitle}
+                        </span>
+                      )}
+                    </span>
+                    <ChevronRight className="w-4 h-4 text-gray-300 shrink-0" />
+                  </Link>
+                ))}
+              </div>
             ))}
             <div className="pt-2 mt-2 border-t border-black/5">
               <button

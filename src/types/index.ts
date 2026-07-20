@@ -53,13 +53,6 @@ export interface MarketData {
   educationLink?: string;
 }
 
-export interface NavigationSection {
-  id: string;
-  label: string;
-  path: string;
-  order: number;
-}
-
 export interface Comment {
   id: string;
   article_id: string;

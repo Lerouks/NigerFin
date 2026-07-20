@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import { Facebook, Twitter, Linkedin, Instagram, Youtube } from '@/components/icons/social';
 import { defaultSocialLinks, defaultContactEmail } from '@/lib/site-data';
+import { FOOTER_ENTRIES } from '@/lib/navigation';
 
 function TikTokIcon({ className }: { className?: string }) {
   return (
@@ -52,37 +53,24 @@ export function Footer() {
             <h4 className="text-[11px] tracking-[0.15em] uppercase text-white/30 mb-5">
               Rubriques
             </h4>
+            {/*
+              Rubriques DERIVEES de la source unique navigation.ts. Les six liens
+              etaient ecrits a la main ici, et divergeaient deja du Header (les
+              simulateurs manquaient). Le pied de page est aussi le refuge des
+              deux pages sorties de la barre principale, Marches et Niger, qui
+              restent ainsi accessibles et indexees.
+            */}
             <ul className="space-y-2.5 text-[13px]">
-              <li>
-                <Link href="/economie" className="text-white/45 hover:text-white/80 transition-colors">
-                  Économie
-                </Link>
-              </li>
-              <li>
-                <Link href="/finance" className="text-white/45 hover:text-white/80 transition-colors">
-                  Finance
-                </Link>
-              </li>
-              <li>
-                <Link href="/marches" className="text-white/45 hover:text-white/80 transition-colors">
-                  Marchés
-                </Link>
-              </li>
-              <li>
-                <Link href="/entreprises" className="text-white/45 hover:text-white/80 transition-colors">
-                  Entreprises
-                </Link>
-              </li>
-              <li>
-                <Link href="/niger" className="text-white/45 hover:text-white/80 transition-colors">
-                  Niger
-                </Link>
-              </li>
-              <li>
-                <Link href="/education" className="text-white/45 hover:text-white/80 transition-colors">
-                  Éducation
-                </Link>
-              </li>
+              {FOOTER_ENTRIES.map((entry) => (
+                <li key={entry.path}>
+                  <Link
+                    href={entry.path}
+                    className="text-white/45 hover:text-white/80 transition-colors"
+                  >
+                    {entry.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 

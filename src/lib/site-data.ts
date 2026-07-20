@@ -1,13 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
 import { unstable_cache } from 'next/cache';
-import { navigationSections } from '@/data/mock-data';
-
-export interface NavItem {
-  label: string;
-  path: string;
-  order: number;
-}
-
 export interface SocialLinks {
   facebook?: string;
   twitter?: string;
@@ -26,10 +18,6 @@ export interface FlashBannerData {
   enabled: boolean;
   items: FlashBannerItem[];
 }
-
-export const defaultNavigation: NavItem[] = navigationSections
-  .map((s) => ({ label: s.label, path: s.path, order: s.order }))
-  .toSorted((a, b) => a.order - b.order);
 
 export const defaultSocialLinks: SocialLinks = {
   facebook: 'https://www.facebook.com/share/1APpbXcsAV/?mibextid=wwXIfr',

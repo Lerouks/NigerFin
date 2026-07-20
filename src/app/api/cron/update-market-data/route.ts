@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache';
 import { verifyBearerSecret } from '@/lib/secret-compare';
 import { createServiceClient } from '@/lib/supabase';
 import { dataOrchestrator } from '@/lib/services/data-orchestrator';
+import { construireMisesAJourMarche } from '@/lib/services/market-updates';
 import * as Sentry from '@sentry/nextjs';
 
 interface UpdateResult {
@@ -16,9 +17,11 @@ interface UpdateResult {
  * Cron endpoint: fetches live market data from external APIs
  * and updates the market_data table in Supabase.
  *
- * Runs every hour from 7h to 23h UTC (configured in vercel.json).
+ * Tourne une fois par jour a 08:00 UTC (vercel.json). Le plan Vercel Hobby ne
+ * permet qu'un passage quotidien par cron, d'ou cette frequence unique.
  * GET /api/cron/update-market-data
  */
+
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
@@ -44,79 +47,22 @@ export async function GET(request: NextRequest) {
       dataOrchestrator.getBRVMIndices(),
     ]);
 
-  // Build a map of symbol → new value
-  const updates: Record<string, number> = {};
-
-  // --- Forex ---
-  if (forexResult.status === 'fulfilled') {
-    const rates = forexResult.value.data.rates;
-    // EUR/XOF: fixed rate
-    const eurXof = rates.find((r) => r.base === 'EUR' && r.target === 'XOF');
-    if (eurXof) updates['EUR/XOF'] = eurXof.rateInXOF;
-    // USD/XOF
-    const usdXof = rates.find((r) => r.base === 'USD' && r.target === 'XOF');
-    if (usdXof) updates['USD/XOF'] = usdXof.rateInXOF;
-  } else {
-    Sentry.captureException(forexResult.reason, { tags: { cron: 'update-market-data', source: 'forex' } });
-    results.push({ symbol: 'EUR/XOF', status: 'error', error: String(forexResult.reason) });
-    results.push({ symbol: 'USD/XOF', status: 'error', error: String(forexResult.reason) });
-  }
-
-  // --- Commodities ---
-  if (commoditiesResult.status === 'fulfilled') {
-    const commodities = commoditiesResult.value.data.commodities;
-    for (const c of commodities) {
-      if (c.symbol === 'XAU') updates['XAU'] = c.price;
-      if (c.symbol === 'ICEEUR:BRN1!' || c.name.toLowerCase().includes('brent')) updates['ICEEUR:BRN1!'] = c.price;
-      if (c.symbol === 'U3O8') updates['U3O8'] = c.price;
-    }
-  } else {
-    Sentry.captureException(commoditiesResult.reason, { tags: { cron: 'update-market-data', source: 'commodities' } });
-    results.push({ symbol: 'XAU', status: 'error', error: String(commoditiesResult.reason) });
-    results.push({ symbol: 'ICEEUR:BRN1!', status: 'error', error: String(commoditiesResult.reason) });
-    results.push({ symbol: 'U3O8', status: 'error', error: String(commoditiesResult.reason) });
-  }
-
-  // --- Indices ---
-  if (indicesResult.status === 'fulfilled') {
-    const quotes = indicesResult.value.data.quotes;
-    for (const q of quotes) {
-      if (q.symbol === 'IXIC') updates['IXIC'] = q.price;
-      if (q.symbol === 'GSPC') updates['GSPC'] = q.price;
-      if (q.symbol === 'SXXP') updates['SXXP'] = q.price;
-    }
-  } else {
-    Sentry.captureException(indicesResult.reason, { tags: { cron: 'update-market-data', source: 'indices' } });
-    results.push({ symbol: 'IXIC', status: 'error', error: String(indicesResult.reason) });
-    results.push({ symbol: 'GSPC', status: 'error', error: String(indicesResult.reason) });
-    results.push({ symbol: 'SXXP', status: 'error', error: String(indicesResult.reason) });
-  }
-
-  // --- Crypto ---
-  if (cryptoResult.status === 'fulfilled') {
-    const prices = cryptoResult.value.data.prices;
-    for (const p of prices) {
-      if (p.symbol === 'BTC') updates['BTC'] = p.price;
-      if (p.symbol === 'ETH') updates['ETH'] = p.price;
-    }
-  } else {
-    Sentry.captureException(cryptoResult.reason, { tags: { cron: 'update-market-data', source: 'crypto' } });
-    results.push({ symbol: 'BTC', status: 'error', error: String(cryptoResult.reason) });
-    results.push({ symbol: 'ETH', status: 'error', error: String(cryptoResult.reason) });
-  }
-
-  // --- BRVM ---
-  if (brvmResult.status === 'fulfilled') {
-    const indices = brvmResult.value.data;
-    const composite = indices.find((i) => i.name.includes('Composite'));
-    if (composite) updates['BRVMC'] = composite.value;
-  } else {
-    Sentry.captureException(brvmResult.reason, { tags: { cron: 'update-market-data', source: 'brvm' } });
-    results.push({ symbol: 'BRVMC', status: 'error', error: String(brvmResult.reason) });
+  const { updates, echecs } = construireMisesAJourMarche(
+    {
+      forex: forexResult,
+      commodities: commoditiesResult,
+      indices: indicesResult,
+      crypto: cryptoResult,
+      brvm: brvmResult,
+    },
+    'cron',
+  );
+  for (const echec of echecs) {
+    results.push({ symbol: echec.symbol, status: 'error', error: echec.error });
   }
 
   // Apply updates to market_data table
-  for (const [symbol, newValue] of Object.entries(updates)) {
+  for (const [symbol, { value: newValue, source }] of Object.entries(updates)) {
     try {
       // Get current row to calculate change from previous_close
       const { data: current } = await supabase
@@ -130,6 +76,12 @@ export async function GET(request: NextRequest) {
         continue;
       }
 
+      // previous_close est realigne chaque nuit a minuit par le cron
+      // reset-market-close, de sorte que change et change_percent mesurent bien
+      // la variation de la journee. Cette remise a niveau a longtemps echoue en
+      // silence (fonction SQL sans clause WHERE, refusee par pg-safeupdate) : la
+      // « variation du jour » affichee etait alors une derive cumulee sur des
+      // mois. Corrige par la migration 00024.
       const refPrice = Number(current.previous_close) || Number(current.value);
       const change = Math.round((newValue - refPrice) * 100) / 100;
       const changePercent = refPrice !== 0
@@ -142,6 +94,9 @@ export async function GET(request: NextRequest) {
           value: newValue,
           change,
           change_percent: changePercent,
+          // La provenance n'est ecrite que si la source la fournit reellement :
+          // on n'invente pas une attribution que l'on ne peut pas attester.
+          ...(source ? { source } : {}),
           updated_at: new Date().toISOString(),
         })
         .eq('id', current.id);

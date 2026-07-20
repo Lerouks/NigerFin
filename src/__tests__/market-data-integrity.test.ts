@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { BRVMScraperService } from '@/lib/services/brvm-scraper-service';
 import { CommoditiesService } from '@/lib/services/commodities-service';
+import { donneeFraiche, construireMisesAJourMarche } from '@/lib/services/market-updates';
 
 /**
  * INTEGRITE DES DONNEES DE MARCHE
@@ -135,6 +136,61 @@ describe('Matieres premieres : le service echoue au lieu d\'inventer', () => {
 
     expect(data.commodities.find((c) => c.symbol === 'U3O8')).toBeUndefined();
     expect(data.commodities.some((c) => c.name.toLowerCase().includes('uranium'))).toBe(false);
+  });
+});
+
+describe('Le cache perime ne peut plus etre republie comme donnee du jour', () => {
+  const resultat = (source: 'api' | 'cache' | 'stale') =>
+    ({ status: 'fulfilled', value: { data: { marqueur: source }, source } }) as const;
+
+  it('accepte une donnee fraiche venue de la source', () => {
+    expect(donneeFraiche(resultat('api'))).toEqual({ marqueur: 'api' });
+  });
+
+  it('accepte un cache encore valide : c\'est une vraie mesure recente', () => {
+    expect(donneeFraiche(resultat('cache'))).toEqual({ marqueur: 'cache' });
+  });
+
+  it('REFUSE un cache expire, sinon une valeur perimee redeviendrait « du jour »', () => {
+    // C'est ce chemin precis qui aurait defait toute la correction : les services
+    // echouent proprement, mais le cache contenait deja les valeurs inventees.
+    expect(donneeFraiche(resultat('stale'))).toBeNull();
+  });
+
+  it('refuse une source en echec', () => {
+    expect(
+      donneeFraiche({ status: 'rejected', reason: new Error('source morte') }),
+    ).toBeNull();
+  });
+
+  it('une source en echec laisse ses symboles hors des mises a jour et consigne l\'echec', () => {
+    const echoue = { status: 'rejected', reason: new Error('brvm morte') } as const;
+    const perime = { status: 'fulfilled', value: { data: [], source: 'stale' } } as const;
+
+    const { updates, echecs } = construireMisesAJourMarche(
+      {
+        forex: echoue,
+        commodities: echoue,
+        indices: echoue,
+        crypto: echoue,
+        brvm: perime,
+      } as never,
+      'cron',
+    );
+
+    // Aucune valeur de substitution n'est produite : la base restera inchangee.
+    expect(Object.keys(updates)).toHaveLength(0);
+    expect(echecs.map((e) => e.symbol)).toContain('BRVMC');
+    expect(echecs.find((e) => e.symbol === 'BRVMC')!.error).toMatch(/perimee/);
+  });
+
+  it('n\'alimente plus le symbole uranium U3O8', () => {
+    const echoue = { status: 'rejected', reason: new Error('hs') } as const;
+    const { echecs } = construireMisesAJourMarche(
+      { forex: echoue, commodities: echoue, indices: echoue, crypto: echoue, brvm: echoue } as never,
+      'cron',
+    );
+    expect(echecs.map((e) => e.symbol)).not.toContain('U3O8');
   });
 });
 

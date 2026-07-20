@@ -18,10 +18,16 @@ import type { BRVMIndex, BRVMStock } from './brvm-scraper-service';
 import type { CommoditiesData } from './commodities-service';
 import type { CryptoData } from './crypto-service';
 import type { IndicesData } from './indices-service';
+import type { DataProvenance } from './base-service';
 
 export interface OrchestratorResult<T> {
   data: T;
-  source: 'api' | 'cache';
+  /**
+   * Provenance reelle de la donnee. 'stale' signale un cache EXPIRE servi en
+   * depannage : l'appelant DOIT en tenir compte et ne jamais republier une telle
+   * valeur comme la cotation du jour (voir le garde du cron update-market-data).
+   */
+  source: DataProvenance;
   fetchedAt: string;
   service: string;
 }

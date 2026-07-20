@@ -22,7 +22,6 @@ export default async function MarchesPage() {
   return (
     <div className="min-h-screen bg-background">
       <CategoryHero
-        label="Rubrique"
         title="Marchés"
         description="Suivez les cours en temps réel et apprenez à comprendre chaque actif grâce à nos fiches pédagogiques."
       />
@@ -32,7 +31,6 @@ export default async function MarchesPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14 md:pb-20">
         <MacroIndicatorsBlock
-          eyebrow="Matières premières"
           title="Cours mondiaux qui pèsent sur le Niger"
           subtitle="Or, uranium, pétrole et fer. Le Niger figure parmi les exportateurs stratégiques de ces 4 actifs."
           indicators={COMMODITIES_NIGER_EXPOSED}
@@ -43,7 +41,6 @@ export default async function MarchesPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14 md:pb-20">
         <MacroIndicatorsBlock
-          eyebrow="Produits alimentaires"
           title="Cours des céréales importées au Niger"
           subtitle="Blé, riz, maïs et sucre, principales matières alimentaires importées. Ces cours impactent directement le coût de la vie."
           indicators={FOOD_PRICES_2025}
@@ -53,9 +50,8 @@ export default async function MarchesPage() {
       </div>
       {(articles.length > 0 || total > 0) && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14 md:pb-20">
-          <div className="flex items-center gap-4 mb-8">
+          <div className="mb-8 pb-3 border-b border-black/10">
             <h2 className="text-2xl font-bold">Articles Marchés</h2>
-            <div className="flex-1 h-px bg-black/6" />
           </div>
           <SectionArticlesFiltered articles={articles} total={total} sectionLabel="Marchés" sectionPath="/marches" viewRanking={viewRanking} />
         </div>

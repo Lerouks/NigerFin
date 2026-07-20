@@ -46,10 +46,8 @@ export default async function NigerPage() {
   return (
     <div className="min-h-screen bg-background">
       <CategoryHero
-        label="Découvrir"
         title="Niger"
         description="Profil économique, chiffres clés, régions et ressources naturelles du Niger."
-        accentGold
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 md:pt-16">
@@ -58,7 +56,6 @@ export default async function NigerPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16">
         <MacroIndicatorsBlock
-          eyebrow="Niger en chiffres"
           title="Indicateurs macroéconomiques officiels"
           subtitle="Données INS Niger, Note de Conjoncture T4 2025 et IHPC mensuel. Sources citables, mises à jour à chaque nouvelle publication officielle."
           indicators={NIGER_MACRO_INDICATORS}

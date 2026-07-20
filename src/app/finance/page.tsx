@@ -18,7 +18,7 @@ export default async function FinancePage() {
   ]);
   return (
     <div className="min-h-screen bg-background">
-      <CategoryHero label="Rubrique" title="Finance" description="Votre argent : banques, crédit, épargne, placements et marchés au Niger et en Afrique de l'Ouest." />
+      <CategoryHero title="Finance" description="Votre argent : banques, crédit, épargne, placements et marchés au Niger et en Afrique de l'Ouest." />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
         {/*
           Facette « Marchés & BRVM » : la rubrique Marchés est sortie de la barre

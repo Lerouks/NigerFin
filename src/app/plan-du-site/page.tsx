@@ -63,10 +63,11 @@ const sections = [
 export default function PlanDuSitePage() {
   return (
     <div className="min-h-screen bg-background">
-      <section className="bg-[#111] text-white py-16 md:py-20">
+      {/* Fond clair : le noir est reserve aux chiffres. */}
+      <section className="bg-background border-b border-black/8 py-14 md:py-16">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl md:text-4xl">Plan du site</h1>
-          <p className="text-white/50 mt-3 text-[15px]">Retrouvez l&apos;ensemble des pages de NFI REPORT</p>
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-[#111]">Plan du site</h1>
+          <p className="text-gray-600 mt-3 text-[15px]">Retrouvez l&apos;ensemble des pages de NFI REPORT</p>
         </div>
       </section>
 

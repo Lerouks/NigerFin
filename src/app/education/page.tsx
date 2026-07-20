@@ -41,7 +41,6 @@ export default async function EducationPage() {
   return (
     <div className="min-h-screen bg-background">
       <CategoryHero
-        label="Rubrique"
         title="Éducation"
         description="Apprenez la finance, l'économie et les marchés à votre rythme. Choisissez une catégorie pour commencer."
       />

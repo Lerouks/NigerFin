@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { TrendingUp, TrendingDown, BookOpen, ChevronRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, BookOpen, ChevronRight } from 'lucide-react';
 import { useMarketData, groupByType, type MarketDataType } from '@/hooks/useMarketData';
 import type { MarketData } from '@/types';
 
@@ -125,19 +125,24 @@ export function MarchesContent() {
         )}
       </div>
 
-      {/* Education CTA */}
-      <div className="bg-[#111] rounded-xl p-6 text-center">
-        <BookOpen className="w-6 h-6 text-white/60 mx-auto mb-3" />
-        <h3 className="text-white text-lg font-semibold mb-2">
-          Comprendre les marchés financiers
-        </h3>
-        <p className="text-white/50 text-[14px] mb-4 max-w-md mx-auto">
-          Accédez à nos cours pour comprendre les indices, devises, matières premières et
-          cryptomonnaies.
-        </p>
+      {/*
+        Appel a l'action vers l'education. Repasse sur fond clair : le noir est
+        reserve aux chiffres, une carte promotionnelle noire au milieu d'une page
+        de donnees etait une surface noire de trop. Un simple encadre clair avec
+        un filet suffit.
+      */}
+      <div className="border border-black/10 rounded-lg p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h3 className="text-[#111] text-[17px] font-semibold mb-1">
+            Comprendre les marchés financiers
+          </h3>
+          <p className="text-gray-600 text-[14px] max-w-md">
+            Nos cours pour comprendre les indices, devises, matières premières et cryptomonnaies.
+          </p>
+        </div>
         <Link
           href="/education"
-          className="inline-flex items-center gap-2 bg-white text-black px-6 py-2.5 rounded-lg text-[14px] font-medium hover:bg-white/90 transition-colors"
+          className="inline-flex items-center gap-2 bg-[#111] text-white px-5 py-2.5 rounded-lg text-[14px] font-medium hover:bg-black transition-colors shrink-0 self-start sm:self-auto"
         >
           Explorer les cours
           <ChevronRight className="w-4 h-4" />
@@ -185,16 +190,22 @@ function QuoteRow({
         <div className="flex items-center gap-6 shrink-0">
           <div className="text-right">
             <div className="text-[15px] font-semibold tabular-nums">
-              {item.value.toLocaleString('fr-FR', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-              {item.unit && (
-                <span className="text-[11px] text-gray-500 font-normal ml-1">{item.unit}</span>
+              {item.value === null || !Number.isFinite(item.value) ? (
+                <span className="text-gray-400 font-normal">Donnée indisponible</span>
+              ) : (
+                <>
+                  {item.value.toLocaleString('fr-FR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                  {item.unit && (
+                    <span className="text-[11px] text-gray-500 font-normal ml-1">{item.unit}</span>
+                  )}
+                </>
               )}
             </div>
           </div>
-          {item.symbol === 'EUR/XOF' ? (
+          {item.value === null ? null : item.symbol === 'EUR/XOF' ? (
             <div className="flex items-center gap-1 min-w-[80px] justify-end text-[13px] font-medium text-gray-500">
               Taux fixe
             </div>
@@ -207,13 +218,20 @@ function QuoteRow({
             >
               &ndash;
             </div>
+          ) : item.changePercent === 0 ? (
+            // Variation mesuree a exactement 0 : neutre (gris), sans fleche. Une
+            // fleche verte montante sur « 0,00 % » suggererait une hausse.
+            <div className="flex items-center gap-1 min-w-[80px] justify-end text-[13px] font-medium text-gray-500">
+              <Minus className="w-3.5 h-3.5" />
+              0,00&nbsp;%
+            </div>
           ) : (
             <div
               className={`flex items-center gap-1 min-w-[80px] justify-end text-[13px] font-medium ${
-                item.change >= 0 ? 'text-emerald-600' : 'text-red-500'
+                item.change! >= 0 ? 'text-emerald-600' : 'text-red-500'
               }`}
             >
-              {item.change >= 0 ? (
+              {item.change! >= 0 ? (
                 <TrendingUp className="w-3.5 h-3.5" />
               ) : (
                 <TrendingDown className="w-3.5 h-3.5" />

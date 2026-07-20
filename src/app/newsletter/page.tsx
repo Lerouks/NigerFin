@@ -46,10 +46,8 @@ export default function NewsletterPage() {
   return (
     <div className="min-h-screen bg-background">
       <CategoryHero
-        label="Newsletter"
         title="La connaissance, votre meilleur capital."
         description="Chaque lundi à 7h, une analyse longue et signée sur l'économie du Niger et de l'Afrique de l'Ouest. Pour décider vite et juste."
-        accentGold
       />
 
       <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">

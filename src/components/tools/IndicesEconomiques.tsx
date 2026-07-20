@@ -348,7 +348,6 @@ export function IndicesEconomiques() {
       */}
       <div className="pt-8 mt-4 border-t border-black/6">
         <MacroIndicatorsBlock
-          eyebrow="Conjoncture récente"
           title="Indicateurs INS Niger temps quasi-réel"
           subtitle="Publications officielles INS Niger plus récentes que les séries Banque mondiale / FMI, qui ont 1 à 2 ans de lag. Mise à jour à chaque nouveau bulletin INS."
           indicators={NIGER_MACRO_INDICATORS}

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
-import { MarketMarquee } from '@/components/MarketMarquee';
+import { MarketRail } from '@/components/MarketRail';
 import { NewsletterForm } from '@/components/NewsletterForm';
 import { PracticalTools } from '@/components/PracticalTools';
 import { HomeHero } from '@/components/home/HomeHero';
@@ -104,15 +104,16 @@ export default async function HomePage() {
         </div>
       )}
 
-      {/* Market Ticker Bar */}
+      {/*
+        Rail de donnees. Seule surface noire permanente du site (le noir est
+        reserve aux chiffres). Fixe et feuilletable, plus de defilement
+        automatique. Le libelle « Marchés » en or sur noir a ete retire : c'etait
+        de l'or decoratif, banni ; les symboles parlent d'eux-memes.
+      */}
       {siteFeatures.marketTickerEnabled && (
-        <div className="bg-[#0a0a0a] border-b border-white/8 overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center gap-6 min-w-0">
-            <span className="text-[10px] tracking-[0.22em] uppercase text-gold font-bold shrink-0">
-              Marchés
-            </span>
-            <div className="h-3 w-px bg-white/10 shrink-0" />
-            <MarketMarquee />
+        <div className="bg-[#0a0a0a] border-b border-white/8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 min-w-0">
+            <MarketRail />
           </div>
         </div>
       )}
@@ -126,11 +127,8 @@ export default async function HomePage() {
           className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 md:pt-20 pb-2"
         >
           <header className="mb-8 md:mb-10">
-            <div className="flex items-center gap-3 mb-3">
-              <span className="text-[11px] uppercase tracking-[0.24em] text-foreground font-extrabold">
-                Actualité
-              </span>
-            </div>
+            {/* Eyebrow « Actualité » retire : redondant avec le titre juste
+                dessous, « Dernières actualités ». */}
             <div className="flex items-end justify-between gap-4 flex-wrap">
               <h2
                 id="home-latest-heading"

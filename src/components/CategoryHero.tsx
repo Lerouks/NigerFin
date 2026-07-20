@@ -1,25 +1,29 @@
 interface CategoryHeroProps {
-  label: string;
   title: string;
   description: string;
-  accentGold?: boolean;
 }
 
-export function CategoryHero({ label, title, description, accentGold = false }: CategoryHeroProps) {
+/**
+ * En-tete editorial d'une rubrique.
+ *
+ * Refondu sur FOND CLAIR : le noir est reserve aux chiffres, or ce hero etait un
+ * grand bloc noir (bg-[#0d0d0d]) present en tete de six rubriques, avec trois
+ * tics visuels cumules qui sont tous bannis :
+ *   - un filigrane de grille (hero-grid-pattern),
+ *   - un filet en degrade or (divider decoratif),
+ *   - un halo flou (blur-3xl).
+ * L'eyebrow « Rubrique » / « Découvrir » a aussi ete retire : dire au lecteur
+ * qu'une rubrique est une rubrique n'apporte rien. Reste l'essentiel, un titre
+ * et une phrase, poses par un simple filet bas de 1 px.
+ */
+export function CategoryHero({ title, description }: CategoryHeroProps) {
   return (
-    <section className="bg-[#0d0d0d] text-white py-16 md:py-20 relative overflow-hidden">
-      <div className="absolute inset-0 hero-grid-pattern" />
-      <div className="absolute top-0 inset-x-0 h-[2px] bg-linear-to-r from-transparent via-gold/30 to-transparent" />
-      <div className="absolute -top-20 -right-20 w-60 h-60 bg-gold/3 rounded-full blur-3xl" />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <div className="inline-flex items-center gap-2.5 mb-4 animate-fade-in">
-          <span className={`text-[11px] tracking-[0.2em] uppercase font-semibold ${accentGold ? 'text-gold/60' : 'text-white/40'}`}>
-            {label}
-          </span>
-        </div>
-        <h1 className="text-3xl sm:text-4xl md:text-5xl leading-tight animate-fade-in-up delay-75 wrap-break-word">{title}</h1>
-        <p className="text-white/40 text-[15px] mt-3 max-w-xl animate-fade-in-up delay-150">
+    <section className="bg-background border-b border-black/8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight text-[#111] wrap-break-word">
+          {title}
+        </h1>
+        <p className="text-gray-600 text-[15px] md:text-[16px] mt-3 max-w-2xl leading-relaxed">
           {description}
         </p>
       </div>

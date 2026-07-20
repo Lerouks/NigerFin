@@ -40,7 +40,6 @@ export default async function ArticlesPage() {
   return (
     <div className="min-h-screen bg-background">
       <CategoryHero
-        label="Archives"
         title="Tous les articles"
         description="L’ensemble des analyses et actualités économiques et financières du Niger et de l’Afrique de l’Ouest."
       />

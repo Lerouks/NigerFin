@@ -3,8 +3,6 @@ import type { MacroIndicator } from '@/data/ins-indicators';
 import { AnimatedNumber } from './AnimatedNumber';
 
 interface MacroIndicatorsBlockProps {
-  /** Eyebrow gold uppercase */
-  eyebrow: string;
   /** Heading principal */
   title: string;
   /** Sous-titre ou contexte */
@@ -37,7 +35,6 @@ const TREND_COLOR = {
  * Réutilisable sur /niger, /marches, /economie.
  */
 export function MacroIndicatorsBlock({
-  eyebrow,
   title,
   subtitle,
   indicators,
@@ -55,14 +52,10 @@ export function MacroIndicatorsBlock({
 
   return (
     <section>
-      {/* Header */}
-      <div className="flex items-end justify-between mb-8 flex-wrap gap-4">
+      {/* En-tete : titre + date. Le point median separe le titre de sa date,
+          en monospace, dans l'esprit « chaque chiffre porte sa date ». */}
+      <div className="flex items-end justify-between mb-6 flex-wrap gap-3 pb-4 border-b border-black/10">
         <div>
-          <div className="flex items-center gap-2.5 mb-3">
-            <span className="text-[11px] font-semibold tracking-[0.18em] uppercase text-gold">
-              {eyebrow}
-            </span>
-          </div>
           <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-[#111]">
             {title}
           </h2>
@@ -71,77 +64,66 @@ export function MacroIndicatorsBlock({
           )}
         </div>
         {asOf && (
-          <div className="text-right">
-            <div className="text-[11px] tracking-[0.12em] uppercase text-gray-500">
-              Snapshot
-            </div>
-            <div className="text-[13px] text-gray-600 font-medium tabular-nums">
-              {asOf}
-            </div>
+          <div className="font-mono text-[11px] uppercase tracking-[0.04em] text-gray-500 tabular-nums pb-1">
+            au {asOf}
           </div>
         )}
       </div>
 
-      {/* Grid d'indicateurs */}
-      <div className={`grid grid-cols-1 ${gridCols} gap-4`}>
+      {/*
+        ANTI-CARTE : ces indicateurs sont comparables entre eux, ils se lisent
+        donc en LIGNES alignees separees par un filet de 1 px, pas en mosaique de
+        cartes arrondies. On lit une colonne de chiffres d'un coup d'oeil, comme
+        sur un terminal. Sur large ecran, deux ou trois colonnes de lignes.
+      */}
+      <div className={`grid grid-cols-1 ${gridCols} gap-x-10`}>
         {indicators.map((kpi) => {
           const TrendIcon = TREND_ICON[kpi.trend ?? 'neutral'];
           const trendClass = TREND_COLOR[kpi.trend ?? 'neutral'];
           return (
-            <article
+            <div
               key={kpi.id}
-              className="bg-white rounded-xl border border-black/6 p-5 hover:border-black/12 transition-colors"
+              className="flex items-baseline justify-between gap-4 py-4 border-b border-black/8"
             >
-              {/* Label + period */}
-              <div className="flex items-start justify-between gap-2 mb-3">
-                <div className="min-w-0">
-                  <div className="text-[13px] font-semibold text-[#111] leading-tight">
-                    {kpi.label}
-                  </div>
-                  <div className="text-[11px] text-gray-500 mt-0.5">
-                    {kpi.period}
-                  </div>
+              <div className="min-w-0">
+                <div className="text-[13px] font-semibold text-[#111] leading-tight">
+                  {kpi.label}
+                </div>
+                {kpi.context && (
+                  <p className="text-[12px] leading-snug text-gray-500 mt-1 max-w-xs">
+                    {kpi.context}
+                  </p>
+                )}
+                {/* Source + periode, en monospace : la provenance du chiffre. */}
+                <div className="font-mono text-[10px] uppercase tracking-[0.04em] text-gray-400 mt-1.5 tabular-nums">
+                  {[kpi.source, kpi.period].filter(Boolean).join(' · ')}
+                </div>
+              </div>
+              <div className="text-right shrink-0">
+                <div className="flex items-baseline justify-end gap-1">
+                  <AnimatedNumber
+                    value={kpi.value}
+                    className="text-xl md:text-2xl font-bold text-[#111] tabular-nums leading-none"
+                  />
+                  <span className="text-[12px] text-gray-500 font-medium">{kpi.unit}</span>
                 </div>
                 {kpi.yearChange && (
                   <span
-                    className={`inline-flex items-center gap-0.5 text-[12px] font-semibold tabular-nums ${trendClass}`}
+                    className={`inline-flex items-center gap-0.5 text-[12px] font-semibold tabular-nums mt-1 ${trendClass}`}
                   >
                     <TrendIcon className="w-3.5 h-3.5" />
                     {kpi.yearChange}
                   </span>
                 )}
               </div>
-
-              {/* Value */}
-              <div className="flex items-baseline gap-1.5 mb-3">
-                <AnimatedNumber
-                  value={kpi.value}
-                  className="text-2xl md:text-[28px] font-bold text-[#111] tabular-nums leading-none"
-                />
-                <span className="text-[13px] text-gray-500 font-medium">
-                  {kpi.unit}
-                </span>
-              </div>
-
-              {/* Context (1 phrase) */}
-              {kpi.context && (
-                <p className="text-[12px] leading-relaxed text-gray-600 mb-2">
-                  {kpi.context}
-                </p>
-              )}
-
-              {/* Source */}
-              <div className="text-[10px] tracking-[0.08em] uppercase text-gray-500 mt-3 pt-3 border-t border-black/4">
-                {kpi.source}
-              </div>
-            </article>
+            </div>
           );
         })}
       </div>
 
       {/* Footer source */}
       {sourceLabel && (
-        <p className="text-[12px] text-gray-500 mt-6 text-right">
+        <p className="font-mono text-[11px] text-gray-400 mt-5 text-right uppercase tracking-[0.04em]">
           {sourceLabel}
         </p>
       )}

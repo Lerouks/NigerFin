@@ -18,7 +18,7 @@ export default async function EconomiePage() {
   ]);
   return (
     <div className="min-h-screen bg-background">
-      <CategoryHero label="Rubrique" title="Économie" description="Analyses et actualités économiques du Niger et de l'Afrique de l'Ouest." />
+      <CategoryHero title="Économie" description="Analyses et actualités économiques du Niger et de l'Afrique de l'Ouest." />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
         <SectionArticlesFiltered articles={articles} total={total} sectionLabel="Économie" sectionPath="/economie" viewRanking={viewRanking} />
       </div>

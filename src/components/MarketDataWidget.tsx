@@ -70,39 +70,53 @@ export function MarketDataWidget() {
 
           return (
             <div key={type}>
-              <h4 className="text-[11px] uppercase tracking-[0.14em] font-semibold text-gray-500 mb-3">
+              <h4 className="text-[11px] uppercase tracking-[0.14em] font-semibold text-gray-500 mb-2">
                 {TYPE_LABELS[type]}
               </h4>
-              <div className="space-y-2.5">
-                {group.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex justify-between items-center py-1.5 px-2 -mx-2 rounded-lg hover:bg-background transition-colors cursor-default"
-                  >
-                    <div className="flex-1">
-                      <div className="text-[13px] font-medium">{item.name}</div>
-                      <div className="text-[11px] text-gray-500">{item.symbol}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-[13px] tabular-nums font-medium">
-                        {item.value.toLocaleString('fr-FR', {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
-                        {item.unit && (
-                          <span className="text-[10px] text-gray-500 ml-0.5">{item.unit}</span>
+              {/* Lignes separees par un filet de 1 px (grammaire anti-carte). */}
+              <div className="divide-y divide-black/6">
+                {group.map((item) => {
+                  const indispo = item.value === null || !Number.isFinite(item.value);
+                  return (
+                    <div
+                      key={item.id}
+                      className="flex justify-between items-center gap-3 py-2"
+                    >
+                      <div className="min-w-0">
+                        <div className="text-[13px] font-medium truncate">{item.name}</div>
+                        <div className="font-mono text-[10px] text-gray-400 uppercase tracking-[0.04em]">
+                          {item.symbol}
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <div className="text-[13px] tabular-nums font-medium">
+                          {indispo ? (
+                            <span className="text-gray-400 font-normal">indisponible</span>
+                          ) : (
+                            <>
+                              {(item.value as number).toLocaleString('fr-FR', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
+                              {item.unit && (
+                                <span className="text-[10px] text-gray-500 ml-0.5">{item.unit}</span>
+                              )}
+                            </>
+                          )}
+                        </div>
+                        {!indispo && (
+                          <div className="flex justify-end">
+                            {item.symbol === 'EUR/XOF' ? (
+                              <span className="text-[10px] text-gray-500">Taux fixe</span>
+                            ) : (
+                              <VariationBadge value={item.changePercent} pill />
+                            )}
+                          </div>
                         )}
                       </div>
-                      <div className="flex justify-end">
-                        {item.symbol === 'EUR/XOF' ? (
-                          <span className="text-[10px] text-gray-500">Taux fixe</span>
-                        ) : (
-                          <VariationBadge value={item.changePercent} pill />
-                        )}
-                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           );

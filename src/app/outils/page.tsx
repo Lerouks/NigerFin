@@ -21,7 +21,6 @@ export default function OutilsPage() {
   return (
     <div className="min-h-screen bg-background">
       <CategoryHero
-        label="Rubrique"
         title="Outils Financiers"
         description="Simulateurs et calculateurs financiers optimisés pour le contexte économique africain."
       />

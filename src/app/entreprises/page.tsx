@@ -38,11 +38,7 @@ export default async function EntreprisesPage() {
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
             <header className="mb-10 md:mb-14">
-              <div className="flex items-baseline gap-3 mb-3">
-                <span className="text-[11px] uppercase tracking-[0.22em] text-foreground font-extrabold">
-                  Actualité
-                </span>
-              </div>
+              {/* Eyebrow « Actualité » retire : redondant avec le titre. */}
               <h2
                 id="atlas-news-heading"
                 className="text-[clamp(2rem,4.5vw,2.75rem)] font-black tracking-tight text-foreground leading-[1.05]"

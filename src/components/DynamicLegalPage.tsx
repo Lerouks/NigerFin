@@ -30,10 +30,10 @@ export function DynamicLegalPage({ title, introParagraphs, initialSections, fall
 
   return (
     <div className="min-h-screen bg-background">
-      <section className="bg-[#111] text-white py-16 md:py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-linear-to-br from-white/2 to-transparent" />
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <h1 className="text-3xl md:text-4xl">{title}</h1>
+      {/* Fond clair, sans degrade decoratif : le noir est reserve aux chiffres. */}
+      <section className="bg-background border-b border-black/8 py-14 md:py-16">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-[#111]">{title}</h1>
         </div>
       </section>
 

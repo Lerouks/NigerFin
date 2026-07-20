@@ -306,11 +306,6 @@
   to { width: 48px; }
 }
 
-@keyframes marqueeScroll {
-  from { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(-50%, 0, 0); }
-}
-
 @keyframes subtlePulse {
   0%, 100% { opacity: 0.4; }
   50% { opacity: 0.7; }
@@ -318,10 +313,6 @@
 
 .animate-gold-line {
   animation: goldLineDraw 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.animate-marquee {
-  animation: marqueeScroll 40s linear infinite;
 }
 
 .animate-subtle-pulse {
@@ -394,7 +385,6 @@
   .animate-scale-in,
   .animate-shimmer,
   .animate-gold-line,
-  .animate-marquee,
   .animate-subtle-pulse,
   .stagger-grid > *,
   .reveal-on-scroll,

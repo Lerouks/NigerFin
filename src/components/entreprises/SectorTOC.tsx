@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { getSectorAnchor } from '@/lib/sector-anchor';
 
 interface SectorTOCProps {
@@ -14,6 +14,7 @@ interface SectorTOCProps {
  */
 export function SectorTOC({ sectors }: SectorTOCProps) {
   const [activeSector, setActiveSector] = useState<string | null>(null);
+  const barreRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -43,8 +44,19 @@ export function SectorTOC({ sectors }: SectorTOCProps) {
       e.preventDefault();
       const el = document.getElementById(getSectorAnchor(sector));
       if (el) {
-        const offset = 80; // hauteur header sticky approximative
-        const top = el.getBoundingClientRect().top + window.scrollY - offset;
+        // Hauteur REELLE du header, lue dans la variable CSS unique, plus la
+        // hauteur de ce sommaire lui-meme, qui est colle juste en dessous.
+        // L'ancienne valeur de 80 px etait une approximation qui ne correspondait
+        // ni au header mobile (64 px) ni au header desktop (120 px) : le titre
+        // vise se retrouvait masque ou trop bas selon la largeur d'ecran.
+        const hauteurHeader =
+          parseInt(
+            getComputedStyle(document.documentElement).getPropertyValue('--header-height'),
+            10,
+          ) || 64;
+        const hauteurSommaire = barreRef.current?.offsetHeight ?? 0;
+        const top =
+          el.getBoundingClientRect().top + window.scrollY - hauteurHeader - hauteurSommaire - 8;
         window.scrollTo({ top, behavior: 'smooth' });
       }
     },
@@ -55,8 +67,9 @@ export function SectorTOC({ sectors }: SectorTOCProps) {
 
   return (
     <nav
+      ref={barreRef}
       aria-label="Sommaire par secteur"
-      className="relative md:sticky md:top-16 z-30 bg-background/95 backdrop-blur-md border-b border-black/8"
+      className="relative md:sticky md:top-[var(--header-height)] z-30 bg-background/95 backdrop-blur-md border-b border-black/8"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <ul className="flex items-center gap-0 overflow-x-auto py-3 -mx-1 scrollbar-thin scroll-smooth">

@@ -357,7 +357,7 @@ export function SectionArticlesFiltered({
       <div className="flex gap-8 lg:gap-10">
         {/* Desktop: sidebar filters */}
         <aside className="hidden lg:block w-[240px] shrink-0">
-          <div className="sticky top-24 bg-white rounded-2xl border border-black/8 p-6 shadow-[0_4px_30px_-14px_rgba(0,0,0,0.1)]">
+          <div className="sticky top-[calc(var(--header-height)+1.5rem)] bg-white rounded-2xl border border-black/8 p-6 shadow-[0_4px_30px_-14px_rgba(0,0,0,0.1)]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="w-4 h-4 text-gold" />

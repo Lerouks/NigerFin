@@ -132,6 +132,29 @@
     --warning: #eab308;
     --error: #ef4444;
     --surface: #ffffff;
+
+    /*
+      HAUTEUR REELLE DU HEADER COLLE (sticky).
+      Declaree UNE SEULE FOIS ici, et consommee par tous les elements qui se
+      collent sous lui.
+
+      Auparavant, sept composants devinaient chacun cette hauteur dans leur coin
+      (top-16, top-24, top-36, top-8), avec des valeurs qui ne correspondaient a
+      rien de reel. Le sommaire des secteurs, en md:top-16, se collait a 64 px
+      sous un header qui en mesure 120 : il passait quasi integralement sous la
+      barre, qui est opaque et porte un z-index superieur. Cinq autres elements
+      se recouvraient de quelques pixels.
+
+      Sous 1024 px : bandeau principal seul, 64 px (h-16).
+      A partir de 1024 px : bandeau 64 px + barre de rubriques 56 px (h-14).
+    */
+    --header-height: 64px;
+  }
+
+  @media (min-width: 1024px) {
+    :root {
+      --header-height: 120px;
+    }
   }
 
   /* Consistent gold focus ring for all interactive elements */

@@ -67,7 +67,7 @@ export default function EnterpriseDetailLoading() {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="lg:sticky lg:top-24 space-y-6">
+            <div className="lg:sticky lg:top-[calc(var(--header-height)+1.5rem)] space-y-6">
               <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] p-6">
                 <div className="h-3 w-24 bg-gray-200 rounded-sm animate-pulse mb-3" />
                 <div className="divide-y divide-black/5">

@@ -677,7 +677,7 @@ export function PaymentContent() {
           </div>
 
           {/* ── RIGHT COLUMN: Plan Summary (sticky) ── */}
-          <div className="lg:sticky lg:top-8">
+          <div className="lg:sticky lg:top-[calc(var(--header-height)+1.5rem)]">
             <div className="bg-white rounded-2xl border border-black/6 p-7">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-[16px] font-bold text-[#111]">

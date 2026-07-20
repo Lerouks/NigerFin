@@ -256,7 +256,7 @@ export function AccountDashboard() {
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           {/* Sidebar navigation - desktop */}
           <aside className="hidden lg:block w-[200px] shrink-0">
-            <nav className="sticky top-24 space-y-1">
+            <nav className="sticky top-[calc(var(--header-height)+1.5rem)] space-y-1">
               {sections.map((s) => {
                 const Icon = s.icon;
                 const isActive = activeSection === s.id;

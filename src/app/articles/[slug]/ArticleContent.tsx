@@ -297,7 +297,7 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [], header
 
           <aside className="lg:col-span-4">
             {/* Sticky pour ne pas etirer la sidebar 1300px sous la fin de l'article */}
-            <div className="lg:sticky lg:top-24">
+            <div className="lg:sticky lg:top-[calc(var(--header-height)+1.5rem)]">
               <MarketDataWidget />
             </div>
           </aside>

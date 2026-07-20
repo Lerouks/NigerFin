@@ -239,7 +239,7 @@ export function EnterpriseContent({
 
           {/* Sidebar - Fiche d'identite */}
           <div className="lg:col-span-1">
-            <div className="lg:sticky lg:top-24 space-y-6">
+            <div className="lg:sticky lg:top-[calc(var(--header-height)+1.5rem)] space-y-6">
               {hasInfo && (
                 <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.06)] border border-black/4 p-6">
                   <h2 className="text-[11px] uppercase tracking-[0.18em] text-gray-500 font-bold mb-3">

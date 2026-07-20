@@ -42,7 +42,7 @@ export function MarketDataWidget() {
 
   if (isLoading && items.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-black/6 sticky top-36 overflow-hidden">
+      <div className="bg-white rounded-xl border border-black/6 sticky top-[calc(var(--header-height)+1.5rem)] overflow-hidden">
         <div className="border-b border-black/5 px-5 py-4">
           <h3 className="text-[15px] font-semibold">Marchés</h3>
         </div>
@@ -59,7 +59,7 @@ export function MarketDataWidget() {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-black/6 sticky top-36 overflow-hidden">
+    <div className="bg-white rounded-xl border border-black/6 sticky top-[calc(var(--header-height)+1.5rem)] overflow-hidden">
       <div className="border-b border-black/5 px-5 py-4">
         <h3 className="text-[15px] font-semibold">Marchés</h3>
       </div>

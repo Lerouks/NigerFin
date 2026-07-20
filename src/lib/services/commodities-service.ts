@@ -23,18 +23,26 @@ export interface CommoditiesData {
 const PRICE_SANITY_RANGES: Record<string, [number, number]> = {
   oil: [40, 200],
   gold: [1500, 6000],
-  uranium: [20, 200],
   cotton: [0.30, 2.00],
 };
 
 // Maximum age (in hours) for a price to be considered fresh.
 const MAX_PRICE_AGE_HOURS = 48;
 
-// World Bank commodity API indicators
+// World Bank commodity API indicators.
+//
+// L'uranium a ete RETIRE volontairement : le ticker Yahoo `UX=F` n'est pas le
+// spot U3O8. Yahoo le renvoie en `instrumentType: 'ALTSYMBOL'` avec un
+// `regularMarketTime` fige (53 jours de retard au 2026-07-20), systematiquement
+// rejete par isPriceFresh(). Le service retombait donc en permanence sur une
+// estimation en dur de 65,00 USD/lb, c'est-a-dire sur un chiffre invente, sur la
+// matiere premiere la plus sensible du Niger.
+// Une vraie cotation U3O8 est publiee chaque semaine par UxC et TradeTech, sur
+// abonnement payant. Tant qu'une de ces sources n'est pas branchee, l'uranium
+// n'est pas publie du tout : absence de donnee = absence d'affichage.
 const COMMODITY_INDICATORS: Record<string, { name: string; symbol: string; unit: string; wbCode: string; yahooTicker?: string }> = {
   oil: { name: 'Pétrole Brent', symbol: 'ICEEUR:BRN1!', unit: 'USD/baril', wbCode: 'CRUDE_BRENT', yahooTicker: 'BZ%3DF' },
   gold: { name: 'Or', symbol: 'XAU', unit: 'USD/once', wbCode: 'GOLD', yahooTicker: 'GC%3DF' },
-  uranium: { name: 'Uranium', symbol: 'U3O8', unit: 'USD/lb', wbCode: 'URANIUM', yahooTicker: 'UX%3DF' },
   cotton: { name: 'Coton', symbol: 'CT', unit: 'USD/lb', wbCode: 'COTTON_A_INDX', yahooTicker: 'CT%3DF' },
 };
 
@@ -59,7 +67,9 @@ export class CommoditiesService extends BaseDataService {
             return await this.fetchBrentFromTradingEconomics(meta);
           } catch { /* fall through */ }
         }
-        return this.getFallbackPrice(key, meta);
+        // Plus aucune source disponible pour cette matiere premiere : on echoue.
+        // On ne renvoie JAMAIS de valeur de repli, un echec doit rester un echec.
+        throw new Error(`Aucune source disponible pour ${key}`);
       }
     });
 
@@ -69,6 +79,14 @@ export class CommoditiesService extends BaseDataService {
       if (result.status === 'fulfilled' && result.value) {
         commodities.push(result.value);
       }
+    }
+
+    // Si AUCUNE matiere premiere n'a pu etre cotee, la promesse doit rejeter pour
+    // que Promise.allSettled cote appelant (cron, /api/health) voie un 'rejected'
+    // et remonte a Sentry. Renvoyer un tableau vide ferait passer une panne totale
+    // pour un succes.
+    if (commodities.length === 0) {
+      throw new Error('Aucune matiere premiere disponible (toutes les sources ont echoue)');
     }
 
     return { commodities, date: new Date().toISOString() };
@@ -155,11 +173,21 @@ export class CommoditiesService extends BaseDataService {
     const result = json?.chart?.result?.[0];
     if (!result) throw new Error('No chart data');
 
-    const price = result.meta?.regularMarketPrice;
-    const previousClose = result.meta?.chartPreviousClose ?? result.meta?.previousClose;
+    const rawPrice = result.meta?.regularMarketPrice;
+    const rawPreviousClose = result.meta?.chartPreviousClose ?? result.meta?.previousClose;
     const regularMarketTime = result.meta?.regularMarketTime; // Unix timestamp
 
-    if (!price) throw new Error('No price in response');
+    if (!rawPrice) throw new Error('No price in response');
+
+    // Yahoo cote certains contrats en `USX` (cents US) et non en `USD` : le coton
+    // (CT=F) vaut ainsi 80,22 USX, c'est-a-dire 0,8022 USD/lb. Sans cette
+    // conversion, la valeur reelle est prise pour des dollars, rejetee par le
+    // controle de plage comme aberrante, et remplacee par une estimation. Une
+    // donnee juste et disponible etait donc detruite au profit d'un chiffre faux.
+    const currency = result.meta?.currency;
+    const divisor = currency === 'USX' ? 100 : 1;
+    const price = rawPrice / divisor;
+    const previousClose = rawPreviousClose != null ? rawPreviousClose / divisor : undefined;
 
     // Use the actual market timestamp from Yahoo, not the current time
     const marketDate = regularMarketTime
@@ -175,7 +203,9 @@ export class CommoditiesService extends BaseDataService {
     return {
       name: meta.name,
       symbol: meta.symbol,
-      price: Math.round(price * 100) / 100,
+      // Les matieres cotees sous 10 USD (le coton, a 0,8022 USD/lb) perdent tout
+      // leur sens a deux decimales : on garde quatre decimales sous ce seuil.
+      price: price < 10 ? Math.round(price * 10000) / 10000 : Math.round(price * 100) / 100,
       unit: meta.unit,
       currency: 'USD',
       change,
@@ -253,32 +283,6 @@ export class CommoditiesService extends BaseDataService {
       changePercent: 0,
       source: 'Frankfurter/ECB',
       date: data.date || new Date().toISOString(),
-    };
-  }
-
-  /**
-   * Last-resort fallback with static estimates.
-   */
-  private getFallbackPrice(key: string, meta: { name: string; symbol: string; unit: string }): CommodityPrice {
-    const estimates: Record<string, { price: number; change: number; changePercent: number }> = {
-      oil: { price: 109.00, change: 0, changePercent: 0 },
-      gold: { price: 3100.00, change: 0, changePercent: 0 },
-      uranium: { price: 65.00, change: 0, changePercent: 0 },
-      cotton: { price: 0.68, change: 0, changePercent: 0 },
-    };
-
-    const est = estimates[key] || { price: 0, change: 0, changePercent: 0 };
-
-    return {
-      name: meta.name,
-      symbol: meta.symbol,
-      price: est.price,
-      unit: meta.unit,
-      currency: 'USD',
-      change: est.change,
-      changePercent: est.changePercent,
-      source: 'Fallback',
-      date: new Date().toISOString(),
     };
   }
 

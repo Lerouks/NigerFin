@@ -28,6 +28,19 @@ export interface BRVMData {
   date: string;
 }
 
+/**
+ * Convertit une valeur brute d'API en nombre exploitable, ou `null`.
+ *
+ * Renvoyer `null` plutot que `0` est le point important : `Number(x || 0)`
+ * transforme une donnee ABSENTE en une donnee AFFIRMEE (« cote a 0 »), ce qui
+ * est une fabrication. Ici, l'absence reste une absence, et l'appelant decide.
+ */
+function toFiniteNumber(raw: unknown): number | null {
+  if (raw === null || raw === undefined || raw === '') return null;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : null;
+}
+
 // Pre-seeded BRVM data with major tickers, fetched from public API
 const BRVM_TICKERS = [
   { ticker: 'BOAN', name: 'BOA Niger', sector: 'Finance', country: 'Niger' },
@@ -57,7 +70,11 @@ const BRVM_TICKERS = [
   { ticker: 'CABC', name: 'Sicable', sector: 'Industrie', country: 'Côte d\'Ivoire' },
   { ticker: 'FTSC', name: 'Filtisac', sector: 'Industrie', country: 'Côte d\'Ivoire' },
   { ticker: 'NEIC', name: 'NEI-CEDA', sector: 'Édition', country: 'Côte d\'Ivoire' },
-  { ticker: 'SEMC', name: 'SAFCA', sector: 'Finance', country: 'Côte d\'Ivoire' },
+  // NOTE : une entree « SEMC » portant elle aussi le nom « SAFCA » figurait ici,
+  // en doublon de la ligne SAFC ci-dessous. SAFC est le code BRVM documente de
+  // SAFCA ; l'entite reelle derriere SEMC n'a pas pu etre attestee, donc la ligne
+  // a ete retiree plutot que de lui inventer une raison sociale. A reintroduire
+  // si la liste officielle BRVM la confirme, avec son vrai nom.
   { ticker: 'PRSC', name: 'Tractafric Motors CI', sector: 'Distribution', country: 'Côte d\'Ivoire' },
   { ticker: 'UNXC', name: 'Uniwax', sector: 'Industrie', country: 'Côte d\'Ivoire' },
   { ticker: 'NTLC', name: 'Nestlé CI', sector: 'Agroalimentaire', country: 'Côte d\'Ivoire' },
@@ -82,87 +99,78 @@ export class BRVMScraperService extends BaseDataService {
   protected defaultTTLSeconds = 1800; // 30 min
 
   async fetch(): Promise<BRVMData> {
-    // Try the BRVM public API endpoint
+    // ATTENTION : `https://www.brvm.org/api/quotes` repond 404 depuis un moment.
+    // Ce service n'a donc aujourd'hui AUCUNE source vivante. Il echoue, et c'est
+    // le comportement voulu : tant qu'une vraie source BRVM n'est pas branchee,
+    // NFI Report ne publie pas de cotation BRVM. Ne jamais reintroduire ici de
+    // valeur de repli : un indice de la place boursiere de reference de l'UEMOA
+    // invente est la pire faute que ce site puisse commettre.
+    let res: Response;
     try {
-      const res = await fetch('https://www.brvm.org/api/quotes', {
+      res = await fetch('https://www.brvm.org/api/quotes', {
         signal: AbortSignal.timeout(15000),
         headers: { 'Accept': 'application/json' },
       });
-
-      if (res.ok) {
-        const json = await res.json();
-        return this.parseAPIResponse(json);
-      }
-    } catch {
-      // Fall through to fallback
+    } catch (err) {
+      throw new Error(
+        `Source BRVM injoignable (brvm.org/api/quotes) : ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
 
-    // Fallback: return structured data from known tickers with cached values
-    return this.buildFallbackData();
+    if (!res.ok) {
+      throw new Error(`Source BRVM indisponible (brvm.org/api/quotes a repondu ${res.status})`);
+    }
+
+    return this.parseAPIResponse(await res.json());
   }
 
   private parseAPIResponse(json: unknown): BRVMData {
     const data = json as Record<string, unknown>;
     const rawStocks = (data.stocks || data.quotes || data.data || []) as Array<Record<string, unknown>>;
 
-    const stocks: BRVMStock[] = rawStocks.map((s) => {
+    // Un titre sans prix exploitable est ECARTE, jamais ramene a 0 : afficher
+    // « 0 FCFA » reviendrait a affirmer une faillite totale de la societe.
+    const stocks: BRVMStock[] = rawStocks.flatMap((s) => {
       const ticker = (s.ticker || s.symbol || s.code || '') as string;
       const meta = BRVM_TICKERS.find((t) => t.ticker === ticker);
-      return {
+      const price = toFiniteNumber(s.price ?? s.last ?? s.close);
+      if (!ticker || price === null) return [];
+      return [{
         ticker,
         name: (s.name || meta?.name || ticker) as string,
         sector: (s.sector || meta?.sector || 'Autre') as string,
-        price: Number(s.price || s.last || s.close || 0),
-        change: Number(s.change || s.variation || 0),
-        changePercent: Number(s.changePercent || s.variationPercent || 0),
-        volume: Number(s.volume || 0),
-        marketCap: s.marketCap ? Number(s.marketCap) : undefined,
+        price,
+        change: toFiniteNumber(s.change ?? s.variation) ?? 0,
+        changePercent: toFiniteNumber(s.changePercent ?? s.variationPercent) ?? 0,
+        volume: toFiniteNumber(s.volume) ?? 0,
+        marketCap: toFiniteNumber(s.marketCap) ?? undefined,
         date: (s.date || new Date().toISOString()) as string,
         country: meta?.country,
-      };
+      }];
     });
 
-    const indices: BRVMIndex[] = [];
+    // Meme regle pour les indices : un indice sans valeur chiffree est ecarte.
     const rawIndices = (data.indices || []) as Array<Record<string, unknown>>;
-    for (const idx of rawIndices) {
-      indices.push({
-        name: (idx.name || '') as string,
-        value: Number(idx.value || idx.close || 0),
-        change: Number(idx.change || 0),
-        changePercent: Number(idx.changePercent || 0),
+    const indices: BRVMIndex[] = rawIndices.flatMap((idx) => {
+      const name = (idx.name || '') as string;
+      const value = toFiniteNumber(idx.value ?? idx.close);
+      if (!name || value === null) return [];
+      return [{
+        name,
+        value,
+        change: toFiniteNumber(idx.change) ?? 0,
+        changePercent: toFiniteNumber(idx.changePercent) ?? 0,
         date: (idx.date || new Date().toISOString()) as string,
-        volume: idx.volume ? Number(idx.volume) : undefined,
-      });
+        volume: toFiniteNumber(idx.volume) ?? undefined,
+      }];
+    });
+
+    // On ne « garantit » PAS la presence du Composite et du BRVM 30 en les
+    // inventant : si la source ne les cote pas, ils sont absents, point.
+    // Une reponse qui ne contient aucun indice exploitable est une panne.
+    if (indices.length === 0) {
+      throw new Error('Reponse BRVM sans aucun indice exploitable');
     }
-
-    // Ensure we always have composite and BRVM 30
-    if (!indices.find((i) => i.name.includes('Composite'))) {
-      indices.unshift({ name: 'BRVM Composite', value: 417.00, change: 2.18, changePercent: 0.52, date: new Date().toISOString() });
-    }
-    if (!indices.find((i) => i.name.includes('30'))) {
-      indices.push({ name: 'BRVM 30', value: 209.00, change: 1.08, changePercent: 0.52, date: new Date().toISOString() });
-    }
-
-    return { indices, stocks, date: new Date().toISOString() };
-  }
-
-  private buildFallbackData(): BRVMData {
-    const stocks: BRVMStock[] = BRVM_TICKERS.map((t) => ({
-      ticker: t.ticker,
-      name: t.name,
-      sector: t.sector,
-      price: 0,
-      change: 0,
-      changePercent: 0,
-      volume: 0,
-      date: new Date().toISOString(),
-      country: t.country,
-    }));
-
-    const indices: BRVMIndex[] = [
-      { name: 'BRVM Composite', value: 417.00, change: 2.18, changePercent: 0.52, date: new Date().toISOString() },
-      { name: 'BRVM 30', value: 209.00, change: 1.08, changePercent: 0.52, date: new Date().toISOString() },
-    ];
 
     return { indices, stocks, date: new Date().toISOString() };
   }

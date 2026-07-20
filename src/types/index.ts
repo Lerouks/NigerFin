@@ -33,7 +33,11 @@ export interface Article {
 export interface MarketData {
   id: string;
   name: string;
-  value: number;
+  /**
+   * Derniere valeur connue, `null` si aucune source fiable ne la fournit.
+   * L'interface affiche alors « donnee indisponible », jamais un chiffre invente.
+   */
+  value: number | null;
   /**
    * Variation absolue, `null` si elle n'a pas ete mesuree.
    * `null` et `0` ne veulent PAS dire la meme chose : `0` affirme une mesure

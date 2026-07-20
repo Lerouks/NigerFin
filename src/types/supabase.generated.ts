@@ -739,7 +739,7 @@ export type Database = {
           type: string
           unit: string | null
           updated_at: string
-          value: number
+          value: number | null
         }
         Insert: {
           change?: number | null
@@ -755,7 +755,7 @@ export type Database = {
           type: string
           unit?: string | null
           updated_at?: string
-          value: number
+          value: number | null
         }
         Update: {
           change?: number | null
@@ -771,7 +771,7 @@ export type Database = {
           type?: string
           unit?: string | null
           updated_at?: string
-          value?: number
+          value?: number | null
         }
         Relationships: []
       }

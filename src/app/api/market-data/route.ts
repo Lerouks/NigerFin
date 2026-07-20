@@ -45,7 +45,10 @@ export async function GET() {
   const mapped = data.map((item) => ({
     id: item.id,
     name: item.name,
-    value: Number(item.value),
+    // Comme pour change/change_percent : Number(null) vaut 0, ce qui
+    // transformerait une valeur ABSENTE en un cours mesure a zero. On preserve
+    // l'absence pour que l'interface affiche « donnee indisponible ».
+    value: item.value === null ? null : Number(item.value),
     // `Number(null)` vaut 0 : convertir sans precaution transformait une
     // variation NON RENSEIGNEE en une variation MESUREE a zero, que l'interface
     // affichait ensuite comme « Stable ». On preserve l'absence telle quelle.

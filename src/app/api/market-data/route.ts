@@ -1,14 +1,28 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase';
-import { marketData as fallbackData } from '@/data/mock-data';
 
 // No static cache, data must propagate instantly after admin updates
 export const dynamic = 'force-dynamic';
 
+/**
+ * Cette route servait auparavant onze cours codes en dur (mock-data.ts) des que
+ * Supabase etait absent, en erreur, OU que la table etait vide. Le lecteur voyait
+ * alors un Bitcoin a 66 246 et un Brent a 109,00 inventes, sans date ni source,
+ * presentes exactement comme de vraies cotations, sur l'accueil et dans chaque
+ * article. Trois etats distincts sont desormais distingues :
+ *   panne (pas de client, ou erreur SQL) -> 503, l'interface sait que c'est casse
+ *   table vide                            -> 200 avec [], l'absence est un etat
+ *                                            legitime, pas une panne
+ *   donnees presentes                     -> 200 avec les vraies lignes
+ * Ne jamais reintroduire de substitution ici.
+ */
 export async function GET() {
   const supabase = await createServerSupabaseClient();
   if (!supabase) {
-    return NextResponse.json(fallbackData);
+    return NextResponse.json(
+      { error: 'Donnees de marche temporairement indisponibles' },
+      { status: 503 },
+    );
   }
 
   const { data, error } = await supabase
@@ -17,8 +31,15 @@ export async function GET() {
     .order('type')
     .order('name');
 
-  if (error || !data || data.length === 0) {
-    return NextResponse.json(fallbackData);
+  if (error) {
+    return NextResponse.json(
+      { error: 'Donnees de marche temporairement indisponibles' },
+      { status: 503 },
+    );
+  }
+
+  if (!data || data.length === 0) {
+    return NextResponse.json([]);
   }
 
   const mapped = data.map((item) => ({

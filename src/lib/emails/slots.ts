@@ -44,7 +44,7 @@ export const TEMPLATE_SLOTS: Record<TransactionalEmailKey, TemplateSlots> = {
       { key: 'intro', label: 'Introduction', default: "Vous êtes désormais inscrit. Vous recevrez nos briefings économiques sur le Niger et l'Afrique de l'Ouest : analyses, données de marché et décryptages." },
       { key: 'bouton', label: 'Bouton', default: 'Lire les derniers articles' },
       { key: 'promo_titre', label: 'Encart Premium (titre)', default: "Envie d'aller plus loin ?" },
-      { key: 'promo_corps', label: 'Encart Premium (texte)', default: "Les abonnés Premium reçoivent 2 analyses exclusives par semaine, des alertes en temps réel et l'accès à tous nos outils financiers." },
+      { key: 'promo_corps', label: 'Encart Premium (texte)', default: "Les abonnés Premium reçoivent Le Brief du Lundi en intégralité chaque semaine, des alertes en temps réel et l'accès à tous nos outils financiers." },
       { key: 'promo_cta', label: 'Encart Premium (lien)', default: "Découvrir l'offre Premium →" },
     ],
   },

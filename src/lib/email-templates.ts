@@ -145,7 +145,7 @@ ${paragraph("Vous êtes désormais inscrit. Vous recevrez nos briefings économi
 ${button('Lire les derniers articles', `${SITE_URL}`)}
 <div style="background-color:#fafaf9;border-radius:8px;padding:20px 24px;margin:24px 0;">
   <p style="margin:0 0 8px;font-size:14px;font-weight:600;color:#111;">Envie d'aller plus loin ?</p>
-  <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#404040;">Les abonnés Premium reçoivent 2 analyses exclusives par semaine, des alertes en temps réel et l'accès à tous nos outils financiers.</p>
+  <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#404040;">Les abonnés Premium reçoivent Le Brief du Lundi en intégralité chaque semaine, des alertes en temps réel et l'accès à tous nos outils financiers.</p>
   <a href="${SITE_URL}/pricing" style="color:#d4a843;font-size:14px;font-weight:600;text-decoration:underline;">Découvrir l'offre Premium →</a>
 </div>
 ${signature()}

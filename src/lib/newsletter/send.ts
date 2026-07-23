@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 import * as Sentry from '@sentry/nextjs';
 import { createServiceClient } from '@/lib/supabase';
-import { renderPremiumBriefingHtml } from '@/emails/render';
+import { renderPremiumBriefingHtml, renderPremiumBriefingText } from '@/emails/render';
 import { SITE_URL } from '@/lib/config';
 import type { NewsletterIssueRow } from '@/lib/newsletter/issues';
 import { updateIssue } from '@/lib/newsletter/issues';
@@ -219,6 +219,9 @@ async function sendBatchesForAudience(
     return { resendIds: [], batchesAttempted: 0, batchesFailed: 0 };
   }
 
+  // BUG-2 : fallback texte brut (delivrabilite anti-spam + clients sans HTML).
+  const bodyText = renderPremiumBriefingText(issue.content, SITE_URL);
+
   const batches = chunk(recipients, BATCH_SIZE);
   const allResendIds: string[] = [];
   let batchesFailed = 0;
@@ -233,6 +236,7 @@ async function sendBatchesForAudience(
         to: r.email,
         subject: issue.subject,
         html: personalHtml,
+        text: bodyText,
         headers: {
           'List-Unsubscribe': `<${personalUnsubUrl}>, <mailto:contact@nfireport.com?subject=unsubscribe>`,
           'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',

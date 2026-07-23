@@ -8,12 +8,16 @@ import { SITE_URL } from '@/lib/config';
 
 interface Params { id: string; }
 
+// Synchro immediate : l'aperçu doit refleter l'etat courant, jamais un cache.
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/admin/newsletter/:id/preview
  * Returns the rendered HTML of the issue, suitable for an iframe preview.
- * Admin only.
+ * Query : ?audience=premium|free pour previsualiser les deux versions
+ * (defaut : version Premium complete). Admin only.
  */
-export async function GET(_req: NextRequest, ctx: { params: Promise<Params> }) {
+export async function GET(req: NextRequest, ctx: { params: Promise<Params> }) {
   try {
     const auth = await requireAdmin();
     if ('error' in auth) return auth.error;
@@ -27,11 +31,16 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<Params> }) {
       return NextResponse.json({ error: 'Numéro introuvable' }, { status: 404 });
     }
 
+    const audienceParam = req.nextUrl.searchParams.get('audience');
+    const audience: 'premium' | 'free' | undefined =
+      audienceParam === 'free' ? 'free' : audienceParam === 'premium' ? 'premium' : undefined;
+
     const html = await renderPremiumBriefingHtml({
       issue: issue.content,
       siteUrl: SITE_URL,
       managePreferencesUrl: `${SITE_URL}/compte/preferences-newsletter`,
       unsubscribeUrl: `${SITE_URL}/api/newsletter/unsubscribe?token=PREVIEW`,
+      audience,
       socials: {
         instagram: 'https://instagram.com/nfireport',
         facebook: 'https://facebook.com/nfireport',

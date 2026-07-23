@@ -6,6 +6,7 @@ import { serverError } from '@/lib/api-error';
 import { getIssue } from '@/lib/newsletter/issues';
 import { renderPremiumBriefingHtml } from '@/emails/render';
 import { sendTransactionalEmail } from '@/lib/email';
+import { logAuditEvent } from '@/lib/audit';
 import { SITE_URL } from '@/lib/config';
 
 interface Params { id: string; }
@@ -62,6 +63,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<Params> }) {
       return NextResponse.json({ error: "Échec d'envoi (Resend non configuré)" }, { status: 500 });
     }
 
+    await logAuditEvent(user.id, 'newsletter.test', 'newsletter', id, { to });
     return NextResponse.json({ success: true, sentTo: to });
   } catch (err) {
     return serverError(err, 'admin-newsletter-test');

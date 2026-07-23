@@ -3,6 +3,7 @@ import { requireAdmin } from '@/lib/admin-auth';
 import { isValidUUID } from '@/lib/validation';
 import { serverError } from '@/lib/api-error';
 import { sendNewsletterIssue } from '@/lib/newsletter/send';
+import { logAuditEvent } from '@/lib/audit';
 
 interface Params { id: string; }
 
@@ -14,6 +15,7 @@ export async function POST(_req: NextRequest, ctx: { params: Promise<Params> }) 
   try {
     const auth = await requireAdmin();
     if ('error' in auth) return auth.error;
+    const { user } = auth;
 
     const { id } = await ctx.params;
     if (!isValidUUID(id)) {
@@ -21,6 +23,10 @@ export async function POST(_req: NextRequest, ctx: { params: Promise<Params> }) 
     }
 
     const result = await sendNewsletterIssue(id);
+    await logAuditEvent(user.id, 'newsletter.send', 'newsletter', id, {
+      recipientsCount: result.recipientsCount,
+      batchesFailed: result.batchesFailed,
+    });
     return NextResponse.json({
       success: true,
       ...result,

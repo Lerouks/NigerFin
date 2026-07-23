@@ -13,11 +13,11 @@ export const dynamic = 'force-dynamic';
 interface Params { type: string; }
 
 /**
- * POST /api/admin/emails/transactional/:type/test
- * Body : { to?: string; userId?: string }
- *   - to    : adresse destinataire (defaut = e-mail admin courant)
- *   - userId: complete l'aperçu avec les vraies donnees d'un destinataire
- * Envoie l'e-mail transactionnel (objet prefixe [TEST]). Admin only, audite.
+ * POST /api/admin/emails/transactional/:type/resend
+ * Body : { to: string; userId?: string }
+ * Renvoie un VRAI e-mail transactionnel a un client (pas de prefixe [TEST]),
+ * avec ses vraies donnees si userId fourni. Cas d'usage support : « renvoyer la
+ * facture », « renvoyer l'e-mail de bienvenue ». Admin only, tracké, audité.
  */
 export async function POST(req: NextRequest, ctx: { params: Promise<Params> }) {
   try {
@@ -32,35 +32,38 @@ export async function POST(req: NextRequest, ctx: { params: Promise<Params> }) {
     }
 
     const body = (await safeParseJSON(req)) as { to?: string; userId?: string } | null;
-    const to = body?.to && isValidEmail(body.to) ? body.to : user.email;
-    if (!to || !isValidEmail(to)) {
-      return NextResponse.json({ error: 'Adresse e-mail destinataire invalide' }, { status: 400 });
+    if (!body?.to || !isValidEmail(body.to)) {
+      return NextResponse.json({ error: 'Adresse e-mail du client requise' }, { status: 400 });
     }
+    const to = body.to;
+    const userId = body.userId && isValidUUID(body.userId) ? body.userId : undefined;
 
     let args: TransactionalArgs = { ...def.sampleArgs };
-    if (body?.userId && isValidUUID(body.userId) && def.resolveRealArgs) {
-      const real = await def.resolveRealArgs(serviceClient, body.userId);
+    if (userId && def.resolveRealArgs) {
+      const real = await def.resolveRealArgs(serviceClient, userId);
       args = { ...args, ...real };
     }
 
     const { subject, html } = await applyOverridesTo(def.key, def.render(args));
     const result = await sendTransactionalEmail({
       to,
-      subject: `[TEST] ${subject}`,
+      subject,
       html,
+      emailType: def.key,
+      ...(userId ? { userId } : {}),
     });
 
     if (!result) {
-      Sentry.captureMessage('Transactional test send returned null', {
+      Sentry.captureMessage('Transactional resend returned null', {
         level: 'warning',
         extra: { type: def.key, to },
       });
       return NextResponse.json({ error: "Échec d'envoi (Resend non configuré)" }, { status: 500 });
     }
 
-    await logAuditEvent(user.id, 'email.transactional_test', 'email', def.key, { to });
+    await logAuditEvent(user.id, 'email.transactional_resend', 'email', def.key, { to, userId: userId ?? null });
     return NextResponse.json({ success: true, sentTo: to });
   } catch (err) {
-    return serverError(err, 'admin-emails-transactional-test');
+    return serverError(err, 'admin-emails-transactional-resend');
   }
 }

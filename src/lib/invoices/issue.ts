@@ -2,6 +2,7 @@ import * as Sentry from '@sentry/nextjs';
 import { createServiceClient } from '@/lib/supabase';
 import { sendTransactionalEmail } from '@/lib/email';
 import { invoiceEmail } from '@/lib/email-templates';
+import { applyOverridesTo } from '@/lib/emails/overrides';
 import { renderInvoicePdf } from '@/lib/invoices/generate-pdf';
 import { uploadInvoicePdf } from '@/lib/invoices/storage';
 import {
@@ -170,7 +171,7 @@ export async function issueInvoice(input: IssueInvoiceInput): Promise<IssueInvoi
   if (input.sendEmail !== false) {
     try {
       const downloadUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://nfireport.com'}/api/invoices/${invoice.id}/download`;
-      const email = invoiceEmail({
+      const email = await applyOverridesTo('invoice', invoiceEmail({
         customerName: fullName,
         invoiceNumber: invoice.invoiceNumber,
         amountXof: invoice.amountXof,
@@ -178,12 +179,13 @@ export async function issueInvoice(input: IssueInvoiceInput): Promise<IssueInvoi
         periodStart: invoice.periodStart,
         periodEnd: invoice.periodEnd,
         downloadUrl,
-      });
+      }));
 
       await sendTransactionalEmail({
         to: customer.email,
         subject: email.subject,
         html: email.html,
+        emailType: 'invoice',
         attachments: [
           {
             filename: `facture-${invoice.invoiceNumber}.pdf`,

@@ -3,6 +3,7 @@ import { requireAdmin } from '@/lib/admin-auth';
 import { serverError } from '@/lib/api-error';
 import { isValidUUID } from '@/lib/validation';
 import { getTransactionalDef, type TransactionalArgs } from '@/lib/emails/registry';
+import { applyOverridesTo } from '@/lib/emails/overrides';
 
 // Synchro immediate : le rendu doit refleter l'etat courant, jamais un cache.
 export const dynamic = 'force-dynamic';
@@ -35,7 +36,8 @@ export async function GET(req: NextRequest, ctx: { params: Promise<Params> }) {
       args = { ...args, ...real };
     }
 
-    const { html } = def.render(args);
+    // Applique les textes edites : l'aperçu reflete exactement ce qui sera envoyé.
+    const { html } = await applyOverridesTo(def.key, def.render(args));
     return new NextResponse(html, {
       status: 200,
       headers: {

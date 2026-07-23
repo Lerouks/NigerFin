@@ -3,6 +3,7 @@ import { requireAdmin } from '@/lib/admin-auth';
 import { logAuditEvent } from '@/lib/audit';
 import { sendTransactionalEmail } from '@/lib/email';
 import { adminPremiumGrantedEmail, adminDowngradeToFreeEmail } from '@/lib/email-templates';
+import { applyOverridesTo } from '@/lib/emails/overrides';
 import { isValidUUID, sanitizeSearchQuery, isOneOf, safeParseJSON } from '@/lib/validation';
 import { parsePagination, paginatedResponse } from '@/lib/pagination';
 import { deleteUserCompletely } from '@/lib/delete-user';
@@ -272,12 +273,11 @@ export async function PUT(request: NextRequest) {
           : months === 1 ? '1 mois' : months === 3 ? '3 mois' : months === 6 ? '6 mois' : `${months} mois`;
 
         try {
-          const emailData = adminPremiumGrantedEmail(
-            targetUser.full_name || 'Client',
-            startDate.toISOString(),
-            endDate.toISOString(),
+          const emailData = await applyOverridesTo(
+            'admin_premium_granted',
+            adminPremiumGrantedEmail(targetUser.full_name || 'Client', startDate.toISOString(), endDate.toISOString()),
           );
-          await sendTransactionalEmail({ to: targetUser.email, ...emailData });
+          await sendTransactionalEmail({ to: targetUser.email, ...emailData, emailType: 'admin_premium_granted', userId });
         } catch (err) {
           Sentry.captureException(err, { tags: { context: 'admin-premium-granted-email' }, extra: { userId } });
         }
@@ -317,8 +317,8 @@ export async function PUT(request: NextRequest) {
           .eq('user_id', userId);
 
         try {
-          const emailData = adminDowngradeToFreeEmail(targetUser.full_name || 'Client');
-          await sendTransactionalEmail({ to: targetUser.email, ...emailData });
+          const emailData = await applyOverridesTo('admin_downgrade_to_free', adminDowngradeToFreeEmail(targetUser.full_name || 'Client'));
+          await sendTransactionalEmail({ to: targetUser.email, ...emailData, emailType: 'admin_downgrade_to_free', userId });
         } catch (err) {
           Sentry.captureException(err, { tags: { context: 'admin-downgrade-email' }, extra: { userId } });
         }

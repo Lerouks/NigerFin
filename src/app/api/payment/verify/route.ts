@@ -4,6 +4,7 @@ import { logAuditEvent } from '@/lib/audit';
 import { getBillingOption, type BillingCycle } from '@/config/pricing';
 import { sendTransactionalEmail } from '@/lib/email';
 import { paymentConfirmationEmail, paymentRejectionEmail } from '@/lib/email-templates';
+import { applyOverridesTo } from '@/lib/emails/overrides';
 import { issueInvoice } from '@/lib/invoices/issue';
 import { upsertNewsletterSubscriber } from '@/lib/newsletter/subscribers';
 import { getBillingCycleLabel } from '@/config/pricing';
@@ -85,8 +86,8 @@ export async function POST(request: NextRequest) {
         .eq('id', paymentRequest.user_id)
         .single();
       if (rejectedProfile?.email) {
-        const rejection = paymentRejectionEmail(rejectedProfile.full_name || 'Client', rejectionReason);
-        await sendTransactionalEmail({ to: rejectedProfile.email, ...rejection }).catch((err) => {
+        const rejection = await applyOverridesTo('payment_rejection', paymentRejectionEmail(rejectedProfile.full_name || 'Client', rejectionReason));
+        await sendTransactionalEmail({ to: rejectedProfile.email, ...rejection, emailType: 'payment_rejection', userId: paymentRequest.user_id }).catch((err) => {
           Sentry.captureException(err, { tags: { context: 'payment-rejection-email' }, extra: { userId: paymentRequest.user_id } });
         });
       }
@@ -184,13 +185,11 @@ export async function POST(request: NextRequest) {
       .eq('id', paymentRequest.user_id)
       .single();
     if (verifiedProfile?.email) {
-      const confirmation = paymentConfirmationEmail(
-        verifiedProfile.full_name || 'Client',
-        'premium',
-        cycle,
-        expiresAt.toISOString(),
+      const confirmation = await applyOverridesTo(
+        'payment_confirmation',
+        paymentConfirmationEmail(verifiedProfile.full_name || 'Client', 'premium', cycle, expiresAt.toISOString()),
       );
-      await sendTransactionalEmail({ to: verifiedProfile.email, ...confirmation }).catch((err) => {
+      await sendTransactionalEmail({ to: verifiedProfile.email, ...confirmation, emailType: 'payment_confirmation', userId: paymentRequest.user_id }).catch((err) => {
         Sentry.captureException(err, { tags: { context: 'payment-confirmation-email' }, extra: { userId: paymentRequest.user_id } });
       });
 

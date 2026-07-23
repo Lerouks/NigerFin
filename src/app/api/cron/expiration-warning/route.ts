@@ -3,6 +3,7 @@ import { verifyBearerSecret } from '@/lib/secret-compare';
 import { createServiceClient } from '@/lib/supabase';
 import { sendTransactionalEmail } from '@/lib/email';
 import { subscriptionExpirationWarningEmail } from '@/lib/email-templates';
+import { applyOverridesTo } from '@/lib/emails/overrides';
 import * as Sentry from '@sentry/nextjs';
 
 /**
@@ -60,13 +61,13 @@ export async function GET(request: NextRequest) {
     const profile = profileMap.get(sub.user_id);
     if (!profile?.email || profile.expiration_warning_sent) continue;
 
-    const warning = subscriptionExpirationWarningEmail(
-      profile.full_name || 'Client',
-      sub.current_period_end,
+    const warning = await applyOverridesTo(
+      'subscription_expiration_warning',
+      subscriptionExpirationWarningEmail(profile.full_name || 'Client', sub.current_period_end),
     );
 
     try {
-      await sendTransactionalEmail({ to: profile.email, ...warning });
+      await sendTransactionalEmail({ to: profile.email, ...warning, emailType: 'subscription_expiration_warning', userId: sub.user_id });
       successUserIds.push(sub.user_id);
     } catch (err) {
       Sentry.captureException(err, { tags: { context: 'cron-expiration-warning-email' }, extra: { userId: sub.user_id } });

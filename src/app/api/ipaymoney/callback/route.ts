@@ -5,6 +5,7 @@ import { logAuditEvent } from '@/lib/audit';
 import { getBillingOption, getBillingCycleLabel, getIPayChargeAmount, MAX_DYNAMIC_PRICE, type BillingCycle } from '@/config/pricing';
 import { sendTransactionalEmail } from '@/lib/email';
 import { paymentConfirmationEmail } from '@/lib/email-templates';
+import { applyOverridesTo } from '@/lib/emails/overrides';
 import { upsertNewsletterSubscriber } from '@/lib/newsletter/subscribers';
 import { issueInvoice } from '@/lib/invoices/issue';
 import { SITE_URL } from '@/lib/config';
@@ -200,13 +201,11 @@ async function notifyAndInvoicePremium(
     .single();
 
   if (profile?.email) {
-    const confirmation = paymentConfirmationEmail(
-      profile.full_name || 'Client',
-      'premium',
-      billingCycle,
-      expiresAt.toISOString(),
+    const confirmation = await applyOverridesTo(
+      'payment_confirmation',
+      paymentConfirmationEmail(profile.full_name || 'Client', 'premium', billingCycle, expiresAt.toISOString()),
     );
-    await sendTransactionalEmail({ to: profile.email, ...confirmation }).catch((err) =>
+    await sendTransactionalEmail({ to: profile.email, ...confirmation, emailType: 'payment_confirmation', userId }).catch((err) =>
       Sentry.captureException(err, { tags: { context: 'ipaymoney-confirmation-email' }, extra: { userId } }),
     );
     // Auto-abo newsletter pour tout nouveau Premium (idempotent : no-op si déjà abonné).

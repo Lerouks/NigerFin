@@ -49,6 +49,8 @@ export async function sendTransactionalEmail({
   html,
   attachments,
   unsubscribeUrl,
+  emailType,
+  userId,
 }: {
   to: string;
   subject: string;
@@ -61,6 +63,15 @@ export async function sendTransactionalEmail({
    * dans Gmail / Yahoo / Apple Mail.
    */
   unsubscribeUrl?: string;
+  /**
+   * Type d'e-mail transactionnel (cle du registre). Pose comme tag Resend
+   * `nfi_email_type` pour que le webhook puisse corréler ouverture/clic/rebond
+   * dans transactional_email_events. Optionnel : sans lui, l'e-mail part quand
+   * même mais n'est pas tracké.
+   */
+  emailType?: string;
+  /** Id du destinataire (tag Resend `nfi_user_id`), pour le suivi par utilisateur. */
+  userId?: string;
 }) {
   const resend = getResend();
   if (!resend) {
@@ -83,6 +94,12 @@ export async function sendTransactionalEmail({
       headers['List-Unsubscribe-Post'] = 'List-Unsubscribe=One-Click';
     }
 
+    // Tags Resend (Phase 3) : corrélation webhook -> transactional_email_events.
+    // Valeurs restreintes par Resend a [A-Za-z0-9_-] ; email_type et UUID valides.
+    const tags: { name: string; value: string }[] = [];
+    if (emailType && /^[A-Za-z0-9_-]+$/.test(emailType)) tags.push({ name: 'nfi_email_type', value: emailType });
+    if (userId && /^[A-Za-z0-9_-]+$/.test(userId)) tags.push({ name: 'nfi_user_id', value: userId });
+
     const result = await resend.emails.send({
       from: 'NFI Report <noreply@nfireport.com>',
       replyTo: 'contact@nfireport.com',
@@ -91,6 +108,7 @@ export async function sendTransactionalEmail({
       html,
       text: htmlToPlainText(html),
       headers,
+      ...(tags.length ? { tags } : {}),
       attachments: attachments?.map((a) => ({
         filename: a.filename,
         content: a.content,

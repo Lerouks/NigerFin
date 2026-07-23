@@ -3,6 +3,7 @@ import { verifyBearerSecret } from '@/lib/secret-compare';
 import { createServiceClient } from '@/lib/supabase';
 import { sendTransactionalEmail } from '@/lib/email';
 import { subscriptionExpiredEmail } from '@/lib/email-templates';
+import { applyOverridesTo } from '@/lib/emails/overrides';
 import { SYSTEM_AUDIT_ID } from '@/lib/audit';
 import * as Sentry from '@sentry/nextjs';
 
@@ -92,11 +93,11 @@ export async function GET(request: NextRequest) {
   // Send expiration emails in parallel
   const emailResults = await Promise.allSettled(
     expiredUsers.map(async (user) => {
-      const emailData = subscriptionExpiredEmail(
-        user.full_name || 'Client',
-        user.subscription_end,
+      const emailData = await applyOverridesTo(
+        'subscription_expired',
+        subscriptionExpiredEmail(user.full_name || 'Client', user.subscription_end),
       );
-      await sendTransactionalEmail({ to: user.email, ...emailData });
+      await sendTransactionalEmail({ to: user.email, ...emailData, emailType: 'subscription_expired', userId: user.id });
     })
   );
 

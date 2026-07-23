@@ -147,12 +147,34 @@ export async function POST(req: NextRequest) {
     const tags = event.data?.tags ?? [];
     const issueId = tags.find((t) => t.name === 'nfi_issue_id')?.value;
     const subscriberId = tags.find((t) => t.name === 'nfi_subscriber_id')?.value;
-    if (!issueId || !subscriberId) {
-      return NextResponse.json({ ignored: true, reason: 'Missing nfi tags' });
-    }
+    const emailType = tags.find((t) => t.name === 'nfi_email_type')?.value;
+    const taggedUserId = tags.find((t) => t.name === 'nfi_user_id')?.value;
 
     const supabase = createServiceClient();
     if (!supabase) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
+
+    // Transactionnel (Phase 3) : tag nfi_email_type, pas d'issue newsletter.
+    // On enregistre l'evenement dans transactional_email_events (suivi par type).
+    if (emailType && !issueId) {
+      const { error: txError } = await supabase.from('transactional_email_events').insert({
+        email_type: emailType,
+        user_id: taggedUserId ?? null,
+        event_type: eventType,
+        recipient: Array.isArray(event.data?.to) ? event.data.to[0] : null,
+        meta: { resend_id: event.data?.email_id },
+      });
+      if (txError) {
+        Sentry.captureException(txError, {
+          tags: { context: 'resend-webhook', op: 'insert-transactional-event' },
+          extra: { emailType, eventType },
+        });
+      }
+      return NextResponse.json({ ok: true, kind: 'transactional' });
+    }
+
+    if (!issueId || !subscriberId) {
+      return NextResponse.json({ ignored: true, reason: 'Missing nfi tags' });
+    }
 
     // Insert event. On capture les erreurs Supabase pour Sentry sinon les
     // events bounce/complain restent silencieux (audit securite 2026-05-20,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { sendTransactionalEmail } from '@/lib/email';
 import { welcomeSignupEmail } from '@/lib/email-templates';
+import { applyOverridesTo } from '@/lib/emails/overrides';
 import { createServiceClient } from '@/lib/supabase';
 import { safeNextPath } from '@/lib/validation';
 import * as Sentry from '@sentry/nextjs';
@@ -81,8 +82,8 @@ async function sendWelcomeIfNew(userId: string, email?: string, fullName?: strin
   // Only send once, skip if already sent or column doesn't exist
   if (profile?.welcome_email_sent) return;
 
-  const welcome = welcomeSignupEmail(fullName || 'Client');
-  await sendTransactionalEmail({ to: email, ...welcome });
+  const welcome = await applyOverridesTo('welcome_signup', welcomeSignupEmail(fullName || 'Client'));
+  await sendTransactionalEmail({ to: email, ...welcome, emailType: 'welcome_signup', userId });
 
   // Mark as sent (ignore error if column doesn't exist)
   try {

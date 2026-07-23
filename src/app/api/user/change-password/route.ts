@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { sendTransactionalEmail } from '@/lib/email';
 import { passwordChangedEmail } from '@/lib/email-templates';
+import { applyOverridesTo } from '@/lib/emails/overrides';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logAuditEvent } from '@/lib/audit';
 import * as Sentry from '@sentry/nextjs';
@@ -118,8 +119,8 @@ export async function POST(request: NextRequest) {
   // Send confirmation email
   try {
     const fullName = user.user_metadata?.full_name || user.email.split('@')[0];
-    const template = passwordChangedEmail(fullName);
-    await sendTransactionalEmail({ to: user.email, ...template });
+    const template = await applyOverridesTo('password_changed', passwordChangedEmail(fullName));
+    await sendTransactionalEmail({ to: user.email, ...template, emailType: 'password_changed', userId: user.id });
   } catch (err) {
     Sentry.captureException(err, { tags: { context: 'password-changed-email' } });
   }

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { createServiceClient } from '@/lib/supabase';
 import { sendTransactionalEmail } from '@/lib/email';
 import { contactConfirmationEmail, contactNotificationEmail } from '@/lib/email-templates';
+import { applyOverridesTo } from '@/lib/emails/overrides';
 import { parseJsonBody } from '@/lib/validation';
 import { checkRateLimit, getClientIP, RATE_LIMITS } from '@/lib/rate-limit';
 import * as Sentry from '@sentry/nextjs';
@@ -61,11 +62,12 @@ export async function POST(request: NextRequest) {
 
     // Send notification to the team (non-blocking, don't fail if email fails)
     try {
-      const notification = contactNotificationEmail(safeName, safeEmail, safeSubject, safeMessage);
+      const notification = await applyOverridesTo('contact_notification', contactNotificationEmail(safeName, safeEmail, safeSubject, safeMessage));
       await sendTransactionalEmail({
         to: 'contact@nfireport.com',
         subject: notification.subject,
         html: notification.html,
+        emailType: 'contact_notification',
       });
     } catch (err) {
       Sentry.captureException(err, { tags: { context: 'contact-notification-email' } });
@@ -73,11 +75,12 @@ export async function POST(request: NextRequest) {
 
     // Send confirmation to the user (non-blocking)
     try {
-      const confirmation = contactConfirmationEmail(safeName);
+      const confirmation = await applyOverridesTo('contact_confirmation', contactConfirmationEmail(safeName));
       await sendTransactionalEmail({
         to: email,
         subject: confirmation.subject,
         html: confirmation.html,
+        emailType: 'contact_confirmation',
       });
     } catch (err) {
       Sentry.captureException(err, { tags: { context: 'contact-confirmation-email' }, extra: { email } });

@@ -33,8 +33,8 @@ const SCREENSHOTS = [
 const BENEFITS = [
   {
     icon: Mail,
-    title: '2 newsletters Premium / semaine',
-    desc: 'Briefing du lundi pour cadrer la semaine, bilan du vendredi pour comprendre ce qui a bougé.',
+    title: 'Le Brief du Lundi',
+    desc: 'Notre newsletter hebdomadaire, envoyée chaque lundi à 7h pour cadrer la semaine. L’édition complète, sans paywall ni teaser.',
   },
   {
     icon: FileText,
@@ -78,7 +78,7 @@ const FAQ = [
   },
   {
     q: 'Que recouvre exactement Premium ?',
-    a: 'Tout : 2 newsletters/semaine, articles & analyses illimités, outils Premium avec PDF, cours d’éducation financière, alertes.',
+    a: 'Tout : Le Brief du Lundi (notre newsletter hebdomadaire) en intégralité, articles & analyses illimités, outils Premium avec PDF, cours d’éducation financière, alertes.',
   },
 ];
 

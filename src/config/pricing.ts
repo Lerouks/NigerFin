@@ -69,7 +69,7 @@ export const PREMIUM_TIER: PremiumTier = {
     'Accès illimité à tous les articles',
     'Analyses et rapports complets',
     'Accès à tous les cours d\'éducation financière',
-    '2 newsletters exclusives par semaine - briefing du lundi et bilan du vendredi',
+    'Le Brief du Lundi, notre newsletter hebdomadaire en intégralité, chaque lundi',
     'Alertes en temps réel sur les actualités majeures',
     'Accès à tous les outils premium',
   ],

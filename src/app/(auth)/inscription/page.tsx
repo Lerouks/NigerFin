@@ -320,7 +320,7 @@ function InscriptionContent() {
               className="mt-0.5 w-4 h-4 rounded-sm border-black/20 text-[#111] focus:ring-2 focus:ring-gold/30 focus:ring-offset-0"
             />
             <span className="leading-relaxed">
-              Recevoir la newsletter NFI Report (1 édito long par semaine sur l&apos;économie Niger et UEMOA, désabonnement en 1 clic).
+              Recevoir Le Brief du Lundi, notre newsletter (1 édito long chaque lundi sur l&apos;économie Niger et UEMOA, désabonnement en 1 clic).
             </span>
           </label>
 

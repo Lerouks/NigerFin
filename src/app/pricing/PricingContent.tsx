@@ -36,7 +36,7 @@ function FadeUp({
 
 const PRICING_HIGHLIGHTS = [
   'Articles et analyses Premium illimités',
-  '2 newsletters exclusives par semaine',
+  'Le Brief du Lundi, la newsletter hebdomadaire en intégralité',
   'Outils avancés avec téléchargements PDF',
   "Cours complets d'éducation financière",
 ];

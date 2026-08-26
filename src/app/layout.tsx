@@ -108,9 +108,12 @@ export async function generateMetadata(): Promise<Metadata> {
   const { prelaunchEnabled } = await getSiteFeatures();
   // En pré-lancement, tout le site passe en noindex : Googlebot est anonyme,
   // il voit donc la page « Prochainement ». Retour à l'indexation au lancement.
+  // `follow` reste vrai dans les deux cas : « noindex, follow » laisse Google
+  // parcourir les liens et apprendre l'architecture du site pendant l'attente,
+  // sans rien publier dans ses résultats. Un `nofollow` ferait perdre ce temps.
   return {
     ...baseMetadata,
-    robots: { index: !prelaunchEnabled, follow: !prelaunchEnabled },
+    robots: { index: !prelaunchEnabled, follow: true },
   };
 }
 
@@ -166,6 +169,9 @@ export default async function RootLayout({
   // Mode pré-lancement : le public voit « Prochainement », les admins connectés
   // voient le site complet. On laisse toujours passer /connexion, /auth et /admin
   // pour que l'admin puisse se connecter puis basculer le mode.
+  // On laisse aussi passer les pages légales et le désabonnement : la page
+  // d'attente collecte déjà des adresses, donc qui la donne doit pouvoir lire
+  // qui la collecte, et qui veut sortir doit pouvoir sortir.
   const { prelaunchEnabled } = await getSiteFeatures();
   let showComingSoon = false;
   if (prelaunchEnabled) {
@@ -173,7 +179,12 @@ export default async function RootLayout({
       pathname === '/connexion' ||
       pathname.startsWith('/connexion/') ||
       pathname.startsWith('/auth') ||
-      pathname.startsWith('/admin');
+      pathname.startsWith('/admin') ||
+      pathname === '/mentions-legales' ||
+      pathname === '/confidentialite' ||
+      pathname === '/cgu' ||
+      pathname === '/cookies' ||
+      pathname.startsWith('/newsletter/desabonnement');
     if (!isBypassPath) {
       showComingSoon = !(await isAdminViewer());
     }

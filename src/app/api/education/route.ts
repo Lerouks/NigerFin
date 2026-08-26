@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase';
+import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase';
 import { serverError } from '@/lib/api-error';
 
 // Public GET: list available categories with lesson counts
@@ -14,7 +14,14 @@ export async function GET(request: NextRequest) {
 
   // If category_id is provided, return lessons for that category
   if (categoryId) {
-    const { data, error } = await supabase
+    // Le contenu des lecons n'est plus lisible avec la cle publique (migration 00031) :
+    // on le lit avec la cle de service, puis on le retire plus bas pour qui n'y a pas droit.
+    const service = createServiceClient();
+    if (!service) {
+      return NextResponse.json({ error: 'Service indisponible' }, { status: 503 });
+    }
+
+    const { data, error } = await service
       .from('education_lessons')
       .select('id, title, duration, access_level, sort_order, content')
       .eq('category_id', categoryId)

@@ -39,22 +39,37 @@ export interface SiteFeatures {
   prelaunchEnabled: boolean;
 }
 
-const DEFAULT_FEATURES: SiteFeatures = {
+/**
+ * Repli utilise quand la base ne repond pas. `prelaunchEnabled: true` est
+ * DELIBERE : tant que le site n'est pas ouvert au public, une panne reseau ne
+ * doit jamais ouvrir nfireport.com toute seule. Le repli d'une porte fermee est
+ * « fermee ». A repasser a `false` le jour de l'ouverture, une fois le drapeau
+ * bascule en base, pour qu'une panne n'affiche plus la page d'attente a un
+ * public qui connait deja le site.
+ */
+const FALLBACK_FEATURES: SiteFeatures = {
   marketTickerEnabled: true,
-  prelaunchEnabled: false,
+  prelaunchEnabled: true,
 };
 
 /**
+ * Derniere valeur lue avec succes, gardee le temps de vie de l'instance. La
+ * connexion coupe regulierement : mieux vaut rejouer le dernier etat connu que
+ * retomber sur un repli qui contredit ce que Raouf a regle dans l'admin.
+ */
+let lastKnownFeatures: SiteFeatures | null = null;
+
+/**
  * Server-only fetcher for site-wide feature toggles. Table site_features
- * a une seule row (id=1). En cas d'erreur ou de table manquante, retourne
- * les defaults (tout active) pour ne jamais casser le rendu.
+ * a une seule row (id=1). En cas d'erreur ou de table manquante, rejoue le
+ * dernier etat connu, sinon le repli sur — voir FALLBACK_FEATURES.
  * Cache 60s, invalide via revalidateTag('site-features').
  */
 export const getSiteFeatures = unstable_cache(
   async (): Promise<SiteFeatures> => {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    if (!url || !key) return DEFAULT_FEATURES;
+    if (!url || !key) return lastKnownFeatures ?? FALLBACK_FEATURES;
 
     try {
       const supabase = createClient(url, key, {
@@ -66,14 +81,16 @@ export const getSiteFeatures = unstable_cache(
         .eq('id', 1)
         .maybeSingle();
 
-      if (error || !data) return DEFAULT_FEATURES;
+      if (error || !data) return lastKnownFeatures ?? FALLBACK_FEATURES;
 
-      return {
+      const features: SiteFeatures = {
         marketTickerEnabled: data.market_ticker_enabled !== false,
         prelaunchEnabled: data.prelaunch_enabled === true,
       };
+      lastKnownFeatures = features;
+      return features;
     } catch {
-      return DEFAULT_FEATURES;
+      return lastKnownFeatures ?? FALLBACK_FEATURES;
     }
   },
   ['site-features-v1'],

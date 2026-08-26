@@ -65,6 +65,17 @@ export function ComingSoon() {
             <div className="nfi-rise mt-10 max-w-[30rem]" style={{ animationDelay: '640ms' }}>
               <p className="mb-3 text-[14px] text-[#16130d]/60">Recevez le signal du lancement.</p>
               <WaitlistForm />
+              {/* La page collecte une adresse : qui la donne doit pouvoir lire qui la
+                  collecte, et sortir. Les deux pages restent ouvertes en pré-lancement. */}
+              <p className="mt-3 text-[12px] leading-relaxed text-[#16130d]/45">
+                Votre adresse ne sert qu&apos;au signal du lancement.{' '}
+                <a
+                  href="/confidentialite"
+                  className="whitespace-nowrap underline underline-offset-2 transition-colors hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                >
+                  Politique de confidentialité
+                </a>
+              </p>
             </div>
           </div>
 

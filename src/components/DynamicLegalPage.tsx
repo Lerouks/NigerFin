@@ -17,7 +17,7 @@ export function DynamicLegalPage({ title, introParagraphs, initialSections, fall
   const sections = initialSections && initialSections.length > 0 ? initialSections : null;
   const useFallback = !sections && fallbackSections && fallbackSections.length > 0;
 
-  const bodyClass = 'text-gray-600 text-[15px] leading-[1.8] whitespace-pre-line text-pretty text-justify';
+  const bodyClass = 'text-gray-600 text-[15px] leading-[1.8] whitespace-pre-line text-pretty hyphens-auto sm:text-justify';
 
   const lastUpdated = sections && sections.length > 0
     ? (() => {

@@ -42,7 +42,11 @@ vi.mock('@/lib/ipaymoney', async (importOriginal) => {
   return { ...actual, verifyIPayPayment: mockVerify };
 });
 
-const mockAudit = vi.fn(async () => {});
+// Signature explicite, meme raison que dans ipaymoney.test.ts : sans elle,
+// mock.calls est un tuple vide et c[1] ne compile pas.
+const mockAudit = vi.fn<(contexte: unknown, action: string, details?: unknown) => Promise<void>>(
+  async () => {},
+);
 vi.mock('@/lib/audit', () => ({ logAuditEvent: mockAudit }));
 vi.mock('@/lib/email', () => ({ sendTransactionalEmail: vi.fn(async () => {}) }));
 vi.mock('@/lib/email-templates', () => ({

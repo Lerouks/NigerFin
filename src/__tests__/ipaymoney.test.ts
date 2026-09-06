@@ -8,7 +8,24 @@ import {
 
 vi.mock('@sentry/nextjs', () => ({ captureException: vi.fn(), captureMessage: vi.fn() }));
 
-const mockFetch = vi.fn();
+// Signature explicite : sans elle, vitest type les appels enregistres comme un
+// tuple vide et `const [url, opts] = ...calls[0]` ne compile pas. C'est ce qui
+// mettait « npm run build » et toute l'integration continue au rouge, donc ce
+// qui empechait la moindre mise a jour de securite d'etre fusionnee.
+type AppelFetch = [url: string, opts: {
+  method?: string;
+  cache?: string;
+  headers: Record<string, string>;
+  body?: string;
+}];
+const mockFetch = vi.fn<(...args: AppelFetch) => Promise<unknown>>();
+
+/** Rend l'appel demande, ou echoue avec un message lisible plutot qu'un « undefined ». */
+function appelFetch(index: number): AppelFetch {
+  const appel = mockFetch.mock.calls[index];
+  if (!appel) throw new Error(`fetch n'a pas ete appele une ${index + 1}e fois`);
+  return appel;
+}
 
 function okJson(payload: unknown) {
   return { ok: true, status: 200, json: async () => payload };
@@ -59,7 +76,7 @@ describe('ipaymoney helpers', () => {
       expect(res?.status).toBe('succeeded');
       expect(res?.external_reference).toBe('NFI-1');
       expect(mockFetch).toHaveBeenCalledTimes(1);
-      const [url, opts] = mockFetch.mock.calls[0];
+      const [url, opts] = appelFetch(0);
       expect(url).toBe('https://i-pay.money/api/v1/payments/abc');
       expect(opts.method).toBe('GET');
       expect(opts.headers.Authorization).toBe('Bearer sk_test_secret');
@@ -75,7 +92,7 @@ describe('ipaymoney helpers', () => {
       const res = await verifyIPayPayment('abc');
       expect(res?.status).toBe('succeeded');
       expect(mockFetch).toHaveBeenCalledTimes(2);
-      expect(mockFetch.mock.calls[1][1].headers['Ipay-Payment-Type']).toBe('card');
+      expect(appelFetch(1)[1].headers['Ipay-Payment-Type']).toBe('card');
     });
 
     it('renvoie null si la clé secrète est absente (sans appeler fetch)', async () => {

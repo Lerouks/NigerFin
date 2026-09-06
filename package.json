@@ -54,7 +54,7 @@
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^16.2.6",
-    "@playwright/test": "^1.60.0",
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4.3.0",
     "@types/node": "^22.10.0",
     "@types/react": "^19.2.14",
@@ -68,7 +68,7 @@
     "postcss": "^8.4.49",
     "tailwindcss": "^4.3.0",
     "typescript": "^5.7.2",
-    "vitest": "^4.1.7"
+    "vitest": "^5.0.0"
   },
   "overrides": {
     "rollup": "^4.0.0"

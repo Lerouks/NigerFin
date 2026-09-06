@@ -1,20 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { requireAdmin } from '@/lib/admin-auth';
-import { createServerSupabaseClient } from '@/lib/supabase';
 import { serverError } from '@/lib/api-error';
 
-// GET: list lessons for a category
+// GET: liste les leçons d'une catégorie.
+//
+// Lit avec la clé de service, comme les trois autres verbes de cette route.
+// Auparavant elle lisait avec la clé du visiteur : depuis la migration 00031,
+// qui a fermé la fuite du contenu payant en retirant le SELECT au niveau table
+// puis en le réaccordant colonne par colonne, un select('*') avec cette clé
+// échoue. L'admin recevait une erreur 500 et affichait « Aucune leçon » alors
+// que la base en contient 73. Au passage, ce GET n'exigeait aucune
+// authentification : le contrôle requireAdmin est désormais le même partout.
 export async function GET(request: NextRequest) {
-  const supabase = await createServerSupabaseClient();
-  if (!supabase) {
-    return NextResponse.json({ error: 'Service indisponible' }, { status: 503 });
-  }
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
+  const { serviceClient } = auth;
 
   const { searchParams } = new URL(request.url);
   const categoryId = searchParams.get('category_id');
 
-  let query = supabase
+  let query = serviceClient
     .from('education_lessons')
     .select('*')
     .order('sort_order');

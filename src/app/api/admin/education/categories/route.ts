@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { requireAdmin } from '@/lib/admin-auth';
-import { createServerSupabaseClient } from '@/lib/supabase';
 import { serverError } from '@/lib/api-error';
 
-// GET: list all categories with lesson counts
+// GET: liste les catégories avec le nombre de leçons.
+// Lit avec la clé de service et exige le rôle administrateur, comme les autres
+// verbes de cette route (voir la note dans lessons/route.ts).
 export async function GET() {
-  const supabase = await createServerSupabaseClient();
-  if (!supabase) {
-    return NextResponse.json({ error: 'Service indisponible' }, { status: 503 });
-  }
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
+  const { serviceClient } = auth;
 
-  const { data: categories, error: catError } = await supabase
+  const { data: categories, error: catError } = await serviceClient
     .from('education_categories')
     .select('*, education_lessons(id)')
     .order('sort_order');

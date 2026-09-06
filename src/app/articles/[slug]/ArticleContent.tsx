@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, type ReactNode } from 'react';
-import { sanitizeHtml } from '@/lib/sanitize-html';
+import { sanitizeHtmlClient } from '@/lib/sanitize-html.client';
 import { ReadingProgressBar } from '@/components/ReadingProgressBar';
 import { BackToTop } from '@/components/BackToTop';
 import { Link2, Check } from 'lucide-react';
@@ -209,10 +209,7 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [], header
                   ) : (
                     <div
                       className="article-content"
-                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(resolvedBody, {
-                        ADD_TAGS: ['figure', 'figcaption'],
-                        ADD_ATTR: ['data-type', 'data-value', 'data-label', 'target', 'rel'],
-                      }) }}
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtmlClient(resolvedBody) }}
                     />
                   )
                 ) : bodyError ? (

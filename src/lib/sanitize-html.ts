@@ -1,42 +1,54 @@
-import DOMPurify from 'isomorphic-dompurify';
+import sanitize from 'sanitize-html';
+import {
+  ALLOWED_ATTRIBUTES,
+  ALLOWED_IMAGE_SCHEMES,
+  ALLOWED_SCHEMES,
+  ALLOWED_STYLE_PROPERTIES,
+  ALLOWED_TAGS,
+} from './sanitize-policy';
 
 /**
- * Wrapper centralisé autour de DOMPurify pour le contenu utilisateur
- * (articles éditeur TipTap, etc).
+ * Nettoyage du HTML éditorial, côté SERVEUR.
  *
- * Pourquoi un helper : on enregistre un hook `afterSanitizeAttributes`
- * qui force `rel="noopener noreferrer"` sur tout `<a target="_blank">`,
- * y compris si le contenu est arrivé via paste ou import sans rel.
- * Le hook étant global à DOMPurify, on garantit qu'il est posé une
- * seule fois (idempotent via flag module-level).
+ * Ce module ne doit jamais dépendre d'un DOM, simulé ou non : il tourne dans
+ * les routes d'API et dans le rendu serveur, où `jsdom` a déjà cassé la
+ * production pendant deux mois et demi (voir sanitize-policy.ts).
  *
- * Audit sécurité 2026-05-20 : H3 sur DOMPurify ADD_ATTR target sans
- * noopener systématique. Ce module est la barrière defense-en-profondeur.
+ * Pour le navigateur, utiliser `sanitize-html.client.ts`, qui applique la même
+ * politique avec DOMPurify et le DOM natif de la page.
  */
 
-let hookRegistered = false;
+const STYLE_RULES: Record<string, RegExp[]> = Object.fromEntries(
+  ALLOWED_STYLE_PROPERTIES.map((prop) => [prop, [/^[^;{}()<>]*$/]]),
+);
 
-function ensureHook(): void {
-  if (hookRegistered) return;
-  hookRegistered = true;
-  DOMPurify.addHook('afterSanitizeAttributes', (node) => {
-    // Forcer noopener+noreferrer sur tout lien qui ouvre dans un nouvel onglet,
-    // protege contre tabnabbing (window.opener manipulation).
-    if (
-      node instanceof Element &&
-      node.tagName === 'A' &&
-      node.getAttribute('target') === '_blank'
-    ) {
-      node.setAttribute('rel', 'noopener noreferrer');
-    }
-  });
-}
+const OPTIONS: sanitize.IOptions = {
+  allowedTags: [...ALLOWED_TAGS],
+  allowedAttributes: { '*': [...ALLOWED_ATTRIBUTES] },
+  allowedSchemes: [...ALLOWED_SCHEMES],
+  allowedSchemesByTag: { img: [...ALLOWED_IMAGE_SCHEMES] },
+  allowedSchemesAppliedToAttributes: ['href', 'src'],
+  allowProtocolRelative: false,
+  allowedStyles: { '*': STYLE_RULES },
+  // Un lien qui ouvre un nouvel onglet donne sinon au site de destination la
+  // main sur l'onglet d'origine (tabnabbing). Barrière posée en 2026-05-20,
+  // conservée telle quelle lors du changement de moteur.
+  transformTags: {
+    a: (tagName, attribs) => {
+      if (attribs.target === '_blank') {
+        return { tagName, attribs: { ...attribs, rel: 'noopener noreferrer' } };
+      }
+      return { tagName, attribs };
+    },
+  },
+};
 
 /**
- * Sanitize HTML avec les hooks de sécurité NFI Report. Toujours utiliser
- * cette fonction plutôt que DOMPurify.sanitize directement.
+ * Nettoie un fragment de HTML éditorial. Toujours passer par cette fonction
+ * plutôt que d'appeler directement la bibliothèque : la politique est commune
+ * au serveur et au navigateur, et un appel direct la contournerait.
  */
-export function sanitizeHtml(html: string, config?: object): string {
-  ensureHook();
-  return DOMPurify.sanitize(html, config);
+export function sanitizeHtml(html: string | undefined | null): string {
+  if (!html) return '';
+  return sanitize(html, OPTIONS);
 }

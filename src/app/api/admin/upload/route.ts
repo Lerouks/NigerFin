@@ -1,20 +1,14 @@
 import { randomUUID } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase';
-import { createServiceClient } from '@/lib/supabase';
+import { requireAdmin } from '@/lib/admin-auth';
 import { compressImageBuffer } from '@/lib/image-compress';
 
 export async function POST(req: NextRequest) {
-  // Auth check
-  const supabase = await createServerSupabaseClient();
-  if (!supabase) return NextResponse.json({ error: 'Not configured' }, { status: 500 });
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  const service = createServiceClient();
-  if (!service) return NextResponse.json({ error: 'Not configured' }, { status: 500 });
-  const { data: profile } = await service.from('user_profiles').select('role').eq('id', user.id).single();
-  if (profile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  // Contrôle d'accès unique, le même que toutes les autres routes /api/admin :
+  // requireAdmin vérifie la session ET le rôle, et rend le client de service.
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
+  const service = auth.serviceClient;
 
   // Parse form data
   const formData = await req.formData();

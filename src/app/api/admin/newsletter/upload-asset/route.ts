@@ -1,25 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import DOMPurify from 'isomorphic-dompurify';
 import { requireAdmin } from '@/lib/admin-auth';
 import { serverError } from '@/lib/api-error';
 import { compressImageBuffer } from '@/lib/image-compress';
 
-// Sec M-7 : SVG accepte UNIQUEMENT apres sanitize DOMPurify (profile SVG).
-// Sans ca, un admin compromis pouvait uploader un SVG avec un <script>
-// inline => stored XSS quand le SVG est rendu inline dans la newsletter.
-const ALLOWED_MIME = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/svg+xml']);
+// Le SVG est refusé depuis le 6 septembre 2026. C'était le seul format qui
+// exigeait un nettoyage HTML côté serveur, donc un DOM simulé, et ce DOM simulé
+// est ce qui a mis la newsletter en panne pendant deux mois et demi. Les
+// messageries (Gmail, Outlook, Apple Mail) n'affichent de toute façon pas les
+// SVG dans un e-mail : le format ne rendait aucun service et portait à lui seul
+// le risque d'injection de code dans un envoi signé du domaine.
+const ALLOWED_MIME = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif']);
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 const BUCKET = 'newsletter-assets';
-
-function sanitizeSvg(buffer: Buffer): Buffer {
-  const raw = buffer.toString('utf8');
-  const clean = DOMPurify.sanitize(raw, {
-    USE_PROFILES: { svg: true, svgFilters: true },
-    FORBID_TAGS: ['script', 'foreignObject', 'iframe'],
-    FORBID_ATTR: ['onload', 'onclick', 'onerror', 'onmouseover'],
-  });
-  return Buffer.from(clean, 'utf8');
-}
 
 function safeFilename(name: string): string {
   return name
@@ -57,7 +49,11 @@ export async function POST(req: NextRequest) {
     }
     if (!ALLOWED_MIME.has(file.type)) {
       return NextResponse.json(
-        { error: `Type de fichier non supporté (${file.type}). Formats acceptés : PNG, JPEG, WebP, GIF, SVG.` },
+        {
+          error: file.type === 'image/svg+xml'
+            ? "Le format SVG n'est pas accepté : les messageries ne l'affichent pas. Enregistrez l'image en PNG."
+            : `Type de fichier non supporté (${file.type}). Formats acceptés : PNG, JPEG, WebP, GIF.`,
+        },
         { status: 415 },
       );
     }
@@ -66,11 +62,7 @@ export async function POST(req: NextRequest) {
     const path = `${new Date().getFullYear()}/${Date.now()}-${cleanName}`;
 
     const originalBuffer = Buffer.from(await file.arrayBuffer());
-    // SVG : sanitize DOMPurify (strip script/foreignObject/on* handlers).
-    // Autres formats : compression image standard.
-    const { buffer } = file.type === 'image/svg+xml'
-      ? { buffer: sanitizeSvg(originalBuffer) }
-      : await compressImageBuffer(originalBuffer, file.type);
+    const { buffer } = await compressImageBuffer(originalBuffer, file.type);
 
     const { error: upErr } = await serviceClient.storage.from(BUCKET).upload(path, buffer, {
       contentType: file.type,

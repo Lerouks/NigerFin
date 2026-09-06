@@ -1,33 +1,43 @@
-import DOMPurify from 'isomorphic-dompurify';
+import sanitize from 'sanitize-html';
+import {
+  ALLOWED_STYLE_PROPERTIES,
+  EMAIL_ALLOWED_ATTRIBUTES,
+  EMAIL_ALLOWED_TAGS,
+} from '@/lib/sanitize-policy';
 
 /**
- * Sanitize HTML pour usage dans les emails React Email.
+ * Nettoyage du HTML inséré dans un e-mail.
  *
- * Whitelist minimale pour les contenus admin (TipTap RichTextEditor) qui sont
- * inserés dans dangerouslySetInnerHTML. Bloque scripts, iframes, event handlers,
- * data-uri javascript, etc. (H-2 fix avant lancement public).
+ * Politique volontairement plus étroite que celle des articles : ni image, ni
+ * tableau, ni style externe. Si le compte d'administration est un jour
+ * compromis, l'attaquant ne doit pas pouvoir faire partir du code exécutable
+ * dans un e-mail signé du domaine nfireport.com.
  *
- * Si l'admin account est compromis, l'attaquant ne peut plus injecter de JS
- * exécutable dans les emails ni dans la preview server-side.
+ * Moteur sans DOM, comme le reste du serveur (voir sanitize-policy.ts).
  */
-const EMAIL_SAFE_CONFIG = {
-  ALLOWED_TAGS: [
-    'p', 'br', 'span', 'div',
-    'b', 'strong', 'i', 'em', 'u', 's',
-    'a',
-    'ul', 'ol', 'li',
-    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-    'blockquote',
-  ],
-  ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'style'],
-  ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):)/i,
-  ADD_ATTR: ['target', 'rel'],
-  // Force tous les liens sortants en _blank + rel="noopener noreferrer"
-  FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'style', 'form', 'input', 'button'],
-  FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'srcset'],
+
+const OPTIONS: sanitize.IOptions = {
+  allowedTags: [...EMAIL_ALLOWED_TAGS],
+  allowedAttributes: { '*': [...EMAIL_ALLOWED_ATTRIBUTES] },
+  allowedSchemes: ['http', 'https', 'mailto', 'tel'],
+  allowedSchemesAppliedToAttributes: ['href'],
+  allowProtocolRelative: false,
+  allowedStyles: {
+    '*': Object.fromEntries(
+      ALLOWED_STYLE_PROPERTIES.map((prop) => [prop, [/^[^;{}()<>]*$/]]),
+    ),
+  },
+  transformTags: {
+    a: (tagName, attribs) => {
+      if (attribs.target === '_blank') {
+        return { tagName, attribs: { ...attribs, rel: 'noopener noreferrer' } };
+      }
+      return { tagName, attribs };
+    },
+  },
 };
 
 export function sanitizeEmailHtml(html: string | undefined | null): string {
   if (!html) return '';
-  return DOMPurify.sanitize(html, EMAIL_SAFE_CONFIG);
+  return sanitize(html, OPTIONS);
 }

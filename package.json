@@ -61,7 +61,7 @@
     "@types/react-dom": "^19.2.3",
     "@types/sanitize-html": "^2.16.1",
     "@types/web-push": "^3.6.4",
-    "@vitejs/plugin-react": "^6.0.1",
+    "@vitejs/plugin-react": "^6.1.1",
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.2.6",
     "knip": "^6.6.2",

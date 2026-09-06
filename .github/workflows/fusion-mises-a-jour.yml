@@ -1,0 +1,43 @@
+name: Fusionner les mises a jour verifiees
+
+# Se declenche quand la verification (CI) d'une proposition se termine.
+# Volontairement separe du CI : ce traitement n'execute JAMAIS le code de la
+# proposition, il ne fait que lire ses metadonnees et decider de la fusionner.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  fusionner:
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      startsWith(github.event.workflow_run.head_branch, 'dependabot/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Retrouver la proposition
+        id: pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          NUM=$(gh pr list --repo ${{ github.repository }} --state open \
+                 --head "${{ github.event.workflow_run.head_branch }}" \
+                 --json number --jq '.[0].number // empty')
+          [ -n "$NUM" ] || { echo "Aucune proposition ouverte sur cette branche."; exit 0; }
+          echo "numero=$NUM" >> "$GITHUB_OUTPUT"
+
+      - name: Fusionner si la mise a jour est sans risque
+        if: steps.pr.outputs.numero != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEPOT: ${{ github.repository }}
+          NUMERO_PR: ${{ steps.pr.outputs.numero }}
+        run: python3 scripts/fusionner-mise-a-jour.py

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
+import { serverError } from '@/lib/api-error';
 
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin();
@@ -19,11 +20,16 @@ export async function GET(request: NextRequest) {
 
   if (error) {
     // Fallback without join if FK not set up
-    const { data: fallback, count: fc } = await serviceClient
+    const { data: fallback, count: fc, error: erreurRepli } = await serviceClient
       .from('audit_log')
       .select('*', { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
+
+    // L'echec du repli etait avale : la route repondait 200 avec une liste
+    // vide, et l'ecran affichait « Aucune action enregistree » alors que le
+    // journal etait en panne. C'est exactement le mensonge que ce lot traque.
+    if (erreurRepli) return serverError(erreurRepli, 'admin-audit-get');
 
     return NextResponse.json({ data: fallback || [], total: fc || 0 });
   }

@@ -189,8 +189,19 @@ export function NotificationsManager() {
       });
 
       if (!resultat.ok) {
-        // Le serveur n'a rien enregistré : on annule aussi l'abonnement pris
-        // par le navigateur, sinon la carte afficherait « Notifications
+        // Une réponse perdue en route ne prouve rien : l'upsert a pu aboutir.
+        // Détruire l'abonnement du navigateur laisserait alors en base une
+        // ligne morte pointant vers un endpoint qui n'existe plus.
+        const incertain = resultat.statut === 0 && !resultat.rienEnvoye;
+        if (incertain) {
+          setFeedback({
+            tone: 'error',
+            message: `${resultat.cause ?? resultat.message} L'abonnement a peut-être été enregistré : rechargez la page pour voir l'état réel avant de recommencer.`,
+          });
+          return;
+        }
+        // Là, le serveur n'a rien enregistré : on annule aussi l'abonnement
+        // pris par le navigateur, sinon la carte afficherait « Notifications
         // actives » au prochain chargement alors que rien n'arriverait.
         await subscription.unsubscribe().catch(() => undefined);
         setStatus('ready');
@@ -251,7 +262,7 @@ export function NotificationsManager() {
           setStatus('ready');
           setFeedback({
             tone: 'info',
-            message: `Notifications coupées sur ce navigateur. Le serveur, lui, n'a pas pu être prévenu (${resultat.message.toLowerCase()}) : son enregistrement devra être nettoyé.`,
+            message: `Notifications coupées sur ce navigateur. Le serveur, lui, n'a pas pu être prévenu : son enregistrement devra être nettoyé. ${resultat.message}`,
           });
           return;
         }
@@ -299,10 +310,22 @@ export function NotificationsManager() {
       const envoyes = resultat.donnees?.sent ?? 0;
       const echecs = resultat.donnees?.failed ?? 0;
 
-      if (envoyes === 0) {
+      // L'ordre compte. Avec un seul device abonné, cas normal ici, un refus du
+      // service push donne sent: 0 et failed: 1 : tester « envoyés === 0 »
+      // d'abord affichait « activez les notifications » juste sous le titre
+      // « Notifications actives », et cachait la vraie cause.
+      if (envoyes === 0 && echecs === 0) {
         setFeedback({
           tone: 'error',
-          message: 'Aucune notification envoyée. Réessayez après avoir activé les notifications.',
+          message: 'Aucun device abonné. Activez les notifications sur ce navigateur, puis réessayez.',
+        });
+      } else if (envoyes === 0) {
+        const detail = echecs > 1
+          ? `les ${echecs} devices abonnés`
+          : 'le device abonné';
+        setFeedback({
+          tone: 'error',
+          message: `Le service de notifications a refusé la remise pour ${detail}. Les notifications sont bien enregistrées, mais rien n'est arrivé : réessayez dans un instant.`,
         });
       } else if (echecs > 0) {
         const detailEchecs = echecs > 1
@@ -406,7 +429,7 @@ function NotificationsBody({
       <Empty
         icon={<BellOff className="w-5 h-5 text-red-500/80" aria-hidden="true" />}
         title="Notifications bloquées"
-        description="Vous avez déjà refusé les notifications pour ce site. Ouvrez les réglages du navigateur (ou de l'app PWA installée), autorise les notifications pour NFI Cockpit, puis recharge cette page."
+        description="Vous avez déjà refusé les notifications pour ce site. Ouvrez les réglages du navigateur (ou de l'app PWA installée), autorisez les notifications pour NFI Cockpit, puis rechargez cette page."
       />
     );
   }
@@ -423,7 +446,7 @@ function NotificationsBody({
           </p>
           <p className="text-[12px] text-foreground/55 mt-1 leading-relaxed">
             Vous serez notifié quand un nouveau paiement Premium arrive, quand le site
-            rencontre un problème, ou quand un commentaire attend ta modération.
+            rencontre un problème, ou quand un commentaire attend votre modération.
           </p>
         </div>
       </div>

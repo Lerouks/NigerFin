@@ -117,7 +117,7 @@ export function ArgentView() {
   // declare en panne que si aucune des deux sources n'a fini par repondre :
   // tant que l'une charge encore, c'est le squelette qui s'affiche, jamais le
   // message « pas encore de revenu ».
-  const mensuel = overview?.monthlyRevenue ?? revenueDetail?.monthly ?? null;
+  const mensuel = overview?.monthlyRevenue ?? sixDerniersMois(revenueDetail?.monthly) ?? null;
   const grapheEnCours = (overviewLoading || revenueLoading) && mensuel === null;
   const erreurGraphe =
     mensuel === null && !grapheEnCours ? (erreurRevenu ?? erreurOverview) : null;
@@ -180,6 +180,35 @@ export function ArgentView() {
       <QuickAccessSection />
     </div>
   );
+}
+
+/**
+ * Les deux sources du graphe ne parlent pas la meme langue : l'apercu rend six
+ * mois deja etiquetes « sept. 26 », le detail du revenu en rend douze etiquetes
+ * « 2026-09 ». Sans cette remise en forme, des que le repli servait, la courbe
+ * couvrait un an sous un titre qui annonce six mois, et l'axe passait en
+ * notation machine.
+ */
+function sixDerniersMois(
+  points: MonthlyRevenuePoint[] | undefined,
+): MonthlyRevenuePoint[] | null {
+  if (!points || points.length === 0) return null;
+  return points.slice(-6).map((point) => ({
+    ...point,
+    month: libelleDuMois(point.month),
+  }));
+}
+
+function libelleDuMois(cle: string): string {
+  const trouve = /^(\d{4})-(\d{2})$/.exec(cle);
+  if (!trouve) return cle;
+  const annee = Number(trouve[1]);
+  const mois = Number(trouve[2]);
+  if (!Number.isFinite(annee) || !Number.isFinite(mois)) return cle;
+  return new Date(annee, mois - 1, 1).toLocaleDateString('fr-FR', {
+    month: 'short',
+    year: '2-digit',
+  });
 }
 
 // ─── Bloc d'erreur ─────────────────────────────────────────────────────────
@@ -293,9 +322,12 @@ function MetricsSection({
   isLoading: boolean;
 }) {
   const churn = overview?.churnRate ?? null;
-  const churnTone: 'good' | 'warn' | 'bad' =
+  // Une pastille verte « sain » a cote d'un point d'attente affirmait une sante
+  // que l'ecran ne connaissait pas. Tant que le chiffre manque, la pastille le
+  // dit au lieu de rassurer.
+  const churnTone: 'good' | 'warn' | 'bad' | 'inconnu' =
     churn === null
-      ? 'good'
+      ? 'inconnu'
       : churn < 5
         ? 'good'
         : churn > 10
@@ -325,6 +357,9 @@ function MrrCard({
   growthPercent: number | null;
   isLoading: boolean;
 }) {
+  // Fond vert et fleche ascendante sur une croissance inconnue, c'etait
+  // annoncer une hausse qui n'existe peut-etre pas.
+  const inconnu = growthPercent === null;
   const positive = (growthPercent ?? 0) >= 0;
   return (
     <div
@@ -350,19 +385,19 @@ function MrrCard({
         <span
           className={[
             'inline-flex items-center gap-1 text-[12px] font-bold px-2 py-1 rounded-md',
-            positive
-              ? 'bg-[#00c805]/10 text-[#00a004]'
-              : 'bg-red-500/10 text-red-600',
+            inconnu
+              ? 'bg-black/5 text-foreground/40'
+              : positive
+                ? 'bg-[#00c805]/10 text-[#00a004]'
+                : 'bg-red-500/10 text-red-600',
           ].join(' ')}
         >
-          {positive ? (
+          {inconnu ? null : positive ? (
             <ArrowUpRight className="w-3 h-3" aria-hidden="true" />
           ) : (
             <ArrowDownRight className="w-3 h-3" aria-hidden="true" />
           )}
-          {growthPercent === null
-            ? '·'
-            : `${positive ? '+' : ''}${growthPercent}%`}
+          {inconnu ? '·' : `${positive ? '+' : ''}${growthPercent}%`}
         </span>
         <span className="text-[12px] text-foreground/45">vs mois dernier</span>
       </div>
@@ -396,21 +431,25 @@ function ChurnCard({
   isLoading,
 }: {
   rate: number | null;
-  tone: 'good' | 'warn' | 'bad';
+  tone: 'good' | 'warn' | 'bad' | 'inconnu';
   isLoading: boolean;
 }) {
   const toneClass =
-    tone === 'good'
-      ? 'text-[#00a004]'
-      : tone === 'warn'
-        ? 'text-[#d4a843]'
-        : 'text-red-600';
+    tone === 'inconnu'
+      ? 'text-foreground/40'
+      : tone === 'good'
+        ? 'text-[#00a004]'
+        : tone === 'warn'
+          ? 'text-[#d4a843]'
+          : 'text-red-600';
   const toneBg =
-    tone === 'good'
-      ? 'bg-[#00c805]/10'
-      : tone === 'warn'
-        ? 'bg-[#d4a843]/12'
-        : 'bg-red-500/10';
+    tone === 'inconnu'
+      ? 'bg-black/5'
+      : tone === 'good'
+        ? 'bg-[#00c805]/10'
+        : tone === 'warn'
+          ? 'bg-[#d4a843]/12'
+          : 'bg-red-500/10';
 
   return (
     <div className="bg-white border border-black/6 rounded-2xl p-4">
@@ -436,11 +475,13 @@ function ChurnCard({
           toneClass,
         ].join(' ')}
       >
-        {tone === 'good'
-          ? 'sain'
-          : tone === 'warn'
-            ? 'à surveiller'
-            : 'à corriger'}
+        {tone === 'inconnu'
+          ? 'chiffre indisponible'
+          : tone === 'good'
+            ? 'sain'
+            : tone === 'warn'
+              ? 'à surveiller'
+              : 'à corriger'}
       </span>
     </div>
   );
@@ -630,18 +671,26 @@ function TransactionsSection({
 
       {chargementInitial && <TransactionsSkeleton />}
 
-      {etatBloquant && (
+      {/* Panne sans aucune ligne : BlocErreur plutot qu'EtatListe, pour que le
+          bouton dise « Nouvelle tentative... ». EtatListe n'a pas de temoin
+          d'attente, et sur une connexion qui pend l'appel peut mettre une
+          cinquantaine de secondes a rendre la main : on recliquait dans le vide. */}
+      {etatBloquant && erreur && (
+        <BlocErreur
+          titre="Les transactions n'ont pas pu être chargées"
+          erreur={erreur}
+          onReessayer={onReessayer}
+        />
+      )}
+
+      {etatBloquant && !erreur && (
         <div className="bg-white border border-black/6 rounded-2xl">
           {/* Le chargement a son propre squelette juste au-dessus. */}
           <EtatListe
             chargement={false}
-            erreur={erreur?.message ?? null}
-            horsLigne={erreur?.horsLigne}
-            vide={!aDesLignes}
+            erreur={null}
+            vide
             texteVide="Aucune transaction pour le moment. Le premier paiement Premium va arriver."
-            onReessayer={() => {
-              void onReessayer();
-            }}
           />
         </div>
       )}

@@ -144,7 +144,18 @@ export function NewsletterSubscribersView() {
       );
 
       if (!resultat.ok) {
-        show(resultat.message, 'error');
+        // Une coupure en cours d'envoi ne prouve rien : la route desabonne
+        // avant de repondre, la personne peut tres bien l'etre deja. On va
+        // donc relire la liste au lieu de laisser la ligne afficher « Actifs »
+        // jusqu'au prochain rechargement de la page.
+        const incertain = resultat.statut === 0 && !resultat.rienEnvoye;
+        show(
+          incertain
+            ? `${resultat.cause ?? resultat.message} Le désabonnement a peut-être été enregistré : la liste vient d'être relue.`
+            : resultat.message,
+          'error',
+        );
+        void mutate();
         return;
       }
 

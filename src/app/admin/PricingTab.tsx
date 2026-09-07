@@ -60,6 +60,25 @@ export function PricingTab() {
     const resultat = await envoiAdmin(URL_PRIX, 'PUT', { tier, billingCycle, amount });
 
     if (!resultat.ok) {
+      // Une coupure PENDANT l'envoi ne prouve rien : la route fait l'upsert
+      // puis revalide le site public avant de repondre. Affirmer que rien n'a
+      // ete enregistre laisserait vendre un prix different de celui affiche.
+      const incertain = resultat.statut === 0 && !resultat.rienEnvoye;
+      if (incertain) {
+        const relecture = await appelAdmin<DynamicPrice[]>(URL_PRIX);
+        if (relecture.ok && Array.isArray(relecture.donnees)) {
+          setDynamicPrices(relecture.donnees);
+          setErreurAction(
+            `${resultat.cause ?? resultat.message} Les prix affichés viennent d'être relus sur le serveur : ce sont ceux du site.`,
+          );
+        } else {
+          setErreurAction(
+            `${resultat.cause ?? resultat.message} Le prix a peut-être été enregistré : rechargez la page pour voir ce que le site applique avant de recommencer.`,
+          );
+        }
+        setSavingPrice(null);
+        return;
+      }
       setErreurAction(resultat.message);
       setSavingPrice(null);
       return;

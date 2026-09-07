@@ -33,7 +33,7 @@ export function CreateDraftButton() {
         const incertain = resultat.statut === 0 && !resultat.rienEnvoye;
         setError(
           incertain
-            ? `${resultat.message} Rechargez la page pour vérifier si le numéro existe avant de recommencer.`
+            ? `${resultat.cause ?? resultat.message} Le numéro a peut-être été créé : rechargez la page pour vérifier avant de recommencer.`
             : `Le numéro n'a pas été créé. ${resultat.message}`,
         );
         return;

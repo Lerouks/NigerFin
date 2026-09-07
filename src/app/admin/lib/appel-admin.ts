@@ -32,6 +32,13 @@ export type Resultat<T> =
        * affirmer « rien n'a été créé » quand ils n'en savent rien.
        */
       rienEnvoye?: boolean;
+      /**
+       * La cause seule, sans la consigne qui suit : « La connexion s'est
+       * interrompue. » ou « Le serveur a mis trop de temps à répondre. » Un
+       * écran qui sait ce qu'il a demandé compose une phrase plus juste que la
+       * phrase générique.
+       */
+      cause?: string;
     };
 
 const TENTATIVES = 3;
@@ -158,11 +165,24 @@ export async function appelAdmin<T = unknown>(
     }
   }
 
+  // Fin de boucle sans reponse. Ce qu'on peut affirmer ici est mince, et
+  // l'ancienne phrase affirmait bien plus que ca : « tant que rien ne s'affiche,
+  // rien n'a ete enregistre » est FAUX des que la demande est partie et que
+  // seule la reponse s'est perdue. Une lecture n'ecrit rien, elle peut donc
+  // inviter a reessayer ; une ecriture, non.
+  const lecture = !options?.method || options.method === 'GET';
+  const delaiDepasse = derniereErreur.startsWith('Le serveur a mis trop');
   return {
     ok: false,
-    horsLigne: true,
+    // Un serveur qui ne repond pas n'est PAS une connexion coupee. Le confondre
+    // envoyait le proprietaire verifier son wifi pendant qu'une route etait en
+    // panne, avec l'icone « Connexion perdue » a l'appui.
+    horsLigne: !delaiDepasse,
     statut: 0,
-    message: `${derniereErreur} Réessayez : tant que rien ne s'affiche, rien n'a été enregistré.`,
+    cause: derniereErreur,
+    message: lecture
+      ? `${derniereErreur} Réessayez.`
+      : `${derniereErreur} La demande est peut-être arrivée au serveur : rechargez la page pour vérifier avant de recommencer.`,
   };
 }
 

@@ -748,14 +748,25 @@ function QuickAccessSection({
         ))}
       </div>
 
+      {/* Deux phrases differentes, parce que ce sont deux situations
+          differentes : soit la pastille montre un compteur deja charge et il
+          faut dire qu'il date, soit il n'y en a jamais eu et il faut dire qu'il
+          manque. Une seule phrase pour les deux contredisait la pastille. */}
       {erreurMessages && (
         <BandeauAlerte
           className="mt-3"
           texte={
-            <>
-              Le nombre de messages non lus n&apos;a pas pu être chargé.{' '}
-              {erreurMessages}
-            </>
+            unreadMessages !== null ? (
+              <>
+                Compteur du dernier chargement réussi, la mise à jour vient
+                d&apos;échouer. {erreurMessages}
+              </>
+            ) : (
+              <>
+                Le nombre de messages non lus n&apos;a pas pu être chargé.{' '}
+                {erreurMessages}
+              </>
+            )
           }
           horsLigne={horsLigneMessages}
           onReessayer={onReessayerMessages}

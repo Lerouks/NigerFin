@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ArrowUpRight,
   CheckCircle2,
@@ -680,69 +680,147 @@ interface SiteFeaturesPayload {
 }
 
 function MarketTickerInlineToggle() {
-  const { data, error, mutate, isLoading } = useAdminApi<SiteFeaturesPayload>(
-    'site-features',
-  );
+  const { data, error, mutate, isLoading, isValidating } =
+    useAdminApi<SiteFeaturesPayload>('site-features');
   const [erreurBascule, setErreurBascule] = useState<string | null>(null);
+  // Verrou d'envoi. Sans lui, l'interrupteur restait cliquable pendant les
+  // vingt-cinq secondes d'attente d'un PUT : deux clics envoyaient deux ordres
+  // contradictoires, et c'est l'ordre d'arrivée qui décidait de l'état du
+  // bandeau sur le site public.
+  const [envoiEnCours, setEnvoiEnCours] = useState(false);
+  // Une bascule partie dont la réponse s'est perdue. Le serveur a peut-être
+  // enregistré : l'écran refuse alors de donner une position, plutôt que d'en
+  // inventer une.
+  const [doute, setDoute] = useState(false);
+  const attenteVerification = useRef(false);
 
   const erreurLecture = messageErreur(error);
-  const enabled = data?.market_ticker_enabled ?? true;
-  // L'interrupteur montre toujours la dernière valeur réellement lue. Le forcer
-  // en position éteinte quand la relecture échoue faisait pire que le mal :
-  // l'admin cliquait pour « activer » un bandeau déjà actif et l'éteignait sur
-  // le site public. Quand l'état n'est pas sûr, on le dit et on bloque le
-  // bouton plutôt que d'afficher une position fausse.
-  const afficheActif = enabled;
-  const etatIncertain = Boolean(erreurLecture) || !data;
-  const basculeBloquee = isLoading || etatIncertain;
+  // null tant que rien n'a jamais été lu. Mettre « actif » par défaut faisait
+  // afficher une pastille verte, curseur à droite, aria-pressed à true, pour un
+  // état qui n'avait aucune source : c'est le seul signal qu'on lit d'un coup
+  // d'oeil, et il affirmait quelque chose du site public.
+  const valeurLue = data ? data.market_ticker_enabled : null;
+  const etatConnu = valeurLue !== null && !doute;
+  const afficheActif = etatConnu && valeurLue === true;
+  const basculeBloquee =
+    isLoading || envoiEnCours || !etatConnu || Boolean(erreurLecture);
+
+  // Quand la connexion revient, SWR relit de lui-même (revalidateOnReconnect).
+  // Le doute et le message d'échec s'effacent à ce moment-là : sinon ils
+  // restaient affichés à côté d'un interrupteur redevenu juste, et les deux se
+  // contredisaient jusqu'au rechargement de la page.
+  useEffect(() => {
+    if (!attenteVerification.current) return;
+    if (isValidating || error || !data) return;
+    attenteVerification.current = false;
+    setDoute(false);
+    setErreurBascule(null);
+  }, [isValidating, error, data]);
+
+  /** L'état réel du serveur, ou null si la relecture échoue elle aussi. */
+  const relire = async (): Promise<SiteFeaturesPayload | null> => {
+    try {
+      const frais = await mutate();
+      return frais && typeof frais.market_ticker_enabled === 'boolean'
+        ? frais
+        : null;
+    } catch {
+      return null;
+    }
+  };
 
   const handleToggle = async () => {
     if (!data || basculeBloquee) return;
-    const next = !enabled;
+    const avant = data.market_ticker_enabled;
+    const suivant = !avant;
     setErreurBascule(null);
-    // Mise à jour optimiste
-    await mutate(
-      { market_ticker_enabled: next, updated_at: new Date().toISOString() },
-      { revalidate: false },
-    );
+    setEnvoiEnCours(true);
 
-    const resultat = await envoiAdmin<SiteFeaturesPayload>(
-      '/api/admin/site-features',
-      'PUT',
-      { market_ticker_enabled: next },
-    );
-
-    if (!resultat.ok) {
-      // Avant, l'interrupteur revenait tout seul en arrière, sans un mot :
-      // impossible de savoir si le réglage avait pris ou non.
-      setErreurBascule(
-        `Le réglage n'a pas été enregistré, le bandeau reste ${
-          enabled ? 'visible' : 'désactivé'
-        }. ${resultat.message}`,
-      );
-      // On défait d'abord la mise à jour optimiste : hors ligne, la
-      // revalidation échoue elle aussi et l'interrupteur serait resté sur la
-      // position demandée, contredisant le message juste en dessous.
+    try {
       await mutate(
-        { market_ticker_enabled: enabled, updated_at: data.updated_at },
+        { market_ticker_enabled: suivant, updated_at: data.updated_at },
         { revalidate: false },
       );
-      await mutate();
-      return;
-    }
 
-    const confirme = resultat.donnees;
-    if (confirme && typeof confirme.market_ticker_enabled === 'boolean') {
-      await mutate(confirme, { revalidate: false });
-      return;
+      const resultat = await envoiAdmin<SiteFeaturesPayload>(
+        '/api/admin/site-features',
+        'PUT',
+        { market_ticker_enabled: suivant },
+      );
+
+      if (resultat.ok) {
+        const confirme = resultat.donnees;
+        if (confirme && typeof confirme.market_ticker_enabled === 'boolean') {
+          await mutate(confirme, { revalidate: false });
+          return;
+        }
+        // Le serveur n'a rien confirmé : on redemande l'état réel plutôt que de
+        // laisser l'écran afficher ce qu'il espérait.
+        setErreurBascule(
+          "Le serveur n'a pas confirmé le réglage. L'état affiché vient d'être revérifié.",
+        );
+        await relire();
+        return;
+      }
+
+      // Trois situations très différentes se cachent derrière un seul échec.
+      // La première chose à faire est d'aller voir l'état réel : c'est la seule
+      // façon de ne rien affirmer sur le site public sans le savoir.
+      const relu = await relire();
+      if (relu) {
+        setDoute(false);
+        setErreurBascule(
+          `Le réglage n'a pas abouti. ${resultat.message} L'état vient d'être revérifié : le bandeau est ${
+            relu.market_ticker_enabled ? 'visible' : 'désactivé'
+          }.`,
+        );
+        return;
+      }
+
+      // Rien n'est parti, ou le serveur a explicitement refusé : là, on sait
+      // que rien n'a changé, et l'interrupteur revient où il était.
+      if (resultat.rienEnvoye === true || resultat.statut >= 400) {
+        await mutate(
+          { market_ticker_enabled: avant, updated_at: data.updated_at },
+          { revalidate: false },
+        );
+        setDoute(false);
+        setErreurBascule(
+          `Le réglage n'a pas été enregistré, le bandeau reste ${
+            avant ? 'visible' : 'désactivé'
+          }. ${resultat.message}`,
+        );
+        return;
+      }
+
+      // La demande est partie et la réponse s'est perdue. Affirmer que rien n'a
+      // été enregistré serait un mensonge dans un cas sur deux, et remettre
+      // l'interrupteur en arrière ferait recliquer pour un geste déjà effectué.
+      attenteVerification.current = true;
+      setDoute(true);
+      setErreurBascule(
+        `${resultat.cause ?? resultat.message} Le bandeau a peut-être été ${
+          suivant ? 'activé' : 'désactivé'
+        } sur le site : l'état sera revérifié dès le retour de la connexion.`,
+      );
+    } finally {
+      setEnvoiEnCours(false);
     }
-    // Le serveur n'a rien confirmé : on redemande l'état réel plutôt que de
-    // laisser l'écran afficher ce qu'il espérait.
-    setErreurBascule(
-      "Le serveur n'a pas confirmé le réglage. L'état affiché vient d'être revérifié.",
-    );
-    await mutate();
   };
+
+  const sousTitre = !data
+    ? erreurLecture
+      ? "État inconnu, il n'a pas pu être lu."
+      : "Chargement de l'état..."
+    : doute
+      ? "État incertain, la dernière bascule n'a pas été confirmée."
+      : envoiEnCours
+        ? 'Enregistrement en cours...'
+        : erreurLecture
+          ? 'État non revérifié, réglage momentanément indisponible.'
+          : valeurLue
+            ? 'Visible en haut de toutes les pages.'
+            : "Désactivé, le site ne l'affiche pas.";
 
   return (
     <div className="mt-4">
@@ -754,40 +832,41 @@ function MarketTickerInlineToggle() {
           <p className="font-bold text-[14px] text-foreground leading-tight">
             Bandeau Marchés BRVM
           </p>
-          <p className="text-[11px] text-foreground/55 mt-0.5">
-            {erreurLecture
-              ? data
-                ? 'État non revérifié, réglage momentanément indisponible.'
-                : "État inconnu, il n'a pas pu être lu."
-              : isLoading
-                ? 'Chargement de l\'état...'
-                : enabled
-                  ? 'Visible en haut de toutes les pages.'
-                  : 'Désactivé, le site ne l\'affiche pas.'}
-          </p>
+          <p className="text-[11px] text-foreground/55 mt-0.5">{sousTitre}</p>
         </div>
         <button
           type="button"
           onClick={handleToggle}
           disabled={basculeBloquee}
-          aria-pressed={afficheActif}
+          // Pas d'aria-pressed quand la position est inconnue : un lecteur
+          // d'écran annoncerait « activé » sans que personne ne le sache.
+          aria-pressed={etatConnu ? afficheActif : undefined}
           aria-label={
-            etatIncertain
-              ? "Bandeau Marchés BRVM : état non revérifié, réglage indisponible"
+            !etatConnu
+              ? 'Bandeau Marchés BRVM : état inconnu, réglage indisponible'
               : afficheActif
                 ? 'Désactiver le bandeau Marchés BRVM'
                 : 'Activer le bandeau Marchés BRVM'
           }
           className={[
             'relative inline-flex h-7 w-12 items-center rounded-full transition shrink-0',
-            afficheActif ? 'bg-[#00c805]' : 'bg-black/12',
+            afficheActif
+              ? 'bg-[#00c805]'
+              : etatConnu
+                ? 'bg-black/12'
+                : 'bg-black/8 border border-dashed border-black/20',
             basculeBloquee ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
           ].join(' ')}
         >
+          {/* Position centrale quand l'état est inconnu : ni allumé, ni éteint. */}
           <span
             className={[
               'inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition',
-              afficheActif ? 'translate-x-6' : 'translate-x-1',
+              !etatConnu
+                ? 'translate-x-3.5'
+                : afficheActif
+                  ? 'translate-x-6'
+                  : 'translate-x-1',
             ].join(' ')}
           />
         </button>
@@ -808,7 +887,9 @@ function MarketTickerInlineToggle() {
               type="button"
               onClick={() => {
                 setErreurBascule(null);
-                void mutate();
+                setDoute(false);
+                attenteVerification.current = false;
+                void relire();
               }}
               className="mt-2 inline-flex items-center gap-1.5 font-semibold hover:underline"
             >

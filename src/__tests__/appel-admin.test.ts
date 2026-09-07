@@ -117,6 +117,38 @@ describe('appelAdmin', () => {
     expect(fetchSimule).not.toHaveBeenCalled();
   });
 
+  it('n\'affirme jamais qu\'une ecriture perdue n\'a rien enregistre', async () => {
+    // Le serveur peut avoir enregistre avant que la reponse ne se perde. La
+    // phrase d'avant, « tant que rien ne s'affiche, rien n'a ete enregistre »,
+    // faisait recliquer et creait des doublons.
+    fetchSimule.mockRejectedValue(new Error('connexion coupee'));
+    const ecriture = await appelAdmin('/api/admin/newsletter', { method: 'POST', tentatives: 1 });
+    expect(ecriture.ok).toBe(false);
+    if (!ecriture.ok) {
+      expect(ecriture.message).not.toContain("rien n'a été enregistré");
+      expect(ecriture.message).toContain('peut-être arrivée');
+      expect(ecriture.cause).toBe("La connexion s'est interrompue.");
+    }
+
+    // Une lecture n'ecrit rien : elle peut inviter a reessayer.
+    const lecture = await appelAdmin('/api/admin/stats', { tentatives: 1 });
+    expect(lecture.ok).toBe(false);
+    if (!lecture.ok) expect(lecture.message).not.toContain('enregistré');
+  });
+
+  it('ne maquille pas un serveur trop lent en connexion perdue', async () => {
+    // horsLigne choisit l'icone WifiOff et le titre « Connexion perdue » dans
+    // EtatListe : l'afficher pour un delai depasse envoyait verifier le wifi
+    // pendant qu'une route etait en panne.
+    fetchSimule.mockRejectedValue(Object.assign(new Error('timeout'), { name: 'AbortError' }));
+    const r = await appelAdmin('/api/admin/stats', { tentatives: 1 });
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.message).toContain('trop de temps');
+      expect(r.horsLigne).toBe(false);
+    }
+  });
+
   it('dit quand rien n\'est parti, et ne le dit que dans ce cas', async () => {
     vi.stubGlobal('navigator', { onLine: false });
     const horsLigne = await appelAdmin('/api/admin/newsletter', { method: 'POST', tentatives: 1 });

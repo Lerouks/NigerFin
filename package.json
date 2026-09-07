@@ -50,7 +50,7 @@
     "sanitize-html": "^2.17.7",
     "swr": "^2.4.1",
     "web-push": "^3.6.7",
-    "zod": "^4.4.3"
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^16.2.6",

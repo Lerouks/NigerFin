@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Loader2, Plus, Trash2, Check, Zap, Eye, EyeOff } from 'lucide-react';
+import { appelAdmin, envoiAdmin } from '@/app/admin/lib/appel-admin';
+import { EtatListe } from '@/app/admin/lib/EtatListe';
 
 interface FlashItem {
   tag: string;
@@ -19,16 +21,23 @@ export function FlashBannerManager() {
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [error, setError] = useState('');
+  // Echec du chargement de la liste, distinct d'une liste vraiment vide.
+  const [erreurListe, setErreurListe] = useState<string | null>(null);
+  const [horsLigne, setHorsLigne] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    try {
-      const res = await fetch('/api/admin/flash-banner');
-      if (res.ok) {
-        const result = await res.json();
-        setData({ enabled: result.enabled ?? true, items: result.items || [] });
-      }
-    } catch { /* ignore */ }
+    setErreurListe(null);
+    const resultat = await appelAdmin<{ enabled?: boolean; items?: FlashItem[] }>('/api/admin/flash-banner');
+    if (resultat.ok) {
+      const recu = resultat.donnees ?? {};
+      setData({ enabled: recu.enabled ?? true, items: recu.items ?? [] });
+      setHorsLigne(false);
+    } else {
+      // On ne touche pas aux données déjà affichées : un échec n'efface rien.
+      setErreurListe(resultat.message);
+      setHorsLigne(resultat.horsLigne);
+    }
     setLoading(false);
   }, []);
 
@@ -37,19 +46,11 @@ export function FlashBannerManager() {
   const handleToggle = async () => {
     setSaving(true);
     setError('');
-    try {
-      const res = await fetch('/api/admin/flash-banner', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled: !data.enabled }),
-      });
-      if (res.ok) {
-        setData((prev) => ({ ...prev, enabled: !prev.enabled }));
-      } else {
-        setError('Erreur lors de la mise à jour');
-      }
-    } catch {
-      setError('Erreur réseau');
+    const resultat = await envoiAdmin('/api/admin/flash-banner', 'PUT', { enabled: !data.enabled });
+    if (resultat.ok) {
+      setData((prev) => ({ ...prev, enabled: !prev.enabled }));
+    } else {
+      setError(resultat.message);
     }
     setSaving(false);
   };
@@ -57,19 +58,11 @@ export function FlashBannerManager() {
   const handleSave = async () => {
     setSaving(true);
     setError('');
-    try {
-      const res = await fetch('/api/admin/flash-banner', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: data.items }),
-      });
-      if (res.ok) {
-        setDirty(false);
-      } else {
-        setError('Erreur lors de la sauvegarde');
-      }
-    } catch {
-      setError('Erreur réseau');
+    const resultat = await envoiAdmin('/api/admin/flash-banner', 'PUT', { items: data.items });
+    if (resultat.ok) {
+      setDirty(false);
+    } else {
+      setError(resultat.message);
     }
     setSaving(false);
   };
@@ -117,6 +110,9 @@ export function FlashBannerManager() {
           <Zap className="w-5 h-5 text-gold" />
           <h3 className="text-sm font-semibold">Bandeau Flash</h3>
         </div>
+        {/* Tant que la lecture a échoué, on ignore si le bandeau est visible :
+            afficher un état inventé serait pire que ne rien afficher. */}
+        {erreurListe === null && (
         <button
           onClick={handleToggle}
           disabled={saving}
@@ -135,6 +131,7 @@ export function FlashBannerManager() {
           )}
           {data.enabled ? 'Visible' : 'Masqué'}
         </button>
+        )}
       </div>
 
       {/* Error message */}
@@ -144,7 +141,18 @@ export function FlashBannerManager() {
         </div>
       )}
 
+      {/* Chargement en échec, ou liste vraiment vide */}
+      <EtatListe
+        chargement={false}
+        erreur={erreurListe}
+        horsLigne={horsLigne}
+        vide={data.items.length === 0}
+        texteVide="Aucun flash info"
+        onReessayer={fetchData}
+      />
+
       {/* Items list */}
+      {erreurListe === null && data.items.length > 0 && (
       <div className="bg-white rounded-xl border border-black/6 divide-y divide-black/4">
         {data.items.map((item, index) => (
           <div key={index} className="p-4 flex gap-3 items-start">
@@ -177,12 +185,12 @@ export function FlashBannerManager() {
             </button>
           </div>
         ))}
-        {data.items.length === 0 && (
-          <p className="text-center py-6 text-sm text-gray-500">Aucun flash info</p>
-        )}
       </div>
+      )}
 
-      {/* Actions */}
+      {/* Actions : indisponibles tant que la liste n'a pas pu être chargée,
+          pour ne pas enregistrer par-dessus des flashs qu'on n'a pas lus. */}
+      {erreurListe === null && (
       <div className="flex items-center gap-2">
         <button
           onClick={addItem}
@@ -202,6 +210,7 @@ export function FlashBannerManager() {
           </button>
         )}
       </div>
+      )}
     </div>
   );
 }

@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
 import { RefreshCw, CheckCircle, XCircle, AlertTriangle, Clock, Database } from 'lucide-react';
+import { appelAdmin } from '@/app/admin/lib/appel-admin';
+import { EtatListe } from '@/app/admin/lib/EtatListe';
 
 interface ServiceStatus {
   status: 'ok' | 'error';
@@ -37,20 +39,29 @@ export function ApiStatusDashboard() {
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const [horsLigne, setHorsLigne] = useState(false);
 
   const fetchHealth = useCallback(async () => {
-    try {
-      const res = await fetch('/api/health');
-      if (res.ok) {
-        const data = await res.json();
-        setHealth(data);
-      }
-    } catch {
-      // silent
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
+    const resultat = await appelAdmin<HealthResponse>('/api/health');
+
+    if (resultat.ok && resultat.donnees && resultat.donnees.services && resultat.donnees.summary) {
+      setHealth(resultat.donnees);
+      setErreur(null);
+      setHorsLigne(false);
+    } else if (resultat.ok) {
+      // Le serveur a répondu, mais sans le détail des services : c'est la
+      // réponse réduite servie aux visiteurs que le serveur ne reconnaît pas
+      // comme administrateur.
+      setErreur("Le serveur n'a pas renvoyé le détail des services. Votre session a peut-être expiré : reconnectez-vous, puis réessayez.");
+      setHorsLigne(false);
+    } else {
+      setErreur(resultat.message);
+      setHorsLigne(resultat.horsLigne);
     }
+
+    setLoading(false);
+    setRefreshing(false);
   }, []);
 
   useEffect(() => {
@@ -99,8 +110,18 @@ export function ApiStatusDashboard() {
           </button>
         </div>
 
+        {/* Chargement, échec de chargement, ou aucun service renvoyé */}
+        <EtatListe
+          chargement={loading}
+          erreur={erreur}
+          horsLigne={horsLigne}
+          vide={!health}
+          texteVide="Aucun service n'a été renvoyé par le serveur."
+          onReessayer={handleRefresh}
+        />
+
         {/* Global Status */}
-        {health && (
+        {health && !erreur && (
           <div className={`${statusBg} rounded-xl border border-black/6 p-6 mb-8`}>
             <div className="flex items-center gap-3">
               <StatusIcon className={`w-6 h-6 ${statusColor}`} />
@@ -120,7 +141,7 @@ export function ApiStatusDashboard() {
         )}
 
         {/* Services Grid */}
-        {health && (
+        {health && !erreur && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Object.entries(health.services).map(([key, service]) => {
               const label = SERVICE_LABELS[key] || { name: key, description: '' };
@@ -210,11 +231,6 @@ export function ApiStatusDashboard() {
           </div>
         )}
 
-        {!health && (
-          <div className="text-center py-20 text-gray-500">
-            Impossible de charger le statut des API.
-          </div>
-        )}
       </div>
     </div>
   );

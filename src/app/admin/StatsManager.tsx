@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Loader2, Eye, TrendingUp, Users, CreditCard, BarChart3,
+  Eye, TrendingUp, Users, CreditCard, BarChart3,
   FileText, Calendar, ArrowUpRight,
 } from 'lucide-react';
 import { formatPrice } from '@/config/pricing';
+import { appelAdmin } from '@/app/admin/lib/appel-admin';
+import { EtatListe } from '@/app/admin/lib/EtatListe';
 
 interface ViewStats {
   total: number;
@@ -48,30 +50,39 @@ interface StatsData {
 
 export function StatsManager() {
   const [data, setData] = useState<StatsData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [chargement, setChargement] = useState(true);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const [horsLigne, setHorsLigne] = useState(false);
 
   const fetchStats = useCallback(async () => {
-    try {
-      const res = await fetch('/api/admin/views');
-      if (res.ok) {
-        setData(await res.json());
-      }
-    } catch { /* ignore */ }
-    setLoading(false);
+    setChargement(true);
+    const resultat = await appelAdmin<StatsData>('/api/admin/views');
+    if (resultat.ok) {
+      setData(resultat.donnees);
+      setErreur(null);
+      setHorsLigne(false);
+    } else {
+      // Un echec ne doit jamais passer pour une absence de statistiques.
+      setData(null);
+      setErreur(resultat.message);
+      setHorsLigne(resultat.horsLigne);
+    }
+    setChargement(false);
   }, []);
 
   useEffect(() => { fetchStats(); }, [fetchStats]);
 
-  if (loading) {
+  if (chargement || erreur || !data) {
     return (
-      <div className="text-center py-16">
-        <Loader2 className="w-6 h-6 animate-spin text-gray-500 mx-auto" />
-      </div>
+      <EtatListe
+        chargement={chargement}
+        erreur={erreur}
+        horsLigne={horsLigne}
+        vide={!data}
+        texteVide="Aucune statistique disponible pour le moment."
+        onReessayer={fetchStats}
+      />
     );
-  }
-
-  if (!data) {
-    return <p className="text-center py-16 text-gray-500">Erreur de chargement des statistiques</p>;
   }
 
   const maxDaily = Math.max(...data.dailyViews.map((d) => d.views), 1);
@@ -144,7 +155,7 @@ export function StatsManager() {
             Articles les plus lus (30j)
           </h3>
           {data.topArticles.length === 0 ? (
-            <p className="text-[13px] text-gray-500 py-4 text-center">Aucune donnee de vue encore</p>
+            <p className="text-[13px] text-gray-500 py-4 text-center">Aucune donnée de vue pour l&apos;instant</p>
           ) : (
             <div className="space-y-2">
               {data.topArticles.map((article, i) => (
@@ -167,7 +178,7 @@ export function StatsManager() {
             Pages les plus visitées (30j)
           </h3>
           {data.topPages.length === 0 ? (
-            <p className="text-[13px] text-gray-500 py-4 text-center">Aucune donnee de vue encore</p>
+            <p className="text-[13px] text-gray-500 py-4 text-center">Aucune donnée de vue pour l&apos;instant</p>
           ) : (
             <div className="space-y-2">
               {data.topPages.map((page, i) => (

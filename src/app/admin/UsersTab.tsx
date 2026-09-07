@@ -5,6 +5,8 @@ import {
   Users, Loader2, Search, CheckCircle, CreditCard, ChevronDown, ChevronUp,
   Ban, Unlock, Crown, Calendar,
 } from 'lucide-react';
+import { appelAdmin, envoiAdmin } from '@/app/admin/lib/appel-admin';
+import { EtatListe } from '@/app/admin/lib/EtatListe';
 
 interface UserEntry {
   id: string;
@@ -23,9 +25,17 @@ interface UsersTabProps {
   onStatsRefresh: () => void;
 }
 
+/** Resultat d'une ecriture, tel que la ligne d'utilisateur a besoin de le lire. */
+type ResultatAction = { ok: true } | { ok: false; message: string };
+
+/** Ce que la route peut renvoyer : la liste paginee, ou le tableau brut. */
+type ReponseUtilisateurs = UserEntry[] | { data?: UserEntry[] } | null;
+
 export function UsersTab({ onStatsRefresh }: UsersTabProps) {
   const [users, setUsers] = useState<UserEntry[]>([]);
   const [loadingData, setLoadingData] = useState(true);
+  const [erreurListe, setErreurListe] = useState<string | null>(null);
+  const [horsLigne, setHorsLigne] = useState(false);
   const [processingUser, setProcessingUser] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
@@ -33,15 +43,31 @@ export function UsersTab({ onStatsRefresh }: UsersTabProps) {
   const [deleteConfirmUser, setDeleteConfirmUser] = useState<string | null>(null);
 
   const fetchUsers = useCallback(async () => {
-    try {
-      const params = new URLSearchParams();
-      if (searchQuery) params.set('search', searchQuery);
-      if (roleFilter) params.set('role', roleFilter);
-      const res = await fetch(`/api/admin/users?${params}`);
-      const json = await res.json();
-      const list = json.data ?? json;
-      if (Array.isArray(list)) setUsers(list);
-    } catch { /* ignore */ }
+    const params = new URLSearchParams();
+    if (searchQuery) params.set('search', searchQuery);
+    if (roleFilter) params.set('role', roleFilter);
+
+    const resultat = await appelAdmin<ReponseUtilisateurs>(`/api/admin/users?${params}`);
+
+    if (!resultat.ok) {
+      // L'appel a echoue : on le dit, et surtout on n'affiche pas « aucun
+      // utilisateur », qui laisserait croire que la base est vide.
+      setErreurListe(resultat.message);
+      setHorsLigne(resultat.horsLigne);
+      setLoadingData(false);
+      return;
+    }
+
+    const brut = resultat.donnees;
+    const liste = Array.isArray(brut) ? brut : brut?.data;
+    if (Array.isArray(liste)) {
+      setUsers(liste);
+      setErreurListe(null);
+      setHorsLigne(false);
+    } else {
+      setErreurListe("Le serveur a répondu dans un format inattendu. La liste des utilisateurs n'a pas pu être lue.");
+      setHorsLigne(false);
+    }
     setLoadingData(false);
   }, [searchQuery, roleFilter]);
 
@@ -51,37 +77,38 @@ export function UsersTab({ onStatsRefresh }: UsersTabProps) {
     return () => clearTimeout(timeout);
   }, [fetchUsers]);
 
-  const handleDeleteUser = async (userId: string) => {
+  const rechargerListe = useCallback(() => {
+    setLoadingData(true);
+    void fetchUsers();
+  }, [fetchUsers]);
+
+  /** Rend le message d'echec, ou null si la suppression a bien eu lieu. */
+  const handleDeleteUser = async (userId: string): Promise<string | null> => {
     setProcessingUser(userId);
-    try {
-      const res = await fetch(`/api/admin/users?userId=${userId}`, { method: 'DELETE' });
-      if (res.ok) {
-        setDeleteConfirmUser(null);
-        setExpandedUser(null);
-        await fetchUsers();
-        onStatsRefresh();
-      }
-    } catch { /* ignore */ }
+    const resultat = await envoiAdmin(`/api/admin/users?userId=${userId}`, 'DELETE');
+    if (!resultat.ok) {
+      setProcessingUser(null);
+      return resultat.message;
+    }
+    setDeleteConfirmUser(null);
+    setExpandedUser(null);
+    await fetchUsers();
+    onStatsRefresh();
     setProcessingUser(null);
+    return null;
   };
 
-  const handleUserAction = async (userId: string, action: string, extra?: Record<string, string>): Promise<boolean> => {
+  const handleUserAction = async (userId: string, action: string, extra?: Record<string, string>): Promise<ResultatAction> => {
     setProcessingUser(userId);
-    try {
-      const res = await fetch('/api/admin/users', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, action, ...extra }),
-      });
-      if (res.ok) {
-        await fetchUsers();
-        onStatsRefresh();
-        setProcessingUser(null);
-        return true;
-      }
-    } catch { /* ignore */ }
+    const resultat = await envoiAdmin('/api/admin/users', 'PUT', { userId, action, ...extra });
+    if (!resultat.ok) {
+      setProcessingUser(null);
+      return { ok: false, message: resultat.message };
+    }
+    await fetchUsers();
+    onStatsRefresh();
     setProcessingUser(null);
-    return false;
+    return { ok: true };
   };
 
   return (
@@ -109,13 +136,20 @@ export function UsersTab({ onStatsRefresh }: UsersTabProps) {
         </select>
       </div>
 
-      <p className="text-[12px] text-gray-500">{users.length} utilisateur(s)</p>
+      {!erreurListe && (
+        <p className="text-[12px] text-gray-500">{users.length} utilisateur(s)</p>
+      )}
 
-      {loadingData ? (
-        <div className="text-center py-12">
-          <Loader2 className="w-6 h-6 animate-spin text-gray-500 mx-auto" />
-        </div>
-      ) : (
+      <EtatListe
+        chargement={loadingData}
+        erreur={erreurListe}
+        horsLigne={horsLigne}
+        vide={users.length === 0}
+        texteVide="Aucun utilisateur trouvé"
+        onReessayer={rechargerListe}
+      />
+
+      {!loadingData && !erreurListe && users.length > 0 && (
         <div className="bg-white rounded-xl border border-black/6 overflow-hidden">
           <table className="w-full">
             <thead>
@@ -157,7 +191,7 @@ function UserRow({ user, expanded, processing, onToggle, onAction, deleteConfirm
   expanded: boolean;
   processing: boolean;
   onToggle: () => void;
-  onAction: (action: string, extra?: Record<string, string>) => Promise<boolean>;
+  onAction: (action: string, extra?: Record<string, string>) => Promise<ResultatAction>;
   deleteConfirmUser: string | null;
   setDeleteConfirmUser: (id: string | null) => void;
   handleDeleteUser: (id: string) => void;
@@ -183,8 +217,8 @@ function UserRow({ user, expanded, processing, onToggle, onAction, deleteConfirm
   const handleActivate = async () => {
     const extra: Record<string, string> = { durationMonths };
     if (showCustom && customDays) extra.customDays = customDays;
-    const success = await onAction('activateSubscription', extra);
-    if (success) {
+    const resultat = await onAction('activateSubscription', extra);
+    if (resultat.ok) {
       setActionSuccess('premium');
       setTimeout(() => setActionSuccess(null), 3000);
     }
@@ -192,8 +226,8 @@ function UserRow({ user, expanded, processing, onToggle, onAction, deleteConfirm
 
   const handleDeactivate = async () => {
     setShowDowngradeConfirm(false);
-    const success = await onAction('deactivateSubscription');
-    if (success) {
+    const resultat = await onAction('deactivateSubscription');
+    if (resultat.ok) {
       setActionSuccess('downgrade');
       setTimeout(() => setActionSuccess(null), 3000);
     }

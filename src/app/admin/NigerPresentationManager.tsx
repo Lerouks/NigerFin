@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import {
   Loader2, Save, MapPin, Upload, Eye, EyeOff, ChevronDown, ChevronUp,
   Globe, Pickaxe,
 } from 'lucide-react';
+import { appelAdmin, envoiAdmin } from '@/app/admin/lib/appel-admin';
+import { EtatListe } from '@/app/admin/lib/EtatListe';
 
 interface Presentation {
   map_image_url: string;
@@ -50,6 +52,13 @@ interface Resource {
   is_visible: boolean;
 }
 
+interface DonneesNiger {
+  presentation?: Presentation | null;
+  facts?: Fact[] | null;
+  regions?: Region[] | null;
+  resources?: Resource[] | null;
+}
+
 type SubTab = 'presentation' | 'facts' | 'regions' | 'resources';
 
 const SUB_TABS: { id: SubTab; label: string; icon: typeof MapPin }[] = [
@@ -71,40 +80,45 @@ export function NigerPresentationManager() {
   const [regions, setRegions] = useState<Region[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const [horsLigne, setHorsLigne] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
 
-  useEffect(() => {
-    fetch('/api/admin/niger-presentation')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.presentation) setPresentation(data.presentation);
-        if (data.facts) setFacts(data.facts);
-        if (data.regions) setRegions(data.regions);
-        if (data.resources) setResources(data.resources);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+  const charger = useCallback(async () => {
+    setLoading(true);
+    setErreur(null);
+    const resultat = await appelAdmin<DonneesNiger | null>('/api/admin/niger-presentation');
+    if (resultat.ok) {
+      const donnees = resultat.donnees;
+      if (donnees?.presentation) setPresentation(donnees.presentation);
+      if (donnees?.facts) setFacts(donnees.facts);
+      if (donnees?.regions) setRegions(donnees.regions);
+      if (donnees?.resources) setResources(donnees.resources);
+      setHorsLigne(false);
+    } else {
+      setErreur(resultat.message);
+      setHorsLigne(resultat.horsLigne);
+    }
+    setLoading(false);
   }, []);
+
+  useEffect(() => {
+    void charger();
+  }, [charger]);
 
   const handleSave = async () => {
     setSaving(true);
     setMessage('');
-    try {
-      const res = await fetch('/api/admin/niger-presentation', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ presentation, facts, regions, resources }),
-      });
-      if (res.ok) {
-        setMessage('Sauvegarde réussie');
-        setTimeout(() => setMessage(''), 3000);
-      } else {
-        setMessage('Erreur lors de la sauvegarde');
-      }
-    } catch {
-      setMessage('Erreur lors de la sauvegarde');
+    const resultat = await envoiAdmin('/api/admin/niger-presentation', 'PUT', {
+      presentation, facts, regions, resources,
+    });
+    if (resultat.ok) {
+      setMessage('Sauvegarde réussie');
+      setTimeout(() => setMessage(''), 3000);
+    } else {
+      setMessage(resultat.message);
     }
     setSaving(false);
   };
@@ -113,23 +127,38 @@ export function NigerPresentationManager() {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
+    setMessage('');
     const formData = new FormData();
     formData.append('file', file);
-    try {
-      const res = await fetch('/api/admin/upload', { method: 'POST', body: formData });
-      const data = await res.json();
-      if (data.url) {
-        setPresentation((prev) => ({ ...prev, map_image_url: data.url }));
+    // Un envoi de fichier n'est jamais rejoué tout seul : cela créerait un doublon.
+    const resultat = await appelAdmin<{ url?: string } | null>('/api/admin/upload', {
+      method: 'POST',
+      body: formData,
+      tentatives: 1,
+    });
+    if (!resultat.ok) {
+      setMessage(resultat.message);
+    } else {
+      const url = resultat.donnees?.url;
+      if (url) {
+        setPresentation((prev) => ({ ...prev, map_image_url: url }));
+      } else {
+        setMessage("L'image n'a pas pu être envoyée : le serveur n'a renvoyé aucune adresse.");
       }
-    } catch {}
+    }
     setUploading(false);
   };
 
-  if (loading) {
+  if (loading || erreur) {
     return (
-      <div className="flex justify-center py-12">
-        <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
-      </div>
+      <EtatListe
+        chargement={loading}
+        erreur={erreur}
+        horsLigne={horsLigne}
+        vide={false}
+        texteVide="Aucune donnée"
+        onReessayer={() => { void charger(); }}
+      />
     );
   }
 

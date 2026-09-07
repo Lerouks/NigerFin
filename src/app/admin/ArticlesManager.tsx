@@ -3,11 +3,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Plus, Edit3, Trash2, Eye, Loader2, ArrowLeft, Save, Upload, Star, StarOff,
-  Image as ImageIcon, X, Globe, Lock,
+  Image as ImageIcon, X, Globe, Lock, AlertTriangle,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { EDITORIAL_ENTRIES } from '@/lib/navigation';
+import { appelAdmin, envoiAdmin } from '@/app/admin/lib/appel-admin';
+import { EtatListe } from '@/app/admin/lib/EtatListe';
 
 const RichTextEditor = dynamic(
   () => import('@/components/RichTextEditor').then(m => ({ default: m.RichTextEditor })),
@@ -29,6 +31,40 @@ interface ArticleRow {
   created_at: string;
   author_name: string;
   main_image_url: string | null;
+}
+
+/** Article complet renvoye par la route quand on demande un seul identifiant. */
+interface ArticleDetail {
+  id: string;
+  title?: string | null;
+  subtitle?: string | null;
+  slug?: string | null;
+  excerpt?: string | null;
+  category?: string | null;
+  sections?: string[] | null;
+  content_type?: string | null;
+  is_featured?: boolean | null;
+  featured_order?: number | null;
+  author_name?: string | null;
+  main_image_url?: string | null;
+  main_image_alt?: string | null;
+  main_image_caption?: string | null;
+  main_image_source?: string | null;
+  body?: string | null;
+  read_time?: number | null;
+  tags?: string[] | null;
+  seo_title?: string | null;
+  seo_description?: string | null;
+  status?: string | null;
+  published_at?: string | null;
+}
+
+/** Ce que la route renvoie apres un enregistrement. */
+interface ArticleEnregistre {
+  id: string;
+  slug: string;
+  status: string;
+  published_at?: string | null;
 }
 
 interface ArticleForm {
@@ -113,17 +149,24 @@ export function ArticlesManager() {
   const [filter, setFilter] = useState<'all' | 'published' | 'draft'>('all');
   const [tagInput, setTagInput] = useState('');
   const [togglingFeatured, setTogglingFeatured] = useState<string | null>(null);
-  const [featuredWarning, setFeaturedWarning] = useState('');
+  // Banniere de la vue liste : mise a la une, suppression, ouverture d'un article.
+  const [messageListe, setMessageListe] = useState('');
+  const [erreurListe, setErreurListe] = useState<string | null>(null);
+  const [horsLigneListe, setHorsLigneListe] = useState(false);
 
   const fetchArticles = useCallback(async () => {
     setLoading(true);
-    try {
-      const res = await fetch('/api/admin/articles');
-      if (res.ok) {
-        const data = await res.json();
-        setArticles(data);
-      }
-    } catch { /* ignore */ }
+    const resultat = await appelAdmin<ArticleRow[]>('/api/admin/articles');
+    if (resultat.ok) {
+      setArticles(Array.isArray(resultat.donnees) ? resultat.donnees : []);
+      setErreurListe(null);
+      setHorsLigneListe(false);
+    } else {
+      // Sans cette branche, la liste affichait « Aucun article » alors que la
+      // base en contenait huit et que la route repondait une erreur.
+      setErreurListe(resultat.message);
+      setHorsLigneListe(resultat.horsLigne);
+    }
     setLoading(false);
   }, []);
 
@@ -142,47 +185,45 @@ export function ArticlesManager() {
   const handleEdit = async (article: ArticleRow) => {
     setError('');
     setSuccess('');
-    try {
-      // Fetch full article data with body via specific endpoint
-      const res = await fetch(`/api/admin/articles?id=${article.id}`);
-      if (!res.ok) {
-        setError('Erreur lors du chargement de l\'article');
-        return;
-      }
-      const full = await res.json();
-      if (!full) {
-        setError('Article introuvable');
-        return;
-      }
-
-      setForm({
-        id: full.id,
-        title: full.title || '',
-        subtitle: full.subtitle || '',
-        slug: full.slug || '',
-        excerpt: full.excerpt || '',
-        category: full.category || 'economie',
-        sections: full.sections || [full.category || 'economie'],
-        content_type: full.content_type || 'free',
-        is_featured: full.is_featured || false,
-        featured_order: full.featured_order || 0,
-        author_name: full.author_name || 'NFI Report',
-        main_image_url: full.main_image_url || '',
-        main_image_alt: full.main_image_alt || '',
-        main_image_caption: full.main_image_caption || '',
-        main_image_source: full.main_image_source || '',
-        body: full.body || '',
-        read_time: full.read_time || 3,
-        tags: full.tags || [],
-        seo_title: full.seo_title || '',
-        seo_description: full.seo_description || '',
-        status: full.status || 'draft',
-        published_at: full.published_at ? full.published_at.slice(0, 16) : '',
-      });
-      setEditing(true);
-    } catch {
-      setError('Erreur réseau lors du chargement');
+    setMessageListe('');
+    // Fetch full article data with body via specific endpoint
+    const resultat = await appelAdmin<ArticleDetail | null>(`/api/admin/articles?id=${article.id}`);
+    if (!resultat.ok) {
+      // On reste sur la liste : le message doit donc s'afficher ici.
+      setMessageListe(resultat.message);
+      return;
     }
+    const full = resultat.donnees;
+    if (!full) {
+      setMessageListe('Article introuvable.');
+      return;
+    }
+
+    setForm({
+      id: full.id,
+      title: full.title || '',
+      subtitle: full.subtitle || '',
+      slug: full.slug || '',
+      excerpt: full.excerpt || '',
+      category: full.category || 'economie',
+      sections: full.sections || [full.category || 'economie'],
+      content_type: full.content_type || 'free',
+      is_featured: full.is_featured || false,
+      featured_order: full.featured_order || 0,
+      author_name: full.author_name || 'NFI Report',
+      main_image_url: full.main_image_url || '',
+      main_image_alt: full.main_image_alt || '',
+      main_image_caption: full.main_image_caption || '',
+      main_image_source: full.main_image_source || '',
+      body: full.body || '',
+      read_time: full.read_time || 3,
+      tags: full.tags || [],
+      seo_title: full.seo_title || '',
+      seo_description: full.seo_description || '',
+      status: full.status || 'draft',
+      published_at: full.published_at ? full.published_at.slice(0, 16) : '',
+    });
+    setEditing(true);
   };
 
   const handleSave = async (publishNow = false) => {
@@ -202,40 +243,41 @@ export function ArticlesManager() {
       published_at: publishNow && !form.published_at ? new Date().toISOString() : form.published_at || null,
     };
 
-    try {
-      const method = form.id ? 'PUT' : 'POST';
-      const res = await fetch('/api/admin/articles', {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (!res.ok) { setError(data.error || 'Erreur'); setSaving(false); return; }
+    const methode = form.id ? 'PUT' : 'POST';
+    const resultat = await envoiAdmin<ArticleEnregistre>('/api/admin/articles', methode, payload);
+    if (!resultat.ok) { setError(resultat.message); setSaving(false); return; }
 
-      // If featured was toggled on, use atomic endpoint to ensure only one featured
-      if (payload.is_featured) {
-        await fetch('/api/admin/articles/featured', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ articleId: data.id }),
-        });
-      }
-
-      setSuccess(publishNow ? 'Article publié !' : 'Article sauvegardé !');
-      setForm({ ...form, id: data.id, slug: data.slug, status: data.status, published_at: data.published_at || '' });
-      fetchArticles();
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Erreur');
+    const enregistre = resultat.donnees;
+    if (!enregistre?.id) {
+      setError("Le serveur n'a pas confirmé l'enregistrement. Revenez à la liste pour vérifier avant de recommencer.");
+      setSaving(false);
+      return;
     }
+
+    // If featured was toggled on, use atomic endpoint to ensure only one featured
+    if (payload.is_featured) {
+      const miseALaUne = await envoiAdmin('/api/admin/articles/featured', 'POST', { articleId: enregistre.id });
+      if (!miseALaUne.ok) {
+        // L'article est bien enregistré : seule la mise a la une a échoué.
+        setError(`L'article est enregistré, mais la mise à la une a échoué. ${miseALaUne.message}`);
+      }
+    }
+
+    setSuccess(publishNow ? 'Article publié !' : 'Article sauvegardé !');
+    setForm({ ...form, id: enregistre.id, slug: enregistre.slug, status: enregistre.status, published_at: enregistre.published_at || '' });
+    fetchArticles();
     setSaving(false);
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Supprimer cet article ?')) return;
-    try {
-      await fetch(`/api/admin/articles?id=${id}`, { method: 'DELETE' });
-      fetchArticles();
-    } catch { /* ignore */ }
+    setMessageListe('');
+    const resultat = await envoiAdmin(`/api/admin/articles?id=${id}`, 'DELETE');
+    if (!resultat.ok) {
+      setMessageListe(`La suppression a échoué. ${resultat.message}`);
+      return;
+    }
+    fetchArticles();
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -243,16 +285,26 @@ export function ArticlesManager() {
     if (!file) return;
     setUploading(true);
     setError('');
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const res = await fetch('/api/admin/upload', { method: 'POST', body: formData });
-      const data = await res.json();
-      if (!res.ok) { setError(data.error || 'Erreur upload'); setUploading(false); return; }
-      setForm((f) => ({ ...f, main_image_url: data.url }));
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Erreur upload');
+    const formData = new FormData();
+    formData.append('file', file);
+    // Un envoi de fichier n'est jamais rejoue tout seul : pas de doublon d'image.
+    const resultat = await appelAdmin<{ url?: string }>('/api/admin/upload', {
+      method: 'POST',
+      body: formData,
+      tentatives: 1,
+    });
+    if (!resultat.ok) {
+      setError(`L'image n'a pas pu être envoyée. ${resultat.message}`);
+      setUploading(false);
+      return;
     }
+    const adresse = resultat.donnees?.url;
+    if (!adresse) {
+      setError("L'image a été envoyée, mais le site n'a pas renvoyé son adresse. Réessayez.");
+      setUploading(false);
+      return;
+    }
+    setForm((f) => ({ ...f, main_image_url: adresse }));
     setUploading(false);
   };
 
@@ -270,33 +322,19 @@ export function ArticlesManager() {
 
   const handleToggleFeatured = async (article: ArticleRow) => {
     setTogglingFeatured(article.id);
-    setFeaturedWarning('');
-    try {
-      if (article.is_featured) {
-        // Unfeature, zero featured = pas de hero sur la home (fallback propre)
-        const res = await fetch(`/api/admin/articles/featured?articleId=${article.id}`, { method: 'DELETE' });
-        const data = await res.json();
-        if (!res.ok) {
-          setFeaturedWarning(data.error || 'Erreur');
-          setTogglingFeatured(null);
-          return;
-        }
-      } else {
-        // Set as featured, atomic: unfeaturing all others first
-        const res = await fetch('/api/admin/articles/featured', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ articleId: article.id }),
-        });
-        if (!res.ok) {
-          const data = await res.json();
-          setFeaturedWarning(data.error || 'Erreur');
-          setTogglingFeatured(null);
-          return;
-        }
-      }
-      await fetchArticles();
-    } catch { /* ignore */ }
+    setMessageListe('');
+    const resultat = article.is_featured
+      // Unfeature, zero featured = pas de hero sur la home (fallback propre)
+      ? await envoiAdmin(`/api/admin/articles/featured?articleId=${article.id}`, 'DELETE')
+      // Set as featured, atomic: unfeaturing all others first
+      : await envoiAdmin('/api/admin/articles/featured', 'POST', { articleId: article.id });
+
+    if (!resultat.ok) {
+      setMessageListe(resultat.message);
+      setTogglingFeatured(null);
+      return;
+    }
+    await fetchArticles();
     setTogglingFeatured(null);
   };
 
@@ -415,12 +453,28 @@ export function ArticlesManager() {
                 content={form.body}
                 onChange={(html) => setForm((f) => ({ ...f, body: html }))}
                 onImageUpload={async (file) => {
+                  setError('');
                   const formData = new FormData();
                   formData.append('file', file);
-                  const res = await fetch('/api/admin/upload', { method: 'POST', body: formData });
-                  const data = await res.json();
-                  if (!res.ok) throw new Error(data.error || 'Upload failed');
-                  return data.url;
+                  const resultat = await appelAdmin<{ url?: string }>('/api/admin/upload', {
+                    method: 'POST',
+                    body: formData,
+                    tentatives: 1,
+                  });
+                  // L'editeur avale l'erreur qu'on lui leve : on l'affiche donc
+                  // aussi dans la banniere, sinon l'echec resterait invisible.
+                  if (!resultat.ok) {
+                    const message = `L'image n'a pas pu être envoyée. ${resultat.message}`;
+                    setError(message);
+                    throw new Error(message);
+                  }
+                  const adresse = resultat.donnees?.url;
+                  if (!adresse) {
+                    const message = "L'image a été envoyée, mais le site n'a pas renvoyé son adresse. Réessayez.";
+                    setError(message);
+                    throw new Error(message);
+                  }
+                  return adresse;
                 }}
               />
             </div>
@@ -623,24 +677,29 @@ export function ArticlesManager() {
         </button>
       </div>
 
-      {featuredWarning && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-700 flex items-center gap-2">
-          <Star className="w-4 h-4 text-amber-500 shrink-0" />
-          {featuredWarning}
+      {messageListe && (
+        <div role="alert" className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-700 flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+          {messageListe}
         </div>
       )}
 
-      {loading ? (
-        <div className="text-center py-16"><Loader2 className="w-6 h-6 animate-spin text-gray-500 mx-auto" /></div>
-      ) : filteredArticles.length === 0 ? (
-        <div className="text-center py-16">
-          <p className="text-gray-500 mb-4">Aucun article</p>
+      <EtatListe
+        chargement={loading}
+        erreur={erreurListe}
+        horsLigne={horsLigneListe}
+        vide={filteredArticles.length === 0}
+        texteVide="Aucun article"
+        actionVide={
           <button onClick={handleNew}
             className="px-4 py-2 bg-[#111] text-white rounded-lg text-sm hover:bg-[#333]">
             Créer le premier article
           </button>
-        </div>
-      ) : (
+        }
+        onReessayer={fetchArticles}
+      />
+
+      {!loading && !erreurListe && filteredArticles.length > 0 && (
         <div className="bg-white rounded-xl border border-black/6 overflow-hidden">
           <table className="w-full">
             <thead>

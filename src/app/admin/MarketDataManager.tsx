@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Loader2, Plus, Pencil, Trash2, Check, X, TrendingUp, TrendingDown, RefreshCw,
 } from 'lucide-react';
+import { appelAdmin, envoiAdmin } from '@/app/admin/lib/appel-admin';
+import { EtatListe } from '@/app/admin/lib/EtatListe';
 
 interface MarketEntry {
   id: string;
@@ -26,6 +28,11 @@ interface SyncItemResult {
   status: 'updated' | 'skipped' | 'error';
   value?: number;
   error?: string;
+}
+
+interface SyncResponse {
+  summary?: { updated: number; errors: number };
+  results?: SyncItemResult[];
 }
 
 interface FailedItem {
@@ -76,6 +83,8 @@ export function MarketDataManager() {
   const [filterType, setFilterType] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [erreurListe, setErreurListe] = useState<string | null>(null);
+  const [horsLigne, setHorsLigne] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<{ updated: number; errors: number } | null>(null);
   const [failedItems, setFailedItems] = useState<FailedItem[]>([]);
@@ -87,36 +96,30 @@ export function MarketDataManager() {
     setSyncResult(null);
     setFailedItems([]);
     setError('');
-    try {
-      const res = await fetch('/api/admin/sync-market-data', { method: 'POST' });
-      if (res.ok) {
-        const data = await res.json();
-        setSyncResult(data.summary);
-        fetchData();
+    const resultat = await envoiAdmin<SyncResponse>('/api/admin/sync-market-data', 'POST');
+    if (resultat.ok) {
+      setSyncResult(resultat.donnees.summary ?? null);
+      fetchData();
 
-        // Identifier les échecs pour le popup
-        const failed: FailedItem[] = (data.results as SyncItemResult[])
-          .filter((r: SyncItemResult) => r.status === 'error' || r.status === 'skipped')
-          .map((r: SyncItemResult) => {
-            const entry = entries.find((e) => e.symbol === r.symbol);
-            return {
-              symbol: r.symbol,
-              name: entry?.name || r.symbol,
-              unit: entry?.unit || '',
-              manualValue: '',
-            };
-          });
+      // Identifier les échecs pour le popup
+      const failed: FailedItem[] = (resultat.donnees.results ?? [])
+        .filter((r: SyncItemResult) => r.status === 'error' || r.status === 'skipped')
+        .map((r: SyncItemResult) => {
+          const entry = entries.find((e) => e.symbol === r.symbol);
+          return {
+            symbol: r.symbol,
+            name: entry?.name || r.symbol,
+            unit: entry?.unit || '',
+            manualValue: '',
+          };
+        });
 
-        if (failed.length > 0) {
-          setFailedItems(failed);
-          setShowFailedPopup(true);
-        }
-      } else {
-        const data = await res.json().catch(() => ({}));
-        setError(data.error || 'Erreur lors de la synchronisation');
+      if (failed.length > 0) {
+        setFailedItems(failed);
+        setShowFailedPopup(true);
       }
-    } catch {
-      setError('Erreur réseau');
+    } else {
+      setError(resultat.message);
     }
     setSyncing(false);
   };
@@ -135,23 +138,36 @@ export function MarketDataManager() {
     }
 
     setSavingManual(true);
+    setError('');
     let updatedCount = 0;
+    const echecs: string[] = [];
+    let dernierMessage = '';
 
     for (const item of toUpdate) {
       const entry = entries.find((e) => e.symbol === item.symbol);
       if (!entry) continue;
 
-      const res = await fetch('/api/admin/market-data', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: entry.id, value: parseUserNumber(item.manualValue) }),
+      const resultat = await envoiAdmin('/api/admin/market-data', 'PUT', {
+        id: entry.id,
+        value: parseUserNumber(item.manualValue),
       });
-      if (res.ok) updatedCount++;
+      if (resultat.ok) {
+        updatedCount++;
+      } else {
+        echecs.push(`${entry.name || item.symbol} (${item.manualValue})`);
+        dernierMessage = resultat.message;
+      }
     }
 
     setSavingManual(false);
     setShowFailedPopup(false);
     setFailedItems([]);
+    if (echecs.length > 0) {
+      const debut = echecs.length === 1
+        ? "Une valeur n'a pas pu être enregistrée"
+        : `${echecs.length} valeurs n'ont pas pu être enregistrées`;
+      setError(`${debut} : ${echecs.join(', ')}. ${dernierMessage}`);
+    }
     if (updatedCount > 0) {
       setSyncResult((prev) => prev ? {
         ...prev,
@@ -164,13 +180,15 @@ export function MarketDataManager() {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    try {
-      const res = await fetch('/api/admin/market-data');
-      if (res.ok) {
-        const data = await res.json();
-        setEntries(data);
-      }
-    } catch { /* ignore */ }
+    const resultat = await appelAdmin<MarketEntry[]>('/api/admin/market-data');
+    if (resultat.ok) {
+      setEntries(Array.isArray(resultat.donnees) ? resultat.donnees : []);
+      setErreurListe(null);
+      setHorsLigne(false);
+    } else {
+      setErreurListe(resultat.message);
+      setHorsLigne(resultat.horsLigne);
+    }
     setLoading(false);
   }, []);
 
@@ -179,43 +197,28 @@ export function MarketDataManager() {
   const handleSave = async () => {
     setSaving(true);
     setError('');
-    try {
-      const method = editId ? 'PUT' : 'POST';
-      const payload = { ...form, value: parseUserNumber(form.value) };
-      const body = editId ? { id: editId, ...payload } : payload;
-      const res = await fetch('/api/admin/market-data', {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      if (res.ok) {
-        setEditId(null);
-        setShowCreate(false);
-        setForm(emptyForm);
-        fetchData();
-      } else {
-        const data = await res.json().catch(() => ({}));
-        setError(data.error || 'Erreur lors de la sauvegarde');
-      }
-    } catch {
-      setError('Erreur réseau');
+    const payload = { ...form, value: parseUserNumber(form.value) };
+    const body = editId ? { id: editId, ...payload } : payload;
+    const resultat = await envoiAdmin('/api/admin/market-data', editId ? 'PUT' : 'POST', body);
+    if (resultat.ok) {
+      setEditId(null);
+      setShowCreate(false);
+      setForm(emptyForm);
+      fetchData();
+    } else {
+      setError(resultat.message);
     }
     setSaving(false);
   };
 
   const handleDelete = async (id: string) => {
     setError('');
-    try {
-      const res = await fetch(`/api/admin/market-data?id=${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        setDeleteConfirm(null);
-        fetchData();
-      } else {
-        const data = await res.json().catch(() => ({}));
-        setError(data.error || 'Erreur lors de la suppression');
-      }
-    } catch {
-      setError('Erreur réseau');
+    const resultat = await envoiAdmin(`/api/admin/market-data?id=${id}`, 'DELETE');
+    if (resultat.ok) {
+      setDeleteConfirm(null);
+      fetchData();
+    } else {
+      setError(resultat.message);
     }
   };
 
@@ -336,11 +339,16 @@ export function MarketDataManager() {
       )}
 
       {/* Table */}
-      {loading ? (
-        <div className="text-center py-12">
-          <Loader2 className="w-6 h-6 animate-spin text-gray-500 mx-auto" />
-        </div>
-      ) : (
+      <EtatListe
+        chargement={loading}
+        erreur={erreurListe}
+        horsLigne={horsLigne}
+        vide={filtered.length === 0}
+        texteVide="Aucune donnée de marché"
+        onReessayer={fetchData}
+      />
+
+      {!loading && !erreurListe && filtered.length > 0 && (
         <div className="bg-white rounded-xl border border-black/6 overflow-hidden">
           <table className="w-full">
             <thead>
@@ -449,9 +457,6 @@ export function MarketDataManager() {
               ))}
             </tbody>
           </table>
-          {filtered.length === 0 && (
-            <p className="text-center py-8 text-sm text-gray-500">Aucune donnée de marché</p>
-          )}
         </div>
       )}
 

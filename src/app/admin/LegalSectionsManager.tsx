@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import * as Sentry from '@sentry/nextjs';
-import { Loader2, Save, Plus, Trash2, GripVertical, FileText } from 'lucide-react';
+import { Save, Plus, Trash2, GripVertical, FileText, Loader2 } from 'lucide-react';
+import { appelAdmin, envoiAdmin } from '@/app/admin/lib/appel-admin';
+import { EtatListe } from '@/app/admin/lib/EtatListe';
 
 interface LegalSection {
   id: string;
@@ -23,6 +25,8 @@ const PAGES = [
   { slug: 'contact', label: 'Contact', route: '/contact' },
 ];
 
+const TEXTE_VIDE = 'Aucune section pour cette page. Cliquez sur « Ajouter une section » pour commencer.';
+
 export function LegalSectionsManager() {
   const [activeSlug, setActiveSlug] = useState('mentions-legales');
   const [sections, setSections] = useState<LegalSection[]>([]);
@@ -31,21 +35,34 @@ export function LegalSectionsManager() {
   const [adding, setAdding] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  // Echec du chargement de la liste : distinct de la liste vide, pour ne jamais
+  // laisser croire que la page n'a aucune section alors que l'appel a rate.
+  const [erreurListe, setErreurListe] = useState<string | null>(null);
+  const [horsLigne, setHorsLigne] = useState(false);
 
   const activePage = PAGES.find((p) => p.slug === activeSlug)!;
 
   const fetchSections = useCallback(async (slug: string) => {
     setLoading(true);
     setMessage(null);
-    try {
-      const res = await fetch(`/api/admin/legal-sections?page=${slug}`);
-      const data = await res.json();
-      if (Array.isArray(data)) setSections(data);
-      else setSections([]);
-    } catch (err) {
-      Sentry.captureException(err, { tags: { context: 'legal-sections-fetch' } });
-      setMessage({ type: 'error', text: 'Erreur de chargement' });
+    setErreurListe(null);
+    setHorsLigne(false);
+
+    const resultat = await appelAdmin<LegalSection[]>(`/api/admin/legal-sections?page=${slug}`);
+
+    if (resultat.ok) {
+      setSections(Array.isArray(resultat.donnees) ? resultat.donnees : []);
+    } else {
+      setSections([]);
+      setErreurListe(resultat.message);
+      setHorsLigne(resultat.horsLigne);
+      Sentry.captureMessage('legal-sections-fetch failed', {
+        level: 'error',
+        tags: { context: 'legal-sections-fetch' },
+        extra: { slug, statut: resultat.statut },
+      });
     }
+
     setLoading(false);
   }, []);
 
@@ -58,49 +75,49 @@ export function LegalSectionsManager() {
   const handleSave = async () => {
     setSaving(true);
     setMessage(null);
-    try {
-      const res = await fetch('/api/admin/legal-sections', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sections: sections.map((s, i) => ({ ...s, display_order: i + 1 })),
-        }),
+
+    const resultat = await envoiAdmin('/api/admin/legal-sections', 'PUT', {
+      sections: sections.map((s, i) => ({ ...s, display_order: i + 1 })),
+    });
+
+    if (resultat.ok) {
+      setMessage({ type: 'success', text: 'Sections sauvegardées' });
+      await fetchSections(activeSlug);
+    } else {
+      setMessage({ type: 'error', text: resultat.message });
+      Sentry.captureMessage('legal-sections-save failed', {
+        level: 'error',
+        tags: { context: 'legal-sections-save' },
+        extra: { slug: activeSlug, statut: resultat.statut },
       });
-      if (res.ok) {
-        setMessage({ type: 'success', text: 'Sections sauvegardées' });
-        await fetchSections(activeSlug);
-      } else {
-        setMessage({ type: 'error', text: 'Erreur lors de la sauvegarde' });
-      }
-    } catch (err) {
-      Sentry.captureException(err, { tags: { context: 'legal-sections-save' } });
-      setMessage({ type: 'error', text: 'Erreur réseau' });
     }
+
     setSaving(false);
   };
 
   const handleAdd = async () => {
     setAdding(true);
     setMessage(null);
-    try {
-      const res = await fetch('/api/admin/legal-sections', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          page_slug: activeSlug,
-          heading: 'Nouvelle section',
-          text: '',
-          display_order: sections.length + 1,
-        }),
+
+    const resultat = await envoiAdmin('/api/admin/legal-sections', 'POST', {
+      page_slug: activeSlug,
+      heading: 'Nouvelle section',
+      text: '',
+      display_order: sections.length + 1,
+    });
+
+    if (resultat.ok) {
+      await fetchSections(activeSlug);
+      setMessage({ type: 'success', text: 'Section ajoutée' });
+    } else {
+      setMessage({ type: 'error', text: resultat.message });
+      Sentry.captureMessage('legal-sections-add failed', {
+        level: 'error',
+        tags: { context: 'legal-sections-add' },
+        extra: { slug: activeSlug, statut: resultat.statut },
       });
-      if (res.ok) {
-        await fetchSections(activeSlug);
-        setMessage({ type: 'success', text: 'Section ajoutée' });
-      }
-    } catch (err) {
-      Sentry.captureException(err, { tags: { context: 'legal-sections-add' } });
-      setMessage({ type: 'error', text: "Erreur lors de l'ajout" });
     }
+
     setAdding(false);
   };
 
@@ -108,20 +125,21 @@ export function LegalSectionsManager() {
     if (!confirm('Supprimer cette section ?')) return;
     setDeletingId(id);
     setMessage(null);
-    try {
-      const res = await fetch('/api/admin/legal-sections', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
+
+    const resultat = await envoiAdmin('/api/admin/legal-sections', 'DELETE', { id });
+
+    if (resultat.ok) {
+      await fetchSections(activeSlug);
+      setMessage({ type: 'success', text: 'Section supprimée' });
+    } else {
+      setMessage({ type: 'error', text: resultat.message });
+      Sentry.captureMessage('legal-sections-delete failed', {
+        level: 'error',
+        tags: { context: 'legal-sections-delete' },
+        extra: { slug: activeSlug, statut: resultat.statut },
       });
-      if (res.ok) {
-        await fetchSections(activeSlug);
-        setMessage({ type: 'success', text: 'Section supprimée' });
-      }
-    } catch (err) {
-      Sentry.captureException(err, { tags: { context: 'legal-sections-delete' } });
-      setMessage({ type: 'error', text: 'Erreur lors de la suppression' });
     }
+
     setDeletingId(null);
   };
 
@@ -167,7 +185,7 @@ export function LegalSectionsManager() {
           <h3 className="text-sm font-semibold">{activePage.label}</h3>
           <p className="text-[12px] text-gray-500">
             Route : <span className="font-mono">{activePage.route}</span>
-            {sections.length === 0 && !loading && (
+            {sections.length === 0 && !loading && !erreurListe && (
               <span className="ml-2 text-amber-600">· Aucune section (contenu vide)</span>
             )}
           </p>
@@ -202,10 +220,15 @@ export function LegalSectionsManager() {
       )}
 
       {/* Sections */}
-      {loading ? (
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
-        </div>
+      {loading || erreurListe || sections.length === 0 ? (
+        <EtatListe
+          chargement={loading}
+          erreur={erreurListe}
+          horsLigne={horsLigne}
+          vide={sections.length === 0}
+          texteVide={TEXTE_VIDE}
+          onReessayer={() => fetchSections(activeSlug)}
+        />
       ) : (
       <div className="space-y-4">
         {sections.map((section, index) => (
@@ -274,12 +297,6 @@ export function LegalSectionsManager() {
             </div>
           </div>
         ))}
-
-        {sections.length === 0 && (
-          <div className="text-center py-12 text-sm text-gray-500">
-            Aucune section pour cette page. Cliquez sur &quot;Ajouter une section&quot; pour commencer.
-          </div>
-        )}
       </div>
       )}
     </div>

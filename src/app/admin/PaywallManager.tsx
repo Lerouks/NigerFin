@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Loader2, Check, Eye, MousePointerClick, X as XIcon, BarChart3, Clock, ArrowRight, Users, TrendingUp } from 'lucide-react';
+import { appelAdmin, envoiAdmin } from '@/app/admin/lib/appel-admin';
+import { EtatListe } from '@/app/admin/lib/EtatListe';
 
 interface PaywallConfig {
   enabled: boolean;
@@ -53,43 +55,52 @@ export function PaywallManager() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
+  const [erreurConfig, setErreurConfig] = useState<string | null>(null);
+  const [horsLigneConfig, setHorsLigneConfig] = useState(false);
+  const [erreurStats, setErreurStats] = useState<string | null>(null);
+  const [horsLigneStats, setHorsLigneStats] = useState(false);
 
-  const fetchConfig = useCallback(async () => {
+  const chargerDonnees = useCallback(async () => {
     setLoading(true);
-    try {
-      const [cfgRes, anaRes] = await Promise.all([
-        fetch('/api/admin/paywall'),
-        fetch('/api/admin/paywall/analytics?days=30'),
-      ]);
-      if (cfgRes.ok) setConfig(await cfgRes.json());
-      if (anaRes.ok) setAnalytics(await anaRes.json());
-    } catch { /* ignore */ }
+    setErreurConfig(null);
+    setErreurStats(null);
+    const [resConfig, resStats] = await Promise.all([
+      appelAdmin<PaywallConfig>('/api/admin/paywall'),
+      appelAdmin<AnalyticsSummary>('/api/admin/paywall/analytics?days=30'),
+    ]);
+
+    if (resConfig.ok) {
+      setConfig(resConfig.donnees ?? null);
+    } else {
+      setConfig(null);
+      setErreurConfig(resConfig.message);
+      setHorsLigneConfig(resConfig.horsLigne);
+    }
+
+    if (resStats.ok) {
+      setAnalytics(resStats.donnees ?? null);
+    } else {
+      setAnalytics(null);
+      setErreurStats(resStats.message);
+      setHorsLigneStats(resStats.horsLigne);
+    }
+
     setLoading(false);
   }, []);
 
-  useEffect(() => { fetchConfig(); }, [fetchConfig]);
+  useEffect(() => { chargerDonnees(); }, [chargerDonnees]);
 
   const handleSave = async () => {
     if (!config) return;
     setSaving(true);
     setError('');
-    try {
-      const res = await fetch('/api/admin/paywall', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      });
-      if (res.ok) {
-        const updated = await res.json();
-        setConfig(updated);
-        setSaved(true);
-        setTimeout(() => setSaved(false), 2000);
-      } else {
-        const err = await res.json().catch(() => ({ error: 'Erreur serveur' }));
-        setError(err.error || 'Erreur lors de la sauvegarde');
-      }
-    } catch {
-      setError('Erreur réseau');
+    const resultat = await envoiAdmin<PaywallConfig>('/api/admin/paywall', 'PUT', config);
+    if (resultat.ok) {
+      if (resultat.donnees) setConfig(resultat.donnees);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } else {
+      setError(resultat.message);
     }
     setSaving(false);
   };
@@ -99,20 +110,35 @@ export function PaywallManager() {
     setConfig({ ...config, [key]: value });
   };
 
-  if (loading) {
+  if (loading || erreurConfig || !config) {
     return (
-      <div className="text-center py-12">
-        <Loader2 className="w-6 h-6 animate-spin text-gray-500 mx-auto" />
-      </div>
+      <EtatListe
+        chargement={loading}
+        erreur={erreurConfig}
+        horsLigne={horsLigneConfig}
+        vide={!config}
+        texteVide="La configuration du paywall est introuvable."
+        onReessayer={chargerDonnees}
+      />
     );
-  }
-
-  if (!config) {
-    return <p className="text-center py-12 text-gray-500">Erreur de chargement de la configuration</p>;
   }
 
   return (
     <div className="space-y-6">
+      {/* Statistiques : l'echec du chargement ne doit jamais passer pour une absence de donnees */}
+      {erreurStats && (
+        <div className="bg-white rounded-xl border border-black/6">
+          <EtatListe
+            chargement={false}
+            erreur={erreurStats}
+            horsLigne={horsLigneStats}
+            vide={false}
+            texteVide="Aucune statistique sur les 30 derniers jours."
+            onReessayer={chargerDonnees}
+          />
+        </div>
+      )}
+
       {/* Enhanced analytics dashboard */}
       {analytics && (
         <div className="space-y-4">

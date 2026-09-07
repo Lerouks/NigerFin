@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Loader2, CheckCircle, XCircle, Clock, Download } from 'lucide-react';
 import { formatPrice, getBillingCycleLabel } from '@/config/pricing';
+import { appelAdmin, envoiAdmin } from '@/app/admin/lib/appel-admin';
+import { EtatListe } from '@/app/admin/lib/EtatListe';
 
 interface PaymentRequest {
   id: string;
@@ -29,24 +31,32 @@ export function PaymentsTab({ onStatsRefresh }: PaymentsTabProps) {
   const [processingPayment, setProcessingPayment] = useState<string | null>(null);
   const [paymentFilter, setPaymentFilter] = useState('pending');
   const [error, setError] = useState('');
+  const [erreurListe, setErreurListe] = useState<string | null>(null);
+  const [horsLigne, setHorsLigne] = useState(false);
 
   const fetchPayments = useCallback(async (status: string) => {
     setLoading(true);
     setPaymentFilter(status);
     setError('');
-    try {
-      const res = await fetch(`/api/payment/list?status=${status}`);
-      if (!res.ok) {
-        setError('Erreur lors du chargement des paiements');
-        setLoading(false);
-        return;
-      }
-      const json = await res.json();
-      const list = json.data ?? json;
-      if (Array.isArray(list)) setPayments(list);
-    } catch {
-      setError('Erreur réseau');
+    setErreurListe(null);
+    setHorsLigne(false);
+
+    const resultat = await appelAdmin<PaymentRequest[] | { data?: PaymentRequest[] }>(
+      `/api/payment/list?status=${status}`,
+    );
+
+    if (!resultat.ok) {
+      // Sans cette branche, la liste restait vide en silence et laissait croire
+      // qu'aucun paiement n'existait.
+      setErreurListe(resultat.message);
+      setHorsLigne(resultat.horsLigne);
+      setLoading(false);
+      return;
     }
+
+    const brut = resultat.donnees;
+    const list = Array.isArray(brut) ? brut : brut?.data;
+    if (Array.isArray(list)) setPayments(list);
     setLoading(false);
   }, []);
 
@@ -56,26 +66,20 @@ export function PaymentsTab({ onStatsRefresh }: PaymentsTabProps) {
   const handlePaymentAction = async (paymentId: string, action: 'verify' | 'reject') => {
     setProcessingPayment(paymentId);
     setError('');
-    try {
-      const res = await fetch('/api/payment/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          paymentRequestId: paymentId,
-          action,
-          rejectionReason: action === 'reject' ? 'Paiement non confirmé' : undefined,
-        }),
-      });
-      if (res.ok) {
-        setPayments((prev) => prev.filter((p) => p.id !== paymentId));
-        onStatsRefresh();
-      } else {
-        const data = await res.json().catch(() => ({}));
-        setError(data.error || `Erreur lors de ${action === 'verify' ? 'la validation' : 'du rejet'}`);
-      }
-    } catch {
-      setError('Erreur réseau');
+
+    const resultat = await envoiAdmin('/api/payment/verify', 'POST', {
+      paymentRequestId: paymentId,
+      action,
+      rejectionReason: action === 'reject' ? 'Paiement non confirmé' : undefined,
+    });
+
+    if (resultat.ok) {
+      setPayments((prev) => prev.filter((p) => p.id !== paymentId));
+      onStatsRefresh();
+    } else {
+      setError(resultat.message);
     }
+
     setProcessingPayment(null);
   };
 
@@ -114,11 +118,16 @@ export function PaymentsTab({ onStatsRefresh }: PaymentsTabProps) {
         </div>
       )}
 
-      {loading ? (
-        <div className="text-center py-12">
-          <Loader2 className="w-6 h-6 animate-spin text-gray-500 mx-auto" />
-        </div>
-      ) : (
+      <EtatListe
+        chargement={loading}
+        erreur={erreurListe}
+        horsLigne={horsLigne}
+        vide={payments.length === 0}
+        texteVide={paymentFilter === 'pending' ? 'Aucun paiement en attente' : 'Aucun paiement'}
+        onReessayer={() => fetchPayments(paymentFilter)}
+      />
+
+      {!loading && !erreurListe && payments.length > 0 && (
         <div className="bg-white rounded-xl border border-black/6 overflow-hidden">
           <table className="w-full">
             <thead>
@@ -167,9 +176,6 @@ export function PaymentsTab({ onStatsRefresh }: PaymentsTabProps) {
               ))}
             </tbody>
           </table>
-          {payments.length === 0 && (
-            <p className="text-center py-8 text-sm text-gray-500">Aucun paiement {paymentFilter === 'pending' ? 'en attente' : ''}</p>
-          )}
         </div>
       )}
     </div>

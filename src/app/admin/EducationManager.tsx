@@ -7,6 +7,8 @@ import {
   BookOpen,
 } from 'lucide-react';
 import { useToast } from '@/components/Toast';
+import { appelAdmin, envoiAdmin } from '@/app/admin/lib/appel-admin';
+import { EtatListe } from '@/app/admin/lib/EtatListe';
 
 interface Category {
   id: string;
@@ -29,6 +31,12 @@ interface Lesson {
   content: string;
 }
 
+/** Ce qu'un appel raté rapporte : la phrase à afficher et le code du serveur. */
+interface Echec {
+  message: string;
+  statut: number;
+}
+
 const ACCESS_LEVELS = [
   { value: 'free', label: 'Gratuit', color: 'bg-emerald-100 text-emerald-700' },
   { value: 'premium', label: 'Premium', color: 'bg-blue-100 text-blue-700' },
@@ -48,13 +56,30 @@ export function EducationManager() {
   const [saving, setSaving] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 
-  // Qual H-1 : helper centralise au lieu de catches vides. Toast + Sentry.
-  const handleError = useCallback(
-    (err: unknown, context: string, userMessage: string) => {
-      Sentry.captureException(err, { tags: { context: `education-manager-${context}` } });
-      showToast(userMessage, 'error');
+  // Echec du chargement d'une liste : distinct de la liste vide, pour ne jamais
+  // laisser croire qu'il n'y a aucune categorie alors que l'appel a rate.
+  const [erreurCategories, setErreurCategories] = useState<string | null>(null);
+  const [horsLigneCategories, setHorsLigneCategories] = useState(false);
+  const [chargementLecons, setChargementLecons] = useState(true);
+  const [erreurLecons, setErreurLecons] = useState<string | null>(null);
+  const [horsLigneLecons, setHorsLigneLecons] = useState(false);
+
+  // Qual H-1 : helper centralise au lieu de catches vides.
+  const signalerEchec = useCallback((contexte: string, echec: Echec) => {
+    Sentry.captureMessage(`education-${contexte} failed`, {
+      level: 'error',
+      tags: { context: `education-manager-${contexte}` },
+      extra: { statut: echec.statut, message: echec.message },
+    });
+  }, []);
+
+  // Une ecriture qui echoue doit se voir : Sentry pour nous, message pour lui.
+  const echecEcriture = useCallback(
+    (contexte: string, echec: Echec) => {
+      signalerEchec(contexte, echec);
+      showToast(echec.message, 'error');
     },
-    [showToast],
+    [signalerEchec, showToast],
   );
 
   // Category form
@@ -71,23 +96,41 @@ export function EducationManager() {
 
   const fetchCategories = useCallback(async () => {
     setLoading(true);
-    try {
-      const res = await fetch('/api/admin/education/categories');
-      if (res.ok) setCategories(await res.json());
-    } catch (err) {
-      handleError(err, 'crud', 'Erreur lors de l\'opération. Réessayez.');
+
+    const resultat = await appelAdmin<Category[]>('/api/admin/education/categories');
+
+    if (resultat.ok) {
+      setCategories(Array.isArray(resultat.donnees) ? resultat.donnees : []);
+      setErreurCategories(null);
+      setHorsLigneCategories(false);
+    } else {
+      setCategories([]);
+      setErreurCategories(resultat.message);
+      setHorsLigneCategories(resultat.horsLigne);
+      signalerEchec('categories-fetch', resultat);
     }
+
     setLoading(false);
-  }, [handleError]);
+  }, [signalerEchec]);
 
   const fetchLessons = useCallback(async (categoryId: string) => {
-    try {
-      const res = await fetch(`/api/admin/education/lessons?category_id=${categoryId}`);
-      if (res.ok) setLessons(await res.json());
-    } catch (err) {
-      handleError(err, 'crud', 'Erreur lors de l\'opération. Réessayez.');
+    setChargementLecons(true);
+
+    const resultat = await appelAdmin<Lesson[]>(`/api/admin/education/lessons?category_id=${categoryId}`);
+
+    if (resultat.ok) {
+      setLessons(Array.isArray(resultat.donnees) ? resultat.donnees : []);
+      setErreurLecons(null);
+      setHorsLigneLecons(false);
+    } else {
+      setLessons([]);
+      setErreurLecons(resultat.message);
+      setHorsLigneLecons(resultat.horsLigne);
+      signalerEchec('lecons-fetch', resultat);
     }
-  }, [handleError]);
+
+    setChargementLecons(false);
+  }, [signalerEchec]);
 
   useEffect(() => { fetchCategories(); }, [fetchCategories]);
   useEffect(() => { if (selectedCategory) fetchLessons(selectedCategory.id); }, [selectedCategory, fetchLessons]);
@@ -95,34 +138,30 @@ export function EducationManager() {
   // ── Category CRUD ──
   const handleSaveCategory = async () => {
     setSaving(true);
-    try {
-      const method = editCatId ? 'PUT' : 'POST';
-      const body = editCatId ? { id: editCatId, ...catForm } : catForm;
-      const res = await fetch('/api/admin/education/categories', {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      if (res.ok) {
-        resetCatForm();
-        fetchCategories();
-      }
-    } catch (err) {
-      handleError(err, 'crud', 'Erreur lors de l\'opération. Réessayez.');
+
+    const method = editCatId ? 'PUT' : 'POST';
+    const body = editCatId ? { id: editCatId, ...catForm } : catForm;
+    const resultat = await envoiAdmin('/api/admin/education/categories', method, body);
+
+    if (resultat.ok) {
+      resetCatForm();
+      fetchCategories();
+    } else {
+      echecEcriture('categorie-enregistrement', resultat);
     }
+
     setSaving(false);
   };
 
   const handleDeleteCategory = async (id: string) => {
-    try {
-      const res = await fetch(`/api/admin/education/categories?id=${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        setDeleteConfirm(null);
-        if (selectedCategory?.id === id) setSelectedCategory(null);
-        fetchCategories();
-      }
-    } catch (err) {
-      handleError(err, 'crud', 'Erreur lors de l\'opération. Réessayez.');
+    const resultat = await envoiAdmin(`/api/admin/education/categories?id=${id}`, 'DELETE');
+
+    if (resultat.ok) {
+      setDeleteConfirm(null);
+      if (selectedCategory?.id === id) setSelectedCategory(null);
+      fetchCategories();
+    } else {
+      echecEcriture('categorie-suppression', resultat);
     }
   };
 
@@ -139,15 +178,15 @@ export function EducationManager() {
   };
 
   const toggleCategoryAvailable = async (cat: Category) => {
-    try {
-      await fetch('/api/admin/education/categories', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: cat.id, available: !cat.available }),
-      });
+    const resultat = await envoiAdmin('/api/admin/education/categories', 'PUT', {
+      id: cat.id,
+      available: !cat.available,
+    });
+
+    if (resultat.ok) {
       fetchCategories();
-    } catch (err) {
-      handleError(err, 'crud', 'Erreur lors de l\'opération. Réessayez.');
+    } else {
+      echecEcriture('categorie-visibilite', resultat);
     }
   };
 
@@ -155,38 +194,35 @@ export function EducationManager() {
   const handleSaveLesson = async () => {
     if (!selectedCategory) return;
     setSaving(true);
-    try {
-      const method = editLessonId ? 'PUT' : 'POST';
-      const body = editLessonId
-        ? { id: editLessonId, ...lessonForm }
-        : { category_id: selectedCategory.id, ...lessonForm };
-      const res = await fetch('/api/admin/education/lessons', {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      if (res.ok) {
-        resetLessonForm();
-        fetchLessons(selectedCategory.id);
-        fetchCategories();
-      }
-    } catch (err) {
-      handleError(err, 'crud', 'Erreur lors de l\'opération. Réessayez.');
+
+    const method = editLessonId ? 'PUT' : 'POST';
+    const body = editLessonId
+      ? { id: editLessonId, ...lessonForm }
+      : { category_id: selectedCategory.id, ...lessonForm };
+    const resultat = await envoiAdmin('/api/admin/education/lessons', method, body);
+
+    if (resultat.ok) {
+      resetLessonForm();
+      fetchLessons(selectedCategory.id);
+      fetchCategories();
+    } else {
+      echecEcriture('lecon-enregistrement', resultat);
     }
+
     setSaving(false);
   };
 
   const handleDeleteLesson = async (id: string) => {
     if (!selectedCategory) return;
-    try {
-      const res = await fetch(`/api/admin/education/lessons?id=${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        setDeleteConfirm(null);
-        fetchLessons(selectedCategory.id);
-        fetchCategories();
-      }
-    } catch (err) {
-      handleError(err, 'crud', 'Erreur lors de l\'opération. Réessayez.');
+
+    const resultat = await envoiAdmin(`/api/admin/education/lessons?id=${id}`, 'DELETE');
+
+    if (resultat.ok) {
+      setDeleteConfirm(null);
+      fetchLessons(selectedCategory.id);
+      fetchCategories();
+    } else {
+      echecEcriture('lecon-suppression', resultat);
     }
   };
 
@@ -227,7 +263,13 @@ export function EducationManager() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <button
-            onClick={() => { setSelectedCategory(null); setLessons([]); resetLessonForm(); }}
+            onClick={() => {
+              setSelectedCategory(null);
+              setLessons([]);
+              setErreurLecons(null);
+              setChargementLecons(true);
+              resetLessonForm();
+            }}
             className="flex items-center gap-1.5 text-[13px] text-gray-500 hover:text-black transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -361,9 +403,14 @@ export function EducationManager() {
               </div>
             </div>
           ))}
-          {lessons.length === 0 && (
-            <p className="text-center py-8 text-sm text-gray-500">Aucune leçon dans cette catégorie</p>
-          )}
+          <EtatListe
+            chargement={chargementLecons}
+            erreur={erreurLecons}
+            horsLigne={horsLigneLecons}
+            vide={lessons.length === 0}
+            texteVide="Aucune leçon dans cette catégorie"
+            onReessayer={() => fetchLessons(selectedCategory.id)}
+          />
         </div>
       </div>
     );
@@ -523,9 +570,14 @@ export function EducationManager() {
             </div>
           </div>
         ))}
-        {categories.length === 0 && (
-          <p className="text-center py-8 text-sm text-gray-500">Aucune catégorie</p>
-        )}
+        <EtatListe
+          chargement={loading}
+          erreur={erreurCategories}
+          horsLigne={horsLigneCategories}
+          vide={categories.length === 0}
+          texteVide="Aucune catégorie"
+          onReessayer={fetchCategories}
+        />
       </div>
     </div>
   );

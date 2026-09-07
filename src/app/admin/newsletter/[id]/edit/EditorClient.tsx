@@ -11,10 +11,16 @@ import type { NewsletterIssueRow, NewsletterAudience, NewsletterStatus } from '@
 import type { NewsletterIssue } from '@/emails/types';
 import { FormSection, Field, RepeatableSection } from './EditorFormParts';
 import { EditorDiscoverSection } from './EditorDiscoverSection';
+import { envoiAdmin } from '@/app/admin/lib/appel-admin';
 
 interface EditorClientProps {
   issue: NewsletterIssueRow;
 }
+
+/** Ce que les routes d'administration renvoient quand tout va bien. */
+type ReponseNumero = { issue?: NewsletterIssueRow } | null;
+type ReponseTest = { sentTo?: string } | null;
+type ReponseEnvoi = { recipientsCount?: number } | null;
 
 export function EditorClient({ issue: initialIssue }: EditorClientProps) {
   const router = useRouter();
@@ -22,6 +28,7 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
   const [content, setContent] = useState<NewsletterIssue>(initialIssue.content);
   const [pending, startTransition] = useTransition();
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [messageEstUnEchec, setMessageEstUnEchec] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [testEmail, setTestEmail] = useState('');
 
@@ -36,80 +43,92 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
 
   const save = useCallback(() => {
     setSaveMessage(null);
+    setMessageEstUnEchec(false);
     startTransition(async () => {
-      try {
-        const res = await fetch(`/api/admin/newsletter/${issue.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            subject: issue.subject,
-            preheader: issue.preheader,
-            audience: issue.audience,
-            slug: issue.slug,
-            content,
-            scheduled_at: issue.scheduled_at,
-          }),
-        });
-        if (!res.ok) {
-          const j = (await res.json().catch(() => ({}))) as { error?: string };
-          setSaveMessage(`Erreur : ${j.error ?? res.status}`);
-          return;
-        }
-        const data = (await res.json()) as { issue: NewsletterIssueRow };
-        setIssue(data.issue);
-        setContent(data.issue.content);
-        setDirty(false);
-        setSaveMessage('Enregistré ✓');
-        setTimeout(() => setSaveMessage(null), 2000);
-      } catch (err) {
-        setSaveMessage(err instanceof Error ? err.message : 'Erreur réseau');
+      const resultat = await envoiAdmin<ReponseNumero>(`/api/admin/newsletter/${issue.id}`, 'PATCH', {
+        subject: issue.subject,
+        preheader: issue.preheader,
+        audience: issue.audience,
+        slug: issue.slug,
+        content,
+        scheduled_at: issue.scheduled_at,
+      });
+      if (!resultat.ok) {
+        setMessageEstUnEchec(true);
+        setSaveMessage(resultat.message);
+        return;
       }
+      const numero = resultat.donnees?.issue;
+      if (!numero) {
+        setMessageEstUnEchec(true);
+        setSaveMessage("Le serveur n'a pas renvoyé le numéro enregistré. Rechargez la page pour vérifier ce qui a été gardé.");
+        return;
+      }
+      setIssue(numero);
+      setContent(numero.content);
+      setDirty(false);
+      setSaveMessage('Enregistré ✓');
+      setTimeout(() => setSaveMessage(null), 2000);
     });
   }, [issue, content]);
 
   const sendTest = useCallback(() => {
     setSaveMessage(null);
+    setMessageEstUnEchec(false);
     startTransition(async () => {
-      try {
-        const res = await fetch(`/api/admin/newsletter/${issue.id}/test`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ to: testEmail || undefined }),
-        });
-        const j = (await res.json().catch(() => ({}))) as { error?: string; sentTo?: string };
-        if (!res.ok) {
-          setSaveMessage(`Erreur test : ${j.error ?? res.status}`);
-          return;
-        }
-        setSaveMessage(`Test envoyé à ${j.sentTo} ✓`);
-        setTimeout(() => setSaveMessage(null), 4000);
-      } catch (err) {
-        setSaveMessage(err instanceof Error ? err.message : 'Erreur réseau');
+      const resultat = await envoiAdmin<ReponseTest>(
+        `/api/admin/newsletter/${issue.id}/test`,
+        'POST',
+        { to: testEmail || undefined },
+      );
+      if (!resultat.ok) {
+        setMessageEstUnEchec(true);
+        setSaveMessage(resultat.message);
+        return;
       }
+      setSaveMessage(`Test envoyé à ${resultat.donnees?.sentTo ?? 'votre adresse'} ✓`);
+      setTimeout(() => setSaveMessage(null), 4000);
     });
   }, [issue.id, testEmail]);
 
   const setStatus = useCallback((newStatus: NewsletterStatus) => {
+    setSaveMessage(null);
+    setMessageEstUnEchec(false);
     startTransition(async () => {
-      const res = await fetch(`/api/admin/newsletter/${issue.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
-      });
-      if (res.ok) {
-        const data = (await res.json()) as { issue: NewsletterIssueRow };
-        setIssue(data.issue);
-        setSaveMessage(`Statut → ${newStatus}`);
-        setTimeout(() => setSaveMessage(null), 2000);
+      const resultat = await envoiAdmin<ReponseNumero>(
+        `/api/admin/newsletter/${issue.id}`,
+        'PATCH',
+        { status: newStatus },
+      );
+      if (!resultat.ok) {
+        setMessageEstUnEchec(true);
+        setSaveMessage(resultat.message);
+        return;
       }
+      const numero = resultat.donnees?.issue;
+      if (!numero) {
+        setMessageEstUnEchec(true);
+        setSaveMessage("Le serveur n'a pas confirmé le nouveau statut. Rechargez la page pour vérifier.");
+        return;
+      }
+      setIssue(numero);
+      setSaveMessage(`Statut → ${newStatus}`);
+      setTimeout(() => setSaveMessage(null), 2000);
     });
   }, [issue.id]);
 
   const deleteIssue = useCallback(() => {
     if (!confirm('Supprimer définitivement ce brouillon ?')) return;
+    setSaveMessage(null);
+    setMessageEstUnEchec(false);
     startTransition(async () => {
-      const res = await fetch(`/api/admin/newsletter/${issue.id}`, { method: 'DELETE' });
-      if (res.ok) router.push('/admin/newsletter');
+      const resultat = await envoiAdmin(`/api/admin/newsletter/${issue.id}`, 'DELETE');
+      if (!resultat.ok) {
+        setMessageEstUnEchec(true);
+        setSaveMessage(resultat.message);
+        return;
+      }
+      router.push('/admin/newsletter');
     });
   }, [issue.id, router]);
 
@@ -121,7 +140,14 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
           <span className="text-xs font-bold uppercase tracking-wider text-gold">N°{String(issue.number).padStart(2, '0')}</span>
           <span className="rounded-full bg-foreground/10 px-2 py-0.5 text-xs font-semibold uppercase">{issue.status}</span>
           <span className="ml-auto" />
-          {saveMessage ? <span className="text-xs text-foreground/70">{saveMessage}</span> : null}
+          {saveMessage ? (
+            <span
+              role={messageEstUnEchec ? 'alert' : undefined}
+              className={messageEstUnEchec ? 'text-xs font-semibold text-red-700' : 'text-xs text-foreground/70'}
+            >
+              {saveMessage}
+            </span>
+          ) : null}
           {dirty ? <span className="text-xs italic text-amber-700">Modifications non enregistrées</span> : null}
           <button type="button" onClick={() => setPreviewOpen(true)} className="inline-flex items-center gap-1 rounded-md border border-foreground/15 bg-white px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted">
             <Eye className="h-3.5 w-3.5" /> Aperçu
@@ -745,19 +771,16 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
             onClick={() => {
               if (!confirm("Envoyer maintenant à toute l'audience cible ? Cette action est irréversible.")) return;
               setSaveMessage(null);
+              setMessageEstUnEchec(false);
               startTransition(async () => {
-                try {
-                  const res = await fetch(`/api/admin/newsletter/${issue.id}/send`, { method: 'POST' });
-                  const j = (await res.json().catch(() => ({}))) as { error?: string; recipientsCount?: number };
-                  if (!res.ok) {
-                    setSaveMessage(`Erreur envoi : ${j.error ?? res.status}`);
-                    return;
-                  }
-                  setSaveMessage(`Envoyé à ${j.recipientsCount ?? '?'} destinataires ✓`);
-                  router.refresh();
-                } catch (err) {
-                  setSaveMessage(err instanceof Error ? err.message : 'Erreur réseau');
+                const resultat = await envoiAdmin<ReponseEnvoi>(`/api/admin/newsletter/${issue.id}/send`, 'POST');
+                if (!resultat.ok) {
+                  setMessageEstUnEchec(true);
+                  setSaveMessage(resultat.message);
+                  return;
                 }
+                setSaveMessage(`Envoyé à ${resultat.donnees?.recipientsCount ?? '?'} destinataires ✓`);
+                router.refresh();
               });
             }}
             disabled={pending || issue.status === 'sent'}

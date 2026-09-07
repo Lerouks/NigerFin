@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { MessageSquare, Trash2, Loader2, ChevronLeft, ChevronRight, Reply, User, Calendar, FileText } from 'lucide-react';
+import { MessageSquare, Trash2, Loader2, ChevronLeft, ChevronRight, Reply, User, Calendar, FileText, AlertTriangle } from 'lucide-react';
+import { appelAdmin, envoiAdmin } from '@/app/admin/lib/appel-admin';
+import { EtatListe } from '@/app/admin/lib/EtatListe';
 
 interface AdminComment {
   id: string;
@@ -24,6 +26,9 @@ interface CommentsResponse {
 export function CommentsManager() {
   const [comments, setComments] = useState<AdminComment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const [horsLigne, setHorsLigne] = useState(false);
+  const [erreurAction, setErreurAction] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -32,15 +37,28 @@ export function CommentsManager() {
 
   const fetchComments = useCallback(async () => {
     setLoading(true);
-    try {
-      const res = await fetch(`/api/admin/comments?page=${page}&limit=20`);
-      if (res.ok) {
-        const data: CommentsResponse = await res.json();
-        setComments(data.data);
-        setTotal(data.total);
-        setTotalPages(data.totalPages);
-      }
-    } catch { /* ignore */ }
+    setErreur(null);
+    setHorsLigne(false);
+
+    const resultat = await appelAdmin<CommentsResponse>(`/api/admin/comments?page=${page}&limit=20`);
+
+    if (!resultat.ok) {
+      setErreur(resultat.message);
+      setHorsLigne(resultat.horsLigne);
+      setLoading(false);
+      return;
+    }
+
+    const donnees = resultat.donnees;
+    if (!donnees || !Array.isArray(donnees.data)) {
+      setErreur("Le serveur n'a pas renvoyé la liste des commentaires. Réessayez dans un instant.");
+      setLoading(false);
+      return;
+    }
+
+    setComments(donnees.data);
+    setTotal(donnees.total);
+    setTotalPages(donnees.totalPages);
     setLoading(false);
   }, [page]);
 
@@ -48,13 +66,18 @@ export function CommentsManager() {
 
   const handleDelete = async (id: string) => {
     setDeleting(id);
-    try {
-      const res = await fetch(`/api/admin/comments?id=${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        setDeleteConfirm(null);
-        await fetchComments();
-      }
-    } catch { /* ignore */ }
+    setErreurAction(null);
+
+    const resultat = await envoiAdmin(`/api/admin/comments?id=${id}`, 'DELETE');
+
+    if (!resultat.ok) {
+      setErreurAction(resultat.message);
+      setDeleting(null);
+      return;
+    }
+
+    setDeleteConfirm(null);
+    await fetchComments();
     setDeleting(null);
   };
 
@@ -72,30 +95,38 @@ export function CommentsManager() {
           <MessageSquare className="w-5 h-5 text-gray-500" />
           <div>
             <h2 className="text-lg font-bold text-gray-900">Commentaires</h2>
-            <p className="text-[13px] text-gray-500">
-              {total} commentaire{total !== 1 ? 's' : ''} au total
-            </p>
+            {!erreur && (
+              <p className="text-[13px] text-gray-500">
+                {total} commentaire{total !== 1 ? 's' : ''} au total
+              </p>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Loading */}
-      {loading && (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
+      {/* Échec d'une action (suppression) */}
+      {erreurAction && (
+        <div
+          role="alert"
+          className="flex items-start gap-2.5 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-[13px]"
+        >
+          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+          <span className="leading-relaxed">{erreurAction}</span>
         </div>
       )}
 
-      {/* Empty state */}
-      {!loading && comments.length === 0 && (
-        <div className="text-center py-16 bg-white border border-black/6 rounded-xl">
-          <MessageSquare className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500 text-[14px]">Aucun commentaire</p>
-        </div>
-      )}
+      {/* Chargement, échec de chargement, ou liste vraiment vide */}
+      <EtatListe
+        chargement={loading}
+        erreur={erreur}
+        horsLigne={horsLigne}
+        vide={comments.length === 0}
+        texteVide="Aucun commentaire"
+        onReessayer={fetchComments}
+      />
 
       {/* Comments list */}
-      {!loading && comments.length > 0 && (
+      {!loading && !erreur && comments.length > 0 && (
         <div className="space-y-3">
           {comments.map((comment) => (
             <div
@@ -173,7 +204,7 @@ export function CommentsManager() {
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {!erreur && totalPages > 1 && (
         <div className="flex items-center justify-center gap-2">
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}

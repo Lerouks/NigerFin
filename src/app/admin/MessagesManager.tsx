@@ -3,8 +3,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Loader2, Mail, MailOpen, CheckCircle, Trash2, ExternalLink,
-  ChevronDown, ChevronUp, Download,
+  ChevronDown, ChevronUp, Download, AlertTriangle,
 } from 'lucide-react';
+import { appelAdmin, envoiAdmin } from '@/app/admin/lib/appel-admin';
+import { EtatListe } from '@/app/admin/lib/EtatListe';
 
 interface ContactMessage {
   id: string;
@@ -27,53 +29,74 @@ const STATUS_CONFIG: Record<string, { label: string; icon: typeof Mail; color: s
 export function MessagesManager() {
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const [horsLigne, setHorsLigne] = useState(false);
+  const [erreurAction, setErreurAction] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   const fetchMessages = useCallback(async () => {
-    try {
-      const params = statusFilter ? `?status=${statusFilter}` : '';
-      const res = await fetch(`/api/admin/messages${params}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data)) setMessages(data);
-      }
-    } catch { /* ignore */ }
+    setLoading(true);
+    setErreur(null);
+    setHorsLigne(false);
+
+    const params = statusFilter ? `?status=${statusFilter}` : '';
+    const resultat = await appelAdmin<ContactMessage[]>(`/api/admin/messages${params}`);
+
+    if (!resultat.ok) {
+      setErreur(resultat.message);
+      setHorsLigne(resultat.horsLigne);
+      setLoading(false);
+      return;
+    }
+
+    if (!Array.isArray(resultat.donnees)) {
+      setErreur("Le serveur n'a pas renvoyé la liste des messages. Réessayez dans un instant.");
+      setLoading(false);
+      return;
+    }
+
+    setMessages(resultat.donnees);
     setLoading(false);
   }, [statusFilter]);
 
   useEffect(() => {
-    setLoading(true);
     fetchMessages();
   }, [fetchMessages]);
 
   const updateStatus = async (id: string, status: string) => {
     setProcessingId(id);
-    try {
-      const res = await fetch('/api/admin/messages', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, status }),
-      });
-      if (res.ok) {
-        setMessages((prev) =>
-          prev.map((m) => (m.id === id ? { ...m, status: status as ContactMessage['status'] } : m))
-        );
-      }
-    } catch { /* ignore */ }
+    setErreurAction(null);
+
+    const resultat = await envoiAdmin('/api/admin/messages', 'PUT', { id, status });
+
+    if (!resultat.ok) {
+      setErreurAction(resultat.message);
+      setProcessingId(null);
+      return;
+    }
+
+    setMessages((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, status: status as ContactMessage['status'] } : m))
+    );
     setProcessingId(null);
   };
 
   const deleteMessage = async (id: string) => {
     if (!confirm('Supprimer ce message définitivement ?')) return;
     setProcessingId(id);
-    try {
-      const res = await fetch(`/api/admin/messages?id=${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        setMessages((prev) => prev.filter((m) => m.id !== id));
-      }
-    } catch { /* ignore */ }
+    setErreurAction(null);
+
+    const resultat = await envoiAdmin(`/api/admin/messages?id=${id}`, 'DELETE');
+
+    if (!resultat.ok) {
+      setErreurAction(resultat.message);
+      setProcessingId(null);
+      return;
+    }
+
+    setMessages((prev) => prev.filter((m) => m.id !== id));
     setProcessingId(null);
   };
 
@@ -134,16 +157,28 @@ export function MessagesManager() {
         </button>
       </div>
 
-      {loading ? (
-        <div className="text-center py-12">
-          <Loader2 className="w-6 h-6 animate-spin text-gray-500 mx-auto" />
+      {/* Échec d'une action (changement de statut, suppression) */}
+      {erreurAction && (
+        <div
+          role="alert"
+          className="flex items-start gap-2.5 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-[13px]"
+        >
+          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+          <span className="leading-relaxed">{erreurAction}</span>
         </div>
-      ) : messages.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-xl border border-black/6">
-          <Mail className="w-8 h-8 text-gray-300 mx-auto mb-3" />
-          <p className="text-sm text-gray-500">Aucun message</p>
-        </div>
-      ) : (
+      )}
+
+      {/* Chargement, échec de chargement, ou boîte vraiment vide */}
+      <EtatListe
+        chargement={loading}
+        erreur={erreur}
+        horsLigne={horsLigne}
+        vide={messages.length === 0}
+        texteVide="Aucun message"
+        onReessayer={fetchMessages}
+      />
+
+      {!loading && !erreur && messages.length > 0 && (
         <div className="space-y-2">
           {messages.map((msg) => {
             const isOpen = expandedId === msg.id;

@@ -6,6 +6,8 @@ import {
   Plus, Pencil, Trash2, Save, X, Loader2, GripVertical,
   Eye, EyeOff, Building2, ImageIcon,
 } from 'lucide-react';
+import { appelAdmin, envoiAdmin } from '@/app/admin/lib/appel-admin';
+import { EtatListe } from '@/app/admin/lib/EtatListe';
 
 interface Enterprise {
   id: string;
@@ -75,13 +77,21 @@ export function StrategicEnterprisesManager() {
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState<FormData>({ ...emptyForm });
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [erreurListe, setErreurListe] = useState<string | null>(null);
+  const [horsLigne, setHorsLigne] = useState(false);
+  const [erreurAction, setErreurAction] = useState('');
 
   const fetchItems = useCallback(async () => {
     setLoading(true);
-    try {
-      const res = await fetch('/api/admin/strategic-enterprises');
-      if (res.ok) setItems(await res.json());
-    } catch { /* ignore */ }
+    setErreurListe(null);
+    setHorsLigne(false);
+    const resultat = await appelAdmin<Enterprise[]>('/api/admin/strategic-enterprises');
+    if (resultat.ok) {
+      setItems(Array.isArray(resultat.donnees) ? resultat.donnees : []);
+    } else {
+      setErreurListe(resultat.message);
+      setHorsLigne(resultat.horsLigne);
+    }
     setLoading(false);
   }, []);
 
@@ -90,60 +100,63 @@ export function StrategicEnterprisesManager() {
   const handleCreate = async () => {
     if (!form.name || !form.sector) return;
     setSaving(true);
-    try {
-      const res = await fetch('/api/admin/strategic-enterprises', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, display_order: items.length + 1 }),
-      });
-      if (res.ok) {
-        setShowCreate(false);
-        setForm({ ...emptyForm });
-        await fetchItems();
-      }
-    } catch { /* ignore */ }
+    setErreurAction('');
+    const resultat = await envoiAdmin('/api/admin/strategic-enterprises', 'POST', {
+      ...form,
+      display_order: items.length + 1,
+    });
+    if (resultat.ok) {
+      setShowCreate(false);
+      setForm({ ...emptyForm });
+      await fetchItems();
+    } else {
+      setErreurAction(resultat.message);
+    }
     setSaving(false);
   };
 
   const handleUpdate = async () => {
     if (!editingId || !form.name || !form.sector) return;
     setSaving(true);
-    try {
-      const res = await fetch('/api/admin/strategic-enterprises', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: editingId, ...form }),
-      });
-      if (res.ok) {
-        setEditingId(null);
-        setForm({ ...emptyForm });
-        await fetchItems();
-      }
-    } catch { /* ignore */ }
+    setErreurAction('');
+    const resultat = await envoiAdmin('/api/admin/strategic-enterprises', 'PUT', {
+      id: editingId,
+      ...form,
+    });
+    if (resultat.ok) {
+      setEditingId(null);
+      setForm({ ...emptyForm });
+      await fetchItems();
+    } else {
+      setErreurAction(resultat.message);
+    }
     setSaving(false);
   };
 
   const handleDelete = async (id: string) => {
     setSaving(true);
-    try {
-      const res = await fetch(`/api/admin/strategic-enterprises?id=${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        setDeleteConfirm(null);
-        await fetchItems();
-      }
-    } catch { /* ignore */ }
+    setErreurAction('');
+    const resultat = await envoiAdmin(`/api/admin/strategic-enterprises?id=${id}`, 'DELETE');
+    if (resultat.ok) {
+      setDeleteConfirm(null);
+      await fetchItems();
+    } else {
+      setErreurAction(resultat.message);
+    }
     setSaving(false);
   };
 
   const handleToggleVisibility = async (item: Enterprise) => {
-    try {
-      await fetch('/api/admin/strategic-enterprises', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: item.id, is_visible: !item.is_visible }),
-      });
+    setErreurAction('');
+    const resultat = await envoiAdmin('/api/admin/strategic-enterprises', 'PUT', {
+      id: item.id,
+      is_visible: !item.is_visible,
+    });
+    if (resultat.ok) {
       await fetchItems();
-    } catch { /* ignore */ }
+    } else {
+      setErreurAction(resultat.message);
+    }
   };
 
   const startEdit = (item: Enterprise) => {
@@ -406,7 +419,9 @@ export function StrategicEnterprisesManager() {
           <div>
             <h2 className="text-lg font-bold text-gray-900">Entreprises stratégiques</h2>
             <p className="text-[13px] text-gray-500">
-              {items.length} entreprise{items.length !== 1 ? 's' : ''}, affichées sur la page Entreprises
+              {erreurListe
+                ? 'Liste indisponible pour le moment'
+                : `${items.length} entreprise${items.length !== 1 ? 's' : ''}, affichées sur la page Entreprises`}
             </p>
           </div>
         </div>
@@ -421,26 +436,33 @@ export function StrategicEnterprisesManager() {
         )}
       </div>
 
+      {/* Échec d'une écriture : créer, modifier, supprimer, masquer */}
+      {erreurAction && (
+        <div role="alert" className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-[13px] text-red-700">
+          {erreurAction}
+        </div>
+      )}
+
       {/* Create form */}
       {showCreate && renderForm(handleCreate, 'Créer')}
 
-      {/* Loading */}
-      {loading && (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
-        </div>
+      {/* Chargement, échec du chargement, ou liste vraiment vide */}
+      {(loading || erreurListe !== null || (items.length === 0 && !showCreate)) && (
+        <EtatListe
+          chargement={loading}
+          erreur={erreurListe}
+          horsLigne={horsLigne}
+          vide={items.length === 0}
+          texteVide="Aucune entreprise stratégique"
+          actionVide={
+            <p className="text-gray-500 text-[13px]">Cliquez sur &quot;Ajouter&quot; pour commencer.</p>
+          }
+          onReessayer={fetchItems}
+        />
       )}
 
       {/* List */}
-      {!loading && items.length === 0 && !showCreate && (
-        <div className="text-center py-16 bg-white border border-black/6 rounded-xl">
-          <Building2 className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500 text-[14px]">Aucune entreprise stratégique</p>
-          <p className="text-gray-500 text-[13px]">Cliquez sur &quot;Ajouter&quot; pour commencer.</p>
-        </div>
-      )}
-
-      {!loading && items.map((item) => (
+      {!loading && !erreurListe && items.map((item) => (
         <div key={item.id}>
           {editingId === item.id ? (
             renderForm(handleUpdate, 'Enregistrer')

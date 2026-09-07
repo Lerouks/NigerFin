@@ -9,6 +9,8 @@ import {
   Eye,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+import { appelAdmin } from '@/app/admin/lib/appel-admin';
+import { EtatListe } from '@/app/admin/lib/EtatListe';
 import { ArticlesManager } from './ArticlesManager';
 import { CommentsManager } from './CommentsManager';
 import { MarketDataManager } from './MarketDataManager';
@@ -65,6 +67,12 @@ interface OverviewData {
   monthlyUsers_chart: { month: string; users: number }[];
 }
 
+/** Echec du chargement d'un bloc d'indicateurs, distinct d'un cockpit vide. */
+interface EchecChargement {
+  message: string;
+  horsLigne: boolean;
+}
+
 type TabId = 'overview' | 'articles' | 'comments' | 'market' | 'flash' | 'education' | 'niger' | 'enterprises' | 'legal' | 'paywall' | 'users' | 'payments' | 'pricing' | 'stats' | 'audit' | 'messages' | 'site';
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -78,6 +86,13 @@ export function AdminDashboard() {
   const [overview, setOverview] = useState<OverviewData | null>(null);
   const [unreadMessages, setUnreadMessages] = useState(0);
 
+  // Chargement, echec et vide tenus separes : un appel qui echoue ne doit plus
+  // se confondre avec un cockpit reellement sans donnees.
+  const [chargementCockpit, setChargementCockpit] = useState(true);
+  const [echecStats, setEchecStats] = useState<EchecChargement | null>(null);
+  const [echecOverview, setEchecOverview] = useState<EchecChargement | null>(null);
+  const echecCockpit = echecStats ?? echecOverview;
+
   useEffect(() => {
     if (!isLoading && (!isSignedIn || userRole !== 'admin')) {
       router.push('/');
@@ -85,36 +100,45 @@ export function AdminDashboard() {
   }, [isLoading, isSignedIn, userRole, router]);
 
   const fetchStats = useCallback(async () => {
-    try {
-      const res = await fetch('/api/admin/stats');
-      if (res.ok) setStats(await res.json());
-    } catch { /* ignore */ }
+    const resultat = await appelAdmin<UserStats | null>('/api/admin/stats');
+    if (!resultat.ok) {
+      // On garde les chiffres deja affiches : un echec n'efface rien.
+      setEchecStats({ message: resultat.message, horsLigne: resultat.horsLigne });
+      return;
+    }
+    setEchecStats(null);
+    if (resultat.donnees) setStats(resultat.donnees);
   }, []);
 
   const fetchUnreadCount = useCallback(async () => {
-    try {
-      const res = await fetch('/api/admin/messages?count_only=true');
-      if (res.ok) {
-        const data = await res.json();
-        setUnreadMessages(data.unread || 0);
-      }
-    } catch { /* ignore */ }
+    const resultat = await appelAdmin<{ unread?: number } | null>('/api/admin/messages?count_only=true');
+    // Ce compteur n'alimente qu'une pastille. S'il echoue, on conserve la
+    // derniere valeur connue au lieu d'afficher un zero invente : l'onglet
+    // Messages signale lui-meme la panne quand on l'ouvre.
+    if (resultat.ok) setUnreadMessages(resultat.donnees?.unread ?? 0);
   }, []);
 
   const fetchOverview = useCallback(async () => {
-    try {
-      const res = await fetch('/api/admin/overview');
-      if (res.ok) setOverview(await res.json());
-    } catch { /* ignore */ }
+    const resultat = await appelAdmin<OverviewData | null>('/api/admin/overview');
+    if (!resultat.ok) {
+      setEchecOverview({ message: resultat.message, horsLigne: resultat.horsLigne });
+      return;
+    }
+    setEchecOverview(null);
+    setOverview(resultat.donnees ?? null);
   }, []);
+
+  const chargerCockpit = useCallback(async () => {
+    setChargementCockpit(true);
+    await Promise.all([fetchStats(), fetchUnreadCount(), fetchOverview()]);
+    setChargementCockpit(false);
+  }, [fetchStats, fetchUnreadCount, fetchOverview]);
 
   useEffect(() => {
     if (userRole === 'admin') {
-      fetchStats();
-      fetchUnreadCount();
-      fetchOverview();
+      chargerCockpit();
     }
-  }, [userRole, fetchStats, fetchUnreadCount, fetchOverview]);
+  }, [userRole, chargerCockpit]);
 
   const handleExport = (type: string) => {
     window.open(`/api/admin/export?type=${type}`, '_blank');
@@ -206,7 +230,22 @@ export function AdminDashboard() {
         </div>
 
         {/* Tab content */}
-        {activeTab === 'overview' && <OverviewTab overview={overview} stats={stats} />}
+        {activeTab === 'overview' && (
+          <>
+            {/* Chargement, echec de chargement, ou cockpit vraiment sans donnees */}
+            <EtatListe
+              chargement={chargementCockpit}
+              erreur={echecCockpit ? echecCockpit.message : null}
+              horsLigne={echecCockpit?.horsLigne}
+              vide={overview === null}
+              texteVide="Aucun indicateur à afficher pour le moment."
+              onReessayer={chargerCockpit}
+            />
+            {!chargementCockpit && echecCockpit === null && overview !== null && (
+              <OverviewTab overview={overview} stats={stats} />
+            )}
+          </>
+        )}
         {activeTab === 'articles' && <ArticlesManager />}
         {activeTab === 'comments' && <CommentsManager />}
         {activeTab === 'market' && <MarketDataManager />}

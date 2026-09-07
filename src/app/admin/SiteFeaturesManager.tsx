@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Loader2, Eye, EyeOff, TrendingUp, Check, Rocket, Users } from 'lucide-react';
+import { Eye, EyeOff, TrendingUp, Check, Rocket, Users } from 'lucide-react';
+import { appelAdmin, envoiAdmin } from '@/app/admin/lib/appel-admin';
+import { EtatListe } from '@/app/admin/lib/EtatListe';
 
 interface SiteFeaturesData {
   market_ticker_enabled: boolean;
@@ -15,6 +17,13 @@ type FeaturePatch = {
   prelaunch_enabled?: boolean;
 };
 
+interface SiteFeaturesReponse {
+  market_ticker_enabled?: boolean;
+  prelaunch_enabled?: boolean;
+  waitlist_count?: number;
+  updated_at?: string | null;
+}
+
 export function SiteFeaturesManager() {
   const [data, setData] = useState<SiteFeaturesData>({
     market_ticker_enabled: true,
@@ -26,22 +35,25 @@ export function SiteFeaturesManager() {
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [error, setError] = useState('');
+  const [erreurChargement, setErreurChargement] = useState<string | null>(null);
+  const [horsLigneChargement, setHorsLigneChargement] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    try {
-      const res = await fetch('/api/admin/site-features');
-      if (res.ok) {
-        const result = await res.json();
-        setData({
-          market_ticker_enabled: result.market_ticker_enabled !== false,
-          prelaunch_enabled: result.prelaunch_enabled === true,
-          waitlist_count: result.waitlist_count ?? 0,
-          updated_at: result.updated_at ?? null,
-        });
-      }
-    } catch {
-      /* ignore */
+    setErreurChargement(null);
+    setHorsLigneChargement(false);
+    const resultat = await appelAdmin<SiteFeaturesReponse>('/api/admin/site-features');
+    if (resultat.ok) {
+      const result: SiteFeaturesReponse = resultat.donnees ?? {};
+      setData({
+        market_ticker_enabled: result.market_ticker_enabled !== false,
+        prelaunch_enabled: result.prelaunch_enabled === true,
+        waitlist_count: result.waitlist_count ?? 0,
+        updated_at: result.updated_at ?? null,
+      });
+    } else {
+      setErreurChargement(resultat.message);
+      setHorsLigneChargement(resultat.horsLigne);
     }
     setLoading(false);
   }, []);
@@ -53,27 +65,23 @@ export function SiteFeaturesManager() {
   const saveFeature = async (patch: FeaturePatch) => {
     setSaving(true);
     setError('');
-    try {
-      const res = await fetch('/api/admin/site-features', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(patch),
-      });
-      if (res.ok) {
-        const result = await res.json();
-        setData((prev) => ({
-          ...prev,
-          market_ticker_enabled: result.market_ticker_enabled !== false,
-          prelaunch_enabled: result.prelaunch_enabled === true,
-          updated_at: result.updated_at ?? null,
-        }));
-        setSavedAt(Date.now());
-        window.setTimeout(() => setSavedAt(null), 2500);
-      } else {
-        setError('Erreur lors de la mise à jour');
-      }
-    } catch {
-      setError('Erreur réseau');
+    const resultat = await envoiAdmin<SiteFeaturesReponse>(
+      '/api/admin/site-features',
+      'PUT',
+      patch,
+    );
+    if (resultat.ok) {
+      const result: SiteFeaturesReponse = resultat.donnees ?? {};
+      setData((prev) => ({
+        ...prev,
+        market_ticker_enabled: result.market_ticker_enabled !== false,
+        prelaunch_enabled: result.prelaunch_enabled === true,
+        updated_at: result.updated_at ?? null,
+      }));
+      setSavedAt(Date.now());
+      window.setTimeout(() => setSavedAt(null), 2500);
+    } else {
+      setError(resultat.message);
     }
     setSaving(false);
   };
@@ -83,11 +91,16 @@ export function SiteFeaturesManager() {
   const togglePrelaunch = () =>
     saveFeature({ prelaunch_enabled: !data.prelaunch_enabled });
 
-  if (loading) {
+  if (loading || erreurChargement) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
-      </div>
+      <EtatListe
+        chargement={loading}
+        erreur={erreurChargement}
+        horsLigne={horsLigneChargement}
+        vide={false}
+        texteVide=""
+        onReessayer={fetchData}
+      />
     );
   }
 

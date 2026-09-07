@@ -94,4 +94,40 @@ describe('appelAdmin', () => {
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.message).toContain('interrompue');
   });
+
+  it('abandonne pour de bon quand l\'appelant abandonne, sans rejouer', async () => {
+    // La recherche a la frappe remplace sa propre requete a chaque pause :
+    // sans cet abandon, chaque frappe laissait une requete courir, rejeux
+    // compris, jusqu'a une trentaine d'appels en vol.
+    const controleur = new AbortController();
+    fetchSimule.mockImplementation((_url: string, init: RequestInit) => {
+      controleur.abort();
+      return Promise.reject(Object.assign(new Error('aborted'), { name: 'AbortError', init }));
+    });
+    const r = await appelAdmin('/api/admin/users?search=ab', { signal: controleur.signal });
+    expect(r.ok).toBe(false);
+    expect(fetchSimule).toHaveBeenCalledTimes(1);
+  });
+
+  it('ne part meme pas quand l\'appelant a deja abandonne', async () => {
+    const controleur = new AbortController();
+    controleur.abort();
+    const r = await appelAdmin('/api/admin/users?search=ab', { signal: controleur.signal });
+    expect(r.ok).toBe(false);
+    expect(fetchSimule).not.toHaveBeenCalled();
+  });
+
+  it('dit quand rien n\'est parti, et ne le dit que dans ce cas', async () => {
+    vi.stubGlobal('navigator', { onLine: false });
+    const horsLigne = await appelAdmin('/api/admin/newsletter', { method: 'POST', tentatives: 1 });
+    expect(horsLigne.ok).toBe(false);
+    if (!horsLigne.ok) expect(horsLigne.rienEnvoye).toBe(true);
+
+    vi.stubGlobal('navigator', { onLine: true });
+    fetchSimule.mockRejectedValue(new Error('connexion coupee'));
+    const coupe = await appelAdmin('/api/admin/newsletter', { method: 'POST', tentatives: 1 });
+    expect(coupe.ok).toBe(false);
+    // Une coupure en cours de route ne prouve rien : le serveur a pu enregistrer.
+    if (!coupe.ok) expect(coupe.rienEnvoye).toBeUndefined();
+  });
 });

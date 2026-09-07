@@ -12,6 +12,9 @@ import {
   Eye,
   UserPlus,
   Crown,
+  AlertTriangle,
+  RefreshCw,
+  WifiOff,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import {
@@ -23,7 +26,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from 'recharts';
-import { useAdminApiPolling } from '../hooks/useAdminApi';
+import { useAdminApiPolling } from '@/app/admin/hooks/useAdminApi';
 
 interface MonthlyUser {
   month: string;
@@ -48,39 +51,182 @@ interface MessagesCount {
   unread: number;
 }
 
+/** Le hook rend une erreur déjà rédigée en français. On la reprend telle quelle. */
+function messageDeLErreur(erreur: unknown): string {
+  if (erreur instanceof Error && erreur.message.trim()) return erreur.message;
+  return "Les données n'ont pas pu être chargées. Réessayez dans un instant.";
+}
+
+/** Le hook nomme « HorsLigne » l'erreur d'une connexion coupée. */
+function estHorsLigne(erreur: unknown): boolean {
+  return erreur instanceof Error && erreur.name === 'HorsLigne';
+}
+
 export function AudienceView() {
   const {
     data: overview,
-    error,
+    error: erreurOverview,
     isLoading,
+    mutate: rechargerOverview,
   } = useAdminApiPolling<OverviewData>('overview', 60000);
 
-  const { data: messagesCount } = useAdminApiPolling<MessagesCount>(
-    'messages?count_only=true',
-    60000,
-  );
+  const {
+    data: messagesCount,
+    error: erreurMessages,
+    mutate: rechargerMessages,
+  } = useAdminApiPolling<MessagesCount>('messages?count_only=true', 60000);
+
+  const echecOverview = Boolean(erreurOverview);
+  const reessayerOverview = () => {
+    void rechargerOverview();
+  };
 
   return (
     <div className="max-w-[640px] lg:max-w-[920px] mx-auto px-5 pt-8 pb-6">
       <AudienceHeader />
 
-      {error && (
-        <div className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-[13px]">
-          Impossible de charger les données audience. Vérifie ta connexion ou
-          recharge la page.
-        </div>
+      {echecOverview && !overview ? (
+        // Aucun chiffre en mémoire : on n'affiche ni zéro ni tiret à la place
+        // des données, c'est exactement ce qui faisait mentir le tableau de bord.
+        <ErreurAudience
+          message={messageDeLErreur(erreurOverview)}
+          horsLigne={estHorsLigne(erreurOverview)}
+          onReessayer={reessayerOverview}
+        />
+      ) : (
+        <>
+          {echecOverview && (
+            <BandeauAlerte
+              className="mb-6"
+              texte={
+                <>
+                  Chiffres du dernier chargement réussi, la mise à jour vient
+                  d&apos;échouer. {messageDeLErreur(erreurOverview)}
+                </>
+              }
+              horsLigne={estHorsLigne(erreurOverview)}
+              onReessayer={reessayerOverview}
+            />
+          )}
+
+          <OverviewSection overview={overview} isLoading={isLoading} />
+
+          <FunnelSection overview={overview} isLoading={isLoading} />
+
+          <GrowthChartSection
+            data={overview?.monthlyUsers_chart ?? []}
+            isLoading={isLoading}
+          />
+        </>
       )}
 
-      <OverviewSection overview={overview} isLoading={isLoading} />
-
-      <FunnelSection overview={overview} isLoading={isLoading} />
-
-      <GrowthChartSection
-        data={overview?.monthlyUsers_chart ?? []}
-        isLoading={isLoading}
+      <QuickAccessSection
+        unreadMessages={messagesCount?.unread ?? null}
+        erreurMessages={erreurMessages ? messageDeLErreur(erreurMessages) : null}
+        horsLigneMessages={estHorsLigne(erreurMessages)}
+        onReessayerMessages={() => {
+          void rechargerMessages();
+        }}
       />
+    </div>
+  );
+}
 
-      <QuickAccessSection unreadMessages={messagesCount?.unread ?? null} />
+/**
+ * Remplace les chiffres, le funnel et la courbe quand rien n'a pu être chargé.
+ * Un écran vide qui dit pourquoi vaut mieux qu'un écran plein de zéros faux.
+ */
+function ErreurAudience({
+  message,
+  horsLigne,
+  onReessayer,
+}: {
+  message: string;
+  horsLigne: boolean;
+  onReessayer: () => void;
+}) {
+  const Icone = horsLigne ? WifiOff : AlertTriangle;
+
+  return (
+    <section
+      role="alert"
+      className={[
+        'mb-10 rounded-2xl p-5 border',
+        horsLigne ? 'bg-black/2.5 border-black/8' : 'bg-red-50 border-red-200',
+      ].join(' ')}
+    >
+      <div className="flex items-start gap-3">
+        <Icone
+          className={`w-5 h-5 shrink-0 mt-0.5 ${horsLigne ? 'text-foreground/40' : 'text-red-500'}`}
+          aria-hidden="true"
+        />
+        <div className="min-w-0">
+          <p className="font-bold text-[15px] leading-tight">
+            {horsLigne
+              ? 'Connexion perdue'
+              : "Les chiffres audience n'ont pas pu être chargés"}
+          </p>
+          <p className="text-[13px] text-foreground/60 leading-relaxed mt-1">
+            {message} Aucun chiffre n&apos;est affiché tant que le chargement
+            n&apos;a pas réussi, pour ne pas laisser croire à une audience
+            nulle. Nouvel essai automatique dans 60 secondes.
+          </p>
+          <button
+            type="button"
+            onClick={onReessayer}
+            className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#111] text-white text-[13px] font-medium hover:bg-[#222] transition-colors active:scale-[0.98]"
+          >
+            <RefreshCw className="w-4 h-4" aria-hidden="true" />
+            Réessayer
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Bandeau discret : une partie de l'écran a bien des données, mais le dernier
+ * rafraichissement a échoué. Sert aux chiffres périmés et au compteur de
+ * messages qui manque.
+ */
+function BandeauAlerte({
+  texte,
+  horsLigne,
+  onReessayer,
+  className,
+}: {
+  texte: React.ReactNode;
+  horsLigne: boolean;
+  onReessayer: () => void;
+  className: string;
+}) {
+  const Icone = horsLigne ? WifiOff : AlertTriangle;
+
+  return (
+    <div
+      role="alert"
+      className={[
+        className,
+        'rounded-xl px-4 py-3 border flex flex-wrap items-center gap-x-3 gap-y-2',
+        horsLigne ? 'bg-black/2.5 border-black/8' : 'bg-red-50 border-red-200',
+      ].join(' ')}
+    >
+      <Icone
+        className={`w-4 h-4 shrink-0 ${horsLigne ? 'text-foreground/40' : 'text-red-500'}`}
+        aria-hidden="true"
+      />
+      <p className="text-[13px] text-foreground/70 leading-relaxed min-w-0 flex-1">
+        {texte}
+      </p>
+      <button
+        type="button"
+        onClick={onReessayer}
+        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#111] text-white text-[12px] font-medium hover:bg-[#222] transition-colors active:scale-[0.98]"
+      >
+        <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />
+        Réessayer
+      </button>
     </div>
   );
 }
@@ -499,12 +645,20 @@ interface QuickAccessCard {
   title: string;
   description: string;
   badge?: number | null;
+  /** Le compteur n'a pas pu être chargé : on le dit au lieu de ne rien montrer. */
+  badgeIndisponible?: boolean;
 }
 
 function QuickAccessSection({
   unreadMessages,
+  erreurMessages,
+  horsLigneMessages,
+  onReessayerMessages,
 }: {
   unreadMessages: number | null;
+  erreurMessages: string | null;
+  horsLigneMessages: boolean;
+  onReessayerMessages: () => void;
 }) {
   const cards: QuickAccessCard[] = [
     {
@@ -526,7 +680,12 @@ function QuickAccessSection({
       icon: Mail,
       title: 'Messages',
       description: 'Boîte de réception du formulaire de contact.',
+      // Le compteur déjà chargé reste affiché quand un rafraîchissement échoue,
+      // comme les chiffres de la vue d'ensemble juste au-dessus. Le faire
+      // disparaître à chaque coupure le ferait clignoter en permanence, alors
+      // que le bandeau d'erreur suffit à dire qu'il n'est plus tout frais.
       badge: unreadMessages,
+      badgeIndisponible: Boolean(erreurMessages) && unreadMessages === null,
     },
     {
       href: '/admin/audience/statistiques',
@@ -540,7 +699,14 @@ function QuickAccessSection({
     <section className="mb-6">
       <h2 className="font-bold text-[16px] mb-3">Accès rapide</h2>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {cards.map(({ href, icon: Icon, title, description, badge }) => (
+        {cards.map(({
+          href,
+          icon: Icon,
+          title,
+          description,
+          badge,
+          badgeIndisponible,
+        }) => (
           <Link
             key={href}
             href={href}
@@ -552,11 +718,20 @@ function QuickAccessSection({
                 <Icon className="w-5 h-5" aria-hidden="true" />
               </div>
               <div className="flex items-center gap-2">
-                {badge !== null && badge !== undefined && badge > 0 && (
-                  <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-[#dc2626] text-white text-[10px] font-bold">
-                    {badge}
+                {badgeIndisponible && (
+                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-black/5 text-foreground/45">
+                    <AlertTriangle className="w-3 h-3" aria-hidden="true" />
+                    <span className="sr-only">Compteur indisponible</span>
                   </span>
                 )}
+                {!badgeIndisponible &&
+                  badge !== null &&
+                  badge !== undefined &&
+                  badge > 0 && (
+                    <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-[#dc2626] text-white text-[10px] font-bold">
+                      {badge}
+                    </span>
+                  )}
                 <ArrowUpRight
                   className="w-4 h-4 text-foreground/30 group-hover:text-[#d4a843] transition"
                   aria-hidden="true"
@@ -572,6 +747,20 @@ function QuickAccessSection({
           </Link>
         ))}
       </div>
+
+      {erreurMessages && (
+        <BandeauAlerte
+          className="mt-3"
+          texte={
+            <>
+              Le nombre de messages non lus n&apos;a pas pu être chargé.{' '}
+              {erreurMessages}
+            </>
+          }
+          horsLigne={horsLigneMessages}
+          onReessayer={onReessayerMessages}
+        />
+      )}
     </section>
   );
 }
@@ -608,7 +797,10 @@ function AnimatedNumber({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
-  if (isLoading && value === null) return <span className="text-foreground/20">-</span>;
+  // Sans valeur, on montre un tiret et jamais le zéro de l'animation : un zéro
+  // affiché à la place d'une donnée absente ferait mentir le tableau de bord.
+  if (isLoading || value === null)
+    return <span className="text-foreground/20">-</span>;
   return (
     <>
       {display.toLocaleString('fr-FR', {

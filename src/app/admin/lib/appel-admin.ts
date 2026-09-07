@@ -20,7 +20,19 @@
 
 export type Resultat<T> =
   | { ok: true; donnees: T }
-  | { ok: false; message: string; horsLigne: boolean; statut: number };
+  | {
+      ok: false;
+      message: string;
+      horsLigne: boolean;
+      statut: number;
+      /**
+       * Vrai seulement quand la demande n'a JAMAIS quitté la machine. Une
+       * connexion qui tombe en cours de route ne le garantit pas : le serveur
+       * peut très bien avoir enregistré. Les écrans s'en servent pour ne pas
+       * affirmer « rien n'a été créé » quand ils n'en savent rien.
+       */
+      rienEnvoye?: boolean;
+    };
 
 const TENTATIVES = 3;
 const ATTENTE_MS = [400, 1200];
@@ -60,6 +72,17 @@ function messagePour(statut: number, corps: unknown): string {
 }
 
 /**
+ * Demande abandonnee par l'appelant lui-meme. Jamais affichee : celui qui
+ * abandonne a deja remplace ce qu'il attendait.
+ */
+const RESULTAT_ABANDONNE = {
+  ok: false as const,
+  message: 'Demande abandonnée.',
+  horsLigne: false,
+  statut: 0,
+};
+
+/**
  * Fait un appel a l'API d'administration et rend TOUJOURS un resultat explicite.
  * Ne leve jamais : l'appelant traite `ok: false` au lieu d'un catch oublie.
  */
@@ -68,9 +91,15 @@ export async function appelAdmin<T = unknown>(
   options?: RequestInit & { tentatives?: number },
 ): Promise<Resultat<T>> {
   const maxi = options?.tentatives ?? TENTATIVES;
+  // L'appelant peut abandonner sa propre demande : une recherche a la frappe
+  // remplace la precedente, et sans ce signal l'ancienne continuait de courir,
+  // rejeux compris, jusqu'a une trentaine d'appels en vol sur une connexion
+  // qui coupe.
+  const abandonAppelant = options?.signal ?? null;
   let derniereErreur = '';
 
   for (let essai = 0; essai < maxi; essai++) {
+    if (abandonAppelant?.aborted) return RESULTAT_ABANDONNE;
     if (typeof navigator !== 'undefined' && navigator.onLine === false) {
       // Inutile de marteler le reseau : on attend qu'il revienne.
       if (essai < maxi - 1) { await attendre(attenteDeLEssai(essai)); continue; }
@@ -78,15 +107,17 @@ export async function appelAdmin<T = unknown>(
         ok: false,
         horsLigne: true,
         statut: 0,
+        rienEnvoye: true,
         message: "Vous n'êtes pas connecté à Internet. Rien n'a été envoyé : réessayez une fois la connexion revenue.",
       };
     }
 
     const abandon = new AbortController();
     const minuteur = setTimeout(() => abandon.abort(), DELAI_MS);
+    const relayerAbandon = () => abandon.abort();
+    abandonAppelant?.addEventListener('abort', relayerAbandon);
     try {
       const reponse = await fetch(url, { ...options, signal: abandon.signal });
-      clearTimeout(minuteur);
 
       let corps: unknown = null;
       const type = reponse.headers.get('content-type') || '';
@@ -111,7 +142,8 @@ export async function appelAdmin<T = unknown>(
 
       return { ok: false, message: messageBrut, horsLigne: false, statut: reponse.status };
     } catch (err) {
-      clearTimeout(minuteur);
+      // L'appelant a lache la demande : ce n'est pas une panne, on ne rejoue pas.
+      if (abandonAppelant?.aborted) return RESULTAT_ABANDONNE;
       const interrompu = err instanceof Error && err.name === 'AbortError';
       derniereErreur = interrompu
         ? "Le serveur a mis trop de temps à répondre."
@@ -120,6 +152,9 @@ export async function appelAdmin<T = unknown>(
         await attendre(attenteDeLEssai(essai));
         continue;
       }
+    } finally {
+      clearTimeout(minuteur);
+      abandonAppelant?.removeEventListener('abort', relayerAbandon);
     }
   }
 

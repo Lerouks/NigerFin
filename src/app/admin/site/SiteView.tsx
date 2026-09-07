@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import {
   ArrowUpRight,
   CheckCircle2,
@@ -19,10 +20,14 @@ import {
   Pencil,
   Trash2,
   Plus,
+  RefreshCw,
   Settings,
+  WifiOff,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useAdminApi, useAdminApiPolling } from '../hooks/useAdminApi';
+import { envoiAdmin } from '@/app/admin/lib/appel-admin';
+import { EtatListe } from '@/app/admin/lib/EtatListe';
 
 // ─── Types ────────────────────────────────────────────────────────────────
 
@@ -83,6 +88,24 @@ interface AuditResponse {
   total: number;
 }
 
+// ─── Lecture des échecs ───────────────────────────────────────────────────
+
+/**
+ * Les lectures de cet écran passent par useAdminApi, donc par appelAdmin :
+ * l'erreur remontée porte déjà une phrase en français, prête à afficher, et
+ * son nom dit si la connexion est tombée. Avant, l'écran remplaçait cette
+ * phrase par un texte fixe qui n'apprenait rien, ou n'affichait rien du tout.
+ */
+function messageErreur(erreur: unknown): string | null {
+  if (!erreur) return null;
+  if (erreur instanceof Error && erreur.message) return erreur.message;
+  return "Les données n'ont pas pu être chargées. Réessayez dans un instant.";
+}
+
+function erreurHorsLigne(erreur: unknown): boolean {
+  return erreur instanceof Error && erreur.name === 'HorsLigne';
+}
+
 // ─── Main view ────────────────────────────────────────────────────────────
 
 export function SiteView() {
@@ -116,11 +139,14 @@ function SiteHeader() {
 // ─── Health section ───────────────────────────────────────────────────────
 
 function HealthSection() {
-  const { data, error, isLoading } = useAdminApiPolling<SiteHealthData>(
+  const { data, error, isLoading, mutate } = useAdminApiPolling<SiteHealthData>(
     'site-health',
     60000,
   );
 
+  const erreur = messageErreur(error);
+  const horsLigne = erreurHorsLigne(error);
+  const IconeErreur = horsLigne ? WifiOff : AlertTriangle;
   const lastCheckedRelative = data?.checkedAt ? relativeTime(data.checkedAt) : '';
 
   return (
@@ -134,10 +160,40 @@ function HealthSection() {
         </span>
       </div>
 
-      {error && (
-        <div className="mb-4 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-[13px]">
-          Impossible de récupérer les contrôles de santé. Nouvel essai dans 60
-          secondes.
+      {erreur && (
+        <div
+          role="alert"
+          className={`mb-4 p-4 rounded-2xl border text-[13px] ${
+            horsLigne
+              ? 'bg-black/3 border-black/10 text-foreground/70'
+              : 'bg-red-50 border-red-200 text-red-700'
+          }`}
+        >
+          <div className="flex items-start gap-2.5">
+            <IconeErreur className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" />
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold leading-snug">
+                {horsLigne
+                  ? 'Connexion perdue'
+                  : "Les contrôles de santé n'ont pas pu être relevés"}
+              </p>
+              <p className="mt-1 leading-relaxed">{erreur}</p>
+              <p className="mt-1 leading-relaxed opacity-75">
+                Les cartes ci-dessous datent du dernier relevé réussi, ou
+                restent inconnues. Nouvel essai automatique dans 60 secondes.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  void mutate();
+                }}
+                className="mt-2.5 inline-flex items-center gap-1.5 font-semibold hover:underline"
+              >
+                <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />
+                Réessayer maintenant
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -309,12 +365,16 @@ function getStatusVisual(status: HealthStatus | null): {
 // ─── Activity timeline ────────────────────────────────────────────────────
 
 function ActivitySection() {
-  const { data, error, isLoading } = useAdminApiPolling<AuditResponse>(
+  const { data, error, isLoading, mutate } = useAdminApiPolling<AuditResponse>(
     'audit?page=1',
     60000,
   );
 
+  const erreur = messageErreur(error);
+  const horsLigne = erreurHorsLigne(error);
   const events = (data?.data ?? []).slice(0, 10);
+  // Premier chargement seulement : ensuite, l'écran garde ce qu'il affiche déjà.
+  const chargementInitial = isLoading && !erreur && events.length === 0;
 
   return (
     <section className="mb-10">
@@ -328,27 +388,58 @@ function ActivitySection() {
         </Link>
       </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl text-[13px]">
-          Journal d&apos;audit indisponible. Nouvel essai dans 60 secondes.
-        </div>
-      )}
-
-      {!error && isLoading && events.length === 0 && <ActivitySkeleton />}
-
-      {!error && !isLoading && events.length === 0 && (
-        <div className="bg-white border border-black/6 rounded-2xl p-6 text-center text-[13px] text-foreground/55">
-          Aucune action admin enregistrée pour le moment. Les futures
-          modifications apparaîtront ici.
-        </div>
-      )}
-
-      {events.length > 0 && (
-        <div className="space-y-2.5">
-          {events.map((entry) => (
-            <AuditRow key={entry.id} entry={entry} />
-          ))}
-        </div>
+      {/* Le squelette tient lieu d'état de chargement, EtatListe traite les
+          deux autres cas : l'échec, et le journal vraiment vide. Un échec
+          n'affiche plus « Aucune action », qui laissait croire à un journal
+          vide alors que la route ne répondait pas. Quand des lignes ont déjà
+          été chargées, elles restent affichées et l'échec passe en bandeau :
+          sur cette connexion qui coupe toutes les 90 secondes, la liste
+          disparaîtrait sinon en boucle alors que les données sont là. */}
+      {chargementInitial ? (
+        <ActivitySkeleton />
+      ) : events.length === 0 ? (
+        <EtatListe
+          chargement={false}
+          erreur={erreur}
+          horsLigne={horsLigne}
+          vide
+          texteVide="Aucune action admin enregistrée pour le moment. Les futures modifications apparaîtront ici."
+          onReessayer={() => {
+            void mutate();
+          }}
+        />
+      ) : (
+        <>
+          {erreur && (
+            <div
+              role="alert"
+              className={`mb-3 px-4 py-3 rounded-2xl border text-[12px] leading-relaxed ${
+                horsLigne
+                  ? 'bg-black/3 border-black/10 text-foreground/70'
+                  : 'bg-red-50 border-red-200 text-red-700'
+              }`}
+            >
+              <span className="font-semibold">
+                {horsLigne ? 'Connexion perdue. ' : "Le journal n'a pas pu être rafraîchi. "}
+              </span>
+              {erreur} Les lignes ci-dessous datent du dernier relevé réussi.
+              <button
+                type="button"
+                onClick={() => {
+                  void mutate();
+                }}
+                className="ml-2 font-semibold hover:underline"
+              >
+                Réessayer maintenant
+              </button>
+            </div>
+          )}
+          <div className="space-y-2.5">
+            {events.map((entry) => (
+              <AuditRow key={entry.id} entry={entry} />
+            ))}
+          </div>
+        </>
       )}
     </section>
   );
@@ -589,75 +680,144 @@ interface SiteFeaturesPayload {
 }
 
 function MarketTickerInlineToggle() {
-  const { data, mutate, isLoading } = useAdminApi<SiteFeaturesPayload>(
+  const { data, error, mutate, isLoading } = useAdminApi<SiteFeaturesPayload>(
     'site-features',
   );
+  const [erreurBascule, setErreurBascule] = useState<string | null>(null);
 
+  const erreurLecture = messageErreur(error);
   const enabled = data?.market_ticker_enabled ?? true;
+  // L'interrupteur montre toujours la dernière valeur réellement lue. Le forcer
+  // en position éteinte quand la relecture échoue faisait pire que le mal :
+  // l'admin cliquait pour « activer » un bandeau déjà actif et l'éteignait sur
+  // le site public. Quand l'état n'est pas sûr, on le dit et on bloque le
+  // bouton plutôt que d'afficher une position fausse.
+  const afficheActif = enabled;
+  const etatIncertain = Boolean(erreurLecture) || !data;
+  const basculeBloquee = isLoading || etatIncertain;
 
   const handleToggle = async () => {
-    if (!data) return;
+    if (!data || basculeBloquee) return;
     const next = !enabled;
+    setErreurBascule(null);
     // Mise à jour optimiste
     await mutate(
       { market_ticker_enabled: next, updated_at: new Date().toISOString() },
       { revalidate: false },
     );
-    try {
-      const res = await fetch('/api/admin/site-features', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ market_ticker_enabled: next }),
-      });
-      if (!res.ok) throw new Error('toggle failed');
-      const updated = (await res.json()) as SiteFeaturesPayload;
-      await mutate(updated, { revalidate: false });
-    } catch {
-      // Revert si échec
+
+    const resultat = await envoiAdmin<SiteFeaturesPayload>(
+      '/api/admin/site-features',
+      'PUT',
+      { market_ticker_enabled: next },
+    );
+
+    if (!resultat.ok) {
+      // Avant, l'interrupteur revenait tout seul en arrière, sans un mot :
+      // impossible de savoir si le réglage avait pris ou non.
+      setErreurBascule(
+        `Le réglage n'a pas été enregistré, le bandeau reste ${
+          enabled ? 'visible' : 'désactivé'
+        }. ${resultat.message}`,
+      );
+      // On défait d'abord la mise à jour optimiste : hors ligne, la
+      // revalidation échoue elle aussi et l'interrupteur serait resté sur la
+      // position demandée, contredisant le message juste en dessous.
+      await mutate(
+        { market_ticker_enabled: enabled, updated_at: data.updated_at },
+        { revalidate: false },
+      );
       await mutate();
+      return;
     }
+
+    const confirme = resultat.donnees;
+    if (confirme && typeof confirme.market_ticker_enabled === 'boolean') {
+      await mutate(confirme, { revalidate: false });
+      return;
+    }
+    // Le serveur n'a rien confirmé : on redemande l'état réel plutôt que de
+    // laisser l'écran afficher ce qu'il espérait.
+    setErreurBascule(
+      "Le serveur n'a pas confirmé le réglage. L'état affiché vient d'être revérifié.",
+    );
+    await mutate();
   };
 
   return (
-    <div className="mt-4 bg-white border border-black/6 rounded-2xl p-4 flex items-center gap-3">
-      <div className="w-10 h-10 rounded-xl bg-linear-to-br from-[#d4a843]/12 to-[#ff8c42]/8 flex items-center justify-center text-[#d4a843] shrink-0">
-        <LineChart className="w-5 h-5" aria-hidden="true" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-bold text-[14px] text-foreground leading-tight">
-          Bandeau Marchés BRVM
-        </p>
-        <p className="text-[11px] text-foreground/55 mt-0.5">
-          {isLoading
-            ? 'Chargement de l\'état...'
-            : enabled
-              ? 'Visible en haut de toutes les pages.'
-              : 'Désactivé, le site ne l\'affiche pas.'}
-        </p>
-      </div>
-      <button
-        type="button"
-        onClick={handleToggle}
-        disabled={isLoading || !data}
-        aria-pressed={enabled}
-        aria-label={
-          enabled
-            ? 'Désactiver le bandeau Marchés BRVM'
-            : 'Activer le bandeau Marchés BRVM'
-        }
-        className={[
-          'relative inline-flex h-7 w-12 items-center rounded-full transition shrink-0',
-          enabled ? 'bg-[#00c805]' : 'bg-black/12',
-          isLoading || !data ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
-        ].join(' ')}
-      >
-        <span
+    <div className="mt-4">
+      <div className="bg-white border border-black/6 rounded-2xl p-4 flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-linear-to-br from-[#d4a843]/12 to-[#ff8c42]/8 flex items-center justify-center text-[#d4a843] shrink-0">
+          <LineChart className="w-5 h-5" aria-hidden="true" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-bold text-[14px] text-foreground leading-tight">
+            Bandeau Marchés BRVM
+          </p>
+          <p className="text-[11px] text-foreground/55 mt-0.5">
+            {erreurLecture
+              ? data
+                ? 'État non revérifié, réglage momentanément indisponible.'
+                : "État inconnu, il n'a pas pu être lu."
+              : isLoading
+                ? 'Chargement de l\'état...'
+                : enabled
+                  ? 'Visible en haut de toutes les pages.'
+                  : 'Désactivé, le site ne l\'affiche pas.'}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleToggle}
+          disabled={basculeBloquee}
+          aria-pressed={afficheActif}
+          aria-label={
+            etatIncertain
+              ? "Bandeau Marchés BRVM : état non revérifié, réglage indisponible"
+              : afficheActif
+                ? 'Désactiver le bandeau Marchés BRVM'
+                : 'Activer le bandeau Marchés BRVM'
+          }
           className={[
-            'inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition',
-            enabled ? 'translate-x-6' : 'translate-x-1',
+            'relative inline-flex h-7 w-12 items-center rounded-full transition shrink-0',
+            afficheActif ? 'bg-[#00c805]' : 'bg-black/12',
+            basculeBloquee ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
           ].join(' ')}
-        />
-      </button>
+        >
+          <span
+            className={[
+              'inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition',
+              afficheActif ? 'translate-x-6' : 'translate-x-1',
+            ].join(' ')}
+          />
+        </button>
+      </div>
+
+      {(erreurBascule || erreurLecture) && (
+        <div
+          role="alert"
+          className="mt-2 flex items-start gap-2.5 bg-red-50 border border-red-200 text-red-700 rounded-2xl px-4 py-3 text-[13px]"
+        >
+          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" />
+          <div className="flex-1 min-w-0">
+            <p className="leading-relaxed">{erreurBascule ?? erreurLecture}</p>
+            {/* Le bouton est toujours là : sans lui, le message d'échec d'une
+                bascule restait affiché jusqu'au rechargement de la page, même
+                une fois la connexion revenue. */}
+            <button
+              type="button"
+              onClick={() => {
+                setErreurBascule(null);
+                void mutate();
+              }}
+              className="mt-2 inline-flex items-center gap-1.5 font-semibold hover:underline"
+            >
+              <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />
+              {erreurBascule ? "Revérifier l'état" : 'Réessayer'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

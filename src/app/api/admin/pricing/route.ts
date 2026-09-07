@@ -26,11 +26,16 @@ export async function GET() {
   if ('error' in auth) return auth.error;
 
   const { serviceClient } = auth;
-  const { data } = await serviceClient
+  const { data, error } = await serviceClient
     .from('dynamic_pricing')
     .select('*')
     .order('tier')
     .order('billing_cycle');
+
+  // L'erreur etait ignoree : une lecture en panne repondait 200 avec un
+  // tableau vide, et l'ecran des tarifs affichait alors les prix par defaut
+  // de la configuration comme s'ils etaient ceux du site.
+  if (error) return serverError(error, 'admin-pricing-get');
 
   return NextResponse.json(data || []);
 }

@@ -30,6 +30,8 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
+import { appelAdmin } from '@/app/admin/lib/appel-admin';
+import { EtatListe } from '@/app/admin/lib/EtatListe';
 
 interface CommandPaletteProps {
   open: boolean;
@@ -92,8 +94,13 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   const [articles, setArticles] = useState<ArticleResult[]>([]);
   const [loadingRemote, setLoadingRemote] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-  const usersAbortRef = useRef<AbortController | null>(null);
-  const articlesAbortRef = useRef<AbortController | null>(null);
+  // Echec de la recherche a distance. Sans ces etats, une route en panne se
+  // lisait « Aucun resultat », c'est-a-dire le contraire de la verite.
+  const [erreurUtilisateurs, setErreurUtilisateurs] = useState<string | null>(null);
+  const [erreurArticles, setErreurArticles] = useState<string | null>(null);
+  const [horsLigneRecherche, setHorsLigneRecherche] = useState(false);
+  const [relance, setRelance] = useState(0);
+  const champRef = useRef<HTMLInputElement>(null);
 
   // Debounce du query input pour ne pas spammer les endpoints Supabase.
   useEffect(() => {
@@ -109,8 +116,10 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
       setUsers([]);
       setArticles([]);
       setToast(null);
-      usersAbortRef.current?.abort();
-      articlesAbortRef.current?.abort();
+      setErreurUtilisateurs(null);
+      setErreurArticles(null);
+      setHorsLigneRecherche(false);
+      setLoadingRemote(false);
     }
   }, [open]);
 
@@ -128,39 +137,70 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
     if (q.length < MIN_QUERY) {
       setUsers([]);
       setArticles([]);
+      setErreurUtilisateurs(null);
+      setErreurArticles(null);
+      setHorsLigneRecherche(false);
+      // Une recherche encore en vol ne rendra plus la main : on eteint le
+      // « Recherche en cours... » ici, sinon il resterait affiche pour toujours.
+      setLoadingRemote(false);
       return;
     }
 
+    // Deux protections, et elles ne font pas la meme chose. Le drapeau empeche
+    // la reponse d'une frappe precedente d'ecraser la frappe en cours ;
+    // l'abandon coupe pour de bon la requete devenue inutile, rejeux compris,
+    // sinon taper un nom mettait une trentaine d'appels en vol.
+    let perime = false;
+    const abandon = new AbortController();
+
     setLoadingRemote(true);
-    usersAbortRef.current?.abort();
-    articlesAbortRef.current?.abort();
+    setErreurUtilisateurs(null);
+    setErreurArticles(null);
+    setHorsLigneRecherche(false);
 
-    const usersCtrl = new AbortController();
-    const articlesCtrl = new AbortController();
-    usersAbortRef.current = usersCtrl;
-    articlesAbortRef.current = articlesCtrl;
-
-    const usersPromise = fetchUsers(q, usersCtrl.signal)
-      .then(setUsers)
-      .catch((err: unknown) => {
-        if (!isAbortError(err)) setUsers([]);
+    const attenteUtilisateurs = chercherUtilisateurs(q, abandon.signal)
+      .catch(() => ({ ok: false as const, message: REPONSE_INATTENDUE, horsLigne: false }))
+      .then((resultat) => {
+        if (perime) return;
+        if (resultat.ok) {
+          setUsers(resultat.elements);
+          return;
+        }
+        setUsers([]);
+        setErreurUtilisateurs(resultat.message);
+        if (resultat.horsLigne) setHorsLigneRecherche(true);
       });
 
-    const articlesPromise = fetchArticles(q, articlesCtrl.signal)
-      .then(setArticles)
-      .catch((err: unknown) => {
-        if (!isAbortError(err)) setArticles([]);
+    const attenteArticles = chercherArticles(q, abandon.signal)
+      .catch(() => ({ ok: false as const, message: REPONSE_INATTENDUE, horsLigne: false }))
+      .then((resultat) => {
+        if (perime) return;
+        if (resultat.ok) {
+          setArticles(resultat.elements);
+          return;
+        }
+        setArticles([]);
+        setErreurArticles(resultat.message);
+        if (resultat.horsLigne) setHorsLigneRecherche(true);
       });
 
-    Promise.all([usersPromise, articlesPromise]).finally(() => {
-      setLoadingRemote(false);
+    void Promise.all([attenteUtilisateurs, attenteArticles]).finally(() => {
+      if (!perime) setLoadingRemote(false);
     });
 
     return () => {
-      usersCtrl.abort();
-      articlesCtrl.abort();
+      perime = true;
+      abandon.abort();
     };
-  }, [debouncedQuery, open]);
+  }, [debouncedQuery, open, relance]);
+
+  // Rejoue la recherche sans fermer le palette ni recharger la page. Le focus
+  // revient au champ, sinon les caracteres tapes juste apres le clic tombaient
+  // dans le bouton et etaient perdus.
+  const relancerRecherche = () => {
+    setRelance((n) => n + 1);
+    champRef.current?.focus();
+  };
 
   const navigateAndClose = (href: string, openInNewTab = false) => {
     if (openInNewTab && typeof window !== 'undefined') {
@@ -202,6 +242,19 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 
   const showAlwaysSections = debouncedQuery.length === 0;
 
+  // Une phrase unique qui dit ce qui a echoue. Les routes, elles, restent
+  // affichees : seule la partie a distance est tombee.
+  const erreurRecherche =
+    erreurUtilisateurs && erreurArticles
+      ? erreurUtilisateurs === erreurArticles
+        ? `La recherche n'a pas abouti. ${erreurUtilisateurs}`
+        : `La recherche n'a pas abouti. Utilisateurs : ${erreurUtilisateurs} Articles : ${erreurArticles}`
+      : erreurUtilisateurs
+        ? `La recherche des utilisateurs n'a pas abouti. ${erreurUtilisateurs}`
+        : erreurArticles
+          ? `La recherche des articles n'a pas abouti. ${erreurArticles}`
+          : null;
+
   return (
     <Command.Dialog
       open={open}
@@ -224,6 +277,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
           <div className="flex items-center gap-3 px-4 py-3 border-b border-black/6">
             <Search className="w-[18px] h-[18px] text-foreground/45 shrink-0" aria-hidden="true" />
             <Command.Input
+              ref={champRef}
               value={query}
               onValueChange={setQuery}
               autoFocus
@@ -240,9 +294,13 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             className="max-h-[60vh] sm:max-h-96 overflow-y-auto py-2"
             aria-live="polite"
           >
-            <Command.Empty className="px-4 py-8 text-center text-[13px] text-foreground/50">
-              {loadingRemote ? 'Recherche en cours...' : 'Aucun resultat. Essaye un autre mot.'}
-            </Command.Empty>
+            {/* Quand la recherche a echoue, on n'affiche plus « Aucun resultat » :
+                ce serait affirmer qu'il n'y a rien alors qu'on n'en sait rien. */}
+            {!erreurRecherche && (
+              <Command.Empty className="px-4 py-8 text-center text-[13px] text-foreground/50">
+                {loadingRemote ? 'Recherche en cours...' : 'Aucun résultat. Essayez un autre mot.'}
+              </Command.Empty>
+            )}
 
             {showAlwaysSections && (
               <Command.Group heading="Aller a" className="px-2 **:[[cmdk-group-heading]]:px-3 **:[[cmdk-group-heading]]:py-2 **:[[cmdk-group-heading]]:text-[10px] **:[[cmdk-group-heading]]:tracking-widest **:[[cmdk-group-heading]]:uppercase **:[[cmdk-group-heading]]:text-foreground/45 **:[[cmdk-group-heading]]:font-semibold">
@@ -267,6 +325,27 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                 ))}
               </Command.Group>
             )}
+
+            {/* Echec de la partie a distance de la recherche, avec un bouton
+                pour reessayer sans fermer le palette. Rend null quand tout va bien.
+                L'etat vide reste a la charge de Command.Empty plus haut : ici
+                `vide` et `chargement` sont volontairement figes a false.
+                Le stopPropagation empeche cmdk d'intercepter Entree et de
+                naviguer vers la route surlignee au lieu d'activer le bouton. */}
+            <div
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') e.stopPropagation();
+              }}
+            >
+              <EtatListe
+                chargement={false}
+                erreur={erreurRecherche}
+                horsLigne={horsLigneRecherche}
+                vide={false}
+                texteVide=""
+                onReessayer={relancerRecherche}
+              />
+            </div>
 
             {debouncedQuery.length >= MIN_QUERY && users.length > 0 && (
               <Command.Group
@@ -502,13 +581,40 @@ function ActionItem({
 
 // --- Helpers --------------------------------------------------------------
 
-async function fetchUsers(q: string, signal: AbortSignal): Promise<UserResult[]> {
+/** Ce que rend une recherche : la liste, ou la raison de son absence. */
+type Recherche<T> =
+  | { ok: true; elements: T[] }
+  | { ok: false; message: string; horsLigne: boolean };
+
+const REPONSE_INATTENDUE = "Le serveur a répondu quelque chose d'inattendu. Réessayez dans un instant.";
+
+/** La reponse peut etre la liste elle-meme ou un objet qui la contient. */
+function listeUtilisateurs(donnees: unknown): RawUser[] | null {
+  if (Array.isArray(donnees)) return donnees as RawUser[];
+  if (donnees && typeof donnees === 'object') {
+    const champ = (donnees as { data?: unknown }).data;
+    if (Array.isArray(champ)) return champ as RawUser[];
+  }
+  return null;
+}
+
+async function chercherUtilisateurs(q: string, signal?: AbortSignal): Promise<Recherche<UserResult>> {
   const url = `/api/admin/users?search=${encodeURIComponent(q)}&limit=8`;
-  const res = await fetch(url, { credentials: 'same-origin', signal });
-  if (!res.ok) return [];
-  const json = (await res.json()) as { data?: RawUser[] } | RawUser[];
-  const list: RawUser[] = Array.isArray(json) ? json : json.data ?? [];
-  return list.slice(0, 8).map(toUserResult);
+  const resultat = await appelAdmin(url, { credentials: 'same-origin', signal });
+
+  if (!resultat.ok) {
+    return { ok: false, message: resultat.message, horsLigne: resultat.horsLigne };
+  }
+
+  const brut = listeUtilisateurs(resultat.donnees);
+  if (!brut) return { ok: false, message: REPONSE_INATTENDUE, horsLigne: false };
+
+  try {
+    return { ok: true, elements: brut.slice(0, 8).map(toUserResult) };
+  } catch {
+    // Une ligne mal formee ne doit pas se lire « aucun utilisateur ».
+    return { ok: false, message: REPONSE_INATTENDUE, horsLigne: false };
+  }
 }
 
 interface RawUser {
@@ -542,19 +648,40 @@ function initialsFrom(fullName: string | null, email: string): string {
   return handle.slice(0, 2).toUpperCase();
 }
 
-async function fetchArticles(q: string, signal: AbortSignal): Promise<ArticleResult[]> {
+function listeArticles(donnees: unknown): RawArticle[] | null {
+  if (donnees && typeof donnees === 'object') {
+    const champ = (donnees as { articles?: unknown }).articles;
+    if (Array.isArray(champ)) return champ as RawArticle[];
+  }
+  return null;
+}
+
+async function chercherArticles(q: string, signal?: AbortSignal): Promise<Recherche<ArticleResult>> {
   const url = `/api/admin/articles/search?q=${encodeURIComponent(q)}&limit=6`;
-  const res = await fetch(url, { credentials: 'same-origin', signal });
-  if (!res.ok) return [];
-  const json = (await res.json()) as { articles?: RawArticle[] };
-  const list = json.articles ?? [];
-  return list.slice(0, 6).map((a) => ({
-    id: a.id,
-    slug: a.slug,
-    title: a.title,
-    contentType: a.contentType ?? null,
-    publishedAt: a.publishedAt ?? null,
-  }));
+  const resultat = await appelAdmin(url, { credentials: 'same-origin', signal });
+
+  if (!resultat.ok) {
+    return { ok: false, message: resultat.message, horsLigne: resultat.horsLigne };
+  }
+
+  const brut = listeArticles(resultat.donnees);
+  if (!brut) return { ok: false, message: REPONSE_INATTENDUE, horsLigne: false };
+
+  try {
+    return {
+      ok: true,
+      elements: brut.slice(0, 6).map((a) => ({
+        id: a.id,
+        slug: a.slug,
+        title: a.title,
+        contentType: a.contentType ?? null,
+        publishedAt: a.publishedAt ?? null,
+      })),
+    };
+  } catch {
+    // Une ligne mal formee ne doit pas se lire « aucun article ».
+    return { ok: false, message: REPONSE_INATTENDUE, horsLigne: false };
+  }
 }
 
 interface RawArticle {
@@ -593,10 +720,4 @@ function formatRelative(iso: string | null): string {
   if (months < 12) return `il y a ${months} mois`;
   const years = Math.floor(months / 12);
   return `il y a ${years} an${years > 1 ? 's' : ''}`;
-}
-
-function isAbortError(err: unknown): boolean {
-  if (err instanceof DOMException && err.name === 'AbortError') return true;
-  if (err && typeof err === 'object' && 'name' in err && (err as { name?: string }).name === 'AbortError') return true;
-  return false;
 }

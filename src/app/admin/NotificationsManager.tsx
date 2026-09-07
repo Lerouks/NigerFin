@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Bell, BellOff, BellRing, Loader2, Send } from 'lucide-react';
+import { AlertTriangle, Bell, BellOff, BellRing, Loader2, RefreshCw, Send, WifiOff } from 'lucide-react';
+import { appelAdmin, envoiAdmin } from '@/app/admin/lib/appel-admin';
 
 /**
  * NotificationsManager. UI Cockpit pour gérer les notifications Web Push.
@@ -10,6 +11,12 @@ import { Bell, BellOff, BellRing, Loader2, Send } from 'lucide-react';
  *   - unsupported : le navigateur n'a ni Notification ni PushManager
  *     (typiquement Safari iOS sans PWA installée sur l'écran d'accueil)
  *   - unconfigured : VAPID pas configuré côté serveur (clé publique 503)
+ *   - erreur : l'appel n'a pas abouti (serveur en panne, session expirée,
+ *     connexion coupée). Cet état était auparavant confondu avec
+ *     « unconfigured » : la carte annonçait « Configuration en cours »
+ *     alors que le serveur était simplement injoignable. Un écran qui ment
+ *     est pire qu'un écran en panne, donc on affiche la vraie raison et un
+ *     bouton pour réessayer.
  *   - denied : l'utilisateur a refusé les notifs au niveau OS / navigateur
  *   - ready : tout est OK, l'admin peut s'abonner
  *   - subscribed : l'admin reçoit déjà les pushs sur ce device
@@ -22,6 +29,7 @@ type Status =
   | 'loading'
   | 'unsupported'
   | 'unconfigured'
+  | 'erreur'
   | 'denied'
   | 'ready'
   | 'subscribed';
@@ -31,11 +39,42 @@ interface Feedback {
   message: string;
 }
 
+/**
+ * navigator.serviceWorker.ready ne se résout JAMAIS tant qu'aucun service
+ * worker ne s'installe. Sans ce garde-fou, la carte restait bloquée sur
+ * « Vérification de la configuration... » indéfiniment, sans rien dire.
+ *
+ * Le délai est large exprès : AdminShell n'enregistre le worker qu'à
+ * l'évènement window.load, et son installation met quatre fichiers en cache
+ * avant de rendre la main. Trop court, ce garde-fou afficherait une panne
+ * pendant une installation parfaitement normale, ce qui est précisément le
+ * mensonge qu'il est censé supprimer.
+ */
+const DELAI_SERVICE_WORKER_MS = 30000;
+
+function serviceWorkerPret(): Promise<ServiceWorkerRegistration | null> {
+  return Promise.race([
+    navigator.serviceWorker.ready.catch(() => null),
+    new Promise<null>((resoudre) => {
+      setTimeout(() => resoudre(null), DELAI_SERVICE_WORKER_MS);
+    }),
+  ]);
+}
+
+const MESSAGE_SERVICE_WORKER =
+  "Le service de notifications n'a pas démarré dans ce navigateur. Rechargez la page, puis réessayez.";
+
 export function NotificationsManager() {
   const [status, setStatus] = useState<Status>('loading');
   const [publicKey, setPublicKey] = useState<string | null>(null);
   const [busy, setBusy] = useState<'subscribe' | 'unsubscribe' | 'test' | null>(null);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const [erreurChargement, setErreurChargement] = useState<string | null>(null);
+  // Compte les refus du serveur sur la désactivation : au second, on laisse
+  // couper localement, sinon l'admin n'a plus aucun moyen d'arrêter les pushs
+  // sur ce navigateur tant que la route reste en panne.
+  const [echecsDesabonnement, setEchecsDesabonnement] = useState(0);
+  const [horsLigne, setHorsLigne] = useState(false);
 
   const refreshStatus = useCallback(async () => {
     if (typeof window === 'undefined') return;
@@ -49,30 +88,60 @@ export function NotificationsManager() {
       return;
     }
 
-    try {
-      const res = await fetch('/api/admin/push/vapid-public-key', {
-        credentials: 'same-origin',
-      });
-      if (res.status === 503) {
-        setStatus('unconfigured');
-        return;
-      }
-      if (!res.ok) {
-        setStatus('unconfigured');
-        return;
-      }
-      const data = (await res.json()) as { publicKey?: string };
-      if (!data.publicKey) {
-        setStatus('unconfigured');
-        return;
-      }
-      setPublicKey(data.publicKey);
+    setStatus('loading');
+    setErreurChargement(null);
+    setHorsLigne(false);
 
-      const registration = await navigator.serviceWorker.ready;
+    const resultat = await appelAdmin<{ publicKey?: string }>(
+      '/api/admin/push/vapid-public-key',
+      // Une seule tentative : cette route répond 503 en permanence tant que
+      // les clés VAPID ne sont pas posées sur le serveur. Rejouer trois fois
+      // ferait patienter une seconde et demie devant un état qui, lui, ne
+      // changera pas. En cas de vraie panne, le bouton Réessayer est là.
+      { credentials: 'same-origin', tentatives: 1 },
+    );
+
+    if (!resultat.ok) {
+      // Seul un 503 signifie vraiment « pas encore configuré ». Tout le reste
+      // est une panne, et une panne doit se voir.
+      if (resultat.statut === 503) {
+        setStatus('unconfigured');
+        return;
+      }
+      setErreurChargement(resultat.message);
+      setHorsLigne(resultat.horsLigne);
+      setStatus('erreur');
+      return;
+    }
+
+    const cle = resultat.donnees?.publicKey;
+    if (!cle) {
+      setErreurChargement(
+        "Le serveur n'a pas renvoyé la clé de notification. Réessayez dans un instant.",
+      );
+      setHorsLigne(false);
+      setStatus('erreur');
+      return;
+    }
+    setPublicKey(cle);
+
+    const registration = await serviceWorkerPret();
+    if (!registration) {
+      setErreurChargement(MESSAGE_SERVICE_WORKER);
+      setHorsLigne(false);
+      setStatus('erreur');
+      return;
+    }
+
+    try {
       const existing = await registration.pushManager.getSubscription();
       setStatus(existing ? 'subscribed' : 'ready');
     } catch {
-      setStatus('unconfigured');
+      setErreurChargement(
+        "Ce navigateur n'a pas pu dire si les notifications sont déjà actives sur ce device. Rechargez la page, puis réessayez.",
+      );
+      setHorsLigne(false);
+      setStatus('erreur');
     }
   }, []);
 
@@ -90,12 +159,17 @@ export function NotificationsManager() {
         setStatus(permission === 'denied' ? 'denied' : 'ready');
         setFeedback({
           tone: 'error',
-          message: 'Tu as refusé les notifications. Pour les activer, autorise-les dans les réglages du navigateur.',
+          message: 'Vous avez refusé les notifications. Pour les activer, autorisez-les dans les réglages du navigateur.',
         });
         return;
       }
 
-      const registration = await navigator.serviceWorker.ready;
+      const registration = await serviceWorkerPret();
+      if (!registration) {
+        setFeedback({ tone: 'error', message: MESSAGE_SERVICE_WORKER });
+        return;
+      }
+
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicKey),
@@ -109,18 +183,24 @@ export function NotificationsManager() {
         throw new Error('Subscription incomplète renvoyée par le navigateur.');
       }
 
-      const res = await fetch('/api/admin/push/subscribe', {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          endpoint: json.endpoint,
-          keys: { p256dh: json.keys.p256dh, auth: json.keys.auth },
-        }),
+      const resultat = await envoiAdmin('/api/admin/push/subscribe', 'POST', {
+        endpoint: json.endpoint,
+        keys: { p256dh: json.keys.p256dh, auth: json.keys.auth },
       });
-      if (!res.ok) {
-        throw new Error(`Le serveur a renvoyé ${res.status}.`);
+
+      if (!resultat.ok) {
+        // Le serveur n'a rien enregistré : on annule aussi l'abonnement pris
+        // par le navigateur, sinon la carte afficherait « Notifications
+        // actives » au prochain chargement alors que rien n'arriverait.
+        await subscription.unsubscribe().catch(() => undefined);
+        setStatus('ready');
+        setFeedback({
+          tone: 'error',
+          message: `L'activation a échoué. ${resultat.message}`,
+        });
+        return;
       }
+
       setStatus('subscribed');
       setFeedback({
         tone: 'success',
@@ -141,17 +221,44 @@ export function NotificationsManager() {
     setBusy('unsubscribe');
     setFeedback(null);
     try {
-      const registration = await navigator.serviceWorker.ready;
+      const registration = await serviceWorkerPret();
+      if (!registration) {
+        setFeedback({ tone: 'error', message: MESSAGE_SERVICE_WORKER });
+        return;
+      }
+
       const existing = await registration.pushManager.getSubscription();
       if (existing) {
-        await fetch('/api/admin/push/unsubscribe', {
-          method: 'DELETE',
-          credentials: 'same-origin',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ endpoint: existing.endpoint }),
+        const resultat = await envoiAdmin('/api/admin/push/unsubscribe', 'DELETE', {
+          endpoint: existing.endpoint,
         });
+        if (!resultat.ok) {
+          // Auparavant la réponse du serveur était ignorée : la carte annonçait
+          // « Notifications désactivées » pendant que le serveur continuait
+          // d'envoyer les pushs sur ce device.
+          if (echecsDesabonnement === 0) {
+            setEchecsDesabonnement(1);
+            setFeedback({
+              tone: 'error',
+              message: `La désactivation a échoué, ce device reste abonné côté serveur. ${resultat.message} Réessayez : au second refus, les notifications seront coupées sur ce navigateur.`,
+            });
+            return;
+          }
+          // Porte de sortie : le navigateur ne recevra plus rien, mais on ne
+          // prétend pas que le serveur est au courant.
+          await existing.unsubscribe();
+          setEchecsDesabonnement(0);
+          setStatus('ready');
+          setFeedback({
+            tone: 'info',
+            message: `Notifications coupées sur ce navigateur. Le serveur, lui, n'a pas pu être prévenu (${resultat.message.toLowerCase()}) : son enregistrement devra être nettoyé.`,
+          });
+          return;
+        }
+        setEchecsDesabonnement(0);
         await existing.unsubscribe();
       }
+
       setStatus('ready');
       setFeedback({
         tone: 'info',
@@ -166,42 +273,51 @@ export function NotificationsManager() {
     } finally {
       setBusy(null);
     }
-  }, []);
+  }, [echecsDesabonnement]);
 
   const sendTest = useCallback(async () => {
     setBusy('test');
     setFeedback(null);
+
+    // Le finally n'est pas décoratif : sans lui, le moindre imprévu laissait
+    // le bouton Tester désactivé pour de bon, sans un mot à l'écran.
     try {
-      const res = await fetch('/api/admin/push/test', {
-        method: 'POST',
-        credentials: 'same-origin',
-      });
-      const data = (await res.json().catch(() => ({}))) as {
+      const resultat = await envoiAdmin<{
         sent?: number;
         failed?: number;
         removed?: number;
-        error?: string;
-      };
-      if (!res.ok) {
-        throw new Error(data.error || `Le serveur a renvoyé ${res.status}.`);
-      }
-      if ((data.sent ?? 0) === 0) {
+      }>('/api/admin/push/test', 'POST');
+
+      if (!resultat.ok) {
         setFeedback({
           tone: 'error',
-          message: 'Aucune notification envoyée. Réessaie après avoir activé les notifs.',
+          message: `Échec du test : ${resultat.message}`,
+        });
+        return;
+      }
+
+      const envoyes = resultat.donnees?.sent ?? 0;
+      const echecs = resultat.donnees?.failed ?? 0;
+
+      if (envoyes === 0) {
+        setFeedback({
+          tone: 'error',
+          message: 'Aucune notification envoyée. Réessayez après avoir activé les notifications.',
+        });
+      } else if (echecs > 0) {
+        const detailEchecs = echecs > 1
+          ? `${echecs} devices n'ont pas reçu la notification.`
+          : "1 device n'a pas reçu la notification.";
+        setFeedback({
+          tone: 'error',
+          message: `Test envoyé à ${envoyes} device${envoyes > 1 ? 's' : ''}, mais ${detailEchecs}`,
         });
       } else {
         setFeedback({
           tone: 'success',
-          message: `Test envoyé à ${data.sent} device${(data.sent ?? 0) > 1 ? 's' : ''}.`,
+          message: `Test envoyé à ${envoyes} device${envoyes > 1 ? 's' : ''}.`,
         });
       }
-    } catch (err) {
-      const detail = err instanceof Error ? err.message : 'erreur inconnue';
-      setFeedback({
-        tone: 'error',
-        message: `Échec du test : ${detail}`,
-      });
     } finally {
       setBusy(null);
     }
@@ -214,9 +330,12 @@ export function NotificationsManager() {
         <NotificationsBody
           status={status}
           busy={busy}
+          erreurChargement={erreurChargement}
+          horsLigne={horsLigne}
           onSubscribe={subscribe}
           onUnsubscribe={unsubscribe}
           onTest={sendTest}
+          onReessayer={refreshStatus}
         />
         {feedback && <FeedbackBlock feedback={feedback} />}
       </div>
@@ -227,15 +346,21 @@ export function NotificationsManager() {
 function NotificationsBody({
   status,
   busy,
+  erreurChargement,
+  horsLigne,
   onSubscribe,
   onUnsubscribe,
   onTest,
+  onReessayer,
 }: {
   status: Status;
   busy: 'subscribe' | 'unsubscribe' | 'test' | null;
+  erreurChargement: string | null;
+  horsLigne: boolean;
   onSubscribe: () => void;
   onUnsubscribe: () => void;
   onTest: () => void;
+  onReessayer: () => void;
 }) {
   if (status === 'loading') {
     return (
@@ -243,6 +368,16 @@ function NotificationsBody({
         <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
         Vérification de la configuration...
       </div>
+    );
+  }
+
+  if (status === 'erreur') {
+    return (
+      <EchecChargement
+        message={erreurChargement ?? "L'état des notifications n'a pas pu être chargé."}
+        horsLigne={horsLigne}
+        onReessayer={onReessayer}
+      />
     );
   }
 
@@ -261,7 +396,7 @@ function NotificationsBody({
       <Empty
         icon={<BellOff className="w-5 h-5 text-foreground/50" aria-hidden="true" />}
         title="Configuration en cours"
-        description="Le service Web Push n'est pas encore branché côté serveur. Reviens plus tard, ce module sera actif dès que les clés VAPID seront en place."
+        description="Le service Web Push n'est pas encore branché côté serveur. Revenez plus tard, ce module sera actif dès que les clés VAPID seront en place."
       />
     );
   }
@@ -271,7 +406,7 @@ function NotificationsBody({
       <Empty
         icon={<BellOff className="w-5 h-5 text-red-500/80" aria-hidden="true" />}
         title="Notifications bloquées"
-        description="Tu as déjà refusé les notifications pour ce site. Ouvre les réglages du navigateur (ou de l'app PWA installée), autorise les notifications pour NFI Cockpit, puis recharge cette page."
+        description="Vous avez déjà refusé les notifications pour ce site. Ouvrez les réglages du navigateur (ou de l'app PWA installée), autorise les notifications pour NFI Cockpit, puis recharge cette page."
       />
     );
   }
@@ -287,7 +422,7 @@ function NotificationsBody({
             {status === 'subscribed' ? 'Notifications actives' : 'Activer les notifications'}
           </p>
           <p className="text-[12px] text-foreground/55 mt-1 leading-relaxed">
-            Tu seras notifié quand un nouveau paiement Premium arrive, quand le site
+            Vous serez notifié quand un nouveau paiement Premium arrive, quand le site
             rencontre un problème, ou quand un commentaire attend ta modération.
           </p>
         </div>
@@ -339,6 +474,48 @@ function NotificationsBody({
           </button>
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * L'appel n'a pas abouti. On distingue la coupure de connexion (fréquente au
+ * Niger) d'une panne du serveur, et on propose de réessayer sans recharger.
+ */
+function EchecChargement({
+  message,
+  horsLigne,
+  onReessayer,
+}: {
+  message: string;
+  horsLigne: boolean;
+  onReessayer: () => void;
+}) {
+  return (
+    <div className="flex flex-col gap-4" role="alert">
+      <div className="flex items-start gap-3">
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${horsLigne ? 'bg-black/4' : 'bg-red-50'}`}>
+          {horsLigne ? (
+            <WifiOff className="w-5 h-5 text-foreground/50" aria-hidden="true" />
+          ) : (
+            <AlertTriangle className="w-5 h-5 text-red-500/80" aria-hidden="true" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-[14px] text-foreground leading-tight">
+            {horsLigne ? 'Connexion perdue' : "L'état des notifications n'a pas pu être chargé"}
+          </p>
+          <p className="text-[12px] text-foreground/55 mt-1 leading-relaxed">{message}</p>
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={onReessayer}
+        className="w-full rounded-xl px-4 py-3 text-[13px] font-semibold text-foreground bg-black/5 hover:bg-black/8 active:bg-black/10 transition inline-flex items-center justify-center gap-2"
+      >
+        <RefreshCw className="w-4 h-4" aria-hidden="true" />
+        Réessayer
+      </button>
     </div>
   );
 }

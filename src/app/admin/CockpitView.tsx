@@ -3,18 +3,22 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
+  AlertTriangle,
   ArrowUpRight,
   ArrowDownRight,
   Bell,
   Play,
+  RefreshCw,
   Sparkles,
   Wallet,
   MessageSquare,
   UserPlus,
   Newspaper,
+  WifiOff,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useAdminApiPolling } from './hooks/useAdminApi';
+import { EtatListe } from '@/app/admin/lib/EtatListe';
 import { NotificationsManager } from './NotificationsManager';
 
 interface OverviewData {
@@ -37,34 +41,85 @@ interface ProfileGreeting {
   firstName: string;
 }
 
+/**
+ * Traduit l'erreur rendue par useAdminApi en quelque chose d'affichable.
+ * Le hook met deja une phrase en francais dans .message, et « HorsLigne » dans
+ * .name quand la connexion est coupee.
+ */
+function lireErreur(erreur: unknown): { message: string; horsLigne: boolean } | null {
+  if (!erreur) return null;
+  if (erreur instanceof Error) {
+    return {
+      message: erreur.message.trim() || "Les données n'ont pas pu être chargées.",
+      horsLigne: erreur.name === 'HorsLigne',
+    };
+  }
+  return { message: "Les données n'ont pas pu être chargées.", horsLigne: false };
+}
+
 export function CockpitView({ greeting }: { greeting: ProfileGreeting }) {
-  const { data: overview, error, isLoading } = useAdminApiPolling<OverviewData>('overview', 30000);
+  const {
+    data: overview,
+    error,
+    isLoading,
+    mutate,
+  } = useAdminApiPolling<OverviewData>('overview', 30000);
+  const echec = lireErreur(error);
   const today = formatToday();
+
+  /**
+   * Rien n'a pu etre lu : on n'affiche AUCUN chiffre. Un zero ou un tiret mis a
+   * la place d'une valeur qui n'a pas pu etre chargee fait mentir le tableau de
+   * bord, ce qui est pire qu'un ecran en panne.
+   */
+  const chiffresIndisponibles = echec !== null && !overview;
 
   return (
     <div className="max-w-[640px] lg:max-w-[820px] mx-auto px-5 pt-3">
       <CockpitHeader greeting={greeting} today={today} />
 
-      {error && (
-        <div className="my-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-[13px]">
-          Impossible de charger les données. Nouvel essai dans 30 secondes.
-        </div>
+      {echec && overview && (
+        <BandeauErreur
+          titre="Chiffres non actualisés"
+          message={`${echec.message} Ceux affichés ci-dessous viennent de la dernière mise à jour réussie.`}
+          horsLigne={echec.horsLigne}
+          ton="attention"
+          onReessayer={() => {
+            void mutate();
+          }}
+        />
       )}
 
-      <HeroCardViews
-        value={overview?.viewsToday ?? null}
-        growthPercent={overview?.viewsTodayGrowthPercent ?? null}
-        sparkline={overview?.viewsSparkline ?? []}
-        isLoading={isLoading}
-      />
+      {chiffresIndisponibles && echec ? (
+        <BandeauErreur
+          titre={
+            echec.horsLigne
+              ? 'Connexion perdue'
+              : "Les chiffres du jour n'ont pas pu être chargés"
+          }
+          message={echec.message}
+          horsLigne={echec.horsLigne}
+          ton="echec"
+          onReessayer={() => {
+            void mutate();
+          }}
+        />
+      ) : (
+        <>
+          <HeroCardViews
+            value={overview?.viewsToday ?? null}
+            growthPercent={overview?.viewsTodayGrowthPercent ?? null}
+            sparkline={overview?.viewsSparkline ?? []}
+          />
 
-      <StatsRow
-        newUsers={overview?.newUsersToday ?? null}
-        newUsersGrowth={overview?.newUsersTodayGrowthPercent ?? null}
-        mrr={overview?.mrr ?? null}
-        mrrGrowth={overview?.revenueTodayGrowthPercent ?? null}
-        isLoading={isLoading}
-      />
+          <StatsRow
+            newUsers={overview?.newUsersToday ?? null}
+            newUsersGrowth={overview?.newUsersTodayGrowthPercent ?? null}
+            mrr={overview?.mrr ?? null}
+            mrrGrowth={overview?.revenueTodayGrowthPercent ?? null}
+          />
+        </>
+      )}
 
       <ActivitySection />
 
@@ -72,11 +127,48 @@ export function CockpitView({ greeting }: { greeting: ProfileGreeting }) {
 
       <TopArticleSection top={overview?.topArticle ?? null} isLoading={isLoading} />
 
-      <BriefingCard
-        viewsToday={overview?.viewsToday ?? 0}
-        revenueToday={overview?.revenueToday ?? 0}
-        newUsersToday={overview?.newUsersToday ?? 0}
-      />
+      {!chiffresIndisponibles && <BriefingCard overview={overview ?? null} />}
+    </div>
+  );
+}
+
+/**
+ * Panne d'un bloc de chiffres. Deux tons : rouge quand rien n'a pu etre lu,
+ * ambre quand on montre encore les valeurs de la derniere lecture reussie.
+ */
+function BandeauErreur({
+  titre,
+  message,
+  horsLigne,
+  ton,
+  onReessayer,
+}: {
+  titre: string;
+  message: string;
+  horsLigne: boolean;
+  ton: 'echec' | 'attention';
+  onReessayer: () => void;
+}) {
+  const Icone = horsLigne ? WifiOff : AlertTriangle;
+  const couleurs =
+    ton === 'echec'
+      ? 'bg-red-50 border-red-200 text-red-700'
+      : 'bg-amber-50 border-amber-200 text-amber-700';
+  return (
+    <div role="alert" className={`my-4 p-4 rounded-2xl border flex items-start gap-3 ${couleurs}`}>
+      <Icone className="w-[18px] h-[18px] shrink-0 mt-0.5" aria-hidden="true" />
+      <div className="flex-1 min-w-0">
+        <p className="text-[13px] font-semibold">{titre}</p>
+        <p className="text-[13px] leading-relaxed mt-1">{message}</p>
+        <button
+          type="button"
+          onClick={onReessayer}
+          className="mt-3 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#111] text-white text-[12px] font-semibold hover:bg-[#333] transition active:scale-[0.98]"
+        >
+          <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />
+          Réessayer
+        </button>
+      </div>
     </div>
   );
 }
@@ -110,12 +202,10 @@ function HeroCardViews({
   value,
   growthPercent,
   sparkline,
-  isLoading,
 }: {
   value: number | null;
   growthPercent: number | null;
   sparkline: number[];
-  isLoading: boolean;
 }) {
   const positive = (growthPercent ?? 0) >= 0;
   return (
@@ -135,7 +225,7 @@ function HeroCardViews({
         </div>
         <div className="flex items-baseline gap-2 mt-3">
           <span className="font-black text-[64px] leading-none tracking-tight tabular-nums">
-            <AnimatedNumber value={value} isLoading={isLoading} />
+            <AnimatedNumber value={value} />
           </span>
         </div>
         <div className="flex items-center gap-2 mt-3">
@@ -165,13 +255,11 @@ function StatsRow({
   newUsersGrowth,
   mrr,
   mrrGrowth,
-  isLoading,
 }: {
   newUsers: number | null;
   newUsersGrowth: number | null;
   mrr: number | null;
   mrrGrowth: number | null;
-  isLoading: boolean;
 }) {
   const positive = (mrrGrowth ?? 0) >= 0;
   const newUsersPositive = (newUsersGrowth ?? 0) >= 0;
@@ -182,7 +270,7 @@ function StatsRow({
           Nouveaux lecteurs
         </p>
         <p className="font-extrabold text-[28px] leading-tight mt-2 tabular-nums">
-          <AnimatedNumber value={newUsers} isLoading={isLoading} />
+          <AnimatedNumber value={newUsers} />
         </p>
         <span
           className={[
@@ -199,7 +287,7 @@ function StatsRow({
           Premium MRR
         </p>
         <p className="font-extrabold text-[22px] leading-tight mt-2 tabular-nums">
-          <AnimatedNumber value={mrr} isLoading={isLoading} />
+          <AnimatedNumber value={mrr} />
           <span className="text-[12px] text-foreground/40 font-medium ml-1">FCFA</span>
         </p>
         <span
@@ -258,11 +346,25 @@ const TYPE_VISUAL: Record<
 };
 
 function ActivitySection() {
-  const { data, isLoading } = useAdminApiPolling<{ events: ActivityEvent[] }>(
+  const { data, error, isLoading, mutate } = useAdminApiPolling<{ events: ActivityEvent[] }>(
     'activity',
     30000
   );
+  const echec = lireErreur(error);
   const events = data?.events ?? [];
+  /**
+   * Echec sans aucune donnee : la liste est en panne, pas vide. Dire « Aucune
+   * activité récente » dans ce cas est exactement le mensonge qu'on corrige.
+   */
+  const echecListe = echec && !data ? echec : null;
+  const reessayer = () => {
+    void mutate();
+  };
+  // Une panne connue reste affichee pendant que le hook retente, sinon l'ecran
+  // repasserait en squelette toutes les trente secondes sans jamais rien dire.
+  const montrerSquelette = isLoading && echecListe === null;
+  const montrerEtat = !montrerSquelette && (echecListe !== null || events.length === 0);
+  const montrerListe = !montrerSquelette && events.length > 0;
 
   return (
     <section className="mb-6">
@@ -276,13 +378,30 @@ function ActivitySection() {
         </Link>
       </div>
 
-      {isLoading && <ActivitySkeleton />}
-      {!isLoading && events.length === 0 && (
-        <div className="bg-white border border-black/6 rounded-2xl p-6 text-center text-[13px] text-foreground/55">
-          Aucune activité récente. Profite du calme.
+      {echec && data && (
+        <BandeauErreur
+          titre="Activité non actualisée"
+          message={`${echec.message} La liste ci-dessous vient de la dernière mise à jour réussie.`}
+          horsLigne={echec.horsLigne}
+          ton="attention"
+          onReessayer={reessayer}
+        />
+      )}
+
+      {montrerSquelette && <ActivitySkeleton />}
+      {montrerEtat && (
+        <div className="bg-white border border-black/6 rounded-2xl">
+          <EtatListe
+            chargement={false}
+            erreur={echecListe?.message ?? null}
+            horsLigne={echecListe?.horsLigne}
+            vide={events.length === 0}
+            texteVide="Aucune activité récente. Profite du calme."
+            onReessayer={reessayer}
+          />
         </div>
       )}
-      {!isLoading && events.length > 0 && (
+      {montrerListe && (
         <div className="space-y-2.5">
           {events.slice(0, 5).map((e) => (
             <div
@@ -386,16 +505,16 @@ function TopArticleSection({
   );
 }
 
-function BriefingCard({
-  viewsToday,
-  revenueToday,
-  newUsersToday,
-}: {
-  viewsToday: number;
-  revenueToday: number;
-  newUsersToday: number;
-}) {
-  const narrative = buildNarrative({ viewsToday, revenueToday, newUsersToday });
+function BriefingCard({ overview }: { overview: OverviewData | null }) {
+  // Sans chiffres lus, on ne raconte rien : « Pas encore d'activité » alors que
+  // la lecture n'a pas abouti serait une affirmation fausse.
+  const narrative = overview
+    ? buildNarrative({
+        viewsToday: overview.viewsToday,
+        revenueToday: overview.revenueToday,
+        newUsersToday: overview.newUsersToday,
+      })
+    : 'Chiffres du jour en cours de chargement.';
   return (
     <section className="mb-10">
       <div className="rounded-3xl p-5 text-white bg-linear-to-br from-foreground to-black">
@@ -457,13 +576,7 @@ function buildNarrative({
   return `Aujourd'hui : ${parts.join(', ')}.`;
 }
 
-function AnimatedNumber({
-  value,
-  isLoading,
-}: {
-  value: number | null;
-  isLoading: boolean;
-}) {
+function AnimatedNumber({ value }: { value: number | null }) {
   const [display, setDisplay] = useState<number>(0);
 
   useEffect(() => {
@@ -486,7 +599,9 @@ function AnimatedNumber({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
-  if (isLoading && value === null) return <span className="text-foreground/20">-</span>;
+  // Aucune valeur connue : on ne descend jamais sur le zero de l'animation,
+  // sinon un chiffre invente s'affiche a la place d'une donnee manquante.
+  if (value === null) return <span className="text-foreground/20">-</span>;
   return <>{display.toLocaleString('fr-FR')}</>;
 }
 

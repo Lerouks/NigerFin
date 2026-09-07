@@ -18,19 +18,21 @@ interface Props {
   vide: boolean;
   /** Ce qu'on montre quand il n'y a vraiment rien. Exemple : « Aucun article ». */
   texteVide: string;
+  /** Facultatif : dire ce qui charge, plutot que « Chargement... » tout court. */
+  texteChargement?: string;
   /** Facultatif : l'invitation a creer le premier element. */
   actionVide?: React.ReactNode;
   onReessayer?: () => void;
 }
 
 export function EtatListe({
-  chargement, erreur, horsLigne, vide, texteVide, actionVide, onReessayer,
+  chargement, erreur, horsLigne, vide, texteVide, texteChargement, actionVide, onReessayer,
 }: Props) {
   if (chargement) {
     return (
       <div className="flex items-center justify-center gap-3 py-16 text-gray-500">
         <Loader2 className="w-4 h-4 animate-spin" />
-        <span className="text-sm">Chargement...</span>
+        <span className="text-sm">{texteChargement ?? 'Chargement...'}</span>
       </div>
     );
   }

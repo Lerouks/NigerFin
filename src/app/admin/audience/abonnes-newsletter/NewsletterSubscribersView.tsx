@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
-  Mail,
   Search,
   Download,
   UserMinus,
@@ -16,6 +15,8 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import { useAdminApi } from '../../hooks/useAdminApi';
+import { envoiAdmin } from '@/app/admin/lib/appel-admin';
+import { EtatListe } from '@/app/admin/lib/EtatListe';
 import { useToast } from '@/components/Toast';
 import type {
   SubscriberRow,
@@ -61,6 +62,19 @@ const SOURCE_LABELS: Record<string, string> = {
 const PAGE_SIZE = 50;
 const SEARCH_DEBOUNCE_MS = 300;
 
+/**
+ * useAdminApi passe par appelAdmin : le message porte par l'erreur est deja une
+ * phrase en francais prete a afficher, inutile de la reecrire ici.
+ */
+function messageDeLErreur(erreur: unknown): string {
+  if (erreur instanceof Error && erreur.message.trim()) return erreur.message;
+  return "La liste des abonnés n'a pas pu être chargée. Réessayez dans un instant.";
+}
+
+function estHorsLigne(erreur: unknown): boolean {
+  return erreur instanceof Error && erreur.name === 'HorsLigne';
+}
+
 export function NewsletterSubscribersView() {
   const { show } = useToast();
   const [status, setStatus] = useState<SubscriberStatus | 'all'>('active');
@@ -94,7 +108,19 @@ export function NewsletterSubscribersView() {
   );
 
   const stats = data?.stats ?? null;
+  const rows = data?.rows ?? [];
   const totalPages = data ? Math.max(1, Math.ceil(data.total / PAGE_SIZE)) : 1;
+
+  // Un échec alors que rien n'est encore affiché : l'écran doit le dire, et
+  // surtout ne jamais montrer l'état vide, qui ferait croire à zéro abonné.
+  const erreurListe = error && !data ? messageDeLErreur(error) : null;
+  // Un échec alors que des données sont déjà à l'écran : on prévient sans les
+  // effacer, la connexion du site coupe régulièrement quelques secondes.
+  const echecRafraichissement = error && data ? messageDeLErreur(error) : null;
+  const horsLigne = estHorsLigne(error);
+  const reessayer = () => {
+    void mutate();
+  };
 
   const [unsubscribingId, setUnsubscribingId] = useState<string | null>(null);
 
@@ -107,15 +133,23 @@ export function NewsletterSubscribersView() {
     )
       return;
     setUnsubscribingId(row.id);
+
+    // Le finally garantit la remise à zéro : sans lui, un imprévu laissait
+    // le spinner sur la ligne et bloquait TOUS les désabonnements suivants
+    // jusqu'au rechargement de la page.
     try {
-      const res = await fetch(`/api/admin/newsletter/subscribers/${row.id}`, {
-        method: 'DELETE',
-      });
-      if (!res.ok) throw new Error();
+      const resultat = await envoiAdmin(
+        `/api/admin/newsletter/subscribers/${row.id}`,
+        'DELETE',
+      );
+
+      if (!resultat.ok) {
+        show(resultat.message, 'error');
+        return;
+      }
+
       show(`${row.email} désabonné.`, 'success');
-      mutate();
-    } catch {
-      show('Erreur lors du désabonnement.', 'error');
+      void mutate();
     } finally {
       setUnsubscribingId(null);
     }
@@ -137,10 +171,22 @@ export function NewsletterSubscribersView() {
     <div className="space-y-8">
       <Header />
 
-      {error && (
-        <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-[13px] flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4" />
-          Impossible de charger les abonnés. Recharge la page ou vérifie ta connexion.
+      {echecRafraichissement && (
+        <div
+          role="alert"
+          className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-[13px] flex items-start gap-2.5"
+        >
+          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+          <span className="leading-relaxed">
+            {echecRafraichissement} La liste ci-dessous date de la dernière mise à
+            jour réussie.{' '}
+            <button
+              onClick={reessayer}
+              className="underline font-semibold hover:no-underline"
+            >
+              Réessayer
+            </button>
+          </span>
         </div>
       )}
 
@@ -163,12 +209,29 @@ export function NewsletterSubscribersView() {
         exportHref={exportHref}
       />
 
-      <SubscribersTable
-        rows={data?.rows ?? []}
-        isLoading={isLoading}
-        unsubscribingId={unsubscribingId}
-        onUnsubscribe={handleUnsubscribe}
-      />
+      {/* La carte blanche est conservée pour que le chargement, l'échec et
+          l'état vide restent alignés sur les autres blocs de l'écran. */}
+      {((isLoading && !data) || erreurListe || rows.length === 0) && (
+        <div className="bg-white border border-black/6 rounded-2xl">
+          <EtatListe
+            chargement={isLoading && !data}
+            erreur={erreurListe}
+            horsLigne={horsLigne}
+            vide={rows.length === 0}
+            texteChargement="Chargement des abonnés..."
+            texteVide="Aucun abonné ne correspond à ces filtres."
+            onReessayer={reessayer}
+          />
+        </div>
+      )}
+
+      {rows.length > 0 && (
+        <SubscribersTable
+          rows={rows}
+          unsubscribingId={unsubscribingId}
+          onUnsubscribe={handleUnsubscribe}
+        />
+      )}
 
       {data && data.total > 0 && (
         <Pagination
@@ -456,34 +519,13 @@ function FilterChip({
 
 function SubscribersTable({
   rows,
-  isLoading,
   unsubscribingId,
   onUnsubscribe,
 }: {
   rows: SubscriberRow[];
-  isLoading: boolean;
   unsubscribingId: string | null;
   onUnsubscribe: (row: SubscriberRow) => void;
 }) {
-  if (isLoading && rows.length === 0) {
-    return (
-      <div className="bg-white border border-black/6 rounded-2xl p-8 flex items-center justify-center text-foreground/45 text-[13px]">
-        <Loader2 className="w-4 h-4 animate-spin mr-2" />
-        Chargement des abonnés...
-      </div>
-    );
-  }
-  if (rows.length === 0) {
-    return (
-      <div className="bg-white border border-black/6 rounded-2xl p-10 text-center">
-        <Mail className="w-8 h-8 text-foreground/20 mx-auto mb-3" />
-        <p className="text-[14px] text-foreground/55">
-          Aucun abonné ne correspond à ces filtres.
-        </p>
-      </div>
-    );
-  }
-
   return (
     <>
       <div className="hidden lg:block bg-white border border-black/6 rounded-2xl overflow-hidden">

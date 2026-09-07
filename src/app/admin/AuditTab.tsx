@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { appelAdmin } from '@/app/admin/lib/appel-admin';
+import { EtatListe } from '@/app/admin/lib/EtatListe';
 
 interface AuditEntry {
   id: string;
@@ -13,56 +15,93 @@ interface AuditEntry {
   user_profiles?: { email: string; full_name: string };
 }
 
+/** Ce que la route /api/admin/audit renvoie. */
+interface AuditResponse {
+  data: AuditEntry[];
+  total: number;
+}
+
 export function AuditTab() {
   const [auditLog, setAuditLog] = useState<AuditEntry[]>([]);
+  const [chargement, setChargement] = useState(true);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const [horsLigne, setHorsLigne] = useState(false);
 
   const fetchAuditLog = useCallback(async () => {
-    try {
-      const res = await fetch('/api/admin/audit');
-      const data = await res.json();
-      setAuditLog(data.data || []);
-    } catch { /* ignore */ }
+    setChargement(true);
+    setErreur(null);
+    setHorsLigne(false);
+
+    const resultat = await appelAdmin<AuditResponse>('/api/admin/audit');
+
+    if (!resultat.ok) {
+      // Sans cette branche, l'echec etait avale par un catch vide et l'ecran
+      // affichait « Aucune action enregistrée » comme si le journal etait vide.
+      setErreur(resultat.message);
+      setHorsLigne(resultat.horsLigne);
+      setChargement(false);
+      return;
+    }
+
+    const donnees = resultat.donnees;
+    if (!donnees || !Array.isArray(donnees.data)) {
+      setErreur("Le serveur n'a pas renvoyé le journal des actions. Réessayez dans un instant.");
+      setChargement(false);
+      return;
+    }
+
+    setAuditLog(donnees.data);
+    setChargement(false);
   }, []);
 
   useEffect(() => { fetchAuditLog(); }, [fetchAuditLog]);
 
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-xl border border-black/6 overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-black/4">
-              <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Date</th>
-              <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Admin</th>
-              <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Action</th>
-              <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Type</th>
-              <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Détails</th>
-            </tr>
-          </thead>
-          <tbody>
-            {auditLog.map((entry) => (
-              <tr key={entry.id} className="border-b border-black/3 last:border-0">
-                <td className="px-4 py-3 text-[12px] text-gray-500 whitespace-nowrap">
-                  {new Date(entry.created_at).toLocaleString('fr-FR')}
-                </td>
-                <td className="px-4 py-3 text-[12px]">
-                  {entry.user_profiles?.email || entry.admin_id.slice(0, 8) + '...'}
-                </td>
-                <td className="px-4 py-3">
-                  <AuditActionBadge action={entry.action} />
-                </td>
-                <td className="px-4 py-3 text-[12px] text-gray-600">{entry.entity_type}</td>
-                <td className="px-4 py-3 text-[12px] text-gray-500 font-mono max-w-xs truncate">
-                  {JSON.stringify(entry.details)}
-                </td>
+      {/* Chargement, échec de chargement, ou journal vraiment vide */}
+      <EtatListe
+        chargement={chargement}
+        erreur={erreur}
+        horsLigne={horsLigne}
+        vide={auditLog.length === 0}
+        texteVide="Aucune action enregistrée"
+        onReessayer={fetchAuditLog}
+      />
+
+      {!chargement && !erreur && auditLog.length > 0 && (
+        <div className="bg-white rounded-xl border border-black/6 overflow-hidden">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-black/4">
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Date</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Admin</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Action</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Type</th>
+                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Détails</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        {auditLog.length === 0 && (
-          <p className="text-center py-8 text-sm text-gray-500">Aucune action enregistrée</p>
-        )}
-      </div>
+            </thead>
+            <tbody>
+              {auditLog.map((entry) => (
+                <tr key={entry.id} className="border-b border-black/3 last:border-0">
+                  <td className="px-4 py-3 text-[12px] text-gray-500 whitespace-nowrap">
+                    {new Date(entry.created_at).toLocaleString('fr-FR')}
+                  </td>
+                  <td className="px-4 py-3 text-[12px]">
+                    {entry.user_profiles?.email || entry.admin_id.slice(0, 8) + '...'}
+                  </td>
+                  <td className="px-4 py-3">
+                    <AuditActionBadge action={entry.action} />
+                  </td>
+                  <td className="px-4 py-3 text-[12px] text-gray-600">{entry.entity_type}</td>
+                  <td className="px-4 py-3 text-[12px] text-gray-500 font-mono max-w-xs truncate">
+                    {JSON.stringify(entry.details)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

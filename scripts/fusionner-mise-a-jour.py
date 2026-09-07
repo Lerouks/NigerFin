@@ -19,6 +19,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 
 DEPOT = os.environ.get("DEPOT", "Lerouks/NigerFin")
 # « Updates `paquet` from 1.2.3 to 1.3.0 », le format que Dependabot ecrit
@@ -80,16 +81,33 @@ def main() -> int:
         return 0
 
     print(f"Fusion de #{numero} : {pr['title']}")
-    r = subprocess.run(
-        ["gh", "pr", "merge", numero, "--repo", DEPOT, "--squash", "--delete-branch"],
-        capture_output=True, text=True)
-    if r.returncode != 0:
-        # Cas courant et sans gravite : la proposition est en retard sur la
-        # branche principale. Dependabot la remet a jour tout seul au prochain
-        # passage, et elle repassera ici.
-        print(f"Fusion impossible pour l'instant : {r.stderr.strip()}")
-        return 0
-    print("Fusionnee.")
+
+    # GitHub calcule la fusionnabilite d'une proposition de facon differee.
+    # Juste apres la fin de la verification, l'etat vaut encore UNKNOWN et la
+    # fusion est refusee. C'est ce qui laissait des mises a jour de securite
+    # vertes dormir indefiniment, alors que tout etait bon. On attend que le
+    # calcul aboutisse au lieu de renoncer au premier refus.
+    for essai in range(1, 7):
+        etat = gh("pr", "view", numero, "--repo", DEPOT, "--json", "mergeable,state")
+        if etat and etat.get("state") == "MERGED":
+            print("Deja fusionnee entre-temps.")
+            return 0
+        if etat and etat.get("mergeable") == "CONFLICTING":
+            print("Conflit avec la branche principale : Dependabot la remettra a jour lui-meme.")
+            return 0
+        if etat and etat.get("mergeable") == "MERGEABLE":
+            r = subprocess.run(
+                ["gh", "pr", "merge", numero, "--repo", DEPOT, "--squash", "--delete-branch"],
+                capture_output=True, text=True)
+            if r.returncode == 0:
+                print("Fusionnee.")
+                return 0
+            print(f"Refus de fusion (essai {essai}) : {r.stderr.strip()}")
+        else:
+            print(f"GitHub calcule encore la fusionnabilite (essai {essai})...")
+        time.sleep(15)
+
+    print("Fusion impossible pour l'instant. Elle sera retentee au prochain passage.")
     return 0
 
 

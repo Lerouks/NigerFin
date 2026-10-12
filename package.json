@@ -19,7 +19,7 @@
     "@react-pdf/renderer": "^4.5.1",
     "@sentry/nextjs": "^10.75.0",
     "@supabase/ssr": "^0.12.7",
-    "@supabase/supabase-js": "^2.117.2",
+    "@supabase/supabase-js": "^2.117.3",
     "@tailwindcss/typography": "^0.5.20",
     "@tiptap/extension-highlight": "^3.31.4",
     "@tiptap/extension-image": "^3.31.4",

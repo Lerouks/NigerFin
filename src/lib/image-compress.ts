@@ -1,4 +1,4 @@
-import sharp from 'sharp';
+import sharp, { type Metadata } from 'sharp';
 
 const TARGET_SIZE = 95 * 1024; // safe under 100KB
 
@@ -43,7 +43,7 @@ export async function compressImageBuffer(
     return { buffer, mime, beforeBytes, afterBytes: beforeBytes };
   }
 
-  let meta: sharp.Metadata;
+  let meta: Metadata;
   try {
     meta = await sharp(buffer).metadata();
   } catch {

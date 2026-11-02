@@ -22,9 +22,12 @@ async function getCategory(slug: string) {
 export default async function EducationOgImage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const category = await getCategory(params.id);
+  // Next 16 transmet params sous forme de promesse : sans await, params.id
+  // valait undefined et l'image montrait toujours le titre générique.
+  const { id } = await params;
+  const category = await getCategory(id);
   const title = category?.title || 'Éducation financière';
   const subtitle = category?.description || 'Comprendre la finance pas à pas.';
 

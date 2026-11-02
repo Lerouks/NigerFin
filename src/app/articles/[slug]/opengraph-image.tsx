@@ -11,9 +11,13 @@ export const contentType = 'image/png';
 export default async function ArticleOgImage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const result = await getArticleBySlug(params.slug);
+  // Next 16 transmet params sous forme de promesse. Lu sans await, params.slug
+  // valait undefined : aucun article n'était trouvé et chaque partage montrait
+  // le titre par défaut au lieu de celui de l'article.
+  const { slug } = await params;
+  const result = await getArticleBySlug(slug);
 
   const title =
     result?.article.title ||

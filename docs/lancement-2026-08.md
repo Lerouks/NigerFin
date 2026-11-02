@@ -10,6 +10,13 @@ Le site ouvre donc comme média gratuit avec sa liste d'attente, et Premium
 reste éteint jusqu'à ce que le stock d'articles le justifie. Cela sort du
 chemin critique tout le tunnel de paiement et toute la newsletter.
 
+**Mise à jour du 2 novembre 2026.** Les constats suivis d'une mention
+« 2 novembre » ont changé depuis l'audit, preuve à l'appui : commit, ou
+lecture seule en base et sur GitHub. Ce qui a été fait est détaillé dans la
+section « Fait depuis le 26 août ». Les autres constats n'ont pas été
+revérifiés un à un : aucun commit ne les a touchés, mais une correction faite
+en base depuis l'admin n'y laisserait pas de trace.
+
 ---
 
 ## Verdict
@@ -59,6 +66,47 @@ Corrigé et déployé, commit `7975c9f`.
   « échanges intra-régionaux +23 % ». Aucune source. Le bandeau est éteint, mais
   un interrupteur dans l'admin et NFI publie quatre chiffres faux sur la BRVM en
   haut de chaque page. L'API publique les sert déjà en clair. *10 minutes.*
+  **2 novembre** : les cinq chiffres sont toujours en base, bandeau éteint.
+
+---
+
+## Fait depuis le 26 août, relevé le 2 novembre 2026
+
+En production, d'après l'historique Git de `main` :
+
+- **Publier redevient possible** (`d679e0c`, 6 septembre). Depuis le 16 juin,
+  trois routes répondaient une erreur 500 : l'admin des articles, le corps des
+  articles servi aux lecteurs, et la newsletter, aperçu compris. Cause unique :
+  `isomorphic-dompurify` tirait `jsdom`, qui chargeait un module ESM par
+  `require()`, ce que le runtime de Vercel refuse. L'écran Articles affichait
+  « Aucun article » alors que la base en contenait huit. Les 73 leçons,
+  invisibles dans l'admin depuis la migration `00031`, y réapparaissent.
+- **L'intégration continue repasse au vert** (`0cd6d11`, 6 septembre). Le
+  contrôle de types échouait sur chaque commit, si bien qu'aucune mise à jour
+  de Dependabot ne pouvait être fusionnée.
+- **Les mises à jour vérifiées se fusionnent seules** (`8e8474a`,
+  6 septembre). Quand la CI d'une proposition de Dependabot passe, elle est
+  fusionnée et le site se redéploie. Les montées de version majeure restent
+  ouvertes, avec l'étiquette « changement-majeur ». 61 mises à jour sont
+  entrées ainsi entre le 6 septembre et le 2 novembre.
+- **Le mot de passe oublié fonctionne pendant le pré-lancement** (`3b047d3`,
+  6 septembre). Le lien menait à `/compte`, fermé à tous ; il mène désormais à
+  `/connexion/nouveau-mot-de-passe`, toujours ouvert.
+- **L'admin dit quand un appel échoue** (`908aeab` et `35045fb`, 6 et
+  7 septembre). Les dix-sept écrans distinguent le chargement, l'échec avec un
+  bouton « Réessayer », et la liste vraiment vide.
+- **Plus de texte justifié sur téléphone** (`c9397b2`, 27 août), dans les
+  pages légales et les pieds de rubrique.
+
+Sur la branche `sante/sources-et-menage`, **pas encore en production** :
+
+- La BRVM, la CEDEAO et la fiche pays REST Countries sont déclarées « non
+  branchées » : plus appelées, plus comptées comme des pannes (voir bloc 6).
+- REST Countries a retiré son API v3.1. La lecture refuse désormais sa réponse
+  « deprecated » avec un message clair, au lieu de planter. La v5 exige un
+  compte et une clé d'API : décision non prise.
+- Le dossier `IPAY/`, plugin WordPress que le site n'utilise pas, est retiré
+  avec les 20 alertes Dependabot de son `composer.lock`.
 
 ---
 
@@ -74,6 +122,11 @@ titres de rubrique de l'accueil.
 C'est le seul point de cette liste qui ne se répare pas par un réglage. Tout le
 reste est du polissage à côté.
 
+**2 novembre** : toujours ouvert. La base compte 8 articles, le dernier daté du
+17 avril 2026, soit 199 jours. Jusqu'au 6 septembre, publier était de toute
+façon impossible : l'admin des articles répondait une erreur 500 depuis le
+16 juin (`d679e0c`).
+
 ---
 
 ## Bloc 2, corrections en base et dans l'admin, sans une ligne de code
@@ -86,7 +139,7 @@ Un après-midi, tout depuis le Cockpit.
 | 2 | La fiche du STOXX Europe 600 décrit le CAC 40 : « indice phare de la Bourse de Paris, 40 plus grandes capitalisations françaises ». | 5 min |
 | 3 | Coquille en tête d'accroche : « inancement rare », le F manque. Premier caractère visible de l'article sur trois pages. | 5 min |
 | 4 | Deux chiffres d'inflation contradictoires sur `/niger` : -4,7 % en base, -7,5 % dans le bloc juste en dessous. Une troisième valeur (+3,7 %) dort ailleurs en base. | 30 min |
-| 5 | BRVM Composite et Uranium sont « indisponible » depuis le 21 juillet, `brvm.org/api/quotes` renvoie 404. Décider : masquer les 2 lignes, ou saisir la clôture à la main. Ne jamais remettre une valeur inventée. Le Veilleur NFI collecte déjà brvm.org en HTML, c'est la source de remplacement évidente. | 30 min |
+| 5 | BRVM Composite et Uranium sont « indisponible » depuis le 21 juillet, `brvm.org/api/quotes` renvoie 404. Décider : masquer les 2 lignes, ou saisir la clôture à la main. Ne jamais remettre une valeur inventée. Le Veilleur NFI collecte déjà brvm.org en HTML, c'est la source de remplacement évidente. **2 novembre** : toujours 404, et les 2 lignes toujours vides en base. La source est déclarée « non branchée » (branche `sante/sources-et-menage`) : plus d'alerte quotidienne, aucune valeur. La décision masquer ou saisir reste à prendre. | 30 min |
 | 6 | `/marches` se contredit sur l'uranium : « indisponible » en haut, « 139,42 $/kg, T4 2025 » en bas. Idem or et Brent, sous un tampon « Avril 2026 ». | 1 h |
 | 7 | Les 8 articles n'ont ni titre ni description SEO : Google les affiche coupés en plein milieu d'une phrase. | 1 h |
 | 8 | `/about` promet 10 secteurs de couverture, 4 sont alimentés, dont l'agriculture annoncée et jamais traitée. | 15 min |
@@ -180,12 +233,28 @@ Deux heures.
 - Le dépôt GitHub est public sans garde-fou anti-fuite de secret. L'historique
   est propre aujourd'hui, vérifié sur 3 473 fichiers. Trois interrupteurs
   gratuits à activer. *10 min.*
+  **2 novembre** : activés sur GitHub, l'analyse des secrets, le blocage à
+  l'envoi (push protection) et les mises à jour de sécurité Dependabot ; aucune
+  alerte de secret ouverte. Restent désactivés les motifs génériques et la
+  vérification de validité des secrets. La date d'activation n'est pas tracée
+  dans Git.
 - La route d'analytique du paywall accepte des écritures anonymes sans
   limitation. *15 min.*
 - 8 vulnérabilités élevées dans les dépendances de production. *2 h.*
+  **2 novembre** : le blocage est levé. La CI rouge empêchait toute mise à jour
+  (`0cd6d11`), et les mises à jour vérifiées se fusionnent désormais seules
+  (`8e8474a`). Des alertes restent ouvertes, à suivre dans l'onglet Security de
+  GitHub ; les montées majeures attendent une décision.
 - La supervision passe « dégradée » tous les jours depuis 37 jours à cause de la
   BRVM, ce qui rend l'alerte inaudible. La panne de l'uranium n'apparaît nulle
   part. Aucune alerte n'atteint réellement la direction. *3 h.*
+  **2 novembre** : corrigé sur la branche `sante/sources-et-menage`, pas encore
+  en production. La BRVM (610 erreurs journalisées depuis le 20 juillet), la
+  CEDEAO (622 depuis le 13 juin) et REST Countries sont « non branchées » :
+  `/api/health` dit « healthy » quand toutes les sources branchées répondent,
+  « degraded » seulement sur une vraie panne. L'uranium, lui, n'apparaît
+  toujours pas dans la supervision. L'acheminement des alertes jusqu'à la
+  direction n'a pas été revérifié.
 - Le calcul de clôture quotidien écrase les variations nulles. *30 min.*
 - `TODOS-SECURITY.md` est périmé et décrit comme bloquant un trou déjà bouché.
   *30 min.*

@@ -28,6 +28,8 @@ MOTIF = re.compile(
     r"Updates?\s+`?\[?([^`\]\s]+)\]?`?\s+from\s+v?(\d+)\.(\d+)\.(\S*?)\s+to\s+v?(\d+)\.(\d+)\.(\S+)",
     re.IGNORECASE,
 )
+# Identifiant complet d'un commit, tel que GitHub le transmet.
+SHA_COMPLET = re.compile(r"[0-9a-f]{40}")
 
 
 def gh(*args, json_sortie=True):
@@ -48,10 +50,25 @@ def majeures(corps: str):
     return trouvees
 
 
+def tete_changee(tete, sha_verifie: str) -> str:
+    """Explique pourquoi on renonce quand la proposition a bougé depuis la CI."""
+    return (f"Abandon : la proposition pointe maintenant sur {tete}, pas sur {sha_verifie}, "
+            "le commit que la vérification a validé. La vérification du nouveau commit "
+            "relancera ce traitement.")
+
+
 def main() -> int:
     numero = os.environ["NUMERO_PR"]
+    # Le commit que la vérification (CI) a validé. C'est le seul qui peut être
+    # fusionné : entre la fin de la CI et la fusion, Dependabot peut repousser
+    # la branche, et cette nouvelle tête n'a encore été testée par personne.
+    sha_verifie = os.environ.get("SHA_VERIFIE", "").strip().lower()
+    if not SHA_COMPLET.fullmatch(sha_verifie):
+        print("Refusé : le commit validé par la vérification est inconnu (SHA_VERIFIE absent ou invalide).")
+        return 1
+
     pr = gh("pr", "view", numero, "--repo", DEPOT, "--json",
-            "author,headRefName,isCrossRepository,title,body,state,mergeable")
+            "author,headRefName,headRefOid,isCrossRepository,title,body,state,mergeable")
     if not pr:
         return 1
 
@@ -70,6 +87,9 @@ def main() -> int:
     if pr["state"] != "OPEN":
         print("Deja traitee.")
         return 0
+    if pr["headRefOid"] != sha_verifie:
+        print(tete_changee(pr["headRefOid"], sha_verifie))
+        return 0
 
     grosses = majeures(pr.get("body", ""))
     if grosses:
@@ -87,17 +107,27 @@ def main() -> int:
     # fusion est refusee. C'est ce qui laissait des mises a jour de securite
     # vertes dormir indefiniment, alors que tout etait bon. On attend que le
     # calcul aboutisse au lieu de renoncer au premier refus.
+    #
+    # Pendant cette attente (jusqu'à une minute et demie), la tête de la
+    # proposition peut changer. Elle est donc relue à chaque essai, et la fusion
+    # elle-même exige que la tête soit encore le commit validé : si elle bouge
+    # entre la lecture et la fusion, GitHub refuse au lieu de fusionner du code
+    # que la CI n'a jamais vu.
     for essai in range(1, 7):
-        etat = gh("pr", "view", numero, "--repo", DEPOT, "--json", "mergeable,state")
+        etat = gh("pr", "view", numero, "--repo", DEPOT, "--json", "headRefOid,mergeable,state")
         if etat and etat.get("state") == "MERGED":
             print("Deja fusionnee entre-temps.")
+            return 0
+        if etat and etat.get("headRefOid") != sha_verifie:
+            print(tete_changee(etat.get("headRefOid"), sha_verifie))
             return 0
         if etat and etat.get("mergeable") == "CONFLICTING":
             print("Conflit avec la branche principale : Dependabot la remettra a jour lui-meme.")
             return 0
         if etat and etat.get("mergeable") == "MERGEABLE":
             r = subprocess.run(
-                ["gh", "pr", "merge", numero, "--repo", DEPOT, "--squash", "--delete-branch"],
+                ["gh", "pr", "merge", numero, "--repo", DEPOT, "--squash", "--delete-branch",
+                 "--match-head-commit", sha_verifie],
                 capture_output=True, text=True)
             if r.returncode == 0:
                 print("Fusionnee.")

@@ -40,4 +40,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEPOT: ${{ github.repository }}
           NUMERO_PR: ${{ steps.pr.outputs.numero }}
+          # Le commit exact que la vérification a validé : seul celui-là peut
+          # être fusionné, jamais une tête poussée après coup.
+          SHA_VERIFIE: ${{ github.event.workflow_run.head_sha }}
         run: python3 scripts/fusionner-mise-a-jour.py

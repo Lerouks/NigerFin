@@ -14,9 +14,12 @@ permissions:
 
 jobs:
   fusionner:
+    # Dependabot pousse toujours ses branches dans ce dépôt-ci : une vérification
+    # venue d'une copie externe n'a rien à faire dans ce job, qui peut écrire.
     if: >
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
       startsWith(github.event.workflow_run.head_branch, 'dependabot/')
     runs-on: ubuntu-latest
     steps:
@@ -26,10 +29,14 @@ jobs:
         id: pr
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEPOT: ${{ github.repository }}
+          # Le nom de branche est choisi par l'auteur de la proposition : il
+          # passe par une variable, jamais dans le texte du script, pour qu'on
+          # ne puisse pas y glisser une commande.
+          BRANCHE: ${{ github.event.workflow_run.head_branch }}
         run: |
           set -euo pipefail
-          NUM=$(gh pr list --repo ${{ github.repository }} --state open \
-                 --head "${{ github.event.workflow_run.head_branch }}" \
+          NUM=$(gh pr list --repo "$DEPOT" --state open --head "$BRANCHE" \
                  --json number --jq '.[0].number // empty')
           [ -n "$NUM" ] || { echo "Aucune proposition ouverte sur cette branche."; exit 0; }
           echo "numero=$NUM" >> "$GITHUB_OUTPUT"

@@ -1,4 +1,7 @@
-const { withSentryConfig } = require('@sentry/nextjs');
+// Sentry 10.75 : withSentryConfig se lit désormais depuis « @sentry/nextjs/config ».
+// L'ancien chemin affiche un avertissement à chaque build et cessera de
+// fonctionner en v11.
+const { withSentryConfig } = require('@sentry/nextjs/config');
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 });

@@ -30,7 +30,6 @@ export default [
       'node_modules/',
       'out/',
       'coverage/',
-      'IPAY/',
       'test-results/',
       'playwright-report/',
       'scripts/',

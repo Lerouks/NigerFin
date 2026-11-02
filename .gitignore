@@ -49,3 +49,4 @@ next-env.d.ts
 /playwright-report
 /e2e/screenshots
 .gstack/
+__pycache__/

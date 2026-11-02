@@ -14,6 +14,8 @@ vi.mock('@sentry/nextjs', () => ({
 import * as Sentry from '@sentry/nextjs';
 import { createServiceClient } from '@/lib/supabase';
 import { BRVMScraperService, RAISON_BRVM_NON_BRANCHEE } from '@/lib/services/brvm-scraper-service';
+import { ECOWASService } from '@/lib/services/ecowas-service';
+import { RestCountriesService, RAISON_REST_COUNTRIES_RETIREE } from '@/lib/services/rest-countries-service';
 import { SourceNonBranchee, estSourceNonBranchee } from '@/lib/services/source-non-branchee';
 import { resumerSante, type EtatSource } from '@/lib/services/resume-sante';
 import { construireMisesAJourMarche } from '@/lib/services/market-updates';
@@ -58,6 +60,20 @@ describe('Une source non branchée n\'est jamais appelée', () => {
     expect(Sentry.captureException).not.toHaveBeenCalled();
   });
 
+  it('REST Countries : la CEDEAO et la fiche Niger échouent sans réseau ni cache', async () => {
+    // Le cache de la fiche Niger contient une ancienne fiche datée du jour par
+    // erreur : le lire reviendrait à la servir encore comme fraîche.
+    const reseau = vi.fn();
+    vi.stubGlobal('fetch', reseau);
+
+    await expect(new ECOWASService().getRegion()).rejects.toBeInstanceOf(SourceNonBranchee);
+    await expect(new RestCountriesService().getCountry('NER')).rejects.toBeInstanceOf(SourceNonBranchee);
+
+    expect(reseau).not.toHaveBeenCalled();
+    expect(createServiceClient).not.toHaveBeenCalled();
+    expect(RAISON_REST_COUNTRIES_RETIREE).toMatch(/v3\.1/);
+  });
+
   it('l\'erreur porte la raison en clair, et se reconnaît même sans instanceof', async () => {
     const erreur = await new BRVMScraperService().getIndices().catch((e: unknown) => e);
 
@@ -91,16 +107,24 @@ describe('Résumé de santé : une source non branchée est hors du compte', () 
 });
 
 describe('Contrôle de santé', () => {
-  it('rend la BRVM « not_connected » avec sa raison, jamais « error »', async () => {
+  it('rend la BRVM, la CEDEAO et REST Countries « not_connected », jamais « error »', async () => {
     // Réseau coupé pour toutes les sources : les sources branchées doivent
-    // échouer pour de vrai, la BRVM ne doit même pas être tentée.
+    // échouer pour de vrai, les sources non branchées ne doivent même pas être
+    // tentées.
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('réseau coupé (test)')));
 
     const etats = await dataOrchestrator.healthCheck();
 
     expect(etats.brvm).toEqual({ status: 'not_connected', responseTime: 0, reason: RAISON_BRVM_NON_BRANCHEE });
+    expect(etats.ecowas).toEqual({ status: 'not_connected', responseTime: 0, reason: RAISON_REST_COUNTRIES_RETIREE });
+    expect(etats.rest_countries).toEqual({ status: 'not_connected', responseTime: 0, reason: RAISON_REST_COUNTRIES_RETIREE });
     expect(etats.frankfurter?.status).toBe('error');
-    expect(resumerSante(etats).failed).not.toContain('brvm');
+
+    const resume = resumerSante(etats);
+    expect(resume.notConnected).toBe(3);
+    for (const source of ['brvm', 'ecowas', 'rest_countries']) {
+      expect(resume.failed).not.toContain(source);
+    }
   });
 });
 

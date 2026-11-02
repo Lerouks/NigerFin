@@ -1,5 +1,5 @@
 import { BaseDataService } from './base-service';
-import { lireReponsePays } from './rest-countries-service';
+import { lireReponsePays, RAISON_REST_COUNTRIES_RETIREE } from './rest-countries-service';
 
 export interface ECOWASCountry {
   name: string;
@@ -74,6 +74,9 @@ function versPays(fiche: Record<string, unknown>): ECOWASCountry {
 export class ECOWASService extends BaseDataService {
   protected source = 'ecowas';
   protected defaultTTLSeconds = 604800; // 7 days
+  // Même fournisseur, même retrait de la v3.1 : la source n'est plus appelée.
+  // fetch() reste en place et couvert par ses tests, prêt pour une vraie source.
+  protected readonly nonBranchee: string | null = RAISON_REST_COUNTRIES_RETIREE;
 
   async fetch(): Promise<ECOWASData> {
     const codes = ECOWAS_CODES.join(',');

@@ -80,9 +80,30 @@ export async function lireReponsePays(
   throw new Error(`${contexte} : réponse inattendue, une liste de pays était attendue`);
 }
 
+/**
+ * Pourquoi REST Countries est déclaré non branché (voir source-non-branchee.ts),
+ * pour la fiche Niger comme pour la CEDEAO.
+ *
+ * Seule la v5 du fournisseur répond encore, et elle exige un compte et une clé
+ * d'API : la brancher est une décision, pas un correctif. En attendant, la fiche
+ * Niger s'en tient aux faits saisis en base (capitale, superficie) et à la
+ * Banque mondiale (population), et la mention « Source : REST Countries »
+ * disparaît, au lieu d'afficher la date du jour sur une fiche que le
+ * fournisseur ne sert plus depuis juin.
+ *
+ * Le texte s'affiche tel quel dans l'écran Statut des API, d'où les espaces
+ * insécables (\u00a0) avant le deux-points, dans les guillemets et entre le
+ * jour et le mois.
+ */
+export const RAISON_REST_COUNTRIES_RETIREE =
+  'restcountries.com a retiré son API v3.1\u00a0: chaque requête reçoit «\u00a0This API version '
+  + 'has been deprecated\u00a0» sans aucune donnée (première erreur le 13\u00a0juin 2026). La v5 '
+  + 'exige un compte et une clé d\'API.';
+
 export class RestCountriesService extends BaseDataService {
   protected source = 'rest_countries';
   protected defaultTTLSeconds = 604800; // 7 days
+  protected readonly nonBranchee: string | null = RAISON_REST_COUNTRIES_RETIREE;
 
   async fetch(countryCode: string = 'NER'): Promise<CountryData> {
     const contexte = `REST Countries (${countryCode})`;

@@ -1,5 +1,6 @@
 import { createServiceClient } from '@/lib/supabase';
 import * as Sentry from '@sentry/nextjs';
+import { SourceNonBranchee } from './source-non-branchee';
 
 export interface CacheEntry<T = unknown> {
   source: string;
@@ -39,6 +40,15 @@ const MAX_STALE_SECONDS = 6 * 3600; // 6 heures
 export abstract class BaseDataService {
   protected abstract source: string;
   protected abstract defaultTTLSeconds: number;
+
+  /**
+   * Raison, en clair, pour laquelle cette source n'est PAS BRANCHÉE, ou null
+   * quand elle l'est. Renseignée, getOrFetch échoue aussitôt avec
+   * SourceNonBranchee : aucun appel réseau, aucune lecture du cache (qui ne
+   * contient plus qu'un vestige), aucune ligne dans api_health_log, aucun
+   * signalement Sentry. Voir source-non-branchee.ts.
+   */
+  protected readonly nonBranchee: string | null = null;
 
   protected getServiceClient() {
     const client = createServiceClient();
@@ -93,6 +103,12 @@ export abstract class BaseDataService {
   }
 
   async getOrFetch<T>(key: string, fetcher: () => Promise<T>, ttlSeconds?: number): Promise<ServiceResult<T>> {
+    // Une source non branchée n'est ni appelée, ni lue en cache : c'est un état
+    // connu, pas une panne, et rien ne doit en sortir.
+    if (this.nonBranchee !== null) {
+      throw new SourceNonBranchee(this.source, this.nonBranchee);
+    }
+
     // Try cache first
     const cached = await this.getCached<T>(key);
     if (cached && new Date(cached.expires_at) > new Date()) {

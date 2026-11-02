@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
       dataOrchestrator.getBRVMIndices(),
     ]);
 
-  const { updates, echecs } = construireMisesAJourMarche(
+  const { updates, echecs, nonBranches } = construireMisesAJourMarche(
     {
       forex: forexResult,
       commodities: commoditiesResult,
@@ -59,6 +59,10 @@ export async function GET(request: NextRequest) {
   );
   for (const echec of echecs) {
     results.push({ symbol: echec.symbol, status: 'error', error: echec.error });
+  }
+  // Source non branchée : symbole ignoré, pas une erreur du passage.
+  for (const symbole of nonBranches) {
+    results.push({ symbol: symbole.symbol, status: 'skipped', error: symbole.raison });
   }
 
   // Apply updates to market_data table

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyBearerSecret } from '@/lib/secret-compare';
 import { dataOrchestrator } from '@/lib/services';
+import { resumerSante } from '@/lib/services/resume-sante';
 import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase';
 import * as Sentry from '@sentry/nextjs';
 
@@ -43,16 +44,16 @@ export async function GET(request: NextRequest) {
   try {
     const healthResults = await dataOrchestrator.healthCheck();
 
-    // Calculate summary stats
+    // Une source non branchée (BRVM, etc.) est hors du compte : « healthy » quand
+    // toutes les sources BRANCHÉES répondent, « degraded » sur une vraie panne.
     const services = Object.entries(healthResults);
-    const healthy = services.filter(([, s]) => s.status === 'ok').length;
-    const total = services.length;
+    const resume = resumerSante(healthResults);
+    const { healthy, total, notConnected } = resume;
 
     // Reponse slim pour visiteurs non authentifies (probes externes / curieux).
     // Retourne juste un statut global, pas la liste des services internes.
     if (!isCron && !isAdmin) {
-      const status = healthy === total ? 'healthy' : healthy > 0 ? 'degraded' : 'down';
-      return NextResponse.json({ status, timestamp: new Date().toISOString() });
+      return NextResponse.json({ status: resume.status, timestamp: new Date().toISOString() });
     }
 
     // Get 24h success rate from Supabase
@@ -113,8 +114,8 @@ export async function GET(request: NextRequest) {
     }
 
     const response = {
-      status: healthy === total ? 'healthy' : healthy > 0 ? 'degraded' : 'down',
-      summary: { healthy, total, timestamp: new Date().toISOString() },
+      status: resume.status,
+      summary: { healthy, total, notConnected, timestamp: new Date().toISOString() },
       services: Object.fromEntries(
         services.map(([name, result]) => [
           name,
@@ -129,12 +130,10 @@ export async function GET(request: NextRequest) {
       isCron,
     };
 
-    // Log to Sentry if degraded
-    if (healthy < total) {
-      const failedServices = services
-        .filter(([, s]) => s.status === 'error')
-        .map(([name]) => name);
-      Sentry.captureMessage(`API health degraded: ${failedServices.join(', ')}`, 'warning');
+    // Log to Sentry if degraded : une vraie panne seulement, jamais une source
+    // non branchée.
+    if (resume.failed.length > 0) {
+      Sentry.captureMessage(`API health degraded: ${resume.failed.join(', ')}`, 'warning');
     }
 
     return NextResponse.json(response);

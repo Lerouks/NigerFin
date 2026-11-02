@@ -19,6 +19,8 @@ import type { CommoditiesData } from './commodities-service';
 import type { CryptoData } from './crypto-service';
 import type { IndicesData } from './indices-service';
 import type { DataProvenance } from './base-service';
+import type { EtatSource } from './resume-sante';
+import { estSourceNonBranchee } from './source-non-branchee';
 
 export interface OrchestratorResult<T> {
   data: T;
@@ -148,8 +150,12 @@ class DataOrchestrator {
 
   /**
    * Health check: test all services and return status.
+   *
+   * Une source non branchée est rendue 'not_connected' avec sa raison, jamais
+   * 'error' : son service échoue aussitôt, sans réseau, et ce n'est pas une
+   * panne (voir source-non-branchee.ts et resume-sante.ts).
    */
-  async healthCheck(): Promise<Record<string, { status: 'ok' | 'error'; responseTime: number; error?: string }>> {
+  async healthCheck(): Promise<Record<string, EtatSource>> {
     const services = [
       { name: 'world_bank', check: () => worldBankService.getMacro() },
       { name: 'imf', check: () => imfService.getMacro() },
@@ -163,7 +169,7 @@ class DataOrchestrator {
       { name: 'indices', check: () => indicesService.getIndices() },
     ];
 
-    const results: Record<string, { status: 'ok' | 'error'; responseTime: number; error?: string }> = {};
+    const results: Record<string, EtatSource> = {};
 
     await Promise.allSettled(
       services.map(async ({ name, check }) => {
@@ -172,6 +178,10 @@ class DataOrchestrator {
           await check();
           results[name] = { status: 'ok', responseTime: Date.now() - start };
         } catch (err) {
+          if (estSourceNonBranchee(err)) {
+            results[name] = { status: 'not_connected', responseTime: 0, reason: err.raison };
+            return;
+          }
           results[name] = {
             status: 'error',
             responseTime: Date.now() - start,

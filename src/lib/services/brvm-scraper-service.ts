@@ -94,17 +94,35 @@ const BRVM_TICKERS = [
   { ticker: 'SPHC', name: 'SAPH', sector: 'Agriculture', country: 'Côte d\'Ivoire' },
 ];
 
+/**
+ * Pourquoi la BRVM est déclarée non branchée (voir source-non-branchee.ts).
+ *
+ * `https://www.brvm.org/api/quotes` répond 404 depuis le 20 juillet 2026 :
+ * dernière réponse valide ce jour-là à 08:21 UTC, premier 404 à 14:04 UTC,
+ * toujours 404 au GET du 2 novembre 2026. Jusqu'ici, la supervision comptait
+ * cette absence connue comme une panne, plusieurs fois par jour.
+ *
+ * Le texte s'affiche tel quel dans l'écran Statut des API, d'où les espaces
+ * insécables (\u00a0) dans les guillemets et entre le jour et le mois.
+ */
+export const RAISON_BRVM_NON_BRANCHEE =
+  'brvm.org/api/quotes répond 404 depuis le 20\u00a0juillet 2026 et aucune autre source BRVM '
+  + 'n\'est branchée. Le BRVM Composite reste «\u00a0donnée indisponible\u00a0».';
+
 export class BRVMScraperService extends BaseDataService {
   protected source = 'brvm';
   protected defaultTTLSeconds = 1800; // 30 min
+  protected readonly nonBranchee: string | null = RAISON_BRVM_NON_BRANCHEE;
 
   async fetch(): Promise<BRVMData> {
-    // ATTENTION : `https://www.brvm.org/api/quotes` repond 404 depuis un moment.
-    // Ce service n'a donc aujourd'hui AUCUNE source vivante. Il echoue, et c'est
-    // le comportement voulu : tant qu'une vraie source BRVM n'est pas branchee,
-    // NFI Report ne publie pas de cotation BRVM. Ne jamais reintroduire ici de
-    // valeur de repli : un indice de la place boursiere de reference de l'UEMOA
-    // invente est la pire faute que ce site puisse commettre.
+    // ATTENTION : `https://www.brvm.org/api/quotes` répond 404 depuis le
+    // 20 juillet 2026. Ce point d'accès n'est plus appelé : la source est
+    // déclarée non branchée (nonBranchee ci-dessus), donc getIndices et
+    // getStocks échouent sans réseau. Cette lecture reste en place parce que ses
+    // tests verrouillent la règle anti-fabrication ; elle sera repointée le jour
+    // où une vraie source BRVM existera. Ne jamais réintroduire ici de valeur de
+    // repli : un indice inventé de la place boursière de référence de l'UEMOA
+    // est la pire faute que ce site puisse commettre.
     let res: Response;
     try {
       res = await fetch('https://www.brvm.org/api/quotes', {

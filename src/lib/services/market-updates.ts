@@ -5,6 +5,7 @@ import type { CommoditiesData } from './commodities-service';
 import type { IndicesData } from './indices-service';
 import type { CryptoData } from './crypto-service';
 import type { BRVMIndex } from './brvm-scraper-service';
+import { estSourceNonBranchee } from './source-non-branchee';
 
 /**
  * Construction des mises a jour de market_data a partir des sources externes.
@@ -30,6 +31,12 @@ export interface EchecSource {
   error: string;
 }
 
+/** Symbole dont la source n'est pas branchée : ni mis à jour, ni compté en échec. */
+export interface SymboleNonBranche {
+  symbol: string;
+  raison: string;
+}
+
 export interface SourcesMarche {
   forex: ResultatSource<ForexData>;
   commodities: ResultatSource<CommoditiesData>;
@@ -41,6 +48,12 @@ export interface SourcesMarche {
 export interface ResultatConstruction {
   updates: Record<string, MiseAJourMarche>;
   echecs: EchecSource[];
+  /**
+   * Symboles laissés tels quels parce que leur source n'est pas branchée. Ce
+   * n'est pas une panne : rien n'est signalé à Sentry, et l'appelant les
+   * consigne comme « ignorés », pas comme des erreurs.
+   */
+  nonBranches: SymboleNonBranche[];
 }
 
 /**
@@ -74,12 +87,19 @@ export function construireMisesAJourMarche(
 ): ResultatConstruction {
   const updates: Record<string, MiseAJourMarche> = {};
   const echecs: EchecSource[] = [];
+  const nonBranches: SymboleNonBranche[] = [];
 
   const signalerEchec = (
     result: ResultatSource<unknown>,
     nomSource: string,
     symboles: string[],
   ) => {
+    // Source non branchée : état connu, pas une panne. La base reste inchangée
+    // exactement comme pour un échec, mais sans alerte quotidienne.
+    if (result.status === 'rejected' && estSourceNonBranchee(result.reason)) {
+      for (const symbol of symboles) nonBranches.push({ symbol, raison: result.reason.raison });
+      return;
+    }
     const raison =
       result.status === 'rejected'
         ? String(result.reason)
@@ -141,9 +161,10 @@ export function construireMisesAJourMarche(
   }
 
   // --- BRVM ---
-  // Aucune source BRVM vivante a ce jour (brvm.org/api/quotes repond 404), donc
-  // cette branche echoue et BRVMC n'est pas mis a jour. C'est voulu : mieux vaut
-  // pas de cotation BRVM du tout qu'une cotation inventee.
+  // Aucune source BRVM vivante à ce jour (brvm.org/api/quotes répond 404) : la
+  // source est déclarée non branchée, BRVMC n'est pas mis à jour et part dans
+  // nonBranches. C'est voulu : mieux vaut pas de cotation BRVM du tout qu'une
+  // cotation inventée.
   const brvm = donneeFraiche(sources.brvm);
   if (brvm) {
     const composite = brvm.find((i) => i.name.includes('Composite'));
@@ -152,5 +173,5 @@ export function construireMisesAJourMarche(
     signalerEchec(sources.brvm, 'brvm', ['BRVMC']);
   }
 
-  return { updates, echecs };
+  return { updates, echecs, nonBranches };
 }

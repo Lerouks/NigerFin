@@ -36,7 +36,7 @@ export async function POST() {
 
   // Meme construction que le cron, via le module partage : la regle d'integrite
   // des donnees ne doit pas dependre de deux copies a synchroniser a la main.
-  const { updates, echecs } = construireMisesAJourMarche(
+  const { updates, echecs, nonBranches } = construireMisesAJourMarche(
     {
       forex: forexResult,
       commodities: commoditiesResult,
@@ -48,6 +48,11 @@ export async function POST() {
   );
   for (const echec of echecs) {
     results.push({ symbol: echec.symbol, status: 'error', error: echec.error });
+  }
+  // Source non branchée : symbole ignoré, pas une erreur. L'écran le propose
+  // quand même à la saisie manuelle, comme tout symbole non mis à jour.
+  for (const symbole of nonBranches) {
+    results.push({ symbol: symbole.symbol, status: 'skipped', error: symbole.raison });
   }
 
   for (const [symbol, { value: newValue, source }] of Object.entries(updates)) {

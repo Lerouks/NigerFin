@@ -3,22 +3,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
-import { RefreshCw, CheckCircle, XCircle, AlertTriangle, Clock, Database } from 'lucide-react';
+import { RefreshCw, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { appelAdmin } from '@/app/admin/lib/appel-admin';
 import { EtatListe } from '@/app/admin/lib/EtatListe';
-
-interface ServiceStatus {
-  status: 'ok' | 'error';
-  responseTime: number;
-  error?: string;
-  successRate24h: number | null;
-  lastSuccessful: string | null;
-  cacheEntries: number;
-}
+import { CarteSource, type ServiceStatus } from './CarteSource';
 
 interface HealthResponse {
+  /** Calculé sur les seules sources branchées : une source non branchée n'est pas une panne. */
   status: 'healthy' | 'degraded' | 'down';
-  summary: { healthy: number; total: number; timestamp: string };
+  /** healthy et total ne comptent que les sources branchées. */
+  summary: { healthy: number; total: number; notConnected?: number; timestamp: string };
   services: Record<string, ServiceStatus>;
 }
 
@@ -87,6 +81,7 @@ export function ApiStatusDashboard() {
     );
   }
 
+  const nonBranchees = health?.summary.notConnected ?? 0;
   const statusColor = health?.status === 'healthy' ? 'text-emerald-600' : health?.status === 'degraded' ? 'text-amber-500' : 'text-red-500';
   const statusBg = health?.status === 'healthy' ? 'bg-emerald-50' : health?.status === 'degraded' ? 'bg-amber-50' : 'bg-red-50';
   const StatusIcon = health?.status === 'healthy' ? CheckCircle : health?.status === 'degraded' ? AlertTriangle : XCircle;
@@ -127,13 +122,15 @@ export function ApiStatusDashboard() {
               <StatusIcon className={`w-6 h-6 ${statusColor}`} />
               <div>
                 <p className={`text-lg font-semibold ${statusColor}`}>
-                  {health.status === 'healthy' ? 'Tous les services opérationnels' :
-                   health.status === 'degraded' ? 'Services partiellement dégradés' :
+                  {health.status === 'healthy'
+                    ? (nonBranchees > 0 ? 'Toutes les sources branchées sont opérationnelles' : 'Tous les services opérationnels')
+                    : health.status === 'degraded' ? 'Services partiellement dégradés' :
                    'Services hors ligne'}
                 </p>
                 <p className="text-[13px] text-gray-500 mt-0.5">
                   {health.summary.healthy}/{health.summary.total} services actifs &middot;
-                  Dernière vérification : {new Date(health.summary.timestamp).toLocaleString('fr-FR')}
+                  {nonBranchees > 0 && ` ${nonBranchees} non ${nonBranchees > 1 ? 'branchées' : 'branchée'}\u00a0\u00b7`}
+                  {' '}Dernière vérification : {new Date(health.summary.timestamp).toLocaleString('fr-FR')}
                 </p>
               </div>
             </div>
@@ -143,91 +140,13 @@ export function ApiStatusDashboard() {
         {/* Services Grid */}
         {health && !erreur && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {Object.entries(health.services).map(([key, service]) => {
-              const label = SERVICE_LABELS[key] || { name: key, description: '' };
-              const isOk = service.status === 'ok';
-
-              return (
-                <div key={key} className="bg-white rounded-xl border border-black/6 p-5">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        {isOk ? (
-                          <CheckCircle className="w-4 h-4 text-emerald-500" />
-                        ) : (
-                          <XCircle className="w-4 h-4 text-red-500" />
-                        )}
-                        <h3 className="text-[15px] font-semibold">{label.name}</h3>
-                      </div>
-                      <p className="text-[12px] text-gray-500 mt-0.5 ml-6">{label.description}</p>
-                    </div>
-                    <span className={`text-[11px] font-medium px-2.5 py-1 rounded-full ${
-                      isOk ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'
-                    }`}>
-                      {isOk ? 'OK' : 'Erreur'}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-3 mt-4">
-                    {/* Response time */}
-                    <div className="text-center">
-                      <div className="flex items-center justify-center gap-1 mb-1">
-                        <Clock className="w-3 h-3 text-gray-500" />
-                        <span className="text-[10px] text-gray-500">Temps</span>
-                      </div>
-                      <p className="text-[14px] font-semibold tabular-nums">
-                        {service.responseTime}ms
-                      </p>
-                    </div>
-
-                    {/* Success rate */}
-                    <div className="text-center">
-                      <div className="flex items-center justify-center gap-1 mb-1">
-                        <CheckCircle className="w-3 h-3 text-gray-500" />
-                        <span className="text-[10px] text-gray-500">24h</span>
-                      </div>
-                      <p className={`text-[14px] font-semibold tabular-nums ${
-                        service.successRate24h !== null && service.successRate24h >= 90
-                          ? 'text-emerald-600'
-                          : service.successRate24h !== null && service.successRate24h >= 50
-                            ? 'text-amber-500'
-                            : 'text-gray-500'
-                      }`}>
-                        {service.successRate24h !== null ? `${service.successRate24h}%` : '-'}
-                      </p>
-                    </div>
-
-                    {/* Cache entries */}
-                    <div className="text-center">
-                      <div className="flex items-center justify-center gap-1 mb-1">
-                        <Database className="w-3 h-3 text-gray-500" />
-                        <span className="text-[10px] text-gray-500">Cache</span>
-                      </div>
-                      <p className="text-[14px] font-semibold tabular-nums">
-                        {service.cacheEntries}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Last successful fetch */}
-                  {service.lastSuccessful && (
-                    <p className="text-[10px] text-gray-500 mt-3 pt-2 border-t border-black/4">
-                      Dernier succès : {new Date(service.lastSuccessful).toLocaleString('fr-FR', {
-                        day: '2-digit', month: '2-digit', year: 'numeric',
-                        hour: '2-digit', minute: '2-digit',
-                      })}
-                    </p>
-                  )}
-
-                  {/* Error message */}
-                  {service.error && (
-                    <p className="text-[11px] text-red-500 mt-2 bg-red-50 px-3 py-1.5 rounded-lg">
-                      {service.error}
-                    </p>
-                  )}
-                </div>
-              );
-            })}
+            {Object.entries(health.services).map(([key, service]) => (
+              <CarteSource
+                key={key}
+                label={SERVICE_LABELS[key] || { name: key, description: '' }}
+                service={service}
+              />
+            ))}
           </div>
         )}
 

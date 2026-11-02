@@ -4,7 +4,7 @@ Audit du 26 août 2026, dix dimensions balayées en parallèle, chaque blocage
 attaqué par un vérificateur chargé de le réfuter. Ce qui suit ne contient que
 les constats qui ont survécu à cette contradiction.
 
-**Stratégie retenue par Raouf le 26 août : ouvrir en média gratuit d'abord.**
+**Stratégie retenue par la direction le 26 août : ouvrir en média gratuit d'abord.**
 Sept articles sur huit sont gratuits, le mur payant ne ferme presque rien.
 Le site ouvre donc comme média gratuit avec sa liste d'attente, et Premium
 reste éteint jusqu'à ce que le stock d'articles le justifie. Cela sort du
@@ -150,7 +150,7 @@ Deux heures.
 - `/publicite` vend des articles sponsorisés « clairement signalés », alors
   qu'aucun champ ne permet de les signaler. *4 h, ou retirer la promesse.*
 - Aucun directeur de publication n'est nommé, alors que le site se déclare
-  service de presse en ligne. *Arbitrage de Raouf.*
+  service de presse en ligne. *Arbitrage de la direction.*
 - `contact@nfireport.com` ne reçoit rien, aucun MX sur le domaine. L'adresse est
   publiée dans les mentions légales, sur `/publicite`, sur les factures, et
   comme adresse d'exercice des droits devant la HAPDP. Le formulaire du site,
@@ -185,7 +185,7 @@ Deux heures.
 - 8 vulnérabilités élevées dans les dépendances de production. *2 h.*
 - La supervision passe « dégradée » tous les jours depuis 37 jours à cause de la
   BRVM, ce qui rend l'alerte inaudible. La panne de l'uranium n'apparaît nulle
-  part. Aucune alerte n'atteint réellement Raouf. *3 h.*
+  part. Aucune alerte n'atteint réellement la direction. *3 h.*
 - Le calcul de clôture quotidien écrase les variations nulles. *30 min.*
 - `TODOS-SECURITY.md` est périmé et décrit comme bloquant un trou déjà bouché.
   *30 min.*

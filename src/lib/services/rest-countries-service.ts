@@ -24,17 +24,79 @@ export interface CountryData {
   demonyms: Record<string, { m: string; f: string }>;
 }
 
+function estObjet(valeur: unknown): valeur is Record<string, unknown> {
+  return typeof valeur === 'object' && valeur !== null && !Array.isArray(valeur);
+}
+
+/**
+ * Lit une réponse de REST Countries et n'accepte qu'une liste de fiches pays.
+ *
+ * Le code supposait qu'une réponse 200 contenait forcément un tableau. Ce n'est
+ * plus vrai : le fournisseur a retiré ses versions v1 à v4, dont la v3.1 que ce
+ * site appelle. Chaque requête est redirigée (301) vers un fichier fixe qui
+ * répond 200 avec ce corps, constaté le 2 novembre 2026 :
+ *
+ *   { "success": false, "data": null,
+ *     "errors": [{ "message": "This API version has been deprecated. ..." }] }
+ *
+ * Conséquences avant cette lecture stricte : la CEDEAO appelait `.map` sur cet
+ * objet et plantait (« (intermediate value).map is not a function », chaque
+ * jour depuis le 13 juin 2026). La fiche Niger, elle, lisait `json[0]`,
+ * c'est-à-dire `undefined` : le journal de santé notait un succès, et le cache
+ * gardait l'ancienne fiche en lui donnant la date du jour.
+ *
+ * Désormais, tout ce qui n'est pas une liste de fiches est refusé avec un message
+ * clair, qui reprend celui du fournisseur quand il en donne un.
+ */
+export async function lireReponsePays(
+  res: Response,
+  contexte: string,
+): Promise<Array<Record<string, unknown>>> {
+  if (!res.ok) throw new Error(`${contexte} : HTTP ${res.status}`);
+
+  let json: unknown;
+  try {
+    json = await res.json();
+  } catch {
+    throw new Error(`${contexte} : la réponse n'est pas du JSON`);
+  }
+
+  if (Array.isArray(json)) {
+    const fiches = json.filter(estObjet);
+    if (fiches.length !== json.length) {
+      throw new Error(`${contexte} : réponse illisible, un élément de la liste n'est pas une fiche pays`);
+    }
+    return fiches;
+  }
+
+  if (estObjet(json) && json.success === false) {
+    const messages = Array.isArray(json.errors)
+      ? json.errors.flatMap((e) => (estObjet(e) && typeof e.message === 'string' ? [e.message] : []))
+      : [];
+    const detail = messages.length > 0 ? ` : ${messages.join(' ; ')}` : '';
+    throw new Error(`${contexte} : le fournisseur refuse la requête${detail}`);
+  }
+
+  throw new Error(`${contexte} : réponse inattendue, une liste de pays était attendue`);
+}
+
 export class RestCountriesService extends BaseDataService {
   protected source = 'rest_countries';
   protected defaultTTLSeconds = 604800; // 7 days
 
   async fetch(countryCode: string = 'NER'): Promise<CountryData> {
+    const contexte = `REST Countries (${countryCode})`;
     const res = await fetch(`https://restcountries.com/v3.1/alpha/${countryCode}`, {
       signal: AbortSignal.timeout(10000),
     });
-    if (!res.ok) throw new Error(`REST Countries API ${res.status}`);
-    const json = await res.json();
-    return json[0] as CountryData;
+    const fiches = await lireReponsePays(res, contexte);
+
+    // Une liste vide, ou la fiche d'un autre pays, n'est pas la donnée demandée.
+    const fiche = fiches.find((f) => f.cca3 === countryCode);
+    if (!fiche) {
+      throw new Error(`${contexte} : le pays demandé est absent de la réponse`);
+    }
+    return fiche as unknown as CountryData;
   }
 
   async getCountry(countryCode: string = 'NER') {

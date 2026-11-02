@@ -1,4 +1,5 @@
 import { BaseDataService } from './base-service';
+import { lireReponsePays } from './rest-countries-service';
 
 export interface ECOWASCountry {
   name: string;
@@ -21,10 +22,54 @@ export interface ECOWASData {
 }
 
 // ECOWAS member country codes (alpha-3)
+//
+// NOTE : le Burkina Faso, le Mali et le Niger ont quitté la CEDEAO, retrait
+// effectif le 29 janvier 2025. Cette liste les compte encore. À trancher avant
+// de rebrancher une source : CEDEAO à douze membres, ou périmètre renommé.
 const ECOWAS_CODES = [
   'BEN', 'BFA', 'CPV', 'CIV', 'GMB', 'GHA', 'GIN', 'GNB',
   'LBR', 'MLI', 'NER', 'NGA', 'SEN', 'SLE', 'TGO',
 ];
+
+const CONTEXTE = 'REST Countries (CEDEAO)';
+
+/** Nombre strictement positif, sinon null : une population ou une superficie nulle n'existe pas. */
+function positif(valeur: unknown): number | null {
+  return typeof valeur === 'number' && Number.isFinite(valeur) && valeur > 0 ? valeur : null;
+}
+
+/**
+ * Convertit une fiche brute en pays CEDEAO, ou échoue.
+ *
+ * Avant, une population ou une superficie absente devenait 0 (`|| 0`), et le
+ * total régional s'en trouvait faussé sans que rien ne le signale.
+ */
+function versPays(fiche: Record<string, unknown>): ECOWASCountry {
+  const code = typeof fiche.cca3 === 'string' ? fiche.cca3 : '';
+  const nom = fiche.name as { common?: unknown } | undefined;
+  const population = positif(fiche.population);
+  const area = positif(fiche.area);
+  if (!code || typeof nom?.common !== 'string' || population === null || area === null) {
+    throw new Error(`${CONTEXTE} : fiche pays illisible (${code || 'code absent'})`);
+  }
+
+  const flags = fiche.flags as { png?: unknown; svg?: unknown } | undefined;
+  return {
+    name: nom.common,
+    code,
+    capital: Array.isArray(fiche.capital) && typeof fiche.capital[0] === 'string' ? fiche.capital[0] : '',
+    population,
+    area,
+    currencies: fiche.currencies as Record<string, { name: string; symbol: string }> || {},
+    languages: fiche.languages as Record<string, string> || {},
+    flags: {
+      png: typeof flags?.png === 'string' ? flags.png : '',
+      svg: typeof flags?.svg === 'string' ? flags.svg : '',
+    },
+    region: fiche.region as string || '',
+    subregion: fiche.subregion as string || '',
+  };
+}
 
 export class ECOWASService extends BaseDataService {
   protected source = 'ecowas';
@@ -35,21 +80,14 @@ export class ECOWASService extends BaseDataService {
     const res = await fetch(`https://restcountries.com/v3.1/alpha?codes=${codes}&fields=name,cca3,capital,population,area,currencies,languages,flags,region,subregion`, {
       signal: AbortSignal.timeout(15000),
     });
-    if (!res.ok) throw new Error(`REST Countries (ECOWAS) API ${res.status}`);
-    const json = await res.json();
+    const fiches = await lireReponsePays(res, CONTEXTE);
+    const countries = fiches.map(versPays);
 
-    const countries: ECOWASCountry[] = (json as Array<Record<string, unknown>>).map((c: Record<string, unknown>) => ({
-      name: (c.name as Record<string, string>)?.common || '',
-      code: c.cca3 as string,
-      capital: ((c.capital as string[]) || [])[0] || '',
-      population: c.population as number || 0,
-      area: c.area as number || 0,
-      currencies: c.currencies as Record<string, { name: string; symbol: string }> || {},
-      languages: c.languages as Record<string, string> || {},
-      flags: c.flags as { png: string; svg: string },
-      region: c.region as string || '',
-      subregion: c.subregion as string || '',
-    }));
+    // Un total régional calculé sur une liste incomplète serait un chiffre faux.
+    const manquants = ECOWAS_CODES.filter((code) => !countries.some((c) => c.code === code));
+    if (manquants.length > 0) {
+      throw new Error(`${CONTEXTE} : réponse incomplète, il manque ${manquants.join(', ')}`);
+    }
 
     const totalPopulation = countries.reduce((sum, c) => sum + c.population, 0);
     const totalArea = countries.reduce((sum, c) => sum + c.area, 0);

@@ -2,13 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import type { EmailOtpType } from '@supabase/supabase-js';
 import * as Sentry from '@sentry/nextjs';
+import { safeNextPath } from '@/lib/validation';
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const token_hash = searchParams.get('token_hash');
   const type = searchParams.get('type') as EmailOtpType | null;
   const defaultNext = type === 'signup' ? '/inscription/completer-profil' : '/';
-  const next = searchParams.get('next') ?? defaultNext;
+  // « next » vient d'un lien que n'importe qui peut fabriquer : seul un chemin
+  // du site est suivi, sinon l'accueil. Sans ce filtre, next=@evil.com donnait
+  // https://nfireport.com@evil.com, c'est-à-dire evil.com, juste après la
+  // confirmation.
+  const next = safeNextPath(searchParams.get('next') ?? defaultNext);
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;

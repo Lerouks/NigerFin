@@ -119,4 +119,32 @@ describe('safeNextPath', () => {
     expect(safeNextPath(undefined)).toBe('/');
     expect(safeNextPath('')).toBe('/');
   });
+
+  it('rejette « @domaine », qui collé derrière l’origine désigne un autre site', () => {
+    expect(safeNextPath('@evil.com')).toBe('/');
+    expect(new URL(`https://nfireport.com${'@evil.com'}`).origin).toBe('https://evil.com');
+  });
+
+  it('rejette tout caractère de contrôle, que le navigateur retire avant de lire l’adresse', () => {
+    expect(safeNextPath('/\t/evil.com')).toBe('/');
+    expect(safeNextPath('/\n/evil.com')).toBe('/');
+    expect(safeNextPath('/\r\n/evil.com')).toBe('/');
+    expect(safeNextPath('\t//evil.com')).toBe('/');
+    expect(safeNextPath('/articles\u0000')).toBe('/');
+    expect(safeNextPath('/articles\u007f')).toBe('/');
+    // Ce que ferait router.push depuis la page de connexion sans ce filtre.
+    expect(new URL('/\t/evil.com', 'https://nfireport.com/connexion').origin).toBe('https://evil.com');
+  });
+
+  it('ne laisse jamais sortir du site, quelle que soit la page de départ', () => {
+    const pieges = [
+      '@evil.com', '//evil.com', '/\\evil.com', '/\t/evil.com', '/\\\t/evil.com',
+      'https://evil.com', 'HTTPS://evil.com', 'javascript:alert(1)', '\n//evil.com',
+    ];
+    for (const piege of pieges) {
+      const chemin = safeNextPath(piege);
+      expect(new URL(`https://nfireport.com${chemin}`).origin).toBe('https://nfireport.com');
+      expect(new URL(chemin, 'https://nfireport.com/connexion').origin).toBe('https://nfireport.com');
+    }
+  });
 });

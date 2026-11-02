@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
+import { safeNextPath } from '@/lib/validation';
 import { Eye, EyeOff, Mail, Lock, ArrowLeft, CheckCircle } from 'lucide-react';
 import { AuthLayout } from '@/components/AuthLayout';
 
@@ -34,9 +35,10 @@ function ConnexionContent() {
         : 'Une erreur est survenue. Veuillez réessayer.');
       setLoading(false);
     } else {
-      // Redirect immediately - profile loads in background via auth-context
-      const redirect = searchParams.get('redirect');
-      router.push(redirect || '/');
+      // Redirect immediately - profile loads in background via auth-context.
+      // Seul un chemin du site est suivi : un lien piégé vers /connexion ne doit
+      // pas pouvoir envoyer le lecteur, tout juste connecté, sur un autre site.
+      router.push(safeNextPath(searchParams.get('redirect')));
     }
   };
 

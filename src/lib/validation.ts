@@ -81,17 +81,27 @@ export function isOneOf<T extends string>(value: unknown, options: readonly T[])
 }
 
 /**
- * Bornes un chemin de redirection post-auth aux URLs internes (securite C-1).
+ * Borne un chemin de redirection après authentification aux pages du site
+ * (sécurité C-1).
  *
- * Accepte uniquement les chemins absolus mono-slash (`/`, `/articles`, etc.).
- * Rejette les URLs protocol-relative (`//evil.com`), externes (`https://...`,
- * `data:...`), et les variantes Windows (`/\\evil.com`).
- *
- * Retourne `/` par defaut si l'entree est nulle/vide/dangereuse.
+ * N'accepte qu'un chemin du site commençant par un seul « / » (`/`,
+ * `/articles`, `/compte?tab=infos`). Tout le reste donne `/` :
+ * - ce qui ne commence pas par « / » : un schéma (`https://...`,
+ *   `javascript:...`, `data:...`), un chemin relatif, ou `@evil.com`, qui collé
+ *   derrière l'origine donnerait `https://nfireport.com@evil.com`, soit evil.com ;
+ * - les adresses sans schéma (`//evil.com`) et leur variante (`/\\evil.com`),
+ *   que le navigateur lit comme un autre domaine ;
+ * - tout caractère de contrôle : le navigateur retire tabulations et retours à
+ *   la ligne avant de lire une adresse, si bien que `/<tab>/evil.com` devient
+ *   `//evil.com`.
  */
 export function safeNextPath(raw: string | null | undefined): string {
   if (!raw) return '/';
   if (typeof raw !== 'string') return '/';
+  for (let i = 0; i < raw.length; i++) {
+    const code = raw.charCodeAt(i);
+    if (code < 0x20 || code === 0x7f) return '/';
+  }
   if (!raw.startsWith('/')) return '/';
   if (raw.startsWith('//')) return '/';
   if (raw.startsWith('/\\')) return '/';

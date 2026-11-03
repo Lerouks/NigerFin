@@ -5,7 +5,6 @@ import { MapPin, Users, Ruler, Coins, Gem, Factory, Globe, Calendar, TrendingUp,
 import { NigerRegions } from './niger/NigerRegions';
 import { NigerResources } from './niger/NigerResources';
 import { NigerMapInteractive } from './niger/NigerMapInteractive';
-import { useNigerCountry } from '@/hooks/useNigerCountry';
 import { useNigerMacro } from '@/hooks/useNigerMacro';
 
 interface Presentation {
@@ -86,8 +85,10 @@ export function NigerPresentation({ initialData }: NigerPresentationProps = {}) 
   const [resources, setResources] = useState<Resource[]>(initialData?.resources || []);
   const [loading, setLoading] = useState(!initialData);
 
-  // Real-time data hooks (these use SWR with deduping, lightweight)
-  const countryData = useNigerCountry();
+  // Données Banque mondiale (SWR, dédoublonnées). REST Countries n'est plus
+  // appelé : sa version 3.1 est retirée (source « non branchée »), et chaque
+  // visite déclenchait jusqu'à trois appels voués à l'échec. Capitale et
+  // superficie viennent des faits saisis en base.
   const macroData = useNigerMacro();
 
   // Only fetch client-side if no initial data was provided
@@ -105,22 +106,9 @@ export function NigerPresentation({ initialData }: NigerPresentationProps = {}) 
       .finally(() => setLoading(false));
   }, [initialData]);
 
-  // Enrich facts with real-time data (REST Countries + World Bank)
+  // Enrichit les faits avec les données de la Banque mondiale
   const enrichedFacts = facts.map((fact) => {
     const enrichments: Record<string, string> = {};
-
-    // REST Countries data (population, area, capital)
-    if (countryData.data) {
-      if (countryData.data.population) {
-        enrichments['population'] = countryData.data.population.toLocaleString('fr-FR');
-      }
-      if (countryData.data.area) {
-        enrichments['superficie'] = `${countryData.data.area.toLocaleString('fr-FR')} km²`;
-      }
-      if (countryData.data.capital?.[0]) {
-        enrichments['capitale'] = countryData.data.capital[0];
-      }
-    }
 
     // World Bank data (PIB, PIB/habitant, population) - same source as Indices Economiques
     if (macroData.data) {
@@ -183,9 +171,6 @@ export function NigerPresentation({ initialData }: NigerPresentationProps = {}) 
             <span className="text-[11px] tracking-[0.2em] uppercase text-gold font-semibold">Profil pays</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-semibold tracking-tight leading-[1.1]">{presentation.intro_title}</h2>
-          {countryData.lastUpdated && (
-            <p className="text-[11px] text-gray-500 mt-3">Source : REST Countries &middot; {new Date(countryData.lastUpdated).toLocaleDateString('fr-FR')}</p>
-          )}
         </div>
 
         {/* Texte d'introduction */}

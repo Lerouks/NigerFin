@@ -99,7 +99,6 @@ Le seul mecanisme "gratuit" est les 3 articles premium/mois pour les readers.
 |---------|-------------|
 | useAdminCrud.ts | Hook CRUD generique pour les operations admin (fetch, create, update, delete) avec gestion loading/saving |
 | useBRVMStocks.ts | Fetch des donnees boursieres BRVM via SWR (cache 30min) |
-| useNigerCountry.ts | Fetch donnees pays Niger via REST Countries (cache 7 jours) |
 | useNigerMacro.ts | Fetch donnees macroeconomiques (World Bank + IMF) via SWR (cache 24h) |
 | usePdfExport.ts | Generation PDF stylise avec branding NFI Report (jsPDF + jspdf-autotable) |
 | useRegionData.ts | Fetch donnees region ECOWAS via SWR (cache 7 jours) |

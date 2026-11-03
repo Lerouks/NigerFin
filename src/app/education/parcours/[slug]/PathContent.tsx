@@ -195,7 +195,7 @@ export function PathContent({ slug }: { slug: string }) {
               <div className="h-1.5 w-full bg-white/8 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-emerald-400 rounded-full transition-all"
-                  style={{ width: `${progressPct}&nbsp;%` }}
+                  style={{ width: `${progressPct}%` }}
                 />
               </div>
               {continueTarget && (
@@ -282,7 +282,7 @@ export function PathContent({ slug }: { slug: string }) {
                         className={`text-[10px] px-2 py-0.5 rounded-full border ${
                           isFree
                             ? 'bg-emerald-50 border-emerald-100 text-emerald-700'
-                            : 'bg-[#fffbeb] border-[#e2e3e5] text-[#92400e]'
+                            : 'bg-[#111] border-[#111] text-white'
                         }`}
                       >
                         {isFree ? 'Gratuit' : 'Premium'}

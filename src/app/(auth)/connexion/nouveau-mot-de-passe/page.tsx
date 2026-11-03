@@ -108,7 +108,7 @@ export default function NouveauMotDePassePage() {
         </div>
 
         {sessionPrete === false && (
-          <div role="alert" className="bg-amber-50 border border-amber-200 text-amber-800 text-sm px-4 py-3 rounded-lg mb-6">
+          <div role="alert" className="bg-gray-50 border border-black/10 text-[#111] text-sm px-4 py-3 rounded-lg mb-6">
             Ce lien n&apos;est plus valable. Les liens de réinitialisation expirent au bout d&apos;une heure.{' '}
             <Link href="/connexion" className="underline font-medium">Demander un nouveau lien</Link>.
           </div>

@@ -37,9 +37,9 @@ const colors = {
   paper: '#f5f5f7',
   positive: '#16a34a',
   negative: '#dc2626',
-  warning: '#d97706',
-  warningBg: '#fff9eb',
-  warningInk: '#5c4308',
+  warning: '#8a8e95',
+  warningBg: '#f5f5f7',
+  warningInk: '#424245',
 };
 
 const styles = StyleSheet.create({
@@ -75,9 +75,13 @@ const styles = StyleSheet.create({
     marginTop: 4,
     textTransform: 'uppercase',
   },
-  docTitleBox: { textAlign: 'right' },
+  // alignItems et non textAlign : sur une View, react-pdf ignore textAlign.
+  docTitleBox: { alignItems: 'flex-end' },
   docTitle: {
     fontSize: 28,
+    // Sans hauteur de ligne propre, le titre héritait de celle du corps (10,5 pt)
+    // et le numéro de facture venait s'écrire par-dessus « FACTURE ».
+    lineHeight: 1.15,
     fontWeight: 700,
     fontFamily: 'Helvetica-Bold',
     letterSpacing: -0.5,
@@ -312,6 +316,9 @@ const styles = StyleSheet.create({
   stampCancelledText: { color: colors.negative },
 });
 
+// Pas de césure automatique : react-pdf coupait les mots au hasard (« briefin-gs »).
+const sansCesure = (word: string): string[] => [word];
+
 export interface InvoicePdfProps {
   invoice: Invoice;
 }
@@ -422,7 +429,7 @@ export function InvoicePdf({ invoice }: InvoicePdfProps) {
           {invoice.lineItems.map((line, idx) => (
             <View key={idx} style={styles.tableRow}>
               <View style={[{ flex: 1 }]}>
-                <Text style={[styles.tableCell, { fontFamily: 'Helvetica-Bold', fontWeight: 700, paddingBottom: 0 }]}>{line.description}</Text>
+                <Text hyphenationCallback={sansCesure} style={[styles.tableCell, { fontFamily: 'Helvetica-Bold', fontWeight: 700, paddingBottom: 0 }]}>{line.description}</Text>
                 {line.qty > 1 ? (
                   <Text style={[styles.tableCell, styles.tableCellSubtle, { paddingTop: 0 }]}>
                     {line.qty} × {formatXof(line.unitPriceXof)}

@@ -132,7 +132,7 @@ export function PreferencesForm({ initial }: { initial: NewsletterPrefs }) {
           ) : null}
         </span>
         {noneActive ? (
-          <span className="text-xs text-amber-700">
+          <span className="text-xs text-gray-700">
             Aucune communication active. Réactivez au moins une option ci-dessus.
           </span>
         ) : null}

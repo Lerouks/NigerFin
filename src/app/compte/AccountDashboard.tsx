@@ -431,7 +431,7 @@ export function AccountDashboard() {
                             <p className="text-[14px] font-semibold">{payment.amount.toLocaleString('fr-FR')} {CURRENCY}</p>
                             <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
                               payment.status === 'verified' ? 'bg-emerald-50 text-emerald-600' :
-                              payment.status === 'pending' ? 'bg-amber-50 text-amber-600' :
+                              payment.status === 'pending' ? 'bg-gray-100 text-gray-600' :
                               'bg-red-50 text-red-600'
                             }`}>
                               {payment.status === 'verified' ? 'Vérifié' : payment.status === 'pending' ? 'En attente' : 'Rejeté'}
@@ -772,7 +772,7 @@ function getPasswordStrength(password: string) {
   const requiredPassed = checks.length && checks.uppercase && checks.digit && checks.special;
 
   if (!requiredPassed || passed <= 2) return { level: 'weak' as const, label: 'Faible', color: 'text-red-600', bgColor: 'bg-red-500', width: 'w-1/3', checks };
-  if (passed <= 3) return { level: 'medium' as const, label: 'Moyen', color: 'text-amber-600', bgColor: 'bg-amber-500', width: 'w-2/3', checks };
+  if (passed <= 3) return { level: 'medium' as const, label: 'Moyen', color: 'text-[#5f636b]', bgColor: 'bg-[#8a8e95]', width: 'w-2/3', checks };
   return { level: 'strong' as const, label: 'Fort', color: 'text-emerald-600', bgColor: 'bg-emerald-500', width: 'w-full', checks };
 }
 

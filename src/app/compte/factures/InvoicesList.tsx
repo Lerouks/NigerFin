@@ -34,7 +34,7 @@ function statusBadge(status: string): { label: string; classes: string } {
     case 'cancelled':
       return { label: 'Annulée', classes: 'bg-red-100 text-red-800' };
     case 'refunded':
-      return { label: 'Remboursée', classes: 'bg-amber-100 text-amber-800' };
+      return { label: 'Remboursée', classes: 'bg-neutral-200 text-neutral-900' };
     case 'draft':
       return { label: 'Brouillon', classes: 'bg-neutral-100 text-neutral-700' };
     default:

@@ -16,9 +16,9 @@ export const PDF_COLORS = {
   divider: '#d2d2d7',
   dividerLight: '#e5e5e7',
   // Notice (disclaimer)
-  warning: '#d97706',
-  warningBg: '#fff9eb',
-  warningInk: '#5c4308',
+  warning: '#8a8e95',
+  warningBg: '#f5f5f7',
+  warningInk: '#424245',
   // Brand accent (utilisé avec parcimonie, uniquement sur slogan final)
   brand: '#1d1d1f',
 } as const;

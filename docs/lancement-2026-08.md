@@ -147,6 +147,15 @@ Dans le code :
   430 Ko, niveaux des parcours accentués, champ e-mail de la page d'attente à
   48 px, téléphone du texte de secours des mentions légales aligné sur le reste
   du site, promesse de `/about` ramenée à « les secteurs que nous suivons ».
+- Second passage du même jour, zéro jaune jusqu'au bout : badges « Premium »
+  de l'Éducation, compteur de force du mot de passe, alerte de lien expiré,
+  statuts « En attente » et « Remboursée », encadré « Conservation » de la
+  facture (e-mail et PDF). L'administration garde ses couleurs d'état, utiles
+  au pilotage.
+- La barre de progression des parcours s'affichait toujours pleine (un
+  `&nbsp;` glissé dans la largeur CSS) : elle suit de nouveau l'avancement.
+- Facture PDF : le numéro ne s'écrit plus par-dessus « FACTURE », il est aligné
+  à droite sous le titre, et la césure ne coupe plus les mots (« briefin-gs »).
 
 Restent, hors de ce passage : écrire les articles (bloc 1), ouvrir le site le
 jour J (bloc 3), et les indicateurs de l'outil « Indices économiques »

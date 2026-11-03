@@ -64,7 +64,7 @@ const SUBSECTIONS: Record<string, { title: string; from: number; to: number }[]>
 
 const ACCESS_CONFIG: Record<string, { label: string; color: string; bg: string; requiredRoles: string[] }> = {
   free: { label: 'Gratuit', color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-100', requiredRoles: ['reader', 'premium', 'admin'] },
-  premium: { label: 'Premium', color: 'text-[#92400e]', bg: 'bg-[#fffbeb] border-[#e2e3e5]', requiredRoles: ['premium', 'admin'] },
+  premium: { label: 'Premium', color: 'text-white', bg: 'bg-[#111] border-[#111]', requiredRoles: ['premium', 'admin'] },
 };
 
 /* ─── Skeleton de chargement ─── */

@@ -377,9 +377,9 @@ export function invoiceEmail({
 </td></tr>
 
 <tr><td style="padding:0 32px 28px;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#fff9eb;border-left:3px solid #d97706;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f7;border-left:3px solid #8a8e95;">
     <tr><td style="padding:12px 16px;">
-      <p style="margin:0;color:#5c4308;font-family:'Inter',sans-serif;font-size:11.5px;line-height:1.55;"><strong>Conservation.</strong> Cette facture est un document comptable. Conservez-en une copie pour votre comptabilité (durée légale OHADA, 10 ans).</p>
+      <p style="margin:0;color:#424245;font-family:'Inter',sans-serif;font-size:11.5px;line-height:1.55;"><strong>Conservation.</strong> Cette facture est un document comptable. Conservez-en une copie pour votre comptabilité (durée légale OHADA, 10 ans).</p>
     </td></tr>
   </table>
 </td></tr>`;

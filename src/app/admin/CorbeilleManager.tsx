@@ -11,6 +11,7 @@ import {
   dernierJourRecuperable,
   estTableCorbeille,
   jourEnLettres,
+  premierDuMois,
   resumerDependants,
 } from '@/lib/corbeille/libelles';
 import { enPhrases, guillemets, nombreFr, sansMotSeul, typographieFr } from '@/lib/typographie-fr';
@@ -96,13 +97,14 @@ export function EnTeteCorbeille() {
         <p>
           <Phrases
             texte={
-              'Les commentaires et les j\u2019aime d\u2019un article restent en place tant qu\u2019il est ici : la modération les montre sous « Article\u00a0supprimé », et il les retrouve s\u2019il revient. Supprimé définitivement, ou au bout du délai, il les emporte avec lui. Quand un lecteur supprime son compte, sa progression est retirée d\u2019ici aussi.'
+              'Les commentaires et les j\u2019aime d\u2019un article restent en place tant qu\u2019il est ici : la modération les montre sous « Article\u00a0supprimé », et il les retrouve s\u2019il revient. S\u2019il est supprimé définitivement, ou à la fin de son délai, il les emporte avec lui. Quand un lecteur supprime son compte, sa progression est retirée d\u2019ici aussi.'
             }
           />
         </p>
       </div>
       <p className="text-[12px] text-gray-500 mt-2 leading-relaxed max-w-2xl">
-        <Phrases texte="Ne passent pas par la corbeille, et sont supprimés définitivement : les commentaires modérés, les messages reçus, les abonnés, les comptes et les données de marché." />
+        {/* Une chaîne JavaScript, pas un attribut JSX entre guillemets : \u00a0 n'y serait pas lu comme une insécable. */}
+        <Phrases texte={'Ne passent pas par la corbeille, et sont supprimés définitivement : les commentaires modérés, les messages\u00a0reçus, les abonnés, les comptes et les données de marché.'} />
       </p>
     </header>
   );
@@ -144,7 +146,9 @@ function souder(texte: string): string {
 function dateEtHeure(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return '';
-  const jour = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: FUSEAU_CORBEILLE });
+  const jour = premierDuMois(
+    date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: FUSEAU_CORBEILLE }),
+  );
   const heure = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: FUSEAU_CORBEILLE });
   return souder(`${jour} à ${heure}`);
 }
@@ -295,15 +299,15 @@ export function SuiteDeLaListe({
           <Phrases
             texte={
               restantes > 1
-                ? `Encore ${nombreFr(restantes)} suppressions plus anciennes : ce sont les plus proches de leur suppression définitive.`
-                : 'Encore une suppression plus ancienne : c’est la plus proche de sa suppression définitive.'
+                ? `Il reste ${nombreFr(restantes)}\u00a0suppressions plus anciennes à afficher. Ce sont les plus proches de leur suppression définitive.`
+                : 'Il reste une suppression plus ancienne à afficher. C\u2019est la plus proche de sa suppression définitive.'
             }
           />
         </p>
       )}
       {erreur && (
         <p role="alert" className="text-[12px] text-red-700 leading-relaxed max-w-2xl">
-          <Phrases texte={`Les suivantes n’ont pas pu être chargées : ${erreur}`} />
+          <Phrases texte={`Les suivantes n\u2019ont pas pu être chargées. ${erreur}`} />
         </p>
       )}
       <button
@@ -322,7 +326,7 @@ function BandeauRechargement({ erreur, onReessayer }: { erreur: string; onReessa
   return (
     <div role="alert" className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700 mb-5 flex flex-wrap items-center gap-3">
       <p className="flex-1 min-w-[12rem]">
-        <Phrases texte={`La liste n'a pas pu être rechargée : ${erreur}`} />
+        <Phrases texte={`La liste n\u2019a pas pu être rechargée. ${erreur}`} />
       </p>
       <button
         type="button"

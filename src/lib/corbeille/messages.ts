@@ -2,9 +2,11 @@ import { guillemets, typographieFr } from '@/lib/typographie-fr';
 import {
   compter,
   estTableCorbeille,
+  FUSEAU_CORBEILLE,
   LIBELLE_DEPENDANT,
   listeFr,
   nomDeTable,
+  premierDuMois,
   resumerDependants,
   type TableCorbeille,
 } from './libelles';
@@ -123,7 +125,9 @@ function dateFr(valeur: unknown): string | null {
   if (!texte) return null;
   const date = new Date(texte);
   if (Number.isNaN(date.getTime())) return null;
-  return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Africa/Niamey' });
+  return premierDuMois(
+    date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: FUSEAU_CORBEILLE }),
+  );
 }
 
 /** Pourquoi un contenu n'a pas pu partir à la corbeille. */

@@ -117,9 +117,10 @@ CREATE TABLE IF NOT EXISTS public.contenus_supprimes (
 -- en ligne une version périmée, et un double clic créait deux entrées.
 CREATE UNIQUE INDEX IF NOT EXISTS contenus_supprimes_un_par_contenu
   ON public.contenus_supprimes (table_origine, id_origine);
--- La liste (les plus récentes d'abord) et la purge (les plus anciennes).
+-- La liste (les plus récentes d'abord, par pages : date puis identifiant) et
+-- la purge (les plus anciennes).
 CREATE INDEX IF NOT EXISTS contenus_supprimes_supprime_le
-  ON public.contenus_supprimes (supprime_le);
+  ON public.contenus_supprimes (supprime_le, id);
 -- Retrouver vite les entrées d'un lecteur qui supprime son compte.
 CREATE INDEX IF NOT EXISTS contenus_supprimes_lecteurs
   ON public.contenus_supprimes USING gin (lecteurs);
@@ -898,8 +899,8 @@ $fonction$;
 -- Fonction interne : l'instant avant lequel une entrée a fait son temps.
 -- Chaque entrée reste récupérable jusqu'à la fin du jour que l'écran affiche :
 -- le jour de sa mise à la corbeille plus p_jours, en date de Niamey
--- (Africa/Niamey, UTC+1 toute l'année), là où sont l'équipe et la tâche de
--- nuit. Elle n'est donc purgée qu'à partir du lendemain de ce jour, à minuit,
+-- (Africa/Niamey, UTC+1 toute l'année), le fuseau du site, où la tâche de
+-- nuit tourne à 3 h. Elle n'est donc purgée qu'à partir du lendemain de ce jour, à minuit,
 -- heure de Niamey : la limite est minuit, heure de Niamey, du jour
 -- « aujourd'hui à Niamey moins p_jours ». Exemple : une entrée mise à la
 -- corbeille le 3 novembre à 1 h 30 est affichée « récupérable jusqu'au

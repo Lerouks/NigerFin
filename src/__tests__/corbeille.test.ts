@@ -27,6 +27,7 @@ import {
   dernierJourRecuperable,
   jourANiamey,
   jourEnLettres,
+  premierDuMois,
   resumerDependants,
 } from '@/lib/corbeille/libelles';
 import {
@@ -114,6 +115,7 @@ describe('messages de la mise à la corbeille', () => {
     ['introuvable', lireErreur(refus('introuvable')), 404, /introuvable/, false],
     ['déjà dans la corbeille', lireErreur(refus('deja_dans_la_corbeille')), 409, /déjà dans la corbeille/, false],
     ['copie existante', lireErreur(refus('copie_existante', { supprime_le: '2026-11-03T10:00:00Z' })), 409, /depuis le 3 novembre 2026/, false],
+    ['copie existante, un premier du mois', lireErreur(refus('copie_existante', { supprime_le: '2026-10-31T23:30:00Z' })), 409, /depuis le 1er novembre 2026/, false],
     ['numéro envoyé', lireErreur(refus('numero_envoye')), 400, /déjà envoyé/, false],
     ['envoi en cours', lireErreur(refus('envoi_en_cours')), 409, /en cours d’envoi/, false],
     ['cascade inconnue', lireErreur(refus('cascade_inconnue')), 500, /ne sait pas encore garder/, true],
@@ -233,7 +235,11 @@ describe('libellés', () => {
     expect(jourANiamey('2026-11-02T23:00:00Z')).toBe('2026-11-03');
     expect(jourANiamey(new Date('2026-11-02T22:59:59Z'))).toBe('2026-11-02');
     expect(jourEnLettres('2026-12-03')).toBe('3 décembre 2026');
-    expect(jourEnLettres('2027-01-01')).toBe('1 janvier 2027');
+    // Le premier du mois en ordinal, comme on l'écrit en français.
+    expect(jourEnLettres('2027-01-01')).toBe('1er janvier 2027');
+    expect(premierDuMois('1 novembre 2026 à 17:45')).toBe('1er novembre 2026 à 17:45');
+    expect(premierDuMois('11 novembre 2026')).toBe('11 novembre 2026');
+    expect(premierDuMois('21 novembre 2026')).toBe('21 novembre 2026');
   });
 });
 

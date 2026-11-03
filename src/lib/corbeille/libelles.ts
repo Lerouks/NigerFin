@@ -80,15 +80,25 @@ export function dernierJourRecuperable(supprimeLe: string): string | null {
   return jourIso(annee, mois, quantieme + DUREE_CONSERVATION_JOURS);
 }
 
+/**
+ * « 1er novembre 2026 » et non « 1 novembre 2026 » : en français, le premier
+ * jour du mois s'écrit en ordinal. toLocaleDateString ne le fait pas.
+ */
+export function premierDuMois(date: string): string {
+  return date.replace(/^1(?=[\s\u00a0])/, '1er');
+}
+
 /** « 3 décembre 2026 », pour le jour de calendrier « 2026-12-03 ». */
 export function jourEnLettres(jour: string): string {
   const [annee = 0, mois = 1, quantieme = 1] = jour.split('-').map(Number);
-  return new Date(Date.UTC(annee, mois - 1, quantieme)).toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'UTC',
-  });
+  return premierDuMois(
+    new Date(Date.UTC(annee, mois - 1, quantieme)).toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }),
+  );
 }
 
 export const LIBELLE_CONTENU: Record<TableCorbeille, string> = {

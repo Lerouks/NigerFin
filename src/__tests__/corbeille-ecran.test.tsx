@@ -61,7 +61,7 @@ describe('écran de la corbeille', () => {
     expect(lu).toContain('Ils y restent 30 jours, jusqu’à la date affichée incluse (heure de Niamey), puis sont supprimés définitivement.');
     expect(lu).toContain('Les commentaires et les j’aime d’un article restent en place tant qu’il est ici');
     expect(lu).toContain('« Article supprimé »');
-    expect(lu).toContain('Supprimé définitivement, ou au bout du délai, il les emporte avec lui.');
+    expect(lu).toContain('S’il est supprimé définitivement, ou à la fin de son délai, il les emporte avec lui.');
     expect(lu).toContain('jamais à moitié');
     expect(lu).toContain('Ne passent pas par la corbeille');
   });
@@ -99,6 +99,27 @@ describe('écran de la corbeille', () => {
     expect(html).toContain('3\u00a0décembre\u00a02026\u00a0inclus');
   });
 
+  it('le premier du mois s’écrit « 1er », et aucune insécable ne s’affiche en toutes lettres', () => {
+    const html = renderToStaticMarkup(
+      <ul>
+        <LigneCorbeille
+          entree={{ ...ENTREE, supprime_le: '2026-11-01T16:45:00.000Z' }}
+          enCours={false}
+          confirmation={false}
+          onRestaurer={sansAction}
+          onDemanderSuppression={sansAction}
+          onConfirmerSuppression={sansAction}
+          onAnnuler={sansAction}
+        />
+      </ul>,
+    );
+    expect(texte(html)).toContain('dans la corbeille depuis le 1er novembre 2026 à 17:45');
+    expect(texte(html)).toContain('Récupérable jusqu’au 1er décembre 2026 inclus');
+    const entete = renderToStaticMarkup(<EnTeteCorbeille />);
+    expect(entete).toContain('messages\u00a0reçus');
+    expect(entete).not.toContain('\\u00a0');
+  });
+
   it('les entrées se mettent en ligne d’après la largeur de la liste, pas celle de l’écran', () => {
     const html = ligne(false);
     expect(html).toContain('@3xl:flex-row');
@@ -130,12 +151,13 @@ describe('écran de la corbeille', () => {
 
   it('une liste incomplète dit combien d’entrées plus anciennes restent, et propose de les afficher', () => {
     const plusieurs = texte(renderToStaticMarkup(<SuiteDeLaListe restantes={250} enCours={false} erreur={null} onAfficher={sansAction} />));
-    expect(plusieurs).toContain('Encore 250 suppressions plus anciennes : ce sont les plus proches de leur suppression définitive.');
+    expect(plusieurs).toContain('Il reste 250 suppressions plus anciennes à afficher. Ce sont les plus proches de leur suppression définitive.');
     expect(plusieurs).toContain('Afficher les suivantes');
     const une = texte(renderToStaticMarkup(<SuiteDeLaListe restantes={1} enCours={false} erreur={null} onAfficher={sansAction} />));
-    expect(une).toContain('Encore une suppression plus ancienne : c’est la plus proche de sa suppression définitive.');
+    expect(une).toContain('Il reste une suppression plus ancienne à afficher. C’est la plus proche de sa suppression définitive.');
+    // Le message du serveur est une phrase entière : il commence une phrase, pas la suite d'un deux-points.
     const enPanne = texte(renderToStaticMarkup(<SuiteDeLaListe restantes={3} enCours={false} erreur="Le serveur ne répond pas." onAfficher={sansAction} />));
-    expect(enPanne).toContain('Les suivantes n’ont pas pu être chargées : Le serveur ne répond pas.');
+    expect(enPanne).toContain('Les suivantes n’ont pas pu être chargées. Le serveur ne répond pas.');
     expect(texte(renderToStaticMarkup(<SuiteDeLaListe restantes={3} enCours erreur={null} onAfficher={sansAction} />))).toContain('Chargement…');
   });
 

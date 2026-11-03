@@ -50,3 +50,6 @@ next-env.d.ts
 /e2e/screenshots
 .gstack/
 __pycache__/
+
+# Écrit et tenu à jour par next dev (Next.js 16.3 et suivants)
+/AGENTS.md

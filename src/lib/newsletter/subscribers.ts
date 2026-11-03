@@ -1,4 +1,5 @@
 import { createServiceClient } from '@/lib/supabase';
+import { normalizeEmail } from '@/lib/validation';
 
 export interface UpsertSubscriberInput {
   email: string;
@@ -30,7 +31,9 @@ export async function upsertNewsletterSubscriber(
   const supabase = createServiceClient();
   if (!supabase) throw new Error('Supabase service client unavailable');
 
-  const email = input.email.trim().toLowerCase();
+  // La forme enregistrée, la même que celle que la suppression d'un compte
+  // recherche (src/lib/delete-user.ts).
+  const email = normalizeEmail(input.email);
 
   // Check existing
   const { data: existing, error: selErr } = await supabase

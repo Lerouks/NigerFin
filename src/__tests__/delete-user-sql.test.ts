@@ -11,6 +11,7 @@ vi.mock('@/lib/supabase', () => ({ createServiceClient: vi.fn(() => null), creat
 
 import * as Sentry from '@sentry/nextjs';
 import { deleteUserCompletely } from '@/lib/delete-user';
+import { normalizeEmail } from '@/lib/validation';
 
 /**
  * La suppression d'un compte, de bout en bout, sur un vrai PostgreSQL
@@ -60,7 +61,8 @@ afterEach(async () => {
 
 /**
  * Le client de service tel que deleteUserCompletely s'en sert, branché sur la
- * base de test : from(table).delete().eq(colonne, valeur), rpc(), et
+ * base de test : from(table).delete().eq(colonne, valeur), une égalité exacte
+ * comme le filtre eq de PostgREST, rpc(), auth.admin.getUserById() et
  * auth.admin.deleteUser(). Une table absente de la réplique répond comme
  * PostgREST (42P01), et le code doit le supporter.
  */
@@ -82,11 +84,17 @@ function clientDeSuppression(base: Base): SupabaseClient {
       },
     }),
   });
+  const getUserById = async (id: string) => {
+    const lu = await base.query<{ email: string | null }>('select email from auth.users where id = $1', [id]);
+    const compte = lu.rows[0];
+    if (!compte) return { data: { user: null }, error: { status: 404, code: 'user_not_found', message: 'User not found' } };
+    return { data: { user: { id, email: compte.email ?? undefined } }, error: null };
+  };
   const deleteUser = async (id: string) => {
     await base.query('delete from auth.users where id = $1', [id]);
     return { error: null };
   };
-  return { rpc: service.rpc.bind(service), from, auth: { admin: { deleteUser } } } as unknown as SupabaseClient;
+  return { rpc: service.rpc.bind(service), from, auth: { admin: { getUserById, deleteUser } } } as unknown as SupabaseClient;
 }
 
 async function compter(sql: string, params: unknown[] = []): Promise<number> {
@@ -108,6 +116,44 @@ describe('la suppression d’un compte, sur la vraie base', () => {
     // Les autres lecteurs ne perdent rien.
     expect(await compter("select count(*) as n from public.newsletter_subscribers where email = 'lecteur@exemple.test'")).toBe(1);
     expect(await compter('select count(*) as n from public.comments where user_id = $1', [LECTEUR])).toBe(1);
+    expect(Sentry.captureException).not.toHaveBeenCalled();
+  });
+
+  it('F15 : inscrite sur la liste d’attente avant de créer son compte, sans user_id, son adresse part aussi ; une adresse voisine reste', async () => {
+    const COMPTE = uuid(4);
+    const ADRESSE = 'pre_lancement@exemple.test';
+    // Un seul caractère diffère, là où « _ » servirait de joker à like ou ilike.
+    const VOISINE = 'preXlancement@exemple.test';
+    await db.exec(`insert into auth.users (id, email) values ('${COMPTE}', '${ADRESSE}');
+      insert into public.newsletter_subscribers (id, email, source, user_id) values
+        ('${uuid(512)}', '${ADRESSE}', 'prelaunch', null),
+        ('${uuid(513)}', '${VOISINE}', 'prelaunch', null);`);
+
+    await deleteUserCompletely(clientDeSuppression(db), COMPTE, ADRESSE, 'Lectrice', COMPTE);
+
+    expect(await compter('select count(*) as n from public.newsletter_subscribers where email = $1', [ADRESSE])).toBe(0);
+    expect(await compter('select count(*) as n from public.newsletter_subscribers where email = $1', [VOISINE])).toBe(1);
+    expect(await compter('select count(*) as n from auth.users where id = $1', [COMPTE])).toBe(0);
+    // Les autres abonnés ne perdent rien.
+    expect(await compter('select count(*) as n from public.newsletter_subscribers')).toBe(3);
+    expect(Sentry.captureException).not.toHaveBeenCalled();
+  });
+
+  it('l’adresse du compte est comparée sous la forme enregistrée, et celle du profil, que le lecteur peut réécrire, ne compte pas', async () => {
+    const COMPTE = uuid(4);
+    // Les inscriptions écrivent l'adresse par normalizeEmail, comme upsertNewsletterSubscriber.
+    const ENREGISTREE = normalizeEmail('Pre_Lancement@Exemple.TEST');
+    await db.exec(`insert into auth.users (id, email) values ('${COMPTE}', 'Pre_Lancement@Exemple.TEST');
+      insert into public.newsletter_subscribers (id, email, source, user_id) values
+        ('${uuid(512)}', '${ENREGISTREE}', 'form', null),
+        ('${uuid(514)}', 'victime@exemple.test', 'form', null);`);
+
+    // Un profil dont l'adresse a été réécrite pour celle d'une autre personne.
+    await deleteUserCompletely(clientDeSuppression(db), COMPTE, 'victime@exemple.test', 'Lecteur', COMPTE);
+
+    expect(ENREGISTREE).toBe('pre_lancement@exemple.test');
+    expect(await compter('select count(*) as n from public.newsletter_subscribers where email = $1', [ENREGISTREE])).toBe(0);
+    expect(await compter("select count(*) as n from public.newsletter_subscribers where email = 'victime@exemple.test'")).toBe(1);
     expect(Sentry.captureException).not.toHaveBeenCalled();
   });
 

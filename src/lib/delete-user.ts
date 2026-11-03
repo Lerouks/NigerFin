@@ -2,7 +2,45 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { logAuditEvent } from '@/lib/audit';
 import { retirerLecteurDeLaCorbeille } from '@/lib/corbeille';
 import { sendTransactionalEmail } from '@/lib/email';
+import { normalizeEmail } from '@/lib/validation';
 import * as Sentry from '@sentry/nextjs';
+
+type EtapeAbonnement = 'par-compte' | 'lecture-du-compte' | 'par-adresse';
+
+/**
+ * Signale un abonnement à la newsletter qui n'a pas pu être retiré. Le code
+ * seul part chez Sentry : jamais l'adresse, ni le message de la base ou de la
+ * requête, qui peut la citer (la valeur filtrée figure dans l'adresse de la
+ * requête PostgREST).
+ */
+function signalerAbonnement(etape: EtapeAbonnement, userId: string, erreur: unknown): void {
+  const brut = erreur && typeof erreur === 'object' ? (erreur as { code?: unknown; status?: unknown }) : {};
+  const code = typeof brut.code === 'string' && brut.code ? brut.code : typeof brut.status === 'number' ? String(brut.status) : null;
+  Sentry.captureException(Object.assign(new Error(`delete-user: abonnement à la newsletter non retiré (${etape})`), { code }), {
+    tags: { context: 'delete-user-newsletter' },
+    extra: { userId, etape, code },
+  });
+}
+
+/**
+ * L'adresse du compte, lue dans auth.users et mise sous la forme que
+ * newsletter_subscribers enregistre, ou null quand le compte n'en a pas (une
+ * connexion par téléphone) ou qu'elle n'a pas pu être lue (signalé).
+ */
+async function adresseDuCompte(serviceClient: SupabaseClient, userId: string): Promise<string | null> {
+  try {
+    const { data, error } = await serviceClient.auth.admin.getUserById(userId);
+    if (error) {
+      signalerAbonnement('lecture-du-compte', userId, error);
+      return null;
+    }
+    const email = data.user?.email;
+    return typeof email === 'string' && email.trim() ? normalizeEmail(email) : null;
+  } catch (err) {
+    signalerAbonnement('lecture-du-compte', userId, err);
+    return null;
+  }
+}
 
 /**
  * Delete a user and all their data from the database.
@@ -44,21 +82,39 @@ export async function deleteUserCompletely(
     }
   }
 
-  // 2 bis. L'abonnement à la newsletter rattaché au compte. Le courriel de
-  // confirmation promet « Toutes vos données personnelles ont été effacées » :
-  // l'adresse ne doit pas survivre dans newsletter_subscribers. AVANT le
-  // compte : la base vide user_id quand le compte part (ON DELETE SET NULL,
-  // relevé en production), et la ligne, adresse comprise, ne serait plus
-  // rattachée à rien. Ses événements d'envoi restent, sans abonné (ON DELETE
-  // SET NULL), pour les chiffres des numéros. Un échec est signalé sans
-  // bloquer la suite, comme le nettoyage de la corbeille plus bas.
+  // 2 bis. L'abonnement à la newsletter. Le courriel de confirmation promet
+  // « Toutes vos données personnelles ont été effacées » : l'adresse ne doit
+  // pas survivre dans newsletter_subscribers. Deux lignes peuvent la porter :
+  // celle rattachée au compte (user_id), et celle d'une inscription faite
+  // avant le compte, sur la liste d'attente du pré-lancement ou au formulaire
+  // en visiteur, qui n'a pas de user_id. Les deux partent AVANT le profil et
+  // le compte : la base vide user_id quand le compte part (ON DELETE SET
+  // NULL, relevé en production), et la ligne, adresse comprise, ne serait plus
+  // rattachée à rien. Leurs événements d'envoi restent, sans abonné (ON
+  // DELETE SET NULL), pour les chiffres des numéros. Un échec est signalé
+  // sans bloquer la suite, comme le nettoyage de la corbeille plus bas.
   try {
     const { error } = await serviceClient.from('newsletter_subscribers').delete().eq('user_id', userId);
-    if (error) {
-      Sentry.captureException(error, { tags: { context: 'delete-user-newsletter' }, extra: { userId } });
-    }
+    if (error) signalerAbonnement('par-compte', userId, error);
   } catch (err) {
-    Sentry.captureException(err, { tags: { context: 'delete-user-newsletter' }, extra: { userId } });
+    signalerAbonnement('par-compte', userId, err);
+  }
+  // L'inscription d'avant le compte se retrouve par l'adresse DU COMPTE, celle
+  // d'auth.users, que seule une confirmation par courriel change. Jamais par
+  // celle du profil (userEmail) : la session du lecteur peut réécrire
+  // user_profiles.email (politique « Users can update own profile », relevée
+  // en production), et une adresse de profil réécrite effacerait
+  // l'abonnement d'une autre personne. Comparaison exacte (eq) avec la forme
+  // enregistrée, que chaque inscription écrit par normalizeEmail ; jamais
+  // ilike ni like, dont « _ » et « % » sont des jokers.
+  const adresse = await adresseDuCompte(serviceClient, userId);
+  if (adresse) {
+    try {
+      const { error } = await serviceClient.from('newsletter_subscribers').delete().eq('email', adresse);
+      if (error) signalerAbonnement('par-adresse', userId, error);
+    } catch (err) {
+      signalerAbonnement('par-adresse', userId, err);
+    }
   }
 
   // 3. Delete user profile

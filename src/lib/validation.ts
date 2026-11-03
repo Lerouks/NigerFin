@@ -19,6 +19,17 @@ export function isValidEmail(value: unknown): value is string {
   return typeof value === 'string' && value.length <= 254 && EMAIL_REGEX.test(value);
 }
 
+/**
+ * Une adresse telle que newsletter_subscribers l'enregistre : sans espaces
+ * autour, en minuscules. Toute inscription (upsertNewsletterSubscriber) et
+ * toute recherche par adresse dans cette table passent par elle, pour
+ * comparer à l'identique. Jamais ilike ni like : « _ » et « % » y sont des
+ * jokers, et « _ » est courant dans une adresse.
+ */
+export function normalizeEmail(value: string): string {
+  return value.trim().toLowerCase();
+}
+
 /** Sanitize a string for use in Supabase ilike/text filters, escapes SQL wildcards and special chars.
  *
  * Sec M-3 : on enleve aussi les caracteres PostgREST de structure (`,`, `(`, `)`)

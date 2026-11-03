@@ -70,5 +70,7 @@ describe('getIPayChargeAmount — frais iPayMoney absorbes par NFI', () => {
       // 2. Maximalite : envoyer 1 FCFA de plus depasserait forcement le prix.
       expect(iPayTotalReference(sent + 1)).toBeGreaterThan(price);
     }
-  });
+    // 200 000 itérations : environ 2 s au calme, plus de 5 s (délai par défaut)
+    // sur une machine chargée. Délai explicite pour ne pas faire échouer une CI lente.
+  }, 30000);
 });

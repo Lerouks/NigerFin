@@ -34,6 +34,40 @@ describe('appelAdmin', () => {
     if (r.ok) expect(r.donnees).toEqual([{ id: 1 }]);
   });
 
+  // Une réponse positive dont le corps arrive coupé ne doit jamais passer pour
+  // une réussite avec des données vides : l'écran qui les lit plantait.
+  const corpsCoupe = () => ({
+    ok: true,
+    status: 200,
+    headers: { get: () => 'application/json' },
+    json: async () => { throw new Error('corps coupé'); },
+  });
+
+  it('rejoue une lecture dont la réponse positive arrive incomplète, puis réussit', async () => {
+    fetchSimule
+      .mockResolvedValueOnce(corpsCoupe())
+      .mockResolvedValueOnce(reponse(200, { summary: { ok: 1 } }));
+    const r = await appelAdmin<{ summary: { ok: number } }>('/api/admin/stats');
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.donnees.summary.ok).toBe(1);
+    expect(fetchSimule).toHaveBeenCalledTimes(2);
+  });
+
+  it("ne rend jamais « réussi » avec des données vides quand la réponse reste incomplète", async () => {
+    fetchSimule.mockResolvedValue(corpsCoupe());
+    const r = await appelAdmin('/api/admin/stats');
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.message).toContain('incomplète');
+  });
+
+  it("ne rejoue pas un envoi dont la réponse arrive incomplète, et dit de vérifier", async () => {
+    fetchSimule.mockResolvedValue(corpsCoupe());
+    const r = await appelAdmin('/api/admin/sync-market-data', { method: 'POST' });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.message).toContain('si l\'opération a bien été faite');
+    expect(fetchSimule).toHaveBeenCalledTimes(1);
+  });
+
   it('signale une session expiree en francais, pas un code', async () => {
     fetchSimule.mockResolvedValueOnce(reponse(401, { error: 'Unauthorized' }));
     const r = await appelAdmin('/api/admin/articles');

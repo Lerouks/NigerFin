@@ -127,12 +127,33 @@ export async function appelAdmin<T = unknown>(
       const reponse = await fetch(url, { ...options, signal: abandon.signal });
 
       let corps: unknown = null;
+      let corpsIllisible = false;
       const type = reponse.headers.get('content-type') || '';
       if (type.includes('application/json')) {
-        try { corps = await reponse.json(); } catch { corps = null; }
+        try { corps = await reponse.json(); } catch { corps = null; corpsIllisible = true; }
       }
 
-      if (reponse.ok) return { ok: true, donnees: corps as T };
+      if (reponse.ok) {
+        if (!corpsIllisible) return { ok: true, donnees: corps as T };
+        // Réponse positive dont le corps n'a pas pu être lu jusqu'au bout (délai
+        // dépassé pendant la lecture, connexion coupée, abandon). Rendre
+        // « ok » avec des données vides ferait planter l'écran qui les lit :
+        // on le dit, et on rejoue une simple lecture.
+        if (abandonAppelant?.aborted) return RESULTAT_ABANDONNE;
+        const lecture = !options?.method || options.method === 'GET';
+        if (lecture && essai < maxi - 1) {
+          await attendre(attenteDeLEssai(essai));
+          continue;
+        }
+        return {
+          ok: false,
+          horsLigne: false,
+          statut: reponse.status,
+          message: lecture
+            ? "La réponse du serveur est arrivée incomplète. Rechargez la page."
+            : "Le serveur a répondu, mais sa réponse est arrivée incomplète : rechargez la page pour voir si l'opération a bien été faite.",
+        };
+      }
 
       // Une erreur de serveur peut etre passagere : on rejoue une lecture.
       const relisible = reponse.status >= 500 && (!options?.method || options.method === 'GET');

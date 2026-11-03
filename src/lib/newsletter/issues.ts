@@ -169,12 +169,9 @@ export async function updateIssue(
   return rowToTyped(data);
 }
 
-export async function deleteIssue(id: string): Promise<void> {
-  const supabase = createServiceClient();
-  if (!supabase) throw new Error('Supabase service client unavailable');
-  const { error } = await supabase.from('newsletter_issues').delete().eq('id', id);
-  if (error) throw new Error(`Failed to delete issue: ${error.message}`);
-}
+// La suppression d'un numéro passe par la corbeille (mettreALaCorbeille dans
+// la route DELETE) : il n'y a volontairement pas de deleteIssue ici, qui
+// effacerait sans copie.
 
 export async function listIssues(filter?: {
   status?: NewsletterStatus | NewsletterStatus[];

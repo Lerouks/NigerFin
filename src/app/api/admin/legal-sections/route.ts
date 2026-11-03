@@ -1,23 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
 import { requireAdmin } from '@/lib/admin-auth';
 import { serverError } from '@/lib/api-error';
-
-const LEGAL_PAGES = [
-  '/mentions-legales',
-  '/confidentialite',
-  '/cgu',
-  '/cookies',
-  '/about',
-  '/publicite',
-  '/contact',
-] as const;
-
-function revalidateAllLegalPages() {
-  for (const path of LEGAL_PAGES) {
-    revalidatePath(path);
-  }
-}
+import { mettreALaCorbeille } from '@/lib/corbeille';
+import { revaliderPagesLegales as revalidateAllLegalPages } from '@/lib/revalidation-contenus';
+import { isValidUUID, safeParseJSON } from '@/lib/validation';
 
 export async function GET(req: NextRequest) {
   const auth = await requireAdmin();
@@ -87,21 +73,18 @@ export async function POST(req: NextRequest) {
   return NextResponse.json(data);
 }
 
+// DELETE: la section part à la corbeille. La corbeille rafraîchit elle-même
+// les pages légales, avec la même liste qu'à la restauration.
 export async function DELETE(req: NextRequest) {
   const auth = await requireAdmin();
   if ('error' in auth) return auth.error;
 
-  const { id } = await req.json();
+  const corps = await safeParseJSON<{ id?: unknown }>(req);
+  if (!corps || !isValidUUID(corps.id)) {
+    return NextResponse.json({ error: 'Identifiant de section manquant ou invalide.' }, { status: 400 });
+  }
 
-  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
-
-  const { error } = await auth.serviceClient
-    .from('legal_sections')
-    .delete()
-    .eq('id', id);
-
-  if (error) return serverError(error, 'admin-legal-sections');
-
-  revalidateAllLegalPages();
-  return NextResponse.json({ success: true });
+  const resultat = await mettreALaCorbeille(auth.serviceClient, 'legal_sections', corps.id, auth.user.id);
+  if (!resultat.ok) return NextResponse.json({ error: resultat.motif }, { status: resultat.statut });
+  return NextResponse.json({ success: true, corbeille: true, idCorbeille: resultat.idCorbeille });
 }

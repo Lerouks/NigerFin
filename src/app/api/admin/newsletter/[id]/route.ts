@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { isValidUUID, safeParseJSON } from '@/lib/validation';
 import { serverError } from '@/lib/api-error';
+import { mettreALaCorbeille } from '@/lib/corbeille';
 import {
   getIssue,
   updateIssue,
-  deleteIssue,
   type NewsletterAudience,
   type NewsletterStatus,
   type UpdateIssueInput,
@@ -78,6 +78,9 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<Params> }) 
   }
 }
 
+// DELETE: le numéro part à la corbeille, avec ses événements d'envoi. Un
+// numéro déjà envoyé, ou en cours d'envoi, reste impossible à supprimer : la
+// corbeille applique ce refus elle-même, dans la même transaction.
 export async function DELETE(_req: NextRequest, ctx: { params: Promise<Params> }) {
   try {
     const auth = await requireAdmin();
@@ -86,15 +89,9 @@ export async function DELETE(_req: NextRequest, ctx: { params: Promise<Params> }
     if (!isValidUUID(id)) {
       return NextResponse.json({ error: 'Identifiant invalide' }, { status: 400 });
     }
-    const issue = await getIssue(id);
-    if (!issue) {
-      return NextResponse.json({ error: 'Numéro introuvable' }, { status: 404 });
-    }
-    if (issue.status === 'sent') {
-      return NextResponse.json({ error: 'Impossible de supprimer un numéro déjà envoyé' }, { status: 400 });
-    }
-    await deleteIssue(id);
-    return NextResponse.json({ success: true });
+    const resultat = await mettreALaCorbeille(auth.serviceClient, 'newsletter_issues', id, auth.user.id);
+    if (!resultat.ok) return NextResponse.json({ error: resultat.motif }, { status: resultat.statut });
+    return NextResponse.json({ success: true, corbeille: true, idCorbeille: resultat.idCorbeille });
   } catch (err) {
     return serverError(err, 'admin-newsletter-delete');
   }

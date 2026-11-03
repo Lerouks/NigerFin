@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { requireAdmin } from '@/lib/admin-auth';
 import { serverError } from '@/lib/api-error';
+import { mettreALaCorbeille } from '@/lib/corbeille';
+import { isValidUUID } from '@/lib/validation';
 
 // GET: liste les catégories avec le nombre de leçons.
 // Lit avec la clé de service et exige le rôle administrateur, comme les autres
@@ -93,28 +95,19 @@ export async function PUT(request: NextRequest) {
   return NextResponse.json(data);
 }
 
-// DELETE: remove category (cascades to lessons)
+// DELETE: la catégorie part à la corbeille. La base efface en cascade toutes
+// ses leçons, et avec elles leurs étapes de parcours et la progression des
+// lecteurs : tout est copié, et tout revient ensemble à la restauration.
 export async function DELETE(request: NextRequest) {
   const auth = await requireAdmin();
   if ('error' in auth) return auth.error;
-  const { serviceClient } = auth;
 
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get('id');
-
-  if (!id) {
-    return NextResponse.json({ error: 'ID requis' }, { status: 400 });
+  const id = new URL(request.url).searchParams.get('id');
+  if (!isValidUUID(id)) {
+    return NextResponse.json({ error: 'Identifiant de catégorie manquant ou invalide.' }, { status: 400 });
   }
 
-  const { error } = await serviceClient
-    .from('education_categories')
-    .delete()
-    .eq('id', id);
-
-  if (error) {
-    return serverError(error, 'admin-education-categories');
-  }
-
-  revalidatePath('/education');
-  return NextResponse.json({ success: true });
+  const resultat = await mettreALaCorbeille(auth.serviceClient, 'education_categories', id, auth.user.id);
+  if (!resultat.ok) return NextResponse.json({ error: resultat.motif }, { status: resultat.statut });
+  return NextResponse.json({ success: true, corbeille: true, idCorbeille: resultat.idCorbeille });
 }

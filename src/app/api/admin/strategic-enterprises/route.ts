@@ -1,15 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { requireAdmin } from '@/lib/admin-auth';
 import { serverError } from '@/lib/api-error';
-import { STRATEGIC_ENTERPRISES_CACHE_TAG } from '@/lib/strategic-enterprises';
-
-function purgeAtlasCache(slug?: string | null) {
-  revalidateTag(STRATEGIC_ENTERPRISES_CACHE_TAG, 'max');
-  revalidatePath('/entreprises');
-  if (slug) revalidatePath(`/entreprises/${slug}`);
-}
+import { mettreALaCorbeille } from '@/lib/corbeille';
+import { revaliderEntreprises as purgeAtlasCache } from '@/lib/revalidation-contenus';
+import { isValidUUID } from '@/lib/validation';
 
 /**
  * Bloque les schemes dangereux dans une URL stockee en DB (vecteur javascript:
@@ -200,24 +195,19 @@ export async function PUT(request: NextRequest) {
   return NextResponse.json(data);
 }
 
-// DELETE: remove
+// DELETE: la fiche part à la corbeille. Avant, la page de la fiche n'était pas
+// rafraîchie (le slug n'était pas lu) ; la copie le connaît, et la corbeille
+// rafraîchit l'atlas ET la fiche, à la suppression comme à la restauration.
 export async function DELETE(request: NextRequest) {
   const auth = await requireAdmin();
   if ('error' in auth) return auth.error;
 
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get('id');
-
-  if (!id) {
-    return NextResponse.json({ error: 'ID requis' }, { status: 400 });
+  const id = new URL(request.url).searchParams.get('id');
+  if (!isValidUUID(id)) {
+    return NextResponse.json({ error: 'Identifiant de fiche manquant ou invalide.' }, { status: 400 });
   }
 
-  const { error } = await auth.serviceClient
-    .from('strategic_enterprises')
-    .delete()
-    .eq('id', id);
-
-  if (error) return serverError(error, 'admin-strategic-enterprises');
-  purgeAtlasCache(null);
-  return NextResponse.json({ success: true });
+  const resultat = await mettreALaCorbeille(auth.serviceClient, 'strategic_enterprises', id, auth.user.id);
+  if (!resultat.ok) return NextResponse.json({ error: resultat.motif }, { status: resultat.statut });
+  return NextResponse.json({ success: true, corbeille: true, idCorbeille: resultat.idCorbeille });
 }

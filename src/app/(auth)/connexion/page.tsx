@@ -38,7 +38,9 @@ function ConnexionContent() {
       // Redirect immediately - profile loads in background via auth-context.
       // Seul un chemin du site est suivi : un lien piégé vers /connexion ne doit
       // pas pouvoir envoyer le lecteur, tout juste connecté, sur un autre site.
-      router.push(safeNextPath(searchParams.get('redirect')));
+      // Les pages du site renvoient ici avec « next » (factures, préférences,
+      // édition d'une newsletter) ; l'ancienne forme « redirect » reste lue.
+      router.push(safeNextPath(searchParams.get('redirect') ?? searchParams.get('next')));
     }
   };
 

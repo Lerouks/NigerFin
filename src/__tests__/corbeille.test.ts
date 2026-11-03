@@ -360,23 +360,41 @@ describe('restaurerDepuisCorbeille', () => {
 });
 
 describe('supprimerDefinitivement', () => {
-  it('vide l’entrée et le note au journal', async () => {
-    const { service, from, requete } = client({
-      from: { data: [{ table_origine: 'articles', id_origine: uuid(100), titre: 'Le franc CFA' }], error: null },
+  it('passe par corbeille_vider, dit ce qui est parti avec l’article, et le note au journal', async () => {
+    const { service, rpc, from } = client({
+      rpc: { data: { table: 'articles', id_origine: uuid(100), titre: 'Le franc CFA', commentaires: 3, jaime: 1 } },
     });
-    expect(await supprimerDefinitivement(service, uuid(900), ADMIN)).toEqual({ ok: true });
-    expect(from).toHaveBeenCalledWith('contenus_supprimes');
-    expect(requete.eq).toHaveBeenCalledWith('id', uuid(900));
+
+    expect(await supprimerDefinitivement(service, uuid(900), ADMIN)).toEqual({
+      ok: true,
+      message: typographieFr('Élément supprimé définitivement : « Le franc CFA », avec 3\u00a0commentaires et 1\u00a0j’aime.'),
+    });
+    expect(rpc).toHaveBeenCalledWith('corbeille_vider', { p_entree: uuid(900) });
+    // Plus aucun DELETE direct sur la table : il laisserait les commentaires derrière lui.
+    expect(from).not.toHaveBeenCalled();
     expect(logAuditEvent).toHaveBeenCalledWith(ADMIN, 'corbeille.suppression_definitive', 'articles', uuid(100), {
       titre: 'Le franc CFA',
       idCorbeille: uuid(900),
+      commentaires: 3,
+      jaime: 1,
     });
   });
 
-  it('404 quand l’entrée n’y est plus, 503 quand la réponse s’est perdue, 500 signalé sinon', async () => {
-    expect(await supprimerDefinitivement(client({ from: { data: [], error: null } }).service, uuid(900), ADMIN)).toMatchObject({ statut: 404 });
-    expect(await supprimerDefinitivement(client({ from: { data: null, error: { message: 'fetch failed' } } }).service, uuid(900), ADMIN)).toMatchObject({ statut: 503 });
-    expect(await supprimerDefinitivement(client({ from: { data: null, error: { code: 'XX000', message: 'boum' } } }).service, uuid(900), ADMIN)).toMatchObject({ statut: 500 });
+  it('une leçon : rien de plus à dire', async () => {
+    const { service } = client({ rpc: { data: { table: 'education_lessons', id_origine: uuid(110), titre: 'Le PER', commentaires: 0, jaime: 0 } } });
+    expect(await supprimerDefinitivement(service, uuid(900), ADMIN)).toEqual({
+      ok: true,
+      message: typographieFr('Élément supprimé définitivement : « Le PER ».'),
+    });
+  });
+
+  it('404 quand l’entrée n’y est plus, 503 quand la réponse s’est perdue, 409 sur un verrou, 500 signalé sinon', async () => {
+    const avec = (error: unknown) => client({ rpc: { error } }).service;
+    expect(await supprimerDefinitivement(avec(refus('entree_introuvable')), uuid(900), ADMIN)).toMatchObject({ statut: 404, inattendu: false });
+    expect(await supprimerDefinitivement(avec({ message: 'fetch failed' }), uuid(900), ADMIN)).toMatchObject({ statut: 503 });
+    expect(await supprimerDefinitivement(avec({ code: '55P03', message: 'lock' }), uuid(900), ADMIN)).toMatchObject({ statut: 409 });
+    expect(await supprimerDefinitivement(avec({ code: 'PGRST202', message: 'x' }), uuid(900), ADMIN)).toMatchObject({ statut: 503 });
+    expect(await supprimerDefinitivement(avec({ code: 'XX000', message: 'boum' }), uuid(900), ADMIN)).toMatchObject({ statut: 500, inattendu: true });
     expect(Sentry.captureException).toHaveBeenCalledTimes(1);
     expect(logAuditEvent).not.toHaveBeenCalled();
   });

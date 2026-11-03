@@ -98,6 +98,7 @@ const FONCTIONS_EXPOSEES = new Set([
   'corbeille_restaurer',
   'corbeille_retirer_lecteur',
   'corbeille_purger',
+  'corbeille_vider',
 ]);
 
 /**

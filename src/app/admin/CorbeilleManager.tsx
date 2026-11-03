@@ -94,7 +94,11 @@ export function EnTeteCorbeille() {
           />
         </p>
         <p>
-          <Phrases texte={'Les commentaires et les j\u2019aime d\u2019un article ne partent pas avec lui : ils restent en modération, sous « Article\u00a0supprimé », et le retrouvent s\u2019il revient. Quand un lecteur supprime son compte, sa progression est retirée d\u2019ici aussi.'} />
+          <Phrases
+            texte={
+              'Les commentaires et les j\u2019aime d\u2019un article restent en place tant qu\u2019il est ici : la modération les montre sous « Article\u00a0supprimé », et il les retrouve s\u2019il revient. Supprimé définitivement, ou au bout du délai, il les emporte avec lui. Quand un lecteur supprime son compte, sa progression est retirée d\u2019ici aussi.'
+            }
+          />
         </p>
       </div>
       <p className="text-[12px] text-gray-500 mt-2 leading-relaxed max-w-2xl">
@@ -218,9 +222,15 @@ export function LigneCorbeille(props: PropsLigne) {
 function Confirmation(props: PropsLigne & { idTitre: string }) {
   const dependants = resumerDependants(props.entree.resume_dependants);
   const nom = guillemets(props.entree.titre ?? 'Sans titre');
-  const avertissement = dependants
-    ? `Définitif : ${nom} disparaîtra avec ${dependants}, sans retour possible.`
-    : `Définitif : ${nom} disparaîtra, sans retour possible.`;
+  // Un article emporte ses commentaires et ses j'aime (corbeille_vider) :
+  // la confirmation le dit avant, pas après.
+  const avec =
+    props.entree.table_origine === 'articles'
+      ? ' avec ses commentaires et ses j\u2019aime'
+      : dependants
+        ? ` avec ${dependants}`
+        : '';
+  const avertissement = `Définitif : ${nom} disparaîtra${avec}, sans retour possible.`;
   return (
     <div className="flex flex-col gap-2 @3xl:items-end @3xl:shrink-0 @3xl:max-w-xs">
       <p className="text-[12px] text-red-700 flex items-start gap-1.5 leading-relaxed">
@@ -410,10 +420,10 @@ export function CorbeilleManager() {
   async function supprimerDefinitivement(entree: EntreeCorbeille) {
     setEnCours(entree.id);
     setAnnonce(null);
-    const resultat = await envoiAdmin(`/api/admin/corbeille?id=${encodeURIComponent(entree.id)}`, 'DELETE');
+    const resultat = await envoiAdmin<{ message?: string }>(`/api/admin/corbeille?id=${encodeURIComponent(entree.id)}`, 'DELETE');
     if (resultat.ok) {
       setConfirmation(null);
-      setAnnonce({ ton: 'succes', texte: 'Supprimé définitivement de la corbeille.' });
+      setAnnonce({ ton: 'succes', texte: resultat.donnees?.message ?? 'Supprimé définitivement de la corbeille.' });
     } else {
       setAnnonce({ ton: 'echec', texte: resultat.message });
     }

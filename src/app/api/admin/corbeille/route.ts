@@ -18,7 +18,8 @@ import { isValidUUID, safeParseJSON } from '@/lib/validation';
  *         liste les autres, les plus récentes d'abord, par pages de 200 ;
  *         ?avant_le=...&avant_id=... donne la page qui suit cette entrée
  * POST    { id } remet une entrée en place, avec tout ce qui en dépend, ou rien
- * DELETE  ?id=... supprime définitivement une entrée, sans retour possible
+ * DELETE  ?id=... supprime définitivement une entrée, sans retour possible,
+ *         et pour un article ses commentaires et ses j'aime
  *
  * Les trois verbes exigent un compte administrateur : la corbeille contient
  * des articles premium retirés et la progression de lecteurs.
@@ -82,5 +83,5 @@ export async function DELETE(request: NextRequest) {
 
   const resultat = await supprimerDefinitivement(auth.serviceClient, id, auth.user.id);
   if (!resultat.ok) return NextResponse.json({ error: resultat.motif }, { status: resultat.statut });
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, message: resultat.message });
 }

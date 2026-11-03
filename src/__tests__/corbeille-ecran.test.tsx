@@ -59,8 +59,9 @@ describe('écran de la corbeille', () => {
   it('l’en-tête dit la durée, ce que deviennent les commentaires, et ce qui ne passe pas par la corbeille', () => {
     const lu = texte(renderToStaticMarkup(<EnTeteCorbeille />));
     expect(lu).toContain('Ils y restent 30 jours, jusqu’à la date affichée incluse (heure de Niamey), puis sont supprimés définitivement.');
-    expect(lu).toContain('Les commentaires et les j’aime d’un article ne partent pas avec lui');
+    expect(lu).toContain('Les commentaires et les j’aime d’un article restent en place tant qu’il est ici');
     expect(lu).toContain('« Article supprimé »');
+    expect(lu).toContain('Supprimé définitivement, ou au bout du délai, il les emporte avec lui.');
     expect(lu).toContain('jamais à moitié');
     expect(lu).toContain('Ne passent pas par la corbeille');
   });
@@ -108,6 +109,23 @@ describe('écran de la corbeille', () => {
     const lu = texte(ligne(true));
     expect(lu).toContain('Définitif : « Bourse » disparaîtra avec 3 leçons et 12 progressions de lecteurs, sans retour possible.');
     expect(lu).toContain('Annuler');
+    // Un article emporte ses commentaires et ses j'aime : c'est dit avant.
+    const article = texte(
+      renderToStaticMarkup(
+        <ul>
+          <LigneCorbeille
+            entree={{ ...ENTREE, table_origine: 'articles', titre: 'Le franc CFA', resume_dependants: {} }}
+            enCours={false}
+            confirmation
+            onRestaurer={sansAction}
+            onDemanderSuppression={sansAction}
+            onConfirmerSuppression={sansAction}
+            onAnnuler={sansAction}
+          />
+        </ul>,
+      ),
+    );
+    expect(article).toContain('Définitif : « Le franc CFA » disparaîtra avec ses commentaires et ses j’aime, sans retour possible.');
   });
 
   it('une liste incomplète dit combien d’entrées plus anciennes restent, et propose de les afficher', () => {

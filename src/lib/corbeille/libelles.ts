@@ -108,7 +108,8 @@ export interface Libelle {
 /**
  * Ce que la base efface avec un contenu, et donc ce que la corbeille garde,
  * dans l'ordre où l'écran le cite. Les commentaires et j'aime d'un article
- * n'y figurent pas : en production, ils survivent à l'article.
+ * n'y figurent pas : ils restent en place tant qu'il est dans la corbeille,
+ * et sont supprimés avec lui quand il la quitte pour de bon.
  */
 export type TableDependante = 'education_lessons' | 'learning_path_steps' | 'user_lesson_progress' | 'newsletter_events';
 

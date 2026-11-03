@@ -270,7 +270,7 @@ export function ArticlesManager() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Mettre cet article à la corbeille\u202f? Vous pourrez l’y remettre en place pendant 30\u00a0jours, depuis Contenu, Corbeille. Ses commentaires et ses j’aime ne partent pas avec lui\u00a0: ils restent en modération et le retrouvent s’il revient.')) return;
+    if (!confirm('Mettre cet article à la corbeille\u202f? Vous pourrez l’y remettre en place pendant 30\u00a0jours, depuis Contenu, Corbeille. Ses commentaires et ses j’aime restent en place et le retrouvent s’il revient\u00a0; s’il n’en revient pas, ils sont supprimés avec lui.')) return;
     setMessageListe('');
     const resultat = await envoiAdmin(`/api/admin/articles?id=${id}`, 'DELETE');
     if (!resultat.ok) {

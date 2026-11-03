@@ -29,6 +29,7 @@ import {
   purgerLaCorbeille,
   restaurerDepuisCorbeille,
   retirerLecteurDeLaCorbeille,
+  supprimerDefinitivement,
 } from '@/lib/corbeille';
 import { dernierJourRecuperable, jourANiamey } from '@/lib/corbeille/libelles';
 import { autoSlug } from '@/lib/newsletter/issues';
@@ -166,7 +167,7 @@ describe('installation et droits', () => {
     await appliquerMigration(db);
     await appliquerMigration(db);
     expect(await nombre('select count(*) as n from public.contenus_supprimes')).toBe(1);
-    expect(await nombre("select count(*) as n from pg_proc where proname like 'corbeille%'")).toBe(6);
+    expect(await nombre("select count(*) as n from pg_proc where proname like 'corbeille%'")).toBe(8);
   });
 
   it('s’applique en entier ou pas du tout (BEGIN … COMMIT)', async () => {
@@ -202,10 +203,22 @@ describe('installation et droits', () => {
               has_function_privilege($1, 'public.corbeille_retirer_lecteur(uuid)', 'execute') as retirer,
               has_function_privilege($1, 'public.corbeille_purger(integer)', 'execute') as purger,
               has_function_privilege($1, 'public.corbeille_inserer(text, jsonb, jsonb)', 'execute') as inserer,
-              has_function_privilege($1, 'public.corbeille_limite_purge(integer, timestamptz)', 'execute') as limite`,
+              has_function_privilege($1, 'public.corbeille_limite_purge(integer, timestamptz)', 'execute') as limite,
+              has_function_privilege($1, 'public.corbeille_vider(uuid)', 'execute') as vider,
+              has_function_privilege($1, 'public.corbeille_oublier_articles(uuid[])', 'execute') as oublier`,
       [role],
     );
-    expect(droits).toEqual({ table: false, mettre: false, restaurer: false, retirer: false, purger: false, inserer: false, limite: false });
+    expect(droits).toEqual({
+      table: false,
+      mettre: false,
+      restaurer: false,
+      retirer: false,
+      purger: false,
+      inserer: false,
+      limite: false,
+      vider: false,
+      oublier: false,
+    });
 
     for (const sql of [
       'select count(*) from public.contenus_supprimes',
@@ -215,6 +228,8 @@ describe('installation et droits', () => {
       'select public.corbeille_purger(30)',
       `select public.corbeille_inserer('articles', '[]', '{}')`,
       'select public.corbeille_limite_purge(30, now())',
+      `select public.corbeille_vider('${uuid(999)}')`,
+      `select public.corbeille_oublier_articles(array['${ARTICLE}']::uuid[])`,
     ]) {
       const erreur = await erreurDe(commeRole(db, role, () => db.query(sql)));
       expect(erreur.code).toBe('42501');
@@ -224,7 +239,7 @@ describe('installation et droits', () => {
     expect(await nombre('select count(*) as n from public.contenus_supprimes')).toBe(1);
   });
 
-  it('service_role lit et vide la corbeille, appelle les quatre fonctions, mais n’y écrit qu’à travers elles', async () => {
+  it('service_role lit la corbeille et appelle les cinq fonctions, mais n’y écrit ni ne la vide qu’à travers elles', async () => {
     const droits = await un<Json>(
       `select has_table_privilege('service_role', 'public.contenus_supprimes', 'select') as lit,
               has_table_privilege('service_role', 'public.contenus_supprimes', 'delete') as vide,
@@ -233,19 +248,23 @@ describe('installation et droits', () => {
               has_function_privilege('service_role', 'public.corbeille_restaurer(uuid)', 'execute') as restaurer,
               has_function_privilege('service_role', 'public.corbeille_retirer_lecteur(uuid)', 'execute') as retirer,
               has_function_privilege('service_role', 'public.corbeille_purger(integer)', 'execute') as purger,
+              has_function_privilege('service_role', 'public.corbeille_vider(uuid)', 'execute') as vider,
               has_function_privilege('service_role', 'public.corbeille_inserer(text, jsonb, jsonb)', 'execute') as inserer,
-              has_function_privilege('service_role', 'public.corbeille_limite_purge(integer, timestamptz)', 'execute') as limite`,
+              has_function_privilege('service_role', 'public.corbeille_limite_purge(integer, timestamptz)', 'execute') as limite,
+              has_function_privilege('service_role', 'public.corbeille_oublier_articles(uuid[])', 'execute') as oublier`,
     );
     expect(droits).toEqual({
       lit: true,
-      vide: true,
+      vide: false,
       ecrit: false,
       mettre: true,
       restaurer: true,
       retirer: true,
       purger: true,
+      vider: true,
       inserer: false,
       limite: false,
+      oublier: false,
     });
 
     const mise = await mettre('articles', ARTICLE);
@@ -265,11 +284,15 @@ describe('installation et droits', () => {
       commeRole(db, 'service_role', () => db.query(`update public.contenus_supprimes set titre = 'x'`)),
     );
     expect(modification.code).toBe('42501');
-
-    const vidage = await commeRole(db, 'service_role', () =>
-      db.query('delete from public.contenus_supprimes where id = $1', [mise.id_corbeille]),
+    // Un DELETE direct laisserait les commentaires de l'article derrière lui.
+    const vidageDirect = await erreurDe(
+      commeRole(db, 'service_role', () => db.query('delete from public.contenus_supprimes where id = $1', [mise.id_corbeille])),
     );
-    expect(vidage.affectedRows).toBe(1);
+    expect(vidageDirect.code).toBe('42501');
+
+    const vidage = await appeler('corbeille_vider', [mise.id_corbeille]);
+    expect(vidage).toMatchObject({ table: 'articles', id_origine: ARTICLE, titre: 'Le franc CFA' });
+    expect(await nombre('select count(*) as n from public.contenus_supprimes')).toBe(0);
   });
 
   it('RLS active sans politique, fonctions SECURITY DEFINER au chemin de recherche fixé et à l’attente de verrou bornée', async () => {
@@ -286,9 +309,11 @@ describe('installation et droits', () => {
       { proname: 'corbeille_inserer', prosecdef: false, proconfig: ['search_path=public, pg_temp'], proprietaire: 'proprietaire' },
       { proname: 'corbeille_limite_purge', prosecdef: false, proconfig: ['search_path=public, pg_temp'], proprietaire: 'proprietaire' },
       { proname: 'corbeille_mettre', prosecdef: true, proconfig: ['search_path=public, pg_temp', 'lock_timeout=5s'], proprietaire: 'proprietaire' },
+      { proname: 'corbeille_oublier_articles', prosecdef: false, proconfig: ['search_path=public, pg_temp'], proprietaire: 'proprietaire' },
       { proname: 'corbeille_purger', prosecdef: true, proconfig: ['search_path=public, pg_temp', 'lock_timeout=5s'], proprietaire: 'proprietaire' },
       { proname: 'corbeille_restaurer', prosecdef: true, proconfig: ['search_path=public, pg_temp', 'lock_timeout=5s'], proprietaire: 'proprietaire' },
       { proname: 'corbeille_retirer_lecteur', prosecdef: true, proconfig: ['search_path=public, pg_temp', 'lock_timeout=5s'], proprietaire: 'proprietaire' },
+      { proname: 'corbeille_vider', prosecdef: true, proconfig: ['search_path=public, pg_temp', 'lock_timeout=5s'], proprietaire: 'proprietaire' },
     ]);
   });
 
@@ -1006,6 +1031,61 @@ describe('lecteurs et conservation', () => {
   });
 });
 
+describe('quand un article quitte la corbeille pour de bon, ses commentaires et ses j’aime partent avec lui', () => {
+  const commentairesDe = (article: string) => nombre(`select count(*) as n from public.comments where article_id = '${article}'`);
+  const jaimeDe = (article: string) => nombre(`select count(*) as n from public.article_likes where article_id = '${article}'`);
+
+  it('une suppression définitive les efface, en une transaction, et seulement les siens', async () => {
+    await db.exec(`insert into public.comments (id, article_id, user_id, user_name, content) values ('${uuid(213)}', '${ARTICLE_2}', '${LECTRICE}', 'Lectrice', 'Ailleurs');
+      insert into public.article_likes (id, article_id, user_id) values ('${uuid(221)}', '${ARTICLE_2}', '${LECTRICE}');`);
+    const { id_corbeille } = await mettre('articles', ARTICLE);
+    // Pendant le séjour dans la corbeille : tout reste, pour le retour de l'article.
+    expect(await commentairesDe(ARTICLE)).toBe(3);
+    expect(await jaimeDe(ARTICLE)).toBe(1);
+
+    const resultat = await appeler('corbeille_vider', [id_corbeille]);
+
+    expect(resultat).toEqual({ table: 'articles', id_origine: ARTICLE, titre: 'Le franc CFA', commentaires: 3, jaime: 1 });
+    expect(await commentairesDe(ARTICLE)).toBe(0);
+    expect(await jaimeDe(ARTICLE)).toBe(0);
+    expect(await commentairesDe(ARTICLE_2)).toBe(1);
+    expect(await jaimeDe(ARTICLE_2)).toBe(1);
+    expect(await nombre('select count(*) as n from public.contenus_supprimes')).toBe(0);
+    // Une seconde fois : l'entrée n'y est plus.
+    expect((await refus(appeler('corbeille_vider', [id_corbeille]))).code).toBe('entree_introuvable');
+  });
+
+  it('vider une leçon ne touche à aucun commentaire', async () => {
+    const { id_corbeille } = await mettre('education_lessons', LECON);
+    expect(await appeler('corbeille_vider', [id_corbeille])).toMatchObject({ table: 'education_lessons', commentaires: 0, jaime: 0 });
+    expect(await nombre('select count(*) as n from public.comments')).toBe(3);
+  });
+
+  it('la purge efface ceux d’un article expiré, mais pas ceux d’un article recréé depuis sous le même identifiant', async () => {
+    await mettre('articles', ARTICLE);
+    await mettre('articles', ARTICLE_2);
+    await db.exec(`insert into public.comments (id, article_id, user_id, user_name, content) values ('${uuid(213)}', '${ARTICLE_2}', '${LECTRICE}', 'Lectrice', 'Sur le recréé');
+      insert into public.articles (id, title, slug, category) values ('${ARTICLE_2}', 'Recréé', 'recree', 'finance');
+      update public.contenus_supprimes set supprime_le = now() - interval '40 days';`);
+
+    const resultat = await appeler('corbeille_purger', [30]);
+
+    expect(resultat).toMatchObject({ commentaires_supprimes: 3, jaime_supprimes: 1 });
+    expect((resultat.purgees as Json[]).map((p) => p.id_origine).sort()).toEqual([ARTICLE, ARTICLE_2]);
+    expect(await commentairesDe(ARTICLE)).toBe(0);
+    expect(await jaimeDe(ARTICLE)).toBe(0);
+    // L'article vivant sous l'identifiant d'ARTICLE_2 garde son commentaire.
+    expect(await commentairesDe(ARTICLE_2)).toBe(1);
+  });
+
+  it('une entrée encore dans son délai ne fait rien perdre à ses lecteurs', async () => {
+    await mettre('articles', ARTICLE);
+    const resultat = await appeler('corbeille_purger', [30]);
+    expect(resultat).toMatchObject({ purgees: [], commentaires_supprimes: 0, jaime_supprimes: 0 });
+    expect(await commentairesDe(ARTICLE)).toBe(3);
+  });
+});
+
 describe('conservation : la date affichée est celle de la purge', () => {
   /** La purge, à l'instant donné, supprimerait-elle une entrée mise à la corbeille à supprimeLe ? */
   async function purgee(supprimeLe: string, instant: string): Promise<boolean> {
@@ -1214,6 +1294,27 @@ describe('les enveloppes TypeScript, sur la vraie base', () => {
     expect(await purgerLaCorbeille(service, 'tache-planifiee')).toEqual({ ok: false, purgees: 0, lecteursRetires: 0 });
     expect(Sentry.captureException).toHaveBeenCalledTimes(2);
     expect(JSON.stringify(vi.mocked(Sentry.captureException).mock.calls)).toContain('42883');
+  });
+
+  it('suppriment définitivement un article avec ses commentaires, le disent, et le notent au journal', async () => {
+    const service = clientDeService(db);
+    const mise = await mettreALaCorbeille(service, 'articles', ARTICLE, ADMIN);
+    vi.clearAllMocks();
+
+    const resultat = await supprimerDefinitivement(service, mise.ok ? mise.idCorbeille : '', ADMIN);
+
+    expect(resultat).toEqual({
+      ok: true,
+      message: typographieFr('Élément supprimé définitivement : « Le franc CFA », avec 3\u00a0commentaires et 1\u00a0j’aime.'),
+    });
+    expect(logAuditEvent).toHaveBeenCalledWith(ADMIN, 'corbeille.suppression_definitive', 'articles', ARTICLE, {
+      titre: 'Le franc CFA',
+      idCorbeille: mise.ok ? mise.idCorbeille : '',
+      commentaires: 3,
+      jaime: 1,
+    });
+    expect(await supprimerDefinitivement(service, mise.ok ? mise.idCorbeille : '', ADMIN)).toMatchObject({ ok: false, statut: 404 });
+    expect(Sentry.captureException).not.toHaveBeenCalled();
   });
 
   it('annoncent le numéro neuf d’un brouillon dont le numéro a été repris', async () => {

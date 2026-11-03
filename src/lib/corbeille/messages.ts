@@ -183,6 +183,27 @@ const CHEMIN_PUBLIC: Partial<Record<TableCorbeille, string>> = {
   strategic_enterprises: '/entreprises/',
 };
 
+/** Pourquoi une entrée n'a pas pu être supprimée définitivement (corbeille_vider). */
+export function echecSuppressionDefinitive(lue: ErreurLue): Echec {
+  if (lue.code === null) {
+    return echec(
+      503,
+      'La réponse de la base de données s’est perdue : l’élément a peut-être été supprimé. Rechargez la corbeille pour le vérifier.',
+    );
+  }
+  if (corbeilleAbsente(lue)) return echec(503, `${PAS_INSTALLEE} Rien n’a été supprimé.`);
+  if (conflitPassager(lue)) {
+    return echec(409, 'Cet élément est en cours de modification ailleurs : rien n’a été supprimé. Réessayez dans un instant.');
+  }
+  if (lue.refus === 'entree_introuvable') {
+    return echec(
+      404,
+      'Cet élément n’est plus dans la corbeille : il a peut-être déjà été remis en place, ou supprimé définitivement.',
+    );
+  }
+  return echec(500, 'La suppression définitive a échoué : l’élément est toujours dans la corbeille.', true);
+}
+
 /** Pourquoi une entrée n'a pas pu être remise en place. */
 export function echecRestauration(lue: ErreurLue): Echec {
   const rien = 'Rien n’a été remis en place.';
@@ -309,6 +330,22 @@ export function remarqueEnFrancais(remarque: unknown, titre: string, table: Tabl
 }
 
 /** « « Bourse » est de nouveau en place, avec 3 leçons et 12 progressions de lecteurs. » */
+const COMMENTAIRE = { un: 'commentaire', plusieurs: 'commentaires' };
+const JAIME = { un: 'j’aime', plusieurs: 'j’aime' };
+
+/**
+ * « Élément supprimé définitivement : « Le franc CFA », avec 3 commentaires et
+ * 1 j’aime. » Le mot « élément » porte l'accord : le titre peut être celui
+ * d'une leçon comme d'un article.
+ */
+export function messageSuppressionDefinitive(titre: string, commentaires: number, jaime: number): string {
+  const avec = [
+    ...(commentaires > 0 ? [compter(commentaires, COMMENTAIRE)] : []),
+    ...(jaime > 0 ? [compter(jaime, JAIME)] : []),
+  ];
+  return typographieFr(`Élément supprimé définitivement : ${guillemets(titre)}${avec.length > 0 ? `, avec ${listeFr(avec)}` : ''}.`);
+}
+
 export function messageRestauration(titre: string, remis: Record<string, unknown>): string {
   const avec = resumerDependants(remis);
   return typographieFr(`${guillemets(titre)} est de nouveau en place${avec ? `, avec ${avec}` : ''}.`);

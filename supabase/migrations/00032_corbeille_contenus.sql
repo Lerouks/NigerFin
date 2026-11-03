@@ -27,11 +27,13 @@
 --       dépend, ou rien du tout, puis retire l'entrée ;
 --   corbeille_retirer_lecteur(lecteur)   retire d'un coup les lignes d'un
 --       lecteur de toutes les entrées, quand il supprime son compte ;
+--   corbeille_vider(entree)              supprime définitivement une
+--       entrée, et pour un article ses commentaires et ses j'aime ;
 --   corbeille_purger(jours)              supprime les entrées dont le
 --       dernier jour récupérable est passé (le jour de leur mise à la
 --       corbeille plus N jours, 30 au minimum, en date de Niamey : celui que
---       l'écran affiche) et les lignes des lecteurs dont le compte n'existe
---       plus.
+--       l'écran affiche), avec les commentaires et les j'aime de leurs
+--       articles, et les lignes des lecteurs dont le compte n'existe plus.
 --
 -- Ce qui est copié avec un contenu : SEULEMENT ce que la base de production
 -- efface avec lui, d'après ses clés étrangères réelles (relevées en lecture
@@ -43,10 +45,15 @@
 --   article, fiche entreprise, section de page légale : rien d'autre.
 -- Les commentaires et les j'aime d'un article ne sont PAS copiés : en
 -- production, comments.article_id et article_likes.article_id sont du texte
--- sans clé étrangère. Ils survivent à l'article (la modération les montre sous
--- « Article supprimé ») et le retrouvent s'il revient. La première version les
--- copiait, et faisait donc revenir des commentaires que la modération avait
--- supprimés entre-temps. Si une clé étrangère, un déclencheur ou une règle de
+-- sans clé étrangère. Ils restent en place tant que l'article est dans la
+-- corbeille (la modération les montre sous « Article supprimé ») et il les
+-- retrouve s'il revient. La première version les copiait, et faisait donc
+-- revenir des commentaires que la modération avait supprimés entre-temps.
+-- Quand l'article quitte la corbeille pour de bon, par la purge ou par une
+-- suppression définitive, ils sont supprimés avec lui, dans la même
+-- transaction : ce sont des données de lecteurs (nom affiché, identifiant,
+-- texte), que rien ne justifie plus de garder une fois le retour de
+-- l'article impossible. Si une clé étrangère, un déclencheur ou une règle de
 -- suppression venait un jour à effacer autre chose avec un contenu,
 -- corbeille_mettre refuserait la suppression plutôt que de perdre ces lignes
 -- en silence.
@@ -123,11 +130,12 @@ ALTER TABLE public.contenus_supprimes ENABLE ROW LEVEL SECURITY;
 -- des lecteurs, et pourrait y écrire. La RLS sans politique ne suffit pas à
 -- s'en remettre : c'est le piège de la migration 00031, où un droit accordé au
 -- niveau de la table a suffi à tout ouvrir.
--- service_role ne reçoit que la lecture (la liste) et la suppression (la
--- suppression définitive) : toute écriture passe par les fonctions ci-dessous,
--- qui seules savent garder une entrée cohérente.
+-- service_role ne reçoit que la lecture (la liste) : toute écriture, la
+-- suppression définitive comprise, passe par les fonctions ci-dessous, qui
+-- seules savent garder une entrée cohérente et effacer avec elle ce qui doit
+-- partir.
 REVOKE ALL ON public.contenus_supprimes FROM PUBLIC, anon, authenticated, service_role;
-GRANT SELECT, DELETE ON public.contenus_supprimes TO service_role;
+GRANT SELECT ON public.contenus_supprimes TO service_role;
 
 -- Chaque fonction publique attend un verrou 5 secondes au plus
 -- (lock_timeout) : derrière une ligne verrouillée trop longtemps, elle
@@ -851,6 +859,36 @@ BEGIN
 END;
 $fonction$;
 
+-- Fonction interne : les commentaires et les j'aime d'articles qui quittent
+-- la corbeille pour de bon. Ils sont restés en place pour que l'article les
+-- retrouve s'il revenait ; une fois ce retour impossible, ce ne sont plus que
+-- des données de lecteurs (nom affiché, identifiant, texte) rattachées à un
+-- article qui n'existera plus, et que /api/comments servirait encore. Un
+-- article recréé depuis sous le même identifiant garde les siens.
+CREATE OR REPLACE FUNCTION public.corbeille_oublier_articles(p_articles uuid[])
+RETURNS jsonb
+LANGUAGE plpgsql
+SET search_path = public, pg_temp
+AS $fonction$
+DECLARE
+  v_articles text[];
+  v_commentaires integer := 0;
+  v_jaime integer := 0;
+BEGIN
+  SELECT coalesce(array_agg(a::text ORDER BY a), '{}')
+    INTO v_articles
+    FROM unnest(coalesce(p_articles, '{}')) AS a
+   WHERE NOT EXISTS (SELECT 1 FROM public.articles AS x WHERE x.id = a);
+  IF cardinality(v_articles) > 0 THEN
+    DELETE FROM public.comments WHERE article_id = ANY (v_articles);
+    GET DIAGNOSTICS v_commentaires = ROW_COUNT;
+    DELETE FROM public.article_likes WHERE article_id = ANY (v_articles);
+    GET DIAGNOSTICS v_jaime = ROW_COUNT;
+  END IF;
+  RETURN jsonb_build_object('commentaires', v_commentaires, 'jaime', v_jaime);
+END;
+$fonction$;
+
 -- Fonction interne : l'instant avant lequel une entrée a fait son temps.
 -- Chaque entrée reste récupérable jusqu'à la fin du jour que l'écran affiche :
 -- le jour de sa mise à la corbeille plus p_jours, en date de Niamey
@@ -885,6 +923,8 @@ DECLARE
   v_orphelins uuid[];
   v_lecteur uuid;
   v_retires integer := 0;
+  v_articles uuid[];
+  v_oublies jsonb;
 BEGIN
   -- Trente jours au moins : c'est la durée annoncée à l'écran. Une erreur
   -- d'appel (0, null, un nombre négatif) ne peut pas vider la corbeille, et
@@ -917,7 +957,8 @@ BEGIN
     ORDER BY id
       FOR UPDATE;
 
-  -- 3. Les entrées dont le dernier jour récupérable est passé.
+  -- 3. Les entrées dont le dernier jour récupérable est passé, et avec un
+  --    article, ses commentaires et ses j'aime : il ne reviendra plus.
   WITH parties AS (
     DELETE FROM public.contenus_supprimes
      WHERE supprime_le < v_limite
@@ -928,9 +969,11 @@ BEGIN
            'id_origine', id_origine,
            'supprime_le', supprime_le,
            'dependants', resume_dependants
-         ) ORDER BY supprime_le, id_origine), '[]'::jsonb)
-    INTO v_purgees
+         ) ORDER BY supprime_le, id_origine), '[]'::jsonb),
+         coalesce(array_agg(id_origine) FILTER (WHERE table_origine = 'articles'), '{}')
+    INTO v_purgees, v_articles
     FROM parties;
+  v_oublies := public.corbeille_oublier_articles(v_articles);
 
   -- 4. Les lignes des lecteurs disparus, dans les entrées qui restent.
   FOREACH v_lecteur IN ARRAY v_orphelins LOOP
@@ -942,7 +985,44 @@ BEGIN
   RETURN jsonb_build_object(
     'duree_jours', p_jours,
     'purgees', v_purgees,
-    'lecteurs_retires', v_retires
+    'lecteurs_retires', v_retires,
+    'commentaires_supprimes', v_oublies -> 'commentaires',
+    'jaime_supprimes', v_oublies -> 'jaime'
+  );
+END;
+$fonction$;
+
+-- Supprime définitivement une entrée, sans retour possible. Pour un article,
+-- ses commentaires et ses j'aime partent avec elle, dans la même transaction
+-- (voir corbeille_oublier_articles). Remplace le DELETE direct que la clé de
+-- service faisait sur la table, et qu'elle n'a plus le droit de faire.
+CREATE OR REPLACE FUNCTION public.corbeille_vider(p_entree uuid)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+SET lock_timeout = '5s'
+AS $fonction$
+DECLARE
+  v_entree public.contenus_supprimes%ROWTYPE;
+  v_oublies jsonb := jsonb_build_object('commentaires', 0, 'jaime', 0);
+BEGIN
+  -- Le DELETE verrouille l'entrée : une restauration simultanée attend, puis
+  -- ne la trouve plus ; une restauration arrivée avant passe d'abord, et
+  -- l'entrée n'existe alors plus ici.
+  DELETE FROM public.contenus_supprimes WHERE id = p_entree RETURNING * INTO v_entree;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = 'corbeille:entree_introuvable';
+  END IF;
+  IF v_entree.table_origine = 'articles' THEN
+    v_oublies := public.corbeille_oublier_articles(ARRAY[v_entree.id_origine]);
+  END IF;
+  RETURN jsonb_build_object(
+    'table', v_entree.table_origine,
+    'id_origine', v_entree.id_origine,
+    'titre', v_entree.titre,
+    'commentaires', v_oublies -> 'commentaires',
+    'jaime', v_oublies -> 'jaime'
   );
 END;
 $fonction$;
@@ -952,19 +1032,22 @@ $fonction$;
 -- visiteur pourrait vider ou restaurer la corbeille avec la clé publique.
 REVOKE ALL ON FUNCTION public.corbeille_inserer(text, jsonb, jsonb) FROM PUBLIC, anon, authenticated, service_role;
 REVOKE ALL ON FUNCTION public.corbeille_limite_purge(integer, timestamptz) FROM PUBLIC, anon, authenticated, service_role;
+REVOKE ALL ON FUNCTION public.corbeille_oublier_articles(uuid[]) FROM PUBLIC, anon, authenticated, service_role;
 REVOKE ALL ON FUNCTION public.corbeille_mettre(text, uuid, uuid) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.corbeille_restaurer(uuid) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.corbeille_retirer_lecteur(uuid) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.corbeille_purger(integer) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.corbeille_vider(uuid) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.corbeille_mettre(text, uuid, uuid) TO service_role;
 GRANT EXECUTE ON FUNCTION public.corbeille_restaurer(uuid) TO service_role;
 GRANT EXECUTE ON FUNCTION public.corbeille_retirer_lecteur(uuid) TO service_role;
 GRANT EXECUTE ON FUNCTION public.corbeille_purger(integer) TO service_role;
+GRANT EXECUTE ON FUNCTION public.corbeille_vider(uuid) TO service_role;
 
 COMMENT ON TABLE public.contenus_supprimes IS
-  'Corbeille : copie d''un contenu supprimé et de ce que la base a effacé avec lui. Une entrée par contenu, gardée jusqu''au soir du trentième jour, heure de Niamey. Écrite uniquement par les fonctions corbeille_* ; lisible par la seule clé de service.';
+  'Corbeille : copie d''un contenu supprimé et de ce que la base a effacé avec lui. Une entrée par contenu, gardée jusqu''au soir du trentième jour, heure de Niamey. Écrite et vidée uniquement par les fonctions corbeille_* ; lisible par la seule clé de service.';
 COMMENT ON COLUMN public.contenus_supprimes.dependants IS
-  'Lignes que la base efface avec le contenu, par table. Les commentaires et j''aime d''un article n''en font pas partie : en production, ils survivent à l''article.';
+  'Lignes que la base efface avec le contenu, par table. Les commentaires et j''aime d''un article n''en font pas partie : ils restent en place tant qu''il est dans la corbeille, et sont supprimés quand il la quitte pour de bon.';
 COMMENT ON COLUMN public.contenus_supprimes.lecteurs IS
   'Comptes de lecteurs présents dans dependants : leurs lignes sont retirées quand ils suppriment leur compte.';
 COMMENT ON FUNCTION public.corbeille_mettre(text, uuid, uuid) IS
@@ -977,6 +1060,10 @@ COMMENT ON FUNCTION public.corbeille_purger(integer) IS
   'Supprime les entrées dont le dernier jour récupérable (jour de la suppression plus N jours, 30 au minimum, en date de Niamey) est passé, et les lignes des lecteurs disparus. service_role uniquement.';
 COMMENT ON FUNCTION public.corbeille_limite_purge(integer, timestamptz) IS
   'Interne à la corbeille : minuit, heure de Niamey, du jour (date de Niamey de p_instant) - p_jours. Une entrée antérieure a fait son temps.';
+COMMENT ON FUNCTION public.corbeille_vider(uuid) IS
+  'Supprime définitivement une entrée, et pour un article ses commentaires et ses j''aime. service_role uniquement.';
+COMMENT ON FUNCTION public.corbeille_oublier_articles(uuid[]) IS
+  'Interne à la corbeille : supprime les commentaires et j''aime d''articles qui ne reviendront plus.';
 COMMENT ON FUNCTION public.corbeille_inserer(text, jsonb, jsonb) IS
   'Interne à la corbeille : aucun rôle ne peut l''appeler directement.';
 
@@ -991,9 +1078,8 @@ COMMIT;
 --   has_table_privilege('authenticated', 'public.contenus_supprimes',
 --     'select, insert, update, delete, truncate, references, trigger')     as authenticated,     -- false
 --   has_table_privilege('service_role', 'public.contenus_supprimes', 'select') as service_lit,   -- true
---   has_table_privilege('service_role', 'public.contenus_supprimes', 'delete') as service_vide,  -- true
 --   has_table_privilege('service_role', 'public.contenus_supprimes',
---     'insert, update, truncate')                                          as service_ecrit,     -- false
+--     'insert, update, delete, truncate')                                  as service_ecrit,     -- false
 --   (select relrowsecurity from pg_class
 --     where oid = 'public.contenus_supprimes'::regclass)                   as rls,               -- true
 --   (select count(*) from pg_policies
@@ -1005,20 +1091,23 @@ COMMIT;
 --          'public.corbeille_restaurer(uuid)',
 --          'public.corbeille_retirer_lecteur(uuid)',
 --          'public.corbeille_purger(integer)',
+--          'public.corbeille_vider(uuid)',
 --          'public.corbeille_inserer(text, jsonb, jsonb)',
---          'public.corbeille_limite_purge(integer, timestamptz)']) as f,
+--          'public.corbeille_limite_purge(integer, timestamptz)',
+--          'public.corbeille_oublier_articles(uuid[])']) as f,
 --        unnest(array['anon', 'authenticated', 'service_role']) as r
 --  order by f, r;
--- Attendu : peut = false pour anon et authenticated sur les six fonctions ;
--- true pour service_role sur les quatre premières ; false pour service_role
--- sur corbeille_inserer et corbeille_limite_purge (fonctions internes).
+-- Attendu : peut = false pour anon et authenticated sur les huit fonctions ;
+-- true pour service_role sur les cinq premières ; false pour service_role sur
+-- les trois dernières (fonctions internes).
 --
 -- select proname, prosecdef, proconfig from pg_proc
 --  where pronamespace = 'public'::regnamespace and proname like 'corbeille%'
 --  order by proname;
--- Attendu : prosecdef = true pour les quatre fonctions publiques, avec
--- proconfig = {"search_path=public, pg_temp",lock_timeout=5s} ; pour
--- corbeille_inserer et corbeille_limite_purge, prosecdef = false et
+-- Attendu : prosecdef = true pour les cinq fonctions publiques, avec
+-- proconfig = {"search_path=public, pg_temp",lock_timeout=5s} ; pour les
+-- trois fonctions internes (corbeille_inserer, corbeille_limite_purge,
+-- corbeille_oublier_articles), prosecdef = false et
 -- proconfig = {"search_path=public, pg_temp"}.
 --
 -- ---------------------------------------------------------------------------
@@ -1035,7 +1124,9 @@ COMMIT;
 --    garder une copie (select * from public.contenus_supprimes), avant :
 --
 -- BEGIN;
+-- DROP FUNCTION IF EXISTS public.corbeille_vider(uuid);
 -- DROP FUNCTION IF EXISTS public.corbeille_purger(integer);
+-- DROP FUNCTION IF EXISTS public.corbeille_oublier_articles(uuid[]);
 -- DROP FUNCTION IF EXISTS public.corbeille_limite_purge(integer, timestamptz);
 -- DROP FUNCTION IF EXISTS public.corbeille_retirer_lecteur(uuid);
 -- DROP FUNCTION IF EXISTS public.corbeille_restaurer(uuid);

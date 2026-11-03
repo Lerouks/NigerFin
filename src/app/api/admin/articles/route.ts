@@ -208,8 +208,9 @@ export async function PUT(req: NextRequest) {
 // migration 00032) : copié puis supprimé, ou rien du tout. Ses commentaires et
 // ses j'aime ne partent pas avec lui : en production, ils n'ont pas de clé
 // étrangère vers l'article, restent en modération sous « Article supprimé » et
-// le retrouvent s'il revient. Les pages sont rafraîchies par la corbeille, avec
-// la même liste qu'à la restauration.
+// le retrouvent s'il revient. Quand il quitte la corbeille pour de bon (purge
+// ou suppression définitive), ils sont supprimés avec lui. Les pages sont
+// rafraîchies par la corbeille, avec la même liste qu'à la restauration.
 export async function DELETE(req: NextRequest) {
   const auth = await requireAdmin(req);
   if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

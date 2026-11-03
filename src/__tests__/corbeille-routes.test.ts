@@ -154,13 +154,21 @@ describe('route de la corbeille', () => {
     expect(factice.from).not.toHaveBeenCalled();
   });
 
-  it('DELETE supprime définitivement, puis répond 404 pour une entrée déjà partie', async () => {
-    const pleine = clientFactice({ liste: { data: [{ table_origine: 'articles', id_origine: uuid(100), titre: 'A' }], error: null } });
+  it('DELETE supprime définitivement par corbeille_vider, puis répond 404 pour une entrée déjà partie', async () => {
+    const pleine = clientFactice({
+      rpc: { corbeille_vider: { data: { table: 'articles', id_origine: uuid(100), titre: 'A', commentaires: 2, jaime: 0 } } },
+    });
     connecter(pleine.service);
     const { DELETE } = await routeCorbeille();
-    expect(definie(await DELETE(requete(`/api/admin/corbeille?id=${uuid(900)}`, { method: 'DELETE' }))).status).toBe(200);
+    const reponse = definie(await DELETE(requete(`/api/admin/corbeille?id=${uuid(900)}`, { method: 'DELETE' })));
+    expect(reponse.status).toBe(200);
+    expect(String((await reponse.json()).message).replace(/[\u00a0\u202f]/g, ' ')).toMatch(/« A », avec 2 commentaires\.$/);
+    expect(pleine.rpc).toHaveBeenCalledWith('corbeille_vider', { p_entree: uuid(900) });
+    expect(pleine.from).not.toHaveBeenCalled();
 
-    const vide = clientFactice({ liste: { data: [], error: null } });
+    const vide = clientFactice({
+      rpc: { corbeille_vider: { error: { code: 'P0001', message: 'corbeille:entree_introuvable', details: null } } },
+    });
     connecter(vide.service);
     expect(definie(await DELETE(requete(`/api/admin/corbeille?id=${uuid(900)}`, { method: 'DELETE' }))).status).toBe(404);
   });

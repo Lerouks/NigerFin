@@ -15,8 +15,10 @@ import {
   detailPourSentry,
   echecMiseALaCorbeille,
   echecRestauration,
+  echecSuppressionDefinitive,
   lireErreur,
   messageRestauration,
+  messageSuppressionDefinitive,
   remarquesEnFrancais,
   type Echec,
   type ErreurLue,
@@ -233,63 +235,43 @@ export async function restaurerDepuisCorbeille(
 
 /**
  * Vide une entrée : le contenu et ce qui l'accompagnait sont perdus pour de
- * bon. D'où la trace au journal : qui a vidé quoi, et quand.
+ * bon, et pour un article ses commentaires et ses j'aime aussi, dans la même
+ * transaction (corbeille_vider). D'où la trace au journal : qui a vidé quoi,
+ * et quand.
  */
 export async function supprimerDefinitivement(
   service: SupabaseClient,
   idEntree: string,
   parQui: string,
-): Promise<{ ok: true } | Echec> {
-  const { data, error } = await service
-    .from('contenus_supprimes')
-    .delete()
-    .eq('id', idEntree)
-    .select('table_origine, id_origine, titre');
+): Promise<{ ok: true; message: string } | Echec> {
+  const { data, error } = await service.rpc('corbeille_vider', { p_entree: idEntree });
   if (error) {
     const lue = lireErreur(error);
-    if (lue.code === null) {
-      return {
-        ok: false,
-        statut: 503,
-        inattendu: false,
-        motif: typographieFr(
-          'La réponse de la base de données s’est perdue : l’élément a peut-être été supprimé. Rechargez la corbeille pour le vérifier.',
-        ),
-      };
-    }
-    if (corbeilleAbsente(lue)) {
-      return {
-        ok: false,
-        statut: 503,
-        inattendu: false,
-        motif: typographieFr('La corbeille n’est pas encore installée sur la base de données (migration 00032).'),
-      };
-    }
-    signaler('corbeille-suppression-definitive', lue, { idEntree });
+    const resultat = echecSuppressionDefinitive(lue);
+    if (resultat.inattendu) signaler('corbeille-suppression-definitive', lue, { idEntree });
+    return resultat;
+  }
+  const reponse = objet(data);
+  const table = texte(reponse.table);
+  if (!table) {
+    signaler('corbeille-suppression-definitive', null, { idEntree, reponse: typeof data });
     return {
       ok: false,
       statut: 500,
       inattendu: true,
-      motif: typographieFr('La suppression définitive a échoué : l’élément est toujours dans la corbeille.'),
+      motif: typographieFr('L’élément est supprimé définitivement, mais la réponse de la base est illisible. Rechargez la corbeille.'),
     };
   }
-  const supprimee = objet(Array.isArray(data) ? data[0] : null);
-  if (!texte(supprimee.table_origine)) {
-    return {
-      ok: false,
-      statut: 404,
-      inattendu: false,
-      motif: typographieFr('Cet élément n’est plus dans la corbeille : il a peut-être déjà été remis en place, ou supprimé définitivement.'),
-    };
-  }
-  await journaliser(
-    parQui,
-    'corbeille.suppression_definitive',
-    String(supprimee.table_origine),
-    String(supprimee.id_origine ?? ''),
-    { titre: supprimee.titre ?? null, idCorbeille: idEntree },
-  );
-  return { ok: true };
+  const titre = texte(reponse.titre) ?? 'Sans titre';
+  const commentaires = typeof reponse.commentaires === 'number' ? reponse.commentaires : 0;
+  const jaime = typeof reponse.jaime === 'number' ? reponse.jaime : 0;
+  await journaliser(parQui, 'corbeille.suppression_definitive', table, texte(reponse.id_origine) ?? '', {
+    titre,
+    idCorbeille: idEntree,
+    commentaires,
+    jaime,
+  });
+  return { ok: true, message: messageSuppressionDefinitive(titre, commentaires, jaime) };
 }
 
 /** Une page de la liste : l'écran propose ensuite « Afficher les suivantes ». */
@@ -427,6 +409,9 @@ export async function purgerLaCorbeille(
         duree_jours: DUREE_CONSERVATION_JOURS,
         entrees_supprimees: purgees.length,
         lecteurs_retires: lecteursRetires,
+        // Avec les articles partis : leurs commentaires et j'aime, comptés, jamais montrés.
+        commentaires_supprimes: typeof reponse.commentaires_supprimes === 'number' ? reponse.commentaires_supprimes : 0,
+        jaime_supprimes: typeof reponse.jaime_supprimes === 'number' ? reponse.jaime_supprimes : 0,
         detail: purgees.map((p) => {
           const e = objet(p);
           return { table: e.table, id_origine: e.id_origine, supprime_le: e.supprime_le, dependants: e.dependants };

@@ -183,6 +183,25 @@ describe('messages de la restauration', () => {
     }
   });
 
+  it('une restauration qu’un déclencheur ou une règle fausserait est refusée, nomme la table, et part vers Sentry', () => {
+    const echec = echecRestauration(
+      lireErreur(
+        refus('declencheur_inconnu', {
+          titre: 'Le PER',
+          table: 'education_lessons',
+          table_touchee: 'user_lesson_progress',
+          declencheurs: ['déclencheur public.user_lesson_progress (oublier_note)'],
+        }),
+      ),
+    );
+    expect(echec).toMatchObject({ statut: 409, inattendu: true });
+    expect(lisible(echec.motif)).toBe(
+      'Impossible de remettre « Le PER » en place : un déclencheur ou une règle de la table des progressions de lecteurs pourrait modifier, détourner ou écarter sans erreur ce qui serait remis en place. Rien n’a été remis en place. L’élément reste dans la corbeille, intact : la base doit d’abord être corrigée.',
+    );
+    expect(echec.motif).toBe(typographieFr(echec.motif));
+    expect(lisible(echec.motif)).not.toMatch(/supprimer définitivement|suppression définitive/i);
+  });
+
   it('une réponse perdue invite à vérifier, une erreur inconnue part vers Sentry', () => {
     expect(echecRestauration(lireErreur({ message: 'fetch failed' }))).toMatchObject({ statut: 503, inattendu: false });
     expect(lisible(echecRestauration(lireErreur({ message: 'fetch failed' })).motif)).toMatch(/a peut-être eu lieu/);

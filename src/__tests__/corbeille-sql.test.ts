@@ -10,6 +10,7 @@ import {
   commeRole,
   erreurDe,
   MIGRATION,
+  REPLIQUE,
   uuid,
   type Base,
   type Role,
@@ -979,7 +980,7 @@ describe('restauration', () => {
     expect(await entreeDe('education_categories', CATEGORIE)).toEqual(entreeAvant);
   });
 
-  it('un déclencheur BEFORE INSERT qui écarte une progression sans erreur : refus, rien n’est remis, l’entrée reste intacte', async () => {
+  it('un déclencheur BEFORE INSERT qui écarte une progression sans erreur : refus avant toute écriture, l’entrée reste intacte', async () => {
     const { id_corbeille } = await mettre('education_lessons', LECON);
     const entreeAvant = await entreeDe('education_lessons', LECON);
     await db.exec(`create function public.ecarter() returns trigger language plpgsql as $$
@@ -988,8 +989,13 @@ describe('restauration', () => {
 
     const { code, detail } = await refus(restaurer(String(id_corbeille)));
 
-    expect(code).toBe('remise_incomplete');
-    expect(detail).toEqual({ titre: 'Le PER', table: 'education_lessons', table_touchee: 'user_lesson_progress', attendues: 2, remises: 1 });
+    expect(code).toBe('declencheur_inconnu');
+    expect(detail).toEqual({
+      titre: 'Le PER',
+      table: 'education_lessons',
+      table_touchee: 'user_lesson_progress',
+      declencheurs: ['déclencheur public.user_lesson_progress (ecarter)'],
+    });
     expect(await ligne('education_lessons', LECON)).toBeNull();
     expect(await nombre(`select count(*) as n from public.learning_path_steps where lesson_id = '${LECON}'`)).toBe(0);
     expect(await entreeDe('education_lessons', LECON)).toEqual(entreeAvant);
@@ -1002,8 +1008,13 @@ describe('restauration', () => {
 
     const { code, detail } = await refus(restaurer(String(id_corbeille)));
 
-    expect(code).toBe('remise_incomplete');
-    expect(detail).toEqual({ titre: 'CGU : Article 3', table: 'legal_sections', table_touchee: 'legal_sections', attendues: 1, remises: 0 });
+    expect(code).toBe('declencheur_inconnu');
+    expect(detail).toEqual({
+      titre: 'CGU : Article 3',
+      table: 'legal_sections',
+      table_touchee: 'legal_sections',
+      declencheurs: ['règle public.legal_sections (ignorer)'],
+    });
     expect(await entreeDe('legal_sections', SECTION)).toEqual(entreeAvant);
   });
 
@@ -1016,6 +1027,268 @@ describe('restauration', () => {
     await restaurer(String(id_corbeille));
 
     expect(await ligne('legal_sections', SECTION)).toEqual(avant);
+  });
+});
+
+/**
+ * Les déclencheurs non internes des tables de la réplique, tels que relevés
+ * en production, en lecture seule (BEGIN READ ONLY), le 3 novembre 2026 :
+ * table, nom, moment, niveau, événements, état, fonction et empreinte md5 du
+ * corps de la fonction. Aucune règle (pg_rewrite) sur ces tables.
+ */
+const DECLENCHEURS_PRODUCTION = [
+  ['articles', 'articles_updated_at', 'BEFORE', 'ROW', 'UPDATE', 'O', 'public.update_articles_updated_at', '301A884953D37769916294BB60562E05'],
+  ['learning_paths', 'trg_learning_paths_updated_at', 'BEFORE', 'ROW', 'UPDATE', 'O', 'public.set_updated_at', '9B1889F56258BF9D6554213C05019C76'],
+  ['newsletter_issues', 'newsletter_issues_assign_number', 'BEFORE', 'ROW', 'INSERT', 'O', 'public.newsletter_issues_assign_number', 'FDDE29B529589DA9137107DC786ACE08'],
+  ['newsletter_issues', 'newsletter_issues_set_updated_at', 'BEFORE', 'ROW', 'UPDATE', 'O', 'public.newsletter_set_updated_at', '602FD0DB87282E9F18696BD3CAAE794D'],
+  ['newsletter_subscribers', 'newsletter_subscribers_set_updated_at', 'BEFORE', 'ROW', 'UPDATE', 'O', 'public.newsletter_set_updated_at', '602FD0DB87282E9F18696BD3CAAE794D'],
+  ['user_lesson_progress', 'trg_user_lesson_progress_updated_at', 'BEFORE', 'ROW', 'UPDATE', 'O', 'public.set_updated_at', '9B1889F56258BF9D6554213C05019C76'],
+];
+
+describe('restauration : ce qu’un déclencheur ou une règle ferait de la copie', () => {
+  /** Empreinte exacte d'une entrée : la moindre modification la change. */
+  async function empreinteDe(entree: string): Promise<string> {
+    return (await un<{ h: string }>('select md5(c::text) as h from public.contenus_supprimes c where c.id = $1', [entree]))?.h ?? 'absente';
+  }
+
+  it('F2 a : un déclencheur BEFORE INSERT qui vide le corps de l’article : refus, entrée identique, rien d’écrit ; sans lui, l’article revient intact', async () => {
+    const avant = await ligne('articles', ARTICLE);
+    const entree = String((await mettre('articles', ARTICLE)).id_corbeille);
+    const empreinte = await empreinteDe(entree);
+    await db.exec(`create function public.vider_corps() returns trigger language plpgsql as $$ begin new.body := ''; return new; end $$;
+      create trigger vider_corps before insert on public.articles for each row execute function public.vider_corps();`);
+
+    const { code, detail } = await refus(restaurer(entree));
+
+    expect(code).toBe('declencheur_inconnu');
+    expect(detail).toEqual({
+      titre: 'Le franc CFA',
+      table: 'articles',
+      table_touchee: 'articles',
+      declencheurs: ['déclencheur public.articles (vider_corps)'],
+    });
+    expect(await empreinteDe(entree)).toBe(empreinte);
+    expect(await ligne('articles', ARTICLE)).toBeNull();
+    expect(await nombre(`select count(*) as n from public.comments where article_id = '${ARTICLE}'`)).toBe(3);
+
+    await db.exec('drop trigger vider_corps on public.articles');
+    await restaurer(entree);
+    expect(await ligne('articles', ARTICLE)).toEqual(avant);
+    expect(await empreinteDe(entree)).toBe('absente');
+  });
+
+  it('F2 b : un déclencheur BEFORE INSERT qui efface la note d’une lectrice : toute la leçon est refusée, rien d’écrit ; sans lui, la note revient', async () => {
+    const progressions = () => lignes(`select to_jsonb(p) as j from public.user_lesson_progress p where lesson_id = '${LECON}' order by user_id`);
+    const avant = await progressions();
+    expect(avant.map((p) => p.quiz_score)).toEqual([80, null]);
+    const entree = String((await mettre('education_lessons', LECON)).id_corbeille);
+    const empreinte = await empreinteDe(entree);
+    await db.exec(`create function public.oublier_note() returns trigger language plpgsql as $$ begin new.quiz_score := null; return new; end $$;
+      create trigger oublier_note before insert on public.user_lesson_progress for each row execute function public.oublier_note();`);
+
+    const { code, detail } = await refus(restaurer(entree));
+
+    expect(code).toBe('declencheur_inconnu');
+    expect(detail).toEqual({
+      titre: 'Le PER',
+      table: 'education_lessons',
+      table_touchee: 'user_lesson_progress',
+      declencheurs: ['déclencheur public.user_lesson_progress (oublier_note)'],
+    });
+    expect(await empreinteDe(entree)).toBe(empreinte);
+    expect(await ligne('education_lessons', LECON)).toBeNull();
+    expect(await nombre(`select count(*) as n from public.learning_path_steps where lesson_id = '${LECON}'`)).toBe(0);
+    expect(await progressions()).toEqual([]);
+
+    await db.exec('drop trigger oublier_note on public.user_lesson_progress');
+    expect((await restaurer(entree)).remis).toEqual({ learning_path_steps: 2, user_lesson_progress: 2 });
+    expect(await progressions()).toEqual(avant);
+  });
+
+  it('F2 c : une règle ON INSERT DO INSTEAD qui détourne la ligne vers une autre table : refus, rien n’y arrive ; sans elle, la section revient', async () => {
+    const avant = await ligne('legal_sections', SECTION);
+    const entree = String((await mettre('legal_sections', SECTION)).id_corbeille);
+    const empreinte = await empreinteDe(entree);
+    await db.exec(`create table public.ailleurs (like public.legal_sections);
+      create rule detour as on insert to public.legal_sections do instead insert into public.ailleurs values (new.*);`);
+
+    const { code, detail } = await refus(restaurer(entree));
+
+    expect(code).toBe('declencheur_inconnu');
+    expect(detail).toEqual({
+      titre: 'CGU : Article 3',
+      table: 'legal_sections',
+      table_touchee: 'legal_sections',
+      declencheurs: ['règle public.legal_sections (detour)'],
+    });
+    expect(await empreinteDe(entree)).toBe(empreinte);
+    expect(await nombre('select count(*) as n from public.ailleurs')).toBe(0);
+    expect(await ligne('legal_sections', SECTION)).toBeNull();
+
+    await db.exec('drop rule detour on public.legal_sections');
+    await restaurer(entree);
+    expect(await ligne('legal_sections', SECTION)).toEqual(avant);
+    expect(await nombre('select count(*) as n from public.ailleurs')).toBe(0);
+  });
+
+  it('tout déclencheur d’insertion actif compte : après l’insertion, par instruction, ENABLE REPLICA ou ALWAYS ; désactivé, il ne fait rien', async () => {
+    const entree = String((await mettre('strategic_enterprises', ENTREPRISE_2)).id_corbeille);
+    const empreinte = await empreinteDe(entree);
+    // Il supprimerait la fiche juste après l'avoir laissée entrer : le compte de lignes serait juste.
+    await db.exec(`create function public.retirer_fiche() returns trigger language plpgsql as $$
+        begin delete from public.strategic_enterprises where slug = 'orano'; return null; end $$;
+      create trigger retirer_fiche after insert on public.strategic_enterprises for each statement execute function public.retirer_fiche();`);
+
+    for (const etat of [
+      null,
+      'alter table public.strategic_enterprises enable replica trigger retirer_fiche',
+      'alter table public.strategic_enterprises enable always trigger retirer_fiche',
+    ]) {
+      if (etat) await db.exec(etat);
+      const { code, detail } = await refus(restaurer(entree));
+      expect(code, etat ?? 'activé').toBe('declencheur_inconnu');
+      expect(detail.declencheurs).toEqual(['déclencheur public.strategic_enterprises (retirer_fiche)']);
+      expect(await empreinteDe(entree)).toBe(empreinte);
+    }
+
+    await db.exec('alter table public.strategic_enterprises disable trigger retirer_fiche');
+    await restaurer(entree);
+    expect((await ligne('strategic_enterprises', ENTREPRISE_2))?.name).toBe('ORANO Mining');
+  });
+
+  it('un déclencheur admis n’est admis qu’avec sa fonction et le corps relu : réécrit ou remplacé, il est refusé', async () => {
+    const entree = String((await mettre('newsletter_issues', NUMERO)).id_corbeille);
+    const empreinte = await empreinteDe(entree);
+    const origine = /CREATE OR REPLACE FUNCTION public\.newsletter_issues_assign_number\(\)[\s\S]*?\$function\$;/.exec(REPLIQUE)?.[0] ?? '';
+    expect(origine).toContain('if new.number is null then');
+
+    // Même déclencheur, même fonction, corps réécrit : il renumérote toute copie.
+    await db.exec(origine.replace('if new.number is null then', 'if true then'));
+    const reecrit = await refus(restaurer(entree));
+    expect(reecrit.code).toBe('declencheur_inconnu');
+    expect(reecrit.detail.declencheurs).toEqual(['déclencheur public.newsletter_issues (newsletter_issues_assign_number)']);
+    expect(await empreinteDe(entree)).toBe(empreinte);
+
+    // Le corps relu, remis tel quel, sous une autre fonction : refusé aussi.
+    await db.exec(`${origine}
+      ${origine.replace('public.newsletter_issues_assign_number()', 'public.autre_numero()')}
+      drop trigger newsletter_issues_assign_number on public.newsletter_issues;
+      create trigger newsletter_issues_assign_number before insert on public.newsletter_issues for each row execute function public.autre_numero();`);
+    expect((await refus(restaurer(entree))).code).toBe('declencheur_inconnu');
+    expect(await empreinteDe(entree)).toBe(empreinte);
+
+    // Le déclencheur de la production, rétabli : la restauration passe, numéro intact.
+    await db.exec(`drop trigger newsletter_issues_assign_number on public.newsletter_issues;
+      create trigger newsletter_issues_assign_number before insert on public.newsletter_issues for each row execute function public.newsletter_issues_assign_number();`);
+    expect((await restaurer(entree)).remarques).toEqual([]);
+    expect((await ligne('newsletter_issues', NUMERO))?.number).toBe(9);
+  });
+
+  it('la renumérotation, seule écriture par UPDATE, a le même filet ; sans renumérotation, rien n’est écrit par UPDATE', async () => {
+    const entree = String((await mettre('newsletter_issues', NUMERO)).id_corbeille);
+    const empreinte = await empreinteDe(entree);
+    // Le numéro 9 est repris pendant le séjour en corbeille : la restauration renumérote.
+    await db.exec(`insert into public.newsletter_issues (id, number, slug, subject, content) values ('${uuid(501)}', 9, '009-nouveau', 'Nouveau numéro', '{}');
+      create function public.vider_sujet() returns trigger language plpgsql as $$ begin new.subject := ''; return new; end $$;
+      create trigger vider_sujet before update on public.newsletter_issues for each row execute function public.vider_sujet();`);
+
+    expect(await refus(restaurer(entree))).toEqual({
+      code: 'declencheur_inconnu',
+      detail: {
+        titre: 'N° 9 · L’or et la BRVM',
+        table: 'newsletter_issues',
+        table_touchee: 'newsletter_issues',
+        declencheurs: ['déclencheur public.newsletter_issues (vider_sujet)'],
+      },
+    });
+    expect(await ligne('newsletter_issues', NUMERO)).toBeNull();
+    expect(await empreinteDe(entree)).toBe(empreinte);
+
+    // Une règle ON UPDATE qui écarterait la renumérotation : même refus.
+    await db.exec(`drop trigger vider_sujet on public.newsletter_issues;
+      create rule figer as on update to public.newsletter_issues do instead nothing;`);
+    const regle = await refus(restaurer(entree));
+    expect(regle.code).toBe('declencheur_inconnu');
+    expect(regle.detail.declencheurs).toEqual(['règle public.newsletter_issues (figer)']);
+    expect(await empreinteDe(entree)).toBe(empreinte);
+
+    // Le numéro 9 libéré : plus de renumérotation, donc aucun UPDATE, et la règle ne gêne rien.
+    await db.exec(`delete from public.newsletter_issues where id = '${uuid(501)}'`);
+    expect((await restaurer(entree)).remarques).toEqual([]);
+    expect(await ligne('newsletter_issues', NUMERO)).toMatchObject({ number: 9, slug: '009-or-brvm', subject: 'L’or et la BRVM' });
+  });
+
+  it('la restauration n’écrit par UPDATE que dans newsletter_issues, et n’insère que par corbeille_inserer', () => {
+    const code = (fonction: string) => {
+      const debut = MIGRATION.indexOf(`CREATE OR REPLACE FUNCTION public.${fonction}(`);
+      expect(debut, fonction).toBeGreaterThan(0);
+      return MIGRATION.slice(debut, MIGRATION.indexOf('$fonction$;', debut))
+        .split('\n')
+        .filter((ligne) => !ligne.trim().startsWith('--'))
+        .join('\n');
+    };
+    const misesAJour = (texte: string) => [...texte.matchAll(/\bUPDATE\s+(public\.\w+)/gi)].map((m) => m[1]);
+    expect(misesAJour(code('corbeille_restaurer'))).toEqual(['public.newsletter_issues']);
+    expect(misesAJour(code('corbeille_inserer'))).toEqual([]);
+    expect([...code('corbeille_restaurer').matchAll(/\bINSERT\s+INTO\b/gi)]).toHaveLength(0);
+  });
+
+  it('la réplique porte exactement les déclencheurs de la production, et aucun ne bloque la restauration des six types de contenu', async () => {
+    const declencheurs = await db.query<Record<string, string>>(
+      `select c.relname as table_name, t.tgname,
+              case when t.tgtype & 2 <> 0 then 'BEFORE' when t.tgtype & 64 <> 0 then 'INSTEAD OF' else 'AFTER' end as moment,
+              case when t.tgtype & 1 <> 0 then 'ROW' else 'STATEMENT' end as niveau,
+              concat_ws(' OR ', case when t.tgtype & 4 <> 0 then 'INSERT' end, case when t.tgtype & 8 <> 0 then 'DELETE' end,
+                case when t.tgtype & 16 <> 0 then 'UPDATE' end, case when t.tgtype & 32 <> 0 then 'TRUNCATE' end) as evenements,
+              t.tgenabled::text as etat, nf.nspname || '.' || p.proname as fonction, upper(md5(p.prosrc)) as empreinte
+         from pg_trigger t join pg_class c on c.oid = t.tgrelid join pg_proc p on p.oid = t.tgfoid
+         join pg_namespace nf on nf.oid = p.pronamespace
+        where not t.tgisinternal and c.relnamespace = 'public'::regnamespace
+        order by c.relname, t.tgname`,
+    );
+    expect(declencheurs.rows.map((d) => Object.values(d))).toEqual(DECLENCHEURS_PRODUCTION);
+    expect(await nombre(`select count(*) as n from pg_rewrite r join pg_class c on c.oid = r.ev_class where c.relnamespace = 'public'::regnamespace`)).toBe(0);
+
+    // Un contenu de chaque type part à la corbeille et revient, à l'identique, avec tout ce qui en dépend.
+    const tables = ['articles', 'education_categories', 'education_lessons', 'learning_path_steps', 'user_lesson_progress',
+      'strategic_enterprises', 'legal_sections', 'newsletter_issues', 'newsletter_events'];
+    const instantane = async () => {
+      const etat: Record<string, Json[]> = {};
+      for (const table of tables) etat[table] = await lignes(`select to_jsonb(x) as j from public.${table} x order by to_jsonb(x)::text`);
+      return etat;
+    };
+    await db.exec(`insert into public.newsletter_events (id, issue_id, subscriber_id, event_type, meta) values
+      ('${uuid(520)}', '${NUMERO}', '${ABONNE}', 'delivered', '{"resend_id": "re_1"}')`);
+    const avant = await instantane();
+    const entrees: string[] = [];
+    for (const [table, id] of [
+      ['articles', ARTICLE],
+      ['education_categories', CATEGORIE],
+      ['education_lessons', LECON_AUTRE],
+      ['strategic_enterprises', ENTREPRISE],
+      ['legal_sections', SECTION],
+      ['newsletter_issues', NUMERO],
+    ] as const) {
+      entrees.push(String((await mettre(table, id)).id_corbeille));
+    }
+    for (const entree of entrees) expect((await restaurer(entree)).remarques).toEqual([]);
+    expect(await instantane()).toEqual(avant);
+    expect(await nombre('select count(*) as n from public.contenus_supprimes')).toBe(0);
+  });
+
+  it('la renumérotation passe malgré les deux déclencheurs de la production : le numéro vient de l’un, updated_at de l’autre, rien d’autre ne change', async () => {
+    const entree = String((await mettre('newsletter_issues', NUMERO)).id_corbeille);
+    const copie = (await entreeDe('newsletter_issues', NUMERO))?.donnees as Json;
+    await db.exec(`insert into public.newsletter_issues (id, number, slug, subject, content) values ('${uuid(501)}', 9, '009-nouveau', 'Nouveau numéro', '{}')`);
+
+    const resultat = await restaurer(entree);
+
+    expect(resultat.remarques).toEqual([{ code: 'numero_change', ancien: 9, nouveau: 10, autre: 'Nouveau numéro' }]);
+    const remis = (await ligne('newsletter_issues', NUMERO)) as Json;
+    expect(remis).toMatchObject({ number: 10, slug: '010-l-or-et-la', content: { number: 10, slug: '010-l-or-et-la', intro: { heading: 'Or' } } });
+    expect(Date.parse(String(remis.updated_at))).toBeGreaterThan(Date.parse(String(copie.updated_at)));
+    const sauf = (l: Json) => Object.fromEntries(Object.entries(l).filter(([cle]) => !['number', 'slug', 'content', 'updated_at'].includes(cle)));
+    expect(sauf(remis)).toEqual(sauf(copie));
   });
 });
 
@@ -1048,21 +1321,23 @@ describe('pannes forcées : tout ou rien', () => {
     const { id_corbeille } = await mettre('education_categories', CATEGORIE);
     const entreeAvant = await entreeDe('education_categories', CATEGORIE);
     // Les progressions reviennent dans l'ordre de la copie (leçon, puis
-    // lecteur) : celle de la seconde leçon est la dernière écrite.
-    await db.exec(`create function public.panne() returns trigger language plpgsql as $$
-        begin if new.lesson_id = '${LECON_2}' then raise exception 'panne simulée'; end if; return new; end $$;
-      create trigger panne before insert on public.user_lesson_progress for each row execute function public.panne();`);
+    // lecteur) : celle de la seconde leçon est la dernière écrite. La panne
+    // vient d'une contrainte CHECK, posée depuis la suppression : un
+    // déclencheur serait refusé avant la moindre écriture, et la panne
+    // n'aurait plus lieu au milieu de la restauration.
+    await db.exec(`alter table public.user_lesson_progress add constraint panne check (lesson_id <> '${LECON_2}')`);
 
     const erreur = await erreurDe(restaurer(String(id_corbeille)));
 
-    expect(erreur.message).toBe('panne simulée');
+    expect(erreur.code).toBe('23514');
+    expect(erreur.message).toContain('"panne"');
     expect(await ligne('education_categories', CATEGORIE)).toBeNull();
     expect(await nombre(`select count(*) as n from public.education_lessons where category_id = '${CATEGORIE}'`)).toBe(0);
     expect(await nombre(`select count(*) as n from public.learning_path_steps where lesson_id in ('${LECON}', '${LECON_2}')`)).toBe(0);
     expect(await nombre(`select count(*) as n from public.user_lesson_progress where lesson_id in ('${LECON}', '${LECON_2}')`)).toBe(0);
     expect(await entreeDe('education_categories', CATEGORIE)).toEqual(entreeAvant);
 
-    await db.exec('drop trigger panne on public.user_lesson_progress');
+    await db.exec('alter table public.user_lesson_progress drop constraint panne');
     const resultat = await restaurer(String(id_corbeille));
     expect(resultat.remis).toEqual({ education_lessons: 2, learning_path_steps: 3, user_lesson_progress: 3 });
     expect(await instantane()).toEqual(avant);
@@ -1352,6 +1627,30 @@ describe('les enveloppes TypeScript, sur la vraie base', () => {
     );
     expect(Sentry.captureException).toHaveBeenCalledTimes(1);
     expect(logAuditEvent).toHaveBeenCalledTimes(1);
+    expect(await nombre('select count(*) as n from public.contenus_supprimes')).toBe(1);
+  });
+
+  it('refusent une restauration qu’un déclencheur réécrirait, le disent, et le signalent à Sentry sans le contenu', async () => {
+    const service = clientDeService(db);
+    const mise = await mettreALaCorbeille(service, 'articles', ARTICLE, ADMIN);
+    await db.exec(`create function public.vider_corps() returns trigger language plpgsql as $$ begin new.body := ''; return new; end $$;
+      create trigger vider_corps before insert on public.articles for each row execute function public.vider_corps();`);
+    vi.clearAllMocks();
+
+    const retour = await restaurerDepuisCorbeille(service, mise.ok ? mise.idCorbeille : '', ADMIN);
+
+    expect(retour).toMatchObject({ ok: false, statut: 409, inattendu: true });
+    expect(retour.ok ? '' : retour.motif).toBe(
+      typographieFr(
+        'Impossible de remettre « Le franc CFA » en place : un déclencheur ou une règle de la table des articles pourrait modifier, détourner ou écarter sans erreur ce qui serait remis en place. Rien n’a été remis en place. L’élément reste dans la corbeille, intact : la base doit d’abord être corrigée.',
+      ),
+    );
+    expect(Sentry.captureException).toHaveBeenCalledTimes(1);
+    const envoye = JSON.stringify(vi.mocked(Sentry.captureException).mock.calls);
+    expect(envoye).toContain('vider_corps');
+    expect(envoye).not.toContain('Texte premium');
+    expect(logAuditEvent).not.toHaveBeenCalled();
+    expect(await ligne('articles', ARTICLE)).toBeNull();
     expect(await nombre('select count(*) as n from public.contenus_supprimes')).toBe(1);
   });
 

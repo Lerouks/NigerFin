@@ -257,8 +257,14 @@ export function echecRestauration(lue: ErreurLue): Echec {
         409,
         `${impossible} : le numéro\u00a0${String(lue.detail.numero ?? '')} est déjà pris par ${autre}, et ce numéro a déjà été envoyé, au moins en partie : il ne peut pas changer de numéro.`,
       );
-    // Les deux refus suivants disent que le schéma de la base a changé depuis
+    // Les trois refus suivants disent que le schéma de la base a changé depuis
     // la suppression : il faut un développeur, d'où le signalement à Sentry.
+    case 'declencheur_inconnu':
+      return echec(
+        409,
+        `${impossible} : un déclencheur ou une règle de ${nomDeTable(lue.detail.table_touchee)} pourrait modifier, détourner ou écarter sans erreur ce qui serait remis en place. ${rien} L’élément reste dans la corbeille, intact : la base doit d’abord être corrigée.`,
+        true,
+      );
     case 'colonnes_inconnues': {
       const colonnes = (Array.isArray(lue.detail.colonnes) ? lue.detail.colonnes : [])
         .map(chaine)

@@ -56,7 +56,9 @@
 -- l'article impossible. Si une clé étrangère, un déclencheur ou une règle de
 -- suppression venait un jour à effacer autre chose avec un contenu,
 -- corbeille_mettre refuserait la suppression plutôt que de perdre ces lignes
--- en silence.
+-- en silence. De même, si un déclencheur ou une règle venait à réécrire,
+-- écarter ou détourner ce qu'une restauration écrit, corbeille_restaurer
+-- refuserait la remise en place, et l'entrée resterait intacte.
 --
 -- Une seule entrée par contenu (index unique) : une ancienne copie ne peut
 -- jamais remettre en ligne une version périmée.
@@ -149,14 +151,21 @@ GRANT SELECT ON public.contenus_supprimes TO service_role;
 -- laisser la page de l'administration attendre sans fin.
 
 -- Fonction interne : écrit des lignes gardées en jsonb dans leur table, et
--- vérifie qu'elle les a TOUTES écrites, avec toutes leurs valeurs. Deux
+-- vérifie qu'elles y arrivent TOUTES, telles que la copie les garde. Trois
 -- refus, qui annulent la restauration entière et laissent l'entrée intacte :
 --   colonnes_inconnues   la copie remplit une colonne que la table n'a plus
 --       (renommée ou supprimée depuis la suppression) : écrire le reste
 --       perdrait sa valeur sans un mot, puis l'entrée, seule autre copie ;
---   remise_incomplete    la table a écarté sans erreur une partie des lignes
---       (un déclencheur BEFORE INSERT qui renvoie NULL, une règle DO INSTEAD
---       NOTHING) : retirer l'entrée les perdrait.
+--   declencheur_inconnu  un déclencheur d'insertion ou une règle ON INSERT,
+--       actif sur la table, pourrait réécrire une valeur (NEW.body := ''),
+--       écarter une ligne, la supprimer juste après, ou la détourner vers une
+--       autre table en rendant le même nombre de lignes. Rien de tout cela
+--       ne se voit au compte des lignes, et l'entrée, seule autre copie,
+--       partirait quand même. Seuls passent les déclencheurs de la liste
+--       ci-dessous, relus un à un et sans effet sur une copie ; le refus
+--       nomme les autres ;
+--   remise_incomplete    la table a écarté sans erreur une partie des lignes.
+--       Le refus précédent l'empêche déjà ; ce contrôle reste, par prudence.
 -- Une colonne ajoutée depuis prend sa valeur par défaut, et une colonne
 -- générée est recalculée par la base : rien n'est perdu. p_contexte (le titre
 -- et la table de l'entrée) accompagne chaque refus, pour que l'écran nomme le
@@ -178,6 +187,7 @@ DECLARE
   v_contexte jsonb := coalesce(p_contexte, '{}'::jsonb) || jsonb_build_object('table_touchee', p_table);
   v_colonnes text;
   v_inconnues text[];
+  v_detournements text[];
   v_attendues integer;
   v_nombre integer;
 BEGIN
@@ -227,6 +237,57 @@ BEGIN
      AND EXISTS (SELECT 1 FROM jsonb_array_elements(p_lignes) AS e WHERE e ? a.attname::text);
   IF v_colonnes IS NULL THEN
     RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = 'corbeille:copie_illisible', DETAIL = v_contexte::text;
+  END IF;
+
+  -- Ce qu'un déclencheur ou une règle ferait des lignes écrites, vérifié
+  -- AVANT d'écrire : tout déclencheur d'insertion actif (INSERT dans son
+  -- type, bit 4 de tgtype, avant ou après, ligne ou instruction) et toute
+  -- règle ON INSERT active sur la table refusent la restauration. Les
+  -- déclencheurs internes, ceux des clés étrangères, ne font que vérifier ;
+  -- un déclencheur ou une règle désactivé ne fait rien.
+  -- Déclencheurs admis : (table, déclencheur, fonction, empreinte md5 du
+  -- corps de la fonction). Relevés en lecture seule en production le
+  -- 3 novembre 2026 : c'est le seul déclencheur d'insertion des tables
+  -- qu'une restauration écrit, et aucune n'a de règle. L'empreinte fige le
+  -- corps qui a été relu : une fonction réécrite depuis n'est plus celle qui
+  -- a été jugée sans effet, et la restauration est refusée jusqu'à ce que
+  -- son nouveau corps soit relu et son empreinte mise à jour ici.
+  --   newsletter_issues_assign_number ne remplit number que s'il est vide.
+  --   Une copie arrive avec son numéro et le garde ; la restauration ne le
+  --   vide qu'exprès, quand le numéro a été repris entre-temps, pour en
+  --   recevoir un neuf, comme à la création.
+  SELECT array_agg(x.nom ORDER BY x.nom)
+    INTO v_detournements
+    FROM (
+      SELECT format('déclencheur public.%s (%s)', p_table, t.tgname) AS nom
+        FROM pg_trigger AS t
+        JOIN pg_proc AS f ON f.oid = t.tgfoid
+        JOIN pg_namespace AS nf ON nf.oid = f.pronamespace
+       WHERE t.tgrelid = v_relation
+         AND NOT t.tgisinternal
+         AND t.tgenabled <> 'D'
+         AND (t.tgtype & 4) <> 0
+         AND NOT EXISTS (
+               SELECT 1
+                 FROM (VALUES
+                        ('newsletter_issues', 'newsletter_issues_assign_number',
+                         'public.newsletter_issues_assign_number', 'FDDE29B529589DA9137107DC786ACE08')
+                      ) AS admis (table_admise, declencheur, fonction, empreinte)
+                WHERE admis.table_admise = p_table
+                  AND admis.declencheur = t.tgname
+                  AND admis.fonction = nf.nspname || '.' || f.proname
+                  AND admis.empreinte = upper(md5(f.prosrc))
+             )
+      UNION ALL
+      SELECT format('règle public.%s (%s)', p_table, r.rulename)
+        FROM pg_rewrite AS r
+       WHERE r.ev_class = v_relation
+         AND r.ev_type = '3'
+         AND r.ev_enabled <> 'D'
+    ) AS x;
+  IF v_detournements IS NOT NULL THEN
+    RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = 'corbeille:declencheur_inconnu',
+      DETAIL = (v_contexte || jsonb_build_object('declencheurs', to_jsonb(v_detournements)))::text;
   END IF;
 
   EXECUTE format(
@@ -542,6 +603,7 @@ DECLARE
   v_numero integer;
   v_queue text;
   v_slug text;
+  v_detournements text[];
 BEGIN
   -- L'entrée, verrouillée : deux restaurations simultanées de la même entrée
   -- (un double clic) ne peuvent pas la remettre deux fois. La seconde attend,
@@ -680,6 +742,43 @@ BEGIN
     IF EXISTS (SELECT 1 FROM public.newsletter_issues WHERE slug = v_slug AND id <> v_entree.id_origine) THEN
       v_slug := v_slug || '-' || left(v_entree.id_origine::text, 8);
     END IF;
+    -- La seule écriture par UPDATE d'une restauration, donc le même filet que
+    -- pour les insertions (voir corbeille_inserer) : tout déclencheur de mise
+    -- à jour actif (UPDATE dans son type, bit 16 de tgtype) et toute règle
+    -- ON UPDATE active sur newsletter_issues pourraient réécrire ou écarter
+    -- ce que cette instruction change, et la restauration est refusée. Seul
+    -- passe newsletter_issues_set_updated_at, relevé en production le
+    -- 3 novembre 2026 avec l'empreinte de son corps : il ne fait que
+    -- updated_at := now(). Cette instruction change bel et bien le numéro, le
+    -- lien et le contenu : now() est l'heure vraie de cette modification, et
+    -- rien d'autre de la copie n'est touché.
+    SELECT array_agg(x.nom ORDER BY x.nom)
+      INTO v_detournements
+      FROM (
+        SELECT format('déclencheur public.newsletter_issues (%s)', t.tgname) AS nom
+          FROM pg_trigger AS t
+          JOIN pg_proc AS f ON f.oid = t.tgfoid
+          JOIN pg_namespace AS nf ON nf.oid = f.pronamespace
+         WHERE t.tgrelid = 'public.newsletter_issues'::regclass
+           AND NOT t.tgisinternal
+           AND t.tgenabled <> 'D'
+           AND (t.tgtype & 16) <> 0
+           AND NOT (
+                 t.tgname = 'newsletter_issues_set_updated_at'
+                 AND nf.nspname || '.' || f.proname = 'public.newsletter_set_updated_at'
+                 AND upper(md5(f.prosrc)) = '602FD0DB87282E9F18696BD3CAAE794D'
+               )
+        UNION ALL
+        SELECT format('règle public.newsletter_issues (%s)', r.rulename)
+          FROM pg_rewrite AS r
+         WHERE r.ev_class = 'public.newsletter_issues'::regclass
+           AND r.ev_type = '2'
+           AND r.ev_enabled <> 'D'
+      ) AS x;
+    IF v_detournements IS NOT NULL THEN
+      RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = 'corbeille:declencheur_inconnu',
+        DETAIL = (v_contexte || jsonb_build_object('table_touchee', 'newsletter_issues', 'declencheurs', to_jsonb(v_detournements)))::text;
+    END IF;
     -- Le contenu de l'e-mail porte aussi son numéro et son lien (« Édition
     -- n°12 ») : ils suivent.
     UPDATE public.newsletter_issues
@@ -692,6 +791,11 @@ BEGIN
              ELSE content
            END
      WHERE id = v_entree.id_origine;
+    GET DIAGNOSTICS v_nombre = ROW_COUNT;
+    IF v_nombre <> 1 THEN
+      RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = 'corbeille:remise_incomplete',
+        DETAIL = (v_contexte || jsonb_build_object('table_touchee', 'newsletter_issues', 'attendues', 1, 'remises', v_nombre))::text;
+    END IF;
     v_remarques := v_remarques || jsonb_build_array(jsonb_build_object(
       'code', 'numero_change', 'ancien', v_ancien_numero, 'nouveau', v_numero, 'autre', v_autre
     ));

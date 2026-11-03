@@ -122,6 +122,12 @@ export function echecMiseALaCorbeille(lue: ErreurLue): Echec {
         `${rien} La base de données effacerait avec ce contenu d’autres données, que la corbeille ne sait pas encore garder : la suppression reste bloquée jusqu’à sa mise à jour.`,
         true,
       );
+    case 'declencheur_inconnu':
+      return echec(
+        500,
+        `${rien} Un déclencheur ou une règle de la base effacerait ou modifierait, avec ce contenu, d’autres données que la corbeille ne sait pas encore garder : la suppression reste bloquée jusqu’à sa mise à jour.`,
+        true,
+      );
     default:
       break;
   }

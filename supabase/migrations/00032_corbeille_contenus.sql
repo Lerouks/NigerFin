@@ -44,9 +44,10 @@
 -- sans clé étrangère. Ils survivent à l'article (la modération les montre sous
 -- « Article supprimé ») et le retrouvent s'il revient. La première version les
 -- copiait, et faisait donc revenir des commentaires que la modération avait
--- supprimés entre-temps. Si une clé étrangère venait un jour à effacer autre
--- chose avec un contenu, corbeille_mettre refuserait la suppression plutôt
--- que de perdre ces lignes en silence.
+-- supprimés entre-temps. Si une clé étrangère, un déclencheur ou une règle de
+-- suppression venait un jour à effacer autre chose avec un contenu,
+-- corbeille_mettre refuserait la suppression plutôt que de perdre ces lignes
+-- en silence.
 --
 -- Une seule entrée par contenu (index unique) : une ancienne copie ne peut
 -- jamais remettre en ligne une version périmée.
@@ -331,6 +332,39 @@ BEGIN
          ]);
   IF v_inconnues IS NOT NULL THEN
     RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = 'corbeille:cascade_inconnue', DETAIL = v_inconnues;
+  END IF;
+
+  --    Même filet pour ce qu'une clé étrangère ne dit pas : un déclencheur
+  --    actif qui réagit à une suppression (DELETE dans son type, bit 8 de
+  --    tgtype), ou une règle ON DELETE, sur une table que cette suppression
+  --    touche, pourrait effacer ou changer d'autres lignes sans qu'elles
+  --    soient copiées. Les déclencheurs internes, ceux des clés étrangères,
+  --    relèvent du contrôle précédent ; un déclencheur ou une règle désactivé
+  --    ne fait rien.
+  SELECT string_agg(x.nom, ', ' ORDER BY x.nom)
+    INTO v_inconnues
+    FROM (
+      SELECT format('déclencheur %s.%s (%s)', ns.nspname, cl.relname, t.tgname) AS nom
+        FROM pg_trigger AS t
+        JOIN pg_class AS cl ON cl.oid = t.tgrelid
+        JOIN pg_namespace AS ns ON ns.oid = cl.relnamespace
+       WHERE NOT t.tgisinternal
+         AND t.tgenabled <> 'D'
+         AND (t.tgtype & 8) <> 0
+         AND ns.nspname = 'public'
+         AND cl.relname = ANY (v_touchees)
+      UNION ALL
+      SELECT format('règle %s.%s (%s)', ns.nspname, cl.relname, r.rulename)
+        FROM pg_rewrite AS r
+        JOIN pg_class AS cl ON cl.oid = r.ev_class
+        JOIN pg_namespace AS ns ON ns.oid = cl.relnamespace
+       WHERE r.ev_type = '4'
+         AND r.ev_enabled <> 'D'
+         AND ns.nspname = 'public'
+         AND cl.relname = ANY (v_touchees)
+    ) AS x;
+  IF v_inconnues IS NOT NULL THEN
+    RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = 'corbeille:declencheur_inconnu', DETAIL = v_inconnues;
   END IF;
 
   -- 5. Ce que la base effacerait avec le contenu, supprimé ici même avec

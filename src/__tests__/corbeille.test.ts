@@ -94,6 +94,7 @@ describe('messages de la mise à la corbeille', () => {
     ['numéro envoyé', lireErreur(refus('numero_envoye')), 400, /déjà envoyé/, false],
     ['envoi en cours', lireErreur(refus('envoi_en_cours')), 409, /en cours d’envoi/, false],
     ['cascade inconnue', lireErreur(refus('cascade_inconnue')), 500, /ne sait pas encore garder/, true],
+    ['déclencheur inconnu', lireErreur(refus('declencheur_inconnu')), 500, /Un déclencheur ou une règle de la base/, true],
     ['clé étrangère', lireErreur({ code: '23503', message: 'fk' }), 409, /s’y rattachent encore/, false],
     ['inconnu', lireErreur({ code: 'XX000', message: 'boum' }), 500, /La suppression a échoué/, true],
   ];

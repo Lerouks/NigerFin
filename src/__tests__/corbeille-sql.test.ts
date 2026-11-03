@@ -473,6 +473,39 @@ describe('mise à la corbeille', () => {
     expect(await nombre('select count(*) as n from public.contenus_supprimes')).toBe(0);
   });
 
+  it('un déclencheur de suppression inconnu sur la table du contenu : refus, rien ne part en silence', async () => {
+    // Le jour où quelqu'un efface les commentaires d'un article par un déclencheur.
+    await db.exec(`create function public.effacer_commentaires() returns trigger language plpgsql as $$
+        begin delete from public.comments where article_id = old.id::text; return old; end $$;
+      create trigger effacer_commentaires after delete on public.articles for each row execute function public.effacer_commentaires();`);
+
+    const erreur = await erreurDe(mettre('articles', ARTICLE));
+
+    expect(erreur).toMatchObject({ code: 'P0001', message: 'corbeille:declencheur_inconnu', detail: 'déclencheur public.articles (effacer_commentaires)' });
+    expect(await ligne('articles', ARTICLE)).not.toBeNull();
+    expect(await nombre(`select count(*) as n from public.comments where article_id = '${ARTICLE}'`)).toBe(3);
+    expect(await nombre('select count(*) as n from public.contenus_supprimes')).toBe(0);
+
+    // Désactivé, il ne fait plus rien : la suppression passe, et les commentaires restent.
+    await db.exec('alter table public.articles disable trigger effacer_commentaires');
+    await mettre('articles', ARTICLE);
+    expect(await nombre(`select count(*) as n from public.comments where article_id = '${ARTICLE}'`)).toBe(3);
+  });
+
+  it('une règle ON DELETE sur une table liée : refus pour la leçon, sans gêner un contenu qui ne la touche pas', async () => {
+    await db.exec(`create rule journal as on delete to public.learning_path_steps
+      do also delete from public.comments where article_id = old.id::text`);
+
+    const erreur = await erreurDe(mettre('education_lessons', LECON));
+
+    expect(erreur).toMatchObject({ code: 'P0001', message: 'corbeille:declencheur_inconnu', detail: 'règle public.learning_path_steps (journal)' });
+    expect(await ligne('education_lessons', LECON)).not.toBeNull();
+    expect(await nombre(`select count(*) as n from public.learning_path_steps where lesson_id = '${LECON}'`)).toBe(2);
+    expect(await nombre('select count(*) as n from public.contenus_supprimes')).toBe(0);
+    // Un article ne touche pas les étapes de parcours : rien ne le bloque.
+    expect((await mettre('articles', ARTICLE_2)).titre).toBe('La BRVM en octobre');
+  });
+
   it('tout ou rien : si le contenu ne peut pas partir, ce qui en dépend reste aussi', async () => {
     // Une table inconnue retient la leçon (NO ACTION) : la progression, déjà
     // supprimée plus tôt dans la même transaction, doit revenir avec elle.

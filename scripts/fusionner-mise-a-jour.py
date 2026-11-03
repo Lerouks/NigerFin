@@ -10,9 +10,12 @@ Ce qui est fusionne automatiquement : les corrections et les montees mineures,
 et seulement si toute la verification est passee au vert (analyse, types, tests,
 compilation).
 
-Ce qui ne l'est jamais : les montees de version MAJEURE. Une majeure change le
-comportement d'une bibliotheque et peut casser le site sans qu'aucun test ne le
-voie. Elles restent ouvertes, etiquetees, et attendent une decision humaine.
+Ce qui ne l'est jamais : les montees de version MAJEURE, et les montees
+mineures d'un paquet encore en 0.x (0.10 vers 0.12), qui sont des ruptures en
+versionnage semantique. Elles changent le comportement d'une bibliotheque et
+peuvent casser le site sans qu'aucun test ne le voie. Elles restent ouvertes,
+etiquetees, et attendent une decision humaine. Une proposition dont aucune
+version n'est lisible est refusee de la meme facon : dans le doute, un humain.
 """
 import json
 import os
@@ -22,12 +25,22 @@ import sys
 import time
 
 DEPOT = os.environ.get("DEPOT", "Lerouks/NigerFin")
-# « Updates `paquet` from 1.2.3 to 1.3.0 », le format que Dependabot ecrit
-# toujours dans le corps de sa proposition, y compris pour un groupe.
-MOTIF = re.compile(
-    r"Updates?\s+`?\[?([^`\]\s]+)\]?`?\s+from\s+v?(\d+)\.(\d+)\.(\S*?)\s+to\s+v?(\d+)\.(\d+)\.(\S+)",
+# Les deux formes que Dependabot ecrit : « Bumps [paquet](lien) from A to B. »
+# pour une mise a jour seule, « Updates `paquet` from A to B » pour un groupe.
+# Les versions peuvent n'avoir qu'un chiffre (actions GitHub : « from 6 to 7 »).
+PAIRE = re.compile(
+    r"(?:\bbumps?\s+\[?(?P<p1>[^\s\]\[]+?)\]?(?:\([^)]*\))?|\bupdates?\s+`(?P<p2>[^`]+)`)"
+    r"\s+from\s+v?(?P<av>\d+(?:\.\d+)*)\S*?\s+to\s+v?(?P<ap>\d+(?:\.\d+)*)",
     re.IGNORECASE,
 )
+# Ligne du tableau qu'ecrit Dependabot pour un groupe :
+# « | [paquet](lien) | `1.2.3` | `2.0.0` | ».
+LIGNE_TABLEAU = re.compile(
+    r"^\|\s*\[(?P<p>[^\]]+)\]\([^)]*\)\s*\|\s*`v?(?P<av>\d+(?:\.\d+)*)[^`]*`\s*\|\s*`v?(?P<ap>\d+(?:\.\d+)*)[^`]*`\s*\|",
+    re.MULTILINE,
+)
+# « ... group with 12 updates » : le nombre de paquets que la proposition change.
+ANNONCE = re.compile(r"\bwith\s+(\d+)\s+updates?\b", re.IGNORECASE)
 # Identifiant complet d'un commit, tel que GitHub le transmet.
 SHA_COMPLET = re.compile(r"[0-9a-f]{40}")
 
@@ -40,14 +53,36 @@ def gh(*args, json_sortie=True):
     return json.loads(r.stdout) if json_sortie else r.stdout
 
 
-def majeures(corps: str):
-    """Rend la liste des paquets dont le premier numero de version change."""
-    trouvees = []
-    for m in MOTIF.finditer(corps or ""):
-        paquet, av_maj, _, _, ap_maj, _, _ = m.groups()
-        if av_maj != ap_maj:
-            trouvees.append(f"{paquet} {av_maj}.x vers {ap_maj}.x")
-    return trouvees
+def rupture(avant: str, apres: str) -> bool:
+    """Vrai pour une montee majeure, ou mineure tant que le paquet est en 0.x."""
+    a = [int(x) for x in avant.split(".")]
+    b = [int(x) for x in apres.split(".")]
+    if a[0] != b[0]:
+        return True
+    return a[0] == 0 and (a[1:2] or [0]) != (b[1:2] or [0])
+
+
+def majeures(titre: str, corps: str):
+    """Rend les ruptures trouvees (liste, vide si aucune), ou None si aucune
+    version n'est lisible dans la proposition."""
+    # Les blocs <details> (notes de version, liste des commits) citent d'autres
+    # paquets et d'autres versions : seul le resume compte.
+    resume = re.sub(r"<details>.*?</details>", " ", corps or "", flags=re.S | re.I)
+    texte = f"{titre or ''}\n{resume}"
+    paires = {}
+    for m in PAIRE.finditer(texte):
+        paires[m.group("p1") or m.group("p2")] = (m.group("av"), m.group("ap"))
+    for m in LIGNE_TABLEAU.finditer(resume):
+        paires.setdefault(m.group("p"), (m.group("av"), m.group("ap")))
+    if not paires:
+        return None
+    # Au-dela de 65 536 caracteres, Dependabot tronque le corps et les dernieres
+    # lignes disparaissent : un paquet non lu pourrait etre une majeure. Moins de
+    # paquets lus qu'annonces, c'est une decision humaine.
+    annonce = ANNONCE.search(texte)
+    if annonce and len(paires) < int(annonce.group(1)):
+        return None
+    return sorted(f"{p} {av} vers {ap}" for p, (av, ap) in paires.items() if rupture(av, ap))
 
 
 def tete_changee(tete, sha_verifie: str) -> str:
@@ -91,7 +126,10 @@ def main() -> int:
         print(tete_changee(pr["headRefOid"], sha_verifie))
         return 0
 
-    grosses = majeures(pr.get("body", ""))
+    grosses = majeures(pr.get("title", ""), pr.get("body", ""))
+    if grosses is None:
+        print("Refuse : versions illisibles ou incompletes dans la proposition, decision humaine requise.")
+        return 0
     if grosses:
         print("Montee de version majeure, decision humaine requise :")
         for g in grosses:

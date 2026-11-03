@@ -34,6 +34,9 @@ jobs:
       - name: Tests
         run: npm run test
 
+      - name: Tests du script de fusion automatique
+        run: python3 -m unittest discover -s scripts -p 'test_*.py'
+
       - name: Build
         run: npm run build
         env:

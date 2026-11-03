@@ -178,7 +178,7 @@ export function SiteFeaturesManager() {
               Mode pré-lancement
             </h3>
             <p className="text-[13px] text-gray-600 mt-1 leading-relaxed">
-              Quand il est actif, le public voit une page «&nbsp;Prochainement&nbsp;» avec inscription à la liste de lancement. Toi et Ibrahim, une fois connectés, voyez le site complet pour le tester. À couper le jour du lancement.
+              Quand il est actif, le public voit une page «&nbsp;Prochainement&nbsp;» avec inscription à la liste de lancement. Toi et ton associé, une fois connectés, voyez le site complet pour le tester. À couper le jour du lancement.
             </p>
           </div>
           <button

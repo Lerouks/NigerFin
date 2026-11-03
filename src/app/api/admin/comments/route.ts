@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { serverError } from '@/lib/api-error';
-import { isValidUUID } from '@/lib/validation';
+import { isValidUUID, normalizeUuid } from '@/lib/validation';
 import { logAuditEvent } from '@/lib/audit';
 
 // GET: list all comments with article title, paginated
@@ -33,15 +33,17 @@ export async function GET(request: NextRequest) {
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1);
 
+  // article_id est du texte, comparé à la lettre près : en minuscules, comme
+  // la base écrit l'identifiant d'un article (voir normalizeUuid).
   if (articleId && isValidUUID(articleId)) {
-    query = query.eq('article_id', articleId);
+    query = query.eq('article_id', normalizeUuid(articleId));
   }
 
   const { data: comments, count, error } = await query;
   if (error) return serverError(error, 'admin-comments');
 
   // Fetch article titles for the comments
-  const articleIds = [...new Set((comments || []).map((c) => c.article_id).filter(Boolean))];
+  const articleIds = [...new Set((comments || []).map((c) => c.article_id).filter(Boolean).map(normalizeUuid))];
   let articleMap: Record<string, string> = {};
 
   if (articleIds.length > 0) {
@@ -57,7 +59,7 @@ export async function GET(request: NextRequest) {
 
   const enriched = (comments || []).map((c) => ({
     ...c,
-    article_title: articleMap[c.article_id] || 'Article supprimé',
+    article_title: articleMap[normalizeUuid(c.article_id)] || 'Article supprimé',
   }));
 
   return NextResponse.json({

@@ -1432,6 +1432,36 @@ describe('quand un article quitte la corbeille pour de bon, ses commentaires et 
     expect((await refus(appeler('corbeille_vider', [id_corbeille]))).code).toBe('entree_introuvable');
   });
 
+  it('ceux enregistrés avec un identifiant en majuscules partent aussi, au vidage comme à la purge, et seulement ceux-là', async () => {
+    // Des identifiants avec des lettres : ceux des autres tests n'ont que des chiffres.
+    const A = 'abcdef00-0000-4000-8000-0000000000aa';
+    const B = 'abcdef00-0000-4000-8000-0000000000bb';
+    await db.exec(`insert into public.articles (id, title, slug, category) values
+        ('${A}', 'Lettres A', 'lettres-a', 'economie'), ('${B}', 'Lettres B', 'lettres-b', 'finance');
+      insert into public.comments (id, article_id, user_id, user_name, content) values
+        ('${uuid(213)}', upper('${A}'), '${LECTRICE}', 'Lectrice', 'Majuscules'),
+        ('${uuid(214)}', 'ABCdef00-0000-4000-8000-0000000000Aa', '${LECTEUR}', 'Lecteur', 'Casse mêlée'),
+        ('${uuid(215)}', upper('${B}'), '${LECTEUR}', 'Lecteur', 'Autre article');
+      insert into public.article_likes (id, article_id, user_id) values
+        ('${uuid(222)}', upper('${A}'), '${LECTRICE}'), ('${uuid(223)}', upper('${B}'), '${LECTRICE}');`);
+
+    const a = await mettre('articles', A);
+    expect(await appeler('corbeille_vider', [a.id_corbeille])).toMatchObject({ commentaires: 2, jaime: 1 });
+    expect(await nombre(`select count(*) as n from public.comments where id in ('${uuid(213)}', '${uuid(214)}')`)).toBe(0);
+    expect(await nombre(`select count(*) as n from public.article_likes where id = '${uuid(222)}'`)).toBe(0);
+    // Ceux de l'article B, toujours en ligne, ne bougent pas.
+    expect(await nombre(`select count(*) as n from public.comments where id = '${uuid(215)}'`)).toBe(1);
+
+    await mettre('articles', B);
+    await db.exec(`update public.contenus_supprimes set supprime_le = now() - interval '40 days' where id_origine = '${B}'`);
+    expect(await appeler('corbeille_purger', [30])).toMatchObject({ commentaires_supprimes: 1, jaime_supprimes: 1 });
+    expect(await nombre(`select count(*) as n from public.comments where id = '${uuid(215)}'`)).toBe(0);
+    expect(await nombre(`select count(*) as n from public.article_likes where id = '${uuid(223)}'`)).toBe(0);
+    // Les commentaires et le j'aime des autres articles restent.
+    expect(await commentairesDe(ARTICLE)).toBe(3);
+    expect(await jaimeDe(ARTICLE)).toBe(1);
+  });
+
   it('vider une leçon ne touche à aucun commentaire', async () => {
     const { id_corbeille } = await mettre('education_lessons', LECON);
     expect(await appeler('corbeille_vider', [id_corbeille])).toMatchObject({ table: 'education_lessons', commentaires: 0, jaime: 0 });

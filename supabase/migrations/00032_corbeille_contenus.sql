@@ -976,6 +976,11 @@ $fonction$;
 -- des données de lecteurs (nom affiché, identifiant, texte) rattachées à un
 -- article qui n'existera plus, et que /api/comments servirait encore. Un
 -- article recréé depuis sous le même identifiant garde les siens.
+-- comments.article_id et article_likes.article_id sont du texte (relevé en
+-- production), comparé à la lettre près, et /api/comments et /api/likes
+-- acceptaient un identifiant en majuscules : la comparaison se fait donc sur
+-- lower(article_id), face à des identifiants déjà en minuscules (uuid::text
+-- l'est toujours). Les routes enregistrent désormais en minuscules.
 CREATE OR REPLACE FUNCTION public.corbeille_oublier_articles(p_articles uuid[])
 RETURNS jsonb
 LANGUAGE plpgsql
@@ -991,9 +996,9 @@ BEGIN
     FROM unnest(coalesce(p_articles, '{}')) AS a
    WHERE NOT EXISTS (SELECT 1 FROM public.articles AS x WHERE x.id = a);
   IF cardinality(v_articles) > 0 THEN
-    DELETE FROM public.comments WHERE article_id = ANY (v_articles);
+    DELETE FROM public.comments WHERE lower(article_id) = ANY (v_articles);
     GET DIAGNOSTICS v_commentaires = ROW_COUNT;
-    DELETE FROM public.article_likes WHERE article_id = ANY (v_articles);
+    DELETE FROM public.article_likes WHERE lower(article_id) = ANY (v_articles);
     GET DIAGNOSTICS v_jaime = ROW_COUNT;
   END IF;
   RETURN jsonb_build_object('commentaires', v_commentaires, 'jaime', v_jaime);

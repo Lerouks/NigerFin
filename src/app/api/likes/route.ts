@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
 import { createServerSupabaseClient } from '@/lib/supabase';
-import { isValidUUID, safeParseJSON } from '@/lib/validation';
+import { isValidUUID, normalizeUuid, safeParseJSON } from '@/lib/validation';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
 export async function GET(request: NextRequest) {
-  const articleId = request.nextUrl.searchParams.get('article_id');
-  if (!articleId || !isValidUUID(articleId)) {
+  const articleIdRecu = request.nextUrl.searchParams.get('article_id');
+  if (!articleIdRecu || !isValidUUID(articleIdRecu)) {
     return NextResponse.json({ error: 'article_id invalide (UUID requis)' }, { status: 400 });
   }
+  // Comme la base l'écrit : article_id est du texte, comparé à la lettre près.
+  const articleId = normalizeUuid(articleIdRecu);
 
   const supabase = await createServerSupabaseClient();
   if (!supabase) {
@@ -63,10 +65,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Corps de requête JSON invalide' }, { status: 400 });
     }
 
-    const { article_id } = body as { article_id?: string };
-    if (!article_id || !isValidUUID(article_id)) {
+    const { article_id: articleIdRecu } = body as { article_id?: string };
+    if (!articleIdRecu || !isValidUUID(articleIdRecu)) {
       return NextResponse.json({ error: 'article_id invalide (UUID requis)' }, { status: 400 });
     }
+    // Cherché et enregistré en minuscules, comme la base écrit l'identifiant de
+    // l'article : la corbeille retrouve ainsi ce j'aime quand l'article part pour de bon.
+    const article_id = normalizeUuid(articleIdRecu);
 
     // Check if already liked
     const { data: existing } = await supabase

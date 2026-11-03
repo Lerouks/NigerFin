@@ -2,14 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase';
 import { serverError } from '@/lib/api-error';
 import { parsePagination, paginatedResponse } from '@/lib/pagination';
-import { isValidUUID, safeParseJSON } from '@/lib/validation';
+import { isValidUUID, normalizeUuid, safeParseJSON } from '@/lib/validation';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
 export async function GET(request: NextRequest) {
-  const articleId = request.nextUrl.searchParams.get('article_id');
-  if (!articleId || !isValidUUID(articleId)) {
+  const articleIdRecu = request.nextUrl.searchParams.get('article_id');
+  if (!articleIdRecu || !isValidUUID(articleIdRecu)) {
     return NextResponse.json({ error: 'article_id invalide (UUID requis)' }, { status: 400 });
   }
+  // Comme la base l'écrit : article_id est du texte, comparé à la lettre près.
+  const articleId = normalizeUuid(articleIdRecu);
 
   const params = parsePagination(request.nextUrl.searchParams);
 
@@ -69,6 +71,9 @@ export async function POST(request: NextRequest) {
     if (!article_id || !isValidUUID(article_id)) {
       return NextResponse.json({ error: 'article_id invalide (UUID requis)' }, { status: 400 });
     }
+    // Enregistré en minuscules, comme la base écrit l'identifiant de l'article :
+    // la corbeille retrouve ainsi ce commentaire quand l'article part pour de bon.
+    const articleId = normalizeUuid(article_id);
 
     if (!content?.trim()) {
       return NextResponse.json({ error: 'content required' }, { status: 400 });
@@ -93,7 +98,7 @@ export async function POST(request: NextRequest) {
       if (!parentComment) {
         return NextResponse.json({ error: 'Commentaire parent introuvable' }, { status: 404 });
       }
-      if (parentComment.article_id !== article_id) {
+      if (normalizeUuid(parentComment.article_id) !== articleId) {
         return NextResponse.json({ error: 'Le commentaire parent n\'appartient pas à cet article' }, { status: 400 });
       }
     }
@@ -103,7 +108,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase
       .from('comments')
       .insert({
-        article_id,
+        article_id: articleId,
         user_id: user.id,
         user_name: username,
         content: content.trim(),

@@ -14,6 +14,19 @@ export function isValidUUID(value: unknown): value is string {
   return typeof value === 'string' && UUID_REGEX.test(value);
 }
 
+/**
+ * Un identifiant tel que PostgreSQL l'écrit : en minuscules. isValidUUID
+ * accepte les majuscules (drapeau i), mais comments.article_id et
+ * article_likes.article_id sont du texte, comparé à la lettre près : un
+ * identifiant gardé en majuscules échappait aux recherches de l'article et à
+ * la corbeille, qui efface les commentaires et les j'aime d'un article parti
+ * pour de bon. À appliquer après isValidUUID, avant toute écriture et toute
+ * recherche sur ces colonnes.
+ */
+export function normalizeUuid(value: string): string {
+  return value.toLowerCase();
+}
+
 /** Validate email with strict regex (RFC 5322 subset) */
 export function isValidEmail(value: unknown): value is string {
   return typeof value === 'string' && value.length <= 254 && EMAIL_REGEX.test(value);

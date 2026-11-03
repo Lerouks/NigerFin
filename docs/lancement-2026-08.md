@@ -86,9 +86,12 @@ En production, d'après l'historique Git de `main` :
   de Dependabot ne pouvait être fusionnée.
 - **Les mises à jour vérifiées se fusionnent seules** (`8e8474a`,
   6 septembre). Quand la CI d'une proposition de Dependabot passe, elle est
-  fusionnée et le site se redéploie. Les montées de version majeure restent
-  ouvertes, avec l'étiquette « changement-majeur ». 61 mises à jour sont
-  entrées ainsi entre le 6 septembre et le 2 novembre.
+  fusionnée et le site se redéploie. 61 mises à jour sont entrées ainsi entre
+  le 6 septembre et le 2 novembre. Depuis le 3 novembre, les montées de version
+  majeure, et les mineures d'un paquet encore en 0.x, restent ouvertes avec
+  l'étiquette « changement-majeur ». Avant, la lecture des versions en laissait
+  passer certaines : @types/node 22 vers 26, actions/setup-node 6 vers 7 et
+  @supabase/ssr 0.10 vers 0.12 sont parties en production sans décision.
 - **Le mot de passe oublié fonctionne pendant le pré-lancement** (`3b047d3`,
   6 septembre). Le lien menait à `/compte`, fermé à tous ; il mène désormais à
   `/connexion/nouveau-mot-de-passe`, toujours ouvert.
@@ -98,7 +101,7 @@ En production, d'après l'historique Git de `main` :
 - **Plus de texte justifié sur téléphone** (`c9397b2`, 27 août), dans les
   pages légales et les pieds de rubrique.
 
-Sur la branche `sante/sources-et-menage`, **pas encore en production** :
+En production depuis le 3 novembre 2026 :
 
 - La BRVM, la CEDEAO et la fiche pays REST Countries sont déclarées « non
   branchées » : plus appelées, plus comptées comme des pannes (voir bloc 6).
@@ -248,15 +251,15 @@ Deux heures.
 - La supervision passe « dégradée » tous les jours depuis 37 jours à cause de la
   BRVM, ce qui rend l'alerte inaudible. La panne de l'uranium n'apparaît nulle
   part. Aucune alerte n'atteint réellement la direction. *3 h.*
-  **2 novembre** : corrigé sur la branche `sante/sources-et-menage`, pas encore
-  en production. La BRVM (610 erreurs journalisées depuis le 20 juillet), la
+  **3 novembre** : corrigé et en production. La BRVM (610 erreurs journalisées depuis le 20 juillet), la
   CEDEAO (622 depuis le 13 juin) et REST Countries sont « non branchées » :
   `/api/health` dit « healthy » quand toutes les sources branchées répondent,
   « degraded » seulement sur une vraie panne. L'uranium, lui, n'apparaît
   toujours pas dans la supervision. L'acheminement des alertes jusqu'à la
   direction n'a pas été revérifié.
 - Le calcul de clôture quotidien écrase les variations nulles. *30 min.*
-- `TODOS-SECURITY.md` est périmé et décrit comme bloquant un trou déjà bouché.
+- Le suivi interne de sécurité (fichier local, hors du dépôt public) est périmé
+  et décrit comme bloquant un trou déjà bouché.
   *30 min.*
 
 ---

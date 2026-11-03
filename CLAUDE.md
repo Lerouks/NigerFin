@@ -83,7 +83,7 @@ Lors de chaque modification, ne pas se limiter à la demande stricte. Vérifier 
 ### 4. Rotation des secrets (durcissement /cso 2026-04-27)
 
 **Rotation périodique** :
-- `SUPABASE_SERVICE_ROLE_KEY` : tous les 6 mois (prochaine rotation **2026-10-27**). Procédure dans `TODOS-SECURITY.md`.
+- `SUPABASE_SERVICE_ROLE_KEY` : tous les 6 mois (prochaine rotation **2026-10-27**). Procédure dans le suivi interne de sécurité, un fichier local hors du dépôt public.
 - `RESEND_API_KEY` : tous les 12 mois.
 - `CRON_SECRET`, `REVALIDATE_SECRET` : tous les 12 mois ou immédiatement après tout soupçon de fuite.
 

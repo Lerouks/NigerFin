@@ -435,6 +435,7 @@ export function PricingContent() {
 
   const handleSubscribe = (cycle: BillingCycle): void => {
     setLoadingPlan(cycle);
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- navigation complète voulue : la page de paiement reçoit ainsi son propre nonce CSP, neuf, propre à sa requête.
     window.location.href = `/paiement?tier=premium&cycle=${cycle}`;
   };
 

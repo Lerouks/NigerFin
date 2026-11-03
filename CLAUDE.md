@@ -91,11 +91,11 @@ Lors de chaque modification, ne pas se limiter à la demande stricte. Vérifier 
 
 **Disque dev** : FileVault doit être actif sur le Mac dev. Vérifier dans Système → Confidentialité et sécurité → FileVault.
 
-### 5. Supabase Data API : GRANT explicites obligatoires sur les nouvelles tables
+### 5. Supabase Data API : REVOKE puis GRANT explicites, obligatoires sur chaque nouvelle table
 
-À partir du **30 octobre 2026**, Supabase n'expose plus automatiquement les tables `public` à la Data API (supabase-js, REST, GraphQL). Toute nouvelle table créée doit avoir des GRANT explicites pour les rôles `anon`, `authenticated` et `service_role`, sinon le code recevra une erreur `42501` "permission denied".
+**Sur ce projet, une table neuve est ouverte à tous dès sa création.** Les droits par défaut du schéma `public` (`pg_default_acl`, relevés en lecture seule en production le 3 novembre 2026) donnent encore TOUS les droits (`arwdDxtm` : lecture, écriture, suppression, TRUNCATE…) à `anon` et `authenticated` sur chaque table créée par `postgres`, et EXECUTE à `anon` et `authenticated` sur chaque fonction neuve (et à `PUBLIC`, comme partout dans PostgreSQL). L'annonce de Supabase selon laquelle les nouvelles tables ne seraient plus exposées par défaut à partir du 30 octobre 2026 ne s'applique pas à ce projet : ne jamais compter dessus. Sans REVOKE, la clé publique du site (`anon`) lit ET modifie la table ; la RLS ne protège que si elle est activée avec des politiques justes, et un droit accordé au niveau de la table a déjà suffi à tout ouvrir (migration 00031).
 
-**Procédure obligatoire à chaque création de table** (à inclure dans la migration SQL) :
+**Le REVOKE explicite est donc indispensable**, avant tout GRANT, à chaque création de table (dans la migration SQL) :
 
 ```sql
 -- 1. Créer la table
@@ -108,17 +108,22 @@ CREATE TABLE public.ma_nouvelle_table (
 -- 2. Activer RLS (obligatoire pour toute table publique NFI)
 ALTER TABLE public.ma_nouvelle_table ENABLE ROW LEVEL SECURITY;
 
--- 3. GRANT explicites selon l'usage prévu
+-- 3. INDISPENSABLE : retirer les droits que les droits par défaut viennent de donner
+REVOKE ALL ON public.ma_nouvelle_table FROM PUBLIC, anon, authenticated, service_role;
+
+-- 4. GRANT explicites, uniquement ce dont chaque rôle a besoin
 GRANT SELECT ON public.ma_nouvelle_table TO anon;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.ma_nouvelle_table TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.ma_nouvelle_table TO service_role;
 
--- 4. Policies RLS (ajouter au moins une policy par rôle qui doit accéder)
+-- 5. Policies RLS (ajouter au moins une policy par rôle qui doit accéder)
 CREATE POLICY "users read own rows" ON public.ma_nouvelle_table
   FOR SELECT TO authenticated USING (auth.uid() = user_id);
 ```
 
-**Fonctions SECURITY DEFINER (RPC)** : ne JAMAIS laisser une fonction `SECURITY DEFINER` accessible aux rôles `PUBLIC`, `anon` ou `authenticated` sauf si elle est explicitement conçue pour usage public. Procédure standard à appliquer après création de toute nouvelle RPC :
+**Vérifier après application** (lecture seule) : `select grantee, string_agg(privilege_type, ', ' order by privilege_type) from information_schema.role_table_grants where table_schema = 'public' and table_name = 'ma_nouvelle_table' group by grantee;` doit lister, rôle par rôle, exactement ce qui a été accordé, et rien de plus. Le test `src/__tests__/corbeille-sql.test.ts` (« sur ce projet, le REVOKE est indispensable ») rejoue ces droits par défaut sur une réplique de la production.
+
+**Fonctions SECURITY DEFINER (RPC)** : ne JAMAIS laisser une fonction `SECURITY DEFINER` accessible aux rôles `PUBLIC`, `anon` ou `authenticated` sauf si elle est explicitement conçue pour usage public. Les droits par défaut leur donnent EXECUTE dès la création : le REVOKE est là aussi indispensable. Procédure standard à appliquer après création de toute nouvelle RPC :
 
 ```sql
 REVOKE ALL ON FUNCTION public.ma_fonction(args) FROM PUBLIC, anon, authenticated;

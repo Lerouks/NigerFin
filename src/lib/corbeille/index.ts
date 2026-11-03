@@ -59,8 +59,25 @@ export interface EntreeListee {
   resume_dependants: Record<string, number>;
 }
 
+/**
+ * Où reprendre la liste : la dernière entrée déjà affichée. La liste est
+ * triée par date de mise à la corbeille, puis par identifiant, les plus
+ * récentes d'abord : la page suivante commence strictement après.
+ */
+export interface Curseur {
+  supprimeLe: string;
+  id: string;
+}
+
 export type ResultatListe =
-  | { ok: true; entrees: EntreeListee[]; total: number }
+  | {
+      ok: true;
+      entrees: EntreeListee[];
+      /** Le nombre d'entrées à partir du curseur, cette page comprise : toute la corbeille pour la première page. */
+      total: number;
+      /** Où reprendre, ou null quand cette page est la dernière. */
+      suite: Curseur | null;
+    }
   | Echec;
 
 function objet(valeur: unknown): Record<string, unknown> {
@@ -275,16 +292,48 @@ export async function supprimerDefinitivement(
   return { ok: true };
 }
 
-/** Au-delà, l'écran dit combien d'entrées il ne montre pas. */
+/** Une page de la liste : l'écran propose ensuite « Afficher les suivantes ». */
 export const LIMITE_LISTE = 200;
 
-/** Les entrées, les plus récentes d'abord, sans leur contenu : un article premium retiré ne circule pas. */
-export async function listerLaCorbeille(service: SupabaseClient): Promise<ResultatListe> {
-  const { data, error, count } = await service
+/** Un horodatage tel que la base le rend (« 2026-11-03T10:00:00.123456+00:00 »), et rien d'autre. */
+const HORODATAGE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?(Z|[+-]\d{2}:\d{2})$/;
+
+/**
+ * Le curseur lu dans l'adresse : null s'il n'y en a pas (première page),
+ * « invalide » s'il n'a pas exactement la forme que la liste produit. Les
+ * deux valeurs entrent dans un filtre PostgREST : rien d'autre qu'une date et
+ * un identifiant ne doit pouvoir y passer.
+ */
+export function lireCurseur(supprimeLe: string | null, id: string | null): Curseur | null | 'invalide' {
+  if (supprimeLe === null && id === null) return null;
+  if (!supprimeLe || !HORODATAGE.test(supprimeLe) || Number.isNaN(Date.parse(supprimeLe)) || !isValidUUID(id)) {
+    return 'invalide';
+  }
+  return { supprimeLe, id };
+}
+
+/**
+ * Une page d'entrées, les plus récentes d'abord, sans leur contenu : un
+ * article premium retiré ne circule pas. Une liste plafonnée sans suite
+ * cachait les entrées les plus anciennes, celles qui partent le plus tôt :
+ * elles pouvaient expirer sans avoir jamais été visibles.
+ */
+export async function listerLaCorbeille(service: SupabaseClient, apres: Curseur | null = null): Promise<ResultatListe> {
+  let requete = service
     .from('contenus_supprimes')
-    .select('id, table_origine, id_origine, titre, supprime_le, resume_dependants', { count: 'exact' })
+    .select('id, table_origine, id_origine, titre, supprime_le, resume_dependants', { count: 'exact' });
+  if (apres) {
+    // Strictement après le curseur, dans l'ordre de la liste. Les valeurs
+    // entre guillemets : la date contient des points et des deux-points.
+    requete = requete.or(
+      `supprime_le.lt."${apres.supprimeLe}",and(supprime_le.eq."${apres.supprimeLe}",id.lt.${apres.id})`,
+    );
+  }
+  // Une ligne de plus que la page : elle dit s'il existe une suite.
+  const { data, error, count } = await requete
     .order('supprime_le', { ascending: false })
-    .limit(LIMITE_LISTE);
+    .order('id', { ascending: false })
+    .limit(LIMITE_LISTE + 1);
   if (error) {
     const lue = lireErreur(error);
     if (corbeilleAbsente(lue)) {
@@ -298,7 +347,8 @@ export async function listerLaCorbeille(service: SupabaseClient): Promise<Result
     signaler('corbeille-liste', lue);
     return { ok: false, statut: 500, inattendu: true, motif: typographieFr('La corbeille n’a pas pu être lue.') };
   }
-  const entrees = ((data ?? []) as unknown[]).map((ligne): EntreeListee => {
+  const lignes = (data ?? []) as unknown[];
+  const entrees = lignes.slice(0, LIMITE_LISTE).map((ligne): EntreeListee => {
     const l = objet(ligne);
     return {
       id: String(l.id ?? ''),
@@ -309,7 +359,9 @@ export async function listerLaCorbeille(service: SupabaseClient): Promise<Result
       resume_dependants: compteurs(l.resume_dependants),
     };
   });
-  return { ok: true, entrees, total: typeof count === 'number' ? count : entrees.length };
+  const derniere = entrees.at(-1);
+  const suite = lignes.length > LIMITE_LISTE && derniere ? { supprimeLe: derniere.supprime_le, id: derniere.id } : null;
+  return { ok: true, entrees, total: typeof count === 'number' ? count : entrees.length, suite };
 }
 
 /**

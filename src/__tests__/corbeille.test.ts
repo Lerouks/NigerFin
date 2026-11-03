@@ -10,7 +10,10 @@ import * as Sentry from '@sentry/nextjs';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { logAuditEvent } from '@/lib/audit';
 import { ARTICLE_CACHE_TAG } from '@/lib/articles';
+import { createClient } from '@supabase/supabase-js';
 import {
+  LIMITE_LISTE,
+  lireCurseur,
   listerLaCorbeille,
   mettreALaCorbeille,
   purgerLaCorbeille,
@@ -49,7 +52,7 @@ const lisible = (texte: string | null | undefined): string =>
 /** Une requête PostgREST figée : chaque méthode rend la chaîne, l'attente rend le résultat. */
 function requeteFigee(resultat: unknown) {
   const chaine: Record<string, unknown> = {};
-  for (const methode of ['select', 'order', 'limit', 'delete', 'eq']) chaine[methode] = vi.fn(() => chaine);
+  for (const methode of ['select', 'order', 'limit', 'delete', 'eq', 'or']) chaine[methode] = vi.fn(() => chaine);
   chaine.then = (ok: (valeur: unknown) => unknown, ko?: (erreur: unknown) => unknown) => Promise.resolve(resultat).then(ok, ko);
   return chaine;
 }
@@ -389,11 +392,88 @@ describe('listerLaCorbeille', () => {
       },
     });
     const liste = await listerLaCorbeille(service);
-    expect(liste).toMatchObject({ ok: true, total: 1 });
+    expect(liste).toMatchObject({ ok: true, total: 1, suite: null });
     expect(requete.select).toHaveBeenCalledWith('id, table_origine, id_origine, titre, supprime_le, resume_dependants', { count: 'exact' });
+    // Première page : aucun filtre, un ordre total (date puis identifiant), une ligne de plus que la page.
+    expect(requete.or).not.toHaveBeenCalled();
+    expect(requete.order).toHaveBeenNthCalledWith(1, 'supprime_le', { ascending: false });
+    expect(requete.order).toHaveBeenNthCalledWith(2, 'id', { ascending: false });
+    expect(requete.limit).toHaveBeenCalledWith(LIMITE_LISTE + 1);
 
     const absente = await listerLaCorbeille(client({ from: { data: null, error: { code: 'PGRST205', message: 'x' } } }).service);
     expect(absente).toMatchObject({ ok: false, statut: 503 });
+  });
+});
+
+describe('la liste par pages', () => {
+  const ligne = (n: number) => ({
+    id: uuid(10_000 + n),
+    table_origine: 'articles',
+    id_origine: uuid(n),
+    titre: `Article ${n}`,
+    supprime_le: `2026-10-${String(1 + (n % 28)).padStart(2, '0')}T10:00:00.${String(n).padStart(6, '0')}+00:00`,
+    resume_dependants: {},
+  });
+
+  it('une page pleine rend 200 entrées et dit où reprendre ; la suivante part strictement après', async () => {
+    const lignes = Array.from({ length: LIMITE_LISTE + 1 }, (_, n) => ligne(n));
+    const premiere = client({ from: { data: lignes, error: null, count: 450 } });
+
+    const page = await listerLaCorbeille(premiere.service);
+
+    expect(page.ok && page.entrees).toHaveLength(LIMITE_LISTE);
+    const derniere = lignes[LIMITE_LISTE - 1];
+    expect(page).toMatchObject({ ok: true, total: 450, suite: { supprimeLe: derniere?.supprime_le, id: derniere?.id } });
+
+    const suivante = client({ from: { data: [ligne(500)], error: null, count: 250 } });
+    const curseur = page.ok ? page.suite : null;
+    expect(await listerLaCorbeille(suivante.service, curseur)).toMatchObject({ ok: true, total: 250, suite: null });
+    expect(suivante.requete.or).toHaveBeenCalledWith(
+      `supprime_le.lt."${derniere?.supprime_le}",and(supprime_le.eq."${derniere?.supprime_le}",id.lt.${derniere?.id})`,
+    );
+  });
+
+  it('le filtre arrive à PostgREST tel quel, encodé dans l’adresse', async () => {
+    const adresses: string[] = [];
+    const service = createClient('https://exemple.supabase.co', 'cle-de-test', {
+      global: {
+        fetch: async (entree: RequestInfo | URL) => {
+          adresses.push(String(entree instanceof Request ? entree.url : entree));
+          return new Response('[]', { status: 200, headers: { 'Content-Type': 'application/json', 'Content-Range': '0-0/0' } });
+        },
+      },
+      // Node 20 n'a pas de WebSocket natif, que le client temps réel réclame à
+      // sa création : un transport factice suffit, la liste n'ouvre aucun canal.
+      realtime: { transport: class {} as never },
+    });
+
+    await listerLaCorbeille(service, { supprimeLe: '2026-11-03T10:00:00.123456+00:00', id: uuid(900) });
+
+    const adresse = new URL(adresses[0] ?? 'https://x');
+    expect(adresse.pathname).toBe('/rest/v1/contenus_supprimes');
+    expect(adresse.searchParams.get('or')).toBe(
+      `(supprime_le.lt."2026-11-03T10:00:00.123456+00:00",and(supprime_le.eq."2026-11-03T10:00:00.123456+00:00",id.lt.${uuid(900)}))`,
+    );
+    expect(adresse.searchParams.get('order')).toBe('supprime_le.desc,id.desc');
+    expect(adresse.searchParams.get('limit')).toBe(String(LIMITE_LISTE + 1));
+  });
+
+  it('un curseur venu de l’adresse n’est accepté que s’il a exactement la forme d’une date et d’un identifiant', () => {
+    expect(lireCurseur(null, null)).toBeNull();
+    expect(lireCurseur('2026-11-03T10:00:00.123456+00:00', uuid(900))).toEqual({ supprimeLe: '2026-11-03T10:00:00.123456+00:00', id: uuid(900) });
+    expect(lireCurseur('2026-11-03T10:00:00Z', uuid(900))).toEqual({ supprimeLe: '2026-11-03T10:00:00Z', id: uuid(900) });
+    for (const [date, id] of [
+      ['2026-11-03T10:00:00Z', null],
+      [null, uuid(900)],
+      ['2026-11-03', uuid(900)],
+      ['2026-11-03T10:00:00Z,id.gt.0', uuid(900)],
+      ['2026-11-03T10:00:00Z")', uuid(900)],
+      ['2026-13-45T99:99:99Z', uuid(900)],
+      ['2026-11-03T10:00:00Z', `${uuid(900)})`],
+      ['2026-11-03T10:00:00Z', 'pas-un-uuid'],
+    ] as const) {
+      expect(lireCurseur(date, id), `${date} ${id}`).toBe('invalide');
+    }
   });
 });
 

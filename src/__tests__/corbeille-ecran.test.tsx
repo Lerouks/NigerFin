@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { BandeauAnnonce, EnTeteCorbeille, LigneCorbeille, NoteTotal, type EntreeCorbeille } from '@/app/admin/CorbeilleManager';
+import {
+  BandeauAnnonce,
+  EnTeteCorbeille,
+  LigneCorbeille,
+  NoteTotal,
+  SuiteDeLaListe,
+  type EntreeCorbeille,
+} from '@/app/admin/CorbeilleManager';
 
 /**
  * Ce que l'écran de la corbeille affirme. Une phrase fausse sur cet écran
@@ -103,11 +110,22 @@ describe('écran de la corbeille', () => {
     expect(lu).toContain('Annuler');
   });
 
+  it('une liste incomplète dit combien d’entrées plus anciennes restent, et propose de les afficher', () => {
+    const plusieurs = texte(renderToStaticMarkup(<SuiteDeLaListe restantes={250} enCours={false} erreur={null} onAfficher={sansAction} />));
+    expect(plusieurs).toContain('Encore 250 suppressions plus anciennes : ce sont les plus proches de leur suppression définitive.');
+    expect(plusieurs).toContain('Afficher les suivantes');
+    const une = texte(renderToStaticMarkup(<SuiteDeLaListe restantes={1} enCours={false} erreur={null} onAfficher={sansAction} />));
+    expect(une).toContain('Encore une suppression plus ancienne : c’est la plus proche de sa suppression définitive.');
+    const enPanne = texte(renderToStaticMarkup(<SuiteDeLaListe restantes={3} enCours={false} erreur="Le serveur ne répond pas." onAfficher={sansAction} />));
+    expect(enPanne).toContain('Les suivantes n’ont pas pu être chargées : Le serveur ne répond pas.');
+    expect(texte(renderToStaticMarkup(<SuiteDeLaListe restantes={3} enCours erreur={null} onAfficher={sansAction} />))).toContain('Chargement…');
+  });
+
   it('les annonces et la note de liste tronquée posent la typographie française', () => {
     const html = renderToStaticMarkup(<BandeauAnnonce annonce={{ ton: 'succes', texte: '« Bourse » est de nouveau en place.', remarques: ['Une remarque : la voici.'] }} />);
     expect(html).toContain('\u202fBourse\u202f');
     expect(html).toContain('remarque\u00a0:');
-    expect(texte(renderToStaticMarkup(<NoteTotal affichees={200} total={1450} />))).toBe('Les 200 suppressions les plus récentes sur 1 450.');
+    expect(texte(renderToStaticMarkup(<NoteTotal affichees={200} total={1450} />))).toBe('200 suppressions affichées sur 1 450, les plus récentes d’abord.');
     expect(renderToStaticMarkup(<NoteTotal affichees={3} total={3} />)).toBe('');
   });
 });

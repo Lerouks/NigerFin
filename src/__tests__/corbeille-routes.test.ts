@@ -22,7 +22,7 @@ describe('route de la corbeille', () => {
     const { GET, POST, DELETE } = await routeCorbeille();
 
     const reponses = [
-      definie(await GET()),
+      definie(await GET(requete('/api/admin/corbeille', { method: 'GET' }))),
       definie(await POST(requete('/api/admin/corbeille', { method: 'POST', body: { id: uuid(900) } }))),
       definie(await DELETE(requete(`/api/admin/corbeille?id=${uuid(900)}`, { method: 'DELETE' }))),
     ];
@@ -44,13 +44,13 @@ describe('route de la corbeille', () => {
     connecter(factice.service);
     const { GET } = await routeCorbeille();
 
-    const reponse = definie(await GET());
+    const reponse = definie(await GET(requete('/api/admin/corbeille', { method: 'GET' })));
     const corps = await reponse.json();
 
     expect(reponse.status).toBe(200);
     expect(factice.ordre).toEqual(['rpc:corbeille_purger', 'from:contenus_supprimes']);
     expect(factice.rpc).toHaveBeenCalledWith('corbeille_purger', { p_jours: 30 });
-    expect(corps).toMatchObject({ total: 1, limite: 200, dureeConservationJours: 30 });
+    expect(corps).toMatchObject({ total: 1, suite: null, limite: 200, dureeConservationJours: 30 });
     expect(corps.entrees[0]).toEqual({
       id: uuid(900),
       table_origine: 'articles',
@@ -65,7 +65,7 @@ describe('route de la corbeille', () => {
     const factice = clientFactice({ rpc: { corbeille_purger: { error: { code: 'XX000', message: 'boum' } } } });
     connecter(factice.service);
     const { GET } = await routeCorbeille();
-    expect(definie(await GET()).status).toBe(200);
+    expect(definie(await GET(requete('/api/admin/corbeille', { method: 'GET' }))).status).toBe(200);
   });
 
   it('GET dit que la corbeille n’est pas installée quand la table manque', async () => {
@@ -75,9 +75,36 @@ describe('route de la corbeille', () => {
     });
     connecter(factice.service);
     const { GET } = await routeCorbeille();
-    const reponse = definie(await GET());
+    const reponse = definie(await GET(requete('/api/admin/corbeille', { method: 'GET' })));
     expect(reponse.status).toBe(503);
     expect((await reponse.json()).error).toContain('migration 00032');
+  });
+
+  it('GET donne la page suivante à partir d’une entrée, et refuse une position mal formée avant toute requête', async () => {
+    const factice = clientFactice({ rpc: { corbeille_purger: { data: { purgees: [], lecteurs_retires: 0 } } } });
+    connecter(factice.service);
+    const { GET } = await routeCorbeille();
+
+    const avant = '2026-11-03T10:00:00.123456+00:00';
+    const suite = definie(
+      await GET(requete(`/api/admin/corbeille?avant_le=${encodeURIComponent(avant)}&avant_id=${uuid(900)}`, { method: 'GET' })),
+    );
+    expect(suite.status).toBe(200);
+    const chaine = factice.from.mock.results[0]?.value as Record<string, ReturnType<typeof vi.fn>>;
+    expect(chaine.or).toHaveBeenCalledWith(`supprime_le.lt."${avant}",and(supprime_le.eq."${avant}",id.lt.${uuid(900)})`);
+
+    vi.clearAllMocks();
+    connecter(factice.service);
+    for (const adresse of [
+      `/api/admin/corbeille?avant_le=${encodeURIComponent(avant)}`,
+      `/api/admin/corbeille?avant_id=${uuid(900)}`,
+      `/api/admin/corbeille?avant_le=hier&avant_id=${uuid(900)}`,
+      `/api/admin/corbeille?avant_le=${encodeURIComponent(`${avant},id.gt.0`)}&avant_id=${uuid(900)}`,
+    ]) {
+      expect(definie(await GET(requete(adresse, { method: 'GET' }))).status, adresse).toBe(400);
+    }
+    expect(factice.rpc).not.toHaveBeenCalled();
+    expect(factice.from).not.toHaveBeenCalled();
   });
 
   it('POST restaure une entrée et renvoie le message et les remarques', async () => {

@@ -27,7 +27,7 @@ export function clientFactice(reponses: { rpc?: Record<string, { data?: unknown;
   });
   const from = vi.fn((table: string) => {
     const chaine: Record<string, unknown> = {};
-    for (const methode of ['select', 'order', 'limit', 'delete', 'eq', 'not', 'lt', 'in', 'update', 'insert']) {
+    for (const methode of ['select', 'order', 'limit', 'delete', 'eq', 'not', 'lt', 'in', 'update', 'insert', 'or']) {
       chaine[methode] = vi.fn(() => chaine);
     }
     chaine.then = (ok: (v: unknown) => unknown, ko?: (e: unknown) => unknown) => {

@@ -41,9 +41,23 @@ export interface Annonce {
   remarques?: string[];
 }
 
+/** Où reprendre la liste : la dernière entrée déjà affichée (voir listerLaCorbeille). */
+interface Curseur {
+  supprimeLe: string;
+  id: string;
+}
+
 interface ReponseListe {
   entrees: EntreeCorbeille[];
+  /** Les entrées à partir du curseur, cette page comprise. */
   total: number;
+  suite: Curseur | null;
+}
+
+function curseurLu(valeur: unknown): Curseur | null {
+  if (!valeur || typeof valeur !== 'object') return null;
+  const { supprimeLe, id } = valeur as Record<string, unknown>;
+  return typeof supprimeLe === 'string' && typeof id === 'string' ? { supprimeLe, id } : null;
 }
 
 interface ReponseRestauration {
@@ -238,13 +252,59 @@ function Confirmation(props: PropsLigne & { idTitre: string }) {
   );
 }
 
-/** « Les 200 suppressions les plus récentes sur 250 » : la liste ne cache pas qu'elle est tronquée. */
+/** « 200 suppressions affichées sur 250 » : la liste ne cache pas qu'elle est incomplète. */
 export function NoteTotal({ affichees, total }: { affichees: number; total: number }) {
   if (total <= affichees) return null;
   return (
     <p className="text-[12px] text-gray-500 mb-3">
-      {typographieFr(`Les ${nombreFr(affichees)} suppressions les plus récentes sur ${nombreFr(total)}.`)}
+      {typographieFr(`${nombreFr(affichees)}\u00a0suppressions affichées sur ${nombreFr(total)}, les plus récentes d’abord.`)}
     </p>
+  );
+}
+
+/**
+ * Le bas d'une liste incomplète. Les entrées qui manquent sont les plus
+ * anciennes, donc les premières à partir pour de bon : le bouton les rend
+ * toutes atteignables, page après page.
+ */
+export function SuiteDeLaListe({
+  restantes,
+  enCours,
+  erreur,
+  onAfficher,
+}: {
+  restantes: number;
+  enCours: boolean;
+  erreur: string | null;
+  onAfficher: () => void;
+}) {
+  return (
+    <div className="mt-4 flex flex-col items-start gap-2">
+      {restantes > 0 && (
+        <p className="text-[12px] text-gray-500 leading-relaxed max-w-2xl">
+          <Phrases
+            texte={
+              restantes > 1
+                ? `Encore ${nombreFr(restantes)} suppressions plus anciennes : ce sont les plus proches de leur suppression définitive.`
+                : 'Encore une suppression plus ancienne : c’est la plus proche de sa suppression définitive.'
+            }
+          />
+        </p>
+      )}
+      {erreur && (
+        <p role="alert" className="text-[12px] text-red-700 leading-relaxed max-w-2xl">
+          <Phrases texte={`Les suivantes n’ont pas pu être chargées : ${erreur}`} />
+        </p>
+      )}
+      <button
+        type="button"
+        onClick={onAfficher}
+        disabled={enCours}
+        className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white border border-black/10 text-[13px] font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+      >
+        {enCours ? 'Chargement…' : 'Afficher les suivantes'}
+      </button>
+    </div>
   );
 }
 
@@ -276,7 +336,12 @@ export function CorbeilleManager() {
   const [enCours, setEnCours] = useState<string | null>(null);
   const [confirmation, setConfirmation] = useState<string | null>(null);
   const [annonce, setAnnonce] = useState<Annonce | null>(null);
+  const [suite, setSuite] = useState<Curseur | null>(null);
+  const [chargementSuite, setChargementSuite] = useState(false);
+  const [erreurSuite, setErreurSuite] = useState<string | null>(null);
 
+  // Toujours la première page : après une restauration ou une réponse perdue,
+  // seule la liste relue dit ce qui s'est passé.
   const charger = useCallback(async () => {
     setChargement(true);
     const resultat = await appelAdmin<ReponseListe>('/api/admin/corbeille');
@@ -284,6 +349,8 @@ export function CorbeilleManager() {
       const liste = Array.isArray(resultat.donnees?.entrees) ? resultat.donnees.entrees : [];
       setEntrees(liste);
       setTotal(typeof resultat.donnees?.total === 'number' ? resultat.donnees.total : liste.length);
+      setSuite(curseurLu(resultat.donnees?.suite));
+      setErreurSuite(null);
       setChargee(true);
       setErreur(null);
       setHorsLigne(false);
@@ -299,6 +366,28 @@ export function CorbeilleManager() {
   useEffect(() => {
     charger();
   }, [charger]);
+
+  async function afficherLesSuivantes() {
+    if (!suite) return;
+    setChargementSuite(true);
+    setErreurSuite(null);
+    const deja = entrees.length;
+    const parametres = new URLSearchParams({ avant_le: suite.supprimeLe, avant_id: suite.id });
+    const resultat = await appelAdmin<ReponseListe>(`/api/admin/corbeille?${parametres.toString()}`);
+    if (resultat.ok) {
+      const page = Array.isArray(resultat.donnees?.entrees) ? resultat.donnees.entrees : [];
+      setEntrees((avant) => {
+        const connues = new Set(avant.map((entree) => entree.id));
+        return [...avant, ...page.filter((entree) => !connues.has(entree.id))];
+      });
+      // Le total de la page suivante compte à partir du curseur.
+      if (typeof resultat.donnees?.total === 'number') setTotal(deja + resultat.donnees.total);
+      setSuite(curseurLu(resultat.donnees?.suite));
+    } else {
+      setErreurSuite(resultat.message);
+    }
+    setChargementSuite(false);
+  }
 
   async function restaurer(entree: EntreeCorbeille) {
     setEnCours(entree.id);
@@ -367,6 +456,14 @@ export function CorbeilleManager() {
               />
             ))}
           </ul>
+          {suite && (
+            <SuiteDeLaListe
+              restantes={Math.max(total - entrees.length, 0)}
+              enCours={chargementSuite}
+              erreur={erreurSuite}
+              onAfficher={afficherLesSuivantes}
+            />
+          )}
         </>
       )}
     </div>

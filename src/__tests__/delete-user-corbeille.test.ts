@@ -19,13 +19,13 @@ const LECTRICE = uuid(2);
  * Un client qui note chaque opération dans l'ordre où elle arrive : c'est
  * l'ordre qui protège ici les données du lecteur.
  */
-function clientQuiNote(options: { authEchoue?: boolean; corbeilleEchoue?: boolean } = {}) {
+function clientQuiNote(options: { authEchoue?: boolean; corbeilleEchoue?: boolean; tableEnPanne?: string } = {}) {
   const ordre: string[] = [];
   const from = vi.fn((table: string) => ({
     delete: () => ({
       eq: async (colonne: string) => {
         ordre.push(`delete:${table}.${colonne}`);
-        return { error: null };
+        return { error: table === options.tableEnPanne ? { code: 'XX000', message: 'boum' } : null };
       },
     }),
   }));
@@ -55,12 +55,27 @@ describe('deleteUserCompletely et la corbeille', () => {
 
     const rang = (operation: string) => ordre.indexOf(operation);
     expect(rang('delete:comments.user_id')).toBeGreaterThanOrEqual(0);
-    expect(rang('delete:user_profiles.id')).toBeGreaterThan(rang('delete:comments.user_id'));
+    // L'abonnement à la newsletter, AVANT le compte : la base viderait sinon son user_id.
+    expect(rang('delete:newsletter_subscribers.user_id')).toBeGreaterThan(rang('delete:newsletter_preferences.user_id'));
+    expect(rang('delete:user_profiles.id')).toBeGreaterThan(rang('delete:newsletter_subscribers.user_id'));
     expect(rang('auth.deleteUser')).toBeGreaterThan(rang('delete:user_profiles.id'));
     expect(rang('rpc:corbeille_retirer_lecteur')).toBeGreaterThan(rang('auth.deleteUser'));
     // Second passage sur les commentaires et les j'aime, sans clé étrangère vers le compte.
     expect(ordre.slice(rang('rpc:corbeille_retirer_lecteur') + 1)).toEqual(['delete:comments.user_id', 'delete:article_likes.user_id']);
     expect(rpc).toHaveBeenCalledWith('corbeille_retirer_lecteur', { p_user: LECTRICE });
+    expect(sendTransactionalEmail).toHaveBeenCalledTimes(1);
+  });
+
+  it('un abonnement qui ne part pas est signalé, sans empêcher la fin de la suppression', async () => {
+    const { client, ordre } = clientQuiNote({ tableEnPanne: 'newsletter_subscribers' });
+
+    await deleteUserCompletely(client, LECTRICE, 'lectrice@exemple.test', 'Lectrice', ADMIN);
+
+    expect(Sentry.captureException).toHaveBeenCalledWith(
+      expect.objectContaining({ code: 'XX000' }),
+      expect.objectContaining({ tags: { context: 'delete-user-newsletter' } }),
+    );
+    expect(ordre).toContain('auth.deleteUser');
     expect(sendTransactionalEmail).toHaveBeenCalledTimes(1);
   });
 

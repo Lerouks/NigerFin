@@ -44,6 +44,23 @@ export async function deleteUserCompletely(
     }
   }
 
+  // 2 bis. L'abonnement à la newsletter rattaché au compte. Le courriel de
+  // confirmation promet « Toutes vos données personnelles ont été effacées » :
+  // l'adresse ne doit pas survivre dans newsletter_subscribers. AVANT le
+  // compte : la base vide user_id quand le compte part (ON DELETE SET NULL,
+  // relevé en production), et la ligne, adresse comprise, ne serait plus
+  // rattachée à rien. Ses événements d'envoi restent, sans abonné (ON DELETE
+  // SET NULL), pour les chiffres des numéros. Un échec est signalé sans
+  // bloquer la suite, comme le nettoyage de la corbeille plus bas.
+  try {
+    const { error } = await serviceClient.from('newsletter_subscribers').delete().eq('user_id', userId);
+    if (error) {
+      Sentry.captureException(error, { tags: { context: 'delete-user-newsletter' }, extra: { userId } });
+    }
+  } catch (err) {
+    Sentry.captureException(err, { tags: { context: 'delete-user-newsletter' }, extra: { userId } });
+  }
+
   // 3. Delete user profile
   await serviceClient.from('user_profiles').delete().eq('id', userId);
 

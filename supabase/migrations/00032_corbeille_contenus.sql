@@ -1200,7 +1200,15 @@ COMMIT;
 --   (select relrowsecurity from pg_class
 --     where oid = 'public.contenus_supprimes'::regclass)                         as rls,           -- true
 --   (select count(*) from pg_policies
---     where schemaname = 'public' and tablename = 'contenus_supprimes')          as politiques;    -- 0
+--     where schemaname = 'public' and tablename = 'contenus_supprimes')          as politiques,    -- 0
+--   exists (select 1 from pg_constraint
+--     where conname = 'contenus_supprimes_supprime_par_fkey')                    as cle_auteur;    -- true
+-- cle_auteur = false : la table a perdu sa clé vers auth.users, parce que la
+-- migration a été réappliquée après la seule première transaction du retour
+-- arrière (CREATE TABLE IF NOT EXISTS ne recrée pas une table qui existe).
+-- Lancer alors la seconde transaction du retour arrière, après avoir mis à
+-- l'abri ce que la corbeille contient (point 2 du retour arrière), puis
+-- réappliquer la migration.
 --
 -- select f, r, has_function_privilege(r, f, 'execute') as peut
 --   from unnest(array[
@@ -1275,3 +1283,9 @@ COMMIT;
 -- DROP FUNCTION IF EXISTS public.corbeille_inserer(text, jsonb, jsonb);
 -- DROP TABLE IF EXISTS public.contenus_supprimes;
 -- COMMIT;
+--
+-- 4. Une fois la première transaction passée, toujours lancer la seconde
+--    avant de réappliquer la migration. Réappliquée entre les deux, elle
+--    trouve la table encore là (CREATE TABLE IF NOT EXISTS ne la recrée pas)
+--    et la laisse sans sa clé vers auth.users : la première vérification le
+--    signale (cle_auteur = false).

@@ -376,7 +376,7 @@ describe('installation et droits', () => {
     expect(requetes).toHaveLength(3);
 
     expect((await db.query(requetes[0] ?? '')).rows).toEqual([
-      { anon: false, authenticated: false, service_lit: true, service_ecrit: false, rls: true, politiques: 0 },
+      { anon: false, authenticated: false, service_lit: true, service_ecrit: false, rls: true, politiques: 0, cle_auteur: true },
     ]);
     const internes = ['corbeille_inserer', 'corbeille_limite_purge', 'corbeille_oublier_articles'];
     const droits = (await db.query<{ f: string; r: string; peut: boolean }>(requetes[1] ?? '')).rows;
@@ -422,6 +422,33 @@ describe('installation et droits', () => {
     await appliquerMigration(db);
     expect(await nombre("select count(*) as n from pg_proc where proname like 'corbeille%'")).toBe(8);
     expect(await nombre("select count(*) as n from pg_constraint where conname = 'contenus_supprimes_supprime_par_fkey'")).toBe(1);
+  });
+
+  it('F14 : réappliquée après la seule première transaction du retour arrière, la migration laisse la table sans sa clé, et la première vérification le dit', async () => {
+    const [cle, reste] = transactionsDeRetourArriere();
+    const [premiere] = requetesDeVerification();
+    const commeProprietaire = async (sql: string) => {
+      await db.exec('set role proprietaire');
+      try {
+        await db.exec(sql);
+      } finally {
+        await db.exec('reset role');
+      }
+    };
+
+    // Ce que le mode d'emploi interdit : réappliquer entre les deux transactions.
+    await commeProprietaire(cle ?? '');
+    await appliquerMigration(db);
+    expect(await nombre("select count(*) as n from pg_constraint where conname = 'contenus_supprimes_supprime_par_fkey'")).toBe(0);
+    expect((await db.query<Json>(premiere ?? '')).rows[0]).toMatchObject({ cle_auteur: false, rls: true, politiques: 0 });
+
+    // Ce qu'il prescrit : la seconde transaction, puis la migration. La clé revient.
+    await commeProprietaire(reste ?? '');
+    await appliquerMigration(db);
+    expect((await db.query<Json>(premiere ?? '')).rows[0]).toMatchObject({ cle_auteur: true });
+
+    const consigne = sectionDuPied('RETOUR ARRIÈRE', null).join(' ').replace(/\s+/g, ' ');
+    expect(consigne).toContain('Une fois la première transaction passée, toujours lancer la seconde avant de réappliquer la migration.');
   });
 
   it('chaque DELETE et chaque UPDATE de la migration a un WHERE : safeupdate, chargé en production pour PostgREST, refuserait les autres', () => {

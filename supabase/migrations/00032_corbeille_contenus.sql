@@ -64,10 +64,14 @@
 -- Application : à la main, avec « supabase db query --linked --file »,
 -- jamais avec « db push » (l'historique des migrations de ce dépôt n'est pas
 -- celui de la production). Le fichier est encadré par BEGIN et COMMIT : il
--- s'applique en entier ou pas du tout. lock_timeout : la clé étrangère vers
--- auth.users verrouille brièvement auth.users ; derrière une transaction
--- longue, la migration abandonne au bout de 5 secondes au lieu de bloquer les
--- connexions des lecteurs qui arrivent derrière elle. Rejouable sans effet de
+-- s'applique en entier ou pas du tout. Verrous : la clé étrangère vers
+-- auth.users prend sur auth.users un verrou SHARE ROW EXCLUSIVE, qui
+-- n'attend pas les lectures, seulement une écriture en cours (une connexion,
+-- une inscription). Derrière une telle écriture, la migration attend
+-- 5 secondes au plus (lock_timeout), puis abandonne en 55P03 sans rien
+-- laisser : il suffit de la relancer, à une heure creuse. Pendant cette
+-- attente, les écritures sur auth.users qui arrivent derrière elle attendent
+-- aussi, 5 secondes au plus ; les lectures, jamais. Rejouable sans effet de
 -- bord. Vérifications et retour arrière : en fin de fichier.
 
 BEGIN;
@@ -105,7 +109,8 @@ CREATE TABLE IF NOT EXISTS public.contenus_supprimes (
   -- Les comptes de lecteurs présents dans dependants (progression des leçons).
   lecteurs uuid[] NOT NULL DEFAULT '{}',
   supprime_le timestamptz NOT NULL DEFAULT now(),
-  supprime_par uuid REFERENCES auth.users (id) ON DELETE SET NULL
+  -- Nommée : le retour arrière la retire par son nom, en premier.
+  supprime_par uuid CONSTRAINT contenus_supprimes_supprime_par_fkey REFERENCES auth.users (id) ON DELETE SET NULL
 );
 
 -- Une seule entrée par contenu. Sans cela, une vieille copie pouvait remettre
@@ -428,8 +433,9 @@ BEGIN
 
   IF p_table = 'newsletter_issues' THEN
     -- meta.raw n'est jamais copié : le webhook Resend y recopie l'événement
-    -- entier, adresse du destinataire comprise. Seuls resend_id et optimistic,
-    -- qui ne disent rien de personne, sont gardés.
+    -- entier, adresse du destinataire comprise. Seuls resend_id (un
+    -- identifiant d'envoi chez Resend, sans adresse) et optimistic sont
+    -- gardés ; un meta qui n'est pas un objet n'est pas gardé du tout (NULL).
     WITH parties AS (
       DELETE FROM public.newsletter_events WHERE issue_id = p_id RETURNING *
     )
@@ -1070,20 +1076,21 @@ COMMENT ON FUNCTION public.corbeille_inserer(text, jsonb, jsonb) IS
 COMMIT;
 
 -- ---------------------------------------------------------------------------
--- VÉRIFICATIONS, à lancer APRÈS l'application (lecture seule).
+-- VÉRIFICATIONS, à lancer APRÈS l'application (lecture seule). Le test
+-- corbeille-sql les exécute telles quelles et vérifie les résultats attendus.
 --
 -- select
 --   has_table_privilege('anon', 'public.contenus_supprimes',
---     'select, insert, update, delete, truncate, references, trigger')     as anon,              -- false
+--     'select, insert, update, delete, truncate, references, trigger, maintain') as anon,          -- false
 --   has_table_privilege('authenticated', 'public.contenus_supprimes',
---     'select, insert, update, delete, truncate, references, trigger')     as authenticated,     -- false
---   has_table_privilege('service_role', 'public.contenus_supprimes', 'select') as service_lit,   -- true
+--     'select, insert, update, delete, truncate, references, trigger, maintain') as authenticated, -- false
+--   has_table_privilege('service_role', 'public.contenus_supprimes', 'select')   as service_lit,   -- true
 --   has_table_privilege('service_role', 'public.contenus_supprimes',
---     'insert, update, delete, truncate')                                  as service_ecrit,     -- false
+--     'insert, update, delete, truncate, references, trigger, maintain')         as service_ecrit, -- false
 --   (select relrowsecurity from pg_class
---     where oid = 'public.contenus_supprimes'::regclass)                   as rls,               -- true
+--     where oid = 'public.contenus_supprimes'::regclass)                         as rls,           -- true
 --   (select count(*) from pg_policies
---     where schemaname = 'public' and tablename = 'contenus_supprimes')    as politiques;        -- 0
+--     where schemaname = 'public' and tablename = 'contenus_supprimes')          as politiques;    -- 0
 --
 -- select f, r, has_function_privilege(r, f, 'execute') as peut
 --   from unnest(array[
@@ -1121,9 +1128,33 @@ COMMIT;
 --    DÉFINITIVEMENT tout ce qui est dans la corbeille à ce moment-là : chaque
 --    contenu qui s'y trouve est alors perdu pour de bon, sans autre copie que
 --    la sauvegarde de la nuit. Remettre en place ce qui doit l'être, ou en
---    garder une copie (select * from public.contenus_supprimes), avant :
+--    garder une copie (select * from public.contenus_supprimes), avant.
+-- 3. Deux transactions courtes, lancées l'une après l'autre (deux commandes
+--    « supabase db query --linked »), chacune avec une attente de verrou
+--    plafonnée à 3 secondes (SET LOCAL lock_timeout).
+--    La première retire la clé étrangère supprime_par. C'est la seule
+--    instruction du retour arrière qui verrouille auth.users, en ACCESS
+--    EXCLUSIVE, pour retirer les déclencheurs que la clé y a posés. Ce verrou
+--    attend derrière toute transaction qui lit auth.users, et pendant qu'il
+--    attend, chaque nouvelle lecture d'auth.users (une connexion, le
+--    rafraîchissement de session que src/proxy.ts fait à chaque requête, la
+--    garde de l'administration) attend derrière lui : 3 secondes au plus, au
+--    lieu de 2 minutes (le statement_timeout de « supabase db query ») sans
+--    lock_timeout. La seconde ne touche plus auth.users : elle retire les
+--    fonctions, puis la table, sans jamais bloquer une connexion.
+--    Un échec 55P03 (« canceling statement due to lock timeout ») n'a RIEN
+--    changé : la transaction est annulée en entier. Relancer la même
+--    transaction à une heure creuse. Si la seconde échoue après la réussite
+--    de la première, la table reste, sans sa clé vers auth.users, ce qui ne
+--    gêne rien : relancer la seconde.
 --
 -- BEGIN;
+-- SET LOCAL lock_timeout = '3s';
+-- ALTER TABLE IF EXISTS public.contenus_supprimes DROP CONSTRAINT IF EXISTS contenus_supprimes_supprime_par_fkey;
+-- COMMIT;
+--
+-- BEGIN;
+-- SET LOCAL lock_timeout = '3s';
 -- DROP FUNCTION IF EXISTS public.corbeille_vider(uuid);
 -- DROP FUNCTION IF EXISTS public.corbeille_purger(integer);
 -- DROP FUNCTION IF EXISTS public.corbeille_oublier_articles(uuid[]);

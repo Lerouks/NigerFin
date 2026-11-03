@@ -157,6 +157,46 @@ async function refus(promesse: Promise<unknown>): Promise<{ code: string; detail
   return { code: erreur.message.slice('corbeille:'.length), detail };
 }
 
+/** Les lignes d'une section du pied de la migration (vérifications, retour arrière), sans leur « -- ». */
+function sectionDuPied(debut: string, fin: string | null): string[] {
+  const partie = MIGRATION.split(debut)[1] ?? '';
+  return (fin ? (partie.split(fin)[0] ?? '') : partie)
+    .split('\n')
+    .filter((ligne) => ligne.startsWith('--'))
+    .map((ligne) => ligne.replace(/^-- ?/, ''));
+}
+
+/** Les requêtes de vérification, telles que le pied de la migration les donne. */
+function requetesDeVerification(): string[] {
+  const requetes: string[] = [];
+  let courante: string[] | null = null;
+  for (const ligne of sectionDuPied('VÉRIFICATIONS', 'RETOUR ARRIÈRE')) {
+    if (!courante && /^select\b/i.test(ligne)) courante = [];
+    if (!courante) continue;
+    courante.push(ligne);
+    if (/;\s*(--.*)?$/.test(ligne)) {
+      requetes.push(courante.join('\n'));
+      courante = null;
+    }
+  }
+  return requetes;
+}
+
+/** Les transactions du retour arrière, telles que le pied de la migration les donne. */
+function transactionsDeRetourArriere(): string[] {
+  const instructions = sectionDuPied('RETOUR ARRIÈRE', null).filter((ligne) => /^(BEGIN|SET LOCAL|ALTER TABLE|DROP|COMMIT)\b/.test(ligne));
+  const transactions: string[] = [];
+  let courante: string[] = [];
+  for (const instruction of instructions) {
+    courante.push(instruction);
+    if (instruction === 'COMMIT;') {
+      transactions.push(courante.join('\n'));
+      courante = [];
+    }
+  }
+  return transactions;
+}
+
 async function entreeDe(table: string, id: string): Promise<Json | undefined> {
   return un<Json>('select * from public.contenus_supprimes where table_origine = $1 and id_origine = $2', [table, id]);
 }
@@ -328,6 +368,68 @@ describe('installation et droits', () => {
               has_function_privilege('anon', 'public.temoin_f()', 'execute') as fonction_anon`,
     );
     expect(droits).toEqual({ table_anon: true, table_authentifie: true, fonction_anon: true });
+  });
+
+  it('les trois requêtes de vérification de la migration rendent exactement les résultats annoncés', async () => {
+    const requetes = requetesDeVerification();
+    expect(requetes).toHaveLength(3);
+
+    expect((await db.query(requetes[0] ?? '')).rows).toEqual([
+      { anon: false, authenticated: false, service_lit: true, service_ecrit: false, rls: true, politiques: 0 },
+    ]);
+    const internes = ['corbeille_inserer', 'corbeille_limite_purge', 'corbeille_oublier_articles'];
+    const droits = (await db.query<{ f: string; r: string; peut: boolean }>(requetes[1] ?? '')).rows;
+    expect(droits).toHaveLength(8 * 3);
+    for (const { f, r, peut } of droits) {
+      const interne = internes.some((nom) => f.includes(nom));
+      expect(peut, `${r} sur ${f}`).toBe(r === 'service_role' && !interne);
+    }
+    const fonctions = (await db.query<{ proname: string; prosecdef: boolean; proconfig: string[] }>(requetes[2] ?? '')).rows;
+    expect(fonctions).toHaveLength(8);
+    for (const { proname, prosecdef, proconfig } of fonctions) {
+      const interne = internes.includes(proname);
+      expect(prosecdef, proname).toBe(!interne);
+      expect(proconfig, proname).toEqual(interne ? ['search_path=public, pg_temp'] : ['search_path=public, pg_temp', 'lock_timeout=5s']);
+    }
+  });
+
+  it('le retour arrière, tel qu’écrit, tient en deux transactions courtes, retire tout, et la migration se rejoue ensuite', async () => {
+    const [cle, reste] = transactionsDeRetourArriere();
+    for (const transaction of [cle, reste]) {
+      expect(transaction).toMatch(/^BEGIN;\nSET LOCAL lock_timeout = '3s';\n/);
+      expect(transaction).toMatch(/\nCOMMIT;$/);
+    }
+    // Seule la première touche auth.users : elle ne fait que retirer la clé.
+    expect(cle?.split('\n')).toHaveLength(4);
+    expect(reste).not.toMatch(/auth\.users|CONSTRAINT/);
+    await mettre('articles', ARTICLE);
+
+    await db.exec('set role proprietaire');
+    try {
+      await db.exec(cle ?? '');
+      expect(await nombre("select count(*) as n from pg_constraint where conname = 'contenus_supprimes_supprime_par_fkey'")).toBe(0);
+      expect(await nombre("select count(*) as n from pg_proc where proname like 'corbeille%'")).toBe(8);
+      await db.exec(reste ?? '');
+    } finally {
+      await db.exec('reset role');
+    }
+
+    expect(await nombre("select count(*) as n from pg_proc where proname like 'corbeille%'")).toBe(0);
+    expect((await un<{ t: string | null }>("select to_regclass('public.contenus_supprimes')::text as t"))?.t).toBeNull();
+    // Les contenus et les comptes n'ont rien perdu, et tout se réinstalle.
+    expect(await nombre('select count(*) as n from auth.users')).toBe(3);
+    await appliquerMigration(db);
+    expect(await nombre("select count(*) as n from pg_proc where proname like 'corbeille%'")).toBe(8);
+    expect(await nombre("select count(*) as n from pg_constraint where conname = 'contenus_supprimes_supprime_par_fkey'")).toBe(1);
+  });
+
+  it('chaque DELETE et chaque UPDATE de la migration a un WHERE : safeupdate, chargé en production pour PostgREST, refuserait les autres', () => {
+    const code = MIGRATION.split('\n')
+      .filter((ligne) => !ligne.trim().startsWith('--'))
+      .join('\n');
+    const morceaux = code.split(';').filter((morceau) => /\bDELETE\s+FROM\b|\bUPDATE\s+[\w.]+(\s+AS\s+\w+)?\s+SET\b/i.test(morceau));
+    expect(morceaux.length).toBeGreaterThanOrEqual(10);
+    for (const morceau of morceaux) expect(morceau, morceau.trim().slice(0, 120)).toMatch(/\bWHERE\b/i);
   });
 
   it('la réplique est fidèle à la production : aucune clé de comments ni d’article_likes vers articles, quatre cascades', async () => {

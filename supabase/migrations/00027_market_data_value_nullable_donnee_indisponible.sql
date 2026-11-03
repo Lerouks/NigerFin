@@ -1,7 +1,7 @@
 -- ============================================================================
 -- 00027 — market_data.value nullable + neutralisation des valeurs fabriquees
 --
--- DECISION (Raouf, 2026-07-20) : Option B.
+-- DECISION (direction, 2026-07-20) : Option B.
 -- On ne SUPPRIME pas les lignes BRVMC (BRVM Composite) et U3O8 (uranium) : on
 -- VIDE leur valeur, et l'interface affiche « donnee indisponible » a la place du
 -- chiffre. Le lecteur voit ainsi que l'indicateur existe et que NFI Report ne le

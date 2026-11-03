@@ -52,7 +52,7 @@ export default function NouveauMotDePassePage() {
       if (data.session) { setSessionPrete(true); return; }
       // Pas encore de session : le jeton du lien arrive dans l'adresse et met un
       // instant a etre traite. Conclure tout de suite ferait clignoter un
-      // avertissement faux sur une connexion lente, et celle de Raouf coupe
+      // avertissement faux sur une connexion lente, et celle de la direction coupe
       // regulierement. On laisse deux secondes avant de trancher.
       const minuteur = setTimeout(() => {
         if (annule) return;

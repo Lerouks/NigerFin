@@ -87,8 +87,8 @@ describe('sanitizeHtml, côté serveur', () => {
 
 describe('sanitizeEmailHtml, politique restreinte', () => {
   it('conserve le texte mis en forme et les liens', () => {
-    const out = sanitizeEmailHtml('<p>Bonjour <strong>Raouf</strong></p><a href="https://nfireport.com">le site</a>');
-    expect(out).toContain('<strong>Raouf</strong>');
+    const out = sanitizeEmailHtml('<p>Bonjour <strong>Mariama</strong></p><a href="https://nfireport.com">le site</a>');
+    expect(out).toContain('<strong>Mariama</strong>');
     expect(out).toContain('href="https://nfireport.com"');
   });
 

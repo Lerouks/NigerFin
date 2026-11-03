@@ -55,7 +55,7 @@ const FALLBACK_FEATURES: SiteFeatures = {
 /**
  * Derniere valeur lue avec succes, gardee le temps de vie de l'instance. La
  * connexion coupe regulierement : mieux vaut rejouer le dernier etat connu que
- * retomber sur un repli qui contredit ce que Raouf a regle dans l'admin.
+ * retomber sur un repli qui contredit ce que la direction a regle dans l'admin.
  */
 let lastKnownFeatures: SiteFeatures | null = null;
 

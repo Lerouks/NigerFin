@@ -1,5 +1,13 @@
 import { guillemets, typographieFr } from '@/lib/typographie-fr';
-import { compter, estTableCorbeille, LIBELLE_DEPENDANT, resumerDependants, type TableCorbeille } from './libelles';
+import {
+  compter,
+  estTableCorbeille,
+  LIBELLE_DEPENDANT,
+  listeFr,
+  nomDeTable,
+  resumerDependants,
+  type TableCorbeille,
+} from './libelles';
 
 /**
  * Ce que disent les fonctions SQL de la corbeille, en français.
@@ -179,6 +187,31 @@ export function echecRestauration(lue: ErreurLue): Echec {
         409,
         `${impossible} : le numéro\u00a0${String(lue.detail.numero ?? '')} est déjà pris par ${autre}, et ce numéro a déjà été envoyé, au moins en partie : il ne peut pas changer de numéro.`,
       );
+    // Les deux refus suivants disent que le schéma de la base a changé depuis
+    // la suppression : il faut un développeur, d'où le signalement à Sentry.
+    case 'colonnes_inconnues': {
+      const colonnes = (Array.isArray(lue.detail.colonnes) ? lue.detail.colonnes : [])
+        .map(chaine)
+        .filter((nom): nom is string => nom !== null);
+      const perdues =
+        colonnes.length > 1
+          ? `les colonnes ${listeFr(colonnes.map(guillemets))}`
+          : `la colonne ${guillemets(colonnes[0] ?? 'inconnue')}`;
+      return echec(
+        409,
+        `${impossible} : depuis sa suppression, ${nomDeTable(lue.detail.table_touchee)} a perdu ${perdues}, que sa copie remplit encore. ${rien} L’élément reste dans la corbeille, intact : la table doit d’abord être corrigée.`,
+        true,
+      );
+    }
+    case 'remise_incomplete': {
+      const attendues = nombre(lue.detail.attendues);
+      const ecartees = Math.max(attendues - nombre(lue.detail.remises), 0);
+      return echec(
+        409,
+        `${impossible} : ${nomDeTable(lue.detail.table_touchee)} a écarté sans erreur ${compter(ecartees, LIGNE)} sur ${attendues}. ${rien} L’élément reste dans la corbeille, intact : la table doit d’abord être corrigée.`,
+        true,
+      );
+    }
     default:
       break;
   }
@@ -190,6 +223,8 @@ export function echecRestauration(lue: ErreurLue): Echec {
   }
   return echec(500, `La restauration a échoué. ${rien}`, true);
 }
+
+const LIGNE = { un: 'ligne', plusieurs: 'lignes' };
 
 function nombre(valeur: unknown): number {
   return typeof valeur === 'number' && Number.isFinite(valeur) ? valeur : 0;

@@ -200,7 +200,7 @@ describe('installation et droits', () => {
               has_function_privilege($1, 'public.corbeille_restaurer(uuid)', 'execute') as restaurer,
               has_function_privilege($1, 'public.corbeille_retirer_lecteur(uuid)', 'execute') as retirer,
               has_function_privilege($1, 'public.corbeille_purger(integer)', 'execute') as purger,
-              has_function_privilege($1, 'public.corbeille_inserer(text, jsonb)', 'execute') as inserer`,
+              has_function_privilege($1, 'public.corbeille_inserer(text, jsonb, jsonb)', 'execute') as inserer`,
       [role],
     );
     expect(droits).toEqual({ table: false, mettre: false, restaurer: false, retirer: false, purger: false, inserer: false });
@@ -211,7 +211,7 @@ describe('installation et droits', () => {
       `select public.corbeille_restaurer('${uuid(999)}')`,
       `select public.corbeille_retirer_lecteur('${LECTRICE}')`,
       'select public.corbeille_purger(30)',
-      `select public.corbeille_inserer('articles', '[]')`,
+      `select public.corbeille_inserer('articles', '[]', '{}')`,
     ]) {
       const erreur = await erreurDe(commeRole(db, role, () => db.query(sql)));
       expect(erreur.code).toBe('42501');
@@ -230,7 +230,7 @@ describe('installation et droits', () => {
               has_function_privilege('service_role', 'public.corbeille_restaurer(uuid)', 'execute') as restaurer,
               has_function_privilege('service_role', 'public.corbeille_retirer_lecteur(uuid)', 'execute') as retirer,
               has_function_privilege('service_role', 'public.corbeille_purger(integer)', 'execute') as purger,
-              has_function_privilege('service_role', 'public.corbeille_inserer(text, jsonb)', 'execute') as inserer`,
+              has_function_privilege('service_role', 'public.corbeille_inserer(text, jsonb, jsonb)', 'execute') as inserer`,
     );
     expect(droits).toEqual({ lit: true, vide: true, ecrit: false, mettre: true, restaurer: true, retirer: true, purger: true, inserer: false });
 
@@ -774,6 +774,124 @@ describe('restauration', () => {
 
     expect((await ligne('legal_sections', SECTION))?.visible).toBe(true);
   });
+
+  it('une colonne renommée depuis la suppression : refus, rien n’est remis, l’entrée reste intacte', async () => {
+    const { id_corbeille } = await mettre('articles', ARTICLE);
+    const entreeAvant = await entreeDe('articles', ARTICLE);
+    // Sans ce refus, l'article revenait avec un corps vide, et sa seule copie
+    // quittait la corbeille.
+    await db.exec('alter table public.articles rename column body to corps');
+
+    const { code, detail } = await refus(restaurer(String(id_corbeille)));
+
+    expect(code).toBe('colonnes_inconnues');
+    expect(detail).toEqual({ titre: 'Le franc CFA', table: 'articles', table_touchee: 'articles', colonnes: ['body'] });
+    expect(await ligne('articles', ARTICLE)).toBeNull();
+    expect(await entreeDe('articles', ARTICLE)).toEqual(entreeAvant);
+  });
+
+  it('une colonne supprimée d’une table liée : toute la restauration est refusée, l’entrée reste intacte', async () => {
+    const { id_corbeille } = await mettre('education_categories', CATEGORIE);
+    const entreeAvant = await entreeDe('education_categories', CATEGORIE);
+    await db.exec('alter table public.user_lesson_progress drop column quiz_score');
+
+    const { code, detail } = await refus(restaurer(String(id_corbeille)));
+
+    expect(code).toBe('colonnes_inconnues');
+    expect(detail).toEqual({ titre: 'Bourse', table: 'education_categories', table_touchee: 'user_lesson_progress', colonnes: ['quiz_score'] });
+    expect(await ligne('education_categories', CATEGORIE)).toBeNull();
+    expect(await nombre(`select count(*) as n from public.education_lessons where category_id = '${CATEGORIE}'`)).toBe(0);
+    expect(await entreeDe('education_categories', CATEGORIE)).toEqual(entreeAvant);
+  });
+
+  it('un déclencheur BEFORE INSERT qui écarte une progression sans erreur : refus, rien n’est remis, l’entrée reste intacte', async () => {
+    const { id_corbeille } = await mettre('education_lessons', LECON);
+    const entreeAvant = await entreeDe('education_lessons', LECON);
+    await db.exec(`create function public.ecarter() returns trigger language plpgsql as $$
+        begin if new.user_id = '${LECTEUR}' then return null; end if; return new; end $$;
+      create trigger ecarter before insert on public.user_lesson_progress for each row execute function public.ecarter();`);
+
+    const { code, detail } = await refus(restaurer(String(id_corbeille)));
+
+    expect(code).toBe('remise_incomplete');
+    expect(detail).toEqual({ titre: 'Le PER', table: 'education_lessons', table_touchee: 'user_lesson_progress', attendues: 2, remises: 1 });
+    expect(await ligne('education_lessons', LECON)).toBeNull();
+    expect(await nombre(`select count(*) as n from public.learning_path_steps where lesson_id = '${LECON}'`)).toBe(0);
+    expect(await entreeDe('education_lessons', LECON)).toEqual(entreeAvant);
+  });
+
+  it('une règle DO INSTEAD NOTHING qui écarte le contenu lui-même : refus, l’entrée reste intacte', async () => {
+    const { id_corbeille } = await mettre('legal_sections', SECTION);
+    const entreeAvant = await entreeDe('legal_sections', SECTION);
+    await db.exec('create rule ignorer as on insert to public.legal_sections do instead nothing');
+
+    const { code, detail } = await refus(restaurer(String(id_corbeille)));
+
+    expect(code).toBe('remise_incomplete');
+    expect(detail).toEqual({ titre: 'CGU : Article 3', table: 'legal_sections', table_touchee: 'legal_sections', attendues: 1, remises: 0 });
+    expect(await entreeDe('legal_sections', SECTION)).toEqual(entreeAvant);
+  });
+
+  it('une colonne générée n’est pas une colonne inconnue : la base la recalcule, rien n’est perdu', async () => {
+    await db.exec('alter table public.legal_sections add column longueur integer generated always as (length(text)) stored');
+    const avant = await ligne('legal_sections', SECTION);
+    const { id_corbeille } = await mettre('legal_sections', SECTION);
+    expect((await entreeDe('legal_sections', SECTION))?.donnees).toHaveProperty('longueur');
+
+    await restaurer(String(id_corbeille));
+
+    expect(await ligne('legal_sections', SECTION)).toEqual(avant);
+  });
+});
+
+describe('pannes forcées : tout ou rien', () => {
+  const instantane = async () => ({
+    categories: await lignes('select to_jsonb(c) as j from public.education_categories c order by id'),
+    lecons: await lignes('select to_jsonb(l) as j from public.education_lessons l order by id'),
+    etapes: await lignes('select to_jsonb(s) as j from public.learning_path_steps s order by id'),
+    progressions: await lignes('select to_jsonb(p) as j from public.user_lesson_progress p order by lesson_id, user_id'),
+  });
+
+  it('une panne au moment d’écrire l’entrée : la catégorie et tout ce qui en dépend restent en place, et la relance aboutit', async () => {
+    const avant = await instantane();
+    await db.exec(`create function public.panne() returns trigger language plpgsql as $$ begin raise exception 'panne simulée'; end $$;
+      create trigger panne before insert on public.contenus_supprimes for each row execute function public.panne();`);
+
+    const erreur = await erreurDe(mettre('education_categories', CATEGORIE));
+
+    expect(erreur.message).toBe('panne simulée');
+    expect(await instantane()).toEqual(avant);
+    expect(await nombre('select count(*) as n from public.contenus_supprimes')).toBe(0);
+
+    await db.exec('drop trigger panne on public.contenus_supprimes');
+    const resultat = await mettre('education_categories', CATEGORIE);
+    expect(resultat.resume).toEqual({ education_lessons: 2, learning_path_steps: 3, user_lesson_progress: 3 });
+  });
+
+  it('une panne sur la dernière progression remise : rien n’est remis, l’entrée reste intacte, et la relance remet tout', async () => {
+    const avant = await instantane();
+    const { id_corbeille } = await mettre('education_categories', CATEGORIE);
+    const entreeAvant = await entreeDe('education_categories', CATEGORIE);
+    // Les progressions reviennent dans l'ordre de la copie (leçon, puis
+    // lecteur) : celle de la seconde leçon est la dernière écrite.
+    await db.exec(`create function public.panne() returns trigger language plpgsql as $$
+        begin if new.lesson_id = '${LECON_2}' then raise exception 'panne simulée'; end if; return new; end $$;
+      create trigger panne before insert on public.user_lesson_progress for each row execute function public.panne();`);
+
+    const erreur = await erreurDe(restaurer(String(id_corbeille)));
+
+    expect(erreur.message).toBe('panne simulée');
+    expect(await ligne('education_categories', CATEGORIE)).toBeNull();
+    expect(await nombre(`select count(*) as n from public.education_lessons where category_id = '${CATEGORIE}'`)).toBe(0);
+    expect(await nombre(`select count(*) as n from public.learning_path_steps where lesson_id in ('${LECON}', '${LECON_2}')`)).toBe(0);
+    expect(await nombre(`select count(*) as n from public.user_lesson_progress where lesson_id in ('${LECON}', '${LECON_2}')`)).toBe(0);
+    expect(await entreeDe('education_categories', CATEGORIE)).toEqual(entreeAvant);
+
+    await db.exec('drop trigger panne on public.user_lesson_progress');
+    const resultat = await restaurer(String(id_corbeille));
+    expect(resultat.remis).toEqual({ education_lessons: 2, learning_path_steps: 3, user_lesson_progress: 3 });
+    expect(await instantane()).toEqual(avant);
+  });
 });
 
 describe('lecteurs et conservation', () => {
@@ -896,6 +1014,24 @@ describe('les enveloppes TypeScript, sur la vraie base', () => {
       ),
     );
     expect(Sentry.captureException).not.toHaveBeenCalled();
+  });
+
+  it('refusent une restauration qui perdrait une colonne, le disent, et le signalent à Sentry', async () => {
+    const service = clientDeService(db);
+    const mise = await mettreALaCorbeille(service, 'articles', ARTICLE, ADMIN);
+    await db.exec('alter table public.articles rename column body to corps');
+
+    const retour = await restaurerDepuisCorbeille(service, mise.ok ? mise.idCorbeille : '', ADMIN);
+
+    expect(retour).toMatchObject({ ok: false, statut: 409, inattendu: true });
+    expect(retour.ok ? '' : retour.motif).toBe(
+      typographieFr(
+        'Impossible de remettre « Le franc CFA » en place : depuis sa suppression, la table des articles a perdu la colonne « body », que sa copie remplit encore. Rien n’a été remis en place. L’élément reste dans la corbeille, intact : la table doit d’abord être corrigée.',
+      ),
+    );
+    expect(Sentry.captureException).toHaveBeenCalledTimes(1);
+    expect(logAuditEvent).toHaveBeenCalledTimes(1);
+    expect(await nombre('select count(*) as n from public.contenus_supprimes')).toBe(1);
   });
 
   it('annoncent le numéro neuf d’un brouillon dont le numéro a été repris', async () => {

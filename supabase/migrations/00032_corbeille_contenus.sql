@@ -131,19 +131,37 @@ GRANT SELECT, DELETE ON public.contenus_supprimes TO service_role;
 -- abandonne sans rien avoir fait, et l'écran propose de réessayer, au lieu de
 -- laisser la page de l'administration attendre sans fin.
 
--- Fonction interne : écrit des lignes gardées en jsonb dans leur table.
--- Seules les colonnes de la copie qui existent encore dans la table sont
--- écrites : une colonne ajoutée depuis prend sa valeur par défaut. Aucun rôle
--- ne peut l'appeler (voir les REVOKE plus bas) : seules les fonctions de la
--- corbeille, qui s'exécutent avec les droits de leur propriétaire, s'en
--- servent.
-CREATE OR REPLACE FUNCTION public.corbeille_inserer(p_table text, p_lignes jsonb)
+-- Fonction interne : écrit des lignes gardées en jsonb dans leur table, et
+-- vérifie qu'elle les a TOUTES écrites, avec toutes leurs valeurs. Deux
+-- refus, qui annulent la restauration entière et laissent l'entrée intacte :
+--   colonnes_inconnues   la copie remplit une colonne que la table n'a plus
+--       (renommée ou supprimée depuis la suppression) : écrire le reste
+--       perdrait sa valeur sans un mot, puis l'entrée, seule autre copie ;
+--   remise_incomplete    la table a écarté sans erreur une partie des lignes
+--       (un déclencheur BEFORE INSERT qui renvoie NULL, une règle DO INSTEAD
+--       NOTHING) : retirer l'entrée les perdrait.
+-- Une colonne ajoutée depuis prend sa valeur par défaut, et une colonne
+-- générée est recalculée par la base : rien n'est perdu. p_contexte (le titre
+-- et la table de l'entrée) accompagne chaque refus, pour que l'écran nomme le
+-- contenu. Aucun rôle ne peut l'appeler (voir les REVOKE plus bas) : seules
+-- les fonctions de la corbeille, qui s'exécutent avec les droits de leur
+-- propriétaire, s'en servent.
+--
+-- La version à deux arguments n'a existé que dans des brouillons de cette
+-- migration : la retirer, si un brouillon a été appliqué quelque part.
+DROP FUNCTION IF EXISTS public.corbeille_inserer(text, jsonb);
+
+CREATE OR REPLACE FUNCTION public.corbeille_inserer(p_table text, p_lignes jsonb, p_contexte jsonb)
 RETURNS integer
 LANGUAGE plpgsql
 SET search_path = public, pg_temp
 AS $fonction$
 DECLARE
+  v_relation regclass;
+  v_contexte jsonb := coalesce(p_contexte, '{}'::jsonb) || jsonb_build_object('table_touchee', p_table);
   v_colonnes text;
+  v_inconnues text[];
+  v_attendues integer;
   v_nombre integer;
 BEGIN
   IF p_table IS NULL OR p_table NOT IN (
@@ -156,17 +174,42 @@ BEGIN
   IF p_lignes IS NULL OR jsonb_typeof(p_lignes) <> 'array' OR jsonb_array_length(p_lignes) = 0 THEN
     RETURN 0;
   END IF;
+  v_relation := format('public.%I', p_table)::regclass;
+  v_attendues := jsonb_array_length(p_lignes);
 
+  IF EXISTS (SELECT 1 FROM jsonb_array_elements(p_lignes) AS e WHERE jsonb_typeof(e) <> 'object') THEN
+    RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = 'corbeille:copie_illisible', DETAIL = v_contexte::text;
+  END IF;
+
+  -- Les clés de la copie qui n'ont plus de colonne dans la table.
+  SELECT array_agg(c.cle ORDER BY c.cle)
+    INTO v_inconnues
+    FROM (SELECT DISTINCT jsonb_object_keys(e) AS cle FROM jsonb_array_elements(p_lignes) AS e) AS c
+   WHERE NOT EXISTS (
+           SELECT 1
+             FROM pg_attribute AS a
+            WHERE a.attrelid = v_relation
+              AND a.attnum > 0
+              AND NOT a.attisdropped
+              AND a.attname = c.cle
+         );
+  IF v_inconnues IS NOT NULL THEN
+    RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = 'corbeille:colonnes_inconnues',
+      DETAIL = (v_contexte || jsonb_build_object('colonnes', to_jsonb(v_inconnues)))::text;
+  END IF;
+
+  -- Les colonnes écrites : toutes celles de la copie, sauf les colonnes
+  -- générées, que la base recalcule elle-même.
   SELECT string_agg(quote_ident(a.attname), ', ' ORDER BY a.attnum)
     INTO v_colonnes
     FROM pg_attribute AS a
-   WHERE a.attrelid = format('public.%I', p_table)::regclass
+   WHERE a.attrelid = v_relation
      AND a.attnum > 0
      AND NOT a.attisdropped
      AND a.attgenerated = ''
-     AND (p_lignes -> 0) ? a.attname::text;
+     AND EXISTS (SELECT 1 FROM jsonb_array_elements(p_lignes) AS e WHERE e ? a.attname::text);
   IF v_colonnes IS NULL THEN
-    RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = 'corbeille:copie_illisible';
+    RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = 'corbeille:copie_illisible', DETAIL = v_contexte::text;
   END IF;
 
   EXECUTE format(
@@ -174,6 +217,10 @@ BEGIN
     p_table, v_colonnes
   ) USING p_lignes;
   GET DIAGNOSTICS v_nombre = ROW_COUNT;
+  IF v_nombre <> v_attendues THEN
+    RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = 'corbeille:remise_incomplete',
+      DETAIL = (v_contexte || jsonb_build_object('attendues', v_attendues, 'remises', v_nombre))::text;
+  END IF;
   RETURN v_nombre;
 END;
 $fonction$;
@@ -551,8 +598,13 @@ BEGIN
     END IF;
   END IF;
 
-  -- 6. Le contenu.
-  PERFORM public.corbeille_inserer(v_table, jsonb_build_array(v_ligne));
+  -- 6. Le contenu : exactement une ligne doit revenir. corbeille_inserer le
+  --    vérifie déjà ; le redire ici protège la règle si elle venait à changer.
+  v_nombre := public.corbeille_inserer(v_table, jsonb_build_array(v_ligne), v_contexte);
+  IF v_nombre IS DISTINCT FROM 1 THEN
+    RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = 'corbeille:remise_incomplete',
+      DETAIL = (v_contexte || jsonb_build_object('table_touchee', v_table, 'attendues', 1, 'remises', v_nombre))::text;
+  END IF;
 
   IF v_renumeroter THEN
     SELECT number INTO v_numero FROM public.newsletter_issues WHERE id = v_entree.id_origine;
@@ -596,7 +648,7 @@ BEGIN
   END IF;
 
   -- 7. Ce qui en dépend, parents d'abord.
-  v_nombre := public.corbeille_inserer('education_lessons', v_entree.dependants -> 'education_lessons');
+  v_nombre := public.corbeille_inserer('education_lessons', v_entree.dependants -> 'education_lessons', v_contexte);
   IF v_nombre > 0 THEN
     v_remis := v_remis || jsonb_build_object('education_lessons', v_nombre);
   END IF;
@@ -624,7 +676,7 @@ BEGIN
     IF v_ecartees > 0 THEN
       v_remarques := v_remarques || jsonb_build_array(jsonb_build_object('code', 'etapes_ecartees', 'nombre', v_ecartees));
     END IF;
-    v_nombre := public.corbeille_inserer('learning_path_steps', v_gardees);
+    v_nombre := public.corbeille_inserer('learning_path_steps', v_gardees, v_contexte);
     IF v_nombre > 0 THEN
       v_remis := v_remis || jsonb_build_object('learning_path_steps', v_nombre);
     END IF;
@@ -656,7 +708,7 @@ BEGIN
     IF v_ecartees > 0 THEN
       v_remarques := v_remarques || jsonb_build_array(jsonb_build_object('code', 'progressions_ecartees', 'nombre', v_ecartees));
     END IF;
-    v_nombre := public.corbeille_inserer('user_lesson_progress', v_gardees);
+    v_nombre := public.corbeille_inserer('user_lesson_progress', v_gardees, v_contexte);
     IF v_nombre > 0 THEN
       v_remis := v_remis || jsonb_build_object('user_lesson_progress', v_nombre);
     END IF;
@@ -695,7 +747,7 @@ BEGIN
     IF v_ecartees > 0 THEN
       v_remarques := v_remarques || jsonb_build_array(jsonb_build_object('code', 'abonnes_vides', 'nombre', v_ecartees));
     END IF;
-    v_nombre := public.corbeille_inserer('newsletter_events', v_gardees);
+    v_nombre := public.corbeille_inserer('newsletter_events', v_gardees, v_contexte);
     IF v_nombre > 0 THEN
       v_remis := v_remis || jsonb_build_object('newsletter_events', v_nombre);
     END IF;
@@ -823,7 +875,7 @@ $fonction$;
 -- Les droits par défaut du schéma public donnent EXECUTE à PUBLIC, anon et
 -- authenticated sur chaque fonction neuve : sans ces REVOKE, n'importe quel
 -- visiteur pourrait vider ou restaurer la corbeille avec la clé publique.
-REVOKE ALL ON FUNCTION public.corbeille_inserer(text, jsonb) FROM PUBLIC, anon, authenticated, service_role;
+REVOKE ALL ON FUNCTION public.corbeille_inserer(text, jsonb, jsonb) FROM PUBLIC, anon, authenticated, service_role;
 REVOKE ALL ON FUNCTION public.corbeille_mettre(text, uuid, uuid) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.corbeille_restaurer(uuid) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.corbeille_retirer_lecteur(uuid) FROM PUBLIC, anon, authenticated;
@@ -847,7 +899,7 @@ COMMENT ON FUNCTION public.corbeille_retirer_lecteur(uuid) IS
   'Retire les lignes d''un lecteur de toutes les entrées de la corbeille, en une instruction. service_role uniquement.';
 COMMENT ON FUNCTION public.corbeille_purger(integer) IS
   'Supprime les entrées de plus de N jours (30 au minimum) et les lignes des lecteurs disparus. service_role uniquement.';
-COMMENT ON FUNCTION public.corbeille_inserer(text, jsonb) IS
+COMMENT ON FUNCTION public.corbeille_inserer(text, jsonb, jsonb) IS
   'Interne à la corbeille : aucun rôle ne peut l''appeler directement.';
 
 COMMIT;
@@ -875,7 +927,7 @@ COMMIT;
 --          'public.corbeille_restaurer(uuid)',
 --          'public.corbeille_retirer_lecteur(uuid)',
 --          'public.corbeille_purger(integer)',
---          'public.corbeille_inserer(text, jsonb)']) as f,
+--          'public.corbeille_inserer(text, jsonb, jsonb)']) as f,
 --        unnest(array['anon', 'authenticated', 'service_role']) as r
 --  order by f, r;
 -- Attendu : peut = false pour anon et authenticated sur les cinq fonctions ;
@@ -907,6 +959,6 @@ COMMIT;
 -- DROP FUNCTION IF EXISTS public.corbeille_retirer_lecteur(uuid);
 -- DROP FUNCTION IF EXISTS public.corbeille_restaurer(uuid);
 -- DROP FUNCTION IF EXISTS public.corbeille_mettre(text, uuid, uuid);
--- DROP FUNCTION IF EXISTS public.corbeille_inserer(text, jsonb);
+-- DROP FUNCTION IF EXISTS public.corbeille_inserer(text, jsonb, jsonb);
 -- DROP TABLE IF EXISTS public.contenus_supprimes;
 -- COMMIT;

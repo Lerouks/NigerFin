@@ -134,6 +134,29 @@ describe('messages de la restauration', () => {
     }
   });
 
+  it('une restauration qui perdrait une colonne ou une ligne est refusée, nomme la table, et part vers Sentry', () => {
+    const une = echecRestauration(
+      lireErreur(refus('colonnes_inconnues', { titre: 'Le franc CFA', table: 'articles', table_touchee: 'articles', colonnes: ['body'] })),
+    );
+    expect(une).toMatchObject({ statut: 409, inattendu: true });
+    expect(lisible(une.motif)).toBe(
+      'Impossible de remettre « Le franc CFA » en place : depuis sa suppression, la table des articles a perdu la colonne « body », que sa copie remplit encore. Rien n’a été remis en place. L’élément reste dans la corbeille, intact : la table doit d’abord être corrigée.',
+    );
+    const deux = echecRestauration(
+      lireErreur(refus('colonnes_inconnues', { titre: 'Bourse', table_touchee: 'user_lesson_progress', colonnes: ['note', 'score'] })),
+    );
+    expect(lisible(deux.motif)).toMatch(/la table des progressions de lecteurs a perdu les colonnes « note » et « score »/);
+    const ecartees = echecRestauration(
+      lireErreur(refus('remise_incomplete', { titre: 'Bourse', table_touchee: 'user_lesson_progress', attendues: 3, remises: 1 })),
+    );
+    expect(ecartees).toMatchObject({ statut: 409, inattendu: true });
+    expect(lisible(ecartees.motif)).toMatch(/la table des progressions de lecteurs a écarté sans erreur 2 lignes sur 3\. Rien n’a été remis en place\./);
+    for (const echec of [une, deux, ecartees]) {
+      expect(echec.motif).toBe(typographieFr(echec.motif));
+      expect(lisible(echec.motif)).toMatch(/reste dans la corbeille, intact/);
+    }
+  });
+
   it('une réponse perdue invite à vérifier, une erreur inconnue part vers Sentry', () => {
     expect(echecRestauration(lireErreur({ message: 'fetch failed' }))).toMatchObject({ statut: 503, inattendu: false });
     expect(lisible(echecRestauration(lireErreur({ message: 'fetch failed' })).motif)).toMatch(/a peut-être eu lieu/);

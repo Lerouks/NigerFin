@@ -72,6 +72,22 @@ export const LIBELLE_DEPENDANT: Record<TableDependante, Libelle> = {
 const ORDRE_DEPENDANTS: readonly string[] = Object.keys(LIBELLE_DEPENDANT);
 const LIGNE_LIEE: Libelle = { un: 'ligne liée', plusieurs: 'lignes liées' };
 
+const PLURIEL_CONTENU: Record<TableCorbeille, string> = {
+  articles: 'articles',
+  education_lessons: 'leçons',
+  education_categories: 'catégories de leçons',
+  strategic_enterprises: 'fiches entreprises',
+  legal_sections: 'sections des pages légales',
+  newsletter_issues: 'numéros de newsletter',
+};
+
+/** Une table de la base, pour une phrase : « la table des progressions de lecteurs ». */
+export function nomDeTable(table: unknown): string {
+  if (estTableCorbeille(table)) return `la table des ${PLURIEL_CONTENU[table]}`;
+  const dependant = typeof table === 'string' ? (LIBELLE_DEPENDANT as Record<string, Libelle | undefined>)[table] : undefined;
+  return dependant ? `la table des ${dependant.plusieurs}` : 'une table de la base';
+}
+
 function libelleDe(table: string): Libelle {
   return (LIBELLE_DEPENDANT as Record<string, Libelle | undefined>)[table] ?? LIGNE_LIEE;
 }

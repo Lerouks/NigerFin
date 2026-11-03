@@ -105,5 +105,16 @@ export function safeNextPath(raw: string | null | undefined): string {
   if (!raw.startsWith('/')) return '/';
   if (raw.startsWith('//')) return '/';
   if (raw.startsWith('/\\')) return '/';
-  return raw;
+  // Lire le chemin comme le fera le navigateur. « /.//x », « /..//x »,
+  // « /%2e//x » ou « /./\\x » se normalisent en « //x », que le routeur de Next
+  // prend pour une autre origine quand il se rabat sur une navigation complète
+  // (coupure réseau pendant la requête de page).
+  let lu: URL;
+  try {
+    lu = new URL(raw, 'https://nfireport.invalid');
+  } catch {
+    return '/';
+  }
+  if (lu.origin !== 'https://nfireport.invalid' || lu.pathname.startsWith('//')) return '/';
+  return lu.pathname + lu.search + lu.hash;
 }

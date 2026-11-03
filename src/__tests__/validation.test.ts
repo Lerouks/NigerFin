@@ -92,6 +92,20 @@ describe('safeNextPath', () => {
     expect(safeNextPath('/compte?tab=infos')).toBe('/compte?tab=infos');
   });
 
+  it('rejects paths that the browser normalizes into another origin', () => {
+    // Le navigateur résout les segments point : ces cinq chemins deviennent « //evil.com ».
+    expect(safeNextPath('/.//evil.com')).toBe('/');
+    expect(safeNextPath('/..//evil.com')).toBe('/');
+    expect(safeNextPath('/%2e//evil.com')).toBe('/');
+    expect(safeNextPath('/./\\evil.com')).toBe('/');
+    expect(safeNextPath('/a/..//evil.com')).toBe('/');
+  });
+
+  it('keeps internal paths with a query or a fragment unchanged', () => {
+    expect(safeNextPath('/compte?tab=infos')).toBe('/compte?tab=infos');
+    expect(safeNextPath('/articles/slug-123#commentaires')).toBe('/articles/slug-123#commentaires');
+  });
+
   it('rejects protocol-relative URLs (open redirect)', () => {
     expect(safeNextPath('//evil.com')).toBe('/');
     expect(safeNextPath('//evil.com/steal')).toBe('/');

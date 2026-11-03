@@ -1,5 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { logAuditEvent } from '@/lib/audit';
+import { retirerLecteurDeLaCorbeille } from '@/lib/corbeille';
 import { sendTransactionalEmail } from '@/lib/email';
 import * as Sentry from '@sentry/nextjs';
 
@@ -53,7 +54,40 @@ export async function deleteUserCompletely(
     throw new Error(`Erreur lors de la suppression du compte auth: ${authError.message}`);
   }
 
-  // 5. Send confirmation email
+  // 5. La corbeille, puis ce qui a pu s'écrire pendant la suppression. Dans
+  // cet ordre, APRÈS le compte : une restauration lancée au même moment ne
+  // peut plus remettre la progression de ce lecteur (la base la refuse ou
+  // l'efface avec le compte, par la clé étrangère vers auth.users), et le
+  // nettoyage retire en une seule instruction ses lignes de toutes les
+  // entrées. Les commentaires et j'aime n'ont pas de clé étrangère vers le
+  // compte : un commentaire posté depuis un autre onglet pendant la
+  // suppression lui survivrait sans ce second passage. Un échec est signalé
+  // sans bloquer la fin : le compte est déjà supprimé, et la purge de chaque
+  // nuit retire aussi de la corbeille les lignes des comptes disparus.
+  try {
+    const nettoyage = await retirerLecteurDeLaCorbeille(serviceClient, userId);
+    if (!nettoyage.ok) {
+      Sentry.captureMessage('delete-user: copies de la corbeille non retirées', {
+        level: 'error',
+        tags: { context: 'delete-user-corbeille' },
+        extra: { userId },
+      });
+    }
+  } catch (err) {
+    Sentry.captureException(err, { tags: { context: 'delete-user-corbeille' }, extra: { userId } });
+  }
+  for (const table of ['comments', 'article_likes']) {
+    try {
+      const { error } = await serviceClient.from(table).delete().eq('user_id', userId);
+      if (error) {
+        Sentry.captureException(error, { tags: { context: 'delete-user-second-passage' }, extra: { userId, table } });
+      }
+    } catch (err) {
+      Sentry.captureException(err, { tags: { context: 'delete-user-second-passage' }, extra: { userId, table } });
+    }
+  }
+
+  // 6. Send confirmation email
   try {
     await sendTransactionalEmail({
       to: userEmail,

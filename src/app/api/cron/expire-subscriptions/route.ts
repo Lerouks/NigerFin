@@ -5,6 +5,8 @@ import { sendTransactionalEmail } from '@/lib/email';
 import { subscriptionExpiredEmail } from '@/lib/email-templates';
 import { applyOverridesTo } from '@/lib/emails/overrides';
 import { SYSTEM_AUDIT_ID } from '@/lib/audit';
+import { purgerLaCorbeille } from '@/lib/corbeille';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import * as Sentry from '@sentry/nextjs';
 
 /**
@@ -15,6 +17,12 @@ import * as Sentry from '@sentry/nextjs';
  * Call daily via Vercel Cron or external scheduler:
  * GET /api/cron/expire-subscriptions
  * Header: Authorization: Bearer <CRON_SECRET>
+ *
+ * Même tâche de nuit, une fois les abonnements traités : la corbeille des
+ * contenus supprime pour de bon ce qui y dort depuis plus de trente jours.
+ * Elle tourne déjà chaque nuit, et la purge ne prend que quelques
+ * millisecondes : pas besoin d'une tâche planifiée de plus. Une purge en
+ * panne est signalée et ne fait jamais échouer l'expiration des abonnements.
  */
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
@@ -40,7 +48,7 @@ export async function GET(request: NextRequest) {
     .lt('subscription_end', now);
 
   if (!expiredUsers || expiredUsers.length === 0) {
-    return NextResponse.json({ expired: 0 });
+    return repondreApresLaCorbeille(service, { expired: 0 });
   }
 
   // Batch update user_profiles: set all expired users to 'expired' status
@@ -129,5 +137,11 @@ export async function GET(request: NextRequest) {
 
   await service.from('audit_log').insert(auditRows);
 
-  return NextResponse.json({ expired: expiredUsers.length, total: expiredUsers.length });
+  return repondreApresLaCorbeille(service, { expired: expiredUsers.length, total: expiredUsers.length });
+}
+
+/** La réponse de la tâche, une fois la corbeille purgée (purgerLaCorbeille ne lève jamais). */
+async function repondreApresLaCorbeille(service: SupabaseClient, corps: Record<string, unknown>) {
+  const corbeille = await purgerLaCorbeille(service, 'tache-planifiee');
+  return NextResponse.json({ ...corps, corbeille });
 }

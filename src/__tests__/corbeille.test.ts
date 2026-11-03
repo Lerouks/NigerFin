@@ -21,6 +21,8 @@ import {
 } from '@/lib/corbeille';
 import { DUREE_CONSERVATION_JOURS, finDeConservation, resumerDependants } from '@/lib/corbeille/libelles';
 import {
+  corbeilleAbsente,
+  detailPourSentry,
   echecMiseALaCorbeille,
   echecRestauration,
   lireErreur,
@@ -71,13 +73,18 @@ describe('lireErreur', () => {
       refus: 'slug_pris',
       detail: { slug: 'x', autre: 'Y' },
       detailBrut: '{"slug":"x","autre":"Y"}',
+      message: 'corbeille:slug_pris',
+      contrainte: null,
     });
+    expect(
+      lireErreur({ code: '23514', message: 'new row for relation "articles" violates check constraint "articles_category_check"' }).contrainte,
+    ).toBe('articles_category_check');
   });
 
   it('ne suppose rien de la forme : code vide, détail illisible, valeur quelconque', () => {
     expect(lireErreur({ code: '', message: 'TypeError: fetch failed' })).toMatchObject({ code: null, refus: null, detail: {} });
     expect(lireErreur({ code: '23505', message: 'duplicate', details: '{pas du json' })).toMatchObject({ code: '23505', detail: {} });
-    expect(lireErreur('n’importe quoi')).toEqual({ code: null, refus: null, detail: {}, detailBrut: null });
+    expect(lireErreur('n’importe quoi')).toEqual({ code: null, refus: null, detail: {}, detailBrut: null, message: '', contrainte: null });
     expect(lireErreur(null)).toMatchObject({ code: null });
   });
 });
@@ -86,7 +93,14 @@ describe('messages de la mise à la corbeille', () => {
   const cas: [string, ReturnType<typeof lireErreur>, number, RegExp, boolean][] = [
     ['réponse perdue', lireErreur({ code: '', message: 'fetch failed' }), 503, /a peut-être eu lieu/, false],
     ['corbeille absente (PostgREST)', lireErreur({ code: 'PGRST202', message: 'Could not find the function' }), 503, /migration 00032/, false],
-    ['corbeille absente (PostgreSQL)', lireErreur({ code: '42883', message: 'function does not exist' }), 503, /Rien n’a été supprimé/, false],
+    [
+      'corbeille absente (PostgreSQL)',
+      lireErreur({ code: '42883', message: 'function public.corbeille_mettre(p_table => text, p_id => uuid, p_par => uuid) does not exist' }),
+      503,
+      /Rien n’a été supprimé/,
+      false,
+    ],
+    ['opérateur manquant dans la fonction', lireErreur({ code: '42883', message: 'operator does not exist: text[] @> uuid[]' }), 500, /La suppression a échoué/, true],
     ['verrou', lireErreur({ code: '55P03', message: 'lock' }), 409, /Réessayez dans un instant/, false],
     ['introuvable', lireErreur(refus('introuvable')), 404, /introuvable/, false],
     ['déjà dans la corbeille', lireErreur(refus('deja_dans_la_corbeille')), 409, /déjà dans la corbeille/, false],
@@ -367,6 +381,65 @@ describe('listerLaCorbeille', () => {
   });
 });
 
+describe('corbeilleAbsente', () => {
+  it('ne prend pour une corbeille absente que ce qui la nomme, ou un objet absent du cache de PostgREST', () => {
+    const absente = (code: string, message: string) => corbeilleAbsente(lireErreur({ code, message }));
+    expect(absente('PGRST202', 'Could not find the function public.corbeille_purger(p_jours) in the schema cache')).toBe(true);
+    expect(absente('PGRST205', "Could not find the table 'public.contenus_supprimes' in the schema cache")).toBe(true);
+    expect(absente('42883', 'function public.corbeille_purger(p_jours => integer) does not exist')).toBe(true);
+    expect(absente('42P01', 'relation "public.contenus_supprimes" does not exist')).toBe(true);
+    // Levés de l'intérieur d'une fonction : une panne, pas une corbeille vide.
+    expect(absente('42883', 'operator does not exist: text[] @> uuid[]')).toBe(false);
+    expect(absente('42P01', 'relation "public.user_lesson_progress" does not exist')).toBe(false);
+    expect(absente('XX000', 'corbeille_purger')).toBe(false);
+  });
+});
+
+describe('Sentry ne reçoit jamais le contenu d’une ligne', () => {
+  it('un échec imprévu part sans le « Failing row contains » de PostgreSQL, avec le code et la contrainte', async () => {
+    const { service } = client({
+      rpc: {
+        error: {
+          code: '23514',
+          message: 'new row for relation "articles" violates check constraint "articles_category_check"',
+          details: 'Failing row contains (00000000-0000-4000-8000-000000000100, Le franc CFA, <p>Corps premium</p>, economie).',
+          hint: null,
+        },
+      },
+    });
+
+    const resultat = await restaurerDepuisCorbeille(service, uuid(900), ADMIN);
+
+    expect(resultat).toMatchObject({ ok: false, statut: 500, inattendu: true });
+    expect(Sentry.captureException).toHaveBeenCalledTimes(1);
+    const [, contexte] = vi.mocked(Sentry.captureException).mock.calls[0] ?? [];
+    expect(contexte).toMatchObject({ extra: { code: '23514', contrainte: 'articles_category_check', detail: null } });
+    expect(JSON.stringify(vi.mocked(Sentry.captureException).mock.calls)).not.toMatch(/Corps premium|Failing row/);
+  });
+
+  it('une clé en double non plus : « Key (…)=(…) » nomme un lecteur', async () => {
+    const { service } = client({
+      rpc: {
+        error: {
+          code: '23P01',
+          message: 'conflicting key value violates exclusion constraint "x"',
+          details: `Key (user_id)=(${uuid(2)}) conflicts with existing key (user_id)=(${uuid(2)}).`,
+        },
+      },
+    });
+    await mettreALaCorbeille(service, 'education_lessons', uuid(110), ADMIN);
+    expect(Sentry.captureException).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(vi.mocked(Sentry.captureException).mock.calls)).not.toContain(uuid(2));
+  });
+
+  it('le détail d’un refus de la corbeille, écrit par la migration, part toujours', () => {
+    expect(detailPourSentry(lireErreur({ ...refus('cascade_inconnue'), details: 'public.comments (comments_article_id_fkey)' }))).toBe(
+      'public.comments (comments_article_id_fkey)',
+    );
+    expect(detailPourSentry(lireErreur({ code: '23502', message: 'null value', details: 'Failing row contains (a, b).' }))).toBeNull();
+  });
+});
+
 describe('retirerLecteurDeLaCorbeille et purgerLaCorbeille', () => {
   it('retirent en un appel, et ne lèvent jamais', async () => {
     const retrait = client({ rpc: { data: { entrees: 2, lignes: 3 } } });
@@ -374,6 +447,16 @@ describe('retirerLecteurDeLaCorbeille et purgerLaCorbeille', () => {
     expect(retrait.rpc).toHaveBeenCalledWith('corbeille_retirer_lecteur', { p_user: uuid(2) });
     expect(await retirerLecteurDeLaCorbeille(client({ rpc: { error: { code: 'XX000', message: 'x' } } }).service, uuid(2))).toEqual({ ok: false, entrees: 0 });
     expect(await retirerLecteurDeLaCorbeille(client({ rpc: { error: { code: 'PGRST202', message: 'x' } } }).service, uuid(2))).toEqual({ ok: true, entrees: 0 });
+    // Une panne venue de l'intérieur de la fonction n'est pas une corbeille absente : signalée, et ok: false.
+    vi.mocked(Sentry.captureException).mockClear();
+    expect(
+      await retirerLecteurDeLaCorbeille(client({ rpc: { error: { code: '42883', message: 'operator does not exist: text[] @> uuid[]' } } }).service, uuid(2)),
+    ).toEqual({ ok: false, entrees: 0 });
+    expect(Sentry.captureException).toHaveBeenCalledTimes(1);
+    expect(
+      await purgerLaCorbeille(client({ rpc: { error: { code: '42P01', message: 'relation "public.autre" does not exist' } } }).service, 'tache-planifiee'),
+    ).toEqual({ ok: false, purgees: 0, lecteursRetires: 0 });
+    expect(Sentry.captureException).toHaveBeenCalledTimes(2);
 
     const purge = client({ rpc: { data: { purgees: [], lecteurs_retires: 0 } } });
     expect(await purgerLaCorbeille(purge.service, 'liste')).toEqual({ ok: true, purgees: 0, lecteursRetires: 0 });

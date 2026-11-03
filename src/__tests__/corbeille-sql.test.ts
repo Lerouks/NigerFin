@@ -1067,6 +1067,49 @@ describe('les enveloppes TypeScript, sur la vraie base', () => {
     expect(await nombre('select count(*) as n from public.contenus_supprimes')).toBe(1);
   });
 
+  it('ne transmettent à Sentry ni le corps d’un article premium ni la progression d’un lecteur', async () => {
+    const service = clientDeService(db);
+    // Une contrainte resserrée depuis la suppression : PostgreSQL met la ligne
+    // entière dans DETAIL (« Failing row contains (…) »).
+    const article = await mettreALaCorbeille(service, 'articles', ARTICLE, ADMIN);
+    await db.exec(`alter table public.articles drop constraint articles_category_check;
+      alter table public.articles add constraint articles_category_check check (category = 'finance') not valid;`);
+    const refusArticle = await restaurerDepuisCorbeille(service, article.ok ? article.idCorbeille : '', ADMIN);
+
+    // Une colonne NOT NULL sans défaut, ajoutée depuis : la progression remise la viole.
+    const lecon = await mettreALaCorbeille(service, 'education_lessons', LECON, ADMIN);
+    await db.exec(`alter table public.user_lesson_progress add column note_exigee integer not null default 0;
+      alter table public.user_lesson_progress alter column note_exigee drop default;`);
+    const refusLecon = await restaurerDepuisCorbeille(service, lecon.ok ? lecon.idCorbeille : '', ADMIN);
+
+    expect(refusArticle).toMatchObject({ ok: false, statut: 500, inattendu: true });
+    expect(refusLecon).toMatchObject({ ok: false, statut: 500, inattendu: true });
+    const appels = vi.mocked(Sentry.captureException).mock.calls;
+    expect(appels).toHaveLength(2);
+    expect(appels[0]?.[1]).toMatchObject({ extra: { code: '23514', contrainte: 'articles_category_check', detail: null } });
+    expect(appels[1]?.[1]).toMatchObject({ extra: { code: '23502', detail: null } });
+    const envoye = JSON.stringify(appels);
+    expect(envoye).not.toContain('Texte premium');
+    expect(envoye).not.toContain(LECTRICE);
+    expect(envoye).not.toContain(LECTEUR);
+    expect(envoye).not.toContain('Failing row');
+    // Rien n'est perdu : les deux entrées sont toujours là.
+    expect(await nombre('select count(*) as n from public.contenus_supprimes')).toBe(2);
+  });
+
+  it('une panne venue de l’intérieur des fonctions n’est pas prise pour une corbeille absente : ok: false, et Sentry le sait', async () => {
+    const service = clientDeService(db);
+    await mettreALaCorbeille(service, 'education_lessons', LECON, ADMIN);
+    vi.clearAllMocks();
+    // Un changement de type : les opérateurs des fonctions n'existent plus (42883).
+    await db.exec('alter table public.contenus_supprimes alter column lecteurs type text[] using lecteurs::text[]');
+
+    expect(await retirerLecteurDeLaCorbeille(service, LECTEUR)).toEqual({ ok: false, entrees: 0 });
+    expect(await purgerLaCorbeille(service, 'tache-planifiee')).toEqual({ ok: false, purgees: 0, lecteursRetires: 0 });
+    expect(Sentry.captureException).toHaveBeenCalledTimes(2);
+    expect(JSON.stringify(vi.mocked(Sentry.captureException).mock.calls)).toContain('42883');
+  });
+
   it('annoncent le numéro neuf d’un brouillon dont le numéro a été repris', async () => {
     const service = clientDeService(db);
     await db.exec(`insert into public.newsletter_issues (id, number, slug, subject, content, status) values ('${uuid(502)}', 8, '008-precedent', 'Le numéro 8', '{}', 'sent')`);

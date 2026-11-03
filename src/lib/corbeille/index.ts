@@ -12,6 +12,7 @@ import { isValidUUID } from '@/lib/validation';
 import { DUREE_CONSERVATION_JOURS, estTableCorbeille, type TableCorbeille } from './libelles';
 import {
   corbeilleAbsente,
+  detailPourSentry,
   echecMiseALaCorbeille,
   echecRestauration,
   lireErreur,
@@ -78,10 +79,21 @@ function compteurs(valeur: unknown): Record<string, number> {
   return resultat;
 }
 
+/**
+ * Signale un échec imprévu. Ce qui part chez Sentry, un tiers, ne contient
+ * jamais le contenu d'une ligne : le code, le refus de la corbeille, le nom de
+ * la contrainte, et le détail des seuls refus de la corbeille (detailPourSentry).
+ */
 function signaler(contexte: string, lue: ErreurLue | null, extra?: Record<string, unknown>, erreur?: unknown): void {
   Sentry.captureException(erreur ?? new Error(`corbeille : ${lue?.refus ?? lue?.code ?? 'réponse inattendue'}`), {
     tags: { context: contexte },
-    extra: { code: lue?.code ?? null, refus: lue?.refus ?? null, detail: lue?.detailBrut ?? null, ...extra },
+    extra: {
+      code: lue?.code ?? null,
+      refus: lue?.refus ?? null,
+      contrainte: lue?.contrainte ?? null,
+      detail: lue ? detailPourSentry(lue) : null,
+      ...extra,
+    },
   });
 }
 

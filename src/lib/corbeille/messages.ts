@@ -37,8 +37,18 @@ export interface ErreurLue {
   refus: string | null;
   /** Le détail du refus, quand la base en a donné un en JSON. */
   detail: Record<string, unknown>;
-  /** Le détail brut (pour Sentry). */
+  /**
+   * Le détail brut, tel que la base l'a écrit. Il ne part jamais tel quel
+   * chez Sentry : voir detailPourSentry.
+   */
   detailBrut: string | null;
+  /**
+   * Le message de la base. Il sert à reconnaître une corbeille absente, et ne
+   * part pas chez Sentry : PostgreSQL y cite parfois la valeur refusée.
+   */
+  message: string;
+  /** La contrainte en cause, quand le message en nomme une (« violates check constraint "…" »). */
+  contrainte: string | null;
 }
 
 function chaine(valeur: unknown): string | null {
@@ -60,12 +70,41 @@ export function lireErreur(erreur: unknown): ErreurLue {
     }
   }
   const refus = message.startsWith('corbeille:') ? message.slice('corbeille:'.length) : null;
-  return { code, refus, detail, detailBrut };
+  const contrainte = /constraint "([^"]+)"/.exec(message)?.[1] ?? null;
+  return { code, refus, detail, detailBrut, message, contrainte };
 }
 
-/** La migration 00032 n'est pas appliquée : ni la table ni les fonctions n'existent. */
+/**
+ * La migration 00032 n'est pas appliquée, ou vient d'être retirée : ni la
+ * table ni les fonctions n'existent, il n'y a donc rien à lire ni à retirer.
+ *
+ * PostgREST (v14 sur ce projet) répond PGRST202 pour une fonction absente de
+ * son cache, PGRST205 pour une table absente. Un 42883 ou un 42P01 venu de
+ * PostgreSQL ne le dit que s'il nomme la corbeille elle-même : c'est le cas
+ * d'un cache de PostgREST encore périmé juste après un retour arrière. Levé de
+ * l'intérieur d'une fonction (un opérateur qui manque après un changement de
+ * type, une table renommée), c'est une panne : la prendre pour une corbeille
+ * absente ferait échouer en silence l'effacement des données d'un lecteur et
+ * la purge des trente jours.
+ */
 export function corbeilleAbsente(lue: ErreurLue): boolean {
-  return lue.code === 'PGRST202' || lue.code === 'PGRST205' || lue.code === '42883' || lue.code === '42P01';
+  if (lue.code === 'PGRST202' || lue.code === 'PGRST205') return true;
+  if (lue.code === '42883' || lue.code === '42P01') return /corbeille_|contenus_supprimes/.test(lue.message);
+  return false;
+}
+
+/**
+ * Le détail qui peut partir chez Sentry. PostgreSQL écrit dans DETAIL les
+ * valeurs de la ligne en cause : « Failing row contains (…) » pour une
+ * contrainte NOT NULL ou CHECK, « Key (…)=(…) » pour une clé. Ce serait le
+ * corps d'un article premium, ou l'identifiant et la note d'un lecteur. Seul
+ * le détail des refus de la corbeille, que la migration écrit elle-même
+ * (titres, noms de tables, de colonnes et de contraintes), peut partir ; le
+ * code et le nom de la contrainte suffisent pour le reste.
+ */
+export function detailPourSentry(lue: ErreurLue): string | null {
+  if (lue.refus === null || lue.detailBrut === null) return null;
+  return lue.detailBrut.startsWith('Failing row contains') ? null : lue.detailBrut;
 }
 
 /** Deux opérations se sont croisées sur les mêmes lignes : réessayer suffit. */

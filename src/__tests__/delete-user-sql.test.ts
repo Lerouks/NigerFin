@@ -66,7 +66,7 @@ afterEach(async () => {
  * auth.admin.deleteUser(). Une table absente de la réplique répond comme
  * PostgREST (42P01), et le code doit le supporter.
  */
-function clientDeSuppression(base: Base): SupabaseClient {
+function clientDeSuppression(base: Base, nonConfirmes: string[] = []): SupabaseClient {
   const service = clientDeService(base);
   const from = (table: string) => ({
     delete: () => ({
@@ -84,11 +84,14 @@ function clientDeSuppression(base: Base): SupabaseClient {
       },
     }),
   });
+  // La réplique d'auth.users n'a pas email_confirmed_at : un compte est confirmé
+  // sauf s'il figure dans nonConfirmes, comme une inscription jamais validée.
   const getUserById = async (id: string) => {
     const lu = await base.query<{ email: string | null }>('select email from auth.users where id = $1', [id]);
     const compte = lu.rows[0];
     if (!compte) return { data: { user: null }, error: { status: 404, code: 'user_not_found', message: 'User not found' } };
-    return { data: { user: { id, email: compte.email ?? undefined } }, error: null };
+    const email_confirmed_at = nonConfirmes.includes(id) ? undefined : '2026-07-01T10:00:00Z';
+    return { data: { user: { id, email: compte.email ?? undefined, email_confirmed_at } }, error: null };
   };
   const deleteUser = async (id: string) => {
     await base.query('delete from auth.users where id = $1', [id]);
@@ -154,6 +157,20 @@ describe('la suppression d’un compte, sur la vraie base', () => {
     expect(ENREGISTREE).toBe('pre_lancement@exemple.test');
     expect(await compter('select count(*) as n from public.newsletter_subscribers where email = $1', [ENREGISTREE])).toBe(0);
     expect(await compter("select count(*) as n from public.newsletter_subscribers where email = 'victime@exemple.test'")).toBe(1);
+    expect(Sentry.captureException).not.toHaveBeenCalled();
+  });
+
+  it('un compte jamais confirmé qui porte l’adresse d’une abonnée : le compte part, l’abonnement de l’abonnée reste', async () => {
+    const COMPTE = uuid(4);
+    const VICTIME = 'victime@exemple.test';
+    await db.exec(`insert into auth.users (id, email) values ('${COMPTE}', '${VICTIME}');
+      insert into public.newsletter_subscribers (id, email, source, user_id) values
+        ('${uuid(515)}', '${VICTIME}', 'form', null);`);
+
+    await deleteUserCompletely(clientDeSuppression(db, [COMPTE]), COMPTE, VICTIME, 'Inconnu', COMPTE);
+
+    expect(await compter('select count(*) as n from auth.users where id = $1', [COMPTE])).toBe(0);
+    expect(await compter('select count(*) as n from public.newsletter_subscribers where email = $1', [VICTIME])).toBe(1);
     expect(Sentry.captureException).not.toHaveBeenCalled();
   });
 

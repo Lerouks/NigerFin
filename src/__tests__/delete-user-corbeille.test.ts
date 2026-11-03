@@ -28,6 +28,7 @@ function clientQuiNote(
     tableEnPanne?: string;
     lectureEchoue?: boolean;
     adresse?: string | null;
+    nonConfirmee?: boolean;
   } = {},
 ) {
   const ordre: string[] = [];
@@ -54,7 +55,8 @@ function clientQuiNote(
       return { data: { user: null }, error: { status: 500, code: 'unexpected_failure', message: 'panne pour lectrice@exemple.test' } };
     }
     const email = options.adresse === undefined ? 'Lectrice@Exemple.test' : options.adresse;
-    return { data: { user: { id, email: email ?? undefined } }, error: null };
+    const email_confirmed_at = options.nonConfirmee ? undefined : '2026-07-01T10:00:00Z';
+    return { data: { user: { id, email: email ?? undefined, email_confirmed_at } }, error: null };
   });
   const deleteUser = vi.fn(async () => {
     ordre.push('auth.deleteUser');
@@ -117,6 +119,17 @@ describe('deleteUserCompletely et la corbeille', () => {
     await deleteUserCompletely(client, LECTRICE, 'autre.personne@exemple.test', 'Lectrice', ADMIN);
 
     expect(valeurs['newsletter_subscribers.email']).toEqual(['lectrice@exemple.test']);
+  });
+
+  it('un compte jamais confirmé : son adresse ne prouve rien, aucun abonnement n’est cherché par elle', async () => {
+    const { client, ordre } = clientQuiNote({ adresse: 'victime@exemple.test', nonConfirmee: true });
+
+    await deleteUserCompletely(client, LECTRICE, '', 'Lectrice', ADMIN);
+
+    expect(ordre).toContain('auth.getUserById');
+    expect(ordre).not.toContain('delete:newsletter_subscribers.email');
+    expect(ordre).toContain('auth.deleteUser');
+    expect(Sentry.captureException).not.toHaveBeenCalled();
   });
 
   it('un compte sans adresse (connexion par téléphone) : rien n’est cherché par adresse, rien n’est signalé', async () => {

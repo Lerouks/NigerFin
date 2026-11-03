@@ -25,7 +25,10 @@ function signalerAbonnement(etape: EtapeAbonnement, userId: string, erreur: unkn
 /**
  * L'adresse du compte, lue dans auth.users et mise sous la forme que
  * newsletter_subscribers enregistre, ou null quand le compte n'en a pas (une
- * connexion par téléphone) ou qu'elle n'a pas pu être lue (signalé).
+ * connexion par téléphone), qu'elle n'a jamais été confirmée, ou qu'elle n'a
+ * pas pu être lue (signalé). Une inscription jamais confirmée pose l'adresse
+ * dans auth.users sans aucune preuve : n'importe qui peut s'inscrire avec
+ * l'adresse d'une abonnée, et supprimer ce compte effacerait son abonnement.
  */
 async function adresseDuCompte(serviceClient: SupabaseClient, userId: string): Promise<string | null> {
   try {
@@ -35,6 +38,7 @@ async function adresseDuCompte(serviceClient: SupabaseClient, userId: string): P
       return null;
     }
     const email = data.user?.email;
+    if (!data.user?.email_confirmed_at) return null;
     return typeof email === 'string' && email.trim() ? normalizeEmail(email) : null;
   } catch (err) {
     signalerAbonnement('lecture-du-compte', userId, err);
@@ -100,7 +104,7 @@ export async function deleteUserCompletely(
     signalerAbonnement('par-compte', userId, err);
   }
   // L'inscription d'avant le compte se retrouve par l'adresse DU COMPTE, celle
-  // d'auth.users, que seule une confirmation par courriel change. Jamais par
+  // d'auth.users, et seulement si elle a été confirmée par courriel. Jamais par
   // celle du profil (userEmail) : la session du lecteur peut réécrire
   // user_profiles.email (politique « Users can update own profile », relevée
   // en production), et une adresse de profil réécrite effacerait

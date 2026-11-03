@@ -7,8 +7,8 @@ function emailLayout(content: string): string {
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 </head>
-<body style="margin:0;padding:0;background-color:#f5f5f4;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f4;padding:32px 16px;">
+<body style="margin:0;padding:0;background-color:#f5f5f5;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f5;padding:32px 16px;">
 <tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
 
@@ -17,7 +17,7 @@ function emailLayout(content: string): string {
   <span style="color:#ffffff;font-size:20px;font-weight:700;letter-spacing:2px;text-decoration:none;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;">NFI REPORT</span>
 </td></tr>
 <!-- Gold accent line -->
-<tr><td style="background-color:#d4a843;height:3px;font-size:0;line-height:0;">&nbsp;</td></tr>
+<tr><td style="background-color:#8a8e95;height:3px;font-size:0;line-height:0;">&nbsp;</td></tr>
 
 <!-- Content -->
 <tr><td style="background-color:#ffffff;padding:40px 32px;">
@@ -25,8 +25,8 @@ ${content}
 </td></tr>
 
 <!-- Footer -->
-<tr><td style="background-color:#fafaf9;padding:24px 32px;border-top:1px solid #e5e5e5;text-align:center;">
-  <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-style:italic;color:#d4a843;letter-spacing:0.3px;">La connaissance, votre meilleur capital.</p>
+<tr><td style="background-color:#fafafa;padding:24px 32px;border-top:1px solid #e5e5e5;text-align:center;">
+  <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-style:italic;color:#8a8e95;letter-spacing:0.3px;">La connaissance, votre meilleur capital.</p>
   <p style="margin:0 0 8px;font-size:12px;color:#a3a3a3;">NFI Report, actualités économiques et financières du Niger</p>
   <p style="margin:0;font-size:12px;color:#d4d4d4;">
     <a href="${SITE_URL}" style="color:#a3a3a3;text-decoration:underline;">nfireport.com</a>
@@ -143,10 +143,10 @@ export function newsletterWelcomeEmail(): { subject: string; html: string } {
 ${heading('Bienvenue sur NFI Report')}
 ${paragraph("Vous êtes désormais inscrit. Vous recevrez nos briefings économiques sur le Niger et l'Afrique de l'Ouest : analyses, données de marché et décryptages.")}
 ${button('Lire les derniers articles', `${SITE_URL}`)}
-<div style="background-color:#fafaf9;border-radius:8px;padding:20px 24px;margin:24px 0;">
+<div style="background-color:#fafafa;border-radius:8px;padding:20px 24px;margin:24px 0;">
   <p style="margin:0 0 8px;font-size:14px;font-weight:600;color:#111;">Envie d'aller plus loin ?</p>
   <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#404040;">Les abonnés Premium reçoivent Le Brief du Lundi en intégralité chaque semaine, des alertes en temps réel et l'accès à tous nos outils financiers.</p>
-  <a href="${SITE_URL}/pricing" style="color:#d4a843;font-size:14px;font-weight:600;text-decoration:underline;">Découvrir l'offre Premium →</a>
+  <a href="${SITE_URL}/pricing" style="color:#8a8e95;font-size:14px;font-weight:600;text-decoration:underline;">Découvrir l'offre Premium →</a>
 </div>
 ${signature()}
     `),
@@ -177,7 +177,7 @@ ${heading('Nouveau message de contact')}
   <tr><td style="padding:8px 0;font-size:14px;color:#737373;">Email</td><td style="padding:8px 0;font-size:15px;color:#111;"><a href="mailto:${email}" style="color:#111;">${email}</a></td></tr>
   <tr><td style="padding:8px 0;font-size:14px;color:#737373;">Sujet</td><td style="padding:8px 0;font-size:15px;color:#111;">${subject}</td></tr>
 </table>
-<div style="background-color:#fafaf9;border-left:3px solid #111;padding:16px;margin:16px 0;font-size:15px;line-height:1.6;color:#404040;">
+<div style="background-color:#fafafa;border-left:3px solid #111;padding:16px;margin:16px 0;font-size:15px;line-height:1.6;color:#404040;">
 ${message}
 </div>
     `),
@@ -194,7 +194,7 @@ export function paymentConfirmationEmail(name: string, tier: string, billingCycl
 ${heading('Abonnement Premium activé')}
 ${paragraph(`Bonjour ${name},`)}
 ${paragraph(`Votre paiement a été vérifié et votre abonnement <strong>Premium ${cycleLabel}</strong> est maintenant actif.`)}
-<table style="width:100%;border-collapse:collapse;background-color:#fafaf9;border-radius:8px;margin:16px 0;padding:16px;">
+<table style="width:100%;border-collapse:collapse;background-color:#fafafa;border-radius:8px;margin:16px 0;padding:16px;">
   <tr><td style="padding:12px 16px;font-size:14px;color:#737373;">Formule</td><td style="padding:12px 16px;font-size:15px;color:#111;font-weight:600;">Premium ${cycleLabel}</td></tr>
   <tr><td style="padding:12px 16px;font-size:14px;color:#737373;">Valide jusqu'au</td><td style="padding:12px 16px;font-size:15px;color:#111;font-weight:600;">${formattedDate}</td></tr>
 </table>
@@ -253,7 +253,7 @@ export function adminPremiumGrantedEmail(name: string, startDate: string, endDat
 ${heading('Votre abonnement Premium est activé')}
 ${paragraph(`Bonjour ${name},`)}
 ${paragraph("Nous avons le plaisir de vous informer que votre abonnement <strong>Premium NFI Report</strong> est désormais actif.")}
-<table style="width:100%;border-collapse:collapse;background-color:#fafaf9;border-radius:8px;margin:16px 0;">
+<table style="width:100%;border-collapse:collapse;background-color:#fafafa;border-radius:8px;margin:16px 0;">
   <tr><td style="padding:12px 16px;font-size:14px;color:#737373;">Type d'abonnement</td><td style="padding:12px 16px;font-size:15px;color:#111;font-weight:600;">Premium</td></tr>
   <tr><td style="padding:12px 16px;font-size:14px;color:#737373;">Date de début</td><td style="padding:12px 16px;font-size:15px;color:#111;font-weight:600;">${formattedStart}</td></tr>
   <tr><td style="padding:12px 16px;font-size:14px;color:#737373;">Date de fin</td><td style="padding:12px 16px;font-size:15px;color:#111;font-weight:600;">${formattedEnd}</td></tr>

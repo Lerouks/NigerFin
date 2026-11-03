@@ -137,11 +137,11 @@ function AdminSidebar({
               className={[
                 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] font-medium transition',
                 isActive
-                  ? 'bg-linear-to-br from-[#d4a843]/12 to-[#ff8c42]/8 text-foreground border border-[#d4a843]/30'
+                  ? 'bg-linear-to-br from-[#8a8e95]/12 to-[#ff8c42]/8 text-foreground border border-[#8a8e95]/30'
                   : 'text-foreground/60 hover:bg-black/3 hover:text-foreground',
               ].join(' ')}
             >
-              <Icon className={`w-[18px] h-[18px] ${isActive ? 'text-[#d4a843]' : ''}`} aria-hidden="true" />
+              <Icon className={`w-[18px] h-[18px] ${isActive ? 'text-[#8a8e95]' : ''}`} aria-hidden="true" />
               <span>{label}</span>
             </Link>
           );
@@ -177,7 +177,7 @@ function AdminBottomNav({ pathname }: { pathname: string }) {
               aria-current={isActive ? 'page' : undefined}
               className={[
                 'flex flex-col items-center gap-0.5 py-2.5 transition',
-                isActive ? 'text-[#d4a843]' : 'text-foreground/45',
+                isActive ? 'text-[#8a8e95]' : 'text-foreground/45',
               ].join(' ')}
             >
               <Icon className="w-[22px] h-[22px]" aria-hidden="true" />

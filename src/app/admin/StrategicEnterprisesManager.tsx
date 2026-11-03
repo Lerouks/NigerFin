@@ -381,7 +381,7 @@ export function StrategicEnterprisesManager() {
               type="checkbox"
               checked={form.is_featured ?? false}
               onChange={(e) => setForm({ ...form, is_featured: e.target.checked })}
-              className="w-4 h-4 rounded-sm border-gray-300 accent-[#d4a843]"
+              className="w-4 h-4 rounded-sm border-gray-300 accent-[#8a8e95]"
             />
             <span className="text-[13px] text-gray-700">Vedette de l&apos;atlas (1 seule a la fois)</span>
           </label>
@@ -488,7 +488,7 @@ export function StrategicEnterprisesManager() {
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <h3 className="text-[15px] font-semibold text-gray-900 truncate">{item.name}</h3>
                   {item.is_featured && (
-                    <span className="px-2 py-0.5 bg-[#d4a843]/15 text-[#8a6b1f] text-[11px] font-bold rounded-full uppercase tracking-wider">
+                    <span className="px-2 py-0.5 bg-[#8a8e95]/15 text-[#5f636b] text-[11px] font-bold rounded-full uppercase tracking-wider">
                       Vedette
                     </span>
                   )}

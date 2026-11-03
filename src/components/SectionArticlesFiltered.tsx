@@ -322,7 +322,7 @@ export function SectionArticlesFiltered({
                     <button
                       type="button"
                       onClick={resetFilters}
-                      className="text-[12px] text-gold hover:text-[#c49a3a] font-semibold transition-colors"
+                      className="text-[12px] text-gold hover:text-[#6b6f76] font-semibold transition-colors"
                     >
                       Tout effacer
                     </button>
@@ -372,7 +372,7 @@ export function SectionArticlesFiltered({
                 <button
                   type="button"
                   onClick={resetFilters}
-                  className="text-[11px] text-gold hover:text-[#c49a3a] font-semibold transition-colors"
+                  className="text-[11px] text-gold hover:text-[#6b6f76] font-semibold transition-colors"
                 >
                   Tout effacer
                 </button>
@@ -409,7 +409,7 @@ export function SectionArticlesFiltered({
                 <button
                   type="button"
                   onClick={resetFilters}
-                  className="text-[12px] font-semibold text-gold hover:text-[#c49a3a] transition-colors"
+                  className="text-[12px] font-semibold text-gold hover:text-[#6b6f76] transition-colors"
                 >
                   Tout effacer
                 </button>
@@ -431,7 +431,7 @@ export function SectionArticlesFiltered({
               <button
                 type="button"
                 onClick={resetFilters}
-                className="text-[13px] text-gold hover:text-[#c49a3a] font-semibold transition-colors"
+                className="text-[13px] text-gold hover:text-[#6b6f76] font-semibold transition-colors"
               >
                 Réinitialiser les filtres
               </button>

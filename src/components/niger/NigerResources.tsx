@@ -18,19 +18,20 @@ interface Resource {
 type TypeConfig = { icon: typeof Atom; color: string; bg: string };
 
 const TYPE_CONFIG: Record<string, TypeConfig> = {
-  uranium: { icon: Atom, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-  petrole: { icon: Droplets, color: 'text-blue-600', bg: 'bg-blue-50' },
-  or: { icon: CircleDot, color: 'text-gold', bg: 'bg-gold/10' },
-  charbon: { icon: Flame, color: 'text-orange-600', bg: 'bg-orange-50' },
+  // Monochrome (charte NFI : noir, gris, argent) : l'icône distingue la ressource, pas la couleur.
+  uranium: { icon: Atom, color: 'text-[#111]', bg: 'bg-gray-100' },
+  petrole: { icon: Droplets, color: 'text-[#111]', bg: 'bg-gray-100' },
+  or: { icon: CircleDot, color: 'text-[#111]', bg: 'bg-gray-100' },
+  charbon: { icon: Flame, color: 'text-[#111]', bg: 'bg-gray-100' },
   autre: { icon: Factory, color: 'text-gray-600', bg: 'bg-gray-50' },
 };
 
 const DEFAULT_TYPE_CONFIG: TypeConfig = TYPE_CONFIG.autre!;
 
 const IMPORTANCE_LABELS: Record<string, { label: string; style: string }> = {
-  critique: { label: 'Critique', style: 'bg-red-50 text-red-700 border-red-100' },
-  majeure: { label: 'Majeure', style: 'bg-amber-50 text-amber-700 border-amber-100' },
-  moderee: { label: 'Modérée', style: 'bg-blue-50 text-blue-700 border-blue-100' },
+  critique: { label: 'Critique', style: 'bg-[#111] text-white border-[#111]' },
+  majeure: { label: 'Majeure', style: 'bg-white text-[#111] border-black/20' },
+  moderee: { label: 'Modérée', style: 'bg-gray-50 text-gray-600 border-black/10' },
 };
 
 // Map company names to enterprise page slugs (only existing pages)

@@ -58,12 +58,12 @@ export default async function EnterpriseOgImage({
             style={{
               width: '36px',
               height: '2px',
-              background: '#d4a843',
+              background: '#8a8e95',
             }}
           />
           <div
             style={{
-              color: '#d4a843',
+              color: '#8a8e95',
               fontSize: '20px',
               letterSpacing: '0.28em',
               textTransform: 'uppercase',
@@ -144,7 +144,7 @@ export default async function EnterpriseOgImage({
             </div>
             <div
               style={{
-                color: '#d4a843',
+                color: '#8a8e95',
                 fontSize: '14px',
                 textTransform: 'uppercase',
                 letterSpacing: '0.22em',

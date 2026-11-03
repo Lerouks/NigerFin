@@ -15,6 +15,7 @@ export const metadata: Metadata = {
     description:
       'Chaque lundi à 7h, une analyse longue sur l\'économie du Niger et de l\'Afrique de l\'Ouest.',
     type: 'website',
+    images: ['/og-image.png'],
   },
 };
 

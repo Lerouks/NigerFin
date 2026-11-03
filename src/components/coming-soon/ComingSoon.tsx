@@ -29,13 +29,13 @@ const SOCIALS = [
 export function ComingSoon() {
   return (
     <main
-      className="relative flex min-h-svh w-full flex-col overflow-hidden text-[#16130d]"
-      style={{ backgroundColor: '#f6f4ee' }}
+      className="relative flex min-h-svh w-full flex-col overflow-hidden text-[#111111]"
+      style={{ backgroundColor: '#f7f7f7' }}
     >
       {/* Masthead */}
       <header className="nfi-rise px-6 pt-8 sm:px-10 lg:px-16 lg:pt-10" style={{ animationDelay: '40ms' }}>
         <p className="font-[family-name:var(--font-playfair)] text-[22px] font-bold tracking-[0.01em]">NFI&nbsp;REPORT</p>
-        <p className="mt-1 text-[12px] text-[#16130d]/45">Niger Financial Insights</p>
+        <p className="mt-1 text-[12px] text-[#111111]/45">Niger Financial Insights</p>
       </header>
 
       {/* Hero : remplit la hauteur */}
@@ -55,7 +55,7 @@ export function ComingSoon() {
             </h1>
 
             <p
-              className="nfi-rise mt-7 max-w-[34rem] text-[clamp(1rem,1.5vw,1.15rem)] leading-relaxed text-[#16130d]/72"
+              className="nfi-rise mt-7 max-w-[34rem] text-[clamp(1rem,1.5vw,1.15rem)] leading-relaxed text-[#111111]/72"
               style={{ animationDelay: '520ms' }}
             >
               Analyses, données de marché et décryptages, pour comprendre l&apos;économie du Niger
@@ -63,11 +63,11 @@ export function ComingSoon() {
             </p>
 
             <div className="nfi-rise mt-10 max-w-[30rem]" style={{ animationDelay: '640ms' }}>
-              <p className="mb-3 text-[14px] text-[#16130d]/60">Recevez le signal du lancement.</p>
+              <p className="mb-3 text-[14px] text-[#111111]/60">Recevez le signal du lancement.</p>
               <WaitlistForm />
               {/* La page collecte une adresse : qui la donne doit pouvoir lire qui la
                   collecte, et sortir. Les deux pages restent ouvertes en pré-lancement. */}
-              <p className="mt-3 text-[12px] leading-relaxed text-[#16130d]/45">
+              <p className="mt-3 text-[12px] leading-relaxed text-[#111111]/45">
                 Votre adresse ne sert qu&apos;au signal du lancement.{' '}
                 <a
                   href="/confidentialite"
@@ -101,9 +101,9 @@ export function ComingSoon() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={label}
-                className="group relative -ml-2 flex h-11 w-11 items-center justify-center rounded-full text-[#16130d]/55 transition-colors duration-200 first:ml-0 hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-[#f6f4ee]"
+                className="group relative -ml-2 flex h-11 w-11 items-center justify-center rounded-full text-[#111111]/55 transition-colors duration-200 first:ml-0 hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-[#f7f7f7]"
               >
-                <span className="pointer-events-none absolute -top-7 whitespace-nowrap rounded bg-[#16130d] px-2 py-1 text-[11px] font-medium text-[#f6f4ee] opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                <span className="pointer-events-none absolute -top-7 whitespace-nowrap rounded bg-[#111111] px-2 py-1 text-[11px] font-medium text-[#f7f7f7] opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                   {label}
                 </span>
                 <Icon className="h-[18px] w-[18px]" />
@@ -111,7 +111,7 @@ export function ComingSoon() {
             ))}
           </div>
         </div>
-        <p className="text-[13px] text-[#16130d]/40">Niamey&nbsp;· 2026</p>
+        <p className="text-[13px] text-[#111111]/40">Niamey&nbsp;· 2026</p>
       </footer>
 
       {/* Fil d'actualité */}

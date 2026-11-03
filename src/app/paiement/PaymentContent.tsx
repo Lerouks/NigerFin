@@ -441,7 +441,7 @@ export function PaymentContent() {
                           required
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="w-full border border-black/8 rounded-xl pl-11 pr-4 py-3 bg-background focus:outline-hidden focus:border-[#d4a843]/30 focus:ring-2 focus:ring-[#d4a843]/10 transition-all text-[14px]"
+                          className="w-full border border-black/8 rounded-xl pl-11 pr-4 py-3 bg-background focus:outline-hidden focus:border-[#8a8e95]/30 focus:ring-2 focus:ring-[#8a8e95]/10 transition-all text-[14px]"
                           aria-label="Adresse email" placeholder="votre@email.com"
                         />
                       </div>
@@ -482,7 +482,7 @@ export function PaymentContent() {
                             required
                             value={fullName}
                             onChange={(e) => setFullName(e.target.value)}
-                            className="w-full border border-black/8 rounded-xl pl-11 pr-4 py-3 bg-background focus:outline-hidden focus:border-[#d4a843]/30 focus:ring-2 focus:ring-[#d4a843]/10 transition-all text-[14px]"
+                            className="w-full border border-black/8 rounded-xl pl-11 pr-4 py-3 bg-background focus:outline-hidden focus:border-[#8a8e95]/30 focus:ring-2 focus:ring-[#8a8e95]/10 transition-all text-[14px]"
                             aria-label="Nom complet" placeholder="Nom complet"
                             autoComplete="name"
                           />
@@ -496,7 +496,7 @@ export function PaymentContent() {
                           required
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="w-full border border-black/8 rounded-xl pl-11 pr-4 py-3 bg-background focus:outline-hidden focus:border-[#d4a843]/30 focus:ring-2 focus:ring-[#d4a843]/10 transition-all text-[14px]"
+                          className="w-full border border-black/8 rounded-xl pl-11 pr-4 py-3 bg-background focus:outline-hidden focus:border-[#8a8e95]/30 focus:ring-2 focus:ring-[#8a8e95]/10 transition-all text-[14px]"
                           aria-label="Adresse email" placeholder="Entrez votre email"
                           autoComplete="email"
                         />
@@ -510,7 +510,7 @@ export function PaymentContent() {
                           minLength={authMode === 'signup' ? 8 : undefined}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className="w-full border border-black/8 rounded-xl pl-11 pr-11 py-3 bg-background focus:outline-hidden focus:border-[#d4a843]/30 focus:ring-2 focus:ring-[#d4a843]/10 transition-all text-[14px]"
+                          className="w-full border border-black/8 rounded-xl pl-11 pr-11 py-3 bg-background focus:outline-hidden focus:border-[#8a8e95]/30 focus:ring-2 focus:ring-[#8a8e95]/10 transition-all text-[14px]"
                           aria-label="Mot de passe" placeholder={authMode === 'signup' ? 'Minimum 8 caractères' : 'Mot de passe'}
                           autoComplete={authMode === 'login' ? 'current-password' : 'new-password'}
                         />
@@ -535,7 +535,7 @@ export function PaymentContent() {
                             className={`w-full border rounded-xl pl-11 pr-4 py-3 bg-background focus:outline-hidden focus:ring-2 transition-all text-[14px] ${
                               confirmPassword && password !== confirmPassword
                                 ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                                : 'border-black/8 focus:border-[#d4a843]/30 focus:ring-[#d4a843]/10'
+                                : 'border-black/8 focus:border-[#8a8e95]/30 focus:ring-[#8a8e95]/10'
                             }`}
                             aria-label="Confirmer le mot de passe" placeholder="Confirmez le mot de passe"
                             autoComplete="new-password"

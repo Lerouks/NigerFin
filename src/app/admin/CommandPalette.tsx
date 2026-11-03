@@ -503,7 +503,7 @@ function UserItem({
         }
       }}
     >
-      <span className="w-8 h-8 rounded-full bg-linear-to-br from-[#d4a843] to-[#ff8c42] flex items-center justify-center text-white text-[11px] font-bold shrink-0">
+      <span className="w-8 h-8 rounded-full bg-linear-to-br from-[#8a8e95] to-[#ff8c42] flex items-center justify-center text-white text-[11px] font-bold shrink-0">
         {user.initials}
       </span>
       <div className="flex-1 min-w-0">
@@ -700,8 +700,8 @@ function tierLabelFor(role: string): string {
 }
 
 function tierStyleFor(role: string): string {
-  if (role === 'admin') return 'bg-foreground text-[#d4a843]';
-  if (role === 'premium') return 'bg-linear-to-br from-[#d4a843]/15 to-[#ff8c42]/10 text-[#a07a1f]';
+  if (role === 'admin') return 'bg-foreground text-[#8a8e95]';
+  if (role === 'premium') return 'bg-linear-to-br from-[#8a8e95]/15 to-[#ff8c42]/10 text-[#5f636b]';
   return 'bg-black/6 text-foreground/55';
 }
 

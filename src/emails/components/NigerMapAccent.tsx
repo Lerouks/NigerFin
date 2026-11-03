@@ -43,13 +43,13 @@ export interface NigerMapAccentProps {
 export function NigerMapAccent({
   width = 200,
   height,
-  fill = '#d4a843',
-  stroke = '#d4a843',
+  fill = '#8a8e95',
+  stroke = '#8a8e95',
   strokeWidth = 2,
   opacity = 1,
   variant = 'fill',
   showNiamey = false,
-  niameyColor = '#d4a843',
+  niameyColor = '#8a8e95',
   ariaLabel = 'Contour du Niger',
   style,
 }: NigerMapAccentProps) {

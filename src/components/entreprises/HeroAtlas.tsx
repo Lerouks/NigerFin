@@ -30,7 +30,7 @@ export function HeroAtlas({ eyebrow, title, lead }: HeroAtlasProps) {
       <div
         aria-hidden
         className="absolute inset-0 mix-blend-overlay opacity-30"
-        style={{ backgroundColor: '#d4a843' }}
+        style={{ backgroundColor: '#8a8e95' }}
       />
       {/* Overlay degrade horizontal pour le texte (gauche sombre) */}
       <div

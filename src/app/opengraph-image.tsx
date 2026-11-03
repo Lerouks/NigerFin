@@ -35,7 +35,7 @@ export default async function Image() {
             right: 0,
             bottom: 0,
             background:
-              'radial-gradient(ellipse at 50% 30%, rgba(212, 168, 67, 0.15) 0%, transparent 70%)',
+              'radial-gradient(ellipse at 50% 30%, rgba(138, 142, 149, 0.15) 0%, transparent 70%)',
             display: 'flex',
           }}
         />
@@ -48,7 +48,7 @@ export default async function Image() {
             left: 0,
             right: 0,
             height: '4px',
-            backgroundColor: '#d4a843',
+            backgroundColor: '#8a8e95',
             display: 'flex',
           }}
         />
@@ -61,7 +61,7 @@ export default async function Image() {
             left: 0,
             right: 0,
             height: '4px',
-            backgroundColor: '#d4a843',
+            backgroundColor: '#8a8e95',
             display: 'flex',
           }}
         />
@@ -94,13 +94,13 @@ export default async function Image() {
             >
               <path
                 d="M50 10 L85 80 L70 80 L50 30 L30 80 L15 80 Z"
-                stroke="#d4a843"
+                stroke="#8a8e95"
                 strokeWidth="2"
                 fill="none"
               />
               <path
                 d="M50 20 L78 75 L68 75 L50 35 L32 75 L22 75 Z"
-                stroke="rgba(212, 168, 67, 0.5)"
+                stroke="rgba(138, 142, 149, 0.5)"
                 strokeWidth="1.5"
                 fill="none"
               />
@@ -126,7 +126,7 @@ export default async function Image() {
             style={{
               width: '80px',
               height: '3px',
-              backgroundColor: '#d4a843',
+              backgroundColor: '#8a8e95',
               borderRadius: '2px',
               display: 'flex',
             }}
@@ -137,7 +137,7 @@ export default async function Image() {
             style={{
               fontSize: '24px',
               fontWeight: 400,
-              color: '#d4a843',
+              color: '#8a8e95',
               letterSpacing: '0.08em',
               textTransform: 'uppercase' as const,
               display: 'flex',

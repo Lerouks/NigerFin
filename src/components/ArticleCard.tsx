@@ -98,7 +98,7 @@ export function ArticleCard({ article, featured = false, priority = false }: Art
             priority={priority}
           />
           {article.isPremium && (
-            <div className="absolute top-3 left-3 bg-[#d4a843]/90 backdrop-blur-xs text-white text-[10px] font-semibold tracking-[0.12em] uppercase px-2.5 py-1 rounded-full shadow-xs">
+            <div className="absolute top-3 left-3 bg-[#8a8e95]/90 backdrop-blur-xs text-white text-[10px] font-semibold tracking-[0.12em] uppercase px-2.5 py-1 rounded-full shadow-xs">
               Premium
             </div>
           )}

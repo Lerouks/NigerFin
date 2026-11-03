@@ -46,7 +46,7 @@ export function BreakingNews({ initialItems = [], initialEnabled = false }: Brea
       <div
         className="absolute bottom-0 left-0 h-[2px]"
         style={{
-          background: 'linear-gradient(90deg, #b8922f, #d4a843, #e8c96a, #d4a843, #b8922f)',
+          background: 'linear-gradient(90deg, #6b6f76, #8a8e95, #c4c7cc, #8a8e95, #6b6f76)',
           animation: 'progress 5s linear infinite',
           width: '100%',
         }}
@@ -85,7 +85,7 @@ export function BreakingNews({ initialItems = [], initialEnabled = false }: Brea
                   className={`rounded-full transition-all duration-300 ${
                     i === currentIndex ? 'w-4 h-1.5' : 'w-1.5 h-1.5 bg-gray-600 hover:bg-gray-500'
                   }`}
-                  style={i === currentIndex ? { backgroundColor: '#d4a843' } : undefined}
+                  style={i === currentIndex ? { backgroundColor: '#8a8e95' } : undefined}
                   aria-label={`Info ${i + 1}`}
                 />
               ))}

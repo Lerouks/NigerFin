@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { MapPin, Users, Pickaxe, Briefcase, Shield } from 'lucide-react';
+import { MapPin, Users, Pickaxe, Briefcase } from 'lucide-react';
 
 interface Region {
   id: string;
@@ -15,12 +15,10 @@ interface Region {
   security_note: string;
 }
 
-const SECURITY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
-  stable: { bg: 'bg-emerald-50', text: 'text-emerald-700', label: 'Stable' },
-  moderate: { bg: 'bg-amber-50', text: 'text-amber-700', label: 'Modéré' },
-  elevated: { bg: 'bg-orange-50', text: 'text-orange-700', label: 'Vigilance' },
-  critical: { bg: 'bg-red-50', text: 'text-red-700', label: 'Critique' },
-};
+// Pas de niveau ni de note de sécurité à l'écran : NFI traite l'économie, jamais
+// le volet sécuritaire (ligne éditoriale). Les champs restent en base, intacts.
+const formatMillions = (population: number): string =>
+  (population / 1_000_000).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
 export function NigerRegions({ regions }: { regions: Region[] }) {
   const [selected, setSelected] = useState<string | null>(null);
@@ -45,7 +43,7 @@ export function NigerRegions({ regions }: { regions: Region[] }) {
               key={region.id}
               onClick={() => setSelected(isSelected ? null : region.id)}
               aria-expanded={isSelected}
-              aria-label={`${region.name}, ${(region.population / 1_000_000).toFixed(1)}M habitants`}
+              aria-label={`${region.name}, ${formatMillions(region.population)} millions d'habitants`}
               className={`text-left p-4 rounded-xl border transition-all duration-200 ${
                 isSelected
                   ? 'border-black/20 bg-[#111] text-white shadow-lg -translate-y-0.5'
@@ -57,7 +55,7 @@ export function NigerRegions({ regions }: { regions: Region[] }) {
                 <span className="text-[13px] font-medium">{region.name}</span>
               </div>
               <p className={`text-[11px] ${isSelected ? 'text-white/50' : 'text-gray-500'}`}>
-                {(region.population / 1_000_000).toFixed(1)}M hab.
+                {formatMillions(region.population)} M hab.
               </p>
             </button>
           );
@@ -71,15 +69,6 @@ export function NigerRegions({ regions }: { regions: Region[] }) {
               <h3 className="text-xl font-medium">{selectedRegion.name}</h3>
               <p className="text-[13px] text-gray-500 mt-1">Capitale : {selectedRegion.capital}</p>
             </div>
-            {(() => {
-              const secStyle = SECURITY_STYLES[selectedRegion.security_level];
-              return secStyle ? (
-                <span className={`text-[11px] px-3 py-1 rounded-full font-medium ${secStyle.bg} ${secStyle.text}`}>
-                  <Shield className="w-3 h-3 inline mr-1" />
-                  {secStyle.label}
-                </span>
-              ) : null;
-            })()}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -112,7 +101,7 @@ export function NigerRegions({ regions }: { regions: Region[] }) {
               <div className="flex flex-wrap gap-1.5">
                 {selectedRegion.natural_resources.length > 0 ? (
                   selectedRegion.natural_resources.map((r) => (
-                    <span key={r} className="text-[12px] px-2.5 py-1 rounded-full bg-amber-50 border border-amber-100 text-amber-700">{r}</span>
+                    <span key={r} className="text-[12px] px-2.5 py-1 rounded-full bg-gray-50 border border-black/6 text-gray-700">{r}</span>
                   ))
                 ) : (
                   <span className="text-[12px] text-gray-500">-</span>
@@ -121,11 +110,6 @@ export function NigerRegions({ regions }: { regions: Region[] }) {
             </div>
           </div>
 
-          {selectedRegion.security_note && (
-            <p className="text-[12px] text-gray-500 mt-5 pt-4 border-t border-black/4">
-              {selectedRegion.security_note}
-            </p>
-          )}
         </div>
       )}
     </section>

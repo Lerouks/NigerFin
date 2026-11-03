@@ -110,8 +110,8 @@ export default function CompleterProfilPage() {
         <div className="bg-white rounded-2xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] p-8 sm:p-10 animate-fade-in-up">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-14 h-14 bg-[#d4a843]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <User className="w-7 h-7 text-[#d4a843]" />
+            <div className="w-14 h-14 bg-[#8a8e95]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <User className="w-7 h-7 text-[#8a8e95]" />
             </div>
             <h1 className="text-2xl font-bold mb-2">Complétez votre profil</h1>
             <p className="text-gray-500 text-[14px]">

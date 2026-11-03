@@ -2,6 +2,7 @@
 
 import useSWR from 'swr';
 import Link from 'next/link';
+import { formatDifficulty } from '@/lib/difficulty-label';
 import {
   ArrowLeft,
   ArrowRight,
@@ -168,7 +169,7 @@ export function PathContent({ slug }: { slug: string }) {
               {formatDuration(data.total_minutes)}
             </span>
             <span className="text-[12px] bg-white/8 text-white/60 px-3 py-1.5 rounded-full">
-              {data.difficulty}
+              {formatDifficulty(data.difficulty)}
             </span>
             {freeLessons > 0 && (
               <span className="text-[12px] bg-emerald-500/20 text-emerald-300 px-3 py-1.5 rounded-full">
@@ -281,7 +282,7 @@ export function PathContent({ slug }: { slug: string }) {
                         className={`text-[10px] px-2 py-0.5 rounded-full border ${
                           isFree
                             ? 'bg-emerald-50 border-emerald-100 text-emerald-700'
-                            : 'bg-[#fffbeb] border-[#fde68a] text-[#92400e]'
+                            : 'bg-[#fffbeb] border-[#e2e3e5] text-[#92400e]'
                         }`}
                       >
                         {isFree ? 'Gratuit' : 'Premium'}

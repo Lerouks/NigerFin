@@ -175,14 +175,14 @@ function StatCard({
       className={[
         'rounded-2xl p-4',
         accent
-          ? 'bg-linear-to-br from-[#d4a843]/8 to-[#ff8c42]/4 border border-[#d4a843]/15'
+          ? 'bg-linear-to-br from-[#8a8e95]/8 to-[#ff8c42]/4 border border-[#8a8e95]/15'
           : 'bg-black/2.5',
       ].join(' ')}
     >
       <p
         className={[
           'text-[10px] tracking-widest uppercase font-semibold',
-          accent ? 'text-[#d4a843]' : 'text-foreground/45',
+          accent ? 'text-[#8a8e95]' : 'text-foreground/45',
         ].join(' ')}
       >
         {label}

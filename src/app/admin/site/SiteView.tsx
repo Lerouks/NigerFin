@@ -340,10 +340,10 @@ function getStatusVisual(status: HealthStatus | null): {
       };
     case 'warn':
       return {
-        bg: 'bg-[#d4a843]/15',
-        iconColor: 'text-[#d4a843]',
+        bg: 'bg-[#8a8e95]/15',
+        iconColor: 'text-[#8a8e95]',
         statusIcon: AlertTriangle,
-        statusColor: 'text-[#d4a843]',
+        statusColor: 'text-[#8a8e95]',
       };
     case 'error':
       return {
@@ -382,7 +382,7 @@ function ActivitySection() {
         <h2 className="font-bold text-[16px]">Activité système</h2>
         <Link
           href="/admin/site/journal"
-          className="text-[12px] text-[#d4a843] font-semibold hover:underline"
+          className="text-[12px] text-[#8a8e95] font-semibold hover:underline"
         >
           Tout voir
         </Link>
@@ -536,8 +536,8 @@ function getAuditVisual(action: string): {
   ) {
     return {
       icon: Pencil,
-      bg: 'bg-[#d4a843]/15',
-      iconColor: 'text-[#d4a843]',
+      bg: 'bg-[#8a8e95]/15',
+      iconColor: 'text-[#8a8e95]',
       verb: 'a modifié',
     };
   }
@@ -545,7 +545,7 @@ function getAuditVisual(action: string): {
     return {
       icon: FileText,
       bg: 'bg-foreground',
-      iconColor: 'text-[#d4a843]',
+      iconColor: 'text-[#8a8e95]',
       verb: 'a publié',
     };
   }
@@ -647,14 +647,14 @@ function ReferenceDataSection() {
             key={card.href}
             href={card.href}
             prefetch
-            className="group relative bg-white border border-black/6 rounded-2xl p-5 hover:border-[#d4a843]/40 hover:shadow-xs transition"
+            className="group relative bg-white border border-black/6 rounded-2xl p-5 hover:border-[#8a8e95]/40 hover:shadow-xs transition"
           >
             <div className="flex items-start justify-between mb-3">
-              <div className="w-11 h-11 rounded-xl bg-linear-to-br from-[#d4a843]/12 to-[#ff8c42]/8 flex items-center justify-center text-[#d4a843]">
+              <div className="w-11 h-11 rounded-xl bg-linear-to-br from-[#8a8e95]/12 to-[#ff8c42]/8 flex items-center justify-center text-[#8a8e95]">
                 <card.icon className="w-5 h-5" aria-hidden="true" />
               </div>
               <ArrowUpRight
-                className="w-4 h-4 text-foreground/30 group-hover:text-[#d4a843] transition"
+                className="w-4 h-4 text-foreground/30 group-hover:text-[#8a8e95] transition"
                 aria-hidden="true"
               />
             </div>
@@ -825,7 +825,7 @@ function MarketTickerInlineToggle() {
   return (
     <div className="mt-4">
       <div className="bg-white border border-black/6 rounded-2xl p-4 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-linear-to-br from-[#d4a843]/12 to-[#ff8c42]/8 flex items-center justify-center text-[#d4a843] shrink-0">
+        <div className="w-10 h-10 rounded-xl bg-linear-to-br from-[#8a8e95]/12 to-[#ff8c42]/8 flex items-center justify-center text-[#8a8e95] shrink-0">
           <LineChart className="w-5 h-5" aria-hidden="true" />
         </div>
         <div className="flex-1 min-w-0">

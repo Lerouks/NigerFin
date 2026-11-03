@@ -29,10 +29,10 @@ export default async function EnterprisesAtlasOgImage() {
       >
         {/* Top: eyebrow */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ width: '36px', height: '2px', background: '#d4a843' }} />
+          <div style={{ width: '36px', height: '2px', background: '#8a8e95' }} />
           <div
             style={{
-              color: '#d4a843',
+              color: '#8a8e95',
               fontSize: '20px',
               letterSpacing: '0.28em',
               textTransform: 'uppercase',

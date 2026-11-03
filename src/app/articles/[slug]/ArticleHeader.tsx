@@ -40,7 +40,7 @@ export function ArticleHeader({ article }: ArticleHeaderProps) {
           </Link>
         ))}
         {isPremium && (
-          <span className="text-[10px] font-semibold tracking-[0.12em] uppercase px-2.5 py-0.5 rounded-full bg-[#d4a843]/10 text-[#d4a843] ring-1 ring-inset ring-[#d4a843]/20">
+          <span className="text-[10px] font-semibold tracking-[0.12em] uppercase px-2.5 py-0.5 rounded-full bg-[#8a8e95]/10 text-[#8a8e95] ring-1 ring-inset ring-[#8a8e95]/20">
             Premium
           </span>
         )}

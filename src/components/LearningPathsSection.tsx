@@ -2,6 +2,7 @@
 
 import useSWR from 'swr';
 import Link from 'next/link';
+import { formatDifficulty } from '@/lib/difficulty-label';
 import {
   BookOpen,
   TrendingUp,
@@ -98,7 +99,7 @@ export function LearningPathsSection() {
                       <Icon className="w-[18px] h-[18px] text-[#111]" />
                     </div>
                     <span className="text-[10px] uppercase tracking-wider text-gray-500 font-medium">
-                      {path.difficulty}
+                      {formatDifficulty(path.difficulty)}
                     </span>
                   </div>
                   <div>

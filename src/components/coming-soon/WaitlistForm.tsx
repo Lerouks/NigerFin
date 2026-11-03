@@ -49,7 +49,7 @@ export function WaitlistForm() {
   if (status === 'success') {
     return (
       <p
-        className="flex items-center gap-2 text-[15px] font-medium text-[#16130d]"
+        className="flex items-center gap-2 text-[15px] font-medium text-[#111111]"
         role="status"
         aria-live="polite"
       >
@@ -61,7 +61,7 @@ export function WaitlistForm() {
 
   return (
     <form onSubmit={handleSubmit} noValidate>
-      <div className="flex items-center gap-3 border-b border-[#16130d]/25 pb-1 transition-colors duration-200 focus-within:border-gold">
+      <div className="flex items-center gap-3 border-b border-[#111111]/25 pb-1 transition-colors duration-200 focus-within:border-gold">
         <label htmlFor="waitlist-email" className="sr-only">
           Votre adresse email
         </label>
@@ -78,12 +78,12 @@ export function WaitlistForm() {
           }}
           disabled={status === 'loading'}
           aria-invalid={status === 'error'}
-          className="min-w-0 flex-1 bg-transparent py-2 text-[16px] text-[#16130d] placeholder:text-[#16130d]/35 focus:outline-none disabled:opacity-60"
+          className="min-w-0 flex-1 bg-transparent py-3 text-[16px] text-[#111111] placeholder:text-[#111111]/35 focus:outline-none disabled:opacity-60"
         />
         <button
           type="submit"
           disabled={status === 'loading'}
-          className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 text-[15px] font-semibold text-[#16130d] transition-colors duration-200 hover:text-gold focus-visible:text-gold focus-visible:outline-none disabled:opacity-60"
+          className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 text-[15px] font-semibold text-[#111111] transition-colors duration-200 hover:text-gold focus-visible:text-gold focus-visible:outline-none disabled:opacity-60"
         >
           {status === 'loading' ? (
             <>

@@ -111,6 +111,48 @@ En production depuis le 3 novembre 2026 :
 - Le dossier `IPAY/`, plugin WordPress que le site n'utilise pas, est retiré
   avec les 20 alertes Dependabot de son `composer.lock`.
 
+### Corrections visibles du 3 novembre 2026
+
+Passage page par page des 56 pages en session admin, puis corrections. En base
+(valeurs d'avant sauvegardées dans
+`~/Data/Sauvegardes/nigerfin-corrections-visibles-2026-11-03/`) :
+
+- Bloc 2 n° 1 : les 11 liens « Comprendre cet actif » mènent aux vraies
+  rubriques Éducation.
+- Bloc 2 n° 3 : la coquille « inancement rare » est corrigée.
+- Fiche pays de `/niger` : PIB INS (12 354 milliards FCFA en 2025) au lieu de
+  18,8 milliards USD, inflation libellée « moyenne 2025 », langues alignées sur
+  la Charte du 26 mars 2025 (haoussa langue nationale, français et anglais
+  langues de travail).
+
+Dans le code :
+
+- **Zéro doré** : le jeton `gold` vaut désormais le gris argent du logo
+  (`#8a8e95`), les fonds crème passent en gris neutres, courriels et images de
+  partage compris. Seuls les graphiques de deux simulateurs gardent quelques
+  touches dorées écrites en dur (fichiers hors limites).
+- Bloc 2 n° 5 et 6 : un cours sans valeur n'est plus affiché, il revient seul
+  avec sa source. Les cours FMI portent leur date (T4 2025), le minerai de fer
+  est retiré de `/marches`.
+- `/niger` : le PIB de la Banque mondiale n'est plus converti au cours de
+  l'euro (+15 % d'erreur), décimales à la française, plus aucun niveau ni note
+  de sécurité par région (ligne éditoriale).
+- Bloc 3 : l'image de partage fait 1 200 x 630, en noir et argent ; le repli des
+  articles sans photo (`og-default.jpg`) existe enfin ; `/contact` et
+  `/newsletter` ont une image de partage.
+- Bloc 4 : la recherche lit le corps des articles, les 4 parcours sont dans le
+  plan du site.
+- Cosmétique : Inter en police variable (les graisses 800 et 900 s'affichent,
+  48 Ko au lieu de 96), image d'en-tête de `/entreprises` ramenée de 3,1 Mo à
+  430 Ko, niveaux des parcours accentués, champ e-mail de la page d'attente à
+  48 px, téléphone du texte de secours des mentions légales aligné sur le reste
+  du site, promesse de `/about` ramenée à « les secteurs que nous suivons ».
+
+Restent, hors de ce passage : écrire les articles (bloc 1), ouvrir le site le
+jour J (bloc 3), et les indicateurs de l'outil « Indices économiques »
+(`niger_economic_indicators`, saisis en mars 2026, inflation à +3,7 %) que la
+règle des simulateurs interdit de toucher sans accord.
+
 ---
 
 ## Bloc 1, le vrai verrou

@@ -352,12 +352,12 @@ function ConversionCard({
   isLoading: boolean;
 }) {
   return (
-    <div className="rounded-2xl p-4 border border-[#d4a843]/15 bg-linear-to-br from-[#d4a843]/8 to-[#ff8c42]/4">
+    <div className="rounded-2xl p-4 border border-[#8a8e95]/15 bg-linear-to-br from-[#8a8e95]/8 to-[#ff8c42]/4">
       <div className="flex items-center justify-between mb-2">
-        <p className="text-[10px] tracking-widest uppercase text-[#d4a843] font-semibold">
+        <p className="text-[10px] tracking-widest uppercase text-[#8a8e95] font-semibold">
           Taux de conversion
         </p>
-        <TrendingUp className="w-4 h-4 text-[#d4a843]/60" aria-hidden="true" />
+        <TrendingUp className="w-4 h-4 text-[#8a8e95]/60" aria-hidden="true" />
       </div>
       <p className="font-extrabold text-[28px] leading-tight mt-1 tabular-nums">
         {isLoading || rate === null ? (
@@ -441,8 +441,8 @@ function FunnelSection({
             label="Premium"
             sublabel="Abonnements actifs"
             value={premium}
-            color="bg-linear-to-br from-[#d4a843]/20 to-[#ff8c42]/10"
-            textColor="text-[#d4a843]"
+            color="bg-linear-to-br from-[#8a8e95]/20 to-[#ff8c42]/10"
+            textColor="text-[#8a8e95]"
             barWidth={
               registered && premium && registered > 0
                 ? `${Math.max(8, (premium / registered) * 100)}%`
@@ -711,10 +711,10 @@ function QuickAccessSection({
             key={href}
             href={href}
             prefetch
-            className="group relative bg-white border border-black/6 rounded-2xl p-5 hover:border-[#d4a843]/40 hover:shadow-xs transition"
+            className="group relative bg-white border border-black/6 rounded-2xl p-5 hover:border-[#8a8e95]/40 hover:shadow-xs transition"
           >
             <div className="flex items-start justify-between mb-3">
-              <div className="w-11 h-11 rounded-xl bg-linear-to-br from-[#d4a843]/12 to-[#ff8c42]/8 flex items-center justify-center text-[#d4a843]">
+              <div className="w-11 h-11 rounded-xl bg-linear-to-br from-[#8a8e95]/12 to-[#ff8c42]/8 flex items-center justify-center text-[#8a8e95]">
                 <Icon className="w-5 h-5" aria-hidden="true" />
               </div>
               <div className="flex items-center gap-2">
@@ -733,7 +733,7 @@ function QuickAccessSection({
                     </span>
                   )}
                 <ArrowUpRight
-                  className="w-4 h-4 text-foreground/30 group-hover:text-[#d4a843] transition"
+                  className="w-4 h-4 text-foreground/30 group-hover:text-[#8a8e95] transition"
                   aria-hidden="true"
                 />
               </div>

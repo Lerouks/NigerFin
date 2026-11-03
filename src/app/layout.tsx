@@ -13,29 +13,14 @@ import { isAdminViewer } from '@/lib/viewer';
 import { ComingSoon } from '@/components/coming-soon/ComingSoon';
 import './globals.css';
 
+// Inter en police variable (toutes les graisses de 100 à 900 dans un seul
+// fichier de 48 Ko, sous-ensemble latin de @fontsource-variable/inter 5.2.5).
+// Les quatre fichiers fixes d'avant (96 Ko) s'arrêtaient au gras 700 : les
+// titres en extra-gras et en black du site s'affichaient en gras simple.
 const inter = localFont({
-  src: [
-    {
-      path: '../fonts/Inter-Regular.woff2',
-      weight: '400',
-      style: 'normal',
-    },
-    {
-      path: '../fonts/Inter-Medium.woff2',
-      weight: '500',
-      style: 'normal',
-    },
-    {
-      path: '../fonts/Inter-SemiBold.woff2',
-      weight: '600',
-      style: 'normal',
-    },
-    {
-      path: '../fonts/Inter-Bold.woff2',
-      weight: '700',
-      style: 'normal',
-    },
-  ],
+  src: '../fonts/Inter-Variable.woff2',
+  weight: '100 900',
+  style: 'normal',
   variable: '--font-inter',
   display: 'swap',
 });

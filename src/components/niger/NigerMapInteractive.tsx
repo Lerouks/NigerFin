@@ -156,13 +156,13 @@ export function NigerMapInteractive({ className }: NigerMapInteractiveProps) {
                   setActiveCity((curr) => (curr?.name === c.name ? null : curr))
                 }
                 onClick={() => setActiveCity((curr) => (curr?.name === c.name ? null : c))}
-                className="animate-fade-in absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#d4a843] focus-visible:ring-offset-2"
+                className="animate-fade-in absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#8a8e95] focus-visible:ring-offset-2"
                 style={{ left: `${c.x}%`, top: `${c.y}%`, width: '44px', height: '44px', animationDelay: `${i * 70}ms` }}
                 aria-label={`${c.name}, ${c.role}`}
               >
                 <span
                   aria-hidden
-                  className={`rounded-full bg-[#d4a843] ring-[3px] ring-white transition-transform duration-200 ${
+                  className={`rounded-full bg-[#8a8e95] ring-[3px] ring-white transition-transform duration-200 ${
                     isActive ? 'scale-125' : ''
                   } ${c.capital ? 'h-3.5 w-3.5 animate-pulse-gold' : 'h-2.5 w-2.5 shadow-sm'}`}
                 />

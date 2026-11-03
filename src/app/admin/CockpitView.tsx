@@ -177,7 +177,7 @@ function CockpitHeader({ greeting, today }: { greeting: ProfileGreeting; today: 
   return (
     <header className="pt-3 pb-5 flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <div className="w-11 h-11 rounded-full bg-linear-to-br from-[#d4a843] to-[#ff8c42] flex items-center justify-center text-white font-bold text-[14px]">
+        <div className="w-11 h-11 rounded-full bg-linear-to-br from-[#8a8e95] to-[#ff8c42] flex items-center justify-center text-white font-bold text-[14px]">
           {greeting.initials}
         </div>
         <div>
@@ -214,7 +214,7 @@ function HeroCardViews({
         className="rounded-3xl p-6 border border-black/4"
         style={{
           background:
-            'radial-gradient(circle at 20% 0%, rgba(255,140,66,0.08) 0%, transparent 50%), radial-gradient(circle at 80% 100%, rgba(212,168,67,0.12) 0%, transparent 50%), #ffffff',
+            'radial-gradient(circle at 20% 0%, rgba(255,140,66,0.08) 0%, transparent 50%), radial-gradient(circle at 80% 100%, rgba(138,142,149,0.12) 0%, transparent 50%), #ffffff',
         }}
       >
         <div className="flex items-start justify-between mb-1">
@@ -282,8 +282,8 @@ function StatsRow({
           {newUsersGrowth === null ? '-' : `${newUsersPositive ? '+' : ''}${newUsersGrowth}%`}
         </span>
       </div>
-      <div className="rounded-2xl p-4 border border-[#d4a843]/15 bg-linear-to-br from-[#d4a843]/8 to-[#ff8c42]/4">
-        <p className="text-[10px] tracking-widest uppercase text-[#d4a843] font-semibold">
+      <div className="rounded-2xl p-4 border border-[#8a8e95]/15 bg-linear-to-br from-[#8a8e95]/8 to-[#ff8c42]/4">
+        <p className="text-[10px] tracking-widest uppercase text-[#8a8e95] font-semibold">
           Premium MRR
         </p>
         <p className="font-extrabold text-[22px] leading-tight mt-2 tabular-nums">
@@ -293,7 +293,7 @@ function StatsRow({
         <span
           className={[
             'inline-flex items-center gap-1 text-[11px] font-bold mt-1',
-            positive ? 'text-[#d4a843]' : 'text-red-600',
+            positive ? 'text-[#8a8e95]' : 'text-red-600',
           ].join(' ')}
         >
           {positive ? '▲' : '▼'} {mrrGrowth === null ? '-' : `${positive ? '+' : ''}${mrrGrowth}%`}
@@ -321,7 +321,7 @@ const TYPE_VISUAL: Record<
 > = {
   payment: {
     icon: Wallet,
-    bg: 'bg-linear-to-br from-[#d4a843] to-[#ff8c42]',
+    bg: 'bg-linear-to-br from-[#8a8e95] to-[#ff8c42]',
     iconColor: 'text-white',
     label: 'Paiement',
   },
@@ -340,7 +340,7 @@ const TYPE_VISUAL: Record<
   article: {
     icon: Newspaper,
     bg: 'bg-foreground',
-    iconColor: 'text-[#d4a843]',
+    iconColor: 'text-[#8a8e95]',
     label: 'Article',
   },
 };
@@ -372,7 +372,7 @@ function ActivitySection() {
         <h2 className="font-bold text-[16px]">Activité en direct</h2>
         <Link
           href="/admin/legacy"
-          className="text-[12px] text-[#d4a843] font-semibold hover:underline"
+          className="text-[12px] text-[#8a8e95] font-semibold hover:underline"
         >
           Tout voir
         </Link>
@@ -419,7 +419,7 @@ function ActivitySection() {
                   {e.highlight ? (
                     <>
                       {' · '}
-                      <span className="text-[#d4a843] font-semibold">{e.highlight}</span>
+                      <span className="text-[#8a8e95] font-semibold">{e.highlight}</span>
                     </>
                   ) : null}
                 </p>
@@ -453,7 +453,7 @@ function ActivitySkeleton() {
 
 function Avatar({ initials }: { initials: string }) {
   return (
-    <div className="w-10 h-10 rounded-full bg-linear-to-br from-[#d4a843] to-[#ff8c42] flex items-center justify-center text-white font-bold text-[12px] shrink-0">
+    <div className="w-10 h-10 rounded-full bg-linear-to-br from-[#8a8e95] to-[#ff8c42] flex items-center justify-center text-white font-bold text-[12px] shrink-0">
       {initials}
     </div>
   );
@@ -493,7 +493,7 @@ function TopArticleSection({
         href={`/admin/legacy?tab=articles&article=${top.id}`}
         className="block rounded-2xl p-4 text-white bg-linear-to-br from-black to-foreground hover:from-foreground hover:to-[#2a2a2a] transition"
       >
-        <div className="text-[10px] tracking-widest uppercase text-[#d4a843] font-semibold mb-2 flex items-center gap-1">
+        <div className="text-[10px] tracking-widest uppercase text-[#8a8e95] font-semibold mb-2 flex items-center gap-1">
           <Sparkles className="w-3 h-3" aria-hidden="true" /> Top du moment
         </div>
         <p className="font-semibold text-[14px] leading-tight line-clamp-2">{top.title}</p>
@@ -523,12 +523,12 @@ function BriefingCard({ overview }: { overview: OverviewData | null }) {
             type="button"
             aria-label="Écouter le briefing (bientôt)"
             disabled
-            className="w-14 h-14 rounded-full bg-linear-to-br from-[#d4a843] to-[#ff8c42] flex items-center justify-center shrink-0 shadow-lg opacity-70 cursor-not-allowed"
+            className="w-14 h-14 rounded-full bg-linear-to-br from-[#8a8e95] to-[#ff8c42] flex items-center justify-center shrink-0 shadow-lg opacity-70 cursor-not-allowed"
           >
             <Play className="w-[18px] h-[18px] text-white fill-current" />
           </button>
           <div>
-            <p className="text-[11px] tracking-widest uppercase text-[#d4a843] font-bold">
+            <p className="text-[11px] tracking-widest uppercase text-[#8a8e95] font-bold">
               Briefing du jour
             </p>
             <p className="text-[15px] font-bold mt-1">Aujourd&apos;hui en bref</p>

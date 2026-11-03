@@ -165,7 +165,7 @@ export function HomeRubriqueSection({
             </ul>
           ) : (
             <p className="text-[14px] italic text-gray-500">
-              Plus d&apos;articles a venir prochainement.
+              Plus d&apos;articles à venir prochainement.
             </p>
           )}
         </div>

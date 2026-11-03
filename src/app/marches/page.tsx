@@ -4,7 +4,7 @@ import { CategoryHero } from '@/components/CategoryHero';
 import { HubFooter } from '@/components/HubFooter';
 import { MacroIndicatorsBlock } from '@/components/MacroIndicatorsBlock';
 import { SectionArticlesFiltered } from '@/components/SectionArticlesFiltered';
-import { COMMODITIES_NIGER_EXPOSED, FOOD_PRICES_2025, INS_LAST_UPDATE } from '@/data/ins-indicators';
+import { COMMODITIES_NIGER_EXPOSED, FOOD_PRICES_2025 } from '@/data/ins-indicators';
 import { getArticlesByCategory, getArticleViewRanking } from '@/lib/articles';
 
 export const revalidate = 3600;
@@ -30,12 +30,19 @@ export default async function MarchesPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14 md:pb-20">
+        {/*
+          Le Niger n'exporte pas de minerai de fer (la page /niger le dit) : la
+          carte est retirée ici, sans toucher au fichier de données que le
+          simulateur « Indices économiques » partage. Les cours sont des
+          moyennes FMI du T4 2025 : la date affichée est la leur, pas celle du
+          bulletin INS.
+        */}
         <MacroIndicatorsBlock
           title="Cours mondiaux qui pèsent sur le Niger"
-          subtitle="Or, uranium, pétrole et fer. Le Niger figure parmi les exportateurs stratégiques de ces 4 actifs."
-          indicators={COMMODITIES_NIGER_EXPOSED}
-          columns={4}
-          asOf={INS_LAST_UPDATE}
+          subtitle="Or, uranium et pétrole, les trois matières premières phares des exportations du Niger."
+          indicators={COMMODITIES_NIGER_EXPOSED.filter((c) => c.id !== 'iron-ore-q4-2025')}
+          columns={3}
+          asOf="T4 2025"
         />
       </div>
 
@@ -45,7 +52,7 @@ export default async function MarchesPage() {
           subtitle="Blé, riz, maïs et sucre, principales matières alimentaires importées. Ces cours impactent directement le coût de la vie."
           indicators={FOOD_PRICES_2025}
           columns={4}
-          asOf={INS_LAST_UPDATE}
+          asOf="T4 2025"
         />
       </div>
       {(articles.length > 0 || total > 0) && (

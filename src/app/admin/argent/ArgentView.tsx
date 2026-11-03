@@ -363,14 +363,14 @@ function MrrCard({
   const positive = (growthPercent ?? 0) >= 0;
   return (
     <div
-      className="col-span-2 rounded-3xl p-6 border border-[#d4a843]/15"
+      className="col-span-2 rounded-3xl p-6 border border-[#8a8e95]/15"
       style={{
         background:
-          'radial-gradient(circle at 20% 0%, rgba(255,140,66,0.10) 0%, transparent 55%), radial-gradient(circle at 80% 100%, rgba(212,168,67,0.14) 0%, transparent 55%), #ffffff',
+          'radial-gradient(circle at 20% 0%, rgba(255,140,66,0.10) 0%, transparent 55%), radial-gradient(circle at 80% 100%, rgba(138,142,149,0.14) 0%, transparent 55%), #ffffff',
       }}
     >
       <div className="flex items-start justify-between mb-1">
-        <p className="text-[11px] tracking-widest uppercase text-[#d4a843] font-bold">
+        <p className="text-[11px] tracking-widest uppercase text-[#8a8e95] font-bold">
           Revenu mensuel récurrent
         </p>
         <span className="text-[11px] text-foreground/40">en direct</span>
@@ -440,7 +440,7 @@ function ChurnCard({
       : tone === 'good'
         ? 'text-[#00a004]'
         : tone === 'warn'
-          ? 'text-[#d4a843]'
+          ? 'text-[#8a8e95]'
           : 'text-red-600';
   const toneBg =
     tone === 'inconnu'
@@ -448,7 +448,7 @@ function ChurnCard({
       : tone === 'good'
         ? 'bg-[#00c805]/10'
         : tone === 'warn'
-          ? 'bg-[#d4a843]/12'
+          ? 'bg-[#8a8e95]/12'
           : 'bg-red-500/10';
 
   return (
@@ -563,7 +563,7 @@ function RevenueChartSection({
               >
                 <defs>
                   <linearGradient id="argent-revenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#d4a843" stopOpacity={0.4} />
+                    <stop offset="0%" stopColor="#8a8e95" stopOpacity={0.4} />
                     <stop offset="100%" stopColor="#ff8c42" stopOpacity={0} />
                   </linearGradient>
                 </defs>
@@ -575,11 +575,11 @@ function RevenueChartSection({
                   stroke="#1a1a1a"
                   opacity={0.45}
                 />
-                <Tooltip content={<RevenueTooltip />} cursor={{ stroke: '#d4a843', strokeOpacity: 0.3 }} />
+                <Tooltip content={<RevenueTooltip />} cursor={{ stroke: '#8a8e95', strokeOpacity: 0.3 }} />
                 <Area
                   type="monotone"
                   dataKey="revenue"
-                  stroke="#d4a843"
+                  stroke="#8a8e95"
                   strokeWidth={2.5}
                   fill="url(#argent-revenue)"
                   activeDot={{ r: 5, fill: '#ff8c42', stroke: '#fff', strokeWidth: 2 }}
@@ -604,7 +604,7 @@ function RevenueTooltip({ active, payload, label }: RevenueTooltipProps) {
   const value = payload[0]?.value ?? 0;
   return (
     <div className="bg-foreground text-white rounded-lg px-3 py-2 shadow-lg">
-      <p className="text-[10px] uppercase tracking-widest text-[#d4a843] font-bold">
+      <p className="text-[10px] uppercase tracking-widest text-[#8a8e95] font-bold">
         {label}
       </p>
       <p className="text-[13px] font-bold tabular-nums mt-0.5">
@@ -654,7 +654,7 @@ function TransactionsSection({
         <h2 className="font-bold text-[16px]">Transactions récentes</h2>
         <Link
           href="/admin/argent/paiements"
-          className="text-[12px] text-[#d4a843] font-semibold hover:underline"
+          className="text-[12px] text-[#8a8e95] font-semibold hover:underline"
         >
           Tout voir
         </Link>
@@ -721,7 +721,7 @@ function TransactionRow({ transaction }: { transaction: TransactionItem }) {
         </p>
       </div>
       <div className="text-right">
-        <p className="text-[13px] font-bold text-[#d4a843] tabular-nums whitespace-nowrap">
+        <p className="text-[13px] font-bold text-[#8a8e95] tabular-nums whitespace-nowrap">
           +{transaction.amount.toLocaleString('fr-FR')}
         </p>
         <p className="text-[10px] text-foreground/40 mt-0.5">FCFA</p>
@@ -752,7 +752,7 @@ function TransactionsSkeleton() {
 
 function Avatar({ initials }: { initials: string }) {
   return (
-    <div className="w-10 h-10 rounded-full bg-linear-to-br from-[#d4a843] to-[#ff8c42] flex items-center justify-center text-white font-bold text-[12px] shrink-0">
+    <div className="w-10 h-10 rounded-full bg-linear-to-br from-[#8a8e95] to-[#ff8c42] flex items-center justify-center text-white font-bold text-[12px] shrink-0">
       {initials}
     </div>
   );
@@ -785,7 +785,7 @@ function PricingSection({
         <h2 className="font-bold text-[16px]">Tarifs actifs</h2>
         <Link
           href="/admin/argent/tarifs"
-          className="text-[12px] text-[#d4a843] font-semibold hover:underline"
+          className="text-[12px] text-[#8a8e95] font-semibold hover:underline"
         >
           Configurer
         </Link>
@@ -853,7 +853,7 @@ function PricingRow({
     <div
       className={[
         'flex items-center justify-between bg-white border rounded-2xl p-4',
-        isPopular ? 'border-[#d4a843]/50 shadow-xs' : 'border-black/6',
+        isPopular ? 'border-[#8a8e95]/50 shadow-xs' : 'border-black/6',
       ].join(' ')}
     >
       <div className="min-w-0">
@@ -862,7 +862,7 @@ function PricingRow({
             {getBillingCycleLabel(cycle)}
           </p>
           {isPopular && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-[#d4a843] bg-[#d4a843]/10 px-2 py-0.5 rounded-sm">
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-[#8a8e95] bg-[#8a8e95]/10 px-2 py-0.5 rounded-sm">
               <Sparkles className="w-3 h-3" aria-hidden="true" />
               le plus populaire
             </span>
@@ -917,14 +917,14 @@ function QuickAccessSection() {
             key={card.href}
             href={card.href}
             prefetch
-            className="group relative bg-white border border-black/6 rounded-2xl p-5 hover:border-[#d4a843]/40 hover:shadow-xs transition"
+            className="group relative bg-white border border-black/6 rounded-2xl p-5 hover:border-[#8a8e95]/40 hover:shadow-xs transition"
           >
             <div className="flex items-start justify-between mb-3">
-              <div className="w-11 h-11 rounded-xl bg-linear-to-br from-[#d4a843]/12 to-[#ff8c42]/8 flex items-center justify-center text-[#d4a843]">
+              <div className="w-11 h-11 rounded-xl bg-linear-to-br from-[#8a8e95]/12 to-[#ff8c42]/8 flex items-center justify-center text-[#8a8e95]">
                 <card.icon className="w-5 h-5" aria-hidden="true" />
               </div>
               <ArrowUpRight
-                className="w-4 h-4 text-foreground/30 group-hover:text-[#d4a843] transition"
+                className="w-4 h-4 text-foreground/30 group-hover:text-[#8a8e95] transition"
                 aria-hidden="true"
               />
             </div>

@@ -20,7 +20,13 @@ const TYPE_ORDER: MarketDataType[] = ['currency', 'commodity', 'index', 'crypto'
 export function MarketDataWidget() {
   const { items, isLoading } = useMarketData();
 
-  const groupedData = useMemo(() => groupByType(items), [items]);
+  // Un cours sans valeur (source coupée chez son fournisseur) n'est pas affiché :
+  // une ligne « indisponible » fait croire à une panne du site. Il réapparaît
+  // seul dès que sa source renvoie une valeur.
+  const groupedData = useMemo(
+    () => groupByType(items.filter((item) => item.value !== null && Number.isFinite(item.value))),
+    [items],
+  );
 
   const lastUpdated = useMemo(() => {
     let latest: string | null = null;

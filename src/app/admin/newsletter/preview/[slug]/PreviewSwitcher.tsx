@@ -56,7 +56,7 @@ export default function PreviewSwitcher({ slug }: { slug: string }) {
               border: 'none',
               display: 'block',
               borderRadius: '8px',
-              backgroundColor: '#fafaf9',
+              backgroundColor: '#fafafa',
             }}
           />
         </div>

@@ -110,27 +110,28 @@ export function NigerPresentation({ initialData }: NigerPresentationProps = {}) 
   const enrichedFacts = facts.map((fact) => {
     const enrichments: Record<string, string> = {};
 
-    // World Bank data (PIB, PIB/habitant, population) - same source as Indices Economiques
+    // Banque mondiale (PIB/habitant, population), même source que l'outil
+    // Indices économiques. Le PIB lui-même reste celui de l'INS saisi en base,
+    // source primaire du site. Les montants restent en dollars, la devise que
+    // publie la Banque mondiale : les convertir au cours de l'euro (655,957)
+    // gonflait le PIB d'environ 15 %, le dollar ne valant pas 655,957 FCFA.
     if (macroData.data) {
       const wb = macroData.data.worldBank;
       const latest = (arr: { value: number | null; year: number }[]) =>
         [...arr].sort((a, b) => b.year - a.year).find((d) => d.value !== null);
 
-      const latestGdp = latest(wb.gdp);
       const latestGdpPc = latest(wb.gdpPerCapita);
       const latestPop = latest(wb.population);
 
-      if (latestGdp?.value) {
-        const gdpFcfa = latestGdp.value * 655.957;
-        enrichments['pib'] = `${(gdpFcfa / 1e9).toFixed(0)} Mrd FCFA (${latestGdp.year})`;
-      }
       if (latestGdpPc?.value) {
-        const pcFcfa = latestGdpPc.value * 655.957;
-        enrichments['pib_habitant'] = `${Math.round(pcFcfa).toLocaleString('fr-FR')} FCFA (${latestGdpPc.year})`;
+        enrichments['pib_habitant'] = `${Math.round(latestGdpPc.value).toLocaleString('fr-FR')} USD (${latestGdpPc.year})`;
       }
-      // Use World Bank population (more reliable for economic context)
       if (latestPop?.value) {
-        enrichments['population'] = `${(latestPop.value / 1e6).toFixed(1)} millions (${latestPop.year})`;
+        const millions = (latestPop.value / 1e6).toLocaleString('fr-FR', {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1,
+        });
+        enrichments['population'] = `${millions} millions (${latestPop.year})`;
       }
     }
 

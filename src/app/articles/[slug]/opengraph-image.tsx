@@ -51,12 +51,12 @@ export default async function ArticleOgImage({
               width: '12px',
               height: '12px',
               borderRadius: '9999px',
-              background: '#d4a843',
+              background: '#8a8e95',
             }}
           />
           <div
             style={{
-              color: '#d4a843',
+              color: '#8a8e95',
               fontSize: '22px',
               letterSpacing: '0.25em',
               textTransform: 'uppercase',

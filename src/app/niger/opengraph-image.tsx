@@ -23,8 +23,8 @@ export default function NigerOgImage() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ width: '12px', height: '12px', borderRadius: '9999px', background: '#d4a843' }} />
-          <div style={{ color: '#d4a843', fontSize: '22px', letterSpacing: '0.25em', textTransform: 'uppercase', fontWeight: 700 }}>
+          <div style={{ width: '12px', height: '12px', borderRadius: '9999px', background: '#8a8e95' }} />
+          <div style={{ color: '#8a8e95', fontSize: '22px', letterSpacing: '0.25em', textTransform: 'uppercase', fontWeight: 700 }}>
             NIGER
           </div>
         </div>

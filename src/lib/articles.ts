@@ -321,12 +321,14 @@ export async function searchArticles(query: string, limit = 20): Promise<Article
 
   if (!q) return [];
 
-  // Use Supabase ilike for flexible partial matching across key fields
+  // Recherche partielle (ilike) dans le titre, le chapô ET le corps : sans le
+  // corps, « uranium » ou « inflation » ne trouvaient aucun article. Seul le
+  // résumé de l'article est renvoyé, jamais son contenu.
   const { data } = await supabase
     .from('articles')
     .select(ARTICLE_SUMMARY_FIELDS)
     .eq('status', 'published')
-    .or(`title.ilike.%${q}%,excerpt.ilike.%${q}%,category.ilike.%${q}%,author_name.ilike.%${q}%`)
+    .or(`title.ilike.%${q}%,excerpt.ilike.%${q}%,body.ilike.%${q}%,category.ilike.%${q}%,author_name.ilike.%${q}%`)
     .order('published_at', { ascending: false })
     .limit(limit);
 

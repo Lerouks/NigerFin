@@ -322,7 +322,7 @@ function StatsSection({
         <StatCard
           label="Nouveaux ce mois"
           value={stats.newThisMonth}
-          color="text-[#d4a843]"
+          color="text-[#8a8e95]"
         />
         <StatCard
           label="Désabonnés ce mois"
@@ -361,7 +361,7 @@ function StatsSection({
                   </div>
                   <div className="h-1.5 bg-black/5 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-[#d4a843] transition-all"
+                      className="h-full bg-[#8a8e95] transition-all"
                       style={{ width: `${pct}%` }}
                     />
                   </div>
@@ -453,7 +453,7 @@ function Filters({
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Rechercher par email..."
             aria-label="Rechercher un abonné par email"
-            className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white border border-black/8 focus:border-[#d4a843]/40 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#d4a843]/30 text-[14px] placeholder:text-foreground/30"
+            className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white border border-black/8 focus:border-[#8a8e95]/40 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#8a8e95]/30 text-[14px] placeholder:text-foreground/30"
           />
         </div>
         <a
@@ -517,7 +517,7 @@ function FilterChip({
       onClick={onClick}
       aria-pressed={active}
       className={[
-        'px-3 py-1.5 rounded-full text-[12px] font-semibold transition border focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#d4a843]/30',
+        'px-3 py-1.5 rounded-full text-[12px] font-semibold transition border focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#8a8e95]/30',
         active
           ? 'bg-foreground text-white border-foreground'
           : 'bg-white text-foreground/70 border-black/8 hover:border-black/20',
@@ -568,7 +568,7 @@ function SubscribersTable({
                   {row.user_id ? (
                     <Link
                       href={`/admin/audience/utilisateurs?user=${row.user_id}`}
-                      className="text-[#d4a843] hover:underline text-[12px] font-semibold"
+                      className="text-[#8a8e95] hover:underline text-[12px] font-semibold"
                     >
                       Voir profil
                     </Link>
@@ -621,7 +621,7 @@ function SubscribersTable({
             {row.user_id && (
               <Link
                 href={`/admin/audience/utilisateurs?user=${row.user_id}`}
-                className="inline-block mt-2 text-[#d4a843] hover:underline text-[12px] font-semibold"
+                className="inline-block mt-2 text-[#8a8e95] hover:underline text-[12px] font-semibold"
               >
                 Voir le profil utilisateur
               </Link>

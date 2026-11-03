@@ -66,7 +66,7 @@ function SubscribedBanner() {
     <div className="bg-white border-b border-black/6">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3.5 sm:px-6 lg:px-8">
         <div className="flex items-center gap-3">
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gold">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#111]">
             <Crown className="h-3 w-3 text-white" />
           </div>
           <p className="text-sm text-gray-700">
@@ -75,7 +75,7 @@ function SubscribedBanner() {
         </div>
         <Link
           href="/compte"
-          className="text-sm font-medium text-gold transition-colors hover:text-[#b8922f]"
+          className="text-sm font-medium text-gold transition-colors hover:text-[#6b6f76]"
         >
           Mon compte &rarr;
         </Link>
@@ -141,7 +141,7 @@ function PlanCard({
       }`}
     >
       {isYearly && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gold px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#111] px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white">
           Meilleur deal
         </div>
       )}
@@ -165,7 +165,7 @@ function PlanCard({
         disabled={isDisabled}
         className={`mt-7 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-[14px] font-semibold transition-all duration-300 disabled:opacity-40 ${
           isYearly
-            ? 'bg-gold text-white shadow-lg shadow-gold/25 hover:bg-[#b8922f]'
+            ? 'bg-[#111] text-white shadow-lg shadow-black/15 hover:bg-black'
             : 'border border-black/12 text-[#333] hover:border-[#111] hover:bg-[#111] hover:text-white'
         }`}
       >

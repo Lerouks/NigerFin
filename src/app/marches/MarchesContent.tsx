@@ -26,7 +26,13 @@ export function MarchesContent() {
   const { items, isLoading } = useMarketData();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  const groupedData = useMemo(() => groupByType(items), [items]);
+  // Un cours sans valeur (source coupée chez son fournisseur) n'est pas affiché :
+  // une ligne « indisponible » fait croire à une panne du site. Il réapparaît
+  // seul dès que sa source renvoie une valeur.
+  const groupedData = useMemo(
+    () => groupByType(items.filter((item) => item.value !== null && Number.isFinite(item.value))),
+    [items],
+  );
 
   const lastUpdated = useMemo(() => {
     let latest: string | null = null;

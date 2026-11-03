@@ -9,7 +9,7 @@ const ITEMS = [
   'Croissance +6,9 % en 2025',
   'Entreprises',
   'Finance',
-  'PIB 18,8 Mds USD',
+  'PIB 12 354 Mds FCFA',
   'Niger',
   "Afrique de l'Ouest",
   'Investissement',
@@ -21,7 +21,7 @@ function Row() {
       {ITEMS.map((t, i) => (
         <li key={i} className="flex items-center">
           <span className="mx-6 inline-block h-[3px] w-[3px] rounded-full bg-gold" aria-hidden="true" />
-          <span className="whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.2em] text-[#16130d]/50">
+          <span className="whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.2em] text-[#111111]/50">
             {t}
           </span>
         </li>
@@ -34,7 +34,7 @@ export function Ticker() {
   return (
     <div
       className="nfi-fade w-full overflow-hidden py-3.5"
-      style={{ animationDelay: '1.7s', backgroundColor: '#efece1' }}
+      style={{ animationDelay: '1.7s', backgroundColor: '#efefef' }}
       aria-hidden="true"
     >
       <div className="flex w-max nfi-marquee">

@@ -19,13 +19,13 @@ export function IndexChart() {
       >
         <defs>
           <linearGradient id="nfi-area-fill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#d4a843" stopOpacity="0.22" />
-            <stop offset="100%" stopColor="#d4a843" stopOpacity="0" />
+            <stop offset="0%" stopColor="#8a8e95" stopOpacity="0.22" />
+            <stop offset="100%" stopColor="#8a8e95" stopOpacity="0" />
           </linearGradient>
           <linearGradient id="nfi-line-grad" x1="0" y1="1" x2="1" y2="0">
-            <stop offset="0%" stopColor="#c99a38" stopOpacity="0.55" />
-            <stop offset="45%" stopColor="#c99a38" />
-            <stop offset="100%" stopColor="#e6bd5c" />
+            <stop offset="0%" stopColor="#8a8e95" stopOpacity="0.55" />
+            <stop offset="45%" stopColor="#5f636b" />
+            <stop offset="100%" stopColor="#111111" />
           </linearGradient>
           <filter id="nfi-glow" x="-75%" y="-75%" width="250%" height="250%">
             <feGaussianBlur stdDeviation="9" result="b" />
@@ -53,9 +53,9 @@ export function IndexChart() {
 
         {/* Point de tête « live » + halo */}
         <g className="nfi-fade" style={{ animationDelay: '2.1s' }}>
-          <circle cx="612" cy="66" r="11" fill="#d4a843" className="nfi-pulse" />
-          <circle cx="612" cy="66" r="6.5" fill="#d4a843" filter="url(#nfi-glow)" />
-          <circle cx="612" cy="66" r="2.8" fill="#fbf7ee" />
+          <circle cx="612" cy="66" r="11" fill="#8a8e95" className="nfi-pulse" />
+          <circle cx="612" cy="66" r="6.5" fill="#8a8e95" filter="url(#nfi-glow)" />
+          <circle cx="612" cy="66" r="2.8" fill="#ffffff" />
         </g>
       </svg>
     </div>

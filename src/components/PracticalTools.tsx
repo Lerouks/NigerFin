@@ -53,7 +53,7 @@ function PlanCard({ title, badge, tools, isPremium = false, isSubscribed = false
       >
         <span
           className={`inline-block text-[10px] font-semibold tracking-[0.15em] uppercase mb-3 px-2.5 py-0.5 rounded-full ${
-            isPremium ? 'bg-[#d4a843]/20 text-[#d4a843]' : 'text-gray-500'
+            isPremium ? 'bg-[#8a8e95]/20 text-[#8a8e95]' : 'text-gray-500'
           }`}
         >
           {badge}
@@ -101,7 +101,7 @@ function PlanCard({ title, badge, tools, isPremium = false, isSubscribed = false
           className={`flex items-center justify-center gap-2 w-full py-3 rounded-lg text-[13px] transition-all duration-300 ${
             isPremium
               ? isSubscribed
-                ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                ? 'bg-white text-black hover:bg-white/90'
                 : 'bg-white text-black hover:bg-white/90'
               : 'bg-[#111] text-white hover:bg-[#333]'
           }`}

@@ -372,7 +372,7 @@ function PreviewSection() {
                 >
                   <span
                     className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[13px] font-semibold transition ${
-                      active ? 'bg-gold text-white' : 'bg-gray-100 text-gray-500'
+                      active ? 'bg-[#111] text-white' : 'bg-gray-100 text-gray-500'
                     }`}
                   >
                     {i + 1}
@@ -454,7 +454,7 @@ function PricingTeaser() {
                 }`}
               >
                 {isYearly && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gold px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#111] px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white">
                     Meilleur deal
                   </div>
                 )}
@@ -545,7 +545,7 @@ function FinalCta() {
         <div className="mt-10 flex flex-col items-center gap-4">
           <Link
             href="/pricing"
-            className="group inline-flex items-center gap-2 rounded-full bg-gold px-8 py-4 text-[16px] font-semibold text-foreground shadow-2xl transition hover:bg-[#c79a3b] hover:shadow-gold/30"
+            className="group inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-[16px] font-semibold text-[#111] shadow-2xl transition hover:bg-white/90"
           >
             Devenir Premium maintenant
             <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />

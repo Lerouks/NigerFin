@@ -253,7 +253,7 @@ function UserRow({ user, expanded, processing, onToggle, onAction, deleteConfirm
         </td>
         <td className="px-4 py-3">
           <span className={`text-[11px] uppercase tracking-wider px-2 py-1 rounded ${
-            user.role === 'premium' ? 'bg-[#d4a843]/10 text-[#d4a843]' :
+            user.role === 'premium' ? 'bg-[#8a8e95]/10 text-[#8a8e95]' :
             user.role === 'admin' ? 'bg-red-100 text-red-700' :
             'bg-gray-100 text-gray-600'
           }`}>

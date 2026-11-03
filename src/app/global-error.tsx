@@ -17,7 +17,7 @@ export default function GlobalError({
   return (
     <html lang="fr">
       <body style={{ margin: 0, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
-        <div style={{ minHeight: '100vh', backgroundColor: '#fafaf9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ minHeight: '100vh', backgroundColor: '#fafafa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ textAlign: 'center', padding: '0 16px' }}>
             <div style={{ marginBottom: 32 }}>
               <span style={{ fontSize: 160, fontWeight: 700, color: 'rgba(0,0,0,0.04)', lineHeight: 1, display: 'block' }}>

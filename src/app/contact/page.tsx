@@ -12,6 +12,7 @@ export const metadata: Metadata = {
     title: 'Contact : questions, partenariats, presse',
     description: 'Contactez l\'équipe NFI Report. Questions, partenariats, suggestions ou demandes presse.',
     type: 'website',
+    images: ['/og-image.png'],
   },
 };
 

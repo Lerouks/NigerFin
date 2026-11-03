@@ -18,7 +18,7 @@ export function ModulePlaceholder({
   return (
     <div className="max-w-[640px] lg:max-w-[820px] mx-auto px-5 pt-8">
       <header className="mb-8">
-        <div className="inline-flex items-center gap-1.5 text-[10px] tracking-widest uppercase text-[#d4a843] font-bold mb-3">
+        <div className="inline-flex items-center gap-1.5 text-[10px] tracking-widest uppercase text-[#8a8e95] font-bold mb-3">
           <Clock className="w-3 h-3" aria-hidden="true" />
           {phaseLabel}
         </div>

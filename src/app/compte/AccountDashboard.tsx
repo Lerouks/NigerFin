@@ -382,7 +382,7 @@ export function AccountDashboard() {
                     <p className="text-white/50 text-[14px] mb-6 max-w-lg">
                       Accédez à tous les articles, analyses, outils premium et newsletters exclusives.
                     </p>
-                    <Link href="/pricing" className="inline-flex items-center gap-2 bg-gold text-white px-6 py-3 rounded-xl text-[14px] font-medium hover:bg-[#c49a3a] transition-colors">
+                    <Link href="/pricing" className="inline-flex items-center gap-2 bg-gold text-white px-6 py-3 rounded-xl text-[14px] font-medium hover:bg-[#6b6f76] transition-colors">
                       Voir les plans <ArrowRight className="w-4 h-4" />
                     </Link>
                   </div>

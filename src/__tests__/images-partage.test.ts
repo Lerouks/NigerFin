@@ -12,7 +12,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const { getArticleBySlug, eq } = vi.hoisted(() => ({
   getArticleBySlug: vi.fn(async (slug: string) =>
     slug === 'budget-2027'
-      ? { article: { title: 'Budget 2027 : ce qui change', category: 'Économie', excerpt: 'Les grandes lignes.' }, htmlBody: '' }
+      ? { article: { title: 'Budget 2027 : ce qui change', category: 'economie', sections: ['economie'], excerpt: 'Les grandes lignes.' }, htmlBody: '' }
       : null,
   ),
   eq: vi.fn(),

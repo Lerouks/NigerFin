@@ -1,5 +1,6 @@
 import { ImageResponse } from 'next/og';
 import { getArticleBySlug } from '@/lib/articles';
+import { SECTION_META } from '@/lib/sections';
 
 export const runtime = 'nodejs';
 export const revalidate = 3600;
@@ -22,7 +23,12 @@ export default async function ArticleOgImage({
   const title =
     result?.article.title ||
     'NFI Report · Actualités économiques et financières du Niger';
-  const category = result?.article.category || 'NFI REPORT';
+  // Même libellé que les badges du site (accents compris) : la valeur brute en
+  // base est une clé de rubrique, « economie », que l'image affichait telle quelle.
+  const article = result?.article;
+  const category = article
+    ? SECTION_META[article.sections?.[0] ?? article.category]?.label ?? 'NFI Report'
+    : 'NFI Report';
   const excerpt = result?.article.excerpt || '';
 
   return new ImageResponse(

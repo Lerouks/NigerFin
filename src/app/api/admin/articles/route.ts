@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { requireAdmin as requireAdminShared } from '@/lib/admin-auth';
 import { serverError } from '@/lib/api-error';
-import { ARTICLE_CACHE_TAG } from '@/lib/articles';
+import { mettreALaCorbeille } from '@/lib/corbeille';
+import { revaliderArticles } from '@/lib/revalidation-contenus';
 import { parseJsonBody, isValidUUID } from '@/lib/validation';
 import { sanitizeHtml } from '@/lib/sanitize-html';
 
@@ -41,20 +41,6 @@ const CreateArticleBody = z.object({
 const UpdateArticleBody = CreateArticleBody.partial().extend({
   id: z.string().refine((v) => isValidUUID(v), { message: 'id invalide' }),
 });
-
-/** Revalidate all pages that display article data */
-function revalidateArticlePages(slug?: string) {
-  // Purge le Data Cache Next.js (unstable_cache des fonctions articles).
-  // Sans ça, les pages re-rendues serviraient encore l'ancien snapshot data.
-  // Next.js 16 : second argument obligatoire, { expire: 0 } = purge immédiate.
-  revalidateTag(ARTICLE_CACHE_TAG, { expire: 0 });
-  revalidatePath('/');
-  if (slug) revalidatePath(`/articles/${slug}`);
-  for (const cat of ['/economie', '/finance', '/entreprises', '/education', '/marches', '/niger']) {
-    revalidatePath(cat);
-  }
-  revalidatePath('/articles');
-}
 
 async function requireAdmin(_req: NextRequest) {
   const auth = await requireAdminShared();
@@ -148,7 +134,7 @@ export async function POST(req: NextRequest) {
 
   // Revalidate caches so the article appears immediately on the site
   if (data?.status === 'published') {
-    revalidateArticlePages(data?.slug);
+    revaliderArticles(data?.slug);
   }
 
   return NextResponse.json(data);
@@ -212,13 +198,18 @@ export async function PUT(req: NextRequest) {
 
   // Revalidate caches when article is published or updated
   if (data?.status === 'published') {
-    revalidateArticlePages(data?.slug);
+    revaliderArticles(data?.slug);
   }
 
   return NextResponse.json(data);
 }
 
-// DELETE: delete article
+// DELETE: l'article part à la corbeille, en une transaction (corbeille_mettre,
+// migration 00032) : copié puis supprimé, ou rien du tout. Ses commentaires et
+// ses j'aime ne partent pas avec lui : en production, ils n'ont pas de clé
+// étrangère vers l'article, restent en modération sous « Article supprimé » et
+// le retrouvent s'il revient. Les pages sont rafraîchies par la corbeille, avec
+// la même liste qu'à la restauration.
 export async function DELETE(req: NextRequest) {
   const auth = await requireAdmin(req);
   if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -229,10 +220,9 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: 'id invalide (UUID requis)' }, { status: 400 });
   }
 
-  // Fetch slug before deleting so we can revalidate the right pages
-  const { data: article } = await auth.service.from('articles').select('slug').eq('id', id).single();
-  const { error } = await auth.service.from('articles').delete().eq('id', id);
-  if (error) return serverError(error, 'admin-articles');
-  revalidateArticlePages(article?.slug);
-  return NextResponse.json({ success: true });
+  const resultat = await mettreALaCorbeille(auth.service, 'articles', id, auth.user.id);
+  if (!resultat.ok) {
+    return NextResponse.json({ error: resultat.motif }, { status: resultat.statut });
+  }
+  return NextResponse.json({ success: true, corbeille: true, idCorbeille: resultat.idCorbeille });
 }

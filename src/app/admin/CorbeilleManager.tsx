@@ -6,9 +6,11 @@ import { appelAdmin, envoiAdmin } from '@/app/admin/lib/appel-admin';
 import { EtatListe } from '@/app/admin/lib/EtatListe';
 import {
   DUREE_CONSERVATION_JOURS,
+  FUSEAU_CORBEILLE,
   LIBELLE_CONTENU,
+  dernierJourRecuperable,
   estTableCorbeille,
-  finDeConservation,
+  jourEnLettres,
   resumerDependants,
 } from '@/lib/corbeille/libelles';
 import { enPhrases, guillemets, nombreFr, sansMotSeul, typographieFr } from '@/lib/typographie-fr';
@@ -74,7 +76,7 @@ export function EnTeteCorbeille() {
       <div className="mt-2 max-w-2xl space-y-2 text-[13px] text-gray-600 leading-relaxed">
         <p>
           <Phrases
-            texte={`Les articles, les leçons et leurs catégories, les fiches\u00a0entreprises, les sections des pages légales et les numéros de newsletter pas encore envoyés que vous supprimez arrivent ici, avec ce que la base efface avec eux : les leçons d'une catégorie, les étapes de parcours et la progression des lecteurs d'une leçon, les événements d'envoi d'un numéro. Ils y restent ${DUREE_CONSERVATION_JOURS}\u00a0jours, puis sont supprimés définitivement. Remettre un élément en place le remet en entier, ou pas\u00a0du tout : jamais à moitié.`}
+            texte={`Les articles, les leçons et leurs catégories, les fiches\u00a0entreprises, les sections des pages légales et les numéros de newsletter pas encore envoyés que vous supprimez arrivent ici, avec ce que la base efface avec eux : les leçons d'une catégorie, les étapes de parcours et la progression des lecteurs d'une leçon, les événements d'envoi d'un numéro. Ils y restent ${DUREE_CONSERVATION_JOURS}\u00a0jours, jusqu’à la date affichée incluse (heure de Niamey), puis sont supprimés définitivement. Remettre un élément en place le remet en entier, ou pas\u00a0du tout : jamais à moitié.`}
           />
         </p>
         <p>
@@ -120,17 +122,13 @@ function souder(texte: string): string {
   return texte.replace(/ /g, '\u00a0');
 }
 
+/** Heure de Niamey, comme la purge : la date de mise à la corbeille et la date de fin se lisent dans le même fuseau. */
 function dateEtHeure(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return '';
-  const jour = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-  const heure = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  const jour = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: FUSEAU_CORBEILLE });
+  const heure = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: FUSEAU_CORBEILLE });
   return souder(`${jour} à ${heure}`);
-}
-
-function jourSeul(date: Date | null): string {
-  if (!date) return '';
-  return souder(date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }));
 }
 
 interface PropsLigne {
@@ -148,7 +146,7 @@ export function LigneCorbeille(props: PropsLigne) {
   const idTitre = useId();
   const libelle = estTableCorbeille(entree.table_origine) ? LIBELLE_CONTENU[entree.table_origine] : 'Contenu';
   const dependants = resumerDependants(entree.resume_dependants);
-  const fin = jourSeul(finDeConservation(entree.supprime_le));
+  const fin = dernierJourRecuperable(entree.supprime_le);
 
   return (
     <li className="bg-white rounded-xl border border-black/6 px-4 py-3.5 flex flex-col gap-3 @3xl:flex-row @3xl:items-center @3xl:gap-4">
@@ -163,8 +161,13 @@ export function LigneCorbeille(props: PropsLigne) {
           {/* « le » est soudé à la date : il ne reste jamais seul en fin de ligne. */}
           <span>{typographieFr(`dans la corbeille depuis le ${dateEtHeure(entree.supprime_le)}`)}</span>
           {dependants && <span className="block">{typographieFr(`Avec ${dependants}`)}</span>}
-          {/* Garanti jusqu'à cette date ; la purge passe ensuite, la nuit suivante au plus tard. */}
-          {fin && <span className="block">{typographieFr(`Récupérable jusqu’au ${fin}`)}</span>}
+          {/* Le dernier jour, en date de Niamey : l'entrée est gardée jusqu'au
+              soir de ce jour, et la purge (corbeille_limite_purge) ne la
+              supprime qu'à partir du lendemain, à minuit, heure de Niamey.
+              « inclus » est soudé à la date : jamais seul en fin de ligne. */}
+          {fin && (
+            <span className="block">{typographieFr(`Récupérable jusqu’au ${souder(jourEnLettres(fin))}\u00a0inclus`)}</span>
+          )}
         </p>
       </div>
 

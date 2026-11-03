@@ -30,6 +30,7 @@ import {
   restaurerDepuisCorbeille,
   retirerLecteurDeLaCorbeille,
 } from '@/lib/corbeille';
+import { dernierJourRecuperable, jourANiamey } from '@/lib/corbeille/libelles';
 import { autoSlug } from '@/lib/newsletter/issues';
 import { typographieFr } from '@/lib/typographie-fr';
 
@@ -165,7 +166,7 @@ describe('installation et droits', () => {
     await appliquerMigration(db);
     await appliquerMigration(db);
     expect(await nombre('select count(*) as n from public.contenus_supprimes')).toBe(1);
-    expect(await nombre("select count(*) as n from pg_proc where proname like 'corbeille%'")).toBe(5);
+    expect(await nombre("select count(*) as n from pg_proc where proname like 'corbeille%'")).toBe(6);
   });
 
   it('s’applique en entier ou pas du tout (BEGIN … COMMIT)', async () => {
@@ -200,10 +201,11 @@ describe('installation et droits', () => {
               has_function_privilege($1, 'public.corbeille_restaurer(uuid)', 'execute') as restaurer,
               has_function_privilege($1, 'public.corbeille_retirer_lecteur(uuid)', 'execute') as retirer,
               has_function_privilege($1, 'public.corbeille_purger(integer)', 'execute') as purger,
-              has_function_privilege($1, 'public.corbeille_inserer(text, jsonb, jsonb)', 'execute') as inserer`,
+              has_function_privilege($1, 'public.corbeille_inserer(text, jsonb, jsonb)', 'execute') as inserer,
+              has_function_privilege($1, 'public.corbeille_limite_purge(integer, timestamptz)', 'execute') as limite`,
       [role],
     );
-    expect(droits).toEqual({ table: false, mettre: false, restaurer: false, retirer: false, purger: false, inserer: false });
+    expect(droits).toEqual({ table: false, mettre: false, restaurer: false, retirer: false, purger: false, inserer: false, limite: false });
 
     for (const sql of [
       'select count(*) from public.contenus_supprimes',
@@ -212,6 +214,7 @@ describe('installation et droits', () => {
       `select public.corbeille_retirer_lecteur('${LECTRICE}')`,
       'select public.corbeille_purger(30)',
       `select public.corbeille_inserer('articles', '[]', '{}')`,
+      'select public.corbeille_limite_purge(30, now())',
     ]) {
       const erreur = await erreurDe(commeRole(db, role, () => db.query(sql)));
       expect(erreur.code).toBe('42501');
@@ -230,9 +233,20 @@ describe('installation et droits', () => {
               has_function_privilege('service_role', 'public.corbeille_restaurer(uuid)', 'execute') as restaurer,
               has_function_privilege('service_role', 'public.corbeille_retirer_lecteur(uuid)', 'execute') as retirer,
               has_function_privilege('service_role', 'public.corbeille_purger(integer)', 'execute') as purger,
-              has_function_privilege('service_role', 'public.corbeille_inserer(text, jsonb, jsonb)', 'execute') as inserer`,
+              has_function_privilege('service_role', 'public.corbeille_inserer(text, jsonb, jsonb)', 'execute') as inserer,
+              has_function_privilege('service_role', 'public.corbeille_limite_purge(integer, timestamptz)', 'execute') as limite`,
     );
-    expect(droits).toEqual({ lit: true, vide: true, ecrit: false, mettre: true, restaurer: true, retirer: true, purger: true, inserer: false });
+    expect(droits).toEqual({
+      lit: true,
+      vide: true,
+      ecrit: false,
+      mettre: true,
+      restaurer: true,
+      retirer: true,
+      purger: true,
+      inserer: false,
+      limite: false,
+    });
 
     const mise = await mettre('articles', ARTICLE);
     const liste = await commeRole(db, 'service_role', () => db.query('select id from public.contenus_supprimes'));
@@ -270,6 +284,7 @@ describe('installation et droits', () => {
     );
     expect(fonctions.rows).toEqual([
       { proname: 'corbeille_inserer', prosecdef: false, proconfig: ['search_path=public, pg_temp'], proprietaire: 'proprietaire' },
+      { proname: 'corbeille_limite_purge', prosecdef: false, proconfig: ['search_path=public, pg_temp'], proprietaire: 'proprietaire' },
       { proname: 'corbeille_mettre', prosecdef: true, proconfig: ['search_path=public, pg_temp', 'lock_timeout=5s'], proprietaire: 'proprietaire' },
       { proname: 'corbeille_purger', prosecdef: true, proconfig: ['search_path=public, pg_temp', 'lock_timeout=5s'], proprietaire: 'proprietaire' },
       { proname: 'corbeille_restaurer', prosecdef: true, proconfig: ['search_path=public, pg_temp', 'lock_timeout=5s'], proprietaire: 'proprietaire' },
@@ -972,7 +987,7 @@ describe('lecteurs et conservation', () => {
     expect(await entreeDe('legal_sections', SECTION)).toBeDefined();
   });
 
-  it.each([null, 0, 7, 29, -1])('corbeille_purger(%s) est refusé : la corbeille ne se vide pas par erreur', async (jours) => {
+  it.each([null, 0, 7, 29, -1, 3651, 2147483647])('corbeille_purger(%s) est refusé : la corbeille ne se vide pas par erreur', async (jours) => {
     await mettre('articles', ARTICLE);
     await db.exec(`update public.contenus_supprimes set supprime_le = now() - interval '400 days'`);
     expect((await refus(appeler('corbeille_purger', [jours]))).code).toBe('duree_invalide');
@@ -988,6 +1003,97 @@ describe('lecteurs et conservation', () => {
 
     expect(resultat).toMatchObject({ purgees: [], lecteurs_retires: 1 });
     expect((await entreeDe('education_lessons', LECON))?.lecteurs).toEqual([LECTRICE]);
+  });
+});
+
+describe('conservation : la date affichée est celle de la purge', () => {
+  /** La purge, à l'instant donné, supprimerait-elle une entrée mise à la corbeille à supprimeLe ? */
+  async function purgee(supprimeLe: string, instant: string): Promise<boolean> {
+    const r = await un<{ p: boolean }>('select $1::timestamptz < public.corbeille_limite_purge(30, $2::timestamptz) as p', [supprimeLe, instant]);
+    return r?.p ?? false;
+  }
+
+  it('une entrée mise à la corbeille le 3 novembre à 1 h 30 (Niamey) reste toute la journée du 3 décembre, tâche de 3 h comprise', async () => {
+    const supprimeLe = '2026-11-03T00:30:00Z';
+    expect(dernierJourRecuperable(supprimeLe)).toBe('2026-12-03');
+    const pendantLeDernierJour = [
+      '2026-12-02T23:00:00Z', // 3 décembre, 0 h à Niamey
+      '2026-12-03T00:00:00Z', // 1 h
+      '2026-12-03T00:30:00Z', // 1 h 30 : trente jours pile après la suppression
+      '2026-12-03T01:59:59Z', // 2 h 59
+      '2026-12-03T02:00:00Z', // 3 h : la tâche de nuit (vercel.json, 0 2 * * *)
+      '2026-12-03T11:00:00Z', // midi
+      '2026-12-03T22:59:59.999999Z', // 23 h 59 59,999999
+    ];
+    for (const instant of pendantLeDernierJour) expect(await purgee(supprimeLe, instant), instant).toBe(false);
+    expect(await purgee(supprimeLe, '2026-12-03T23:00:00Z'), '4 décembre, 0 h à Niamey').toBe(true);
+    expect(await purgee(supprimeLe, '2026-12-04T02:00:00Z'), 'tâche de nuit du 4').toBe(true);
+  });
+
+  it('l’écran et la purge comptent les jours de la même façon, à toute heure', async () => {
+    const suppressions = [
+      '2026-11-02T22:59:59.999Z', // 2 novembre, 23 h 59 à Niamey
+      '2026-11-02T23:00:00Z', // 3 novembre, 0 h
+      '2026-11-03T00:30:00Z', // 1 h 30
+      '2026-11-03T22:59:59Z', // 23 h 59 59
+      '2026-02-28T23:30:00Z', // 1er mars, 0 h 30
+      '2026-12-31T23:30:00Z', // 1er janvier 2027, 0 h 30
+    ];
+    let comparaisons = 0;
+    for (const supprimeLe of suppressions) {
+      const depart = new Date(supprimeLe).getTime();
+      // De 29 à 32 jours après, toutes les heures et demie : chaque heure du jour est rejouée.
+      for (let minutes = 29 * 24 * 60; minutes <= 32 * 24 * 60; minutes += 90) {
+        const instant = new Date(depart + minutes * 60_000).toISOString();
+        const selonEcran = (jourANiamey(instant) ?? '') > (dernierJourRecuperable(supprimeLe) ?? '');
+        expect(await purgee(supprimeLe, instant), `${supprimeLe} à ${instant}`).toBe(selonEcran);
+        comparaisons += 1;
+      }
+    }
+    // Six suppressions, 49 instants chacune : aucune ne diffère.
+    expect(comparaisons).toBe(6 * 49);
+  });
+
+  it('à l’heure de la base : une entrée dont c’est le dernier jour reste listée, du premier au dernier instant, et celle de la veille part', async () => {
+    await mettre('articles', ARTICLE);
+    await mettre('legal_sections', SECTION);
+    await mettre('strategic_enterprises', ENTREPRISE);
+    // Dans une seule transaction : now() est le même pour les dates posées et pour la purge.
+    await db.exec('begin');
+    try {
+      await db.exec(`
+        update public.contenus_supprimes
+           set supprime_le = ((now() at time zone 'Africa/Niamey')::date - 30)::timestamp at time zone 'Africa/Niamey'
+         where id_origine = '${ARTICLE}';
+        update public.contenus_supprimes
+           set supprime_le = ((now() at time zone 'Africa/Niamey')::date - 29)::timestamp at time zone 'Africa/Niamey' - interval '1 microsecond'
+         where id_origine = '${SECTION}';
+        update public.contenus_supprimes
+           set supprime_le = ((now() at time zone 'Africa/Niamey')::date - 30)::timestamp at time zone 'Africa/Niamey' - interval '1 microsecond'
+         where id_origine = '${ENTREPRISE}';`);
+      const resultat = await appeler('corbeille_purger', [30]);
+      expect(resultat.purgees).toEqual([expect.objectContaining({ table: 'strategic_enterprises', id_origine: ENTREPRISE })]);
+    } finally {
+      await db.exec('commit');
+    }
+    // Premier et dernier instant du dernier jour : toujours là, donc toujours listées.
+    expect(await entreeDe('articles', ARTICLE)).toBeDefined();
+    expect(await entreeDe('legal_sections', SECTION)).toBeDefined();
+    expect(await entreeDe('strategic_enterprises', ENTREPRISE)).toBeUndefined();
+  });
+
+  it('un lecteur disparu est retiré des entrées qui restent, même quand d’autres expirent dans la même purge', async () => {
+    await mettre('education_lessons', LECON);
+    await mettre('education_lessons', LECON_AUTRE);
+    await db.exec(`update public.contenus_supprimes set supprime_le = now() - interval '40 days' where id_origine = '${LECON_AUTRE}';
+      delete from auth.users where id = '${LECTRICE}';`);
+
+    const resultat = await appeler('corbeille_purger', [30]);
+
+    expect(resultat).toMatchObject({ lecteurs_retires: 1 });
+    expect(resultat.purgees).toEqual([expect.objectContaining({ table: 'education_lessons', id_origine: LECON_AUTRE })]);
+    expect((await entreeDe('education_lessons', LECON))?.lecteurs).toEqual([LECTEUR]);
+    expect(JSON.stringify(await lignes('select to_jsonb(c) as j from public.contenus_supprimes c'))).not.toContain(LECTRICE);
   });
 });
 

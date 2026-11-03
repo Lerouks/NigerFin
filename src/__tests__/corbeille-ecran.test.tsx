@@ -51,7 +51,7 @@ function ligne(confirmation: boolean): string {
 describe('écran de la corbeille', () => {
   it('l’en-tête dit la durée, ce que deviennent les commentaires, et ce qui ne passe pas par la corbeille', () => {
     const lu = texte(renderToStaticMarkup(<EnTeteCorbeille />));
-    expect(lu).toContain('Ils y restent 30 jours, puis sont supprimés définitivement.');
+    expect(lu).toContain('Ils y restent 30 jours, jusqu’à la date affichée incluse (heure de Niamey), puis sont supprimés définitivement.');
     expect(lu).toContain('Les commentaires et les j’aime d’un article ne partent pas avec lui');
     expect(lu).toContain('« Article supprimé »');
     expect(lu).toContain('jamais à moitié');
@@ -61,12 +61,34 @@ describe('écran de la corbeille', () => {
   it('une entrée montre son type, sa date, ce qui l’accompagne, sa fin de conservation et deux actions, sans état « à moitié »', () => {
     const lu = texte(ligne(false));
     expect(lu).toContain('Catégorie de leçons');
-    expect(lu).toContain('dans la corbeille depuis le 3 novembre 2026');
+    expect(lu).toContain('dans la corbeille depuis le 3 novembre 2026 à 11:00');
     expect(lu).toContain('Avec 3 leçons et 12 progressions de lecteurs');
-    expect(lu).toContain('Récupérable jusqu’au 3 décembre 2026');
+    expect(lu).toContain('Récupérable jusqu’au 3 décembre 2026 inclus');
     expect(lu).toContain('Remettre en place');
     expect(lu).toContain('Supprimer définitivement');
     expect(lu).not.toMatch(/incomplète|Terminer la restauration|Abandonner/);
+  });
+
+  it('les dates se lisent à l’heure de Niamey, celle de la purge, quel que soit le fuseau du navigateur', () => {
+    // 0 h 30 le 3 novembre à Niamey, encore le 2 novembre en temps universel.
+    const html = renderToStaticMarkup(
+      <ul>
+        <LigneCorbeille
+          entree={{ ...ENTREE, supprime_le: '2026-11-02T23:30:00.000Z' }}
+          enCours={false}
+          confirmation={false}
+          onRestaurer={sansAction}
+          onDemanderSuppression={sansAction}
+          onConfirmerSuppression={sansAction}
+          onAnnuler={sansAction}
+        />
+      </ul>,
+    );
+    const lu = texte(html);
+    expect(lu).toContain('dans la corbeille depuis le 3 novembre 2026 à 00:30');
+    expect(lu).toContain('Récupérable jusqu’au 3 décembre 2026 inclus');
+    // La date et « inclus » forment un seul bloc : « inclus » ne finit jamais seul une ligne.
+    expect(html).toContain('3\u00a0décembre\u00a02026\u00a0inclus');
   });
 
   it('les entrées se mettent en ligne d’après la largeur de la liste, pas celle de l’écran', () => {

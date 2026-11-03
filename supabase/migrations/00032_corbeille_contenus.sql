@@ -27,9 +27,11 @@
 --       dépend, ou rien du tout, puis retire l'entrée ;
 --   corbeille_retirer_lecteur(lecteur)   retire d'un coup les lignes d'un
 --       lecteur de toutes les entrées, quand il supprime son compte ;
---   corbeille_purger(jours)              supprime les entrées de plus de N
---       jours (30 au minimum) et les lignes des lecteurs dont le compte
---       n'existe plus.
+--   corbeille_purger(jours)              supprime les entrées dont le
+--       dernier jour récupérable est passé (le jour de leur mise à la
+--       corbeille plus N jours, 30 au minimum, en date de Niamey : celui que
+--       l'écran affiche) et les lignes des lecteurs dont le compte n'existe
+--       plus.
 --
 -- Ce qui est copié avec un contenu : SEULEMENT ce que la base de production
 -- efface avec lui, d'après ses clés étrangères réelles (relevées en lecture
@@ -815,9 +817,10 @@ BEGIN
   IF p_user IS NULL THEN
     RETURN jsonb_build_object('entrees', 0, 'lignes', 0);
   END IF;
-  -- Les verrous sont pris dans l'ordre des identifiants, comme dans
-  -- corbeille_purger : deux nettoyages simultanés ne peuvent pas s'attendre
-  -- l'un l'autre. Une restauration en cours sur une de ces entrées passe
+  -- Les verrous sont pris en une instruction, dans l'ordre des identifiants,
+  -- comme dans corbeille_purger, qui verrouille d'un coup tout ce qu'elle
+  -- touche : deux nettoyages simultanés peuvent s'attendre, jamais
+  -- s'interbloquer. Une restauration en cours sur une de ces entrées passe
   -- d'abord ; l'entrée n'existe alors plus, et la progression remise est
   -- effacée avec le compte, par la clé étrangère.
   PERFORM 1 FROM public.contenus_supprimes WHERE lecteurs @> ARRAY[p_user] ORDER BY id FOR UPDATE;
@@ -848,6 +851,27 @@ BEGIN
 END;
 $fonction$;
 
+-- Fonction interne : l'instant avant lequel une entrée a fait son temps.
+-- Chaque entrée reste récupérable jusqu'à la fin du jour que l'écran affiche :
+-- le jour de sa mise à la corbeille plus p_jours, en date de Niamey
+-- (Africa/Niamey, UTC+1 toute l'année), là où sont l'équipe et la tâche de
+-- nuit. Elle n'est donc purgée qu'à partir du lendemain de ce jour, à minuit,
+-- heure de Niamey : la limite est minuit, heure de Niamey, du jour
+-- « aujourd'hui à Niamey moins p_jours ». Exemple : une entrée mise à la
+-- corbeille le 3 novembre à 1 h 30 est affichée « récupérable jusqu'au
+-- 3 décembre inclus » ; la tâche de 3 h du 3 décembre la garde, et toute
+-- ouverture de la corbeille ce jour-là aussi ; elle part à partir du 4 à
+-- minuit. p_instant est un paramètre pour que les tests rejouent n'importe
+-- quel moment ; corbeille_purger lui passe toujours now().
+CREATE OR REPLACE FUNCTION public.corbeille_limite_purge(p_jours integer, p_instant timestamptz)
+RETURNS timestamptz
+LANGUAGE sql
+STABLE
+SET search_path = public, pg_temp
+AS $fonction$
+  SELECT (((p_instant AT TIME ZONE 'Africa/Niamey')::date - p_jours)::timestamp) AT TIME ZONE 'Africa/Niamey'
+$fonction$;
+
 CREATE OR REPLACE FUNCTION public.corbeille_purger(p_jours integer)
 RETURNS jsonb
 LANGUAGE plpgsql
@@ -860,15 +884,40 @@ DECLARE
   v_purgees jsonb;
   v_orphelins uuid[];
   v_lecteur uuid;
+  v_retires integer := 0;
 BEGIN
   -- Trente jours au moins : c'est la durée annoncée à l'écran. Une erreur
-  -- d'appel (0, null, un nombre négatif) ne peut pas vider la corbeille.
-  IF p_jours IS NULL OR p_jours < 30 THEN
+  -- d'appel (0, null, un nombre négatif) ne peut pas vider la corbeille, et
+  -- une durée absurde (plus de dix ans) est refusée au lieu de faire échouer
+  -- le calcul des dates.
+  IF p_jours IS NULL OR p_jours < 30 OR p_jours > 3650 THEN
     RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = 'corbeille:duree_invalide';
   END IF;
-  v_limite := now() - make_interval(days => p_jours);
+  v_limite := public.corbeille_limite_purge(p_jours, now());
 
-  PERFORM 1 FROM public.contenus_supprimes WHERE supprime_le < v_limite ORDER BY id FOR UPDATE;
+  -- 1. Les lecteurs dont le compte n'existe plus. La suppression d'un compte
+  --    retire déjà leurs lignes ; ceci rattrape un nettoyage qui aurait
+  --    échoué. Calculés AVANT tout verrou, pour tout verrouiller en une fois.
+  SELECT coalesce(array_agg(DISTINCT l ORDER BY l), '{}')
+    INTO v_orphelins
+    FROM public.contenus_supprimes AS c
+   CROSS JOIN LATERAL unnest(c.lecteurs) AS l
+   WHERE NOT EXISTS (SELECT 1 FROM auth.users AS u WHERE u.id = l AND u.deleted_at IS NULL);
+
+  -- 2. Tout ce que la purge va toucher, verrouillé en UNE instruction, dans
+  --    l'ordre des identifiants : les entrées dont le temps est passé ET
+  --    celles des lecteurs disparus. corbeille_retirer_lecteur verrouille dans
+  --    le même ordre : deux nettoyages qui se croisent s'attendent, sans
+  --    jamais s'interbloquer. Verrouiller en deux passes, comme avant, faisait
+  --    échouer l'un des deux en 40P01 quand un compte était supprimé pendant
+  --    la purge.
+  PERFORM 1
+     FROM public.contenus_supprimes
+    WHERE supprime_le < v_limite OR lecteurs && v_orphelins
+    ORDER BY id
+      FOR UPDATE;
+
+  -- 3. Les entrées dont le dernier jour récupérable est passé.
   WITH parties AS (
     DELETE FROM public.contenus_supprimes
      WHERE supprime_le < v_limite
@@ -883,25 +932,17 @@ BEGIN
     INTO v_purgees
     FROM parties;
 
-  -- Les lignes des lecteurs dont le compte n'existe plus : la suppression
-  -- d'un compte les retire déjà, ceci rattrape un nettoyage qui aurait échoué.
-  SELECT coalesce(array_agg(DISTINCT l ORDER BY l), '{}')
-    INTO v_orphelins
-    FROM public.contenus_supprimes AS c
-   CROSS JOIN LATERAL unnest(c.lecteurs) AS l
-   WHERE NOT EXISTS (SELECT 1 FROM auth.users AS u WHERE u.id = l AND u.deleted_at IS NULL);
-  IF cardinality(v_orphelins) > 0 THEN
-    -- Toutes les entrées concernées d'un coup, dans l'ordre des identifiants.
-    PERFORM 1 FROM public.contenus_supprimes WHERE lecteurs && v_orphelins ORDER BY id FOR UPDATE;
-    FOREACH v_lecteur IN ARRAY v_orphelins LOOP
-      PERFORM public.corbeille_retirer_lecteur(v_lecteur);
-    END LOOP;
-  END IF;
+  -- 4. Les lignes des lecteurs disparus, dans les entrées qui restent.
+  FOREACH v_lecteur IN ARRAY v_orphelins LOOP
+    IF (public.corbeille_retirer_lecteur(v_lecteur) ->> 'entrees')::integer > 0 THEN
+      v_retires := v_retires + 1;
+    END IF;
+  END LOOP;
 
   RETURN jsonb_build_object(
     'duree_jours', p_jours,
     'purgees', v_purgees,
-    'lecteurs_retires', cardinality(v_orphelins)
+    'lecteurs_retires', v_retires
   );
 END;
 $fonction$;
@@ -910,6 +951,7 @@ $fonction$;
 -- authenticated sur chaque fonction neuve : sans ces REVOKE, n'importe quel
 -- visiteur pourrait vider ou restaurer la corbeille avec la clé publique.
 REVOKE ALL ON FUNCTION public.corbeille_inserer(text, jsonb, jsonb) FROM PUBLIC, anon, authenticated, service_role;
+REVOKE ALL ON FUNCTION public.corbeille_limite_purge(integer, timestamptz) FROM PUBLIC, anon, authenticated, service_role;
 REVOKE ALL ON FUNCTION public.corbeille_mettre(text, uuid, uuid) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.corbeille_restaurer(uuid) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.corbeille_retirer_lecteur(uuid) FROM PUBLIC, anon, authenticated;
@@ -920,7 +962,7 @@ GRANT EXECUTE ON FUNCTION public.corbeille_retirer_lecteur(uuid) TO service_role
 GRANT EXECUTE ON FUNCTION public.corbeille_purger(integer) TO service_role;
 
 COMMENT ON TABLE public.contenus_supprimes IS
-  'Corbeille : copie d''un contenu supprimé et de ce que la base a effacé avec lui. Une entrée par contenu, gardée 30 jours. Écrite uniquement par les fonctions corbeille_* ; lisible par la seule clé de service.';
+  'Corbeille : copie d''un contenu supprimé et de ce que la base a effacé avec lui. Une entrée par contenu, gardée jusqu''au soir du trentième jour, heure de Niamey. Écrite uniquement par les fonctions corbeille_* ; lisible par la seule clé de service.';
 COMMENT ON COLUMN public.contenus_supprimes.dependants IS
   'Lignes que la base efface avec le contenu, par table. Les commentaires et j''aime d''un article n''en font pas partie : en production, ils survivent à l''article.';
 COMMENT ON COLUMN public.contenus_supprimes.lecteurs IS
@@ -932,7 +974,9 @@ COMMENT ON FUNCTION public.corbeille_restaurer(uuid) IS
 COMMENT ON FUNCTION public.corbeille_retirer_lecteur(uuid) IS
   'Retire les lignes d''un lecteur de toutes les entrées de la corbeille, en une instruction. service_role uniquement.';
 COMMENT ON FUNCTION public.corbeille_purger(integer) IS
-  'Supprime les entrées de plus de N jours (30 au minimum) et les lignes des lecteurs disparus. service_role uniquement.';
+  'Supprime les entrées dont le dernier jour récupérable (jour de la suppression plus N jours, 30 au minimum, en date de Niamey) est passé, et les lignes des lecteurs disparus. service_role uniquement.';
+COMMENT ON FUNCTION public.corbeille_limite_purge(integer, timestamptz) IS
+  'Interne à la corbeille : minuit, heure de Niamey, du jour (date de Niamey de p_instant) - p_jours. Une entrée antérieure a fait son temps.';
 COMMENT ON FUNCTION public.corbeille_inserer(text, jsonb, jsonb) IS
   'Interne à la corbeille : aucun rôle ne peut l''appeler directement.';
 
@@ -961,19 +1005,21 @@ COMMIT;
 --          'public.corbeille_restaurer(uuid)',
 --          'public.corbeille_retirer_lecteur(uuid)',
 --          'public.corbeille_purger(integer)',
---          'public.corbeille_inserer(text, jsonb, jsonb)']) as f,
+--          'public.corbeille_inserer(text, jsonb, jsonb)',
+--          'public.corbeille_limite_purge(integer, timestamptz)']) as f,
 --        unnest(array['anon', 'authenticated', 'service_role']) as r
 --  order by f, r;
--- Attendu : peut = false pour anon et authenticated sur les cinq fonctions ;
+-- Attendu : peut = false pour anon et authenticated sur les six fonctions ;
 -- true pour service_role sur les quatre premières ; false pour service_role
--- sur corbeille_inserer (fonction interne).
+-- sur corbeille_inserer et corbeille_limite_purge (fonctions internes).
 --
 -- select proname, prosecdef, proconfig from pg_proc
 --  where pronamespace = 'public'::regnamespace and proname like 'corbeille%'
 --  order by proname;
 -- Attendu : prosecdef = true pour les quatre fonctions publiques, avec
 -- proconfig = {"search_path=public, pg_temp",lock_timeout=5s} ; pour
--- corbeille_inserer, prosecdef = false et proconfig = {"search_path=public, pg_temp"}.
+-- corbeille_inserer et corbeille_limite_purge, prosecdef = false et
+-- proconfig = {"search_path=public, pg_temp"}.
 --
 -- ---------------------------------------------------------------------------
 -- RETOUR ARRIÈRE (à ne faire qu'en connaissance de cause).
@@ -990,6 +1036,7 @@ COMMIT;
 --
 -- BEGIN;
 -- DROP FUNCTION IF EXISTS public.corbeille_purger(integer);
+-- DROP FUNCTION IF EXISTS public.corbeille_limite_purge(integer, timestamptz);
 -- DROP FUNCTION IF EXISTS public.corbeille_retirer_lecteur(uuid);
 -- DROP FUNCTION IF EXISTS public.corbeille_restaurer(uuid);
 -- DROP FUNCTION IF EXISTS public.corbeille_mettre(text, uuid, uuid);

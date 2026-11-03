@@ -13,8 +13,8 @@ import { isValidUUID, safeParseJSON } from '@/lib/validation';
 /**
  * La corbeille : ce qui a été supprimé, et le moyen de le remettre en place.
  *
- * GET     purge ce qui a dépassé trente jours, puis liste les entrées, les
- *         plus récentes d'abord
+ * GET     purge les entrées dont le dernier jour récupérable est passé, puis
+ *         liste les autres, les plus récentes d'abord
  * POST    { id } remet une entrée en place, avec tout ce qui en dépend, ou rien
  * DELETE  ?id=... supprime définitivement une entrée, sans retour possible
  *

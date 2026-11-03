@@ -28,17 +28,67 @@ export function estTableCorbeille(valeur: unknown): valeur is TableCorbeille {
 }
 
 /**
- * Durée de conservation : une entrée plus ancienne est supprimée pour de bon,
- * chaque nuit et à chaque ouverture de la corbeille. La base refuse toute
- * purge en dessous de trente jours (corbeille_purger, migration 00032).
+ * Durée de conservation, en jours de Niamey. Une entrée reste récupérable
+ * jusqu'au soir du jour de sa mise à la corbeille plus trente jours
+ * (dernierJourRecuperable), puis elle est supprimée pour de bon, par la tâche
+ * de nuit ou à l'ouverture de la corbeille. La base refuse toute purge en
+ * dessous de trente jours (corbeille_purger, migration 00032).
  */
 export const DUREE_CONSERVATION_JOURS = 30;
 
-/** Le moment où une entrée quittera la corbeille pour de bon. */
-export function finDeConservation(supprimeLe: string): Date | null {
-  const date = new Date(supprimeLe);
+/**
+ * Le fuseau où la corbeille compte ses jours : celui de Niamey (UTC+1 toute
+ * l'année), comme corbeille_limite_purge dans la base. L'écran affiche ses
+ * dates dans ce fuseau, quel que soit celui du navigateur : sinon la date
+ * affichée et celle de la purge pourraient différer d'un jour.
+ */
+export const FUSEAU_CORBEILLE = 'Africa/Niamey';
+
+const JOUR_A_NIAMEY = new Intl.DateTimeFormat('fr-FR', {
+  timeZone: FUSEAU_CORBEILLE,
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
+
+/** Un jour de calendrier, « 2026-12-03 », à partir de ses trois nombres (Date.UTC reporte les mois et les années). */
+function jourIso(annee: number, mois: number, jour: number): string {
+  return new Date(Date.UTC(annee, mois - 1, jour)).toISOString().slice(0, 10);
+}
+
+/** Le jour qu'il est à Niamey à cet instant, « 2026-11-03 ». Null pour une date illisible. */
+export function jourANiamey(instant: string | Date): string | null {
+  const date = instant instanceof Date ? instant : new Date(instant);
   if (Number.isNaN(date.getTime())) return null;
-  return new Date(date.getTime() + DUREE_CONSERVATION_JOURS * 24 * 60 * 60 * 1000);
+  const parties = JOUR_A_NIAMEY.formatToParts(date);
+  const valeur = (type: 'year' | 'month' | 'day') => Number(parties.find((partie) => partie.type === type)?.value);
+  return jourIso(valeur('year'), valeur('month'), valeur('day'));
+}
+
+/**
+ * Le dernier jour où une entrée est récupérable, « 2026-12-03 » : le jour de
+ * sa mise à la corbeille, à Niamey, plus trente jours. Elle reste dans la
+ * corbeille jusqu'à la fin de ce jour, heure de Niamey : la purge
+ * (corbeille_limite_purge, migration 00032) ne la supprime qu'à partir du
+ * lendemain, à minuit. Une entrée mise à la corbeille le 3 novembre à 1 h 30
+ * est donc encore là le 3 décembre après la tâche de 3 h.
+ */
+export function dernierJourRecuperable(supprimeLe: string): string | null {
+  const jour = jourANiamey(supprimeLe);
+  if (!jour) return null;
+  const [annee = 0, mois = 1, quantieme = 1] = jour.split('-').map(Number);
+  return jourIso(annee, mois, quantieme + DUREE_CONSERVATION_JOURS);
+}
+
+/** « 3 décembre 2026 », pour le jour de calendrier « 2026-12-03 ». */
+export function jourEnLettres(jour: string): string {
+  const [annee = 0, mois = 1, quantieme = 1] = jour.split('-').map(Number);
+  return new Date(Date.UTC(annee, mois - 1, quantieme)).toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
 }
 
 export const LIBELLE_CONTENU: Record<TableCorbeille, string> = {

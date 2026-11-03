@@ -19,7 +19,9 @@ import * as Sentry from '@sentry/nextjs';
  * Header: Authorization: Bearer <CRON_SECRET>
  *
  * Même tâche de nuit, une fois les abonnements traités : la corbeille des
- * contenus supprime pour de bon ce qui y dort depuis plus de trente jours.
+ * contenus supprime pour de bon les entrées dont le dernier jour récupérable
+ * (la date affichée, trente jours après la suppression, heure de Niamey) est
+ * passé. La tâche tourne à 2 h UTC, soit 3 h à Niamey.
  * Elle tourne déjà chaque nuit, et la purge ne prend que quelques
  * millisecondes : pas besoin d'une tâche planifiée de plus. Une purge en
  * panne est signalée et ne fait jamais échouer l'expiration des abonnements.

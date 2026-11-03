@@ -322,7 +322,15 @@ export async function retirerLecteurDeLaCorbeille(
   lecteur: string,
 ): Promise<{ ok: boolean; entrees: number }> {
   if (!isValidUUID(lecteur)) return { ok: true, entrees: 0 };
-  const { data, error } = await service.rpc('corbeille_retirer_lecteur', { p_user: lecteur });
+  let reponse = await service.rpc('corbeille_retirer_lecteur', { p_user: lecteur });
+  // Un interblocage (40P01) annule la transaction perdante sans rien changer :
+  // la rejouer une fois suffit. La purge verrouille désormais dans le même
+  // ordre et ne devrait plus en provoquer, mais l'effacement des données d'un
+  // lecteur ne doit pas dépendre d'un croisement malheureux.
+  if (reponse.error && lireErreur(reponse.error).code === '40P01') {
+    reponse = await service.rpc('corbeille_retirer_lecteur', { p_user: lecteur });
+  }
+  const { data, error } = reponse;
   if (error) {
     const lue = lireErreur(error);
     // Corbeille pas encore installée : il n'y a aucune copie à retirer.
@@ -335,10 +343,12 @@ export async function retirerLecteurDeLaCorbeille(
 }
 
 /**
- * Supprime pour de bon les entrées de plus de trente jours, et les lignes des
- * lecteurs dont le compte n'existe plus. Appelée chaque nuit par la tâche
- * planifiée des abonnements, et à chaque ouverture de la corbeille. Ne lève
- * jamais : une purge en panne ne doit bloquer ni la liste ni la tâche.
+ * Supprime pour de bon les entrées dont le dernier jour récupérable est passé
+ * (le jour de leur mise à la corbeille plus trente jours, en date de Niamey :
+ * celui que l'écran affiche), et les lignes des lecteurs dont le compte
+ * n'existe plus. Appelée chaque nuit par la tâche planifiée des abonnements,
+ * et à chaque ouverture de la corbeille. Ne lève jamais : une purge en panne
+ * ne doit bloquer ni la liste ni la tâche ; elle est signalée.
  *
  * Le journal du serveur garde ce qui est parti : type de contenu,
  * identifiant, date de mise à la corbeille, nombre de lignes liées. Ni titre

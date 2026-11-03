@@ -19,7 +19,13 @@ import {
   supprimerDefinitivement,
   type TableCorbeille,
 } from '@/lib/corbeille';
-import { DUREE_CONSERVATION_JOURS, finDeConservation, resumerDependants } from '@/lib/corbeille/libelles';
+import {
+  DUREE_CONSERVATION_JOURS,
+  dernierJourRecuperable,
+  jourANiamey,
+  jourEnLettres,
+  resumerDependants,
+} from '@/lib/corbeille/libelles';
 import {
   corbeilleAbsente,
   detailPourSentry,
@@ -211,10 +217,20 @@ describe('libellés', () => {
     expect(resumerDependants({ inconnue: 2 })).toBe(`2${NB}lignes liées`);
   });
 
-  it('une entrée part pour de bon trente jours après sa mise à la corbeille', () => {
+  it('une entrée reste récupérable jusqu’au soir du trentième jour, en date de Niamey, quel que soit le fuseau du navigateur', () => {
     expect(DUREE_CONSERVATION_JOURS).toBe(30);
-    expect(finDeConservation('2026-11-03T10:00:00.000Z')?.toISOString()).toBe('2026-12-03T10:00:00.000Z');
-    expect(finDeConservation('pas une date')).toBeNull();
+    expect(dernierJourRecuperable('2026-11-03T10:00:00.000Z')).toBe('2026-12-03');
+    // 0 h 30 le 3 novembre à Niamey, encore le 2 en temps universel.
+    expect(dernierJourRecuperable('2026-11-02T23:30:00.000Z')).toBe('2026-12-03');
+    expect(dernierJourRecuperable('2026-11-02T22:59:59.999Z')).toBe('2026-12-02');
+    // Fins de mois et d'année.
+    expect(dernierJourRecuperable('2026-01-31T12:00:00Z')).toBe('2026-03-02');
+    expect(dernierJourRecuperable('2026-12-15T12:00:00Z')).toBe('2027-01-14');
+    expect(dernierJourRecuperable('pas une date')).toBeNull();
+    expect(jourANiamey('2026-11-02T23:00:00Z')).toBe('2026-11-03');
+    expect(jourANiamey(new Date('2026-11-02T22:59:59Z'))).toBe('2026-11-02');
+    expect(jourEnLettres('2026-12-03')).toBe('3 décembre 2026');
+    expect(jourEnLettres('2027-01-01')).toBe('1 janvier 2027');
   });
 });
 
@@ -466,6 +482,19 @@ describe('retirerLecteurDeLaCorbeille et purgerLaCorbeille', () => {
       purgees: 0,
       lecteursRetires: 0,
     });
+  });
+
+  it('le retrait d’un lecteur est rejoué une fois après un interblocage, et signalé s’il échoue encore', async () => {
+    const interblocage = { data: null, error: { code: '40P01', message: 'deadlock detected' } };
+    const rpc = vi.fn().mockResolvedValueOnce(interblocage).mockResolvedValueOnce({ data: { entrees: 1, lignes: 2 }, error: null });
+    expect(await retirerLecteurDeLaCorbeille({ rpc } as unknown as SupabaseClient, uuid(2))).toEqual({ ok: true, entrees: 1 });
+    expect(rpc).toHaveBeenCalledTimes(2);
+    expect(Sentry.captureException).not.toHaveBeenCalled();
+
+    const toujours = vi.fn().mockResolvedValue(interblocage);
+    expect(await retirerLecteurDeLaCorbeille({ rpc: toujours } as unknown as SupabaseClient, uuid(2))).toEqual({ ok: false, entrees: 0 });
+    expect(toujours).toHaveBeenCalledTimes(2);
+    expect(Sentry.captureException).toHaveBeenCalledTimes(1);
   });
 
   it('la purge note au journal du serveur ce qui est parti, sans titre', async () => {

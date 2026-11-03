@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import * as Sentry from '@sentry/nextjs';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
@@ -95,6 +95,7 @@ function AdminSidebar({
   pathname: string;
   onOpenPalette: () => void;
 }) {
+  const mac = useEstUnMac();
   return (
     <aside
       aria-label="Navigation administration"
@@ -117,8 +118,8 @@ function AdminSidebar({
           <Search className="w-[16px] h-[16px]" aria-hidden="true" />
           <span className="flex-1 text-left font-medium">Rechercher</span>
           <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded-sm bg-white text-foreground/55 border border-black/6">
-            <span aria-hidden="true">{getCommandKeyLabel()}</span>
-            <span className="sr-only">{getCommandKeyAriaLabel()}</span>
+            <span aria-hidden="true">{mac ? '⌘' : 'Ctrl'}</span>
+            <span className="sr-only">{mac ? 'Commande plus ' : 'Controle plus '}</span>
             K
           </kbd>
         </button>
@@ -191,20 +192,24 @@ function AdminBottomNav({ pathname }: { pathname: string }) {
   );
 }
 
-function getCommandKeyLabel(): string {
-  if (typeof navigator === 'undefined') return 'Ctrl';
-  const platform =
-    (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ??
-    navigator.platform ??
-    '';
-  return /mac|iphone|ipad/i.test(platform) ? '⌘' : 'Ctrl';
+// La plateforme n'existe que dans le navigateur. La lire pendant le rendu
+// donnait « Ctrl » côté serveur et « ⌘ » sur un Mac : React voyait deux textes
+// différents à l'hydratation (erreur #418, relevée en production le 2026-11-03).
+// useSyncExternalStore rend la valeur du serveur pendant l'hydratation, puis
+// celle du navigateur juste après, sans erreur. La plateforme ne change pas :
+// il n'y a rien à écouter.
+function ecouterRien(): () => void {
+  return () => {};
 }
 
-function getCommandKeyAriaLabel(): string {
-  if (typeof navigator === 'undefined') return 'Ctrl + ';
+function estUnMac(): boolean {
   const platform =
     (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ??
     navigator.platform ??
     '';
-  return /mac|iphone|ipad/i.test(platform) ? 'Commande plus ' : 'Controle plus ';
+  return /mac|iphone|ipad/i.test(platform);
+}
+
+function useEstUnMac(): boolean {
+  return useSyncExternalStore(ecouterRien, estUnMac, () => false);
 }

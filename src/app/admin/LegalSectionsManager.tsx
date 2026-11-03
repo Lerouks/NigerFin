@@ -122,7 +122,7 @@ export function LegalSectionsManager() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Supprimer cette section ?')) return;
+    if (!confirm('Mettre cette section à la corbeille\u202f? Vous pourrez l’y remettre en place pendant 30\u00a0jours, depuis Contenu, Corbeille.')) return;
     setDeletingId(id);
     setMessage(null);
 
@@ -130,7 +130,7 @@ export function LegalSectionsManager() {
 
     if (resultat.ok) {
       await fetchSections(activeSlug);
-      setMessage({ type: 'success', text: 'Section supprimée' });
+      setMessage({ type: 'success', text: 'Section mise à la corbeille' });
     } else {
       setMessage({ type: 'error', text: resultat.message });
       Sentry.captureMessage('legal-sections-delete failed', {

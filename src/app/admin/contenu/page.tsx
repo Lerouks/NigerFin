@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Newspaper, MessageSquare, Mail, Zap, BookOpen, FileText, ArrowUpRight } from 'lucide-react';
+import { Newspaper, MessageSquare, Mail, Zap, BookOpen, FileText, Trash2, ArrowUpRight } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { ContenuStats } from './ContenuStats';
 
@@ -55,6 +55,12 @@ const SECTIONS: SectionLink[] = [
     icon: FileText,
     title: 'Pages légales',
     description: 'Mentions légales, CGU, confidentialité, cookies.',
+  },
+  {
+    href: '/admin/contenu/corbeille',
+    icon: Trash2,
+    title: 'Corbeille',
+    description: 'Remettre en place un contenu supprimé par erreur.',
   },
 ];
 

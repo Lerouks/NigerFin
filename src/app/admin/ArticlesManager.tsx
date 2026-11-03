@@ -270,11 +270,13 @@ export function ArticlesManager() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Supprimer cet article ?')) return;
+    if (!confirm('Mettre cet article à la corbeille\u202f? Vous pourrez l’y remettre en place pendant 30\u00a0jours, depuis Contenu, Corbeille. Ses commentaires et ses j’aime ne partent pas avec lui\u00a0: ils restent en modération et le retrouvent s’il revient.')) return;
     setMessageListe('');
     const resultat = await envoiAdmin(`/api/admin/articles?id=${id}`, 'DELETE');
     if (!resultat.ok) {
-      setMessageListe(`La suppression a échoué. ${resultat.message}`);
+      // Le message du serveur se suffit : il dit aussi quand la suppression a
+      // peut-être eu lieu malgré une réponse perdue.
+      setMessageListe(resultat.message);
       return;
     }
     fetchArticles();
@@ -792,8 +794,8 @@ export function ArticlesManager() {
                           <Eye className="w-3.5 h-3.5 text-gray-500" />
                         </a>
                       )}
-                      <button onClick={() => handleDelete(a.id)} className="p-1.5 hover:bg-red-50 rounded-sm transition-colors" title="Supprimer">
-                        <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                      <button onClick={() => handleDelete(a.id)} className="p-1.5 hover:bg-red-50 rounded-sm transition-colors" title="Mettre à la corbeille" aria-label="Mettre l’article à la corbeille">
+                        <Trash2 className="w-3.5 h-3.5 text-red-400" aria-hidden="true" />
                       </button>
                     </div>
                   </td>

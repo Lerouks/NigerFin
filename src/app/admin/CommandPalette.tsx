@@ -70,6 +70,7 @@ const ROUTES: RouteCommand[] = [
   { href: '/admin/contenu/flash', label: 'Flash', group: 'Contenu', icon: Zap, keywords: 'flash banniere alerte' },
   { href: '/admin/contenu/education', label: 'Education', group: 'Contenu', icon: BookOpen, keywords: 'education cours pedagogie' },
   { href: '/admin/contenu/pages', label: 'Pages', group: 'Contenu', icon: FileText, keywords: 'pages legales mentions' },
+  { href: '/admin/contenu/corbeille', label: 'Corbeille', group: 'Contenu', icon: Trash2, keywords: 'corbeille supprime restaurer remettre' },
   { href: '/admin/audience', label: 'Audience', group: 'Audience', icon: Users, keywords: 'audience lecteurs' },
   { href: '/admin/audience/utilisateurs', label: 'Utilisateurs', group: 'Audience', icon: UserIcon, keywords: 'utilisateurs comptes users' },
   { href: '/admin/audience/messages', label: 'Messages', group: 'Audience', icon: Mail, keywords: 'messages contact' },

@@ -542,9 +542,11 @@ export function StrategicEnterprisesManager() {
                 ) : (
                   <button
                     onClick={() => setDeleteConfirm(item.id)}
+                    aria-label="Mettre la fiche à la corbeille"
+                    title="Mettre à la corbeille"
                     className="p-2 rounded-lg text-gray-500 hover:text-red-500 hover:bg-red-50 transition-colors"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4" aria-hidden="true" />
                   </button>
                 )}
               </div>

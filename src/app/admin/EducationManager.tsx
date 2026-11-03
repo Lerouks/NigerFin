@@ -7,6 +7,7 @@ import {
   BookOpen,
 } from 'lucide-react';
 import { useToast } from '@/components/Toast';
+import { typographieFr } from '@/lib/typographie-fr';
 import { appelAdmin, envoiAdmin } from '@/app/admin/lib/appel-admin';
 import { EtatListe } from '@/app/admin/lib/EtatListe';
 
@@ -160,6 +161,7 @@ export function EducationManager() {
       setDeleteConfirm(null);
       if (selectedCategory?.id === id) setSelectedCategory(null);
       fetchCategories();
+      showToast(typographieFr('Catégorie mise à la corbeille, avec ses leçons. Vous pouvez tout remettre en place pendant 30 jours, depuis Contenu, Corbeille.'), 'success');
     } else {
       echecEcriture('categorie-suppression', resultat);
     }
@@ -221,6 +223,7 @@ export function EducationManager() {
       setDeleteConfirm(null);
       fetchLessons(selectedCategory.id);
       fetchCategories();
+      showToast(typographieFr('Leçon mise à la corbeille. Vous pouvez la remettre en place pendant 30 jours, depuis Contenu, Corbeille.'), 'success');
     } else {
       echecEcriture('lecon-suppression', resultat);
     }
@@ -388,16 +391,16 @@ export function EducationManager() {
                 </button>
                 {deleteConfirm === lesson.id ? (
                   <div className="flex items-center gap-1">
-                    <button onClick={() => handleDeleteLesson(lesson.id)} className="p-1.5 rounded-sm bg-red-100 text-red-700 hover:bg-red-200 transition-colors">
-                      <Check className="w-3.5 h-3.5" />
+                    <button onClick={() => handleDeleteLesson(lesson.id)} aria-label={'Confirmer\u00a0: la leçon part à la corbeille'} title={'Confirmer\u00a0: la leçon part à la corbeille'} className="p-1.5 rounded-sm bg-red-100 text-red-700 hover:bg-red-200 transition-colors">
+                      <Check className="w-3.5 h-3.5" aria-hidden="true" />
                     </button>
-                    <button onClick={() => setDeleteConfirm(null)} className="p-1.5 rounded-sm hover:bg-gray-100 text-gray-500 transition-colors">
-                      <X className="w-3.5 h-3.5" />
+                    <button onClick={() => setDeleteConfirm(null)} aria-label="Annuler" title="Annuler" className="p-1.5 rounded-sm hover:bg-gray-100 text-gray-500 transition-colors">
+                      <X className="w-3.5 h-3.5" aria-hidden="true" />
                     </button>
                   </div>
                 ) : (
-                  <button onClick={() => setDeleteConfirm(lesson.id)} className="p-1.5 rounded-sm hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors">
-                    <Trash2 className="w-3.5 h-3.5" />
+                  <button onClick={() => setDeleteConfirm(lesson.id)} aria-label="Mettre la leçon à la corbeille" title="Mettre à la corbeille" className="p-1.5 rounded-sm hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors">
+                    <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
                   </button>
                 )}
               </div>
@@ -555,16 +558,16 @@ export function EducationManager() {
               </button>
               {deleteConfirm === cat.id ? (
                 <div className="flex items-center gap-1">
-                  <button onClick={() => handleDeleteCategory(cat.id)} className="p-1.5 rounded-sm bg-red-100 text-red-700 hover:bg-red-200 transition-colors">
-                    <Check className="w-3.5 h-3.5" />
+                  <button onClick={() => handleDeleteCategory(cat.id)} aria-label={'Confirmer\u00a0: la catégorie et ses leçons partent à la corbeille'} title={'Confirmer\u00a0: la catégorie et ses leçons partent à la corbeille'} className="p-1.5 rounded-sm bg-red-100 text-red-700 hover:bg-red-200 transition-colors">
+                    <Check className="w-3.5 h-3.5" aria-hidden="true" />
                   </button>
-                  <button onClick={() => setDeleteConfirm(null)} className="p-1.5 rounded-sm hover:bg-gray-100 text-gray-500 transition-colors">
-                    <X className="w-3.5 h-3.5" />
+                  <button onClick={() => setDeleteConfirm(null)} aria-label="Annuler" title="Annuler" className="p-1.5 rounded-sm hover:bg-gray-100 text-gray-500 transition-colors">
+                    <X className="w-3.5 h-3.5" aria-hidden="true" />
                   </button>
                 </div>
               ) : (
-                <button onClick={() => setDeleteConfirm(cat.id)} className="p-1.5 rounded-sm hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors">
-                  <Trash2 className="w-3.5 h-3.5" />
+                <button onClick={() => setDeleteConfirm(cat.id)} aria-label="Mettre la catégorie et ses leçons à la corbeille" title="Mettre à la corbeille" className="p-1.5 rounded-sm hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors">
+                  <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>
               )}
             </div>

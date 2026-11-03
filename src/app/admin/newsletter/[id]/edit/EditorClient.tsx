@@ -118,7 +118,7 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
   }, [issue.id]);
 
   const deleteIssue = useCallback(() => {
-    if (!confirm('Supprimer définitivement ce brouillon ?')) return;
+    if (!confirm('Mettre ce brouillon à la corbeille\u202f? Vous pourrez l’y remettre en place pendant 30\u00a0jours, depuis Contenu, Corbeille.')) return;
     setSaveMessage(null);
     setMessageEstUnEchec(false);
     startTransition(async () => {

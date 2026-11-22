@@ -19,7 +19,7 @@ export function WaitlistForm() {
     const value = email.trim();
     if (!EMAIL_RE.test(value)) {
       setStatus('error');
-      setMessage('Entrez une adresse email valide.');
+      setMessage('Entrez une adresse e-mail valide.');
       return;
     }
 
@@ -49,28 +49,28 @@ export function WaitlistForm() {
   if (status === 'success') {
     return (
       <p
-        className="flex items-center gap-2 text-[15px] font-medium text-[#111111]"
+        className="flex items-center gap-2 border-b border-white/25 py-[14px] text-[15px] font-medium text-[#f4f4f5]"
         role="status"
         aria-live="polite"
       >
-        <Check className="h-4 w-4 shrink-0 text-gold" />
-        Merci. Vous recevrez le signal du lancement.
+        <Check className="h-4 w-4 shrink-0" />
+        Merci, c’est noté. Vous serez prévenu à l’ouverture.
       </p>
     );
   }
 
   return (
     <form onSubmit={handleSubmit} noValidate>
-      <div className="flex items-center gap-3 border-b border-[#111111]/25 pb-1 transition-colors duration-200 focus-within:border-gold">
-        <label htmlFor="waitlist-email" className="sr-only">
-          Votre adresse email
-        </label>
+      <label htmlFor="waitlist-email" className="mb-2.5 block text-[13px] text-[#a9adb4]">
+        Être prévenu de l’ouverture
+      </label>
+      <div className="flex items-center gap-3 border-b border-white/25 transition-colors duration-200 focus-within:border-[#f4f4f5]">
         <input
           id="waitlist-email"
           type="email"
           inputMode="email"
           autoComplete="email"
-          placeholder="votre@email.com"
+          placeholder="Votre adresse e-mail"
           value={email}
           onChange={(e) => {
             setEmail(e.target.value);
@@ -78,12 +78,12 @@ export function WaitlistForm() {
           }}
           disabled={status === 'loading'}
           aria-invalid={status === 'error'}
-          className="min-w-0 flex-1 bg-transparent py-3 text-[16px] text-[#111111] placeholder:text-[#111111]/35 focus:outline-none disabled:opacity-60"
+          className="min-w-0 flex-1 bg-transparent py-[13px] text-[16px] text-[#f4f4f5] placeholder:text-[#5c6068] focus:outline-none disabled:opacity-60 sm:text-[17px]"
         />
         <button
           type="submit"
           disabled={status === 'loading'}
-          className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 text-[15px] font-semibold text-[#111111] transition-colors duration-200 hover:text-gold focus-visible:text-gold focus-visible:outline-none disabled:opacity-60"
+          className="group inline-flex min-h-[44px] shrink-0 items-center gap-2 text-[15px] font-semibold text-[#f4f4f5] transition-opacity duration-200 hover:opacity-80 focus-visible:underline focus-visible:outline-none disabled:opacity-60"
         >
           {status === 'loading' ? (
             <>
@@ -93,18 +93,18 @@ export function WaitlistForm() {
           ) : (
             <>
               <span>M’inscrire</span>
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
             </>
           )}
         </button>
       </div>
 
       <p
-        className="mt-3 min-h-[1.25rem] text-[13px]"
+        className="mt-2 min-h-[1.25rem] text-[13px]"
         aria-live="polite"
         role={status === 'error' ? 'alert' : undefined}
       >
-        {status === 'error' && <span className="text-[#b0402f]">{message}</span>}
+        {status === 'error' && <span className="text-[#ff8f80]">{message}</span>}
       </p>
     </form>
   );

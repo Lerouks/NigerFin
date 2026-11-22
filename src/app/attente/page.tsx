@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { ComingSoon } from '@/components/coming-soon/ComingSoon';
 
 /**
@@ -11,6 +11,18 @@ export const metadata: Metadata = {
   alternates: { canonical: '/' },
 };
 
+// Barre du navigateur sur téléphone et fond du rebond de défilement : noirs,
+// comme la page, au lieu du blanc du site.
+export const viewport: Viewport = {
+  themeColor: '#09090a',
+  colorScheme: 'dark',
+};
+
 export default function PageAttente() {
-  return <ComingSoon />;
+  return (
+    <>
+      <style>{'html,body{background:#09090a}'}</style>
+      <ComingSoon />
+    </>
+  );
 }

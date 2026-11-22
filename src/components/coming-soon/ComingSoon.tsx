@@ -1,8 +1,7 @@
 import { Facebook, Instagram, Youtube } from '@/components/icons/social';
 import { defaultSocialLinks } from '@/lib/site-data';
 import { WaitlistForm } from './WaitlistForm';
-import { IndexChart } from './IndexChart';
-import { Ticker } from './Ticker';
+import { CarteNiger } from './CarteNiger';
 
 /** Icône TikTok (identique à celle du Footer, non fournie par le pack lucide). */
 function TikTokIcon({ className }: { className?: string }) {
@@ -21,101 +20,68 @@ const SOCIALS = [
 ].filter((s) => Boolean(s.url));
 
 /**
- * Page publique du mode pré-lancement. Couverture éditoriale plein écran d'un
- * média financier : titre à gauche en révélation cinétique + surlignage marqueur
- * (signature NFI), graphe d'indice ascendant animé à droite, fil d'actualité
- * défilant en bas. Les admins connectés ne voient jamais cette page (bypass layout).
+ * Page d'attente du pré-lancement (maquette « la carte », choisie par la
+ * direction le 23/11/2026). Fond noir ; le Niger en points argentés occupe le
+ * haut à droite, le titre se pose dans le vide du nord-ouest de la carte. Sur
+ * téléphone, la carte passe sous le formulaire pour que l'inscription reste
+ * en haut de l'écran.
  */
 export function ComingSoon() {
   return (
-    <main
-      className="relative flex min-h-svh w-full flex-col overflow-hidden text-[#111111]"
-      style={{ backgroundColor: '#f7f7f7' }}
-    >
-      {/* Masthead */}
-      <header className="nfi-rise px-6 pt-8 sm:px-10 lg:px-16 lg:pt-10" style={{ animationDelay: '40ms' }}>
-        <p className="font-[family-name:var(--font-playfair)] text-[22px] font-bold tracking-[0.01em]">NFI&nbsp;REPORT</p>
-        <p className="mt-1 text-[12px] text-[#111111]/45">Niger Financial Insights</p>
+    <main className="relative flex min-h-svh w-full flex-col overflow-hidden bg-[#09090a] px-[22px] pb-6 pt-6 text-[#f4f4f5] antialiased sm:px-10 xl:px-14 xl:pb-8 xl:pt-9">
+      <CarteNiger className="pointer-events-none relative order-2 -ml-[9vw] mt-6 block aspect-[1000/794] w-[118vw] max-w-none sm:mx-auto sm:w-[min(100%,760px)] xl:absolute xl:right-[3vw] xl:top-[9vh] xl:order-none xl:m-0 xl:w-[min(63vw,104vh)]" />
+
+      <header className="relative z-10 order-0 flex items-start justify-between">
+        <div>
+          <p className="font-[family-name:var(--font-playfair)] text-[22px] font-bold tracking-[0.01em]">NFI&nbsp;REPORT</p>
+          <p className="mt-1 text-[12px] text-[#7d8189]">Niger Financial Insights</p>
+        </div>
+        <p className="hidden items-center gap-2.5 text-[13px] text-[#a9adb4] xl:flex">
+          <span className="nfi-veille h-1.5 w-1.5 rounded-full bg-[#f4f4f5]" aria-hidden="true" />
+          Ouverture prochaine
+        </p>
       </header>
 
-      {/* Hero : remplit la hauteur */}
-      <section className="flex flex-1 items-center px-6 py-10 sm:px-10 lg:px-16">
-        <div className="grid w-full items-center gap-12 lg:grid-cols-[1.02fr_0.98fr] lg:gap-10">
-          {/* Texte */}
-          <div className="max-w-[42rem]">
-            <h1 className="text-[clamp(2.6rem,6.5vw,5.15rem)] font-bold leading-[1.04] tracking-[-0.04em]">
-              <span className="nfi-reveal">
-                <span style={{ animationDelay: '180ms' }}>
-                  <span className="nfi-marker" style={{ animationDelay: '1050ms' }}>
-                    L’intelligence économique
-                  </span>{' '}
-                  du Niger arrive.
-                </span>
-              </span>
-            </h1>
-
-            <p
-              className="nfi-rise mt-7 max-w-[34rem] text-[clamp(1rem,1.5vw,1.15rem)] leading-relaxed text-[#111111]/72"
-              style={{ animationDelay: '520ms' }}
+      <section className="relative z-10 order-1 flex max-w-[560px] flex-col pt-[10vh] xl:flex-1 xl:justify-end xl:pb-[4vh] xl:pt-[4vh]">
+        <h1 className="text-[46px] font-bold leading-[0.96] tracking-[-0.045em] sm:text-[64px] xl:text-[clamp(52px,min(6.2vw,10vh),96px)]">
+          L’économie du&nbsp;Niger, <span className="text-[#7d8189]">en&nbsp;clair.</span>
+        </h1>
+        <p className="mt-5 max-w-[470px] text-[16px] leading-[1.55] text-[#a9adb4] sm:text-[18px] xl:mt-[3.2vh]">
+          Un média d’information économique et financière consacré au&nbsp;Niger&nbsp;: l’énergie, les banques, la bourse, les entreprises.
+        </p>
+        <div className="mt-8 max-w-[470px] xl:mt-[5vh]">
+          <WaitlistForm />
+          {/* La page collecte une adresse : qui la donne doit pouvoir lire qui la
+              collecte, et sortir. Ces pages restent ouvertes en pré-lancement. */}
+          <p className="mt-1 text-[12px] leading-relaxed text-[#7d8189]">
+            Votre adresse ne sert qu’à vous prévenir de l’ouverture.{' '}
+            <a
+              href="/confidentialite"
+              className="whitespace-nowrap underline underline-offset-[3px] transition-colors hover:text-[#f4f4f5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f4f5]"
             >
-              Analyses, données de marché et décryptages, pour comprendre l’économie du Niger
-              et de l’Afrique de l’Ouest.
-            </p>
-
-            <div className="nfi-rise mt-10 max-w-[30rem]" style={{ animationDelay: '640ms' }}>
-              <p className="mb-3 text-[14px] text-[#111111]/60">Recevez le signal du lancement.</p>
-              <WaitlistForm />
-              {/* La page collecte une adresse : qui la donne doit pouvoir lire qui la
-                  collecte, et sortir. Les deux pages restent ouvertes en pré-lancement. */}
-              <p className="mt-3 text-[12px] leading-relaxed text-[#111111]/45">
-                Votre adresse ne sert qu’au signal du lancement.{' '}
-                <a
-                  href="/confidentialite"
-                  className="whitespace-nowrap underline underline-offset-2 transition-colors hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
-                >
-                  Politique de confidentialité
-                </a>
-              </p>
-            </div>
-          </div>
-
-          {/* Graphe */}
-          <div className="flex w-full items-end self-stretch lg:pl-6">
-            <IndexChart />
-          </div>
+              Politique de confidentialité
+            </a>
+          </p>
         </div>
       </section>
 
-      {/* Pied éditorial */}
-      <footer
-        className="nfi-rise flex flex-col gap-5 px-6 pb-7 sm:flex-row sm:items-end sm:justify-between sm:px-10 lg:px-16"
-        style={{ animationDelay: '760ms' }}
-      >
-        <div>
-          <p className="font-[family-name:var(--font-playfair)] text-[15px] font-medium text-[#111111]/70">La connaissance, votre meilleur capital.</p>
-          <div className="mt-4 flex items-center gap-1.5">
-            {SOCIALS.map(({ label, Icon, url }) => (
-              <a
-                key={label}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={label}
-                className="group relative -ml-2 flex h-11 w-11 items-center justify-center rounded-full text-[#111111]/55 transition-colors duration-200 first:ml-0 hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-[#f7f7f7]"
-              >
-                <span className="pointer-events-none absolute -top-7 whitespace-nowrap rounded bg-[#111111] px-2 py-1 text-[11px] font-medium text-[#f7f7f7] opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                  {label}
-                </span>
-                <Icon className="h-[18px] w-[18px]" />
-              </a>
-            ))}
-          </div>
-        </div>
-        <p className="text-[13px] text-[#111111]/60">Niamey&nbsp;· 2026</p>
+      <footer className="relative z-10 order-3 mt-4 flex items-center justify-between gap-6 text-[13px] text-[#7d8189] xl:mt-0">
+        <nav className="-ml-2.5 flex items-center gap-1" aria-label="NFI Report sur les réseaux sociaux">
+          {SOCIALS.map(({ label, Icon, url }) => (
+            <a
+              key={label}
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={label}
+              className="flex h-11 w-11 items-center justify-center rounded-full text-[#a9adb4] transition-colors duration-200 hover:text-[#f4f4f5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f4f5]"
+            >
+              <Icon className="h-[18px] w-[18px]" />
+            </a>
+          ))}
+        </nav>
+        <p className="xl:hidden">Ouverture prochaine</p>
       </footer>
-
-      {/* Fil d'actualité */}
-      <Ticker />
     </main>
   );
 }

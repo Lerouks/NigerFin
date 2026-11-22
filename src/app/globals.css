@@ -18,50 +18,13 @@
   --color-surface: #ffffff;
 }
 
-/* ─── Motion page « Prochainement » (mode pré-lancement) ───
-   Séquence orchestrée + graphe d'indice animé (signature). CSS/SVG pur,
-   déterministe, neutralisé si prefers-reduced-motion. */
-@keyframes nfi-rise      { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
-@keyframes nfi-reveal-up { from { transform: translateY(112%); }            to { transform: translateY(0); } }
-@keyframes nfi-marker    { from { background-size: 0% 86%; }                to { background-size: 100% 86%; } }
-@keyframes nfi-draw      { from { stroke-dashoffset: 1; }                   to { stroke-dashoffset: 0; } }
-@keyframes nfi-fade      { from { opacity: 0; }                            to { opacity: 1; } }
-@keyframes nfi-pulse     { 0% { transform: scale(1); opacity: .5; }         70%, 100% { transform: scale(2.6); opacity: 0; } }
-@keyframes nfi-drift     { 0%, 100% { transform: translateY(0); }          50% { transform: translateY(-8px); } }
-@keyframes nfi-marquee   { from { transform: translateX(0); }              to { transform: translateX(-50%); } }
-
-.nfi-rise { opacity: 0; animation: nfi-rise .9s cubic-bezier(.2, .9, .25, 1) both; }
-
-/* Révélation cinétique : le texte remonte derrière un masque. */
-.nfi-reveal { display: block; overflow: hidden; padding-bottom: .14em; margin-bottom: -.14em; }
-.nfi-reveal > * { display: block; animation: nfi-reveal-up 1s cubic-bezier(.16, 1, .3, 1) both; }
-
-/* Surlignage marqueur : suit le texte même sur plusieurs lignes (box-decoration-break). */
-.nfi-marker {
-  background-image: linear-gradient(rgba(138, 142, 149, .24), rgba(138, 142, 149, .24));
-  background-repeat: no-repeat;
-  background-position: 0 88%;
-  background-size: 0% 86%;
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
-  animation: nfi-marker .8s cubic-bezier(.85, 0, .15, 1) both;
-}
-
-.nfi-draw  { stroke-dasharray: 1; stroke-dashoffset: 1; animation: nfi-draw 1.8s cubic-bezier(.4, 0, .2, 1) both; }
-.nfi-fade  { opacity: 0; animation: nfi-fade 1.1s ease both; }
-.nfi-pulse { transform-box: fill-box; transform-origin: center; animation: nfi-pulse 2.4s ease-out infinite; }
-.nfi-drift { animation: nfi-drift 7s ease-in-out infinite; }
-.nfi-marquee { animation: nfi-marquee 34s linear infinite; }
-
+/* ─── Page d'attente (mode pré-lancement) ───
+   La carte est dessinée par CarteNiger.tsx ; ici, seulement le point qui
+   veille à côté de « Ouverture prochaine ». */
+@keyframes nfi-veille { 50% { opacity: .25; } }
+.nfi-veille { animation: nfi-veille 2.4s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) {
-  .nfi-rise, .nfi-reveal > *, .nfi-marker, .nfi-draw, .nfi-fade,
-  .nfi-pulse, .nfi-drift, .nfi-marquee {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
-    stroke-dashoffset: 0 !important;
-    background-size: 100% 86% !important;
-  }
+  .nfi-veille { animation: none; }
 }
 
 /*

@@ -65,7 +65,7 @@ export function MacroIndicatorsBlock({
         </div>
         {asOf && (
           <div className="font-mono text-[11px] uppercase tracking-[0.04em] text-gray-500 tabular-nums pb-1">
-            au {asOf}
+            Mise à jour&nbsp;: {asOf}
           </div>
         )}
       </div>

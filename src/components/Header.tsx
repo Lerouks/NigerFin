@@ -56,8 +56,8 @@ export function Header() {
             </button>
 
             <Link href="/" className="flex items-center lg:static absolute left-1/2 -translate-x-1/2 lg:translate-x-0 max-w-[calc(100%-160px)] lg:max-w-none" aria-label="NFI Report, accueil">
-              <span className="text-[18px] sm:text-[22px] md:text-[26px] tracking-[-0.03em] font-bold truncate">
-                NFI REPORT
+              <span className="font-[family-name:var(--font-playfair)] text-[20px] sm:text-[22px] md:text-[26px] tracking-[0.01em] font-bold truncate">
+                NFI&nbsp;REPORT
               </span>
             </Link>
 

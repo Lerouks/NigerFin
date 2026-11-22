@@ -115,15 +115,15 @@ function PlanCard({ title, badge, tools, isPremium = false, isSubscribed = false
 }
 
 const defaultFreeTools: ToolData[] = [
-  { _id: 'f1', name: "Simulateur d'Emprunt", slug: 'simulateur-emprunt', icon: 'Calculator', isPremium: false },
-  { _id: 'f2', name: 'Intérêt Simple', slug: 'interet-simple', icon: 'Percent', isPremium: false },
-  { _id: 'f4', name: 'Indices Économiques', slug: 'indices-economiques', icon: 'BarChart3', isPremium: false },
+  { _id: 'f1', name: "Simulateur d'emprunt", slug: 'simulateur-emprunt', icon: 'Calculator', isPremium: false },
+  { _id: 'f2', name: 'Intérêt simple', slug: 'interet-simple', icon: 'Percent', isPremium: false },
+  { _id: 'f4', name: 'Indices économiques', slug: 'indices-economiques', icon: 'BarChart3', isPremium: false },
 ];
 
 const defaultPremiumTools: ToolData[] = [
-  { _id: 'f3', name: 'Simulateur Salaire', slug: 'simulateur-salaire', icon: 'DollarSign', isPremium: true },
-  { _id: 'f5', name: 'Intérêt Composé', slug: 'interet-compose', icon: 'TrendingUp', isPremium: true },
-  { _id: 'f6', name: 'Budget Familial', slug: 'budget-familial', icon: 'Wallet', isPremium: true },
+  { _id: 'f3', name: 'Simulateur de salaire', slug: 'simulateur-salaire', icon: 'DollarSign', isPremium: true },
+  { _id: 'f5', name: 'Intérêt composé', slug: 'interet-compose', icon: 'TrendingUp', isPremium: true },
+  { _id: 'f6', name: 'Budget familial', slug: 'budget-familial', icon: 'Wallet', isPremium: true },
 ];
 
 export function PracticalTools() {
@@ -164,7 +164,7 @@ export function PracticalTools() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
-          <PlanCard title="Plan Gratuit" badge="GRATUIT" tools={freeTools} />
+          <PlanCard title="Plan gratuit" badge="GRATUIT" tools={freeTools} />
           <PlanCard title={isSubscribed ? 'Vos outils Premium' : 'Plan Premium'} badge={isSubscribed ? 'DÉBLOQUÉ' : 'PREMIUM'} tools={premiumTools} isPremium isSubscribed={isSubscribed} />
         </div>
 

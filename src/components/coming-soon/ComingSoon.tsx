@@ -47,7 +47,7 @@ export function ComingSoon() {
               <span className="nfi-reveal">
                 <span style={{ animationDelay: '180ms' }}>
                   <span className="nfi-marker" style={{ animationDelay: '1050ms' }}>
-                    L&apos;intelligence économique
+                    L’intelligence économique
                   </span>{' '}
                   du Niger arrive.
                 </span>
@@ -58,8 +58,8 @@ export function ComingSoon() {
               className="nfi-rise mt-7 max-w-[34rem] text-[clamp(1rem,1.5vw,1.15rem)] leading-relaxed text-[#111111]/72"
               style={{ animationDelay: '520ms' }}
             >
-              Analyses, données de marché et décryptages, pour comprendre l&apos;économie du Niger
-              et de l&apos;Afrique de l&apos;Ouest.
+              Analyses, données de marché et décryptages, pour comprendre l’économie du Niger
+              et de l’Afrique de l’Ouest.
             </p>
 
             <div className="nfi-rise mt-10 max-w-[30rem]" style={{ animationDelay: '640ms' }}>
@@ -68,7 +68,7 @@ export function ComingSoon() {
               {/* La page collecte une adresse : qui la donne doit pouvoir lire qui la
                   collecte, et sortir. Les deux pages restent ouvertes en pré-lancement. */}
               <p className="mt-3 text-[12px] leading-relaxed text-[#111111]/45">
-                Votre adresse ne sert qu&apos;au signal du lancement.{' '}
+                Votre adresse ne sert qu’au signal du lancement.{' '}
                 <a
                   href="/confidentialite"
                   className="whitespace-nowrap underline underline-offset-2 transition-colors hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
@@ -92,7 +92,7 @@ export function ComingSoon() {
         style={{ animationDelay: '760ms' }}
       >
         <div>
-          <p className="font-[family-name:var(--font-playfair)] text-[15px] font-medium text-gold">La connaissance, votre meilleur capital.</p>
+          <p className="font-[family-name:var(--font-playfair)] text-[15px] font-medium text-[#111111]/70">La connaissance, votre meilleur capital.</p>
           <div className="mt-4 flex items-center gap-1.5">
             {SOCIALS.map(({ label, Icon, url }) => (
               <a
@@ -111,7 +111,7 @@ export function ComingSoon() {
             ))}
           </div>
         </div>
-        <p className="text-[13px] text-[#111111]/40">Niamey&nbsp;· 2026</p>
+        <p className="text-[13px] text-[#111111]/60">Niamey&nbsp;· 2026</p>
       </footer>
 
       {/* Fil d'actualité */}

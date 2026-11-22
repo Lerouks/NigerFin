@@ -29,6 +29,10 @@ export function HomeRubriqueSection({
   const [vedette, ...rest] = articles;
   const secondary = rest.slice(0, 3);
   if (!vedette) return null;
+  // Une rubrique avec un seul article : la vedette s'étale sur toute la
+  // largeur (image à gauche, texte à droite) au lieu de laisser une colonne
+  // vide ou une mention « à venir ».
+  const seul = secondary.length === 0;
 
   return (
     <section
@@ -74,14 +78,30 @@ export function HomeRubriqueSection({
       </header>
 
       {/* Grid vedette + liste secondaires */}
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-8 lg:gap-12">
+      <div
+        className={
+          seul
+            ? 'grid grid-cols-1'
+            : 'grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-8 lg:gap-12'
+        }
+      >
         {/* Vedette */}
         <Link
           href={`/articles/${vedette.slug.current}`}
           className="group block"
         >
-          <article>
-            <div className="relative aspect-[16/10] overflow-hidden bg-secondary mb-5">
+          <article
+            className={
+              seul
+                ? 'lg:grid lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:gap-12 lg:items-center'
+                : undefined
+            }
+          >
+            <div
+              className={
+                'relative aspect-[16/10] overflow-hidden bg-secondary mb-5' + (seul ? ' lg:mb-0' : '')
+              }
+            >
               <Image
                 src={vedette.mainImage?.url || fallbackImageUrl}
                 alt={vedette.mainImage?.alt || vedette.title}
@@ -91,6 +111,7 @@ export function HomeRubriqueSection({
                 className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
               />
             </div>
+            <div>
             <div className="flex items-center gap-2 mb-3 text-[11px] uppercase tracking-[0.18em] text-gray-600 font-semibold">
               {vedette.isPremium ? (
                 <span className="text-gold font-bold">Premium</span>
@@ -117,12 +138,13 @@ export function HomeRubriqueSection({
                 </>
               ) : null}
             </div>
+            </div>
           </article>
         </Link>
 
-        {/* Secondaires : liste dense FT-style */}
+        {/* Secondaires : liste dense FT-style (rien si la rubrique n'a qu'un article) */}
+        {secondary.length > 0 ? (
         <div>
-          {secondary.length > 0 ? (
             <ul>
               {secondary.map((a, idx) => (
                 <li
@@ -163,12 +185,8 @@ export function HomeRubriqueSection({
                 </li>
               ))}
             </ul>
-          ) : (
-            <p className="text-[14px] italic text-gray-500">
-              Plus d&apos;articles à venir prochainement.
-            </p>
-          )}
         </div>
+        ) : null}
       </div>
     </section>
   );

@@ -252,6 +252,9 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [], header
                     <ArticleLikes articleId={article._id} />
                   </div>
                   <div className="flex flex-wrap gap-2">
+                    <a href={shareLinks.whatsapp} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 bg-[#25D366] text-white rounded-lg text-[13px] hover:opacity-90 transition-opacity">
+                      <WhatsAppIcon className="w-4 h-4" />WhatsApp
+                    </a>
                     <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 bg-[#1877F2] text-white rounded-lg text-[13px] hover:opacity-90 transition-opacity">
                       <Facebook className="w-4 h-4" />Facebook
                     </a>
@@ -260,9 +263,6 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [], header
                     </a>
                     <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 bg-[#0A66C2] text-white rounded-lg text-[13px] hover:opacity-90 transition-opacity">
                       <Linkedin className="w-4 h-4" />LinkedIn
-                    </a>
-                    <a href={shareLinks.whatsapp} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 bg-[#25D366] text-white rounded-lg text-[13px] hover:opacity-90 transition-opacity">
-                      <WhatsAppIcon className="w-4 h-4" />WhatsApp
                     </a>
                     <button onClick={handleCopyLink} className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-[13px] hover:bg-gray-200 transition-colors">
                       {linkCopied ? <Check className="w-4 h-4 text-green-600" /> : <Link2 className="w-4 h-4" />}

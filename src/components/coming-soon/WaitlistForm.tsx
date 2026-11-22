@@ -92,7 +92,7 @@ export function WaitlistForm() {
             </>
           ) : (
             <>
-              <span>M&apos;inscrire</span>
+              <span>M’inscrire</span>
               <ArrowRight className="h-4 w-4" />
             </>
           )}

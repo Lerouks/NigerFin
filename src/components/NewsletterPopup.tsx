@@ -249,7 +249,7 @@ export function NewsletterPopup() {
             )}
 
             <p className="text-[10px] text-gray-500 text-center mt-4">
-              Gratuit, sans spam. Désabonnez-vous à tout moment.
+              Gratuit. Désinscription à tout moment.
             </p>
           </div>
         </div>

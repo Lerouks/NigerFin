@@ -40,7 +40,7 @@ export function Footer() {
                 className="shrink-0"
                 unoptimized
               />
-              <h3 className="text-[20px] font-semibold uppercase tracking-wide">NFI REPORT</h3>
+              <h3 className="font-[family-name:var(--font-playfair)] text-[20px] font-bold tracking-[0.01em]">NFI&nbsp;REPORT</h3>
             </div>
             <p className="text-white/50 text-[13px] mb-4">Niger Financial Insights</p>
             <p className="text-white/40 text-[13px] leading-relaxed">

@@ -110,7 +110,7 @@ export function NewsletterForm() {
           </button>
         </form>
       )}
-      <p className="text-[11px] text-white/20 mt-4">Gratuit, sans spam. Désabonnez-vous à tout moment.</p>
+      <p className="text-[11px] text-white/20 mt-4">Gratuit. Désinscription à tout moment.</p>
     </div>
   );
 }

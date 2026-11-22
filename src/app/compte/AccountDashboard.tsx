@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useId } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { chargementComplet } from '@/lib/chargement-complet';
 import Link from 'next/link';
 import {
   Loader2, Lock, Eye, EyeOff, XCircle, LogOut, Check,
@@ -243,7 +244,7 @@ export function AccountDashboard() {
           <div className="mt-4">
             <p className="text-white/75 text-[12px]">{user?.email}</p>
             <button
-              onClick={async () => { await signOut(); router.push('/'); }}
+              onClick={async () => { await signOut(); chargementComplet('/'); }}
               className="inline-flex items-center gap-1.5 mt-2 text-[12px] text-white/75 hover:text-white transition-colors"
             >
               Pas vous ? <span className="underline">Se déconnecter</span>
@@ -277,7 +278,7 @@ export function AccountDashboard() {
               })}
               <div className="h-px bg-black/6 my-3" />
               <button
-                onClick={async () => { await signOut(); router.push('/'); }}
+                onClick={async () => { await signOut(); chargementComplet('/'); }}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[14px] text-gray-500 hover:text-red-500 hover:bg-red-50 transition-colors"
               >
                 <LogOut className="w-4 h-4" />
@@ -798,7 +799,6 @@ function DeleteAccountSection() {
   const [confirmText, setConfirmText] = useState('');
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState('');
-  const router = useRouter();
   const { signOut } = useAuth();
 
   const handleDelete = async () => {
@@ -808,7 +808,7 @@ function DeleteAccountSection() {
       const res = await fetch('/api/user/delete-account', { method: 'DELETE' });
       if (res.ok) {
         await signOut();
-        router.push('/');
+        chargementComplet('/');
       } else {
         const data = await res.json();
         setError(data.error || 'Erreur lors de la suppression.');

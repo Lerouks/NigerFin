@@ -10,8 +10,8 @@ import { CivilityPrompt } from '@/components/CivilityPrompt';
 import { SITE_URL } from '@/lib/config';
 import { getFlashBanner, getSiteFeatures } from '@/lib/site-data';
 import { isAdminViewer } from '@/lib/viewer';
+import { PAGE_ATTENTE, estPageOuverte } from '@/lib/pre-lancement';
 import { ComingSoon } from '@/components/coming-soon/ComingSoon';
-import { PrelaunchShell } from '@/components/coming-soon/PrelaunchShell';
 import './globals.css';
 
 // Inter en police variable (toutes les graisses de 100 à 900 dans un seul
@@ -152,38 +152,27 @@ export default async function RootLayout({
   const nonce = headerList.get('x-nonce') ?? undefined;
   const pathname = headerList.get('x-pathname') ?? '/';
 
-  // Mode pré-lancement : le public voit « Prochainement », les admins connectés
-  // voient le site complet. On laisse toujours passer /connexion, /auth et /admin
-  // pour que l'admin puisse se connecter puis basculer le mode.
-  // On laisse aussi passer les pages légales et le désabonnement : la page
-  // d'attente collecte déjà des adresses, donc qui la donne doit pouvoir lire
-  // qui la collecte, et qui veut sortir doit pouvoir sortir.
+  // Mode pré-lancement. La porte elle-même est tenue par src/proxy.ts : toute
+  // page fermée y est réécrite vers la page d'attente, navigations internes
+  // comprises. Ici, on ne choisit que l'habillage, et il ne dépend que du
+  // lecteur, jamais de la page : un layout racine n'est pas réexécuté lors
+  // d'une navigation interne, donc un habillage choisi selon la page resterait
+  // collé à la suivante (c'est par là que « Retour à l'accueil », depuis la
+  // politique de confidentialité, ouvrait tout le site jusqu'au 23/11/2026).
+  // - visiteur : aucun menu du site ; la page d'attente occupe l'écran et les
+  //   pages ouvertes (légales, connexion, désabonnement) portent leur propre
+  //   habillage (HabillagePreLancement) ;
+  // - admin, ou site lancé : le site complet.
   const { prelaunchEnabled } = await getSiteFeatures();
-  let showComingSoon = false;
-  // Visiteur non admin sur une page restée ouverte (légales, connexion,
-  // désabonnement) : il la voit sans le menu du site, pour ne pas « entrer »
-  // dans le site depuis la page d'attente.
-  let prelaunchVisitor = false;
-  if (prelaunchEnabled) {
-    const isBypassPath =
-      pathname === '/connexion' ||
-      pathname.startsWith('/connexion/') ||
-      pathname.startsWith('/auth') ||
-      pathname.startsWith('/admin') ||
-      pathname === '/mentions-legales' ||
-      pathname === '/confidentialite' ||
-      pathname === '/cgu' ||
-      pathname === '/cookies' ||
-      pathname.startsWith('/newsletter/desabonnement');
-    const admin = await isAdminViewer();
-    if (!isBypassPath) {
-      showComingSoon = !admin;
-    } else if (!admin && !pathname.startsWith('/admin')) {
-      prelaunchVisitor = true;
-    }
-  }
+  const visiteur = prelaunchEnabled && !(await isAdminViewer());
+  // Filet de sécurité si le proxy laissait passer une page fermée (panne,
+  // erreur de configuration) : la page d'attente la remplace.
+  const pageFermee = visiteur && pathname !== PAGE_ATTENTE && !estPageOuverte(pathname);
+  // La page d'attente s'affiche toujours seule, y compris pour un admin qui
+  // ouvre /attente pour la regarder.
+  const sansMenu = visiteur || pathname === PAGE_ATTENTE;
 
-  const initialFlashBanner = showComingSoon
+  const initialFlashBanner = sansMenu
     ? { enabled: false as const, items: [] }
     : await getFlashBanner();
 
@@ -204,12 +193,10 @@ export default async function RootLayout({
         />
       </head>
       <body className="min-h-screen flex flex-col">
-        {showComingSoon ? (
+        {pageFermee ? (
           <ComingSoon />
-        ) : prelaunchVisitor ? (
-          <Providers>
-            <PrelaunchShell>{children}</PrelaunchShell>
-          </Providers>
+        ) : sansMenu ? (
+          <Providers>{children}</Providers>
         ) : (
           <Providers>
             <ViewTracker />

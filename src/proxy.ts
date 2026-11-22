@@ -1,5 +1,13 @@
 import { createServerClient } from '@supabase/ssr';
+import { createClient } from '@supabase/supabase-js';
 import { NextResponse, type NextRequest } from 'next/server';
+import {
+  PAGE_ATTENTE,
+  PRE_LANCEMENT_PAR_DEFAUT,
+  decidePorte,
+  estInfrastructure,
+  type DecisionPorte,
+} from '@/lib/pre-lancement';
 
 /**
  * Construit une CSP nonce-based dynamique. Le nonce est unique par requete
@@ -37,6 +45,112 @@ function buildCspHeader(nonce: string): string {
   return directives.join('; ');
 }
 
+/**
+ * Réglage « pré-lancement » lu en base, gardé 30 secondes par instance. Une
+ * base lente ne doit jamais bloquer le site : délai de 2 secondes, puis dernier
+ * état connu, sinon porte fermée (voir PRE_LANCEMENT_PAR_DEFAUT).
+ */
+const DUREE_REGLAGE_MS = 30_000;
+const NOUVEL_ESSAI_APRES_PANNE_MS = 5_000;
+let reglage: { valeur: boolean; jusqua: number } | null = null;
+let lectureEnCours: Promise<boolean> | null = null;
+
+async function lirePreLancement(url: string, key: string): Promise<boolean> {
+  if (reglage && Date.now() < reglage.jusqua) return reglage.valeur;
+  if (!lectureEnCours) {
+    lectureEnCours = (async () => {
+      try {
+        const supabase = createClient(url, key, {
+          auth: { persistSession: false, autoRefreshToken: false },
+        });
+        const { data, error } = await supabase
+          .from('site_features')
+          .select('prelaunch_enabled')
+          .eq('id', 1)
+          .abortSignal(AbortSignal.timeout(2_000))
+          .maybeSingle();
+        if (error || !data) throw error ?? new Error('site_features sans ligne');
+        const valeur = data.prelaunch_enabled === true;
+        reglage = { valeur, jusqua: Date.now() + DUREE_REGLAGE_MS };
+        return valeur;
+      } catch {
+        const valeur = reglage?.valeur ?? PRE_LANCEMENT_PAR_DEFAUT;
+        reglage = { valeur, jusqua: Date.now() + NOUVEL_ESSAI_APRES_PANNE_MS };
+        return valeur;
+      } finally {
+        lectureEnCours = null;
+      }
+    })();
+  }
+  return lectureEnCours;
+}
+
+/** Rôle admin des comptes connectés, gardé 60 secondes (même règle que src/lib/viewer.ts). */
+const DUREE_ROLE_MS = 60_000;
+const roles = new Map<string, { admin: boolean; jusqua: number }>();
+
+async function estAdmin(userId: string): Promise<boolean> {
+  const connu = roles.get(userId);
+  if (connu && Date.now() < connu.jusqua) return connu.admin;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const service = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !service) return false;
+  try {
+    const supabase = createClient(url, service, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .select('role')
+      .eq('id', userId)
+      .abortSignal(AbortSignal.timeout(2_000))
+      .maybeSingle();
+    if (error) return false;
+    const admin = data?.role === 'admin';
+    if (roles.size > 500) roles.clear();
+    roles.set(userId, { admin, jusqua: Date.now() + DUREE_ROLE_MS });
+    return admin;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Traduit la décision de la porte en réponse. `suite` est la réponse « laisser
+ * passer » déjà préparée (en-têtes de requête, cookies de session rafraîchis) :
+ * les cookies sont recopiés sur toute autre réponse pour ne pas perdre un
+ * rafraîchissement de session.
+ */
+function appliquerPorte(
+  decision: DecisionPorte,
+  request: NextRequest,
+  requestHeaders: Headers,
+  suite: NextResponse,
+): NextResponse {
+  if (decision === 'passer') return suite;
+
+  let reponse: NextResponse;
+  if (decision === 'attente') {
+    requestHeaders.set('x-pathname', PAGE_ATTENTE);
+    reponse = NextResponse.rewrite(new URL(PAGE_ATTENTE, request.url), {
+      request: { headers: requestHeaders },
+    });
+  } else if (decision === 'connexion') {
+    const cible = new URL('/connexion', request.url);
+    cible.searchParams.set('next', request.nextUrl.pathname + request.nextUrl.search);
+    reponse = NextResponse.redirect(cible, 307);
+  } else if (decision === 'accueil') {
+    reponse = NextResponse.redirect(new URL('/', request.url), 307);
+  } else {
+    reponse = request.nextUrl.pathname.startsWith('/api/')
+      ? NextResponse.json({ error: 'Not found' }, { status: 404 })
+      : new NextResponse('Not found', { status: 404, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+  }
+  reponse.headers.set('Cache-Control', 'private, no-store');
+  suite.cookies.getAll().forEach((cookie) => reponse.cookies.set(cookie));
+  return reponse;
+}
+
 export async function proxy(request: NextRequest) {
   const host = request.headers.get('host') || '';
   if (host.startsWith('www.')) {
@@ -64,11 +178,6 @@ export async function proxy(request: NextRequest) {
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) {
-    const response = NextResponse.next({ request: { headers: requestHeaders } });
-    response.headers.set('Content-Security-Policy', cspHeader);
-    return response;
-  }
 
   // Court-circuit perf : si aucun cookie Supabase n'est present (visiteur
   // anonyme, ~90% du trafic Niger), on skip TOTALEMENT le refresh auth.
@@ -80,47 +189,60 @@ export async function proxy(request: NextRequest) {
     .getAll()
     .some((c) => c.name.startsWith('sb-'));
 
-  if (!hasSupabaseSession) {
-    const response = NextResponse.next({ request: { headers: requestHeaders } });
-    response.headers.set('Content-Security-Policy', cspHeader);
-    return response;
-  }
-
   let supabaseResponse = NextResponse.next({
     request: { headers: requestHeaders },
   });
-  supabaseResponse.headers.set('Content-Security-Policy', cspHeader);
+  let userId: string | null = null;
 
-  const supabase = createServerClient(url, key,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
+  if (url && key && hasSupabaseSession) {
+    const supabase = createServerClient(url, key,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
+            cookiesToSet.forEach(({ name, value }) =>
+              request.cookies.set(name, value)
+            );
+            supabaseResponse = NextResponse.next({
+              request: { headers: requestHeaders },
+            });
+            cookiesToSet.forEach(({ name, value, options }) =>
+              supabaseResponse.cookies.set(name, value, options)
+            );
+          },
         },
-        setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
-          supabaseResponse = NextResponse.next({
-            request: { headers: requestHeaders },
-          });
-          supabaseResponse.headers.set('Content-Security-Policy', cspHeader);
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
-        },
-      },
+      }
+    );
+
+    // Refresh the auth token (ignore errors, stale tokens are acceptable)
+    try {
+      const { data } = await supabase.auth.getUser();
+      userId = data.user?.id ?? null;
+    } catch {
+      // Token refresh failure is non-critical, user will be prompted to re-auth
     }
-  );
-
-  // Refresh the auth token (ignore errors, stale tokens are acceptable)
-  try {
-    await supabase.auth.getUser();
-  } catch {
-    // Token refresh failure is non-critical, user will be prompted to re-auth
   }
 
-  return supabaseResponse;
+  // Porte du pré-lancement (src/lib/pre-lancement.ts). Elle est ici, et non
+  // dans le layout racine, parce que le proxy voit toutes les requêtes : les
+  // navigations internes, les préchargements, les API, le plan du site.
+  let response = supabaseResponse;
+  if (!estInfrastructure(pathname)) {
+    const preLancement = url && key ? await lirePreLancement(url, key) : PRE_LANCEMENT_PAR_DEFAUT;
+    const admin = preLancement && userId ? await estAdmin(userId) : false;
+    const decision = decidePorte({
+      chemin: pathname,
+      preLancement,
+      admin,
+      session: userId !== null,
+    });
+    response = appliquerPorte(decision, request, requestHeaders, supabaseResponse);
+  }
+
+  response.headers.set('Content-Security-Policy', cspHeader);
+  return response;
 }
 
 export const config = {

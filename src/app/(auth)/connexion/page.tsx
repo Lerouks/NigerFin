@@ -2,7 +2,8 @@
 
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { chargementComplet } from '@/lib/chargement-complet';
 import { useAuth } from '@/lib/auth-context';
 import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import { safeNextPath } from '@/lib/validation';
@@ -20,7 +21,6 @@ function ConnexionContent() {
   const [resetSent, setResetSent] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
   const { signIn } = useAuth();
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +40,10 @@ function ConnexionContent() {
       // pas pouvoir envoyer le lecteur, tout juste connecté, sur un autre site.
       // Les pages du site renvoient ici avec « next » (factures, préférences,
       // édition d'une newsletter) ; l'ancienne forme « redirect » reste lue.
-      router.push(safeNextPath(searchParams.get('redirect') ?? searchParams.get('next')));
+      // Chargement complet, pas une navigation interne : le layout racine doit
+      // être réévalué avec la session (pendant le pré-lancement, un admin passe
+      // de la page de connexion sans menu au site complet).
+      chargementComplet(safeNextPath(searchParams.get('redirect') ?? searchParams.get('next')));
     }
   };
 

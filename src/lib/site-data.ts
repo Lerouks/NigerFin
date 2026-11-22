@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { unstable_cache } from 'next/cache';
+import { PRE_LANCEMENT_PAR_DEFAUT } from '@/lib/pre-lancement';
 export interface SocialLinks {
   facebook?: string;
   twitter?: string;
@@ -40,16 +41,14 @@ export interface SiteFeatures {
 }
 
 /**
- * Repli utilise quand la base ne repond pas. `prelaunchEnabled: true` est
- * DELIBERE : tant que le site n'est pas ouvert au public, une panne reseau ne
- * doit jamais ouvrir nfireport.com toute seule. Le repli d'une porte fermee est
- * « fermee ». A repasser a `false` le jour de l'ouverture, une fois le drapeau
- * bascule en base, pour qu'une panne n'affiche plus la page d'attente a un
- * public qui connait deja le site.
+ * Repli utilise quand la base ne repond pas. Le mode pre-lancement retombe sur
+ * PRE_LANCEMENT_PAR_DEFAUT (src/lib/pre-lancement.ts), que le proxy partage :
+ * porte fermee tant que le site n'est pas lance, a repasser a false le jour de
+ * l'ouverture.
  */
 const FALLBACK_FEATURES: SiteFeatures = {
   marketTickerEnabled: true,
-  prelaunchEnabled: true,
+  prelaunchEnabled: PRE_LANCEMENT_PAR_DEFAUT,
 };
 
 /**

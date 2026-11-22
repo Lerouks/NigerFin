@@ -207,7 +207,7 @@ Un après-midi, tout depuis le Cockpit.
 Deux heures.
 
 - Basculer `prelaunch_enabled` à `false` en base.
-- Repasser le repli de `src/lib/site-data.ts` à `prelaunchEnabled: false`.
+- Repasser `PRE_LANCEMENT_PAR_DEFAUT` à `false` dans `src/lib/pre-lancement.ts` (repli partagé par le proxy et par `src/lib/site-data.ts`).
 - **L'image de partage principale est un portrait présenté comme un paysage** :
   1080 x 1350, fond noir, monogramme argenté seul, aucun texte, aucun « NFI
   Report », alors que le code la déclare en 1200 x 630. Recadrée par Facebook et

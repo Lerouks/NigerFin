@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { cookies } from 'next/headers';
 import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase';
 
@@ -14,7 +15,7 @@ import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase'
  *
  * Non-bloquant : toute erreur -> false (on ne casse jamais le rendu).
  */
-export async function isAdminViewer(): Promise<boolean> {
+export const isAdminViewer = cache(async function isAdminViewer(): Promise<boolean> {
   const cookieStore = await cookies();
   const hasSession = cookieStore.getAll().some((c) => c.name.startsWith('sb-'));
   if (!hasSession) return false;
@@ -42,4 +43,4 @@ export async function isAdminViewer(): Promise<boolean> {
   } catch {
     return false;
   }
-}
+});

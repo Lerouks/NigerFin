@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import { Eye, EyeOff, Lock, CheckCircle, XCircle } from 'lucide-react';
 import { AuthLayout } from '@/components/AuthLayout';
+import { chargementComplet } from '@/lib/chargement-complet';
 
 /**
  * Page de definition d'un nouveau mot de passe apres un lien recu par courriel.
@@ -26,7 +26,6 @@ const REGLES = [
 ];
 
 export default function NouveauMotDePassePage() {
-  const router = useRouter();
   const [motDePasse, setMotDePasse] = useState('');
   const [confirmation, setConfirmation] = useState('');
   const [visible, setVisible] = useState(false);
@@ -87,7 +86,7 @@ export default function NouveauMotDePassePage() {
         setMessage({ type: 'erreur', texte: traduire(error.message) });
       } else {
         setMessage({ type: 'succes', texte: 'Mot de passe enregistré. Redirection en cours.' });
-        setTimeout(() => router.replace('/admin'), 1200);
+        setTimeout(() => chargementComplet('/admin', { remplacer: true }), 1200);
       }
     } catch {
       setMessage({

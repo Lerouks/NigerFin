@@ -7,6 +7,9 @@ export function ViewTracker({ articleId }: { articleId?: string }) {
   const pathname = usePathname();
 
   useEffect(() => {
+    // Le site lancé en local (`next dev`) lit la base de production : ses
+    // visites ne doivent pas gonfler les statistiques réelles.
+    if (process.env.NODE_ENV !== 'production') return;
     // Debounce - don't track if navigating quickly
     const timeout = setTimeout(() => {
       fetch('/api/track', {

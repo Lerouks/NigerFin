@@ -48,7 +48,7 @@ Tests live in `src/__tests__/*.test.ts` and match the pattern `src/**/*.test.ts`
 
 **Cron jobs** (configured in `vercel.json`): Daily subscription expiration check (2 AM) and expiration warning emails (8 AM).
 
-**Design tokens:** Custom Tailwind colors (background: `#fafaf9`, foreground: `#1a1a1a`, primary: `#111111`, secondary: `#f5f5f0`, muted: `#f0efe9`, gold: `#d4a843`). Font: Inter (body and headings), loaded as a local font.
+**Design tokens:** Custom Tailwind colors (background: `#fafaf9`, foreground: `#1a1a1a`, primary: `#111111`, secondary: `#f5f5f0`, muted: `#f0efe9`, gold: `#d4a843`). Fonts: Montserrat for all text (body and headings, `next/font/google`, variable `--font-montserrat`) and Playfair Display only for the « NFI REPORT » wordmark and the slogan (decision of 2026-11-22, NFI brand charter).
 
 **Figma source:** Design originates from Figma file `Lv7u6t8ImmhJDTmgUnHZwa`.
 

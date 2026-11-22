@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import localFont from 'next/font/local';
-import { Playfair_Display } from 'next/font/google';
+import { Montserrat, Playfair_Display } from 'next/font/google';
 import { headers } from 'next/headers';
 import { Providers } from './providers';
 import { MainLayoutShell } from '@/components/MainLayoutShell';
@@ -14,19 +13,18 @@ import { ComingSoon } from '@/components/coming-soon/ComingSoon';
 import { PrelaunchShell } from '@/components/coming-soon/PrelaunchShell';
 import './globals.css';
 
-// Inter en police variable (toutes les graisses de 100 à 900 dans un seul
-// fichier de 48 Ko, sous-ensemble latin de @fontsource-variable/inter 5.2.5).
-// Les quatre fichiers fixes d'avant (96 Ko) s'arrêtaient au gras 700 : les
-// titres en extra-gras et en black du site s'affichaient en gras simple.
-const inter = localFont({
-  src: '../fonts/Inter-Variable.woff2',
-  weight: '100 900',
-  style: 'normal',
-  variable: '--font-inter',
+// Police des textes (charte NFI, décision de la direction du 22/11/2026) :
+// Montserrat partout, comme sur nos visuels. Police variable (graisses 100 à
+// 900), auto-hébergée par next/font au build (aucune requête externe au
+// runtime, compatible CSP).
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  style: ['normal'],
+  variable: '--font-montserrat',
   display: 'swap',
 });
 
-// Serif de marque (charte NFI) : réservée au wordmark et au slogan/citation.
+// Serif de marque (charte NFI) : réservée au mot « NFI REPORT » et au slogan.
 // Auto-hébergée par next/font au build (aucune requête externe au runtime, compatible CSP).
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -188,7 +186,7 @@ export default async function RootLayout({
     : await getFlashBanner();
 
   return (
-    <html lang="fr" dir="ltr" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
+    <html lang="fr" dir="ltr" className={`${montserrat.variable} ${playfair.variable}`} suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"

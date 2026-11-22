@@ -153,7 +153,7 @@ function InscriptionContent() {
       <div className="bg-white rounded-2xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] p-8 sm:p-10 animate-fade-in-up">
         {/* Mobile logo */}
         <div className="lg:hidden text-center mb-6">
-          <Link href="/" className="text-xl font-bold text-[#111]">NFI Report</Link>
+          <Link href="/" className="font-[family-name:var(--font-playfair)] text-xl font-bold tracking-[0.01em] text-[#111]">NFI&nbsp;REPORT</Link>
         </div>
 
         <div className="text-center mb-8">

@@ -335,7 +335,7 @@ export function PaymentContent() {
       {/* Header bar */}
       <div className="bg-[#111] py-5">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-white">NFI Report</Link>
+          <Link href="/" className="font-[family-name:var(--font-playfair)] text-xl font-bold tracking-[0.01em] text-white">NFI&nbsp;REPORT</Link>
         </div>
       </div>
 

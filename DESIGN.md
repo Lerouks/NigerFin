@@ -36,10 +36,10 @@ No purple, violet, indigo, magenta, or pastel anywhere. No gradients on text (on
 
 | Family | Use |
 |--------|-----|
-| Inter (local woff2) | Body, headings, UI everywhere |
-| Playfair Display | Reserved for "NFI REPORT" wordmark on social cards and reels outro. Never in product UI. |
+| Montserrat (`next/font/google`, variable) | Body, headings, UI everywhere (since 2026-11-22) |
+| Playfair Display | Reserved for the "NFI REPORT" wordmark (header, footer, waiting page, auth pages) and the slogan. Never for body text. |
 
-Loaded as `localFont` in `src/app/layout.tsx`, weights 400/500/600/700, `display: swap`, served as `--font-inter` CSS variable.
+Loaded with `next/font/google` in `src/app/layout.tsx`, `display: swap`, served as the `--font-montserrat` CSS variable (Playfair as `--font-playfair`).
 
 Scale (px, observed on prod):
 

@@ -63,7 +63,9 @@ export default async function HomePage() {
   const [featured, { articles: latestArticles }, sectionArticles, siteFeatures] = await Promise.all([
     getFeaturedArticles(),
     getAllArticles(1, LATEST_COUNT),
-    getLatestBySection([...HOME_SECTIONS], ARTICLES_PER_SECTION),
+    // Marge pour le dédoublonnage : une rubrique écarte les articles déjà
+    // montrés plus haut sur la page, elle doit donc en lire davantage.
+    getLatestBySection([...HOME_SECTIONS], ARTICLES_PER_SECTION + LATEST_COUNT),
     getSiteFeatures(),
   ]);
 
@@ -80,6 +82,20 @@ export default async function HomePage() {
   const latestFiltered = latestArticles.filter((a) => a._id !== heroId);
   const recentVedette = latestFiltered[0] ?? null;
   const recentSecondary = latestFiltered.slice(1, 4);
+
+  // Un article n'apparaît qu'une seule fois sur l'accueil. Chaque rubrique,
+  // dans l'ordre de la page, ne garde que les articles pas encore montrés ;
+  // une rubrique qui n'a plus rien de neuf à montrer disparaît.
+  const dejaAffiches = new Set<string>(
+    [heroArticle, recentVedette, ...recentSecondary].flatMap((a) => (a ? [a._id] : [])),
+  );
+  const rubriques = HOME_SECTIONS.map((sectionKey) => {
+    const articles = (sectionArticles[sectionKey] || [])
+      .filter((a) => !dejaAffiches.has(a._id))
+      .slice(0, ARTICLES_PER_SECTION);
+    articles.forEach((a) => dejaAffiches.add(a._id));
+    return { sectionKey, articles };
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -249,10 +265,9 @@ export default async function HomePage() {
 
       {/* Sections par rubrique : 1 vedette + 3 secondaires liste FT-style */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 md:pb-16 space-y-12 md:space-y-16">
-        {HOME_SECTIONS.map((sectionKey) => {
+        {rubriques.map(({ sectionKey, articles }) => {
           const meta = SECTION_META[sectionKey];
           if (!meta) return null;
-          const articles = sectionArticles[sectionKey] || [];
           if (articles.length === 0) return null;
           return (
             <HomeRubriqueSection

@@ -1,5 +1,6 @@
 import { unstable_cache } from 'next/cache';
 import { createServiceClient } from '@/lib/supabase';
+import { typographier, typographierHtml } from '@/lib/typographie';
 
 /**
  * Tags d'invalidation utilisés par unstable_cache.
@@ -47,9 +48,9 @@ function toArticle(row: SupabaseArticle): Article {
   return {
     _id: row.id,
     slug: { current: row.slug },
-    title: row.title,
-    subtitle: row.subtitle || undefined,
-    excerpt: row.excerpt || '',
+    title: typographier(row.title),
+    subtitle: typographier(row.subtitle) || undefined,
+    excerpt: typographier(row.excerpt) || '',
     category: row.category,
     sections: row.sections || [row.category],
     author: {
@@ -82,14 +83,16 @@ function bodyToHtml(raw: string): string {
   if (!raw.trim()) return '';
   // If body already contains block-level HTML, assume it's already formatted
   if (/<(?:p|div|h[1-6]|ul|ol|blockquote|figure|table|section|article)\b/i.test(raw)) {
-    return raw;
+    return typographierHtml(raw);
   }
   // Split on double newlines (paragraph breaks), then convert single newlines to <br>
-  return raw
-    .split(/\n{2,}/)
-    .filter(block => block.trim())
-    .map(block => `<p>${block.trim().replace(/\n/g, '<br>')}</p>`)
-    .join('\n');
+  return typographierHtml(
+    raw
+      .split(/\n{2,}/)
+      .filter(block => block.trim())
+      .map(block => `<p>${block.trim().replace(/\n/g, '<br>')}</p>`)
+      .join('\n'),
+  );
 }
 
 // ─── Data fetching functions ────────────────────────────────────────────────

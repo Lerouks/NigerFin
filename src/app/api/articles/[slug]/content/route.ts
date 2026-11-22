@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase';
 import { sanitizeHtml } from '@/lib/sanitize-html';
+import { typographierHtml } from '@/lib/typographie';
 
 export async function GET(
   _request: NextRequest,
@@ -137,5 +138,7 @@ function bodyToHtml(raw: string): string {
       .map(block => `<p>${block.trim().replace(/\n/g, '<br>')}</p>`)
       .join('\n');
   }
-  return sanitizeHtml(html);
+  // Typographie française après le nettoyage : elle ne change que des
+  // caractères dans les nœuds texte, jamais les balises.
+  return typographierHtml(sanitizeHtml(html));
 }

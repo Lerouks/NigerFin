@@ -21,8 +21,6 @@ const CreateArticleBody = z.object({
   category: z.string().max(60).optional(),
   sections: z.array(z.string().max(60)).max(10).optional(),
   content_type: ContentType.optional(),
-  is_featured: z.boolean().optional(),
-  featured_order: z.number().int().optional(),
   author_name: z.string().max(120).optional(),
   author_avatar: z.string().max(500).nullable().optional(),
   main_image_url: z.string().max(2000).nullable().optional(),
@@ -111,8 +109,6 @@ export async function POST(req: NextRequest) {
     category: sections[0],
     sections,
     content_type: contentType,
-    is_featured: body.is_featured ?? false,
-    featured_order: body.featured_order ?? 0,
     author_name: body.author_name || 'NFI Report',
     author_avatar: body.author_avatar ?? null,
     main_image_url: body.main_image_url ?? null,
@@ -154,7 +150,7 @@ export async function PUT(req: NextRequest) {
   const updateData: Record<string, unknown> = {};
   const fields = [
     'title', 'subtitle', 'slug', 'excerpt', 'sections',
-    'is_featured', 'featured_order', 'author_name', 'author_avatar',
+    'author_name', 'author_avatar',
     'main_image_url', 'main_image_alt', 'main_image_caption', 'main_image_source', 'read_time', 'tags',
     'seo_title', 'seo_description', 'status', 'published_at',
   ] as const;

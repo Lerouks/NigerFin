@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Plus, Edit3, Trash2, Eye, Loader2, ArrowLeft, Save, Upload, Star, StarOff,
+  Plus, Edit3, Trash2, Eye, Loader2, ArrowLeft, Save, Upload,
   Image as ImageIcon, X, Globe, Lock, AlertTriangle,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
@@ -26,7 +26,6 @@ interface ArticleRow {
   sections: string[];
   status: 'draft' | 'published' | 'archived';
   content_type: 'free' | 'premium';
-  is_featured: boolean;
   published_at: string | null;
   created_at: string;
   author_name: string;
@@ -43,8 +42,6 @@ interface ArticleDetail {
   category?: string | null;
   sections?: string[] | null;
   content_type?: string | null;
-  is_featured?: boolean | null;
-  featured_order?: number | null;
   author_name?: string | null;
   main_image_url?: string | null;
   main_image_alt?: string | null;
@@ -76,8 +73,6 @@ interface ArticleForm {
   category: string;
   sections: string[];
   content_type: string;
-  is_featured: boolean;
-  featured_order: number;
   author_name: string;
   main_image_url: string;
   main_image_alt: string;
@@ -100,8 +95,6 @@ const EMPTY_FORM: ArticleForm = {
   category: 'economie',
   sections: ['economie'],
   content_type: 'free',
-  is_featured: false,
-  featured_order: 0,
   author_name: 'NFI Report',
   main_image_url: '',
   main_image_alt: '',
@@ -148,8 +141,7 @@ export function ArticlesManager() {
   const [success, setSuccess] = useState('');
   const [filter, setFilter] = useState<'all' | 'published' | 'draft'>('all');
   const [tagInput, setTagInput] = useState('');
-  const [togglingFeatured, setTogglingFeatured] = useState<string | null>(null);
-  // Banniere de la vue liste : mise a la une, suppression, ouverture d'un article.
+  // Banniere de la vue liste : suppression, ouverture d'un article.
   const [messageListe, setMessageListe] = useState('');
   const [erreurListe, setErreurListe] = useState<string | null>(null);
   const [horsLigneListe, setHorsLigneListe] = useState(false);
@@ -208,8 +200,6 @@ export function ArticlesManager() {
       category: full.category || 'economie',
       sections: full.sections || [full.category || 'economie'],
       content_type: full.content_type || 'free',
-      is_featured: full.is_featured || false,
-      featured_order: full.featured_order || 0,
       author_name: full.author_name || 'NFI Report',
       main_image_url: full.main_image_url || '',
       main_image_alt: full.main_image_alt || '',
@@ -252,15 +242,6 @@ export function ArticlesManager() {
       setError("Le serveur n'a pas confirmé l'enregistrement. Revenez à la liste pour vérifier avant de recommencer.");
       setSaving(false);
       return;
-    }
-
-    // If featured was toggled on, use atomic endpoint to ensure only one featured
-    if (payload.is_featured) {
-      const miseALaUne = await envoiAdmin('/api/admin/articles/featured', 'POST', { articleId: enregistre.id });
-      if (!miseALaUne.ok) {
-        // L'article est bien enregistré : seule la mise a la une a échoué.
-        setError(`L'article est enregistré, mais la mise à la une a échoué. ${miseALaUne.message}`);
-      }
     }
 
     setSuccess(publishNow ? 'Article publié !' : 'Article sauvegardé !');
@@ -320,24 +301,6 @@ export function ArticlesManager() {
 
   const handleRemoveTag = (tag: string) => {
     setForm((f) => ({ ...f, tags: f.tags.filter((t) => t !== tag) }));
-  };
-
-  const handleToggleFeatured = async (article: ArticleRow) => {
-    setTogglingFeatured(article.id);
-    setMessageListe('');
-    const resultat = article.is_featured
-      // Unfeature, zero featured = pas de hero sur la home (fallback propre)
-      ? await envoiAdmin(`/api/admin/articles/featured?articleId=${article.id}`, 'DELETE')
-      // Set as featured, atomic: unfeaturing all others first
-      : await envoiAdmin('/api/admin/articles/featured', 'POST', { articleId: article.id });
-
-    if (!resultat.ok) {
-      setMessageListe(resultat.message);
-      setTogglingFeatured(null);
-      return;
-    }
-    await fetchArticles();
-    setTogglingFeatured(null);
   };
 
   // ─── Editor View ──────────────────────────────────────────────────────────
@@ -565,21 +528,6 @@ export function ArticlesManager() {
               </div>
             </div>
 
-            {/* Featured */}
-            <div className="bg-white border border-black/6 rounded-xl p-4">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" checked={form.is_featured}
-                  onChange={(e) => setForm((f) => ({ ...f, is_featured: e.target.checked }))}
-                  className="w-4 h-4 rounded-sm border-gray-300" />
-                <div>
-                  <span className="text-sm font-medium flex items-center gap-1.5">
-                    <Star className="w-4 h-4 text-amber-500" /> A la une
-                  </span>
-                  <span className="text-[11px] text-gray-500 block">Affiche en hero sur la page d&apos;accueil</span>
-                </div>
-              </label>
-            </div>
-
             {/* Author & Read time */}
             <div className="bg-white border border-black/6 rounded-xl p-4 space-y-3">
               <div>
@@ -728,11 +676,6 @@ export function ArticlesManager() {
                       )}
                       <div>
                         <p className="text-sm font-medium line-clamp-1 flex items-center gap-1.5">
-                          {a.is_featured && (
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[10px] uppercase tracking-wider rounded-sm font-bold shrink-0">
-                              <Star className="w-3 h-3 fill-amber-500 text-amber-500" /> À la une
-                            </span>
-                          )}
                           {a.title}
                         </p>
                         <p className="text-[11px] text-gray-500 font-mono">/articles/{a.slug}</p>
@@ -767,24 +710,6 @@ export function ArticlesManager() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1.5">
-                      <button
-                        onClick={() => handleToggleFeatured(a)}
-                        disabled={togglingFeatured === a.id}
-                        className={`p-1.5 rounded transition-colors ${
-                          a.is_featured
-                            ? 'bg-amber-100 hover:bg-amber-200'
-                            : 'hover:bg-amber-50'
-                        }`}
-                        title={a.is_featured ? 'Retirer de la une' : 'Mettre à la une'}
-                      >
-                        {togglingFeatured === a.id ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-500" />
-                        ) : a.is_featured ? (
-                          <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                        ) : (
-                          <StarOff className="w-3.5 h-3.5 text-gray-500" />
-                        )}
-                      </button>
                       <button onClick={() => handleEdit(a)} className="p-1.5 hover:bg-gray-100 rounded-sm transition-colors" title="Modifier">
                         <Edit3 className="w-3.5 h-3.5 text-gray-500" />
                       </button>

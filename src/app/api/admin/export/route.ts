@@ -161,14 +161,14 @@ export async function GET(request: NextRequest) {
   if (type === 'articles') {
     const { data } = await serviceClient
       .from('articles')
-      .select('id, title, slug, category, sections, status, content_type, is_featured, author_name, published_at, created_at')
+      .select('id, title, slug, category, sections, status, content_type, author_name, published_at, created_at')
       .order('created_at', { ascending: false })
       .limit(EXPORT_ROW_LIMIT);
 
     if (!data) return NextResponse.json({ error: 'No data' }, { status: 404 });
     const truncated = data.length === EXPORT_ROW_LIMIT;
 
-    const headers = ['ID', 'Titre', 'Slug', 'Catégorie', 'Sections', 'Statut', 'Accès', 'À la une', 'Auteur', 'Publié le', 'Créé le'];
+    const headers = ['ID', 'Titre', 'Slug', 'Catégorie', 'Sections', 'Statut', 'Accès', 'Auteur', 'Publié le', 'Créé le'];
     const rows = data.map((a: Record<string, unknown>) => [
       String(a.id),
       String(a.title ?? ''),
@@ -177,7 +177,6 @@ export async function GET(request: NextRequest) {
       Array.isArray(a.sections) ? (a.sections as string[]).join('; ') : '',
       String(a.status ?? ''),
       String(a.content_type ?? ''),
-      a.is_featured ? 'Oui' : 'Non',
       String(a.author_name ?? ''),
       fmtDate(a.published_at),
       fmtDate(a.created_at),

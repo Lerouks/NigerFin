@@ -5,11 +5,10 @@ import { MarketDataWidget } from '@/components/MarketDataWidget';
 import { MarketRail } from '@/components/MarketRail';
 import { NewsletterForm } from '@/components/NewsletterForm';
 import { PracticalTools } from '@/components/PracticalTools';
-import { HomeHero } from '@/components/home/HomeHero';
 import { HomeRubriqueSection } from '@/components/home/HomeRubriqueSection';
 import { formatDate } from '@/lib/utils';
 import { fallbackImageUrl } from '@/data/mock-data';
-import { getAllArticles, getFeaturedArticles, getLatestBySection } from '@/lib/articles';
+import { getAllArticles, getLatestBySection } from '@/lib/articles';
 import { SECTION_META } from '@/lib/sections';
 import { getSiteFeatures } from '@/lib/site-data';
 
@@ -56,12 +55,11 @@ const SECTION_INTROS: Record<string, string> = {
     "Acteurs stratégiques nigériens et régionaux : résultats, stratégies, opportunités.",
 };
 
-const LATEST_COUNT = 8; // 1 hero + 1 vedette + 6 secondaires
+const LATEST_COUNT = 4; // 1 vedette + 3 secondaires dans « Dernières actualités »
 const ARTICLES_PER_SECTION = 4; // 1 vedette + 3 secondaires par rubrique
 
 export default async function HomePage() {
-  const [featured, { articles: latestArticles }, sectionArticles, siteFeatures] = await Promise.all([
-    getFeaturedArticles(),
+  const [{ articles: latestArticles }, sectionArticles, siteFeatures] = await Promise.all([
     getAllArticles(1, LATEST_COUNT),
     // Marge pour le dédoublonnage : une rubrique écarte les articles déjà
     // montrés plus haut sur la page, elle doit donc en lire davantage.
@@ -69,25 +67,17 @@ export default async function HomePage() {
     getSiteFeatures(),
   ]);
 
-  // "La une" = uniquement un article explicitement mis en avant (is_featured).
-  // Aucun fallback automatique : si rien n'est a la une, pas de hero du tout,
-  // la home attaque directement les "Dernieres actualites" (le plus recent
-  // devient alors la grande vedette). Comportement aligne sur l'intention
-  // documentee de /api/admin/articles/featured (zero featured = pas de hero).
-  const heroArticle = featured[0] ?? null;
-  const heroId = heroArticle?._id;
-
-  // Articles restants pour la section "Dernieres actualites" (exclu le hero
-  // s'il existe ; sinon le plus recent reste la vedette de la section)
-  const latestFiltered = latestArticles.filter((a) => a._id !== heroId);
-  const recentVedette = latestFiltered[0] ?? null;
-  const recentSecondary = latestFiltered.slice(1, 4);
+  // Pas d'article « à la une » (fonction retirée le 22/11/2026, décision de la
+  // direction) : l'accueil commence par « Dernières actualités », dont le plus
+  // récent est la grande vedette.
+  const recentVedette = latestArticles[0] ?? null;
+  const recentSecondary = latestArticles.slice(1, 4);
 
   // Un article n'apparaît qu'une seule fois sur l'accueil. Chaque rubrique,
   // dans l'ordre de la page, ne garde que les articles pas encore montrés ;
   // une rubrique qui n'a plus rien de neuf à montrer disparaît.
   const dejaAffiches = new Set<string>(
-    [heroArticle, recentVedette, ...recentSecondary].flatMap((a) => (a ? [a._id] : [])),
+    [recentVedette, ...recentSecondary].flatMap((a) => (a ? [a._id] : [])),
   );
   const rubriques = HOME_SECTIONS.map((sectionKey) => {
     const articles = (sectionArticles[sectionKey] || [])
@@ -99,13 +89,10 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Une magazine plein largeur. Sans article a la une : pas de hero, on
-          garde juste un H1 invisible (SEO + a11y) et on enchaine directement
-          sur les actualites. Le bloc de marque est reserve au site reellement
-          vide (aucune une ET aucune actualite). */}
-      {heroArticle ? (
-        <HomeHero article={heroArticle} />
-      ) : recentVedette ? (
+      {/* L'accueil commence par « Dernières actualités » : un H1 invisible
+          (référencement et lecteurs d'écran) suffit. Le bloc de marque est
+          réservé au site réellement vide. */}
+      {recentVedette ? (
         <h1 className="sr-only">
           NFI Report, actualités économiques et financières du Niger
         </h1>
@@ -179,7 +166,7 @@ export default async function HomePage() {
                     fill
                     sizes="(min-width: 1024px) 720px, 100vw"
                     quality={85}
-                    priority={!heroArticle}
+                    priority
                     className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
                   />
                 </div>

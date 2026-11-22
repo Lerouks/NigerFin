@@ -20,8 +20,6 @@ export interface SupabaseArticle {
   category: string;
   sections: string[];
   content_type: 'free' | 'premium';
-  is_featured: boolean;
-  featured_order: number;
   author_name: string;
   author_avatar: string | null;
   main_image_url: string | null;
@@ -105,7 +103,6 @@ function bodyToHtml(raw: string): string {
 const ARTICLE_SUMMARY_FIELDS = [
   'id', 'title', 'subtitle', 'slug', 'excerpt',
   'category', 'sections', 'content_type',
-  'is_featured', 'featured_order',
   'author_name', 'author_avatar',
   'main_image_url', 'main_image_alt', 'main_image_caption', 'main_image_source',
   'read_time', 'tags',
@@ -205,25 +202,6 @@ async function getArticlesByCategoryUncached(
 export const getArticlesByCategory = unstable_cache(
   getArticlesByCategoryUncached,
   ['articles-by-category'],
-  { tags: [ARTICLE_CACHE_TAG], revalidate: 3600 },
-);
-
-async function getFeaturedArticlesUncached(): Promise<Article[]> {
-  const supabase = createServiceClient();
-  if (!supabase) return [];
-  const { data } = await supabase
-    .from('articles')
-    .select(ARTICLE_SUMMARY_FIELDS)
-    .eq('status', 'published')
-    .eq('is_featured', true)
-    .order('featured_order', { ascending: true })
-    .limit(5);
-  return (data || []).map((row) => toArticle(row as unknown as SupabaseArticle));
-}
-
-export const getFeaturedArticles = unstable_cache(
-  getFeaturedArticlesUncached,
-  ['featured-articles'],
   { tags: [ARTICLE_CACHE_TAG], revalidate: 3600 },
 );
 

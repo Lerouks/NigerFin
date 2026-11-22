@@ -1,7 +1,8 @@
 @import 'tailwindcss';
 
 @theme {
-  --font-sans: var(--font-montserrat), Montserrat, Helvetica Neue, Arial, sans-serif;
+  --font-inter: var(--font-inter), Inter, Helvetica Neue, Arial, sans-serif;
+  --font-sans: var(--font-inter), Inter, Helvetica Neue, Arial, sans-serif;
 
   --color-background: #fafafa;
   --color-foreground: #1a1a1a;
@@ -169,7 +170,7 @@
   }
 
   body {
-    font-family: var(--font-montserrat), Montserrat, Helvetica Neue, Arial, sans-serif;
+    font-family: var(--font-inter);
     -webkit-font-smoothing: antialiased;
     background-color: var(--background);
     color: var(--foreground);
@@ -181,7 +182,7 @@
   h4,
   h5,
   h6 {
-    font-family: var(--font-montserrat), Montserrat, Helvetica Neue, Arial, sans-serif;
+    font-family: var(--font-inter);
   }
 
   h1 {

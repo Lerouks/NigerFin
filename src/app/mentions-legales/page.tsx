@@ -17,7 +17,7 @@ export default async function MentionsLegalesPage() {
       title="Mentions Légales"
       initialSections={initialSections}
       introParagraphs={[
-        "Les présentes mentions légales identifient l'éditeur du site nfireport.com, son hébergeur, ses responsables éditoriaux et les conditions juridiques générales d'utilisation du service. Elles sont rédigées conformément aux exigences de transparence du droit nigérien et aux standards internationaux applicables aux services de presse en ligne et d'information économique et financière.",
+        "Les présentes mentions légales identifient l'éditeur du site nfireport.com et précisent les conditions juridiques d'utilisation du service.",
         "NFI Report constitue un service de presse en ligne spécialisé dans l'information économique, financière et entrepreneuriale dédié au Niger et à l'Afrique de l'Ouest. Le site n'est pas un prestataire de services d'investissement agréé et n'exerce aucune activité réglementée par les autorités de marché ouest-africaines. Les contenus publiés (articles, analyses, indicateurs, simulateurs) sont fournis à titre informatif et pédagogique uniquement et ne constituent en aucun cas un conseil personnalisé en investissement, en gestion de patrimoine, en fiscalité ou en droit.",
         "L'ensemble des contenus est protégé par les lois sur la propriété intellectuelle nigériennes et les conventions internationales (notamment l'Accord de Bangui révisé instituant l'Organisation Africaine de la Propriété Intellectuelle, OAPI). Toute reproduction, représentation, diffusion ou exploitation non autorisée est strictement interdite. Les citations courtes à des fins d'information sont tolérées sous réserve d'indiquer clairement la source NFI Report et de fournir un lien actif vers l'article d'origine.",
         "Les présentes mentions légales sont régies par le droit nigérien. En cas de litige, les parties s'engagent à rechercher une solution amiable avant toute action contentieuse. À défaut, les tribunaux compétents de Niamey seront seuls compétents pour connaître du litige, conformément aux règles de procédure civile nigérienne et aux dispositions OHADA applicables.",
@@ -29,7 +29,7 @@ export default async function MentionsLegalesPage() {
         },
         {
           heading: '2. Hébergement',
-          text: "Le Site est hébergé par Vercel Inc., 440\u00A0N Barranca Ave #4133, Covina, CA\u00A091723, États-Unis (https://vercel.com). Les données applicatives sont stockées par Supabase Inc., San Francisco, CA, États-Unis. En cas de transfert de données hors du Niger, des garanties appropriées sont mises en place conformément à la réglementation applicable.",
+          text: 'Le Site est hébergé par des prestataires techniques spécialisés.',
         },
         {
           heading: '3. Propriété intellectuelle',
@@ -52,8 +52,8 @@ export default async function MentionsLegalesPage() {
           text: "Les utilisateurs qui publient des commentaires, participent aux discussions ou transmettent des contenus sur le Site sont seuls et pleinement responsables de leurs contributions. En publiant un contenu, l'utilisateur garantit qu'il détient les droits nécessaires et concède à NFI Report une licence non exclusive, gratuite et mondiale d'utilisation de ce contenu dans le cadre du Site. NFI Report se réserve le droit, sans préavis ni justification, de modérer, modifier ou supprimer tout contenu contraire aux lois en vigueur au Niger, à l'ordre public, aux bonnes mœurs ou aux présentes mentions légales, et de suspendre ou résilier le compte de tout utilisateur contrevenant.",
         },
         {
-          heading: '8. Abonnements et paiements',
-          text: "Les abonnements premium sont régis par les conditions générales de vente accessibles lors du processus de souscription. Les paiements sont traités de manière sécurisée par iPayMoney, qui regroupe le Mobile Money (Airtel, Moov, Nita, Amana) et les cartes bancaires (Visa, Mastercard, American Express). NFI Report ne stocke aucune donnée bancaire sur ses serveurs. Les tarifs sont indiqués en francs CFA (XOF) et sont susceptibles de modification avec un préavis raisonnable communiqué aux abonnés.",
+          heading: '8. Paiements',
+          text: 'Les paiements sont traités par un prestataire de paiement spécialisé. NFI Report ne conserve aucune donnée bancaire. Les tarifs sont indiqués en francs CFA (XOF).',
         },
         {
           heading: '9. Protection des données personnelles',

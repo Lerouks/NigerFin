@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       paymentRequestId: data.id,
-      message: 'Votre demande de paiement a été soumise. Elle sera vérifiée sous 24h.',
+      message: 'Votre demande de paiement a été soumise. Elle va être vérifiée.',
     });
   } catch (err) {
     Sentry.captureException(err, { tags: { context: 'payment-submit' } });

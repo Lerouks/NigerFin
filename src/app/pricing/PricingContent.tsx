@@ -192,7 +192,7 @@ function TrustStrip() {
   const items = [
     { icon: XCircle, label: 'Aucun prélèvement auto' },
     { icon: RefreshCw, label: 'Sans engagement' },
-    { icon: ShieldCheck, label: 'Paiement sécurisé iPayMoney' },
+    { icon: ShieldCheck, label: 'Mobile Money ou carte bancaire' },
   ];
   return (
     <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[12.5px] text-gray-500">
@@ -237,7 +237,7 @@ function PricingPlans({ getPrice, loadingPlan, onSubscribe }: PricingPlansProps)
 const PRICING_FAQ = [
   {
     q: 'Comment je paie ?',
-    a: 'Mobile Money (Airtel, Moov) ou par carte Visa, Mastercard, American Express via iPayMoney. Le paiement est sécurisé et prend quelques secondes.',
+    a: 'Mobile Money (Airtel, Moov) ou carte Visa, Mastercard, American Express.',
   },
   {
     q: 'Y a-t-il un engagement ?',

@@ -13,33 +13,16 @@ export function AboutContent({ sections }: { sections: Section[] }) {
 
   const mission = getSection(1);
   const values = [getSection(2), getSection(3), getSection(4)].filter(Boolean) as Section[];
-  const founders = [getSection(5), getSection(6)].filter(Boolean) as Section[];
+  // Pas de bloc « fondateurs » : aucun nom de personne sur NFI (décision du
+  // 22/11/2026). Les entrées 5 et 6 de la base ont été retirées.
   const coverage = getSection(7);
 
   const coverageSectors = coverage?.text
     ? coverage.text.split(/,\s*|;\s*/).map((s) => s.replace(/^(Nous couvrons.*:\s*)/i, '').trim()).filter(Boolean)
     : [
-        'Économie générale', 'Marchés financiers', 'Finance et investissement', 'Entreprises et startups',
-        'Technologie et innovation', 'Agriculture et agro-industrie', 'Énergie et ressources naturelles',
-        'Commerce et international', 'Éducation financière et économique', 'Outils pratiques de gestion',
+        'Économie du Niger', 'Énergie et ressources naturelles', 'Banques et finance',
+        'Bourse et marchés', 'Entreprises', 'Éducation financière',
       ];
-
-  // Split convention : "Name · Role" (le séparateur est le middle dot U+00B7)
-  const splitFounder = (heading: string) => {
-    const parts = heading.split(' · ');
-    return {
-      name: parts[0]?.trim() || heading,
-      role: parts[1]?.trim() || 'Co-fondateur',
-    };
-  };
-
-  const getInitials = (heading: string) => {
-    const { name } = splitFounder(heading);
-    return name.split(/\s+/).map((w) => w[0]).filter(Boolean).join('').toUpperCase().slice(0, 2);
-  };
-
-  const getFounderName = (heading: string) => splitFounder(heading).name;
-  const getFounderRole = (heading: string) => splitFounder(heading).role;
 
   return (
     <>
@@ -76,33 +59,6 @@ export function AboutContent({ sections }: { sections: Section[] }) {
                     <p className="text-gray-600 text-[15px] leading-relaxed">{v.text}</p>
                   </div>
                 ))}
-              </div>
-            </div>
-          )}
-
-          {founders.length > 0 && (
-            <div className="mb-20 text-center">
-              <div className="inline-flex items-center gap-3 mb-4">
-                <span className="text-[11px] tracking-[0.15em] uppercase text-gold font-semibold">Fondateurs</span>
-              </div>
-              <h2 className="text-3xl mb-8">Qui est derrière NFI Report</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                {founders.map((f) => (
-                  <div key={f.id} className="bg-white rounded-xl border border-black/6 p-7 text-left hover:shadow-lg transition-all duration-300 group">
-                    <div className="w-16 h-16 bg-[#111] text-white rounded-full flex items-center justify-center text-xl font-semibold mb-4 mx-auto group-hover:bg-gold transition-colors duration-300">
-                      {getInitials(f.heading)}
-                    </div>
-                    <h3 className="text-xl font-semibold mb-1 text-center">{getFounderName(f.heading)}</h3>
-                    <p className="text-[13px] text-gold mb-3 text-center">{getFounderRole(f.heading)}</p>
-                    <p className="text-gray-600 text-[15px] leading-relaxed text-pretty">{f.text}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="bg-white rounded-xl border border-black/6 p-8 relative overflow-hidden">
-                <div className="absolute top-0 inset-x-0 h-[2px] bg-linear-to-r from-transparent via-gold/30 to-transparent" />
-                <p className="text-gray-600 text-[18px] italic leading-relaxed">
-                  &ldquo;Nous croyons fermement au potentiel économique de l&apos;Afrique et nous nous engageons à être les catalyseurs de cette transformation en fournissant l&apos;information qui compte.&rdquo;
-                </p>
               </div>
             </div>
           )}

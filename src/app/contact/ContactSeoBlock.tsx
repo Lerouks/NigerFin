@@ -7,12 +7,8 @@ export function ContactSeoBlock() {
             Comment nous joindre
           </h2>
           <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-pretty mb-6 text-justify hyphens-auto">
-            L&apos;équipe NFI Report est joignable directement depuis ce formulaire pour toute
-            demande relative à notre couverture éditoriale, nos analyses, nos outils financiers
-            ou notre offre Premium. Nous nous efforçons de répondre à chaque message dans un
-            délai de 48 heures ouvrées. Pour des demandes urgentes liées à un événement de
-            marché ou à une publication imminente, mentionnez-le clairement dans l&apos;objet
-            de votre message.
+            Ce formulaire permet d&apos;écrire à NFI Report pour toute demande relative à nos
+            articles, nos analyses, nos outils financiers ou un partenariat.
           </p>
           <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-pretty mb-10 text-justify hyphens-auto">
             Pour les demandes professionnelles structurées (partenariats stratégiques,

@@ -55,7 +55,7 @@ export function ContactForm() {
         return;
       }
       setSubmitted(true);
-      show('Message envoyé. Nous vous répondons rapidement.', 'success');
+      show('Message envoyé. Merci de nous avoir écrit.', 'success');
     } catch {
       const msg = 'Impossible de contacter le serveur. Vérifiez votre connexion.';
       setError(msg);
@@ -135,7 +135,7 @@ export function ContactForm() {
                     <Check className="w-7 h-7 text-emerald-500" />
                   </div>
                   <h2 className="text-2xl mb-3 font-bold">Message envoyé</h2>
-                  <p className="text-gray-600 mb-8">Merci pour votre message. Notre équipe vous répondra dans les plus brefs délais.</p>
+                  <p className="text-gray-600 mb-8">Merci pour votre message.</p>
                   <button
                     onClick={() => { setSubmitted(false); setFormData({ name: '', email: '', subject: '', message: '' }); }}
                     className="bg-[#111] text-white px-8 py-3 rounded-xl hover:bg-[#222] transition-colors text-[14px]"

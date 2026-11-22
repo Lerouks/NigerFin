@@ -11,6 +11,7 @@ import { SITE_URL } from '@/lib/config';
 import { getFlashBanner, getSiteFeatures } from '@/lib/site-data';
 import { isAdminViewer } from '@/lib/viewer';
 import { ComingSoon } from '@/components/coming-soon/ComingSoon';
+import { PrelaunchShell } from '@/components/coming-soon/PrelaunchShell';
 import './globals.css';
 
 // Inter en police variable (toutes les graisses de 100 à 900 dans un seul
@@ -159,6 +160,10 @@ export default async function RootLayout({
   // qui la collecte, et qui veut sortir doit pouvoir sortir.
   const { prelaunchEnabled } = await getSiteFeatures();
   let showComingSoon = false;
+  // Visiteur non admin sur une page restée ouverte (légales, connexion,
+  // désabonnement) : il la voit sans le menu du site, pour ne pas « entrer »
+  // dans le site depuis la page d'attente.
+  let prelaunchVisitor = false;
   if (prelaunchEnabled) {
     const isBypassPath =
       pathname === '/connexion' ||
@@ -170,8 +175,11 @@ export default async function RootLayout({
       pathname === '/cgu' ||
       pathname === '/cookies' ||
       pathname.startsWith('/newsletter/desabonnement');
+    const admin = await isAdminViewer();
     if (!isBypassPath) {
-      showComingSoon = !(await isAdminViewer());
+      showComingSoon = !admin;
+    } else if (!admin && !pathname.startsWith('/admin')) {
+      prelaunchVisitor = true;
     }
   }
 
@@ -198,6 +206,10 @@ export default async function RootLayout({
       <body className="min-h-screen flex flex-col">
         {showComingSoon ? (
           <ComingSoon />
+        ) : prelaunchVisitor ? (
+          <Providers>
+            <PrelaunchShell>{children}</PrelaunchShell>
+          </Providers>
         ) : (
           <Providers>
             <ViewTracker />

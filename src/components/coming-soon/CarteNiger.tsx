@@ -62,7 +62,12 @@ const POINTS: Point[] = (() => {
  * légère : aucune image à télécharger, animation arrêtée hors de l'écran et
  * pour les lecteurs qui demandent moins de mouvement.
  */
-export function CarteNiger({ className }: { className?: string }) {
+/**
+ * `ajuster` : la toile remplit son parent (taille fixée par la mise en page) et la
+ * carte s'y inscrit sans déformation, calée à droite et centrée en hauteur. Sert
+ * sur téléphone, où la carte prend la place que laissent le titre et le formulaire.
+ */
+export function CarteNiger({ className, ajuster = false }: { className?: string; ajuster?: boolean }) {
   const toileRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -77,6 +82,9 @@ export function CarteNiger({ className }: { className?: string }) {
     let hauteur = 0;
     let echelle = 1;
     let ratio = 1;
+    // Décalage de la carte dans la toile (mode « ajuster ») : calée à droite, centrée en hauteur.
+    let ox = 0;
+    let oy = 0;
     let visible = true;
     let image = 0;
     let derniere = -Infinity;
@@ -88,7 +96,9 @@ export function CarteNiger({ className }: { className?: string }) {
       ratio = Math.min(window.devicePixelRatio || 1, 2);
       largeur = cadre.width;
       hauteur = cadre.height;
-      echelle = largeur / CARTE_NIGER.largeur;
+      echelle = ajuster ? Math.min(largeur / CARTE_NIGER.largeur, hauteur / CARTE_NIGER.hauteur) : largeur / CARTE_NIGER.largeur;
+      ox = ajuster ? largeur - CARTE_NIGER.largeur * echelle : 0;
+      oy = ajuster ? (hauteur - CARTE_NIGER.hauteur * echelle) / 2 : 0;
       toile.width = Math.round(largeur * ratio);
       toile.height = Math.round(hauteur * ratio);
     }
@@ -122,14 +132,14 @@ export function CarteNiger({ className }: { className?: string }) {
         const presence = allume(point.x / CARTE_NIGER.largeur);
         if (presence <= 0) continue;
         ctx.fillStyle = `rgba(214,217,222,${((0.17 + scintille + 0.72 * eclat) * presence).toFixed(3)})`;
-        ctx.fillRect(point.x * echelle - cote / 2, point.y * echelle - cote / 2, cote, cote);
+        ctx.fillRect(ox + point.x * echelle - cote / 2, oy + point.y * echelle - cote / 2, cote, cote);
       }
 
       ctx.font = `500 ${Math.max(11, Math.round(15 * echelle))}px ${police}`;
       ctx.lineJoin = 'round';
       // Sur un petit écran, Tillabéri et Dosso, collées à Niamey, chevaucheraient
       // son nom : on ne garde que les villes qu'on peut lire.
-      const petit = largeur < 520;
+      const petit = CARTE_NIGER.largeur * echelle < 520;
       const villes = petit ? CARTE_NIGER.villes.filter((v) => v.nom !== 'Tillabéri' && v.nom !== 'Dosso') : CARTE_NIGER.villes;
       for (const ville of villes) {
         const presenceVille = allume(ville.x / CARTE_NIGER.largeur);
@@ -137,8 +147,8 @@ export function CarteNiger({ className }: { className?: string }) {
         ctx.globalAlpha = presenceVille;
         const ecart = (ville.x / CARTE_NIGER.largeur - lumiere) / 0.08;
         const eclat = Math.exp(-ecart * ecart);
-        const x = ville.x * echelle;
-        const y = ville.y * echelle;
+        const x = ox + ville.x * echelle;
+        const y = oy + ville.y * echelle;
         ctx.fillStyle = '#f4f4f5';
         ctx.beginPath();
         ctx.arc(x, y, Math.max(2.2, 3.2 * echelle), 0, Math.PI * 2);
@@ -163,7 +173,7 @@ export function CarteNiger({ className }: { className?: string }) {
         ctx.strokeStyle = `rgba(244,244,245,${(0.55 * (1 - avance)).toFixed(3)})`;
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.arc(niamey.x * echelle, niamey.y * echelle, 4 + avance * 34 * Math.max(echelle, 0.6), 0, Math.PI * 2);
+        ctx.arc(ox + niamey.x * echelle, oy + niamey.y * echelle, 4 + avance * 34 * Math.max(echelle, 0.6), 0, Math.PI * 2);
         ctx.stroke();
       }
     }
@@ -209,14 +219,14 @@ export function CarteNiger({ className }: { className?: string }) {
       presence.disconnect();
       if (image) cancelAnimationFrame(image);
     };
-  }, []);
+  }, [ajuster]);
 
   return (
     <canvas
       ref={toileRef}
       aria-hidden="true"
       className={className}
-      style={{ aspectRatio: `${CARTE_NIGER.largeur} / ${CARTE_NIGER.hauteur}` }}
+      style={ajuster ? undefined : { aspectRatio: `${CARTE_NIGER.largeur} / ${CARTE_NIGER.hauteur}` }}
     />
   );
 }

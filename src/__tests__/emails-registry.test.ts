@@ -49,7 +49,7 @@ describe('registre des e-mails transactionnels', () => {
 
   it('utilise le bon layout : facture = receipt (pas de liseré or ni slogan)', () => {
     const invoice = TRANSACTIONAL_REGISTRY.invoice.render(TRANSACTIONAL_REGISTRY.invoice.sampleArgs).html;
-    expect(invoice).toContain('Reçu de paiement');
+    expect(invoice).toMatch(/Reçu de[\s\u00a0]paiement/);
     expect(invoice).not.toContain('La connaissance, votre meilleur capital.');
     const welcome = TRANSACTIONAL_REGISTRY.welcome_signup.render({ name: 'Amadou Diallo' }).html;
     expect(welcome).toContain('La connaissance, votre meilleur capital.');

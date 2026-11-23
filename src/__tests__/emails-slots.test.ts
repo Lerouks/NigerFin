@@ -46,9 +46,10 @@ describe('slots de textes editables (Phase 2)', () => {
     });
     expect(out.subject).toBe('Bienvenue chez NFI 🎉');
     expect(out.html).toContain('Explorer le site');
-    expect(out.html).not.toContain('Découvrir les articles');
+    const slots = TEMPLATE_SLOTS[key].blocks;
+    expect(out.html).not.toContain(slots.find((b) => b.key === 'bouton')!.default);
     // Le reste du HTML est inchange.
-    expect(out.html).toContain('Bienvenue sur NFI Report');
+    expect(out.html).toContain(slots.find((b) => b.key === 'heading')!.default);
   });
 
   it('ignore une valeur egale au defaut ou vide (pas de bruit)', () => {
@@ -56,7 +57,7 @@ describe('slots de textes editables (Phase 2)', () => {
     const built = TRANSACTIONAL_REGISTRY[key].render({ name: 'Amadou Diallo' });
     const out = applyOverrideStrings(key, built, {
       subject: null,
-      blocks: { heading: 'Message bien reçu', bouton: '   ' },
+      blocks: { heading: TEMPLATE_SLOTS[key].blocks.find((b) => b.key === 'heading')!.default, bouton: '   ' },
     });
     expect(out).toEqual(built);
   });

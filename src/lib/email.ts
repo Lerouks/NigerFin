@@ -17,15 +17,25 @@ function getResend(): Resend | null {
 /** Strip HTML tags to produce a plain-text version of the email */
 function htmlToPlainText(html: string): string {
   return html
+    // En-tête (styles du mode sombre), ligne d'aperçu cachée et commentaires Outlook : rien à lire.
+    .replace(/<head[\s\S]*?<\/head>/gi, '')
+    .replace(/<!--apercu-->[\s\S]*?<!--\/apercu-->/gi, '')
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<div class="img-sombre"[\s\S]*?<\/div>/gi, '')
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<\/p>/gi, '\n\n')
     .replace(/<\/h[1-6]>/gi, '\n\n')
     .replace(/<\/tr>/gi, '\n')
     .replace(/<\/li>/gi, '\n')
     .replace(/<li[^>]*>/gi, '  • ')
-    .replace(/<a[^>]*href="([^"]*)"[^>]*>[^<]*<\/a>/gi, '$1')
+    // Un lien garde son libellé, suivi de son adresse.
+    .replace(/<a[^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/gi, (_m, href: string, libelle: string) => {
+      const l = libelle.replace(/&nbsp;|\u00a0/g, ' ').replace(/\s*→\s*$/, '').trim();
+      return l && !href.startsWith('mailto:') && l !== href ? `${l} : ${href}` : href;
+    })
     .replace(/<[^>]+>/g, '')
     .replace(/&nbsp;/g, ' ')
+    .replace(/&zwnj;/g, '')
     .replace(/&middot;/g, '·')
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')

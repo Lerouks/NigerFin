@@ -44,9 +44,10 @@ export function Footer() {
               />
               <h3 className="font-[family-name:var(--font-playfair)] text-[20px] font-bold tracking-[0.01em]">NFI&nbsp;REPORT</h3>
             </div>
-            <p className="text-white/40 text-[13px] leading-relaxed">
+            {/* Lignes équilibrées : jamais « de l’Ouest. » seul en dernière ligne. */}
+            <p className="text-white/40 text-[13px] leading-relaxed text-balance">
               Votre source d’informations économiques et financières pour le Niger et
-              l’Afrique de l’Ouest.
+              l’Afrique&nbsp;de&nbsp;l’Ouest.
             </p>
           </div>
 
@@ -155,7 +156,9 @@ export function Footer() {
         <div className="border-t border-white/6 pt-8">
           <div className="flex flex-col items-start gap-4 text-[12px] text-white/25 md:flex-row md:items-center md:justify-between">
             <p>&copy; {new Date().getFullYear()} NFI&nbsp;REPORT. Tous droits réservés.</p>
-            <div className="flex flex-wrap gap-x-6 gap-y-2">
+            {/* Pleine largeur sur téléphone : sans cela, Safari calcule la largeur de
+                la rangée sans ses espacements et renvoie « Plan du site » à la ligne. */}
+            <div className="flex w-full flex-wrap gap-x-6 gap-y-2 md:w-auto">
               <Link href="/confidentialite" className="hover:text-white/50 transition-colors">
                 Confidentialité
               </Link>

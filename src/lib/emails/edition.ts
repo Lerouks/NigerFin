@@ -1,16 +1,19 @@
 import { SITE_URL } from '@/lib/config';
 
 /**
- * Design « Édition » des e-mails de NFI REPORT (choisi par Raouf le 23/11/2026).
+ * Design « Cadre » des e-mails de NFI REPORT (choisi par Raouf le 23/11/2026,
+ * à la place du design « Édition » du même jour).
  *
- * Journal du matin : papier blanc, titre NFI REPORT en Playfair centré sous un
- * double filet, ligne de folio, pied avec le vrai logo et le slogan.
+ * Aux couleurs du site : le noir ouvre et ferme le mail (bandeau avec le logo
+ * argent et NFI REPORT, pied noir avec le slogan), la lecture se fait sur blanc,
+ * le titre finit en gris comme « L’économie du Niger, en clair ». Aucune autre
+ * couleur que le noir, les gris, l’argent et le blanc (vert et rouge pour les états).
  *
  * Ce que ce module garantit pour tous les mails :
  * - un mode sombre dessiné (Apple Mail via prefers-color-scheme, Outlook.com via
- *   [data-ogsc] et [data-ogsb]) ; Gmail impose ses couleurs, d'où le liseré
- *   blanc autour du titre et du slogan, qui les garde lisibles ;
- * - le titre et le slogan en images Playfair (Gmail ne charge pas les polices) ;
+ *   [data-ogsc] et [data-ogsb]) ; si Gmail éclaircit les bandeaux noirs, le mot
+ *   NFI REPORT et le slogan gardent un liseré sombre qui les laisse lisibles ;
+ * - NFI REPORT et le slogan en images Playfair (Gmail ne charge pas les polices) ;
  * - des tableaux et des styles en ligne, lus par tous les clients mail ;
  * - une typographie française : espaces insécables, apostrophes courbes, mots
  *   courts soudés au mot suivant, fins de paragraphe et débuts de phrase soudés
@@ -19,23 +22,25 @@ import { SITE_URL } from '@/lib/config';
 
 export const NB = ' ';
 const SANS = "Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
-const MONO = "'SF Mono',Menlo,Consolas,'Roboto Mono',monospace";
+const TITRE = `'Inter Display',${SANS}`;
 const IMG = `${SITE_URL}/email`;
 
 const CLAIR = {
-  page: '#f3f2ef', papier: '#ffffff', bloc: '#f7f6f3', encre: '#111111', texte: '#2a2a2a', doux: '#6b6b6b',
-  num: '#a3a19b', filet: '#e4e3df', fort: '#111111', btn: '#111111', btnTxt: '#ffffff', past: '#111111', pastTxt: '#ffffff',
+  page: '#efeff0', papier: '#ffffff', bloc: '#f5f5f6', encre: '#111111', texte: '#2b2c30', doux: '#6b6f76', gris: '#8a8e95',
+  num: '#a9adb4', filet: '#e4e5e8', fort: '#111111', btn: '#0b0b0c', btnTxt: '#ffffff', past: '#111111', pastTxt: '#ffffff',
 };
 const SOMBRE = {
-  page: '#0c0c0d', papier: '#161618', bloc: '#1d1d20', encre: '#f2f2f0', texte: '#d6d6d3', doux: '#9b9b97',
-  num: '#6e6d68', filet: '#2e2e31', fort: '#e6e6e3', btn: '#f2f2f0', btnTxt: '#111111', past: '#f2f2f0', pastTxt: '#111111',
+  page: '#000000', papier: '#161618', bloc: '#1f1f22', encre: '#f5f5f5', texte: '#d4d6da', doux: '#9a9ea5', gris: '#8a8e95',
+  num: '#6b6f76', filet: '#2c2c30', fort: '#e6e7ea', btn: '#f5f5f5', btnTxt: '#0b0b0c', past: '#f5f5f5', pastTxt: '#0b0b0c',
 };
+/** Bandeaux noirs d'ouverture et de fermeture : identiques en mode clair et en mode sombre. */
+const BANDE = { fond: '#0b0b0c', texte: '#8a8e95', lien: '#d4d6da', sep: '#4a4d52', mentions: '#6b6f76', fort: '#d4d6da' };
 const C = CLAIR;
 
 // ─── Typographie française ───────────────────────────────────────────────────
 
 const PETITS =
-  'à|a|y|au|aux|de|des|du|la|le|les|un|une|en|et|ou|ce|sa|se|ne|il|on|par|pour|dans|sur|avec|sans|entre|chez|vers|sous|' +
+  'à|a|y|au|aux|de|des|du|la|le|les|un|une|en|et|ou|si|ce|sa|se|ne|il|on|par|pour|dans|sur|avec|sans|entre|chez|vers|sous|' +
   'cet|cette|ces|son|ses|mon|ma|mes|votre|vos|notre|nos|leur|leurs|moins|aussi|donc|bien|doit|peut';
 const RE_PETITS = new RegExp(`(^|[\\s\\u00a0(“])(${PETITS}) (?=\\S)`, 'giu');
 
@@ -55,6 +60,10 @@ export function typo(s: string): string {
     .replace(/(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre) (\d{4})/giu, `$1${NB}$2`)
     .replace(/(\d) (\d{3})\b/g, `$1${NB}$2`)
     .replace(/(\d) (FCFA|mois|an|ans|heure|heures|jours?)\b/giu, `$1${NB}$2`)
+    // … et un nombre reste avec le nom qu'il compte (« 30 pays »), jamais avec un mot court (« 2026 au »).
+    .replace(new RegExp(`(\\d) (?!(?:${PETITS})[\\s\\u00a0])(?=\\p{L})`, 'giu'), `$1${NB}`)
+    // Un mot composé ne se coupe pas à son trait d'union : « conservez‑la », « Nigeria‑Algérie ».
+    .replace(/(\p{L})-(\p{L})/gu, '$1\u2011$2')
     // Le code postal reste avec sa ville : « 8001 Niamey ».
     .replace(/(\d{4}) Niamey/g, `$1${NB}Niamey`)
     // Un libellé court cité entre guillemets ne se coupe pas : “Mot de passe oublié”.
@@ -138,17 +147,34 @@ export function filet(fort = false, epaisseur = 1): string {
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td class="${cls}" style="border-top:${epaisseur}px solid ${coul};font-size:0;line-height:0;">&nbsp;</td></tr></table>`;
 }
 
-function doubleFilet(): string {
-  return filet(true, 3) + blanc(3) + filet(true, 1);
-}
-
 /** Ligne de contenu du mail (bandeau papier, marges latérales). */
 export function rangee(contenu: string, haut = 0, bas = 0): string {
-  return `<tr><td class="px f-papier" style="background:${C.papier};padding:${haut}px 40px ${bas}px;">${contenu}</td></tr>`;
+  return `<tr><td class="px f-papier" style="background:${C.papier};padding:${haut}px 48px ${bas}px;">${contenu}</td></tr>`;
+}
+
+/**
+ * Fins de titre posées en gris, comme « en clair » sur la page d'accueil du site.
+ * Un titre modifié dans le Cockpit qui ne finit par aucune d'elles reste tout en noir.
+ */
+const SUITES_GRISES = [
+  'est passé en lecture gratuite', 'prend fin bientôt', 'pour votre inscription', 'votre nouvelle adresse',
+  'de vérification', 'de connexion', 'sur NFI REPORT', 'est disponible', 'votre compte', 'mot de passe',
+  'a pris fin', 'est activé', 'est ouvert', 'non validé', 'bien reçu', 'de contact', 'modifié',
+];
+
+/**
+ * Contenu exact du titre dans le HTML (fin grise comprise). Les textes modifiables
+ * du Cockpit s'en servent pour retrouver le titre et le remplacer (slots.ts).
+ */
+export function titreRendu(s: string): string {
+  const suite = SUITES_GRISES.find((g) => s.endsWith(` ${g}`));
+  if (!suite) return titreTypo(s);
+  const court = suite.length <= 18;
+  return `${typo(s.slice(0, s.length - suite.length - 1))} <span class="c-gris" style="color:${C.gris};${court ? 'white-space:nowrap;' : ''}">${court ? typo(suite) : titreTypo(suite)}</span>`;
 }
 
 export function titre(s: string): string {
-  return `<h1 class="h1 c-encre" style="margin:0;font-family:${SANS};font-size:32px;line-height:38px;font-weight:700;letter-spacing:-0.022em;color:${C.encre};">${titreTypo(s)}</h1>`;
+  return `<h1 class="h1 c-encre" style="margin:0;font-family:${TITRE};font-size:32px;line-height:38px;font-weight:700;letter-spacing:-0.02em;color:${C.encre};">${titreRendu(s)}</h1>`;
 }
 
 type Role = 'encre' | 'texte' | 'doux';
@@ -167,8 +193,8 @@ export function paraHtml(html: string, o: OptionsPara = {}): string {
 }
 
 export function bouton(libelle: string, href: string): string {
-  return `<table role="presentation" cellpadding="0" cellspacing="0" class="bouton-plein"><tr><td class="f-btn" style="border-radius:2px;background:${C.btn};">`
-    + `<a href="${href}" class="c-btn" style="display:inline-block;padding:15px 28px;font-family:${SANS};font-size:15px;line-height:20px;font-weight:600;color:${C.btnTxt};border-radius:2px;">${titreTypo(libelle)}</a>`
+  return `<table role="presentation" cellpadding="0" cellspacing="0" class="bouton-plein"><tr><td class="f-btn" bgcolor="${C.btn}" style="border-radius:6px;background:${C.btn};">`
+    + `<a href="${href}" class="c-btn" style="display:inline-block;padding:15px 30px;font-family:${SANS};font-size:15px;line-height:20px;font-weight:600;color:${C.btnTxt};border-radius:6px;">${titreTypo(libelle)}</a>`
     + `</td></tr></table>`;
 }
 
@@ -178,33 +204,44 @@ export function lienFleche(libelle: string, href: string, marge = '10px 0 0'): s
 
 /** Adresse de secours sous un bouton (lien copiable). */
 export function adresseBrute(url: string): string {
-  return `<p class="c-encre" style="margin:6px 0 0;font-family:${MONO};font-size:12.5px;line-height:19px;color:${C.encre};word-break:break-all;">${url}</p>`;
+  return `<p style="margin:6px 0 0;font-family:${SANS};font-size:13px;line-height:19px;word-break:break-all;"><a href="${url}" class="c-encre" style="color:${C.encre};text-decoration:underline;">${url}</a></p>`;
 }
 
-/** Fiche de détails : libellé à gauche, valeur à droite (valeurs déjà échappées). */
+/**
+ * Fiche de détails sur fond gris : libellé à gauche, valeur à droite (valeurs
+ * déjà échappées). Une seule donnée (une adresse) se pose sous son libellé.
+ */
 export function fiche(lignes: Array<[string, string]>): string {
+  const ouvre = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="f-bloc" bgcolor="${C.bloc}" style="background:${C.bloc};border-radius:6px;border-collapse:separate;">`;
+  if (lignes.length === 1) {
+    const [k, v] = lignes[0] ?? ['', ''];
+    return `${ouvre}<tr><td style="padding:14px 20px 15px;">`
+      + `<p class="c-doux" style="margin:0;font-family:${SANS};font-size:13px;line-height:18px;color:${C.doux};">${typo(k)}</p>`
+      + `<p class="c-encre" style="margin:3px 0 0;font-family:${SANS};font-size:16px;line-height:22px;font-weight:600;color:${C.encre};overflow-wrap:anywhere;word-break:break-word;">${v}</p>`
+      + `</td></tr></table>`;
+  }
   const r = lignes.map(([k, v], i) => {
     const bord = i === 0 ? '' : `border-top:1px solid ${C.filet};`;
-    return `<tr><td valign="top" width="128" class="c-doux b-filet" style="width:128px;padding:13px 12px 13px 0;${bord}font-family:${SANS};font-size:14px;line-height:21px;color:${C.doux};">${typo(k)}</td>`
-      + `<td valign="top" class="c-encre b-filet" style="padding:13px 0;${bord}font-family:${SANS};font-size:15px;line-height:21px;font-weight:600;color:${C.encre};overflow-wrap:anywhere;word-break:break-word;">${v}</td></tr>`;
+    return `<tr><td valign="top" class="fl c-doux b-filet" style="padding:13px 12px 13px 20px;${bord}font-family:${SANS};font-size:14px;line-height:21px;color:${C.doux};white-space:nowrap;">${typo(k)}</td>`
+      + `<td valign="top" align="right" class="fv c-encre b-filet" style="padding:13px 20px 13px 12px;${bord}font-family:${SANS};font-size:15px;line-height:21px;font-weight:600;color:${C.encre};text-align:right;overflow-wrap:anywhere;word-break:break-word;">${v}</td></tr>`;
   }).join('');
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="b-fort" style="border-top:1px solid ${C.fort};border-bottom:1px solid ${C.fort};">${r}</table>`;
+  return `${ouvre}${r}</table>`;
 }
 
-/** Liste numérotée façon journal (titre, texte, lien). */
+/** Liste numérotée (numéro gris, titre, texte, lien), séparée par des filets fins. */
 export function listeNumerotee(items: Array<{ titre: string; texte: string; lien?: [string, string] }>): string {
   const r = items.map((it, i) => `<tr><td style="padding:20px 0 0;">${filet()}</td></tr><tr><td style="padding:18px 0 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>`
-    + `<td valign="top" width="46" class="c-num" style="width:46px;font-family:${SANS};font-size:31px;line-height:30px;font-weight:300;color:${C.num};">${i + 1}</td>`
-    + `<td valign="top"><p class="c-encre" style="margin:0;font-family:${SANS};font-size:18px;line-height:24px;font-weight:700;color:${C.encre};">${titreTypo(it.titre)}</p>`
+    + `<td valign="top" width="32" class="c-num" style="width:32px;font-family:${TITRE};font-size:18px;line-height:24px;font-weight:700;color:${C.num};">${i + 1}</td>`
+    + `<td valign="top"><p class="c-encre" style="margin:0;font-family:${TITRE};font-size:18px;line-height:24px;font-weight:700;letter-spacing:-0.01em;color:${C.encre};">${titreTypo(it.titre)}</p>`
     + para(it.texte, { taille: 15, hauteur: 24, marge: '6px 0 0', plafond: 28 })
     + (it.lien ? lienFleche(it.lien[0], it.lien[1]) : '')
     + `</td></tr></table></td></tr>`).join('');
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0">${r}</table>`;
 }
 
-/** Encart encadré d'un filet noir (appel Premium, motif, message). */
+/** Encart sur fond gris (appel Premium, message). */
 export function encart(contenu: string): string {
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td class="b-fort" style="border:1px solid ${C.fort};padding:24px 26px 26px;">${contenu}</td></tr></table>`;
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="f-bloc" bgcolor="${C.bloc}" style="background:${C.bloc};border-radius:6px;border-collapse:separate;"><tr><td style="padding:24px 26px 26px;">${contenu}</td></tr></table>`;
 }
 
 /** Citation d'un message reçu (filet vertical à gauche). */
@@ -215,14 +252,15 @@ export function citation(html: string): string {
 
 export function signature(salut?: string): string {
   return (salut ? para(salut, { marge: '30px 0 0' }) : '')
-    + paraHtml(titreTypo('L’équipe NFI REPORT'), { role: 'encre', taille: 15, hauteur: 22, marge: salut ? '2px 0 0' : '28px 0 0', graisse: 600 });
+    + paraHtml(titreTypo('L’équipe NFI REPORT'), { role: 'encre', taille: 16, hauteur: 24, marge: salut ? '4px 0 0' : '32px 0 0', graisse: 600 });
 }
 
 // ─── Images (titre, slogan, logo) ────────────────────────────────────────────
 
-function image(srcClair: string, srcSombre: string | null, largeur: number, alt: string, centre = true): string {
+function image(srcClair: string, srcSombre: string | null, largeur: number, alt: string, centre = true, couleurAlt: string = C.encre): string {
   const m = centre ? 'margin:0 auto;' : '';
-  const altStyle = `font-family:${SANS};font-size:14px;font-weight:700;color:${C.encre};`;
+  // Texte affiché à la place de l'image quand la messagerie bloque les images (Outlook par défaut).
+  const altStyle = `font-family:${SANS};font-size:14px;font-weight:700;color:${couleurAlt};`;
   const img = (src: string) => `<img src="${IMG}/${src}" width="${largeur}" alt="${alt}" style="display:block;width:${largeur}px;max-width:100%;height:auto;border:0;${m}${altStyle}">`;
   if (!srcSombre) return img(srcClair);
   return img(srcClair).replace('<img ', '<img class="img-clair" ')
@@ -235,7 +273,7 @@ function cssSombre(): string {
   const s = SOMBRE;
   const regles: Record<string, string> = {
     '.f-page': `background:${s.page}`, '.f-papier': `background:${s.papier}`, '.f-bloc': `background:${s.bloc}`,
-    '.c-encre': `color:${s.encre}`, '.c-texte': `color:${s.texte}`, '.c-doux': `color:${s.doux}`, '.c-num': `color:${s.num}`,
+    '.c-encre': `color:${s.encre}`, '.c-texte': `color:${s.texte}`, '.c-doux': `color:${s.doux}`, '.c-num': `color:${s.num}`, '.c-gris': `color:${s.gris}`,
     '.b-filet': `border-color:${s.filet}`, '.b-fort': `border-color:${s.fort}`,
     '.f-btn': `background:${s.btn}`, '.c-btn': `color:${s.btnTxt}`, '.f-past': `background:${s.past}`, '.c-past': `color:${s.pastTxt}`,
   };
@@ -274,32 +312,40 @@ export function ecrireAuContact(objet?: string): string {
   return `mailto:contact@nfireport.com${objet ? `?subject=${encodeURIComponent(objet)}` : ''}`;
 }
 
+/** Cellule du bandeau noir (en-tête ou pied), identique en mode clair et en mode sombre. */
+function bande(contenu: string, style: string, centre = true): string {
+  return `<tr><td${centre ? ' align="center"' : ''} class="px f-bande" bgcolor="${BANDE.fond}" style="background:${BANDE.fond};${style}">${contenu}</td></tr>`;
+}
+
 export function documentEdition(d: DocumentEdition): string {
-  const sep = ` <span class="c-doux" style="color:${C.doux};">·</span> `;
-  const liens = (d.liens ?? [['nfireport.com', SITE_URL], ['Confidentialité', `${SITE_URL}/confidentialite`], ['Contact', ecrireAuContact()]])
-    .map(([l, h]) => `<a href="${h}" class="c-texte" style="color:${C.texte};text-decoration:underline;white-space:nowrap;">${typo(l)}</a>`).join(sep);
+  const sep = ` <span style="color:${BANDE.sep};">&nbsp;·&nbsp;</span> `;
+  const lien = ([l, h]: [string, string]) => `<a href="${h}" style="color:${BANDE.lien};text-decoration:underline;white-space:nowrap;">${typo(l)}</a>`;
+  const tous = d.liens ?? [['nfireport.com', SITE_URL], ['Confidentialité', `${SITE_URL}/confidentialite`], ['Contact', ecrireAuContact()]];
+  // Un lien long (« Se désabonner de la newsletter ») prend sa propre ligne : jamais de point suspendu en bout de ligne.
+  const courts = tous.filter(([l]) => l.length <= 16);
+  const longs = tous.filter(([l]) => l.length > 16);
+  const liens = [courts.map(lien).join(sep), ...longs.map(lien)].filter(Boolean).join('<br>');
+  const texteBande = (taille: number, coul: string) => `font-family:${SANS};font-size:${taille}px;line-height:${taille >= 13 ? 20 : 19}px;color:${coul};`;
+  const mentions = `<p style="margin:0;">${DROITS()}</p>` + (d.recu ? '' : `<p style="margin:0;">${ADRESSE}</p>`);
 
+  // Le corps se termine par un blanc, puis le pied noir ferme le mail.
+  const finCorps = `<tr><td class="f-papier" style="background:${C.papier};height:48px;font-size:0;line-height:0;">&nbsp;</td></tr>`;
   const pied = d.recu
-    ? rangee(filet(), 40)
-      + `<tr><td align="center" class="f-papier" style="background:${C.papier};padding:26px 40px 0;">${image('logo.png', null, 52, 'NFI REPORT')}</td></tr>`
-      + d.recu.lignes.map((l, i) => `<tr><td align="center" class="px f-papier ${i === 0 ? 'c-encre' : 'c-doux'}" style="background:${C.papier};padding:${i === 0 ? 16 : 6}px 48px 0;font-family:${SANS};font-size:${i === 0 ? 13.5 : 12}px;line-height:19px;font-weight:${i === 0 ? 600 : 400};color:${i === 0 ? C.encre : C.doux};">${l}</td></tr>`).join('')
-      + `<tr><td align="center" class="px f-papier" style="background:${C.papier};padding:12px 40px 0;font-family:${SANS};font-size:12.5px;line-height:19px;">${liens}</td></tr>`
-      + `<tr><td align="center" class="px f-papier c-doux" style="background:${C.papier};padding:10px 40px 36px;font-family:${SANS};font-size:12px;line-height:18px;color:${C.doux};">${DROITS()}</td></tr>`
-    : rangee(filet(), 44)
-      + `<tr><td align="center" class="f-papier" style="background:${C.papier};padding:28px 40px 0;">${image('logo.png', null, 56, 'NFI REPORT')}</td></tr>`
-      + `<tr><td align="center" class="f-papier" style="background:${C.papier};padding:16px 40px 0;">${image('slogan-sombre-halo.png', 'slogan-clair.png', 254, 'La connaissance, votre meilleur capital.')}</td></tr>`
-      + (d.raison ? `<tr><td align="center" class="px f-papier c-doux" style="background:${C.papier};padding:18px 56px 0;font-family:${SANS};font-size:12.5px;line-height:19px;color:${C.doux};">${soude(d.raison)}</td></tr>` : '')
-      + `<tr><td align="center" class="px f-papier" style="background:${C.papier};padding:12px 40px 0;font-family:${SANS};font-size:12.5px;line-height:19px;">${liens}</td></tr>`
-      + `<tr><td align="center" class="px f-papier c-doux" style="background:${C.papier};padding:10px 40px 0;font-family:${SANS};font-size:12px;line-height:18px;color:${C.doux};">${DROITS()}</td></tr>`
-      + `<tr><td align="center" class="px f-papier c-doux" style="background:${C.papier};padding:2px 40px 36px;font-family:${SANS};font-size:12px;line-height:18px;color:${C.doux};">${ADRESSE}</td></tr>`;
+    ? finCorps
+      + d.recu.lignes.map((l, i) => bande(l, `padding:${i === 0 ? 34 : 6}px 48px 0;${texteBande(i === 0 ? 13 : 12, i === 0 ? BANDE.fort : BANDE.texte)}font-weight:${i === 0 ? 600 : 400};`)).join('')
+      + bande(liens, `padding:16px 40px 0;${texteBande(13, BANDE.lien)}`)
+      + bande(mentions, `padding:14px 40px 36px;${texteBande(12, BANDE.mentions)}`)
+    : finCorps
+      + bande(image('slogan-bandeau.png', null, 250, 'La connaissance, votre meilleur capital.', true, BANDE.lien), 'padding:36px 48px 0;')
+      + (d.raison ? bande(soude(d.raison), `padding:22px 48px 0;${texteBande(13, BANDE.texte)}`) : '')
+      + bande(liens, `padding:16px 40px 0;${texteBande(13, BANDE.lien)}`)
+      + bande(mentions, `padding:16px 40px 38px;${texteBande(12, BANDE.mentions)}`);
 
-  const tete = `<tr><td align="center" class="f-papier" style="background:${C.papier};padding:36px 40px 0;">${image('wm-noir-halo.png', 'wm-blanc.png', 252, 'NFI REPORT')}</td></tr>`
-    + rangee(doubleFilet(), 18)
-    + rangee(`<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>`
-      + `<td class="c-texte" style="font-family:${SANS};font-size:13px;line-height:18px;color:${C.texte};">${typo(d.folio[0])}</td>`
-      + `<td align="right" class="c-encre" style="font-family:${SANS};font-size:13px;line-height:18px;font-weight:600;color:${C.encre};">${typo(d.folio[1])}</td>`
-      + `</tr></table>`, 10)
-    + rangee(filet(true), 10);
+  const tete = bande(`<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>`
+    + `<td valign="middle" width="46" style="width:46px;">${image('logo.png', null, 46, '', false)}</td>`
+    + `<td valign="middle" style="padding-left:12px;">${image('wm-bandeau.png', null, 128, 'NFI REPORT', false, '#ffffff')}</td>`
+    + `<td valign="middle" align="right" class="rubrique" style="font-family:${SANS};font-size:13px;line-height:18px;color:${BANDE.texte};white-space:nowrap;">${typo(d.folio[0])}</td>`
+    + `</tr></table>`, 'padding:22px 40px;', false);
 
   return `<!DOCTYPE html>
 <html lang="fr" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -321,9 +367,18 @@ a{text-decoration:none}
 a[x-apple-data-detectors]{color:inherit!important;text-decoration:none!important}
 @media only screen and (max-width:620px){
 .w{width:100%!important}
-.px{padding-left:22px!important;padding-right:22px!important}
-.h1{font-size:26px!important;line-height:32px!important}
+.p0{padding:0!important}
+.px{padding-left:24px!important;padding-right:24px!important}
+.h1{font-size:27px!important;line-height:33px!important}
+.bouton-plein,.bouton-plein td{width:100%!important}
 .bouton-plein a{display:block!important;text-align:center!important}
+}
+@media only screen and (max-width:360px){
+.fl{display:block!important;padding:12px 20px 0!important;white-space:normal!important}
+.fv{display:block!important;text-align:left!important;padding:2px 20px 12px!important;border-top:0!important}
+}
+@media only screen and (max-width:340px){
+.rubrique{display:none!important}
 }
 ${cssSombre()}
 </style>
@@ -331,7 +386,7 @@ ${cssSombre()}
 <body class="f-page" style="margin:0;padding:0;background:${C.page};">
 <!--apercu--><div style="display:none;max-height:0;max-width:0;overflow:hidden;opacity:0;mso-hide:all;">${esc(d.apercu.replace(/'/g, '’'))}${ENTITES_APERCU}</div><!--/apercu-->
 <table role="presentation" class="f-page" width="100%" cellpadding="0" cellspacing="0" style="background:${C.page};">
-<tr><td align="center" style="padding:24px 0 40px;">
+<tr><td align="center" class="p0" style="padding:32px 0 48px;">
 <!--[if mso]><table role="presentation" width="600" cellpadding="0" cellspacing="0"><tr><td><![endif]-->
 <table role="presentation" class="w" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:600px;">
 ${tete}

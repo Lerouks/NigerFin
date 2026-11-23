@@ -18,14 +18,13 @@ import {
   signature,
   soude,
   titre,
-  titreTypo,
   typo,
 } from '@/lib/emails/edition';
 import { TEXTES, dureeFormule } from '@/lib/emails/textes';
 import { defaultSocialLinks } from '@/lib/site-data';
 
 /**
- * E-mails transactionnels de NFI REPORT, design « Édition » (23/11/2026).
+ * E-mails transactionnels de NFI REPORT, design « Cadre » (23/11/2026).
  *
  * La mise en page vit dans src/lib/emails/edition.ts, les textes dans
  * src/lib/emails/textes.ts. Les signatures des fonctions sont inchangées :
@@ -141,7 +140,7 @@ export function newsletterWelcomeEmail(unsubscribeUrl?: string): { subject: stri
         + blanc(26) + bouton(t.bouton, `${SITE_URL}/articles`)
         + blanc(34)
         + encart(
-          `<p class="c-encre" style="margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:18px;line-height:24px;font-weight:700;color:#111111;">${titreTypo(t.premiumTitre)}</p>`
+          `<p class="c-encre" style="margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:18px;line-height:24px;font-weight:700;color:#111111;">${soude(t.premiumTitre)}</p>`
           + para(t.premium, { taille: 15, hauteur: 24, marge: '8px 0 0' })
           + lienFleche(t.premiumLien, `${SITE_URL}/pricing`, '12px 0 0'),
         )
@@ -167,7 +166,7 @@ export function waitlistConfirmationEmail({ unsubscribeUrl, whatsappUrl }: { uns
     ['YouTube', defaultSocialLinks.youtube],
   ].filter((r): r is [string, string] => Boolean(r[1]))
     .map(([nom, url]) => [nom, url.split('?')[0] ?? url]);
-  const sep = ' <span class="c-doux" style="color:#6b6b6b;">·</span> ';
+  const sep = ' <span class="c-doux" style="color:#6b6f76;">·</span> ';
   const lienReseau = ([nom, url]: [string, string]) => `<a href="${url}" class="c-encre" style="color:#111111;text-decoration:underline;font-weight:600;">${nom}</a>`;
   const paires: string[] = [];
   for (let i = 0; i < reseaux.length; i += 2) paires.push(`<span style="white-space:nowrap;">${reseaux.slice(i, i + 2).map(lienReseau).join(sep)}</span>`);
@@ -189,7 +188,7 @@ export function waitlistConfirmationEmail({ unsubscribeUrl, whatsappUrl }: { uns
         + para(t.contacts, { role: 'doux', taille: 14.5, hauteur: 23 })
         + blanc(30)
         + encart(
-          `<p class="c-encre" style="margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:18px;line-height:24px;font-weight:700;color:#111111;">${titreTypo(t.attenteTitre)}</p>`
+          `<p class="c-encre" style="margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:18px;line-height:24px;font-weight:700;color:#111111;">${soude(t.attenteTitre)}</p>`
           + para(whatsappUrl ? t.attenteAvecChaine : t.attente, { taille: 15, hauteur: 24, marge: '8px 0 0' })
           + (whatsappUrl ? blanc(18) + bouton(t.whatsapp, whatsappUrl) : '')
           + `<p style="margin:16px 0 0;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14.5px;line-height:22px;">${lignesReseaux}</p>`,
@@ -431,7 +430,7 @@ export function invoiceEmail({
         + fiche([
           ['Numéro', esc(invoiceNumber)],
           ['Date du paiement', typo(dateFr(paidAt))],
-          ['Prestation', periode ? `${typo(t.prestation)}<br><span class="c-doux" style="font-weight:400;color:#6b6b6b;">${periode}</span>` : typo(t.prestation)],
+          ['Prestation', periode ? `${typo(t.prestation)}<br><span class="c-doux" style="font-weight:400;color:#6b6f76;">${periode}</span>` : typo(t.prestation)],
           ['Montant', `<span style="font-size:20px;line-height:26px;">${montantXof(amountXof)}</span>`],
           ['Statut', `<span style="color:#15803d;">${typo('Payé')}</span>`],
         ])

@@ -20,8 +20,8 @@ describe('slots de textes editables (Phase 2)', () => {
       }
       for (const b of slots.blocks) {
         expect(
-          html.includes(b.default),
-          `bloc "${b.key}" introuvable dans ${key} : « ${b.default} »`,
+          html.includes(b.rendu ?? b.default),
+          `bloc "${b.key}" introuvable dans ${key} : « ${b.rendu ?? b.default} »`,
         ).toBe(true);
       }
     }
@@ -49,7 +49,8 @@ describe('slots de textes editables (Phase 2)', () => {
     const slots = TEMPLATE_SLOTS[key].blocks;
     expect(out.html).not.toContain(slots.find((b) => b.key === 'bouton')!.default);
     // Le reste du HTML est inchange.
-    expect(out.html).toContain(slots.find((b) => b.key === 'heading')!.default);
+    const titre = slots.find((b) => b.key === 'heading')!;
+    expect(out.html).toContain(titre.rendu ?? titre.default);
   });
 
   it('ignore une valeur egale au defaut ou vide (pas de bruit)', () => {

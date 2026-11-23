@@ -1,5 +1,5 @@
 import type { TransactionalEmailKey } from '@/lib/emails/registry';
-import { soude, titreTypo, typo } from '@/lib/emails/edition';
+import { soude, titreRendu, titreTypo, typo } from '@/lib/emails/edition';
 import { TEXTES } from '@/lib/emails/textes';
 
 /**
@@ -21,6 +21,11 @@ export interface EmailSlot {
   key: string;
   label: string;
   default: string;
+  /**
+   * Chaine exacte du HTML quand elle differe du texte montre dans l'editeur :
+   * le titre finit en gris (design Cadre), sa fin est donc dans une balise.
+   */
+  rendu?: string;
 }
 
 export interface TemplateSlots {
@@ -29,7 +34,7 @@ export interface TemplateSlots {
   blocks: EmailSlot[];
 }
 
-const titreSlot = (d: string): EmailSlot => ({ key: 'heading', label: 'Titre', default: titreTypo(d) });
+const titreSlot = (d: string): EmailSlot => ({ key: 'heading', label: 'Titre', default: titreTypo(d), rendu: titreRendu(d) });
 const boutonSlot = (d: string): EmailSlot => ({ key: 'bouton', label: 'Bouton', default: titreTypo(d) });
 const bloc = (key: string, label: string, d: string): EmailSlot => ({ key, label, default: soude(d) });
 
@@ -68,7 +73,7 @@ export const TEMPLATE_SLOTS: Record<TransactionalEmailKey, TemplateSlots> = {
       bloc('intro', 'Introduction', N.intro),
       bloc('articles', 'Derniers articles', N.articles),
       boutonSlot(N.bouton),
-      { key: 'promo_titre', label: 'Encart Premium (titre)', default: titreTypo(N.premiumTitre) },
+      { key: 'promo_titre', label: 'Encart Premium (titre)', default: soude(N.premiumTitre) },
       bloc('promo_corps', 'Encart Premium (texte)', N.premium),
       { key: 'promo_cta', label: 'Encart Premium (lien)', default: typo(N.premiumLien) },
     ],
@@ -164,7 +169,7 @@ export const TEMPLATE_SLOTS: Record<TransactionalEmailKey, TemplateSlots> = {
       bloc('inscrit', 'Inscription', WA.inscrit),
       bloc('suite', 'Ce qui va se passer', WA.suite),
       bloc('contacts', 'Ajouter aux contacts', WA.contacts),
-      { key: 'attente_titre', label: 'Encadré (titre)', default: titreTypo(WA.attenteTitre) },
+      { key: 'attente_titre', label: 'Encadré (titre)', default: soude(WA.attenteTitre) },
       bloc('attente', 'Encadré (texte)', WA.attente),
       bloc('partage', 'Partage', WA.partage),
       { key: 'partage_lien', label: 'Partage (lien)', default: typo(WA.partageLien) },

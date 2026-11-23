@@ -74,7 +74,7 @@ export function applyOverrideStrings(
   for (const block of slots.blocks) {
     const val = override.blocks?.[block.key];
     if (typeof val === 'string' && val.trim() !== '' && val !== block.default) {
-      html = html.replace(block.default, () => val);
+      html = html.replace(block.rendu ?? block.default, () => val);
     }
   }
   return { subject, html };

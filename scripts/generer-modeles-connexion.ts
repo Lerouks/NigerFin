@@ -1,7 +1,7 @@
 /**
  * Génère les 6 mails de connexion envoyés par Supabase (inscription, lien de
  * connexion, mot de passe oublié, changement d'adresse, invitation, code de
- * vérification) dans le design « Édition », avec le même code que les mails
+ * vérification) dans le design « Cadre », avec le même code que les mails
  * du site (src/lib/emails/edition.ts).
  *
  * Usage : npx tsx scripts/generer-modeles-connexion.ts
@@ -80,20 +80,20 @@ const MODELES: Modele[] = [
     bouton: 'Choisir un nouveau mot\u00a0de\u00a0passe',
     validite: 'Ce lien reste valable une heure.',
     fin: "Si vous n'avez rien demandé, ignorez ce message : votre mot de passe actuel reste valable.",
-    raison: "Vous recevez ce message parce qu'un nouveau mot de passe a été demandé pour votre compte NFI REPORT.",
+    raison: "Vous recevez ce message parce qu'un nouveau mot de passe a été demandé pour votre compte.",
   },
   {
     fichier: 'email-change', cle: 'email_change',
     objet: 'Confirmez votre nouvelle adresse',
     apercu: 'Un clic suffit pour valider le changement.',
     titre: 'Confirmez votre nouvelle adresse',
-    corps: ["Vous avez demandé à remplacer l'adresse de votre compte NFI REPORT."],
+    corps: ["Vous avez demandé à changer l'adresse e-mail de votre compte."],
     adresse: ['Nouvelle adresse', NOUVELLE_],
     suite: ['Confirmez ce changement avec le bouton suivant.'],
     bouton: 'Confirmer la nouvelle adresse',
     validite: 'Ce lien reste valable une heure.',
     fin: "Si vous n'êtes pas à l'origine de cette demande, ignorez ce message : votre adresse ne change pas.",
-    raison: "Vous recevez ce message parce qu'un changement d'adresse a été demandé sur votre compte NFI REPORT.",
+    raison: "Vous recevez ce message parce qu'un changement d'adresse a été demandé sur votre compte.",
   },
   {
     fichier: 'invite', cle: 'invite',
@@ -110,7 +110,7 @@ const MODELES: Modele[] = [
     objet: 'Votre code de vérification',
     apercu: 'Le code à saisir sur le site.',
     titre: 'Votre code de vérification',
-    corps: ["Voici le code à saisir sur le site pour confirmer l'opération en cours."],
+    corps: ["Voici le code à saisir sur le site pour confirmer votre opération."],
     code: true,
     fin: "Si vous n'avez rien demandé, ignorez simplement ce message.",
     raison: "Vous recevez ce message parce qu'une vérification a été demandée sur votre compte NFI REPORT.",
@@ -121,7 +121,7 @@ const sortie = join(process.cwd(), 'supabase', 'templates');
 const objets: Record<string, string> = {};
 for (const m of MODELES) {
   let corps = titre(m.titre) + paraHtml('Bonjour,', { marge: '22px 0 0' }) + m.corps.map((p) => para(p)).join('')
-    + (m.adresse ? blanc(20) + fiche([[m.adresse[0], `<span style="font-weight:400;font-size:14px;">${m.adresse[1]}</span>`]]) : '')
+    + (m.adresse ? blanc(22) + fiche([[m.adresse[0], m.adresse[1]]]) : '')
     + (m.suite ? m.suite.map((p) => para(p, { marge: '20px 0 0' })).join('') : '');
   if (m.bouton) {
     corps += blanc(28) + bouton(m.bouton, URL_);
@@ -130,7 +130,7 @@ for (const m of MODELES) {
       + adresseBrute(URL_);
   }
   if (m.code) {
-    corps += blanc(22) + `<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" class="b-fort" style="border-top:1px solid #111111;border-bottom:1px solid #111111;padding:22px 0;">`
+    corps += blanc(24) + `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="f-bloc" bgcolor="#f5f5f6" style="background:#f5f5f6;border-radius:6px;border-collapse:separate;"><tr><td align="center" style="padding:24px 0 26px;">`
       + `<span class="c-encre" style="font-family:'SF Mono',Menlo,Consolas,'Roboto Mono',monospace;font-size:34px;line-height:40px;font-weight:600;letter-spacing:0.28em;color:#111111;">${CODE_}</span></td></tr></table>`;
   }
   corps += blanc(24) + filet() + para(m.fin, { role: 'doux', taille: 14, hauteur: 22, marge: '18px 0 0' }) + signature();

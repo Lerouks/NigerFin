@@ -12,7 +12,7 @@
  */
 
 const AVANTAGES_PREMIUM =
-  'tous les contenus Premium : les cours d’éducation financière, le Brief du Lundi complet, les outils avancés et tous nos articles';
+  'tous les contenus Premium : les cours d’éducation financière, la newsletter complète, les outils avancés et tous nos articles';
 
 export const TEXTES = {
   welcome_signup: {
@@ -28,11 +28,11 @@ export const TEXTES = {
     simulateurs: 'Ils calculent vos emprunts et vos placements.',
     simulateursLien: 'Ouvrir les simulateurs',
     premiumTitre: 'L’offre Premium',
-    premium: 'Elle ouvre tous les contenus Premium : articles, Brief du Lundi complet, outils avancés et cours.',
+    premium: 'Elle donne accès à tous les contenus Premium : articles, newsletter complète, outils avancés et cours.',
     premiumLien: 'Découvrir l’offre Premium',
     bouton: 'Lire les derniers articles',
     salut: 'Bonne lecture,',
-    raison: 'Vous recevez ce message parce que vous venez de créer un compte sur nfireport.com.',
+    raison: 'Vous recevez ce message parce que vous avez créé un compte sur nfireport.com.',
   },
   newsletter_welcome: {
     objet: 'Bienvenue dans la newsletter de NFI REPORT',
@@ -42,8 +42,8 @@ export const TEXTES = {
     intro: 'Votre adresse est bien inscrite à la newsletter de NFI REPORT, consacrée à l’économie et à la finance du Niger.',
     articles: 'Nos derniers articles sont déjà en ligne, si vous voulez commencer tout de suite.',
     bouton: 'Lire les derniers articles',
-    premiumTitre: 'Le Brief du Lundi en intégralité',
-    premium: 'Les lecteurs Premium reçoivent le Brief du Lundi en intégralité, et accèdent aussi à tous nos articles, outils et cours Premium.',
+    premiumTitre: 'La newsletter en intégralité',
+    premium: 'Les lecteurs Premium reçoivent la newsletter complète, et ont aussi accès à tous nos articles, outils et cours Premium.',
     premiumLien: 'Découvrir l’offre Premium',
     raison: 'Vous recevez ce message parce que cette adresse vient d’être inscrite à la newsletter de NFI REPORT.',
     desabonner: 'Se désabonner de la newsletter',
@@ -74,7 +74,7 @@ export const TEXTES = {
     acces: `Vous avez maintenant accès à ${AVANTAGES_PREMIUM}.`,
     facture: 'Votre facture vous attend dans votre compte, à la rubrique Factures.',
     bouton: 'Accéder à mon compte',
-    raison: 'Vous recevez ce message parce qu’un paiement Premium vient d’être validé sur votre compte NFI REPORT.',
+    raison: 'Vous recevez ce message parce qu’un paiement Premium vient d’être validé sur votre compte.',
   },
   payment_rejection: {
     objet: 'Votre paiement n’a pas pu être validé',
@@ -137,7 +137,7 @@ export const TEXTES = {
     pasVous: 'Si ce n’est pas vous, cliquez tout de suite sur “Mot de passe oublié” dans la page de connexion pour en choisir un nouveau.',
     prevenir: 'Prévenez-nous ensuite en répondant à ce message.',
     bouton: 'Ouvrir la page de connexion',
-    raison: 'Vous recevez ce message parce que votre mot de passe NFI REPORT a été modifié.',
+    raison: 'Vous recevez ce message parce que votre mot de passe a été modifié.',
   },
   waitlist_confirmation: {
     objet: 'C’est noté : nous vous préviendrons de l’ouverture',

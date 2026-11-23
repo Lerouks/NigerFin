@@ -4,6 +4,12 @@ import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { X, ArrowRight, Check, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+import {
+  estUnEchec,
+  inscrireALaNewsletter,
+  MESSAGE_ADRESSE_DEJA_INSCRITE,
+  MESSAGES_ECHEC,
+} from '@/lib/newsletter/inscription';
 
 const DISMISS_KEY = 'nfi_newsletter_popup_dismissed';
 const SUBSCRIBED_KEY = 'nfi_newsletter_subscribed';
@@ -46,8 +52,9 @@ export function NewsletterPopup() {
   const [animateIn, setAnimateIn] = useState(false);
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState(false);
+  // Message de fin : inscription faite, ou adresse qui l'était déjà (aucun mail ne part alors).
+  const [fin, setFin] = useState<string | null>(null);
+  const [erreur, setErreur] = useState<string | null>(null);
   const hasTriggered = useRef(false);
   const dialogRef = useRef<HTMLDivElement>(null);
 
@@ -106,29 +113,26 @@ export function NewsletterPopup() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    if (loading || !email.trim()) return;
 
     setLoading(true);
-    setError(false);
-    try {
-      const res = await fetch('/api/newsletter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, source: 'popup_scroll' }),
-      });
-      if (!res.ok) throw new Error();
-      setSuccess(true);
-      markNewsletterSubscribed();
-      markDismissed();
-      setTimeout(() => {
-        setAnimateIn(false);
-        setTimeout(() => setVisible(false), 300);
-      }, 2000);
-    } catch {
-      setError(true);
-    } finally {
-      setLoading(false);
+    setErreur(null);
+    const issue = await inscrireALaNewsletter(email, 'popup_scroll');
+    setLoading(false);
+
+    if (estUnEchec(issue)) {
+      // L'adresse reste dans le champ : on la corrige au lieu de tout retaper.
+      setErreur(MESSAGES_ECHEC[issue]);
+      return;
     }
+
+    setFin(issue === 'deja-inscrit' ? MESSAGE_ADRESSE_DEJA_INSCRITE : 'Inscription confirmée\u00a0!');
+    markNewsletterSubscribed();
+    markDismissed();
+    setTimeout(() => {
+      setAnimateIn(false);
+      setTimeout(() => setVisible(false), 300);
+    }, issue === 'deja-inscrit' ? 3000 : 2000);
   };
 
   useEffect(() => {
@@ -203,33 +207,37 @@ export function NewsletterPopup() {
 
             {/* Content */}
             <h3 className="text-[18px] sm:text-[20px] font-bold text-center text-[#111] mb-1.5">
-              Ne manquez rien de l&apos;actualité économique
+              Ne manquez rien de l’actualité économique
             </h3>
             <p className="text-[13px] sm:text-[14px] text-gray-500 text-center mb-5 leading-relaxed">
               Briefings, analyses et données de marché. Recevez le meilleur de NFI Report dans votre boîte mail.
             </p>
 
             {/* Form */}
-            {success ? (
-              <div className="flex items-center gap-3 bg-emerald-50 rounded-xl px-4 py-3.5">
+            {fin ? (
+              <div className="flex items-center gap-3 bg-emerald-50 rounded-xl px-4 py-3.5" role="status" aria-live="polite">
                 <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
                   <Check className="w-4 h-4 text-emerald-600" />
                 </div>
-                <p className="text-[14px] text-emerald-700 font-medium">Inscription confirmée !</p>
+                <p className="text-[14px] text-emerald-700 font-medium text-balance">{fin}</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-3">
                 <input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (erreur) setErreur(null);
+                  }}
                   aria-label="Adresse email" placeholder="Votre adresse email"
+                  aria-invalid={erreur !== null}
                   required
                   autoComplete="email"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[14px] text-[#111] placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-[#111] focus:border-transparent transition-shadow bg-background"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[16px] text-[#111] placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-[#111] focus:border-transparent transition-shadow bg-background"
                 />
-                {error && (
-                  <p className="text-[12px] text-red-500">Une erreur est survenue. Réessayez.</p>
+                {erreur && (
+                  <p role="alert" className="text-[12px] text-red-500 text-balance">{erreur}</p>
                 )}
                 <button
                   type="submit"
@@ -240,7 +248,7 @@ export function NewsletterPopup() {
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <>
-                      S&apos;inscrire
+                      S’inscrire
                       <ArrowRight className="w-4 h-4" />
                     </>
                   )}

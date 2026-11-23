@@ -65,7 +65,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({ success: true });
+    // Comme /api/newsletter : le formulaire dit « déjà inscrite » quand rien n'a changé.
+    return NextResponse.json({ success: true, isNew: result.isNew, reactivated: result.reactivated });
   } catch (err) {
     Sentry.captureException(err, { tags: { context: 'waitlist-subscribe' } });
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });

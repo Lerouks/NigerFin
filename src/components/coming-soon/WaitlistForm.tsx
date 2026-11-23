@@ -11,6 +11,8 @@ export function WaitlistForm() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<Status>('idle');
   const [message, setMessage] = useState('');
+  // L'adresse était déjà sur la liste : rien n'a été envoyé, on le dit.
+  const [dejaInscrite, setDejaInscrite] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -32,6 +34,10 @@ export function WaitlistForm() {
         body: JSON.stringify({ email: value }),
       });
       if (res.ok) {
+        const corps = (await res.json().catch(() => null)) as
+          | { isNew?: unknown; reactivated?: unknown }
+          | null;
+        setDejaInscrite(corps?.isNew === false && corps?.reactivated === false);
         setStatus('success');
       } else if (res.status === 429) {
         setStatus('error');
@@ -54,7 +60,15 @@ export function WaitlistForm() {
         aria-live="polite"
       >
         <Check className="nfi-coche h-4 w-4 shrink-0" />
-        Merci, c’est noté. Vous serez prévenu à l’ouverture.
+        {dejaInscrite ? (
+          // Trop long pour une ligne : une phrase par ligne, la coche reste collée au texte.
+          <span>
+            <span className="block">Cette adresse est déjà inscrite.</span>
+            <span className="block">Vous serez prévenu à l’ouverture.</span>
+          </span>
+        ) : (
+          'Merci, c’est noté. Vous serez prévenu à l’ouverture.'
+        )}
       </p>
     );
   }

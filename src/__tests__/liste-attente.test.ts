@@ -65,6 +65,29 @@ describe('une personne de la liste d’attente qui s’abonne ensuite à la news
     expect(majs).toHaveLength(0);
   });
 
+  it('une adresse qui nous a classés en indésirable n’est jamais réinscrite, même des mois après', async () => {
+    const ilYaUnAn = new Date(Date.now() - 365 * 24 * 3600 * 1000).toISOString();
+    existant = { id: 'c3', status: 'complained', unsubscribed_at: ilYaUnAn, source: 'form_home' };
+    for (const source of ['prelaunch', 'form_home']) {
+      const r = await upsertNewsletterSubscriber({ email: 'plainte@exemple.test', source });
+      expect(r).toEqual({ id: 'c3', isNew: false, reactivated: false });
+    }
+    expect(majs).toHaveLength(0);
+  });
+
+  it('une adresse en rebond attend 30 jours avant d’être réinscrite', async () => {
+    const ilYaDixJours = new Date(Date.now() - 10 * 24 * 3600 * 1000).toISOString();
+    existant = { id: 'd4', status: 'bounced', unsubscribed_at: ilYaDixJours, source: 'prelaunch' };
+    expect(await upsertNewsletterSubscriber({ email: 'rebond@exemple.test', source: 'prelaunch' }))
+      .toEqual({ id: 'd4', isNew: false, reactivated: false });
+    expect(majs).toHaveLength(0);
+
+    existant = { ...existant, unsubscribed_at: new Date(Date.now() - 40 * 24 * 3600 * 1000).toISOString() };
+    expect(await upsertNewsletterSubscriber({ email: 'rebond@exemple.test', source: 'prelaunch' }))
+      .toEqual({ id: 'd4', isNew: false, reactivated: true });
+    expect(majs[0]).toMatchObject({ status: 'active' });
+  });
+
   it('un abonné de la newsletter qui passe par la page d’attente reste abonné', async () => {
     existant = { id: 'b2', status: 'active', unsubscribed_at: null, source: 'form_home' };
     const r = await upsertNewsletterSubscriber({ email: 'abonne@exemple.test', source: 'prelaunch' });

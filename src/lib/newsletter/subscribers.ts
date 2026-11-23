@@ -101,14 +101,20 @@ export async function upsertNewsletterSubscriber(
       return { id: existing.id, isNew: false, reactivated: false };
     }
 
-    // Cooldown 30j sur bounced/complained : protège le sender score Resend
-    // contre les boucles infinies (email invalide reréabonné -> rebounce).
-    // Pour 'unsubscribed' (désabo volontaire), pas de cooldown : si l'user
+    // Une adresse qui a classé un de nos mails en indésirable n'est jamais
+    // réinscrite par un formulaire : n'importe qui a pu la retaper, et un
+    // nouveau mail la ferait se plaindre encore (décision de Raouf, 23/11/2026).
+    // No-op silencieux, comme pendant l'attente ci-dessous.
+    if (existing.status === 'complained') {
+      return { id: existing.id, isNew: false, reactivated: false };
+    }
+
+    // Rebond (adresse inexistante, boîte pleine) : 30 jours d'attente avant de
+    // la réinscrire, pour protéger la réputation d'envoi (Resend) contre les
+    // boucles (adresse invalide réinscrite, nouveau rebond).
+    // Pour 'unsubscribed' (désabo volontaire), pas d'attente : si la personne
     // clique sur S'inscrire, c'est son choix de revenir.
-    if (
-      (existing.status === 'bounced' || existing.status === 'complained') &&
-      existing.unsubscribed_at
-    ) {
+    if (existing.status === 'bounced' && existing.unsubscribed_at) {
       const unsubDate = new Date(existing.unsubscribed_at).getTime();
       const cooldownEnd = unsubDate + 30 * 24 * 60 * 60 * 1000;
       if (Date.now() < cooldownEnd) {
@@ -118,7 +124,7 @@ export async function upsertNewsletterSubscriber(
       }
     }
 
-    // Reactivate previously unsubscribed/bounced/complained (hors cooldown).
+    // Réinscription d'une adresse désinscrite, ou en rebond depuis plus de 30 jours.
     const { error: updErr } = await supabase
       .from('newsletter_subscribers')
       .update({

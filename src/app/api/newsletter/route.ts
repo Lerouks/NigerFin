@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
   try {
     const ip = getClientIP(request);
 
-    // Persistent rate limit: 5 per hour per IP
+    // Limite persistante : 30 par heure et par adresse IP (RATE_LIMITS.newsletter)
     const rl = await checkRateLimit(
       `newsletter:${ip}`,
       RATE_LIMITS.newsletter.limit,

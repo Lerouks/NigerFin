@@ -137,6 +137,14 @@ describe('le mail qui suit l’inscription', () => {
 
     expect(reponse.status).toBe(200);
     expect(sendTransactionalEmail).not.toHaveBeenCalled();
+    // La page d'attente affiche alors « Cette adresse est déjà inscrite ».
+    expect(await reponse.json()).toEqual({ success: true, isNew: false, reactivated: false });
+  });
+
+  it('liste d’attente : une adresse nouvelle est annoncée comme telle', async () => {
+    const { POST } = await import('@/app/api/waitlist/route');
+    const reponse = await POST(requete('http://localhost/api/waitlist', { email: 'lecteur@exemple.test' }));
+    expect(await reponse.json()).toEqual({ success: true, isNew: true, reactivated: false });
   });
 
   it('liste d’attente : un envoi en échec n’empêche pas l’inscription', async () => {

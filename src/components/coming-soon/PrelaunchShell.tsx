@@ -16,7 +16,6 @@ export function PrelaunchShell({ children }: { children: React.ReactNode }) {
       <header className="px-6 pt-8 sm:px-10 lg:px-16 lg:pt-10">
         <Link href="/" className="inline-block" aria-label="NFI Report, retour à l’accueil">
           <p className="font-[family-name:var(--font-playfair)] text-[22px] font-bold tracking-[0.01em]">NFI&nbsp;REPORT</p>
-          <p className="mt-1 text-[12px] text-[#111111]/45">Niger Financial Insights</p>
         </Link>
       </header>
       <main id="main-content" className="flex-1">

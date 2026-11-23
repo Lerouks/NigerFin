@@ -18,6 +18,17 @@
   --color-surface: #ffffff;
 }
 
+/* ─── Texte justifié (pages légales) ───
+   Justifié sur tous les écrans, téléphone compris, avec la césure française
+   pour éviter les trous entre les mots. Safari exige encore le préfixe. */
+.texte-justifie {
+  text-align: justify;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+  hyphenate-limit-chars: 7 3 3;
+  text-wrap: pretty;
+}
+
 /* ─── Page d'attente (mode pré-lancement) ───
    La carte est dessinée par CarteNiger.tsx. */
 

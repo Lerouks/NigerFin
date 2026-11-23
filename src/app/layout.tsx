@@ -61,18 +61,20 @@ const baseMetadata: Metadata = {
     'uranium',
     'FCFA',
   ],
-  // Icône d'onglet (23/11/2026) : un rond noir parfait, sans bord, comme une
-  // photo de profil, avec la pyramide argentée du logo officiel. Le fond noir
-  // est indispensable : le logo est argenté, il disparaîtrait sur la barre
-  // d'onglets claire de Safari. Traits épaissis à 16 et 32 pixels pour rester
-  // lisibles. favicon.ico contient 16, 32 et 48 pixels. « ?v=2 » change
-  // l'adresse pour que Safari, qui garde longtemps ses icônes, prenne la
-  // nouvelle. L'icône iPhone reste carrée : iOS arrondit lui-même ses coins.
+  // Icône d'onglet (23/11/2026) : un rond parfait, sans bord, en dégradé
+  // argent vers graphite, avec la pyramide blanche du logo officiel. Choix
+  // validé dans le vrai Safari : Safari pose une plaque blanche derrière une
+  // icône trop sombre en mode sombre, et derrière une icône trop claire en
+  // mode clair ; ce dégradé reste net dans les deux modes (le rond noir et le
+  // logo seul sans fond, eux, ne passaient que dans un mode). Safari ignore
+  // les icônes par mode (attribut media, SVG). Traits épaissis à 16 et 32
+  // pixels. « ?v=3 » change l'adresse pour que Safari remplace l'icône déjà en
+  // cache. L'icône iPhone reste carrée : iOS arrondit lui-même ses coins.
   icons: {
     icon: [
-      { url: '/favicon.ico?v=2', sizes: '16x16 32x32 48x48' },
-      { url: '/icone-32.png?v=2', sizes: '32x32', type: 'image/png' },
-      { url: '/icone-192.png?v=2', sizes: '192x192', type: 'image/png' },
+      { url: '/favicon.ico?v=3', sizes: '16x16 32x32 48x48' },
+      { url: '/icone-32.png?v=3', sizes: '32x32', type: 'image/png' },
+      { url: '/icone-192.png?v=3', sizes: '192x192', type: 'image/png' },
     ],
     apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
   },

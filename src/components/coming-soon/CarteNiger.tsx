@@ -12,6 +12,13 @@ const INTERVALLE_IMAGE_MS = 33;
 
 const FOND = '#09090a';
 
+/** Place des noms de ville sur petit écran (par défaut : à droite du point). */
+const POSITION_PETIT_ECRAN: Record<string, 'dessus' | 'dessous'> = {
+  Maradi: 'dessous',
+  Zinder: 'dessus',
+  Diffa: 'dessus',
+};
+
 interface Point {
   x: number;
   y: number;
@@ -80,7 +87,7 @@ export function CarteNiger({ className }: { className?: string }) {
 
       // Position de la lumière, de -0,25 à 1,25 de la largeur ; hors champ si calme.
       const lumiere = calme ? -1 : ((t % PERIODE_BALAYAGE_MS) / PERIODE_BALAYAGE_MS) * 1.5 - 0.25;
-      const cote = Math.max(1.1, 2.8 * echelle);
+      const cote = Math.max(1.4, 2.8 * echelle);
       for (const point of POINTS) {
         const ecart = (point.x / CARTE_NIGER.largeur - lumiere) / 0.09;
         const eclat = Math.exp(-ecart * ecart);
@@ -89,9 +96,13 @@ export function CarteNiger({ className }: { className?: string }) {
         ctx.fillRect(point.x * echelle - cote / 2, point.y * echelle - cote / 2, cote, cote);
       }
 
-      ctx.font = `500 ${Math.max(10, Math.round(15 * echelle))}px ${police}`;
+      ctx.font = `500 ${Math.max(11, Math.round(15 * echelle))}px ${police}`;
       ctx.lineJoin = 'round';
-      for (const ville of CARTE_NIGER.villes) {
+      // Sur un petit écran, Tillabéri et Dosso, collées à Niamey, chevaucheraient
+      // son nom : on ne garde que les villes qu'on peut lire.
+      const petit = largeur < 520;
+      const villes = petit ? CARTE_NIGER.villes.filter((v) => v.nom !== 'Tillabéri' && v.nom !== 'Dosso') : CARTE_NIGER.villes;
+      for (const ville of villes) {
         const ecart = (ville.x / CARTE_NIGER.largeur - lumiere) / 0.08;
         const eclat = Math.exp(-ecart * ecart);
         const x = ville.x * echelle;
@@ -103,9 +114,15 @@ export function CarteNiger({ className }: { className?: string }) {
         const opacite = ville.nom === 'Niamey' ? 0.92 : 0.3 + 0.68 * eclat;
         ctx.lineWidth = 5;
         ctx.strokeStyle = FOND;
-        ctx.strokeText(ville.nom, x + 9, y + 4);
+        // Sur petit écran, Maradi, Zinder et Diffa sont trop proches pour avoir
+        // tous leur nom à droite : certains passent au-dessus ou au-dessous.
+        const position = petit ? POSITION_PETIT_ECRAN[ville.nom] : undefined;
+        const largeurNom = ctx.measureText(ville.nom).width;
+        const tx = position ? x - largeurNom / 2 : x + 9;
+        const ty = position === 'dessus' ? y - 9 : position === 'dessous' ? y + 17 : y + 4;
+        ctx.strokeText(ville.nom, tx, ty);
         ctx.fillStyle = `rgba(244,244,245,${opacite.toFixed(3)})`;
-        ctx.fillText(ville.nom, x + 9, y + 4);
+        ctx.fillText(ville.nom, tx, ty);
       }
 
       if (!calme && niamey) {

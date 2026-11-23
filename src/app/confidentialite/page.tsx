@@ -16,7 +16,7 @@ export default async function ConfidentialitePage() {
   const initialSections = await fetchLegalSections('confidentialite');
   return (
     <DynamicLegalPage
-      title="Politique de Confidentialité"
+      title="Politique de confidentialité"
       initialSections={initialSections}
       introParagraphs={[
         'La présente politique décrit les données recueillies sur le site nfireport.com, l’usage qui en est fait et les droits dont vous disposez.',

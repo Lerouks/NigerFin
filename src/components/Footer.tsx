@@ -42,7 +42,6 @@ export function Footer() {
               />
               <h3 className="font-[family-name:var(--font-playfair)] text-[20px] font-bold tracking-[0.01em]">NFI&nbsp;REPORT</h3>
             </div>
-            <p className="text-white/50 text-[13px] mb-4">Niger Financial Insights</p>
             <p className="text-white/40 text-[13px] leading-relaxed">
               Votre source d&apos;informations économiques et financières pour le Niger et
               l&apos;Afrique de l&apos;Ouest.

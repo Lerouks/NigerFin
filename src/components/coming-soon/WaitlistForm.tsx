@@ -61,7 +61,7 @@ export function WaitlistForm() {
 
   return (
     <form onSubmit={handleSubmit} noValidate>
-      <label htmlFor="waitlist-email" className="mb-2.5 block text-[13px] text-[#a9adb4]">
+      <label htmlFor="waitlist-email" className="mb-2.5 block text-[14px] text-[#a9adb4] xl:text-[13px]">
         Être prévenu de l’ouverture
       </label>
       <div className="flex items-center gap-3 border-b border-white/25 transition-colors duration-200 focus-within:border-[#f4f4f5]">
@@ -70,6 +70,10 @@ export function WaitlistForm() {
           type="email"
           inputMode="email"
           autoComplete="email"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+          enterKeyHint="send"
           placeholder="Votre adresse e-mail"
           value={email}
           onChange={(e) => {

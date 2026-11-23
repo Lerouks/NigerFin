@@ -14,7 +14,7 @@ export default async function MentionsLegalesPage() {
   const initialSections = await fetchLegalSections('mentions-legales');
   return (
     <DynamicLegalPage
-      title="Mentions Légales"
+      title="Mentions légales"
       initialSections={initialSections}
       introParagraphs={[
         "Les présentes mentions légales identifient l'éditeur du site nfireport.com et précisent les conditions juridiques d'utilisation du service.",

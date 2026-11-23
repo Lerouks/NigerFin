@@ -16,7 +16,7 @@ export default async function PublicitePage() {
   const initialSections = await fetchLegalSections('publicite');
   return (
     <DynamicLegalPage
-      title="Publicité & Partenariats"
+      title="Publicité et partenariats"
       initialSections={initialSections}
       introParagraphs={[
         'NFI Report couvre l’économie et la finance du Niger et de l’Afrique de l’Ouest, en français, sur son site et sur ses réseaux sociaux.',

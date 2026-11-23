@@ -16,7 +16,7 @@ export default async function CookiesPage() {
   const initialSections = await fetchLegalSections('cookies');
   return (
     <DynamicLegalPage
-      title="Politique de Cookies"
+      title="Politique de cookies"
       initialSections={initialSections}
       introParagraphs={[
         'La présente politique explique l’usage des cookies sur nfireport.com. Un cookie est un petit fichier enregistré par votre navigateur, qui permet à un site de vous reconnaître ou de mesurer son audience.',

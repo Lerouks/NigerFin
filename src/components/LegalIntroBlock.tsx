@@ -1,3 +1,5 @@
+import { texteJustifie } from '@/components/TexteJustifie';
+
 interface LegalIntroBlockProps {
   paragraphs: string[];
 }
@@ -8,9 +10,9 @@ interface LegalIntroBlockProps {
  */
 export function LegalIntroBlock({ paragraphs }: LegalIntroBlockProps) {
   return (
-    <div className="space-y-5 text-[15px] leading-[1.8] text-gray-600 mb-12 pb-12 border-b border-black/4 text-pretty hyphens-auto sm:text-justify">
+    <div className="space-y-5 text-[15px] leading-[1.8] text-gray-600 mb-12 pb-12 border-b border-black/4 texte-justifie">
       {paragraphs.map((p) => (
-        <p key={p.slice(0, 32)}>{p}</p>
+        <p key={p.slice(0, 32)}>{texteJustifie(p)}</p>
       ))}
     </div>
   );

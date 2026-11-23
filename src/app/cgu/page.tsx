@@ -16,7 +16,7 @@ export default async function CGUPage() {
   const initialSections = await fetchLegalSections('cgu');
   return (
     <DynamicLegalPage
-      title="Conditions Générales d'Utilisation"
+      title="Conditions générales d’utilisation"
       initialSections={initialSections}
       introParagraphs={[
         'Les présentes conditions générales d’utilisation régissent l’accès et l’usage du site NFI Report (nfireport.com), média d’information économique et financière consacré au Niger et à l’Afrique de l’Ouest, édité par NFI Group SARL. En utilisant le site, l’utilisateur accepte les présentes conditions.',

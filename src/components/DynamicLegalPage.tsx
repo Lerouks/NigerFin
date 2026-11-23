@@ -1,5 +1,6 @@
 import type { LegalSection } from '@/lib/legal-sections';
 import { LegalIntroBlock } from '@/components/LegalIntroBlock';
+import { texteJustifie } from '@/components/TexteJustifie';
 import { HabillagePreLancement } from '@/components/coming-soon/HabillagePreLancement';
 
 interface FallbackSection {
@@ -18,7 +19,7 @@ export function DynamicLegalPage({ title, introParagraphs, initialSections, fall
   const sections = initialSections && initialSections.length > 0 ? initialSections : null;
   const useFallback = !sections && fallbackSections && fallbackSections.length > 0;
 
-  const bodyClass = 'text-gray-600 text-[15px] leading-[1.8] whitespace-pre-line text-pretty hyphens-auto sm:text-justify';
+  const bodyClass = 'texte-justifie text-gray-600 text-[15px] leading-[1.8] whitespace-pre-line';
 
   const lastUpdated = sections && sections.length > 0
     ? (() => {
@@ -41,7 +42,7 @@ export function DynamicLegalPage({ title, introParagraphs, initialSections, fall
 
         <section className="py-16 md:py-20">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-white rounded-xl p-7 md:p-10 border border-black/6">
+            <div className="bg-white rounded-xl p-5 sm:p-7 md:p-10 border border-black/6">
               {introParagraphs && introParagraphs.length > 0 && (
                 <LegalIntroBlock paragraphs={introParagraphs} />
               )}
@@ -50,7 +51,7 @@ export function DynamicLegalPage({ title, introParagraphs, initialSections, fall
                   {sections.map((section) => (
                     <div key={section.id}>
                       <h2 className="text-xl font-bold mb-3">{section.heading}</h2>
-                      <div className={bodyClass} style={{ hyphens: 'auto' }}>{section.text}</div>
+                      <div className={bodyClass}>{texteJustifie(section.text)}</div>
                     </div>
                   ))}
                 </div>
@@ -59,7 +60,7 @@ export function DynamicLegalPage({ title, introParagraphs, initialSections, fall
                   {fallbackSections.map((section, index) => (
                     <div key={index}>
                       <h2 className="text-xl font-bold mb-3">{section.heading}</h2>
-                      <div className={bodyClass} style={{ hyphens: 'auto' }}>{section.text}</div>
+                      <div className={bodyClass}>{texteJustifie(section.text)}</div>
                     </div>
                   ))}
                 </div>

@@ -34,13 +34,12 @@ const SOCIALS = [
  */
 export function ComingSoon() {
   return (
-    <main className="relative flex min-h-svh w-full flex-col overflow-hidden bg-[#09090a] px-[22px] pb-6 pt-6 text-[#f4f4f5] antialiased sm:px-10 lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:grid-rows-[auto_1fr_auto] lg:gap-x-10 xl:flex xl:px-14 xl:pb-8 xl:pt-9">
-      <CarteNiger className="pointer-events-none relative order-2 -ml-[9vw] mt-6 block w-[118vw] max-w-none sm:mx-auto sm:w-[min(100%,760px)] lg:col-start-2 lg:row-start-2 lg:mx-0 lg:mt-0 lg:w-full lg:self-center xl:absolute xl:right-[3vw] xl:top-[9vh] xl:order-none xl:m-0 xl:w-[min(63vw,104vh)]" />
+    <main className="relative flex min-h-svh w-full flex-col overflow-hidden bg-[#09090a] px-[22px] pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-6 [-webkit-tap-highlight-color:transparent] text-[#f4f4f5] antialiased sm:px-10 lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:grid-rows-[auto_1fr_auto] lg:gap-x-10 xl:flex xl:px-14 xl:pb-8 xl:pt-9">
+      <CarteNiger className="pointer-events-none relative order-2 mx-auto mt-10 block w-full max-w-[760px] lg:col-start-2 lg:row-start-2 lg:mx-0 lg:mt-0 lg:w-full lg:self-center xl:absolute xl:right-[3vw] xl:top-[9vh] xl:order-none xl:m-0 xl:w-[min(63vw,104vh)]" />
 
       <header className="relative z-10 order-0 lg:col-span-2 lg:row-start-1">
         <div>
           <p className="font-[family-name:var(--font-playfair)] text-[22px] font-bold tracking-[0.01em] min-[1800px]:text-[26px]">NFI&nbsp;REPORT</p>
-          <p className="mt-1 text-[12px] text-[#7d8189]">Niger Financial Insights</p>
         </div>
       </header>
 
@@ -55,7 +54,7 @@ export function ComingSoon() {
           <WaitlistForm />
           {/* La page collecte une adresse : qui la donne doit pouvoir lire qui la
               collecte, et sortir. Ces pages restent ouvertes en pré-lancement. */}
-          <p className="mt-1 text-[12px] leading-relaxed text-[#7d8189]">
+          <p className="mt-1 text-[13px] leading-relaxed text-[#8a8e95] xl:text-[12px] xl:text-[#7d8189]">
             Votre adresse ne sert qu’à vous prévenir de l’ouverture.{' '}
             <a
               href="/confidentialite"

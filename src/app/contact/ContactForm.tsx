@@ -32,7 +32,7 @@ export function ContactForm() {
     return section?.text || fallback;
   };
 
-  const address = getInfo(1, 'Niamey, Niger\nPlateau, BP 8001');
+  const address = getInfo(1, 'Quartier Plateau\n8001 Niamey, Niger');
   const email = getInfo(2, 'contact@nfireport.com');
   const phone = getInfo(3, '+227 91 70 71 94');
   const hoursText = getInfo(4, 'Lundi au vendredi : 08h00 à 18h00 | Samedi : 09h00 à 13h00 | Dimanche : fermé');
@@ -100,7 +100,7 @@ export function ContactForm() {
                     <div className="w-10 h-10 bg-[#111] text-white rounded-xl flex items-center justify-center shrink-0 group-hover:bg-gold transition-colors duration-300">
                       <Icon className="w-4 h-4" />
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <h3 className="font-semibold mb-1">{label}</h3>
                       <p className="text-gray-600 text-sm">{content}</p>
                     </div>

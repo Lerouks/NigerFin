@@ -29,8 +29,10 @@ export function Footer() {
   return (
     <footer className="bg-[#111] text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
-          <div>
+        {/* Téléphone : la marque et les réseaux sur toute la largeur, Rubriques et
+            Société côte à côte ; tout part du même bord gauche. */}
+        <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4 md:gap-10 mb-10">
+          <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2.5 mb-1">
               <Image
                 src="/logo-about.png"
@@ -43,8 +45,8 @@ export function Footer() {
               <h3 className="font-[family-name:var(--font-playfair)] text-[20px] font-bold tracking-[0.01em]">NFI&nbsp;REPORT</h3>
             </div>
             <p className="text-white/40 text-[13px] leading-relaxed">
-              Votre source d&apos;informations économiques et financières pour le Niger et
-              l&apos;Afrique de l&apos;Ouest.
+              Votre source d’informations économiques et financières pour le Niger et
+              l’Afrique de l’Ouest.
             </p>
           </div>
 
@@ -101,7 +103,7 @@ export function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="col-span-2 md:col-span-1">
             <h4 className="text-[11px] tracking-[0.15em] uppercase text-white/30 mb-5">
               Suivez-nous
             </h4>
@@ -126,28 +128,34 @@ export function Footer() {
                 href={`mailto:${contactEmail}`}
                 className="text-white/40 hover:text-white/70 transition-colors text-[13px] flex items-center gap-2"
               >
-                <Mail className="w-4 h-4" />
+                <Mail className="w-4 h-4 shrink-0" />
                 {contactEmail}
               </a>
               <a
                 href="tel:+22791707194"
                 className="text-white/40 hover:text-white/70 transition-colors text-[13px] flex items-center gap-2"
               >
-                <Phone className="w-4 h-4" />
+                <Phone className="w-4 h-4 shrink-0" />
                 +227&nbsp;91&nbsp;70&nbsp;71&nbsp;94
               </a>
               <p className="text-white/40 text-[13px] flex items-start gap-2">
                 <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
-                <span>Niamey, Niger<br />Plateau, BP&nbsp;8001</span>
+                {/* Deux lignes en bloc, dans une colonne qui prend toute la largeur :
+                    avec un <br> dans un élément flexible, Safari réduisait le bloc à sa
+                    largeur minimale et coupait l'adresse sur quatre lignes. */}
+                <span className="min-w-0 flex-1">
+                  <span className="block">Quartier Plateau</span>
+                  <span className="block">8001&nbsp;Niamey, Niger</span>
+                </span>
               </p>
             </div>
           </div>
         </div>
 
         <div className="border-t border-white/6 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-[12px] text-white/25">
-            <p>&copy; {new Date().getFullYear()} NFI Report. Tous droits réservés.</p>
-            <div className="flex gap-6">
+          <div className="flex flex-col items-start gap-4 text-[12px] text-white/25 md:flex-row md:items-center md:justify-between">
+            <p>&copy; {new Date().getFullYear()} NFI&nbsp;REPORT. Tous droits réservés.</p>
+            <div className="flex flex-wrap gap-x-6 gap-y-2">
               <Link href="/confidentialite" className="hover:text-white/50 transition-colors">
                 Confidentialité
               </Link>

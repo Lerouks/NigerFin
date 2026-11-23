@@ -159,18 +159,24 @@ export function Footer() {
             {/* Pleine largeur sur téléphone : sans cela, Safari calcule la largeur de
                 la rangée sans ses espacements et renvoie « Plan du site » à la ligne. */}
             <div className="flex w-full flex-wrap gap-x-6 gap-y-2 md:w-auto">
-              <Link href="/confidentialite" className="hover:text-white/50 transition-colors">
-                Confidentialité
-              </Link>
-              <Link href="/cookies" className="hover:text-white/50 transition-colors">
-                Cookies
-              </Link>
-              <Link href="/cgu" className="hover:text-white/50 transition-colors">
-                CGU
-              </Link>
-              <Link href="/plan-du-site" className="hover:text-white/50 transition-colors">
-                Plan du site
-              </Link>
+              {/* Deux paires : sur un écran de 320 px, les liens passent deux par deux
+                  au lieu de laisser « Plan du site » seul sur sa ligne. */}
+              <span className="flex gap-x-6">
+                <Link href="/confidentialite" className="hover:text-white/50 transition-colors">
+                  Confidentialité
+                </Link>
+                <Link href="/cookies" className="hover:text-white/50 transition-colors">
+                  Cookies
+                </Link>
+              </span>
+              <span className="flex gap-x-6">
+                <Link href="/cgu" className="hover:text-white/50 transition-colors">
+                  CGU
+                </Link>
+                <Link href="/plan-du-site" className="hover:text-white/50 transition-colors">
+                  Plan du site
+                </Link>
+              </span>
             </div>
           </div>
         </div>

@@ -7,6 +7,14 @@ export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || 'https://nfireport.com';
 
 /**
+ * Nom du site, tout en majuscules comme la marque (décision de la direction,
+ * 23/11/2026), et titre de l'onglet de l'accueil et de la page d'attente :
+ * deux-points à la française, jamais de tiret.
+ */
+export const NOM_DU_SITE = 'NFI REPORT';
+export const TITRE_DU_SITE = `${NOM_DU_SITE}\u00a0: actualités économiques et financières du Niger`;
+
+/**
  * Truncate a title for the HTML <title> tag (SEO).
  * Cuts at the last word boundary before maxLen, preserves meaning.
  * Adds an ellipsis only if truncated.

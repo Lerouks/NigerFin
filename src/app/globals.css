@@ -19,12 +19,22 @@
 }
 
 /* ─── Page d'attente (mode pré-lancement) ───
-   La carte est dessinée par CarteNiger.tsx ; ici, seulement le point qui
-   veille à côté de « Ouverture prochaine ». */
-@keyframes nfi-veille { 50% { opacity: .25; } }
-.nfi-veille { animation: nfi-veille 2.4s ease-in-out infinite; }
+   La carte est dessinée par CarteNiger.tsx. */
+
+/* Réseaux de la page d'attente : argent au repos, couleurs officielles au
+   survol et au clavier (logos de tiers, hors palette NFI par nature). */
+.nfi-reseau { color: #a9adb4; transition: color .2s ease; }
+.nfi-reseau svg { transition: filter .2s ease; }
+.nfi-reseau-fond { opacity: 0; transition: opacity .2s ease; }
+.nfi-reseau:is(:hover, :focus-visible) .nfi-reseau-fond { opacity: 1; }
+.nfi-reseau--facebook:is(:hover, :focus-visible) { color: #1877f2; }
+.nfi-reseau--youtube:is(:hover, :focus-visible) { color: #ff0000; }
+.nfi-reseau--instagram:is(:hover, :focus-visible) svg { fill: url(#nfi-degrade-instagram); }
+.nfi-reseau--tiktok:is(:hover, :focus-visible) { color: #ffffff; }
+.nfi-reseau--tiktok:is(:hover, :focus-visible) svg { filter: drop-shadow(-1.2px -1px 0 #25f4ee) drop-shadow(1.2px 1px 0 #fe2c55); }
+
 @media (prefers-reduced-motion: reduce) {
-  .nfi-veille { animation: none; }
+  .nfi-reseau, .nfi-reseau svg, .nfi-reseau-fond { transition: none; }
 }
 
 /*

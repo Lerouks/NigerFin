@@ -11,9 +11,10 @@ import { fallbackImageUrl } from '@/data/mock-data';
 import { getAllArticles, getLatestBySection } from '@/lib/articles';
 import { SECTION_META } from '@/lib/sections';
 import { getSiteFeatures } from '@/lib/site-data';
+import { NOM_DU_SITE, TITRE_DU_SITE } from '@/lib/config';
 
 export const metadata: Metadata = {
-  title: 'NFI Report - Actualités économiques et financières du Niger',
+  title: TITRE_DU_SITE,
   description:
     "Magazine économique premium dédié au Niger et à l'Afrique de l'Ouest : analyses, données de marché, dossiers d'entreprises stratégiques, outils financiers.",
   alternates: { canonical: '/' },
@@ -22,9 +23,9 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
-    siteName: 'NFI Report',
+    siteName: NOM_DU_SITE,
     url: '/',
-    title: 'NFI Report - Actualités économiques et financières du Niger',
+    title: TITRE_DU_SITE,
     description:
       "Magazine économique premium dédié au Niger et à l'Afrique de l'Ouest : analyses, données de marché, dossiers d'entreprises stratégiques, outils financiers.",
     images: [
@@ -32,7 +33,7 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'NFI Report - Actualités économiques et financières du Niger',
+        alt: TITRE_DU_SITE,
       },
     ],
   },

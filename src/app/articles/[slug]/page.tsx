@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
       publishedTime: article.publishedAt,
       authors: [article.author.name],
       images: imageUrl ? [{ url: imageUrl, width: 1200, height: 630, alt: article.title }] : [],
-      siteName: 'NFI Report',
+      siteName: 'NFI REPORT',
       locale: 'fr_FR',
     },
     twitter: {
@@ -104,7 +104,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     },
     publisher: {
       '@type': 'Organization',
-      name: 'NFI Report',
+      name: 'NFI REPORT',
       url: siteUrl,
     },
     mainEntityOfPage: {

@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     notFound();
   }
 
-  const seoTitle = `${category.title} : cours gratuits | NFI Report`;
+  const seoTitle = `${category.title} : cours gratuits | NFI REPORT`;
   const description = `Cours et leçons gratuits sur ${category.title.toLowerCase()} adaptés au Niger et à l'UEMOA. Formation pas-à-pas.`;
 
   return {

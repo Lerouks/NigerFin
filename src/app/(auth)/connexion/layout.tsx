@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { HabillagePreLancement } from '@/components/coming-soon/HabillagePreLancement';
 
 export const metadata: Metadata = {
-  title: 'Connexion - NFI Report',
+  title: 'Connexion',
   description: 'Connectez-vous à votre compte NFI Report pour accéder aux analyses économiques, articles premium et outils financiers.',
   robots: { index: false },
 };

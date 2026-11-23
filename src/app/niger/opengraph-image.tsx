@@ -48,7 +48,7 @@ export default function NigerOgImage() {
             paddingTop: '28px',
           }}
         >
-          <div style={{ color: '#ffffff', fontSize: '28px', fontWeight: 700 }}>NFI Report</div>
+          <div style={{ color: '#ffffff', fontSize: '28px', fontWeight: 700 }}>NFI REPORT</div>
           <div style={{ color: '#6b7280', fontSize: '20px' }}>nfireport.com/niger</div>
         </div>
       </div>

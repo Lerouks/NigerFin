@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     canonical: '/premium',
   },
   openGraph: {
-    title: 'NFI Report Premium - La connaissance, votre meilleur capital',
+    title: 'NFI REPORT Premium\u00a0: la connaissance, votre meilleur capital',
     description:
       'Newsletters exclusives, articles Premium illimités, outils financiers avancés et téléchargement PDF des analyses. À partir de 5 000 FCFA/mois.',
     type: 'website',

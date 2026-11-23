@@ -161,5 +161,12 @@ export function CarteNiger({ className }: { className?: string }) {
     };
   }, []);
 
-  return <canvas ref={toileRef} aria-hidden="true" className={className} />;
+  return (
+    <canvas
+      ref={toileRef}
+      aria-hidden="true"
+      className={className}
+      style={{ aspectRatio: `${CARTE_NIGER.largeur} / ${CARTE_NIGER.hauteur}` }}
+    />
+  );
 }

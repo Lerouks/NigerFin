@@ -7,7 +7,7 @@ import { MainLayoutShell } from '@/components/MainLayoutShell';
 import { ViewTracker } from '@/components/ViewTracker';
 import { CookieBanner } from '@/components/CookieBanner';
 import { CivilityPrompt } from '@/components/CivilityPrompt';
-import { SITE_URL } from '@/lib/config';
+import { NOM_DU_SITE, SITE_URL, TITRE_DU_SITE } from '@/lib/config';
 import { getFlashBanner, getSiteFeatures } from '@/lib/site-data';
 import { isAdminViewer } from '@/lib/viewer';
 import { PAGE_ATTENTE, estPageOuverte } from '@/lib/pre-lancement';
@@ -45,8 +45,8 @@ export const viewport: Viewport = {
 const baseMetadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'NFI Report - Actualités économiques et financières du Niger',
-    template: '%s | NFI Report',
+    default: TITRE_DU_SITE,
+    template: `%s | ${NOM_DU_SITE}`,
   },
   description:
     "Votre source d'informations économiques et financières pour le Niger et l'Afrique de l'Ouest. Articles, analyses, outils financiers et données de marché.",
@@ -61,23 +61,29 @@ const baseMetadata: Metadata = {
     'uranium',
     'FCFA',
   ],
+  // Icônes refaites le 23/11/2026 depuis le logo officiel détouré : la
+  // pyramide remplit l'icône, traits épaissis aux petites tailles (16 et 32
+  // pixels) pour rester lisible dans un onglet. favicon.ico contient 16, 32
+  // et 48 pixels. Nouveaux noms de fichiers : Safari garde longtemps l'ancienne
+  // icône en cache si l'adresse ne change pas.
   icons: {
     icon: [
-      { url: '/favicon.png', type: 'image/png' },
-      { url: '/icon.png', sizes: '192x192', type: 'image/png' },
+      { url: '/favicon.ico', sizes: '16x16 32x32 48x48' },
+      { url: '/icone-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icone-192.png', sizes: '192x192', type: 'image/png' },
     ],
-    apple: '/icon.png',
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
   },
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
-    siteName: 'NFI Report',
+    siteName: NOM_DU_SITE,
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'NFI Report - Actualités économiques et financières du Niger',
+        alt: TITRE_DU_SITE,
       },
     ],
   },
@@ -106,8 +112,8 @@ export async function generateMetadata(): Promise<Metadata> {
 const organizationJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'NewsMediaOrganization',
-  name: 'NFI Report',
-  alternateName: 'NFI Report - Actualités économiques et financières du Niger',
+  name: NOM_DU_SITE,
+  alternateName: TITRE_DU_SITE,
   url: SITE_URL,
   logo: `${SITE_URL}/icon.png`,
   description:
@@ -125,12 +131,12 @@ const organizationJsonLd = {
 const websiteJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
-  name: 'NFI Report',
+  name: NOM_DU_SITE,
   url: SITE_URL,
   inLanguage: 'fr-FR',
   publisher: {
     '@type': 'NewsMediaOrganization',
-    name: 'NFI Report',
+    name: NOM_DU_SITE,
   },
   potentialAction: {
     '@type': 'SearchAction',

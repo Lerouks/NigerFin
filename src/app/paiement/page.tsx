@@ -3,7 +3,7 @@ import { Suspense } from 'react';
 import { PaymentContent } from './PaymentContent';
 
 export const metadata: Metadata = {
-  title: 'Paiement - NFI Report',
+  title: 'Paiement',
   description: 'Finalisez votre abonnement NFI Report par Mobile Money ou carte bancaire, en toute sécurité.',
   robots: { index: false },
 };

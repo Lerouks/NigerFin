@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og';
 
 export const runtime = 'nodejs';
 
-export const alt = 'NFI Report, actualités économiques et financières du Niger';
+export const alt = 'NFI REPORT\u00a0: actualités économiques et financières du Niger';
 
 export const size = {
   width: 1200,
@@ -118,7 +118,7 @@ export default async function Image() {
               display: 'flex',
             }}
           >
-            NFI Report
+            NFI REPORT
           </div>
 
           {/* Gold separator */}

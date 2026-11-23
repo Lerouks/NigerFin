@@ -85,7 +85,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
     },
     publisher: {
       '@type': 'Organization',
-      name: 'NFI Report',
+      name: 'NFI REPORT',
       url: SITE_URL,
     },
   };

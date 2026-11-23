@@ -9,12 +9,12 @@ export const revalidate = 3600;
 // heure d'envoi, longueur, nombre de mots, lieu d'hébergement, conformité).
 // La newsletter n'est pas encore lancée : la page reste générale.
 export const metadata: Metadata = {
-  title: 'Newsletter NFI Report',
+  title: 'Newsletter',
   description:
     'Recevez par e-mail les analyses de NFI Report sur l’économie du Niger et de l’Afrique de l’Ouest.',
   alternates: { canonical: '/newsletter' },
   openGraph: {
-    title: 'Newsletter NFI Report',
+    title: 'Newsletter NFI REPORT',
     description:
       'Les analyses de NFI Report sur l’économie du Niger et de l’Afrique de l’Ouest, par e-mail.',
     type: 'website',

@@ -4,7 +4,7 @@ import { formatPrice, PREMIUM_MONTHLY_PRICE } from '@/config/pricing';
 export const runtime = 'nodejs';
 export const revalidate = 86400;
 
-export const alt = 'NFI Report Premium : tarifs';
+export const alt = 'NFI REPORT Premium : tarifs';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -49,7 +49,7 @@ export default function PricingOgImage() {
             paddingTop: '28px',
           }}
         >
-          <div style={{ color: '#ffffff', fontSize: '28px', fontWeight: 700 }}>NFI Report</div>
+          <div style={{ color: '#ffffff', fontSize: '28px', fontWeight: 700 }}>NFI REPORT</div>
           <div style={{ color: '#6b7280', fontSize: '20px' }}>nfireport.com/pricing</div>
         </div>
       </div>

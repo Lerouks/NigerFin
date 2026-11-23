@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Complétez votre profil - NFI Report',
+  title: 'Complétez votre profil',
   robots: { index: false },
 };
 

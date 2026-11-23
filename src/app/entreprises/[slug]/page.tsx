@@ -70,7 +70,7 @@ export async function generateMetadata({ params }: EnterprisePageProps): Promise
       description,
       type: 'profile',
       url: `${SITE_URL}/entreprises/${slug}`,
-      siteName: 'NFI Report',
+      siteName: 'NFI REPORT',
       locale: 'fr_FR',
       ...(enterprise.logo_url && {
         images: [{ url: enterprise.logo_url, width: 200, height: 200, alt: enterprise.name }],

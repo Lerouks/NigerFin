@@ -121,7 +121,7 @@ function InscriptionContent() {
             Se connecter
           </Link>
           <p className="text-gray-500 text-[12px] mt-4">
-            Mot de passe oublié ? Contactez le support.
+            Mot de passe oublié&nbsp;? Contactez le support.
           </p>
         </div>
       </AuthLayout>
@@ -157,7 +157,7 @@ function InscriptionContent() {
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold mb-2">Créer un compte</h1>
           <p className="text-gray-500 text-sm">
-            Rejoignez NFI Report gratuitement
+            Rejoignez NFI&nbsp;Report gratuitement
           </p>
         </div>
 
@@ -318,7 +318,7 @@ function InscriptionContent() {
               className="mt-0.5 w-4 h-4 rounded-sm border-black/20 text-[#111] focus:ring-2 focus:ring-gold/30 focus:ring-offset-0"
             />
             <span className="leading-relaxed">
-              Recevoir la newsletter de NFI Report sur l&apos;économie du Niger (désinscription à tout moment).
+              Recevoir la newsletter de NFI&nbsp;Report sur l&apos;économie du Niger (désinscription à tout moment).
             </span>
           </label>
 
@@ -348,9 +348,9 @@ function InscriptionContent() {
         {google && <BoutonGoogle suite={suite} />}
 
         <p className={`text-center text-sm text-gray-500${google ? ' mt-7' : ''}`}>
-          Déjà un compte ?{' '}
+          Déjà un compte&nbsp;?{' '}
           <Link href="/connexion" className="text-[#111] hover:text-gold font-semibold transition-colors">
-            Se connecter
+            Se&nbsp;connecter
           </Link>
         </p>
       </div>

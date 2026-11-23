@@ -129,7 +129,7 @@ function ConnexionContent() {
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold mb-3">Connexion</h1>
           <p className="text-gray-500 text-base">
-            Accédez à votre compte NFI Report
+            Accédez à votre compte NFI&nbsp;Report
           </p>
         </div>
 
@@ -159,9 +159,9 @@ function ConnexionContent() {
 
           <div>
             <div className="flex items-center justify-between mb-2.5">
-              <label htmlFor="password" className="block text-sm font-medium">Mot de passe</label>
+              <label htmlFor="password" className="block text-sm font-medium whitespace-nowrap">Mot de passe</label>
               <button type="button" onClick={() => { setForgotMode(true); setError(''); }} className="text-[13px] text-gray-500 hover:text-gold transition-colors">
-                Mot de passe oublié ?
+                Mot de passe oublié&nbsp;?
               </button>
             </div>
             <div className="relative">
@@ -213,9 +213,9 @@ function ConnexionContent() {
         {google && <BoutonGoogle suite={suite} />}
 
         <p className={`text-center text-sm text-gray-500${google ? ' mt-8' : ''}`}>
-          Pas encore de compte ?{' '}
+          Pas encore de compte&nbsp;?{' '}
           <Link href="/inscription" className="text-[#111] hover:text-gold font-semibold transition-colors">
-            Créer un compte
+            Créer&nbsp;un&nbsp;compte
           </Link>
         </p>
       </div>

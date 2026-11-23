@@ -1,6 +1,21 @@
 import { createServiceClient } from '@/lib/supabase';
 import { normalizeEmail } from '@/lib/validation';
 
+/**
+ * Source des adresses laissées sur la page d'attente du pré-lancement.
+ *
+ * La page promet : « Votre adresse ne sert qu'à vous prévenir de l'ouverture ».
+ * Ces adresses vivent dans newsletter_subscribers (même désabonnement, même
+ * suppression de compte) mais ne reçoivent PAS la newsletter tant que la
+ * personne ne s'y abonne pas elle-même (décision de Raouf, 23/11/2026).
+ */
+export const SOURCE_LISTE_ATTENTE = 'prelaunch';
+
+/** Une adresse active reçoit-elle la newsletter ? Non si elle vient seulement de la liste d'attente. */
+export function recoitLaNewsletter(source: string | null | undefined): boolean {
+  return source !== SOURCE_LISTE_ATTENTE;
+}
+
 export interface UpsertSubscriberInput {
   email: string;
   /** Where the user opted in (e.g. 'form', 'popup', 'signup', 'admin'). */
@@ -38,7 +53,7 @@ export async function upsertNewsletterSubscriber(
   // Check existing
   const { data: existing, error: selErr } = await supabase
     .from('newsletter_subscribers')
-    .select('id, status, unsubscribed_at')
+    .select('id, status, unsubscribed_at, source')
     .eq('email', email)
     .maybeSingle();
 
@@ -48,6 +63,23 @@ export async function upsertNewsletterSubscriber(
 
   if (existing) {
     if (existing.status === 'active') {
+      // Inscrite seulement sur la liste d'attente, la personne s'abonne
+      // maintenant à la newsletter : on enregistre ce nouveau choix, sinon
+      // elle resterait exclue des envois (voir recoitLaNewsletter).
+      if (!recoitLaNewsletter(existing.source) && recoitLaNewsletter(input.source)) {
+        const { error: majErr } = await supabase
+          .from('newsletter_subscribers')
+          .update({
+            source: input.source ?? null,
+            opt_in_at: new Date().toISOString(),
+            ...(input.userId ? { user_id: input.userId } : {}),
+          })
+          .eq('id', existing.id);
+        if (majErr) {
+          throw new Error(`Failed to record newsletter opt-in: ${majErr.message}`);
+        }
+        return { id: existing.id, isNew: false, reactivated: true };
+      }
       return { id: existing.id, isNew: false, reactivated: false };
     }
 

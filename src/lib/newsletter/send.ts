@@ -5,6 +5,7 @@ import { renderPremiumBriefingHtml, renderPremiumBriefingText } from '@/emails/r
 import { SITE_URL } from '@/lib/config';
 import type { NewsletterIssueRow } from '@/lib/newsletter/issues';
 import { updateIssue } from '@/lib/newsletter/issues';
+import { recoitLaNewsletter } from '@/lib/newsletter/subscribers';
 
 const FROM = 'NFI Report <noreply@nfireport.com>';
 const REPLY_TO = 'contact@nfireport.com';
@@ -42,12 +43,14 @@ async function resolveRecipients(
   const supabase = createServiceClient();
   if (!supabase) return { premium: [], free: [] };
 
-  const { data: subs, error } = await supabase
+  const { data, error } = await supabase
     .from('newsletter_subscribers')
-    .select('id, email, unsubscribe_token, user_id')
+    .select('id, email, unsubscribe_token, user_id, source')
     .eq('status', 'active');
 
-  if (error || !subs) return { premium: [], free: [] };
+  if (error || !data) return { premium: [], free: [] };
+  // La liste d'attente ne reçoit pas la newsletter (promesse de la page d'attente).
+  const subs = data.filter((s) => recoitLaNewsletter(s.source));
 
   // Charge les rôles pour pouvoir splitter (utile dans tous les modes d'audience)
   const userIds = subs.map((s) => s.user_id).filter((u): u is string => !!u);

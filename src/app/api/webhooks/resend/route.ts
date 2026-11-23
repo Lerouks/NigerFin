@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
 import { createServiceClient } from '@/lib/supabase';
+import { lireEtiquette, type EtiquettesResend } from '@/lib/emails/etiquettes-resend';
 
 interface ResendEvent {
   type: string; // 'email.delivered' | 'email.opened' | 'email.clicked' | 'email.bounced' | 'email.complained' | 'email.delivery_delayed'
@@ -9,7 +10,8 @@ interface ResendEvent {
   data: {
     email_id?: string;
     to?: string[];
-    tags?: { name: string; value: string }[];
+    // Objet dans les avis de Resend ({ nfi_email_type: 'facture' }), tableau dans l'API d'envoi.
+    tags?: EtiquettesResend;
     subject?: string;
     [k: string]: unknown;
   };
@@ -144,11 +146,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ignored: true });
     }
 
-    const tags = event.data?.tags ?? [];
-    const issueId = tags.find((t) => t.name === 'nfi_issue_id')?.value;
-    const subscriberId = tags.find((t) => t.name === 'nfi_subscriber_id')?.value;
-    const emailType = tags.find((t) => t.name === 'nfi_email_type')?.value;
-    const taggedUserId = tags.find((t) => t.name === 'nfi_user_id')?.value;
+    const tags = event.data?.tags;
+    const issueId = lireEtiquette(tags, 'nfi_issue_id');
+    const subscriberId = lireEtiquette(tags, 'nfi_subscriber_id');
+    const emailType = lireEtiquette(tags, 'nfi_email_type');
+    const taggedUserId = lireEtiquette(tags, 'nfi_user_id');
 
     const supabase = createServiceClient();
     if (!supabase) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });

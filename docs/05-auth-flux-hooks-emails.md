@@ -2,9 +2,9 @@
 
 ### 21. Providers d'auth
 
-Email/password uniquement (via supabase.auth.signInWithPassword et supabase.auth.signUp).
+Deux portes : e-mail et mot de passe (supabase.auth.signInWithPassword et supabase.auth.signUp), et Google. Pas de magic link. Le signup par e-mail inclut un champ full_name passe dans options.data.
 
-Pas de Google, pas de magic link, pas d'OAuth tiers. Le signup inclut un champ full_name passe dans options.data.
+Connexion avec Google (bouton « Continuer avec Google », sous le formulaire de /connexion et de /inscription) : nos propres routes, pas signInWithOAuth, pour que la fenetre de Google affiche nfireport.com et non l'adresse supabase.co du projet. /api/auth/google envoie chez Google (etat et nonce dans un cookie httpOnly de dix minutes), /api/auth/google/retour echange le code contre le jeton d'identite (secret GOOGLE_CLIENT_SECRET) puis supabase.auth.signInWithIdToken ouvre la session. Compte tout juste ouvert : prenom et nom depuis Google, mail de bienvenue, puis /inscription/completer-profil. Le bouton n'apparait que si GOOGLE_CLIENT_ID et GOOGLE_CLIENT_SECRET sont poses, et pendant le pre-lancement seulement pour un admin. Dans le navigateur integre de Facebook, Instagram ou TikTok, Google refuse la connexion (erreur 403 disallowed_useragent) : le bouton affiche alors un message pour ouvrir la page dans Safari ou Chrome. Reglages : client OAuth « Application Web » du compte Google contact@nfireport.com, URI de redirection https://nfireport.com/api/auth/google/retour ; fournisseur Google active dans Supabase avec le meme identifiant client.
 
 Le callback route (/api/auth/callback) gere l'echange de code pour confirmation d'email.
 

@@ -9,18 +9,24 @@ import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import { safeNextPath } from '@/lib/validation';
 import { Eye, EyeOff, Mail, Lock, ArrowLeft, CheckCircle } from 'lucide-react';
 import { AuthLayout } from '@/components/AuthLayout';
+import { BoutonGoogle, useGoogleDisponible } from '@/components/auth/ConnexionGoogle';
+
+// Traits d'union insécables (\u2011) : « connectez-vous » et « e-mail » ne se coupent pas en fin de ligne.
+const ERREUR_GOOGLE = 'La connexion avec Google n’a pas abouti. Réessayez, ou connectez\u2011vous avec votre\u00a0e\u2011mail.';
 
 function ConnexionContent() {
   const searchParams = useSearchParams();
   const [email, setEmail] = useState(searchParams.get('email') || '');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(searchParams.get('erreur') === 'google' ? ERREUR_GOOGLE : '');
   const [loading, setLoading] = useState(false);
   const [forgotMode, setForgotMode] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
   const { signIn } = useAuth();
+  const google = useGoogleDisponible();
+  const suite = searchParams.get('redirect') ?? searchParams.get('next');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,11 +126,6 @@ function ConnexionContent() {
   return (
     <AuthLayout>
       <div className="bg-white rounded-2xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] p-10 sm:p-12 animate-fade-in-up">
-        {/* Mobile logo */}
-        <div className="lg:hidden text-center mb-6">
-          <Link href="/" className="font-[family-name:var(--font-playfair)] text-xl font-bold tracking-[0.01em] text-[#111]">NFI&nbsp;REPORT</Link>
-        </div>
-
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold mb-3">Connexion</h1>
           <p className="text-gray-500 text-base">
@@ -133,7 +134,7 @@ function ConnexionContent() {
         </div>
 
         {error && (
-          <div role="alert" className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-lg mb-6">
+          <div role="alert" className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-lg mb-6 text-pretty">
             {error}
           </div>
         )}
@@ -209,7 +210,9 @@ function ConnexionContent() {
           </div>
         </div>
 
-        <p className="text-center text-sm text-gray-500">
+        {google && <BoutonGoogle suite={suite} />}
+
+        <p className={`text-center text-sm text-gray-500${google ? ' mt-8' : ''}`}>
           Pas encore de compte ?{' '}
           <Link href="/inscription" className="text-[#111] hover:text-gold font-semibold transition-colors">
             Créer un compte

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { FournisseurGoogle } from '@/components/auth/FournisseurGoogle';
 
 export const metadata: Metadata = {
   title: 'Créer un compte',
@@ -10,5 +11,5 @@ export default function InscriptionLayout({ children }: { children: React.ReactN
   // Le H1 visible vit dans page.tsx (Compte existant / Verifiez votre email /
   // Creer un compte selon l'etat). Le layout ne doit PAS dupliquer un H1
   // sr-only, sinon WCAG signale "2 H1 par page" (audit QA 2026-05-27).
-  return <>{children}</>;
+  return <FournisseurGoogle>{children}</FournisseurGoogle>;
 }

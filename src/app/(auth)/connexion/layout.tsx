@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { HabillagePreLancement } from '@/components/coming-soon/HabillagePreLancement';
+import { FournisseurGoogle } from '@/components/auth/FournisseurGoogle';
 
 export const metadata: Metadata = {
   title: 'Connexion',
@@ -11,5 +12,9 @@ export default function ConnexionLayout({ children }: { children: React.ReactNod
   // Le H1 visible vit dans page.tsx (variantes Connexion / Mot de passe oublie /
   // Email envoye selon l'etat du formulaire). Le layout ne doit PAS dupliquer
   // un H1 sr-only, sinon WCAG signale "2 H1 par page" (audit QA 2026-05-27).
-  return <HabillagePreLancement>{children}</HabillagePreLancement>;
+  return (
+    <HabillagePreLancement>
+      <FournisseurGoogle>{children}</FournisseurGoogle>
+    </HabillagePreLancement>
+  );
 }

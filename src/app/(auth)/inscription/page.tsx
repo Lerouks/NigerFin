@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import { AuthLayout } from '@/components/AuthLayout';
+import { BoutonGoogle, useGoogleDisponible } from '@/components/auth/ConnexionGoogle';
 
 function getPasswordStrength(password: string): { level: 'weak' | 'medium' | 'strong'; label: string; color: string; bgColor: string; width: string } {
   let score = 0;
@@ -24,6 +25,8 @@ type Civility = 'M.' | 'Mme';
 
 function InscriptionContent() {
   const searchParams = useSearchParams();
+  const google = useGoogleDisponible();
+  const suite = searchParams.get('redirect') ?? searchParams.get('next');
   const [civility, setCivility] = useState<Civility | ''>('');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState(searchParams.get('email') || '');
@@ -151,11 +154,6 @@ function InscriptionContent() {
   return (
     <AuthLayout>
       <div className="bg-white rounded-2xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] p-8 sm:p-10 animate-fade-in-up">
-        {/* Mobile logo */}
-        <div className="lg:hidden text-center mb-6">
-          <Link href="/" className="font-[family-name:var(--font-playfair)] text-xl font-bold tracking-[0.01em] text-[#111]">NFI&nbsp;REPORT</Link>
-        </div>
-
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold mb-2">Créer un compte</h1>
           <p className="text-gray-500 text-sm">
@@ -347,7 +345,9 @@ function InscriptionContent() {
           </div>
         </div>
 
-        <p className="text-center text-sm text-gray-500">
+        {google && <BoutonGoogle suite={suite} />}
+
+        <p className={`text-center text-sm text-gray-500${google ? ' mt-7' : ''}`}>
           Déjà un compte ?{' '}
           <Link href="/connexion" className="text-[#111] hover:text-gold font-semibold transition-colors">
             Se connecter

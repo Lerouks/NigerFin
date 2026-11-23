@@ -61,16 +61,18 @@ const baseMetadata: Metadata = {
     'uranium',
     'FCFA',
   ],
-  // Icônes refaites le 23/11/2026 depuis le logo officiel détouré : la
-  // pyramide remplit l'icône, traits épaissis aux petites tailles (16 et 32
-  // pixels) pour rester lisible dans un onglet. favicon.ico contient 16, 32
-  // et 48 pixels. Nouveaux noms de fichiers : Safari garde longtemps l'ancienne
-  // icône en cache si l'adresse ne change pas.
+  // Icône d'onglet (23/11/2026) : un rond noir parfait, sans bord, comme une
+  // photo de profil, avec la pyramide argentée du logo officiel. Le fond noir
+  // est indispensable : le logo est argenté, il disparaîtrait sur la barre
+  // d'onglets claire de Safari. Traits épaissis à 16 et 32 pixels pour rester
+  // lisibles. favicon.ico contient 16, 32 et 48 pixels. « ?v=2 » change
+  // l'adresse pour que Safari, qui garde longtemps ses icônes, prenne la
+  // nouvelle. L'icône iPhone reste carrée : iOS arrondit lui-même ses coins.
   icons: {
     icon: [
-      { url: '/favicon.ico', sizes: '16x16 32x32 48x48' },
-      { url: '/icone-32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/icone-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/favicon.ico?v=2', sizes: '16x16 32x32 48x48' },
+      { url: '/icone-32.png?v=2', sizes: '32x32', type: 'image/png' },
+      { url: '/icone-192.png?v=2', sizes: '192x192', type: 'image/png' },
     ],
     apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
   },

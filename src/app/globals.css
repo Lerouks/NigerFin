@@ -30,7 +30,18 @@
 }
 
 /* ─── Page d'attente (mode pré-lancement) ───
-   La carte est dessinée par CarteNiger.tsx. */
+   La carte est dessinée par CarteNiger.tsx (elle s'allume d'ouest en est).
+   Entrée sobre, une seule fois : le titre se dévoile d'un bloc, par le bas, sans
+   glissement ; le reste apparaît en fondu. Rien au défilement, rien qui flotte. */
+@keyframes nfi-devoile {
+  from { clip-path: inset(100% 0 -0.3em 0); }
+  to   { clip-path: inset(-0.3em 0 -0.3em 0); }
+}
+@keyframes nfi-fondu { from { opacity: 0; } to { opacity: 1; } }
+.nfi-titre { animation: nfi-devoile .95s cubic-bezier(.2, .7, .1, 1) .2s backwards; }
+.nfi-apparait { animation: nfi-fondu .8s ease .6s backwards; }
+.nfi-apparait-2 { animation-delay: .75s; }
+.nfi-apparait-3 { animation-delay: .9s; }
 
 /* Réseaux de la page d'attente : argent au repos, couleurs officielles au
    survol et au clavier (logos de tiers, hors palette NFI par nature). */
@@ -46,6 +57,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .nfi-reseau, .nfi-reseau svg, .nfi-reseau-fond { transition: none; }
+  .nfi-titre, .nfi-apparait { animation: none; }
 }
 
 /*

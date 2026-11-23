@@ -29,13 +29,15 @@ const SOCIALS = [
  * Page d'attente du pré-lancement (maquette « la carte », choisie par la
  * direction le 23/11/2026). Fond noir ; le Niger en points argentés occupe le
  * haut à droite, le titre se pose dans le vide du nord-ouest de la carte. Sur
- * téléphone, la carte passe sous le formulaire pour que l'inscription reste
- * en haut de l'écran.
+ * téléphone (version D, choisie le 23/11/2026), la carte, plus compacte, passe
+ * en tête : le Niger dès l'ouverture, puis le titre et le formulaire, bouton
+ * visible sans défiler. Entrée sobre, une seule fois (globals.css) : la carte
+ * s'allume d'ouest en est, le titre se dévoile d'un bloc, le reste en fondu.
  */
 export function ComingSoon() {
   return (
-    <main className="relative flex min-h-svh w-full flex-col overflow-hidden bg-[#09090a] px-[22px] pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-6 [-webkit-tap-highlight-color:transparent] text-[#f4f4f5] antialiased sm:px-10 lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:grid-rows-[auto_1fr_auto] lg:gap-x-10 xl:flex xl:px-14 xl:pb-8 xl:pt-9">
-      <CarteNiger className="pointer-events-none relative order-2 mx-auto mt-10 block w-full max-w-[760px] lg:col-start-2 lg:row-start-2 lg:mx-0 lg:mt-0 lg:w-full lg:self-center xl:absolute xl:right-[3vw] xl:top-[9vh] xl:order-none xl:m-0 xl:w-[min(63vw,104vh)]" />
+    <main className="relative flex min-h-svh w-full flex-col overflow-hidden bg-[#09090a] px-[22px] pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-5 [-webkit-tap-highlight-color:transparent] sm:pt-6 text-[#f4f4f5] antialiased sm:px-10 lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:grid-rows-[auto_1fr_auto] lg:gap-x-10 xl:flex xl:px-14 xl:pb-8 xl:pt-9">
+      <CarteNiger className="pointer-events-none relative order-1 mb-0.5 ml-auto mt-3.5 block w-[74%] max-w-[760px] sm:order-2 sm:mx-auto sm:mb-0 sm:mt-10 sm:w-full lg:col-start-2 lg:row-start-2 lg:mx-0 lg:mt-0 lg:w-full lg:self-center xl:absolute xl:right-[3vw] xl:top-[9vh] xl:order-none xl:m-0 xl:w-[min(63vw,104vh)]" />
 
       <header className="relative z-10 order-0 lg:col-span-2 lg:row-start-1">
         <div>
@@ -43,14 +45,15 @@ export function ComingSoon() {
         </div>
       </header>
 
-      <section className="relative z-10 order-1 flex max-w-[560px] flex-col pt-[10vh] lg:col-start-1 lg:row-start-2 lg:self-center lg:pt-0 xl:max-w-[600px] xl:self-auto xl:flex-1 xl:justify-end xl:pb-[4vh] xl:pt-[4vh] min-[1800px]:max-w-[760px]">
-        <h1 className="text-[46px] font-bold leading-[0.96] tracking-[-0.045em] sm:text-[64px] xl:text-[clamp(52px,min(6.2vw,10vh),136px)]">
-          L’économie du&nbsp;Niger, <span className="text-[#7d8189]">en&nbsp;clair.</span>
+      <section className="relative z-10 order-2 -mt-1.5 flex max-w-[560px] flex-col sm:order-1 sm:mt-0 sm:pt-[10vh] lg:col-start-1 lg:row-start-2 lg:self-center lg:pt-0 xl:max-w-[600px] xl:self-auto xl:flex-1 xl:justify-end xl:pb-[4vh] xl:pt-[4vh] min-[1800px]:max-w-[760px]">
+        <h1 className="nfi-titre text-[38px] font-bold leading-[0.96] tracking-[-0.045em] min-[380px]:text-[40px] sm:text-[64px] xl:text-[clamp(52px,min(6.2vw,10vh),136px)]">
+          {/* Sans point final, comme un titre de presse. */}
+          L’économie du&nbsp;Niger, <span className="text-[#7d8189]">en&nbsp;clair</span>
         </h1>
-        <p className="mt-5 max-w-[470px] text-[16px] leading-[1.55] text-[#a9adb4] sm:text-[18px] xl:mt-[3.2vh] min-[1800px]:max-w-[600px] min-[1800px]:text-[21px]">
+        <p className="nfi-apparait mt-3 max-w-[470px] text-[15.5px] leading-[1.55] text-[#a9adb4] sm:mt-5 sm:text-[18px] xl:mt-[3.2vh] min-[1800px]:max-w-[600px] min-[1800px]:text-[21px]">
           Un média d’information économique et financière consacré au&nbsp;Niger&nbsp;: l’énergie, les banques, la bourse, les entreprises.
         </p>
-        <div className="mt-8 max-w-[470px] xl:mt-[5vh] min-[1800px]:max-w-[560px]">
+        <div className="nfi-apparait nfi-apparait-2 mt-[18px] max-w-[470px] sm:mt-8 xl:mt-[5vh] min-[1800px]:max-w-[560px]">
           <WaitlistForm />
           {/* La page collecte une adresse : qui la donne doit pouvoir lire qui la
               collecte, et sortir. Ces pages restent ouvertes en pré-lancement. */}
@@ -66,7 +69,7 @@ export function ComingSoon() {
         </div>
       </section>
 
-      <footer className="relative z-10 order-3 mt-4 flex items-center lg:col-start-1 lg:row-start-3 xl:mt-0">
+      <footer className="nfi-apparait nfi-apparait-3 relative z-10 order-3 mt-4 flex items-center lg:col-start-1 lg:row-start-3 xl:mt-0">
         <nav className="-ml-2.5 flex items-center gap-1" aria-label="NFI REPORT sur les réseaux sociaux">
           {/* Dégradé officiel d'Instagram, appelé par .nfi-reseau--instagram. */}
           <svg width="0" height="0" className="absolute" aria-hidden="true" focusable="false">

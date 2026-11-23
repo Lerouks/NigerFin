@@ -61,10 +61,12 @@ export function WaitlistForm() {
 
   return (
     <form onSubmit={handleSubmit} noValidate>
-      <label htmlFor="waitlist-email" className="mb-2.5 block text-[14px] text-[#a9adb4] xl:text-[13px]">
+      <label htmlFor="waitlist-email" className="mb-2 block text-[14px] text-[#a9adb4] sm:mb-2.5 xl:text-[13px]">
         Être prévenu de l’ouverture
       </label>
-      <div className="flex items-center gap-3 border-b border-white/25 transition-colors duration-200 focus-within:border-[#f4f4f5]">
+      {/* Téléphone : champ encadré et vrai bouton blanc, sur toute la largeur.
+          À partir de la tablette : la ligne fine du site, champ et bouton côte à côte. */}
+      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-3 sm:border-b sm:border-white/25 sm:transition-colors sm:duration-200 sm:focus-within:border-[#f4f4f5]">
         <input
           id="waitlist-email"
           type="email"
@@ -82,12 +84,12 @@ export function WaitlistForm() {
           }}
           disabled={status === 'loading'}
           aria-invalid={status === 'error'}
-          className="min-w-0 flex-1 bg-transparent py-[13px] text-[16px] text-[#f4f4f5] placeholder:text-[#5c6068] focus:outline-none disabled:opacity-60 sm:text-[17px]"
+          className="h-[50px] min-w-0 flex-none rounded-[10px] border border-white/20 bg-transparent px-4 text-[16px] text-[#f4f4f5] transition-colors duration-200 placeholder:text-[#6b6f76] focus:border-[#f4f4f5] focus:outline-none disabled:opacity-60 sm:h-auto sm:flex-1 sm:rounded-none sm:border-0 sm:px-0 sm:py-[13px] sm:text-[17px] sm:placeholder:text-[#5c6068]"
         />
         <button
           type="submit"
           disabled={status === 'loading'}
-          className="group inline-flex min-h-[44px] shrink-0 items-center gap-2 text-[15px] font-semibold text-[#f4f4f5] transition-opacity duration-200 hover:opacity-80 focus-visible:underline focus-visible:outline-none disabled:opacity-60"
+          className="group inline-flex h-[50px] w-full shrink-0 items-center justify-center gap-2 rounded-[10px] bg-[#f4f4f5] text-[16px] font-semibold text-[#0b0b0c] transition-colors duration-200 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f4f5] focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090a] active:bg-[#dcdfe3] disabled:opacity-60 sm:h-auto sm:min-h-[44px] sm:w-auto sm:rounded-none sm:bg-transparent sm:text-[15px] sm:text-[#f4f4f5] sm:hover:bg-transparent sm:hover:opacity-80 sm:focus-visible:underline sm:focus-visible:ring-0 sm:active:bg-transparent"
         >
           {status === 'loading' ? (
             <>

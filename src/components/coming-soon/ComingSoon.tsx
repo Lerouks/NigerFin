@@ -37,6 +37,8 @@ const SOCIALS = [
  *   titre monte mot par mot puis « en clair » passe du flou au net, le reste
  *   arrive en fondu ; sur ordinateur, la souris éclaire les points qu'elle
  *   survole. Tout est coupé pour qui demande moins de mouvement.
+ * - Signature (choix de Raouf, 24/11/2026) : le slogan, mot pour mot, ferme la
+ *   page juste au-dessus des réseaux, comme à la fin de nos posts.
  */
 export function ComingSoon() {
   return (
@@ -69,14 +71,17 @@ export function ComingSoon() {
             <span className="nfi-net text-[#7d8189]">en&nbsp;clair</span>
           </h1>
           <p className="nfi-apparait mt-[clamp(10px,1.6svh,16px)] max-w-[470px] text-[clamp(15px,4.1vw,18px)] leading-[1.55] text-[#a9adb4] sm:mx-auto sm:mt-[2.4vh] sm:text-[18px] 2xl:max-w-[600px] 2xl:text-[20px]">
-            Un média d’information économique et financière consacré au&nbsp;Niger&nbsp;: l’énergie, les banques, la bourse, les entreprises.
+            {/* « et » et « les » ne finissent jamais une ligne, et la dernière ligne
+                garde au moins quatre mots, à toutes les largeurs. */}
+            Un média d’information économique et&nbsp;financière consacré au&nbsp;Niger&nbsp;: l’énergie, les&nbsp;banques,{' '}
+            <span className="whitespace-nowrap">la bourse, les entreprises.</span>
           </p>
           <div className="nfi-apparait nfi-apparait-2 mt-[clamp(14px,2.4svh,24px)] w-full max-w-[470px] sm:mx-auto sm:mt-[3.4vh] 2xl:max-w-[540px]">
             <WaitlistForm />
             {/* La page collecte une adresse : qui la donne doit pouvoir lire qui la
                 collecte, et sortir. Ces pages restent ouvertes en pré-lancement. */}
             <p className="mt-1 hidden text-[13px] leading-relaxed text-[#8a8e95] sm:block xl:text-[12px] xl:text-[#7d8189]">
-              Votre adresse ne sert qu’à vous prévenir de l’ouverture.{' '}
+              Votre adresse ne sert qu’à vous prévenir de&nbsp;l’ouverture.{' '}
               <a
                 href="/confidentialite"
                 className="whitespace-nowrap underline underline-offset-[3px] transition-colors hover:text-[#f4f4f5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f4f5]"
@@ -90,7 +95,7 @@ export function ComingSoon() {
 
       {/* Téléphone : la mention suit le bouton, juste sous le premier écran. */}
       <p className="mt-3 text-[clamp(12.5px,3.3vw,14px)] leading-relaxed text-[#8a8e95] sm:hidden">
-        Votre adresse ne sert qu’à vous prévenir de l’ouverture.{' '}
+        Votre adresse ne sert qu’à vous prévenir de&nbsp;l’ouverture.{' '}
         <a
           href="/confidentialite"
           className="whitespace-nowrap underline underline-offset-[3px] transition-colors hover:text-[#f4f4f5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f4f5]"
@@ -99,7 +104,12 @@ export function ComingSoon() {
         </a>
       </p>
 
-      <footer className="nfi-apparait nfi-apparait-3 relative z-10 order-3 mt-5 flex items-center sm:justify-center sm:pt-[2.4vh]">
+      {/* Le slogan signe la page au-dessus des réseaux. Sur ordinateur, la marge
+          du haut passe en vh pour que la page tienne toujours dans l'écran 1280 × 720. */}
+      <footer className="nfi-apparait nfi-apparait-3 relative z-10 order-3 mt-5 flex flex-col items-start sm:mt-0 sm:items-center sm:pt-[2.4vh]">
+        <p className="mb-1.5 font-[family-name:var(--font-playfair)] text-[16px] leading-snug text-[#a9adb4] sm:mb-2 sm:text-[17px] 2xl:text-[19px]">
+          La connaissance, votre meilleur&nbsp;capital.
+        </p>
         <nav className="-ml-2.5 flex items-center gap-1 sm:ml-0" aria-label="NFI REPORT sur les réseaux sociaux">
           {/* Dégradé officiel d'Instagram, appelé par .nfi-reseau--instagram. */}
           <svg width="0" height="0" className="absolute" aria-hidden="true" focusable="false">

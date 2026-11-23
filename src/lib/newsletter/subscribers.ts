@@ -18,9 +18,12 @@ export function recoitLaNewsletter(source: string | null | undefined): boolean {
 }
 
 /**
- * Lien de désinscription en un clic d'une adresse (jeton unique de la ligne).
- * Sert au pied des mails de la liste d'attente et de la newsletter, et à
- * l'en-tête List-Unsubscribe. `undefined` si le jeton est introuvable.
+ * Lien de désabonnement de la newsletter d'une adresse (jeton unique de la
+ * ligne). Sert au pied des mails de la newsletter et à l'en-tête
+ * List-Unsubscribe. Ouvert dans un navigateur, il mène à une page qui demande
+ * de confirmer : il ne désabonne jamais à lui seul. Les mails de la liste
+ * d'attente n'en portent pas, car la liste d'attente ne se quitte pas
+ * (décision de Raouf, 23/11/2026). `undefined` si le jeton est introuvable.
  */
 export async function lienDesinscription(id: string): Promise<string | undefined> {
   const supabase = createServiceClient();
@@ -415,41 +418,110 @@ async function syncProfileNewsletterFlag(
  * Mark a subscriber as unsubscribed (RFC 8058 one-click and standard flow).
  * Idempotent: no-op if already unsubscribed.
  *
+ * Par jeton, seule la newsletter se quitte : une adresse de la seule liste
+ * d'attente est traitée comme inconnue, la liste d'attente ne se quittant pas
+ * (décision de Raouf, 23/11/2026).
+ *
  * Synchronise aussi `user_profiles.newsletter_subscribed = false` quand le
  * subscriber a un user_id lié (single source of truth).
  */
 export async function unsubscribeBy(
   field: 'email' | 'unsubscribe_token',
   value: string,
-): Promise<{ found: boolean; alreadyUnsubscribed: boolean; listeAttente: boolean }> {
+): Promise<{ found: boolean; alreadyUnsubscribed: boolean }> {
   const supabase = createServiceClient();
   if (!supabase) throw new Error('Supabase service client unavailable');
 
-  const { data: existing } = await supabase
+  const { data: existing, error: selErr } = await supabase
     .from('newsletter_subscribers')
     .select('id, status, user_id, source')
     .eq(field, value)
     .maybeSingle();
 
-  if (!existing) return { found: false, alreadyUnsubscribed: false, listeAttente: false };
-  // L'adresse vient seulement de la page d'attente : la page de confirmation
-  // parle alors de la liste d'attente, pas de la newsletter.
-  const listeAttente = !recoitLaNewsletter(existing.source);
+  if (selErr) throw new Error(`Failed to lookup subscriber: ${selErr.message}`);
+  if (!existing) return { found: false, alreadyUnsubscribed: false };
+  if (field === 'unsubscribe_token' && !recoitLaNewsletter(existing.source)) {
+    return { found: false, alreadyUnsubscribed: false };
+  }
   if (existing.status === 'unsubscribed') {
-    return { found: true, alreadyUnsubscribed: true, listeAttente };
+    return { found: true, alreadyUnsubscribed: true };
   }
 
-  await supabase
+  const { error: majErr } = await supabase
     .from('newsletter_subscribers')
     .update({
       status: 'unsubscribed',
       unsubscribed_at: new Date().toISOString(),
     })
     .eq('id', existing.id);
+  if (majErr) throw new Error(`Failed to unsubscribe: ${majErr.message}`);
 
   if (existing.user_id) {
     await syncProfileNewsletterFlag(existing.user_id, false);
   }
 
-  return { found: true, alreadyUnsubscribed: false, listeAttente };
+  return { found: true, alreadyUnsubscribed: false };
+}
+
+/** Ce que la page de désabonnement montre d'un abonnement désigné par son jeton. */
+export interface AbonnementParJeton {
+  email: string;
+  status: SubscriberStatus;
+}
+
+/**
+ * Abonnement à la newsletter désigné par un jeton de désabonnement, pour la
+ * page qui demande de confirmer. `null` si le jeton est inconnu ou s'il désigne
+ * une adresse de la seule liste d'attente (celle-ci ne se quitte pas).
+ */
+export async function abonnementParJeton(jeton: string): Promise<AbonnementParJeton | null> {
+  const supabase = createServiceClient();
+  if (!supabase) throw new Error('Supabase service client unavailable');
+
+  const { data, error } = await supabase
+    .from('newsletter_subscribers')
+    .select('email, status, source')
+    .eq('unsubscribe_token', jeton)
+    .maybeSingle();
+
+  if (error) throw new Error(`Failed to lookup subscriber: ${error.message}`);
+  if (!data || !recoitLaNewsletter(data.source)) return null;
+  return { email: data.email, status: data.status as SubscriberStatus };
+}
+
+/**
+ * Réabonnement depuis la page de désabonnement (« Vous changez d'avis ? »).
+ * Seule une adresse qui s'est désabonnée elle-même revient : jamais une adresse
+ * en rebond ou qui nous a classés en indésirable, ni une adresse de la seule
+ * liste d'attente. Aucun mail ne part. Idempotent.
+ */
+export async function reabonnerParJeton(jeton: string): Promise<{ found: boolean; reabonne: boolean }> {
+  const supabase = createServiceClient();
+  if (!supabase) throw new Error('Supabase service client unavailable');
+
+  const { data: existing, error: selErr } = await supabase
+    .from('newsletter_subscribers')
+    .select('id, status, user_id, source')
+    .eq('unsubscribe_token', jeton)
+    .maybeSingle();
+
+  if (selErr) throw new Error(`Failed to lookup subscriber: ${selErr.message}`);
+  if (!existing || !recoitLaNewsletter(existing.source)) return { found: false, reabonne: false };
+  if (existing.status !== 'unsubscribed') return { found: true, reabonne: false };
+
+  const { error: majErr } = await supabase
+    .from('newsletter_subscribers')
+    .update({
+      status: 'active',
+      unsubscribed_at: null,
+      opt_in_at: new Date().toISOString(),
+    })
+    .eq('id', existing.id);
+  if (majErr) throw new Error(`Failed to resubscribe: ${majErr.message}`);
+
+  if (existing.user_id) {
+    await syncProfileNewsletterFlag(existing.user_id, true);
+  }
+
+  return { found: true, reabonne: true };
 }

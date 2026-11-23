@@ -12,9 +12,10 @@ import { NextRequest } from 'next/server';
  * deux confirmations de paiement. Ce test vérifie, par le vrai code des deux
  * routes publiques, que l'adresse est cherchée et écrite sous cette forme.
  *
- * Depuis le 23/11/2026, les deux routes envoient aussi un mail (confirmation
- * de la liste d'attente, bienvenue de la newsletter) qui porte le lien de
- * désinscription de l'adresse : elles relisent donc son jeton par l'id.
+ * Depuis le 23/11/2026, les deux routes envoient aussi un mail. La bienvenue
+ * de la newsletter porte le lien de désabonnement : la route relit donc le
+ * jeton par l'id. La confirmation de la liste d'attente n'en porte aucun, car
+ * la liste d'attente ne se quitte pas (décision de Raouf, 23/11/2026).
  * Rien n'est envoyé ici : l'envoi est simulé (vi.mock de @/lib/email).
  */
 
@@ -93,7 +94,6 @@ describe('les inscriptions enregistrent l’adresse normalisée', () => {
         operation: 'newsletter_subscribers.insert',
         valeur: { email: 'pre_lancement@exemple.test', source: 'prelaunch', user_id: null, locale: 'fr' },
       },
-      { operation: 'newsletter_subscribers.select.eq.id', valeur: 'abonne-1' },
     ]);
   });
 
@@ -117,17 +117,18 @@ describe('les inscriptions enregistrent l’adresse normalisée', () => {
 describe('le mail qui suit l’inscription', () => {
   const lien = expect.stringContaining(`/api/newsletter/unsubscribe?token=${JETON}`);
 
-  it('liste d’attente : la confirmation part, avec le lien pour quitter la liste', async () => {
+  it('liste d’attente : la confirmation part, sans lien ni en-tête pour quitter la liste', async () => {
     const { POST } = await import('@/app/api/waitlist/route');
     await POST(requete('http://localhost/api/waitlist', { email: 'Lecteur@Exemple.Test' }));
 
-    expect(waitlistConfirmationEmail).toHaveBeenCalledWith({ unsubscribeUrl: lien });
+    expect(waitlistConfirmationEmail).toHaveBeenCalledWith();
     expect(sendTransactionalEmail).toHaveBeenCalledTimes(1);
     expect(sendTransactionalEmail).toHaveBeenCalledWith(expect.objectContaining({
       to: 'lecteur@exemple.test',
       emailType: 'waitlist_confirmation',
-      unsubscribeUrl: lien,
     }));
+    expect(vi.mocked(sendTransactionalEmail).mock.calls[0]![0]).not.toHaveProperty('unsubscribeUrl');
+    expect(appels.map((a) => a.operation)).not.toContain('newsletter_subscribers.select.eq.id');
   });
 
   it('liste d’attente : rien n’est renvoyé à une adresse déjà inscrite', async () => {

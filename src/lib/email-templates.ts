@@ -154,10 +154,11 @@ export function newsletterWelcomeEmail(unsubscribeUrl?: string): { subject: stri
 /**
  * Confirmation de la liste d'attente (pré-lancement). La page promet : « Votre
  * adresse ne sert qu'à vous prévenir de l'ouverture ». Ce mail le confirme,
- * propose de suivre NFI REPORT en attendant et donne un lien pour se retirer.
+ * et propose de suivre NFI REPORT en attendant. Aucun lien pour quitter la liste :
+ * une fois inscrit, c'est fait (décision de Raouf, 23/11/2026).
  * `whatsappUrl` : lien de la chaîne WhatsApp NFI REPORT (bloc masqué si absent).
  */
-export function waitlistConfirmationEmail({ unsubscribeUrl, whatsappUrl }: { unsubscribeUrl: string; whatsappUrl?: string }): { subject: string; html: string } {
+export function waitlistConfirmationEmail({ whatsappUrl }: { whatsappUrl?: string } = {}): { subject: string; html: string } {
   const t = TEXTES.waitlist_confirmation;
   const reseaux: Array<[string, string]> = [
     ['Facebook', defaultSocialLinks.facebook],
@@ -179,7 +180,7 @@ export function waitlistConfirmationEmail({ unsubscribeUrl, whatsappUrl }: { uns
       apercu: t.apercu,
       folio: [t.folio, FOLIO_SITE],
       raison: t.raison,
-      liens: [['nfireport.com', SITE_URL], ['Confidentialité', `${SITE_URL}/confidentialite`], [t.retirer, unsubscribeUrl]],
+      liens: [['nfireport.com', SITE_URL], ['Confidentialité', `${SITE_URL}/confidentialite`]],
       corps: rangee(
         titre(t.titre)
         + paraHtml('Bonjour,', { marge: '22px 0 0' })

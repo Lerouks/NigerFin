@@ -1,112 +1,119 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
+import { NB, soude, typo } from '@/lib/emails/edition';
+import {
+  COOKIE_DESABONNEMENT,
+  lireEtatDesabonnement,
+  type EtatDesabonnement,
+} from '@/lib/newsletter/desabonnement';
+import { seDesabonner, seReabonner } from './actions';
+import { BoutonEnvoi } from './BoutonEnvoi';
 
-// Perf M-3 : page de confirmation post-clic email = jamais cacheable.
-// Explicite plutot que de laisser Next.js inferer (les searchParams forcent
-// deja le dynamic en pratique, mais c'est plus clair pour le futur).
+// Page lue avec le cookie du lien du mail : jamais mise en cache.
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Désinscription',
-  description: 'Confirmation de votre désinscription des messages de NFI REPORT.',
+  title: 'Désabonnement de la newsletter',
+  description: 'Se désabonner de la newsletter de NFI REPORT.',
   robots: { index: false },
 };
 
 interface SearchParams {
-  ok?: string;
-  /** « attente » : l'adresse venait seulement de la page d'attente. */
-  liste?: string;
-  already?: string;
-  demo?: string;
-  error?: string;
+  /** « invalide » : le lien suivi était incomplet ou mal formé. */
+  lien?: string;
+  /** Dernière action faite sur la page : « fait » ou « reabonne ». */
+  apres?: string;
+  erreur?: string;
 }
 
-export default async function UnsubscribePage({
+type Etat = EtatDesabonnement['etat'];
+
+const CONTACT = 'contact@nfireport.com';
+/** Fin de titre qui ne se coupe pas : « de la newsletter ? » reste d'un bloc. */
+const bloc = (s: string) => typo(s).replace(/ /g, NB);
+
+/** Titres en deux tons, comme sur le reste du site : le début en noir, la fin en gris. */
+const TITRES: Record<Etat, [string, string]> = {
+  question: ['Se désabonner', bloc('de la newsletter ?')],
+  fait: ['Désabonnement', 'confirmé'],
+  reabonne: ['Abonnement', 'rétabli'],
+  inactif: ['Ce lien', bloc('n’est plus valable')],
+  'sans-lien': ['Se désabonner', bloc('de la newsletter')],
+  erreur: ['Une erreur', bloc('est survenue')],
+};
+
+const CORPS: Record<Etat, string> = {
+  question: soude('Vous ne la recevrez plus à cette adresse.'),
+  fait: soude('Nous n’enverrons plus la newsletter à cette adresse.'),
+  reabonne: soude('Cette adresse est de nouveau inscrite à la newsletter.'),
+  inactif: soude('Si vous recevez encore notre newsletter, utilisez le lien en bas du dernier envoi.'),
+  'sans-lien': soude('Le lien de désabonnement se trouve en bas de chacun de nos envois.'),
+  erreur: soude('Réessayez dans un instant, ou écrivez-nous si le problème continue.'),
+};
+
+const ANNEAU = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111] focus-visible:ring-offset-2 focus-visible:ring-offset-background';
+const BOUTON = `inline-flex h-[50px] w-full items-center justify-center rounded-md bg-[#111] px-7 text-[15px] font-semibold text-white transition-colors hover:bg-[#2b2b2b] disabled:cursor-wait disabled:opacity-70 sm:w-auto ${ANNEAU}`;
+const BOUTON_CONTOUR = `inline-flex h-[46px] w-full items-center justify-center whitespace-nowrap rounded-md border-[1.5px] border-[#111] px-[22px] text-[15px] font-semibold text-[#111] transition-colors hover:bg-[#111] hover:text-white disabled:cursor-wait disabled:opacity-70 sm:w-auto ${ANNEAU}`;
+const LIEN = `rounded-sm text-[15px] font-semibold text-[#111] underline decoration-[#111]/30 underline-offset-4 transition-colors hover:decoration-[#111] ${ANNEAU}`;
+
+export default async function PageDesabonnement({
   searchParams,
 }: {
   searchParams: Promise<SearchParams>;
 }) {
   const sp = await searchParams;
-
-  let title = 'Désabonnement';
-  let body: string | React.ReactNode = '';
-  let tone: 'success' | 'info' | 'error' = 'info';
-
-  // Le lien peut venir d'un mail de la newsletter comme d'un mail de la liste
-  // d'attente : /api/newsletter/unsubscribe ajoute `liste=attente` quand
-  // l'adresse vient seulement de la page d'attente. Sans cette précision, les
-  // textes restent neutres (ni « newsletter » ni « liste d'attente »).
-  const attente = sp.liste === 'attente';
-
-  if (sp.demo) {
-    title = 'Lien de démonstration';
-    body = 'Ce lien vient d’un message de test ou d’aperçu\u00a0: aucune désinscription n’a été faite.';
-    tone = 'info';
-  } else if (sp.ok && attente) {
-    title = sp.already ? 'Désinscription déjà effectuée' : 'Désinscription confirmée';
-    body = sp.already
-      ? 'Votre adresse n’est plus sur la liste d’attente, et nous ne vous écrirons pas à\u00a0l’ouverture du\u00a0site.'
-      : 'C’est fait\u00a0: votre adresse a été retirée de la liste d’attente, et nous ne vous écrirons pas à\u00a0l’ouverture du\u00a0site.';
-    tone = 'success';
-  } else if (sp.ok) {
-    title = sp.already ? 'Désabonnement déjà effectué' : 'Désabonnement confirmé';
-    body = sp.already
-      ? 'Votre adresse était déjà retirée de la liste\u00a0: vous ne recevez plus la newsletter de NFI\u00a0REPORT.'
-      : 'C’est fait\u00a0: votre adresse a été retirée de la liste, et vous ne recevrez plus la newsletter de NFI\u00a0REPORT.';
-    tone = 'success';
-  } else if (sp.error === 'missing' || sp.error === 'invalid') {
-    title = 'Lien invalide';
-    body = 'Ce lien est incomplet ou mal formé. Réessayez depuis le pied de notre dernier message.';
-    tone = 'error';
-  } else if (sp.error === 'notfound') {
-    title = 'Lien inactif';
-    body = 'Ce lien n’est plus actif. Si vous recevez encore nos messages, écrivez-nous à\u00a0contact@nfireport.com.';
-    tone = 'error';
-  } else if (sp.error === 'server') {
-    title = 'Erreur serveur';
-    body = 'Une erreur est survenue. Réessayez dans quelques instants, ou écrivez-nous à\u00a0contact@nfireport.com.';
-    tone = 'error';
-  } else {
-    title = 'Se désinscrire';
-    body = 'Pour vous désinscrire, utilisez le lien présent au pied de chacun de nos messages.';
-    tone = 'info';
-  }
+  const etat = await lireEtatDesabonnement({
+    jeton: (await cookies()).get(COOKIE_DESABONNEMENT)?.value,
+    lienInvalide: sp.lien === 'invalide',
+    apres: sp.apres,
+    erreur: sp.erreur === '1',
+  });
+  const [debut, fin] = TITRES[etat.etat];
 
   return (
-    <main className="mx-auto flex min-h-[60vh] max-w-xl flex-col justify-center px-4 py-12 sm:px-6">
-      <div
-        className={`rounded-2xl border p-8 sm:p-10 ${
-          tone === 'success'
-            ? 'border-green-200 bg-green-50/60'
-            : tone === 'error'
-              ? 'border-red-200 bg-red-50/60'
-              : 'border-neutral-200 bg-white'
-        }`}
-      >
-        <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-foreground/50">
-          {attente ? 'Liste d’attente' : sp.ok ? 'Newsletter' : 'NFI REPORT'}
-        </p>
-        <h1 className="mb-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{title}</h1>
-        <p className="text-base leading-relaxed text-foreground/75">{body}</p>
+    <div className="mx-auto w-full max-w-[640px] px-6 pb-16 pt-[9svh] sm:px-10 sm:pt-[13vh]">
+      <h1 className="text-[clamp(31px,10.2vw,38px)] font-bold leading-[1.06] tracking-[-0.03em] text-[#111] sm:text-[52px] sm:leading-[1.05] sm:tracking-[-0.035em]">
+        {debut} <span className="text-[#8a8e95]">{fin}</span>
+      </h1>
+      <p className="mt-[22px] max-w-[560px] text-[17px] leading-[1.6] text-[#4b4f56] sm:text-[18px]">{CORPS[etat.etat]}</p>
 
-        <div className="mt-8 flex flex-wrap items-center gap-4 text-sm">
-          <Link
-            href="/"
-            className="inline-flex items-center rounded-md bg-foreground px-5 py-2.5 font-medium text-background transition hover:opacity-90"
-          >
-            Retour à l’accueil
-          </Link>
-          {tone === 'success' ? (
-            <Link href={attente ? '/' : '/newsletter'} className="text-foreground/70 underline-offset-2 hover:underline">
-              Vous changez d’avis{'\u00a0'}? <span className="whitespace-nowrap">{attente ? 'Réinscrivez-vous' : 'Réabonnez-vous'}</span>
-            </Link>
-          ) : (
-            <a href="mailto:contact@nfireport.com" className="text-foreground/70 underline-offset-2 hover:underline">
-              contact@nfireport.com
-            </a>
-          )}
+      {'adresse' in etat && (
+        <div className="mt-[26px] flex max-w-[560px] items-baseline justify-between gap-4 border-y border-[#e4e5e8] py-[17px]">
+          <span className="text-[14px] text-[#6b6f76]">Adresse</span>
+          <span className="min-w-0 text-right text-[16px] font-semibold text-[#111] [overflow-wrap:anywhere]">{etat.adresse}</span>
         </div>
-      </div>
-    </main>
+      )}
+
+      {etat.etat === 'question' && (
+        <div className="mt-[34px] flex flex-col items-stretch gap-5 text-center sm:flex-row sm:items-center sm:gap-7 sm:text-left">
+          <form action={seDesabonner} className="w-full sm:w-auto">
+            <BoutonEnvoi className={BOUTON} enCours="Un instant…">Me désabonner</BoutonEnvoi>
+          </form>
+          <Link href="/" className={LIEN}>Garder la newsletter</Link>
+        </div>
+      )}
+
+      {etat.etat === 'fait' && etat.reabonnable && (
+        <div className="mt-[34px] flex max-w-[560px] flex-col items-stretch gap-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-5">
+          <p className="text-[16px] text-[#4b4f56]">{typo('Vous changez d’avis ?')}</p>
+          <form action={seReabonner} className="w-full sm:w-auto">
+            <BoutonEnvoi className={BOUTON_CONTOUR} enCours="Un instant…">Me réabonner</BoutonEnvoi>
+          </form>
+        </div>
+      )}
+
+      {(etat.etat === 'inactif' || etat.etat === 'erreur') && (
+        <p className="mt-[30px]">
+          <a href={`mailto:${CONTACT}`} className={LIEN}>
+            {`Écrire à${NB}${CONTACT}`}
+          </a>
+        </p>
+      )}
+
+      {'essai' in etat && etat.essai && (
+        <p className="mt-7 text-[14px] text-[#6b6f76]">{typo('Lien d’essai : rien n’est enregistré.')}</p>
+      )}
+    </div>
   );
 }

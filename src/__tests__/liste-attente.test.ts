@@ -27,7 +27,15 @@ const service = {
 
 vi.mock('@/lib/supabase', () => ({ createServiceClient: vi.fn(() => service) }));
 
-import { lienDesinscription, recoitLaNewsletter, SOURCE_LISTE_ATTENTE, unsubscribeBy, upsertNewsletterSubscriber } from '@/lib/newsletter/subscribers';
+import {
+  abonnementParJeton,
+  lienDesinscription,
+  reabonnerParJeton,
+  recoitLaNewsletter,
+  SOURCE_LISTE_ATTENTE,
+  unsubscribeBy,
+  upsertNewsletterSubscriber,
+} from '@/lib/newsletter/subscribers';
 
 beforeEach(() => {
   existant = null;
@@ -96,24 +104,61 @@ describe('une personne de la liste d’attente qui s’abonne ensuite à la news
   });
 });
 
-describe('quitter la liste par le lien d’un mail', () => {
-  it('une adresse de la page d’attente : la page de confirmation parle de la liste d’attente', async () => {
-    existant = { id: 'a1', status: 'active', user_id: null, source: 'prelaunch' };
-    const r = await unsubscribeBy('unsubscribe_token', '11111111-2222-3333-4444-555555555555');
-    expect(r).toEqual({ found: true, alreadyUnsubscribed: false, listeAttente: true });
+const JETON = '11111111-2222-3333-4444-555555555555';
+
+describe('se désabonner de la newsletter par le jeton d’un mail', () => {
+  it('un abonné de la newsletter est désabonné', async () => {
+    existant = { id: 'b2', status: 'active', user_id: null, source: 'form_home' };
+    const r = await unsubscribeBy('unsubscribe_token', JETON);
+    expect(r).toEqual({ found: true, alreadyUnsubscribed: false });
     expect(majs[0]).toMatchObject({ status: 'unsubscribed' });
   });
 
-  it('un abonné de la newsletter : la page parle de la newsletter', async () => {
-    existant = { id: 'b2', status: 'active', user_id: null, source: 'form_home' };
-    const r = await unsubscribeBy('unsubscribe_token', '11111111-2222-3333-4444-555555555555');
-    expect(r).toEqual({ found: true, alreadyUnsubscribed: false, listeAttente: false });
+  it('la liste d’attente ne se quitte pas : son adresse est traitée comme inconnue', async () => {
+    existant = { id: 'a1', status: 'active', user_id: null, source: 'prelaunch' };
+    const r = await unsubscribeBy('unsubscribe_token', JETON);
+    expect(r).toEqual({ found: false, alreadyUnsubscribed: false });
+    expect(majs).toHaveLength(0);
   });
 
-  it('un deuxième clic : rien ne change, la page le dit', async () => {
+  it('un deuxième désabonnement ne change rien', async () => {
+    existant = { id: 'b2', status: 'unsubscribed', user_id: null, source: 'form_home' };
+    const r = await unsubscribeBy('unsubscribe_token', JETON);
+    expect(r).toEqual({ found: true, alreadyUnsubscribed: true });
+    expect(majs).toHaveLength(0);
+  });
+
+  it('la page lit l’adresse et l’état d’un abonné de la newsletter, jamais ceux de la liste d’attente', async () => {
+    existant = { email: 'lecteur@exemple.test', status: 'active', source: 'form_home' };
+    expect(await abonnementParJeton(JETON)).toEqual({ email: 'lecteur@exemple.test', status: 'active' });
+    existant = { email: 'attente@exemple.test', status: 'active', source: 'prelaunch' };
+    expect(await abonnementParJeton(JETON)).toBeNull();
+    existant = null;
+    expect(await abonnementParJeton(JETON)).toBeNull();
+  });
+});
+
+describe('se réabonner depuis la page (« Vous changez d’avis ? »)', () => {
+  it('une adresse désabonnée par elle-même revient, sans aucun mail', async () => {
+    existant = { id: 'b2', status: 'unsubscribed', user_id: null, source: 'form_home' };
+    expect(await reabonnerParJeton(JETON)).toEqual({ found: true, reabonne: true });
+    expect(majs[0]).toMatchObject({ status: 'active', unsubscribed_at: null });
+    expect(typeof majs[0]!.opt_in_at).toBe('string');
+  });
+
+  it('jamais une adresse qui nous a classés en indésirable, ni une adresse en rebond', async () => {
+    for (const status of ['complained', 'bounced']) {
+      existant = { id: 'c3', status, user_id: null, source: 'form_home' };
+      expect(await reabonnerParJeton(JETON)).toEqual({ found: true, reabonne: false });
+    }
+    expect(majs).toHaveLength(0);
+  });
+
+  it('rien pour une adresse déjà abonnée, ni pour une adresse de la liste d’attente', async () => {
+    existant = { id: 'b2', status: 'active', user_id: null, source: 'form_home' };
+    expect(await reabonnerParJeton(JETON)).toEqual({ found: true, reabonne: false });
     existant = { id: 'a1', status: 'unsubscribed', user_id: null, source: 'prelaunch' };
-    const r = await unsubscribeBy('unsubscribe_token', '11111111-2222-3333-4444-555555555555');
-    expect(r).toEqual({ found: true, alreadyUnsubscribed: true, listeAttente: true });
+    expect(await reabonnerParJeton(JETON)).toEqual({ found: false, reabonne: false });
     expect(majs).toHaveLength(0);
   });
 

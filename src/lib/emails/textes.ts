@@ -155,7 +155,6 @@ export const TEXTES = {
     partageLien: 'Partager sur WhatsApp',
     partageMessage: 'NFI REPORT, le média de l’économie et de la finance du Niger, ouvre bientôt son site. Inscrivez-vous pour être prévenu : https://nfireport.com',
     raison: 'Vous recevez ce message parce que cette adresse vient d’être inscrite sur la liste d’attente de NFI REPORT.',
-    retirer: 'Quitter la liste d’attente',
   },
   invoice: {
     apercu: 'Votre facture est jointe à ce message.',

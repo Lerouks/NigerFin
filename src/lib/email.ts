@@ -92,15 +92,15 @@ export async function sendTransactionalEmail({
   }
 
   try {
-    // RFC 8058 + 2369 : si on a une URL HTTPS, on combine HTTPS + mailto + One-Click
-    const listUnsubscribe = unsubscribeUrl
-      ? `<${unsubscribeUrl}>, <mailto:contact@nfireport.com?subject=unsubscribe>`
-      : '<mailto:contact@nfireport.com?subject=unsubscribe>';
-    const headers: Record<string, string> = {
-      'List-Unsubscribe': listUnsubscribe,
-    };
+    // RFC 8058 + 2369, seulement pour un mail de la newsletter (unsubscribeUrl
+    // fourni) : HTTPS + mailto + One-Click, ce qui affiche le bouton « Se
+    // désabonner » de Gmail, Yahoo et Apple Mail. Les mails de compte, de
+    // paiement, de facture et de la liste d'attente n'en portent aucun, sinon
+    // ce bouton apparaîtrait aussi en haut d'un mail de mot de passe
+    // (décision de Raouf, 23/11/2026).
+    const headers: Record<string, string> = {};
     if (unsubscribeUrl) {
-      // Active le bouton "Se désabonner" en 1 clic dans Gmail / Yahoo / Apple Mail
+      headers['List-Unsubscribe'] = `<${unsubscribeUrl}>, <mailto:contact@nfireport.com?subject=unsubscribe>`;
       headers['List-Unsubscribe-Post'] = 'List-Unsubscribe=One-Click';
     }
 
@@ -117,7 +117,7 @@ export async function sendTransactionalEmail({
       subject,
       html,
       text: htmlToPlainText(html),
-      headers,
+      ...(unsubscribeUrl ? { headers } : {}),
       ...(tags.length ? { tags } : {}),
       attachments: attachments?.map((a) => ({
         filename: a.filename,

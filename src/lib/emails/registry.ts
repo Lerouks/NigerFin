@@ -101,9 +101,9 @@ export const TRANSACTIONAL_REGISTRY: Record<TransactionalEmailKey, Transactional
     audience: 'client',
     layout: 'brand',
     triggerDescription: "À chaque nouvelle inscription sur la page d'attente du pré-lancement.",
-    variables: ['unsubscribeUrl'],
-    sampleArgs: { unsubscribeUrl: '#' },
-    render: (a) => T.waitlistConfirmationEmail({ unsubscribeUrl: str(a.unsubscribeUrl, '#') }),
+    variables: [],
+    sampleArgs: {},
+    render: () => T.waitlistConfirmationEmail(),
   },
   newsletter_welcome: {
     key: 'newsletter_welcome',

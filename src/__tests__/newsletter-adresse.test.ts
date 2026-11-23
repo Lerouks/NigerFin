@@ -11,9 +11,16 @@ import { NextRequest } from 'next/server';
  * d'attente, le formulaire (qui sert aussi à la création de compte), et les
  * deux confirmations de paiement. Ce test vérifie, par le vrai code des deux
  * routes publiques, que l'adresse est cherchée et écrite sous cette forme.
+ *
+ * Depuis le 23/11/2026, les deux routes envoient aussi un mail (confirmation
+ * de la liste d'attente, bienvenue de la newsletter) qui porte le lien de
+ * désinscription de l'adresse : elles relisent donc son jeton par l'id.
+ * Rien n'est envoyé ici : l'envoi est simulé (vi.mock de @/lib/email).
  */
 
+const JETON = '11111111-2222-3333-4444-555555555555';
 const appels: { operation: string; valeur: unknown }[] = [];
+let existant: Record<string, unknown> | null = null;
 
 const service = {
   from: (table: string) => ({
@@ -21,7 +28,8 @@ const service = {
       eq: (colonne: string, valeur: string) => ({
         maybeSingle: async () => {
           appels.push({ operation: `${table}.select.eq.${colonne}`, valeur });
-          return { data: null, error: null };
+          if (colonne === 'id') return { data: { unsubscribe_token: JETON }, error: null };
+          return { data: existant, error: null };
         },
       }),
     }),
@@ -43,10 +51,15 @@ vi.mock('@/lib/rate-limit', () => ({
 }));
 vi.mock('@sentry/nextjs', () => ({ captureException: vi.fn(), captureMessage: vi.fn() }));
 vi.mock('@/lib/email', () => ({ sendTransactionalEmail: vi.fn(async () => undefined) }));
-vi.mock('@/lib/email-templates', () => ({ newsletterWelcomeEmail: vi.fn(() => ({ subject: 'Bienvenue', html: '<p>Bienvenue</p>' })) }));
+vi.mock('@/lib/email-templates', () => ({
+  newsletterWelcomeEmail: vi.fn(() => ({ subject: 'Bienvenue', html: '<p>Bienvenue</p>' })),
+  waitlistConfirmationEmail: vi.fn(() => ({ subject: 'C’est noté', html: '<p>C’est noté</p>' })),
+}));
 vi.mock('@/lib/emails/overrides', () => ({ applyOverridesTo: vi.fn(async (_type: string, email: unknown) => email) }));
 
 import { normalizeEmail } from '@/lib/validation';
+import { sendTransactionalEmail } from '@/lib/email';
+import { newsletterWelcomeEmail, waitlistConfirmationEmail } from '@/lib/email-templates';
 
 function requete(url: string, corps: unknown): NextRequest {
   return new NextRequest(
@@ -56,6 +69,7 @@ function requete(url: string, corps: unknown): NextRequest {
 
 beforeEach(() => {
   appels.length = 0;
+  existant = null;
   vi.clearAllMocks();
 });
 
@@ -79,6 +93,7 @@ describe('les inscriptions enregistrent l’adresse normalisée', () => {
         operation: 'newsletter_subscribers.insert',
         valeur: { email: 'pre_lancement@exemple.test', source: 'prelaunch', user_id: null, locale: 'fr' },
       },
+      { operation: 'newsletter_subscribers.select.eq.id', valeur: 'abonne-1' },
     ]);
   });
 
@@ -94,6 +109,52 @@ describe('les inscriptions enregistrent l’adresse normalisée', () => {
         operation: 'newsletter_subscribers.insert',
         valeur: { email: 'lecteur.visiteur@exemple.test', source: 'signup', user_id: null, locale: 'fr' },
       },
+      { operation: 'newsletter_subscribers.select.eq.id', valeur: 'abonne-1' },
     ]);
+  });
+});
+
+describe('le mail qui suit l’inscription', () => {
+  const lien = expect.stringContaining(`/api/newsletter/unsubscribe?token=${JETON}`);
+
+  it('liste d’attente : la confirmation part, avec le lien pour quitter la liste', async () => {
+    const { POST } = await import('@/app/api/waitlist/route');
+    await POST(requete('http://localhost/api/waitlist', { email: 'Lecteur@Exemple.Test' }));
+
+    expect(waitlistConfirmationEmail).toHaveBeenCalledWith({ unsubscribeUrl: lien });
+    expect(sendTransactionalEmail).toHaveBeenCalledTimes(1);
+    expect(sendTransactionalEmail).toHaveBeenCalledWith(expect.objectContaining({
+      to: 'lecteur@exemple.test',
+      emailType: 'waitlist_confirmation',
+      unsubscribeUrl: lien,
+    }));
+  });
+
+  it('liste d’attente : rien n’est renvoyé à une adresse déjà inscrite', async () => {
+    existant = { id: 'a1', status: 'active', unsubscribed_at: null, source: 'prelaunch' };
+    const { POST } = await import('@/app/api/waitlist/route');
+    const reponse = await POST(requete('http://localhost/api/waitlist', { email: 'lecteur@exemple.test' }));
+
+    expect(reponse.status).toBe(200);
+    expect(sendTransactionalEmail).not.toHaveBeenCalled();
+  });
+
+  it('liste d’attente : un envoi en échec n’empêche pas l’inscription', async () => {
+    vi.mocked(sendTransactionalEmail).mockRejectedValueOnce(new Error('Resend indisponible'));
+    const { POST } = await import('@/app/api/waitlist/route');
+    const reponse = await POST(requete('http://localhost/api/waitlist', { email: 'lecteur@exemple.test' }));
+
+    expect(reponse.status).toBe(200);
+  });
+
+  it('newsletter : la bienvenue porte le lien pour se désabonner', async () => {
+    const { POST } = await import('@/app/api/newsletter/route');
+    await POST(requete('http://localhost/api/newsletter', { email: 'lecteur@exemple.test', source: 'form_home' }));
+
+    expect(newsletterWelcomeEmail).toHaveBeenCalledWith(lien);
+    expect(sendTransactionalEmail).toHaveBeenCalledWith(expect.objectContaining({
+      emailType: 'newsletter_welcome',
+      unsubscribeUrl: lien,
+    }));
   });
 });

@@ -7,13 +7,15 @@ import Link from 'next/link';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Désabonnement newsletter',
-  description: 'Confirmation de votre désabonnement à la newsletter NFI Report.',
+  title: 'Désinscription',
+  description: 'Confirmation de votre désinscription des messages de NFI REPORT.',
   robots: { index: false },
 };
 
 interface SearchParams {
   ok?: string;
+  /** « attente » : l'adresse venait seulement de la page d'attente. */
+  liste?: string;
   already?: string;
   demo?: string;
   error?: string;
@@ -30,31 +32,43 @@ export default async function UnsubscribePage({
   let body: string | React.ReactNode = '';
   let tone: 'success' | 'info' | 'error' = 'info';
 
+  // Le lien peut venir d'un mail de la newsletter comme d'un mail de la liste
+  // d'attente : /api/newsletter/unsubscribe ajoute `liste=attente` quand
+  // l'adresse vient seulement de la page d'attente. Sans cette précision, les
+  // textes restent neutres (ni « newsletter » ni « liste d'attente »).
+  const attente = sp.liste === 'attente';
+
   if (sp.demo) {
     title = 'Lien de démonstration';
-    body = "Ce lien provient d'un email de test ou de prévisualisation. Aucun désabonnement réel n'a été effectué.";
+    body = 'Ce lien vient d’un message de test ou d’aperçu\u00a0: aucune désinscription n’a été faite.';
     tone = 'info';
-  } else if (sp.ok) {
-    title = sp.already ? 'Vous étiez déjà désabonné' : 'Désabonnement confirmé';
+  } else if (sp.ok && attente) {
+    title = sp.already ? 'Désinscription déjà effectuée' : 'Désinscription confirmée';
     body = sp.already
-      ? "Votre adresse était déjà retirée de notre liste. Vous ne recevrez plus aucun email de la newsletter NFI Report."
-      : "C'est fait. Votre adresse a été retirée de notre liste, vous ne recevrez plus la newsletter. Désolé de vous voir partir.";
+      ? 'Votre adresse n’est plus sur la liste d’attente, et nous ne vous écrirons pas à\u00a0l’ouverture du\u00a0site.'
+      : 'C’est fait\u00a0: votre adresse a été retirée de la liste d’attente, et nous ne vous écrirons pas à\u00a0l’ouverture du\u00a0site.';
+    tone = 'success';
+  } else if (sp.ok) {
+    title = sp.already ? 'Désabonnement déjà effectué' : 'Désabonnement confirmé';
+    body = sp.already
+      ? 'Votre adresse était déjà retirée de la liste\u00a0: vous ne recevez plus la newsletter de NFI\u00a0REPORT.'
+      : 'C’est fait\u00a0: votre adresse a été retirée de la liste, et vous ne recevrez plus la newsletter de NFI\u00a0REPORT.';
     tone = 'success';
   } else if (sp.error === 'missing' || sp.error === 'invalid') {
     title = 'Lien invalide';
-    body = "Le lien de désabonnement est incomplet ou mal formé. Réessayez depuis le pied de votre dernier email.";
+    body = 'Ce lien est incomplet ou mal formé. Réessayez depuis le pied de notre dernier message.';
     tone = 'error';
   } else if (sp.error === 'notfound') {
-    title = 'Lien expiré';
-    body = "Ce lien de désabonnement n'est plus actif. Si vous recevez encore notre newsletter, écrivez-nous à contact@nfireport.com.";
+    title = 'Lien inactif';
+    body = 'Ce lien n’est plus actif. Si vous recevez encore nos messages, écrivez-nous à\u00a0contact@nfireport.com.';
     tone = 'error';
   } else if (sp.error === 'server') {
     title = 'Erreur serveur';
-    body = "Une erreur est survenue. Réessayez dans quelques instants ou écrivez-nous à contact@nfireport.com.";
+    body = 'Une erreur est survenue. Réessayez dans quelques instants, ou écrivez-nous à\u00a0contact@nfireport.com.';
     tone = 'error';
   } else {
-    title = 'Désabonnement';
-    body = "Pour vous désabonner, utilisez le lien présent en pied de chacun de nos emails.";
+    title = 'Se désinscrire';
+    body = 'Pour vous désinscrire, utilisez le lien présent au pied de chacun de nos messages.';
     tone = 'info';
   }
 
@@ -70,7 +84,7 @@ export default async function UnsubscribePage({
         }`}
       >
         <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-foreground/50">
-          Newsletter NFI Report
+          {attente ? 'Liste d’attente' : sp.ok ? 'Newsletter' : 'NFI REPORT'}
         </p>
         <h1 className="mb-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{title}</h1>
         <p className="text-base leading-relaxed text-foreground/75">{body}</p>
@@ -80,11 +94,11 @@ export default async function UnsubscribePage({
             href="/"
             className="inline-flex items-center rounded-md bg-foreground px-5 py-2.5 font-medium text-background transition hover:opacity-90"
           >
-            Retour à l&apos;accueil
+            Retour à l’accueil
           </Link>
           {tone === 'success' ? (
-            <Link href="/" className="text-foreground/70 underline-offset-2 hover:underline">
-              Vous changez d&apos;avis ? Réabonnez-vous
+            <Link href={attente ? '/' : '/newsletter'} className="text-foreground/70 underline-offset-2 hover:underline">
+              Vous changez d’avis{'\u00a0'}? <span className="whitespace-nowrap">{attente ? 'Réinscrivez-vous' : 'Réabonnez-vous'}</span>
             </Link>
           ) : (
             <a href="mailto:contact@nfireport.com" className="text-foreground/70 underline-offset-2 hover:underline">

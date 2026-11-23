@@ -3,6 +3,7 @@ import { NFI_GROUP_ISSUER } from '@/types/invoice';
 import {
   NB,
   blanc,
+  ecrireAuContact,
   bouton,
   citation,
   documentEdition,
@@ -21,6 +22,7 @@ import {
   typo,
 } from '@/lib/emails/edition';
 import { TEXTES, dureeFormule } from '@/lib/emails/textes';
+import { defaultSocialLinks } from '@/lib/site-data';
 
 /**
  * E-mails transactionnels de NFI REPORT, design « Édition » (23/11/2026).
@@ -61,11 +63,11 @@ export function welcomeSignupEmail(name: string): { subject: string; html: strin
         + bonjour(name)
         + para(t.intro)
         + listeNumerotee([
-          { titre: t.articlesTitre, texte: t.articles, lien: [t.articlesLien, SITE_URL] },
+          { titre: t.articlesTitre, texte: t.articles, lien: [t.articlesLien, `${SITE_URL}/articles`] },
           { titre: t.simulateursTitre, texte: t.simulateurs, lien: [t.simulateursLien, `${SITE_URL}/outils`] },
           { titre: t.premiumTitre, texte: t.premium, lien: [t.premiumLien, `${SITE_URL}/pricing`] },
         ])
-        + blanc(30) + bouton(t.bouton, SITE_URL)
+        + blanc(30) + bouton(t.bouton, `${SITE_URL}/articles`)
         + signature(t.salut),
         42,
       ),
@@ -88,7 +90,8 @@ export function passwordChangedEmail(name: string): { subject: string; html: str
         + para(t.modifie)
         + para(t.vous, { role: 'encre', graisse: 600 })
         + para(t.pasVous)
-        + blanc(28) + bouton(t.bouton, `${SITE_URL}/compte`)
+        + para(t.prevenir)
+        + blanc(28) + bouton(t.bouton, `${SITE_URL}/connexion`)
         + signature(),
         42,
       ),
@@ -121,7 +124,7 @@ export function adminDowngradeToFreeEmail(name: string): { subject: string; html
 
 // ─── Newsletter ──────────────────────────────────────────────────────────────
 
-export function newsletterWelcomeEmail(): { subject: string; html: string } {
+export function newsletterWelcomeEmail(unsubscribeUrl?: string): { subject: string; html: string } {
   const t = TEXTES.newsletter_welcome;
   return {
     subject: t.objet,
@@ -130,17 +133,69 @@ export function newsletterWelcomeEmail(): { subject: string; html: string } {
       apercu: t.apercu,
       folio: [t.folio, FOLIO_SITE],
       raison: t.raison,
+      liens: [['nfireport.com', SITE_URL], ['Confidentialité', `${SITE_URL}/confidentialite`], [t.desabonner, unsubscribeUrl ?? ecrireAuContact(t.desabonner)]],
       corps: rangee(
         titre(t.titre)
         + para(t.intro, { taille: 17, hauteur: 28, marge: '20px 0 0' })
         + para(t.articles)
-        + blanc(26) + bouton(t.bouton, SITE_URL)
+        + blanc(26) + bouton(t.bouton, `${SITE_URL}/articles`)
         + blanc(34)
         + encart(
           `<p class="c-encre" style="margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:18px;line-height:24px;font-weight:700;color:#111111;">${titreTypo(t.premiumTitre)}</p>`
           + para(t.premium, { taille: 15, hauteur: 24, marge: '8px 0 0' })
           + lienFleche(t.premiumLien, `${SITE_URL}/pricing`, '12px 0 0'),
         )
+        + signature(),
+        42,
+      ),
+    }),
+  };
+}
+
+/**
+ * Confirmation de la liste d'attente (pré-lancement). La page promet : « Votre
+ * adresse ne sert qu'à vous prévenir de l'ouverture ». Ce mail le confirme,
+ * propose de suivre NFI REPORT en attendant et donne un lien pour se retirer.
+ * `whatsappUrl` : lien de la chaîne WhatsApp NFI REPORT (bloc masqué si absent).
+ */
+export function waitlistConfirmationEmail({ unsubscribeUrl, whatsappUrl }: { unsubscribeUrl: string; whatsappUrl?: string }): { subject: string; html: string } {
+  const t = TEXTES.waitlist_confirmation;
+  const reseaux: Array<[string, string]> = [
+    ['Facebook', defaultSocialLinks.facebook],
+    ['Instagram', defaultSocialLinks.instagram],
+    ['TikTok', defaultSocialLinks.tiktok],
+    ['YouTube', defaultSocialLinks.youtube],
+  ].filter((r): r is [string, string] => Boolean(r[1]))
+    .map(([nom, url]) => [nom, url.split('?')[0] ?? url]);
+  const sep = ' <span class="c-doux" style="color:#6b6b6b;">·</span> ';
+  const lienReseau = ([nom, url]: [string, string]) => `<a href="${url}" class="c-encre" style="color:#111111;text-decoration:underline;font-weight:600;">${nom}</a>`;
+  const paires: string[] = [];
+  for (let i = 0; i < reseaux.length; i += 2) paires.push(`<span style="white-space:nowrap;">${reseaux.slice(i, i + 2).map(lienReseau).join(sep)}</span>`);
+  const lignesReseaux = paires.join(sep);
+  const partage = `https://wa.me/?text=${encodeURIComponent(t.partageMessage)}`;
+  return {
+    subject: t.objet,
+    html: documentEdition({
+      objet: t.objet,
+      apercu: t.apercu,
+      folio: [t.folio, FOLIO_SITE],
+      raison: t.raison,
+      liens: [['nfireport.com', SITE_URL], ['Confidentialité', `${SITE_URL}/confidentialite`], [t.retirer, unsubscribeUrl]],
+      corps: rangee(
+        titre(t.titre)
+        + paraHtml('Bonjour,', { marge: '22px 0 0' })
+        + para(t.inscrit)
+        + para(t.suite)
+        + para(t.contacts, { role: 'doux', taille: 14.5, hauteur: 23 })
+        + blanc(30)
+        + encart(
+          `<p class="c-encre" style="margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:18px;line-height:24px;font-weight:700;color:#111111;">${titreTypo(t.attenteTitre)}</p>`
+          + para(whatsappUrl ? t.attenteAvecChaine : t.attente, { taille: 15, hauteur: 24, marge: '8px 0 0' })
+          + (whatsappUrl ? blanc(18) + bouton(t.whatsapp, whatsappUrl) : '')
+          + `<p style="margin:16px 0 0;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14.5px;line-height:22px;">${lignesReseaux}</p>`,
+        )
+        + para(t.partage, { marge: '28px 0 0' })
+        + lienFleche(t.partageLien, partage)
         + signature(),
         42,
       ),
@@ -164,7 +219,7 @@ export function contactConfirmationEmail(name: string): { subject: string; html:
         + bonjour(name)
         + para(t.recu)
         + para(t.complement)
-        + blanc(28) + bouton(t.bouton, SITE_URL)
+        + blanc(28) + bouton(t.bouton, `${SITE_URL}/articles`)
         + signature(),
         42,
       ),
@@ -182,13 +237,14 @@ export function contactNotificationEmail(name: string, email: string, subject: s
       apercu: t.apercu,
       folio: [t.folio, FOLIO_SITE],
       raison: t.raison,
+      liens: [['nfireport.com', SITE_URL]],
       corps: rangee(
         titre(t.titre)
         + blanc(22)
         + fiche([
           ['Nom', esc(name)],
           ['Adresse', `<a href="mailto:${esc(email)}" class="c-encre" style="color:#111111;text-decoration:underline;">${esc(email)}</a>`],
-          ['Sujet', typo(esc(subject))],
+          ['Sujet', soude(esc(subject), 20)],
         ])
         + blanc(24)
         + citation(message.split('\n').map((l) => soude(esc(l))).join('<br>'))
@@ -233,7 +289,7 @@ export function paymentConfirmationEmail(name: string, tier: string, billingCycl
 export function paymentRejectionEmail(name: string, reason?: string): { subject: string; html: string } {
   const t = TEXTES.payment_rejection;
   const motif = reason && reason.trim()
-    ? blanc(22) + fiche([['Motif', typo(esc(reason.trim()))]])
+    ? blanc(22) + paraHtml(`<strong class="c-encre" style="font-weight:600;color:#111111;">Motif${NB}:</strong> ${soude(esc(reason.trim()))}`)
     : '';
   return {
     subject: t.objet,
@@ -364,7 +420,7 @@ export function invoiceEmail({
           `${typo(`SARL au capital de ${capital}, RCCM`)} <span style="white-space:nowrap;">${esc(emetteur.rccm ?? '')}</span>, ${typo(`NIF ${emetteur.nif}`)}`,
           typo(`Siège : ${emetteur.address}, ${emetteur.city}, ${emetteur.country}`),
           `${typo('Tél.')} <span style="white-space:nowrap;">${esc(emetteur.phone ?? '')}</span>`,
-          typo('Document généré électroniquement, valable sans signature manuscrite.'),
+          soude('Document généré électroniquement, valable sans signature manuscrite.', 38),
         ],
       },
       corps: rangee(

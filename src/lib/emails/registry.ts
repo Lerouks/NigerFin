@@ -23,7 +23,8 @@ export type TransactionalEmailKey =
   | 'password_changed'
   | 'invoice'
   | 'subscription_expired'
-  | 'contact_notification';
+  | 'contact_notification'
+  | 'waitlist_confirmation';
 
 /** Arguments d'un template : valeurs scalaires simples, jamais de HTML de mise en page. */
 export type TransactionalArgs = Record<string, string | number | undefined>;
@@ -93,6 +94,16 @@ export const TRANSACTIONAL_REGISTRY: Record<TransactionalEmailKey, Transactional
     sampleArgs: { name: SAMPLE_NAME },
     render: (a) => T.welcomeSignupEmail(str(a.name, SAMPLE_NAME)),
     resolveRealArgs: resolveUserName,
+  },
+  waitlist_confirmation: {
+    key: 'waitlist_confirmation',
+    label: 'Confirmation de la liste d’attente',
+    audience: 'client',
+    layout: 'brand',
+    triggerDescription: "À chaque nouvelle inscription sur la page d'attente du pré-lancement.",
+    variables: ['unsubscribeUrl'],
+    sampleArgs: { unsubscribeUrl: '#' },
+    render: (a) => T.waitlistConfirmationEmail({ unsubscribeUrl: str(a.unsubscribeUrl, '#') }),
   },
   newsletter_welcome: {
     key: 'newsletter_welcome',

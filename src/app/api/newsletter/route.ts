@@ -5,7 +5,7 @@ import { applyOverridesTo } from '@/lib/emails/overrides';
 import { isValidEmail, safeParseJSON } from '@/lib/validation';
 import { checkRateLimit, getClientIP, RATE_LIMITS } from '@/lib/rate-limit';
 import { createServerSupabaseClient } from '@/lib/supabase';
-import { upsertNewsletterSubscriber } from '@/lib/newsletter/subscribers';
+import { lienDesinscription, upsertNewsletterSubscriber } from '@/lib/newsletter/subscribers';
 import * as Sentry from '@sentry/nextjs';
 
 interface SubscribePayload {
@@ -77,12 +77,14 @@ export async function POST(request: NextRequest) {
 
     // Send branded welcome email only on first subscription or after reactivation.
     if (result.isNew || result.reactivated) {
-      const welcome = await applyOverridesTo('newsletter_welcome', newsletterWelcomeEmail());
+      const desinscription = await lienDesinscription(result.id);
+      const welcome = await applyOverridesTo('newsletter_welcome', newsletterWelcomeEmail(desinscription));
       await sendTransactionalEmail({
         to: email!,
         subject: welcome.subject,
         html: welcome.html,
         emailType: 'newsletter_welcome',
+        ...(desinscription ? { unsubscribeUrl: desinscription } : {}),
       }).catch((err) => {
         Sentry.captureException(err, {
           tags: { context: 'newsletter-welcome-email' },

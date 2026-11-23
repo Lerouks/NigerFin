@@ -74,7 +74,8 @@ export const NFI_GROUP_ISSUER: InvoiceIssuer = {
   name: 'NFI Group SARL',
   capitalXof: 1_000_000,
   address: 'Quartier Plateau',
-  city: 'Niamey',
+  // Code postal de Niamey devant la ville (format de la Poste du Niger).
+  city: '8001 Niamey',
   country: 'Niger',
   email: 'contact@nfireport.com',
   phone: '+227 91 70 71 94',

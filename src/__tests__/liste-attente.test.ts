@@ -27,7 +27,7 @@ const service = {
 
 vi.mock('@/lib/supabase', () => ({ createServiceClient: vi.fn(() => service) }));
 
-import { recoitLaNewsletter, SOURCE_LISTE_ATTENTE, upsertNewsletterSubscriber } from '@/lib/newsletter/subscribers';
+import { lienDesinscription, recoitLaNewsletter, SOURCE_LISTE_ATTENTE, unsubscribeBy, upsertNewsletterSubscriber } from '@/lib/newsletter/subscribers';
 
 beforeEach(() => {
   existant = null;
@@ -70,5 +70,34 @@ describe('une personne de la liste d’attente qui s’abonne ensuite à la news
     const r = await upsertNewsletterSubscriber({ email: 'abonne@exemple.test', source: 'prelaunch' });
     expect(r).toEqual({ id: 'b2', isNew: false, reactivated: false });
     expect(majs).toHaveLength(0);
+  });
+});
+
+describe('quitter la liste par le lien d’un mail', () => {
+  it('une adresse de la page d’attente : la page de confirmation parle de la liste d’attente', async () => {
+    existant = { id: 'a1', status: 'active', user_id: null, source: 'prelaunch' };
+    const r = await unsubscribeBy('unsubscribe_token', '11111111-2222-3333-4444-555555555555');
+    expect(r).toEqual({ found: true, alreadyUnsubscribed: false, listeAttente: true });
+    expect(majs[0]).toMatchObject({ status: 'unsubscribed' });
+  });
+
+  it('un abonné de la newsletter : la page parle de la newsletter', async () => {
+    existant = { id: 'b2', status: 'active', user_id: null, source: 'form_home' };
+    const r = await unsubscribeBy('unsubscribe_token', '11111111-2222-3333-4444-555555555555');
+    expect(r).toEqual({ found: true, alreadyUnsubscribed: false, listeAttente: false });
+  });
+
+  it('un deuxième clic : rien ne change, la page le dit', async () => {
+    existant = { id: 'a1', status: 'unsubscribed', user_id: null, source: 'prelaunch' };
+    const r = await unsubscribeBy('unsubscribe_token', '11111111-2222-3333-4444-555555555555');
+    expect(r).toEqual({ found: true, alreadyUnsubscribed: true, listeAttente: true });
+    expect(majs).toHaveLength(0);
+  });
+
+  it('le lien de désinscription d’une adresse porte son jeton', async () => {
+    existant = { unsubscribe_token: '11111111-2222-3333-4444-555555555555' };
+    expect(await lienDesinscription('a1')).toMatch(/\/api\/newsletter\/unsubscribe\?token=11111111-2222-3333-4444-555555555555$/);
+    existant = null;
+    expect(await lienDesinscription('a1')).toBeUndefined();
   });
 });

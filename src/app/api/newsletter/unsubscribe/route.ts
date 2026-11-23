@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
     if (!result.found) {
       return NextResponse.redirect(`${PAGE}?error=notfound`);
     }
-    return NextResponse.redirect(`${PAGE}?ok=1${result.alreadyUnsubscribed ? '&already=1' : ''}`);
+    return NextResponse.redirect(`${PAGE}?ok=1${result.alreadyUnsubscribed ? '&already=1' : ''}${result.listeAttente ? '&liste=attente' : ''}`);
   } catch (err) {
     Sentry.captureException(err, { tags: { context: 'newsletter-unsubscribe' } });
     return NextResponse.redirect(`${PAGE}?error=server`);

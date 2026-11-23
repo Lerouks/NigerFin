@@ -1,15 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isValidEmail, safeParseJSON } from '@/lib/validation';
 import { checkRateLimit, getClientIP, RATE_LIMITS } from '@/lib/rate-limit';
-import { upsertNewsletterSubscriber } from '@/lib/newsletter/subscribers';
+import { lienDesinscription, SOURCE_LISTE_ATTENTE, upsertNewsletterSubscriber } from '@/lib/newsletter/subscribers';
+import { sendTransactionalEmail } from '@/lib/email';
+import { waitlistConfirmationEmail } from '@/lib/email-templates';
+import { applyOverridesTo } from '@/lib/emails/overrides';
+import { ecrireAuContact } from '@/lib/emails/edition';
+import { normalizeEmail } from '@/lib/validation';
 import * as Sentry from '@sentry/nextjs';
 
 /**
- * Inscription à la liste de lancement (mode pré-lancement / page « Prochainement »).
+ * Inscription à la liste d'attente (pré-lancement).
  *
- * Ajoute l'email à newsletter_subscribers avec source='prelaunch' (idempotent).
- * Volontairement AUCUN email de confirmation n'est envoyé à ce stade : le site
- * est en test, on ne veut rien envoyer aux inscrits avant le vrai lancement.
+ * Ajoute l'adresse à newsletter_subscribers avec la source « prelaunch »
+ * (idempotent) : la newsletter ne lui part pas (voir recoitLaNewsletter).
+ * Depuis le 23/11/2026, décision de Raouf : une confirmation part à chaque
+ * nouvelle inscription, avec un lien pour quitter la liste. Rien n'est envoyé
+ * à une adresse déjà inscrite. Un échec d'envoi n'empêche pas l'inscription.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -39,7 +46,24 @@ export async function POST(request: NextRequest) {
 
     // Source de vérité : newsletter_subscribers (upsert idempotent). source='prelaunch'
     // permet de distinguer la liste de lancement des inscrits classiques.
-    await upsertNewsletterSubscriber({ email: email!, source: 'prelaunch' });
+    const result = await upsertNewsletterSubscriber({ email: email!, source: SOURCE_LISTE_ATTENTE });
+
+    if (result.isNew || result.reactivated) {
+      const desinscription = await lienDesinscription(result.id);
+      const mail = await applyOverridesTo(
+        'waitlist_confirmation',
+        waitlistConfirmationEmail({ unsubscribeUrl: desinscription ?? ecrireAuContact('Quitter la liste d’attente') }),
+      );
+      await sendTransactionalEmail({
+        to: normalizeEmail(email!),
+        subject: mail.subject,
+        html: mail.html,
+        emailType: 'waitlist_confirmation',
+        ...(desinscription ? { unsubscribeUrl: desinscription } : {}),
+      }).catch((err) => {
+        Sentry.captureException(err, { tags: { context: 'waitlist-confirmation-email' } });
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {

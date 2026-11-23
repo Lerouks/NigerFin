@@ -44,6 +44,7 @@ const AG = TEXTES.admin_premium_granted;
 const AD = TEXTES.admin_downgrade_to_free;
 const PW = TEXTES.password_changed;
 const IV = TEXTES.invoice;
+const WA = TEXTES.waitlist_confirmation;
 
 export const TEMPLATE_SLOTS: Record<TransactionalEmailKey, TemplateSlots> = {
   welcome_signup: {
@@ -135,6 +136,7 @@ export const TEMPLATE_SLOTS: Record<TransactionalEmailKey, TemplateSlots> = {
       bloc('modifie', 'Confirmation', PW.modifie),
       bloc('vous', 'C’était vous', PW.vous),
       bloc('pas_vous', 'Ce n’était pas vous', PW.pasVous),
+      bloc('prevenir', 'Nous prévenir', PW.prevenir),
       boutonSlot(PW.bouton),
     ],
   },
@@ -153,6 +155,19 @@ export const TEMPLATE_SLOTS: Record<TransactionalEmailKey, TemplateSlots> = {
       bloc('gratuit', 'Lecture gratuite', EX.gratuit),
       bloc('renouveler', 'Renouveler', EX.renouveler),
       boutonSlot(EX.bouton),
+    ],
+  },
+  waitlist_confirmation: {
+    subject: WA.objet,
+    blocks: [
+      titreSlot(WA.titre),
+      bloc('inscrit', 'Inscription', WA.inscrit),
+      bloc('suite', 'Ce qui va se passer', WA.suite),
+      bloc('contacts', 'Ajouter aux contacts', WA.contacts),
+      { key: 'attente_titre', label: 'Encadré (titre)', default: titreTypo(WA.attenteTitre) },
+      bloc('attente', 'Encadré (texte)', WA.attente),
+      bloc('partage', 'Partage', WA.partage),
+      { key: 'partage_lien', label: 'Partage (lien)', default: typo(WA.partageLien) },
     ],
   },
   contact_notification: {

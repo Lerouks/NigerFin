@@ -54,7 +54,11 @@ export function typo(s: string): string {
     .replace(/(\d+(?:er)?) (janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\b/giu, `$1${NB}$2`)
     .replace(/(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre) (\d{4})/giu, `$1${NB}$2`)
     .replace(/(\d) (\d{3})\b/g, `$1${NB}$2`)
-    .replace(/(\d) (FCFA|mois|an|ans|heure|heures|jours?)\b/giu, `$1${NB}$2`);
+    .replace(/(\d) (FCFA|mois|an|ans|heure|heures|jours?)\b/giu, `$1${NB}$2`)
+    // Le code postal reste avec sa ville : « 8001 Niamey ».
+    .replace(/(\d{4}) Niamey/g, `$1${NB}Niamey`)
+    // Un libellé court cité entre guillemets ne se coupe pas : “Mot de passe oublié”.
+    .replace(/“([^”]{1,24})”/gu, (_m, dedans: string) => `“${dedans.replace(/ /g, NB)}”`);
 }
 
 const mots = (toks: string[], a: number, b: number) => toks.slice(a, b + 1).join(' ').split(/[  ]/).length;
@@ -69,9 +73,14 @@ const longueur = (toks: string[], a: number, b: number) => toks.slice(a, b + 1).
 export function soude(s: string, plafond = 34): string {
   const toks = typo(s).split(' ');
   const n = toks.length;
-  if (mots(toks, 0, n - 1) < 9) {
-    // Paragraphe court : les trois derniers mots restent ensemble, aucun mot seul en dernière ligne.
-    if (n >= 4 && longueur(toks, n - 3, n - 1) <= 26) return [...toks.slice(0, n - 3), toks.slice(n - 3).join(NB)].join(' ');
+  const total = mots(toks, 0, n - 1);
+  if (total < 9) {
+    // Paragraphe court : la dernière ligne garde au moins trois mots (quatre dès
+    // huit mots), dans la limite d'un bloc qui tient sur une ligne de téléphone.
+    const cible = total >= 8 ? 4 : 3;
+    let k = n - 1;
+    while (k > 0 && mots(toks, k, n - 1) < cible && longueur(toks, k - 1, n - 1) <= plafond - 4) k--;
+    if (k < n - 1) return [...toks.slice(0, k), toks.slice(k).join(NB)].join(' ');
     return toks.join(' ');
   }
   let j = n - 1;
@@ -252,24 +261,37 @@ export interface DocumentEdition {
   raison?: string;
   /** Pied de reçu (mentions de la société) à la place du slogan. */
   recu?: { lignes: string[] };
+  /** Liens du pied de page, à la place de nfireport.com, Confidentialité et Contact. */
+  liens?: Array<[string, string]>;
+}
+
+/** Mentions de bas de mail, comme au pied du site : droits, puis adresse postale. */
+const DROITS = () => typo(`© ${new Date().getFullYear()} NFI REPORT. Tous droits réservés.`);
+const ADRESSE = typo('Quartier Plateau, 8001 Niamey, Niger');
+
+/** Lien qui ouvre un message à contact@nfireport.com, avec un objet prérempli si besoin. */
+export function ecrireAuContact(objet?: string): string {
+  return `mailto:contact@nfireport.com${objet ? `?subject=${encodeURIComponent(objet)}` : ''}`;
 }
 
 export function documentEdition(d: DocumentEdition): string {
   const sep = ` <span class="c-doux" style="color:${C.doux};">·</span> `;
-  const liens = [['nfireport.com', SITE_URL], ['Confidentialité', `${SITE_URL}/confidentialite`], ['Contact', `${SITE_URL}/contact`]]
-    .map(([l, h]) => `<a href="${h}" class="c-texte" style="color:${C.texte};text-decoration:underline;">${l}</a>`).join(sep);
+  const liens = (d.liens ?? [['nfireport.com', SITE_URL], ['Confidentialité', `${SITE_URL}/confidentialite`], ['Contact', ecrireAuContact()]])
+    .map(([l, h]) => `<a href="${h}" class="c-texte" style="color:${C.texte};text-decoration:underline;white-space:nowrap;">${typo(l)}</a>`).join(sep);
 
   const pied = d.recu
     ? rangee(filet(), 40)
       + `<tr><td align="center" class="f-papier" style="background:${C.papier};padding:26px 40px 0;">${image('logo.png', null, 52, 'NFI REPORT')}</td></tr>`
       + d.recu.lignes.map((l, i) => `<tr><td align="center" class="px f-papier ${i === 0 ? 'c-encre' : 'c-doux'}" style="background:${C.papier};padding:${i === 0 ? 16 : 6}px 48px 0;font-family:${SANS};font-size:${i === 0 ? 13.5 : 12}px;line-height:19px;font-weight:${i === 0 ? 600 : 400};color:${i === 0 ? C.encre : C.doux};">${l}</td></tr>`).join('')
-      + `<tr><td align="center" class="px f-papier" style="background:${C.papier};padding:12px 40px 36px;font-family:${SANS};font-size:12.5px;line-height:19px;">${liens}</td></tr>`
+      + `<tr><td align="center" class="px f-papier" style="background:${C.papier};padding:12px 40px 0;font-family:${SANS};font-size:12.5px;line-height:19px;">${liens}</td></tr>`
+      + `<tr><td align="center" class="px f-papier c-doux" style="background:${C.papier};padding:10px 40px 36px;font-family:${SANS};font-size:12px;line-height:18px;color:${C.doux};">${DROITS()}</td></tr>`
     : rangee(filet(), 44)
       + `<tr><td align="center" class="f-papier" style="background:${C.papier};padding:28px 40px 0;">${image('logo.png', null, 56, 'NFI REPORT')}</td></tr>`
       + `<tr><td align="center" class="f-papier" style="background:${C.papier};padding:16px 40px 0;">${image('slogan-sombre-halo.png', 'slogan-clair.png', 254, 'La connaissance, votre meilleur capital.')}</td></tr>`
       + (d.raison ? `<tr><td align="center" class="px f-papier c-doux" style="background:${C.papier};padding:18px 56px 0;font-family:${SANS};font-size:12.5px;line-height:19px;color:${C.doux};">${soude(d.raison)}</td></tr>` : '')
       + `<tr><td align="center" class="px f-papier" style="background:${C.papier};padding:12px 40px 0;font-family:${SANS};font-size:12.5px;line-height:19px;">${liens}</td></tr>`
-      + `<tr><td align="center" class="px f-papier c-doux" style="background:${C.papier};padding:10px 40px 36px;font-family:${SANS};font-size:12px;line-height:18px;color:${C.doux};">${typo('NFI REPORT, Quartier Plateau, Niamey, Niger')}</td></tr>`;
+      + `<tr><td align="center" class="px f-papier c-doux" style="background:${C.papier};padding:10px 40px 0;font-family:${SANS};font-size:12px;line-height:18px;color:${C.doux};">${DROITS()}</td></tr>`
+      + `<tr><td align="center" class="px f-papier c-doux" style="background:${C.papier};padding:2px 40px 36px;font-family:${SANS};font-size:12px;line-height:18px;color:${C.doux};">${ADRESSE}</td></tr>`;
 
   const tete = `<tr><td align="center" class="f-papier" style="background:${C.papier};padding:36px 40px 0;">${image('wm-noir-halo.png', 'wm-blanc.png', 252, 'NFI REPORT')}</td></tr>`
     + rangee(doubleFilet(), 18)

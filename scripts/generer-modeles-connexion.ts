@@ -77,7 +77,7 @@ const MODELES: Modele[] = [
       'Vous avez demandé un nouveau mot de passe.',
       "Le bouton suivant vous permet d'en choisir un nouveau.",
     ],
-    bouton: 'Choisir un nouveau mot de passe',
+    bouton: 'Choisir un nouveau mot\u00a0de\u00a0passe',
     validite: 'Ce lien reste valable une heure.',
     fin: "Si vous n'avez rien demandé, ignorez ce message : votre mot de passe actuel reste valable.",
     raison: "Vous recevez ce message parce qu'un nouveau mot de passe a été demandé pour votre compte NFI REPORT.",

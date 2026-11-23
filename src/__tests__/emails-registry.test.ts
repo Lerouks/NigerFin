@@ -11,8 +11,8 @@ import * as T from '@/lib/email-templates';
 const ALL_KEYS = Object.keys(TRANSACTIONAL_REGISTRY) as TransactionalEmailKey[];
 
 describe('registre des e-mails transactionnels', () => {
-  it('couvre les 12 templates (11 clients + 1 interne)', () => {
-    expect(ALL_KEYS).toHaveLength(12);
+  it('couvre les 13 templates (12 clients + 1 interne)', () => {
+    expect(ALL_KEYS).toHaveLength(13);
     const internal = ALL_KEYS.filter((k) => TRANSACTIONAL_REGISTRY[k].audience === 'internal');
     expect(internal).toEqual(['contact_notification']);
   });
@@ -57,7 +57,7 @@ describe('registre des e-mails transactionnels', () => {
 
   it('listTransactionalDefs expose objet + metadonnees sans fonctions', () => {
     const list = listTransactionalDefs();
-    expect(list).toHaveLength(12);
+    expect(list).toHaveLength(13);
     for (const item of list) {
       expect(item.subject).toBeTruthy();
       expect(['brand', 'receipt']).toContain(item.layout);

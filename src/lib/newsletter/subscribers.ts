@@ -1,5 +1,6 @@
 import { createServiceClient } from '@/lib/supabase';
 import { normalizeEmail } from '@/lib/validation';
+import { SITE_URL } from '@/lib/config';
 
 /**
  * Source des adresses laissées sur la page d'attente du pré-lancement.
@@ -14,6 +15,23 @@ export const SOURCE_LISTE_ATTENTE = 'prelaunch';
 /** Une adresse active reçoit-elle la newsletter ? Non si elle vient seulement de la liste d'attente. */
 export function recoitLaNewsletter(source: string | null | undefined): boolean {
   return source !== SOURCE_LISTE_ATTENTE;
+}
+
+/**
+ * Lien de désinscription en un clic d'une adresse (jeton unique de la ligne).
+ * Sert au pied des mails de la liste d'attente et de la newsletter, et à
+ * l'en-tête List-Unsubscribe. `undefined` si le jeton est introuvable.
+ */
+export async function lienDesinscription(id: string): Promise<string | undefined> {
+  const supabase = createServiceClient();
+  if (!supabase) return undefined;
+  const { data } = await supabase
+    .from('newsletter_subscribers')
+    .select('unsubscribe_token')
+    .eq('id', id)
+    .maybeSingle();
+  const jeton = (data as { unsubscribe_token?: string } | null)?.unsubscribe_token;
+  return jeton ? `${SITE_URL}/api/newsletter/unsubscribe?token=${jeton}` : undefined;
 }
 
 export interface UpsertSubscriberInput {
@@ -397,19 +415,22 @@ async function syncProfileNewsletterFlag(
 export async function unsubscribeBy(
   field: 'email' | 'unsubscribe_token',
   value: string,
-): Promise<{ found: boolean; alreadyUnsubscribed: boolean }> {
+): Promise<{ found: boolean; alreadyUnsubscribed: boolean; listeAttente: boolean }> {
   const supabase = createServiceClient();
   if (!supabase) throw new Error('Supabase service client unavailable');
 
   const { data: existing } = await supabase
     .from('newsletter_subscribers')
-    .select('id, status, user_id')
+    .select('id, status, user_id, source')
     .eq(field, value)
     .maybeSingle();
 
-  if (!existing) return { found: false, alreadyUnsubscribed: false };
+  if (!existing) return { found: false, alreadyUnsubscribed: false, listeAttente: false };
+  // L'adresse vient seulement de la page d'attente : la page de confirmation
+  // parle alors de la liste d'attente, pas de la newsletter.
+  const listeAttente = !recoitLaNewsletter(existing.source);
   if (existing.status === 'unsubscribed') {
-    return { found: true, alreadyUnsubscribed: true };
+    return { found: true, alreadyUnsubscribed: true, listeAttente };
   }
 
   await supabase
@@ -424,5 +445,5 @@ export async function unsubscribeBy(
     await syncProfileNewsletterFlag(existing.user_id, false);
   }
 
-  return { found: true, alreadyUnsubscribed: false };
+  return { found: true, alreadyUnsubscribed: false, listeAttente };
 }

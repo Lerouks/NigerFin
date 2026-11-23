@@ -26,60 +26,66 @@ const SOCIALS = [
 ].filter((s) => Boolean(s.url));
 
 /**
- * Page d'attente du pré-lancement (maquette « la carte », choisie par la
- * direction le 23/11/2026). Fond noir ; le Niger en points argentés occupe le
- * haut à droite, le titre se pose dans le vide du nord-ouest de la carte. Sur
- * téléphone (version D, choisie le 23/11/2026), la carte passe en tête : le
- * Niger dès l'ouverture, puis le titre et le formulaire. Le premier écran
- * occupe exactement la hauteur visible de Safari et la carte prend tout
- * l'espace que laissent le titre et le formulaire : grande sur un 17 Pro Max,
- * plus petite sur un iPhone SE ; titre, texte et bouton suivent la largeur de
- * l'écran. Entrée sobre, une seule fois (globals.css) : la carte s'allume
- * d'ouest en est, le titre se dévoile d'un bloc, le reste en fondu.
+ * Page d'attente du pré-lancement (maquette « la carte », 23/11/2026).
+ *
+ * - Téléphone (version D) : la carte en tête, puis le titre et le formulaire.
+ *   Le premier écran prend la hauteur visible exacte de Safari et la carte
+ *   occupe la place que laissent le titre et le formulaire.
+ * - Tablette et ordinateur (version B) : tout est centré, le titre et le
+ *   formulaire en haut, la carte en dessous comme un horizon.
+ * - Entrée (globals.css et CarteNiger) : la carte s'assemble d'ouest en est, le
+ *   titre monte mot par mot puis « en clair » passe du flou au net, le reste
+ *   arrive en fondu ; sur ordinateur, la souris éclaire les points qu'elle
+ *   survole. Tout est coupé pour qui demande moins de mouvement.
  */
 export function ComingSoon() {
   return (
-    <main className="relative flex min-h-svh w-full flex-col overflow-hidden bg-[#09090a] px-[22px] pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-4 [-webkit-tap-highlight-color:transparent] sm:pt-6 text-[#f4f4f5] antialiased sm:px-10 lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:grid-rows-[auto_1fr_auto] lg:gap-x-10 xl:flex xl:px-14 xl:pb-8 xl:pt-9">
-      {/* Tablette et ordinateur : la carte sous le texte, puis à côté. */}
-      <CarteNiger className="pointer-events-none relative hidden max-w-[760px] sm:order-2 sm:mx-auto sm:mt-10 sm:block sm:w-full lg:col-start-2 lg:row-start-2 lg:mx-0 lg:mt-0 lg:w-full lg:max-w-none lg:self-center xl:absolute xl:right-[3vw] xl:top-[9vh] xl:order-none xl:m-0 xl:w-[min(63vw,104vh)]" />
+    <main className="relative flex min-h-svh w-full flex-col overflow-hidden bg-[#09090a] px-[22px] pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-4 text-[#f4f4f5] antialiased [-webkit-tap-highlight-color:transparent] sm:items-center sm:px-10 sm:pt-6 sm:text-center xl:px-14 xl:pb-6 xl:pt-7">
+      {/* Tablette et ordinateur : la carte sous le texte, centrée, comme un horizon.
+          Elle prend toute la hauteur que laissent le texte et les réseaux : la page
+          tient dans l'écran, du portable 1280 × 720 à l'écran 2560. */}
+      <div className="relative hidden sm:order-2 sm:mt-[2.4vh] sm:block sm:max-h-[62vh] sm:min-h-[170px] sm:w-full sm:flex-1 sm:self-stretch">
+        <CarteNiger ajuster centrer className="pointer-events-none absolute inset-0 block h-full w-full" />
+      </div>
 
       {/* Téléphone : le premier écran (marque, carte, titre, formulaire) prend la
           hauteur visible exacte ; à partir de la tablette, ce bloc s'efface et ses
-          éléments rejoignent la mise en page du site (display: contents). */}
+          éléments rejoignent la colonne centrée (display: contents). */}
       <div className="flex min-h-[calc(100svh-1.75rem)] flex-col sm:contents">
-      <header className="relative z-10 order-0 lg:col-span-2 lg:row-start-1">
-        <div>
-          <p className="font-[family-name:var(--font-playfair)] text-[22px] font-bold tracking-[0.01em] min-[1800px]:text-[26px]">NFI&nbsp;REPORT</p>
+        <header className="relative z-10 order-0 sm:self-stretch">
+          <p className="font-[family-name:var(--font-playfair)] text-[22px] font-bold tracking-[0.01em] 2xl:text-[26px]">NFI&nbsp;REPORT</p>
+        </header>
+
+        <div className="relative my-[1.2svh] min-h-[110px] flex-1 sm:hidden">
+          <CarteNiger ajuster className="pointer-events-none absolute inset-0 block h-full w-full" />
         </div>
-      </header>
 
-      <div className="relative my-[1.2svh] min-h-[110px] flex-1 sm:hidden">
-        <CarteNiger ajuster className="pointer-events-none absolute inset-0 block h-full w-full" />
-      </div>
-
-      <section className="relative z-10 flex max-w-[560px] flex-col sm:order-1 sm:pt-[10vh] lg:col-start-1 lg:row-start-2 lg:self-center lg:pt-0 xl:max-w-[600px] xl:self-auto xl:flex-1 xl:justify-end xl:pb-[4vh] xl:pt-[4vh] min-[1800px]:max-w-[760px]">
-        <h1 className="nfi-titre text-[clamp(34px,11.2vw,52px)] font-bold leading-[0.96] tracking-[-0.045em] sm:text-[64px] xl:text-[clamp(52px,min(6.2vw,10vh),136px)]">
-          {/* Sans point final, comme un titre de presse. */}
-          L’économie du&nbsp;Niger, <span className="text-[#7d8189]">en&nbsp;clair</span>
-        </h1>
-        <p className="nfi-apparait mt-[clamp(10px,1.6svh,16px)] max-w-[470px] text-[clamp(15px,4.1vw,18px)] leading-[1.55] text-[#a9adb4] sm:mt-5 sm:text-[18px] xl:mt-[3.2vh] min-[1800px]:max-w-[600px] min-[1800px]:text-[21px]">
-          Un média d’information économique et financière consacré au&nbsp;Niger&nbsp;: l’énergie, les banques, la bourse, les entreprises.
-        </p>
-        <div className="nfi-apparait nfi-apparait-2 mt-[clamp(14px,2.4svh,24px)] max-w-[470px] sm:mt-8 xl:mt-[5vh] min-[1800px]:max-w-[560px]">
-          <WaitlistForm />
-          {/* La page collecte une adresse : qui la donne doit pouvoir lire qui la
-              collecte, et sortir. Ces pages restent ouvertes en pré-lancement. */}
-          <p className="mt-1 hidden text-[13px] leading-relaxed text-[#8a8e95] sm:block xl:text-[12px] xl:text-[#7d8189]">
-            Votre adresse ne sert qu’à vous prévenir de l’ouverture.{' '}
-            <a
-              href="/confidentialite"
-              className="whitespace-nowrap underline underline-offset-[3px] transition-colors hover:text-[#f4f4f5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f4f5]"
-            >
-              Politique de confidentialité
-            </a>
+        <section className="relative z-10 flex max-w-[560px] flex-col sm:order-1 sm:max-w-[640px] sm:items-center sm:pt-[6vh] lg:max-w-none lg:pt-[4.2vh]">
+          {/* Sans point final, comme un titre de presse. Chaque groupe de mots
+              monte de sous un cache ; « en clair » passe du flou au net. */}
+          <h1 className="text-[clamp(34px,11.2vw,52px)] font-bold leading-[0.98] tracking-[-0.045em] sm:text-[clamp(44px,6.6vw,64px)] lg:whitespace-nowrap lg:text-[clamp(44px,4.3vw,84px)] 2xl:text-[clamp(66px,4.3vw,110px)]">
+            <span className="nfi-mot"><span style={{ '--i': 0 } as React.CSSProperties}>L’économie</span></span>{' '}
+            <span className="nfi-mot"><span style={{ '--i': 1 } as React.CSSProperties}>du&nbsp;Niger,</span></span>{' '}
+            <span className="nfi-net text-[#7d8189]">en&nbsp;clair</span>
+          </h1>
+          <p className="nfi-apparait mt-[clamp(10px,1.6svh,16px)] max-w-[470px] text-[clamp(15px,4.1vw,18px)] leading-[1.55] text-[#a9adb4] sm:mx-auto sm:mt-[2.4vh] sm:text-[18px] 2xl:max-w-[600px] 2xl:text-[20px]">
+            Un média d’information économique et financière consacré au&nbsp;Niger&nbsp;: l’énergie, les banques, la bourse, les entreprises.
           </p>
-        </div>
-      </section>
+          <div className="nfi-apparait nfi-apparait-2 mt-[clamp(14px,2.4svh,24px)] w-full max-w-[470px] sm:mx-auto sm:mt-[3.4vh] 2xl:max-w-[540px]">
+            <WaitlistForm />
+            {/* La page collecte une adresse : qui la donne doit pouvoir lire qui la
+                collecte, et sortir. Ces pages restent ouvertes en pré-lancement. */}
+            <p className="mt-1 hidden text-[13px] leading-relaxed text-[#8a8e95] sm:block xl:text-[12px] xl:text-[#7d8189]">
+              Votre adresse ne sert qu’à vous prévenir de l’ouverture.{' '}
+              <a
+                href="/confidentialite"
+                className="whitespace-nowrap underline underline-offset-[3px] transition-colors hover:text-[#f4f4f5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f4f5]"
+              >
+                Politique de confidentialité
+              </a>
+            </p>
+          </div>
+        </section>
       </div>
 
       {/* Téléphone : la mention suit le bouton, juste sous le premier écran. */}
@@ -93,8 +99,8 @@ export function ComingSoon() {
         </a>
       </p>
 
-      <footer className="nfi-apparait nfi-apparait-3 relative z-10 order-3 mt-5 flex items-center sm:mt-4 lg:col-start-1 lg:row-start-3 xl:mt-0">
-        <nav className="-ml-2.5 flex items-center gap-1" aria-label="NFI REPORT sur les réseaux sociaux">
+      <footer className="nfi-apparait nfi-apparait-3 relative z-10 order-3 mt-5 flex items-center sm:justify-center sm:pt-[2.4vh]">
+        <nav className="-ml-2.5 flex items-center gap-1 sm:ml-0" aria-label="NFI REPORT sur les réseaux sociaux">
           {/* Dégradé officiel d'Instagram, appelé par .nfi-reseau--instagram. */}
           <svg width="0" height="0" className="absolute" aria-hidden="true" focusable="false">
             <defs>

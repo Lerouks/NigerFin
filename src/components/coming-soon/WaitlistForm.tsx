@@ -49,11 +49,11 @@ export function WaitlistForm() {
   if (status === 'success') {
     return (
       <p
-        className="flex items-center gap-2 border-b border-white/25 py-[14px] text-[15px] font-medium text-[#f4f4f5]"
+        className="nfi-merci flex items-center gap-2 border-b border-white/25 py-[14px] text-[15px] font-medium text-[#f4f4f5] sm:justify-center"
         role="status"
         aria-live="polite"
       >
-        <Check className="h-4 w-4 shrink-0" />
+        <Check className="nfi-coche h-4 w-4 shrink-0" />
         Merci, c’est noté. Vous serez prévenu à l’ouverture.
       </p>
     );
@@ -61,7 +61,7 @@ export function WaitlistForm() {
 
   return (
     <form onSubmit={handleSubmit} noValidate>
-      <label htmlFor="waitlist-email" className="mb-2 block text-[clamp(14px,3.6vw,15.5px)] text-[#a9adb4] sm:mb-2.5 sm:text-[14px] xl:text-[13px]">
+      <label htmlFor="waitlist-email" className="mb-2 block text-[clamp(14px,3.6vw,15.5px)] text-[#a9adb4] transition-colors duration-200 sm:mb-2.5 sm:text-center sm:text-[14px] xl:text-[13px]">
         Être prévenu de l’ouverture
       </label>
       {/* Téléphone : champ encadré et vrai bouton blanc, sur toute la largeur.

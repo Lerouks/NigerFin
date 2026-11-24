@@ -41,15 +41,15 @@ export default async function EducationPage() {
   return (
     <div className="min-h-screen bg-background">
       <CategoryHero
-        title="Éducation"
-        description="Apprenez la finance, l'économie et les marchés à votre rythme. Choisissez une catégorie pour commencer."
+        title="Apprendre"
+        description="Apprenez la finance, l'économie et les marchés à votre rythme, thème par thème ou en suivant un parcours."
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
         <div className="flex items-end justify-between mb-6">
           <div>
             <h2 className="text-xl md:text-2xl font-bold leading-tight">Toutes les catégories</h2>
             <p className="text-[13px] text-gray-500 mt-1">
-              Explore librement par thème, au rythme qui te convient.
+              Explorez librement par thème, au rythme qui vous convient.
             </p>
           </div>
         </div>

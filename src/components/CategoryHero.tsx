@@ -1,3 +1,5 @@
+import { paragrapheFr } from '@/lib/typographie-fr';
+
 interface CategoryHeroProps {
   title: string;
   description: string;
@@ -24,7 +26,7 @@ export function CategoryHero({ title, description }: CategoryHeroProps) {
           {title}
         </h1>
         <p className="text-gray-600 text-[15px] md:text-[16px] mt-3 max-w-2xl leading-relaxed">
-          {description}
+          {paragrapheFr(description)}
         </p>
       </div>
     </section>

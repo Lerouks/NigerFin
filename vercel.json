@@ -21,6 +21,10 @@
       "schedule": "0 8 * * *"
     },
     {
+      "path": "/api/cron/releve-brvm",
+      "schedule": "0 17 * * 1-5"
+    },
+    {
       "path": "/api/cron/send-scheduled-newsletters",
       "schedule": "0 7 * * 1"
     }

@@ -126,7 +126,7 @@ const defaultPremiumTools: ToolData[] = [
   { _id: 'f6', name: 'Budget familial', slug: 'budget-familial', icon: 'Wallet', isPremium: true },
 ];
 
-export function PracticalTools() {
+export function PracticalTools({ avecEnTete = true }: { avecEnTete?: boolean } = {}) {
   const { userRole } = useAuth();
   const isSubscribed = userRole === 'premium' || userRole === 'admin';
   const [freeTools, setFreeTools] = useState<ToolData[]>(defaultFreeTools);
@@ -150,18 +150,22 @@ export function PracticalTools() {
   }, []);
 
   return (
-    <section id="outils" className="py-20 md:py-28 scroll-mt-[180px]">
+    <section id="outils" className={`${avecEnTete ? 'py-20 md:py-28' : 'pt-10 pb-20 md:pt-14 md:pb-28'} scroll-mt-[180px]`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-xl mb-14">
-          <span className="text-[11px] tracking-[0.15em] uppercase text-gray-500 block mb-3">
-            Outils financiers
-          </span>
-          <h2 className="text-3xl md:text-4xl mb-4">Calculez, simulez, anticipez</h2>
-          <p className="text-gray-500 text-[15px] leading-relaxed">
-            Des calculateurs et simulateurs professionnels conçus pour les investisseurs et
-            professionnels au Niger et en Afrique.
-          </p>
-        </div>
+        {/* Sur /outils, l'en-tête de la page présente déjà les simulateurs :
+            cet en-tête de section n'y est pas répété (24/11/2026). */}
+        {avecEnTete ? (
+          <div className="max-w-xl mb-14">
+            <span className="text-[11px] tracking-[0.15em] uppercase text-gray-500 block mb-3">
+              Outils financiers
+            </span>
+            <h2 className="text-3xl md:text-4xl mb-4">Calculez, simulez, anticipez</h2>
+            <p className="text-gray-500 text-[15px] leading-relaxed">
+              Des calculateurs et simulateurs professionnels conçus pour les investisseurs et
+              professionnels au Niger et en Afrique.
+            </p>
+          </div>
+        ) : null}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
           <PlanCard title="Plan gratuit" badge="GRATUIT" tools={freeTools} />

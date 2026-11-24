@@ -21,10 +21,10 @@ export default function OutilsPage() {
   return (
     <div className="min-h-screen bg-background">
       <CategoryHero
-        title="Outils Financiers"
-        description="Simulateurs et calculateurs financiers optimisés pour le contexte économique africain."
+        title="Simulateurs"
+        description="Calculez un salaire, un emprunt, un budget ou les intérêts d'une épargne, en francs CFA."
       />
-      <PracticalTools />
+      <PracticalTools avecEnTete={false} />
       <HubFooter
         paragraphs={[
           "Les outils financiers de NFI Report sont conçus spécifiquement pour le contexte économique du Niger et de la zone UEMOA. Que vous prépariez l'achat d'une voiture, le financement d'un projet immobilier, l'analyse de votre salaire ou la gestion de votre budget familial, nos simulateurs vous aident à prendre des décisions éclairées en quelques secondes.",

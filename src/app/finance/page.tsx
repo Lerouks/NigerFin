@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { CategoryHero } from '@/components/CategoryHero';
+import { CoursDuJour } from '@/components/finance/CoursDuJour';
 import { HubFooter } from '@/components/HubFooter';
 import { SectionArticlesFiltered } from '@/components/SectionArticlesFiltered';
 import { getArticlesByCategory, getArticleViewRanking } from '@/lib/articles';
@@ -19,7 +20,11 @@ export default async function FinancePage() {
   return (
     <div className="min-h-screen bg-background">
       <CategoryHero title="Finance" description="Votre argent : banques, crédit, épargne, placements et marchés au Niger et en Afrique de l'Ouest." />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 md:pt-12 pb-14 md:pb-20">
+        {/* Les cours du jour : euro, dollar, naira, BRVM, or et Brent (24/11/2026). */}
+        <div className="mb-12 md:mb-16">
+          <CoursDuJour />
+        </div>
         {/*
           Facette « Marchés & BRVM » : la rubrique Marchés est sortie de la barre
           de navigation et ses articles ont rejoint Finance. La facette leur rend

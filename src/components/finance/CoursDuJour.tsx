@@ -1,11 +1,13 @@
 import { getCoursDuJour, type Cours, type PointDeCours } from '@/lib/cours-du-jour';
 import { paragrapheFr } from '@/lib/typographie-fr';
+import { SourcesDesCours, type SourceDeCours } from './SourcesDesCours';
 
 /**
  * « Les cours du jour », en tête de la page Finance (maquette validée le
  * 24/11/2026). Six tuiles : euro, dollar, naira, BRVM Composite, or et Brent.
  * Une tuile dont la source est en panne disparaît ; le bloc entier disparaît
- * s'il ne reste que l'euro.
+ * s'il ne reste que l'euro. Les sources s'ouvrent par le bouton « Sources »
+ * (choix de Raouf le 24/11/2026, à la place d'un paragraphe sous les tuiles).
  */
 
 const NB = '\u00a0';
@@ -96,18 +98,17 @@ function Courbe({ serie, description }: { serie: PointDeCours[]; description?: s
   );
 }
 
-function phraseDesSources(cours: Cours[]): string {
-  const cles = new Set(cours.map((c) => c.cle));
-  const sources = [
-    cles.has('dollar') && 'Banque centrale européenne pour le dollar',
-    cles.has('naira') && 'cours indicatif du marché pour le naira',
-    cles.has('brvm') && 'clôture de la BRVM pour le Composite',
-    cles.has('or') && 'COMEX pour l’or, converti avec le dollar du jour',
-    cles.has('brent') && 'NYMEX pour le Brent',
-  ].filter((s): s is string => Boolean(s));
-  const liste =
-    sources.length > 1 ? `${sources.slice(0, -1).join(', ')} et ${sources.at(-1)}` : (sources[0] ?? '');
-  return `L’euro vaut 655,957${NB}FCFA, une parité fixe. Sources${NB}: ${liste}.`;
+/** Les sources des cours affichés, dans l'ordre des tuiles. */
+function sourcesDesCours(cours: Cours[]): SourceDeCours[] {
+  const textes: Record<Cours['cle'], string> = {
+    euro: `Parité fixe : 1 euro vaut 655,957${NB}FCFA.`,
+    dollar: 'Cours de référence de la Banque centrale européenne, converti en FCFA par la parité fixe.',
+    naira: 'Cours indicatif du marché des changes, mis à jour chaque jour.',
+    brvm: 'Cours de clôture publié par la BRVM à la fin de chaque séance.',
+    or: 'Cours de l’or à New York (COMEX), converti en FCFA le gramme avec le dollar du jour.',
+    brent: 'Cours du Brent à New York (NYMEX), en dollars le baril.',
+  };
+  return cours.map((c) => ({ cours: c.libelle, source: paragrapheFr(textes[c.cle], 24) }));
 }
 
 export async function CoursDuJour() {
@@ -119,11 +120,14 @@ export async function CoursDuJour() {
 
   return (
     <section aria-labelledby="cours-du-jour-titre" className="rounded-xl border border-black/10 bg-white px-4 py-5 sm:px-6 sm:py-6">
-      <header className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <h2 id="cours-du-jour-titre" className="text-[18px] sm:text-[19px] font-bold tracking-tight text-[#111]">
-          Les cours du jour
-        </h2>
-        <p className="text-[13px] text-gray-500">{dateLongue(plusRecente)}</p>
+      <header className="relative flex items-start justify-between gap-3">
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <h2 id="cours-du-jour-titre" className="text-[18px] sm:text-[19px] font-bold tracking-tight text-[#111]">
+            Les cours du jour
+          </h2>
+          <p className="text-[13px] text-gray-500">{dateLongue(plusRecente)}</p>
+        </div>
+        <SourcesDesCours sources={sourcesDesCours(cours)} />
       </header>
 
       <div className={`mt-5 grid grid-cols-2 gap-y-6 sm:grid-cols-3 ${COLONNES_LARGES[cours.length] ?? 'lg:grid-cols-6'}`}>
@@ -145,9 +149,6 @@ export async function CoursDuJour() {
         ))}
       </div>
 
-      <p className="mt-5 border-t border-black/8 pt-4 text-[12px] leading-relaxed text-gray-500">
-        {paragrapheFr(phraseDesSources(cours))}
-      </p>
     </section>
   );
 }

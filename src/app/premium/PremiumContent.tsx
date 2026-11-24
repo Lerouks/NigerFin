@@ -33,8 +33,8 @@ const SCREENSHOTS = [
 const BENEFITS = [
   {
     icon: Mail,
-    title: 'Le Brief du Lundi',
-    desc: 'Notre newsletter hebdomadaire, envoyée chaque lundi à 7h pour cadrer la semaine. L’édition complète, sans paywall ni teaser.',
+    title: 'La newsletter en entier',
+    desc: 'Vous la recevez en intégralité, quand l’abonné gratuit n’en\u00a0lit\u00a0que\u00a0le\u00a0début.',
   },
   {
     icon: FileText,
@@ -78,7 +78,7 @@ const FAQ = [
   },
   {
     q: 'Que recouvre exactement Premium ?',
-    a: 'Tout : Le Brief du Lundi (notre newsletter hebdomadaire) en intégralité, articles & analyses illimités, outils Premium avec PDF, cours d’éducation financière, alertes.',
+    a: 'Tout : la newsletter en intégralité, articles & analyses illimités, outils Premium avec PDF, cours\u00a0d’éducation\u00a0financière,\u00a0alertes.',
   },
 ];
 
@@ -535,8 +535,8 @@ function FinalCta() {
           <span className="text-gold">votre connaissance.</span>
         </h2>
         <p className="mx-auto mt-6 max-w-xl text-[16px] leading-relaxed text-gray-300">
-          Rejoignez les membres Premium de NFI Report et recevez dès aujourd&rsquo;hui
-          votre premier briefing économique ouest-africain.
+          Rejoignez les membres Premium de NFI&nbsp;REPORT et lisez
+          la&nbsp;newsletter en&nbsp;intégralité.
         </p>
         <div className="mt-10 flex flex-col items-center gap-4">
           <Link

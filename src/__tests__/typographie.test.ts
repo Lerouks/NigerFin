@@ -33,3 +33,26 @@ describe('typographierHtml', () => {
     );
   });
 });
+
+describe('finSoudee et paragrapheFr : jamais une dernière ligne de deux ou trois mots', () => {
+  it('soude les quatre derniers mots', async () => {
+    const { finSoudee } = await import('@/lib/typographie-fr');
+    expect(finSoudee('un deux trois quatre cinq six')).toBe('un deux trois\u00a0quatre\u00a0cinq\u00a0six');
+  });
+  it('ne soude jamais plus de 28 caractères, pour ne pas déborder d\u2019un écran de 320 px', async () => {
+    const { paragrapheFr } = await import('@/lib/typographie-fr');
+    const r = paragrapheFr('Les sociétés qui pèsent dans l\u2019économie du pays.');
+    const queue = r.slice(r.lastIndexOf(' ') + 1);
+    expect(queue.length).toBeLessThanOrEqual(28);
+    expect(queue).toBe('dans\u00a0l\u2019économie\u00a0du\u00a0pays.');
+  });
+  it('est idempotente', async () => {
+    const { paragrapheFr } = await import('@/lib/typographie-fr');
+    const une = paragrapheFr('Part de chaque secteur dans le PIB 2025');
+    expect(paragrapheFr(une)).toBe(une);
+  });
+  it('laisse un texte d\u2019un seul morceau tel quel', async () => {
+    const { finSoudee } = await import('@/lib/typographie-fr');
+    expect(finSoudee('Niger')).toBe('Niger');
+  });
+});

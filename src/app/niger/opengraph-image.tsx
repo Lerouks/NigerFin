@@ -3,7 +3,7 @@ import { ImageResponse } from 'next/og';
 export const runtime = 'nodejs';
 export const revalidate = 86400;
 
-export const alt = 'Niger : données économiques et géographiques';
+export const alt = 'Niger : chiffres clés et entreprises';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -34,8 +34,8 @@ export default function NigerOgImage() {
             Économie du Niger
           </div>
           <div style={{ color: '#9ca3af', fontSize: '30px', lineHeight: 1.4 }}>
-            Indicateurs macro, ressources, régions et partenaires. Mises à jour
-            issues de l&apos;INS Niger et de la Banque Mondiale.
+            Les chiffres officiels du pays, chacun avec sa source,
+            et les entreprises qui pèsent dans son économie.
           </div>
         </div>
 

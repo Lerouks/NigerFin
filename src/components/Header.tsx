@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { Menu, Search, X, ChevronRight, ChevronDown, LogOut } from 'lucide-react';
+import { Menu, Search, X, ChevronRight, ChevronDown, LogOut, UserRound } from 'lucide-react';
 import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { SearchOverlay } from './SearchOverlay';
@@ -166,7 +166,7 @@ export function Header({ menuApprendre = MENU_APPRENDRE_VIDE }: HeaderProps) {
             </button>
 
             <Link href="/" className="flex items-center lg:static absolute left-1/2 -translate-x-1/2 lg:translate-x-0 max-w-[calc(100%-160px)] lg:max-w-none" aria-label="NFI Report, accueil">
-              <span className="font-[family-name:var(--font-playfair)] text-[20px] sm:text-[22px] md:text-[26px] tracking-[0.01em] font-bold truncate">
+              <span className="font-[family-name:var(--font-playfair)] text-[18px] min-[360px]:text-[20px] sm:text-[22px] md:text-[26px] tracking-[0.01em] font-bold truncate">
                 NFI&nbsp;REPORT
               </span>
             </Link>
@@ -179,12 +179,14 @@ export function Header({ menuApprendre = MENU_APPRENDRE_VIDE }: HeaderProps) {
                 ) : isSignedIn ? (
                   <button
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
-                    className="text-[14px] text-[#111] hover:text-black/60 transition-colors whitespace-nowrap"
+                    className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] min-[360px]:min-w-0 text-[14px] text-[#111] hover:text-black/60 transition-colors whitespace-nowrap"
                     aria-label="Mon compte"
                     aria-haspopup="menu"
                     aria-expanded={userMenuOpen}
                   >
-                    Mon compte
+                    {/* Sous 360 px, le texte touchait le logo : une icône le remplace. */}
+                    <UserRound className="w-5 h-5 min-[360px]:hidden" aria-hidden="true" />
+                    <span className="hidden min-[360px]:inline">Mon compte</span>
                   </button>
                 ) : (
                   <Link
@@ -230,11 +232,12 @@ export function Header({ menuApprendre = MENU_APPRENDRE_VIDE }: HeaderProps) {
                 )}
               </div>
 
-              {/* Subscribe CTA (visible desktop + mobile) */}
+              {/* Bouton S'abonner : partout, sauf sous 360 px, où il toucherait le
+                  logo ; il reste alors en tête du menu, ligne « S'abonner ». */}
               {!isAuthLoading && !isSignedIn && (
                 <Link
                   href="/premium"
-                  className="inline-flex items-center justify-center min-h-[44px] px-4 sm:px-5 bg-[#111] text-white text-[13px] sm:text-[14px] font-medium rounded-[4px] hover:bg-black transition-colors whitespace-nowrap border border-[#111]"
+                  className="hidden min-[360px]:inline-flex items-center justify-center min-h-[44px] px-4 sm:px-5 bg-[#111] text-white text-[13px] sm:text-[14px] font-medium rounded-[4px] hover:bg-black transition-colors whitespace-nowrap border border-[#111]"
                 >
                   S&apos;abonner
                 </Link>
@@ -404,7 +407,7 @@ export function Header({ menuApprendre = MENU_APPRENDRE_VIDE }: HeaderProps) {
                       <div className="mt-3.5 pt-3 border-t border-black/6 flex items-center justify-between gap-4 text-[13px]">
                         <span className="text-gray-500">
                           {menuApprendre.lecons > 0
-                            ? `${menuApprendre.lecons} leçons, du premier pas à la BRVM`
+                            ? `${menuApprendre.lecons}\u00a0leçons, du premier pas à la\u00a0BRVM`
                             : 'Des cours pour comprendre l’argent'}
                         </span>
                         <Link href="/education" className="font-semibold text-foreground hover:text-foreground/70 whitespace-nowrap">
@@ -505,7 +508,7 @@ export function Header({ menuApprendre = MENU_APPRENDRE_VIDE }: HeaderProps) {
                               tabIndex={mobileMenuOpen ? 0 : -1}
                               className="flex items-center min-h-[44px] px-3 text-[15px] font-semibold text-foreground hover:bg-black/3 rounded-lg transition-colors"
                             >
-                              {cle === 'outils' ? 'Tous les simulateurs ›' : 'Tout Apprendre ›'}
+                              {cle === 'outils' ? 'Tous les simulateurs\u00a0›' : 'Tout Apprendre\u00a0›'}
                             </Link>
                           </li>
                         </ul>

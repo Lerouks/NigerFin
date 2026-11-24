@@ -5,6 +5,7 @@ import type { Article } from '@/types';
 import { formatDate } from '@/lib/utils';
 import { fallbackImageUrl } from '@/data/mock-data';
 import { SECTION_META } from '@/lib/sections';
+import { paragrapheFr } from '@/lib/typographie-fr';
 
 interface ArticleCardProps {
   article: Article;
@@ -113,10 +114,10 @@ export function ArticleCard({ article, featured = false, priority = false }: Art
             </span>
           </div>
           <h3 className="text-[17px] leading-snug mb-2 line-clamp-2 group-hover:text-gray-600 transition-colors">
-            {article.title}
+            {paragrapheFr(article.title, 24)}
           </h3>
           <p className="text-[13px] text-gray-500 mb-4 line-clamp-2 leading-relaxed">
-            {article.excerpt}
+            {paragrapheFr(article.excerpt, 24)}
           </p>
           <div className="flex items-center justify-between text-xs text-gray-500">
             <span>{article.author.name}</span>

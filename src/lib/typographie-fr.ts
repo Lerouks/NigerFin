@@ -108,3 +108,31 @@ export function enPhrases(texte: string): string[] {
   }
   return phrases;
 }
+
+/**
+ * Fin de paragraphe soudée : les derniers mots restent ensemble jusqu'à en
+ * compter quatre, pour qu'aucun paragraphe ni titre ne finisse sur une ligne
+ * de deux ou trois mots. Le bloc soudé ne dépasse pas `longueurMax`
+ * caractères : plus long, il déborderait d'un écran de 320 px. À appliquer
+ * après typographieFr (seule l'espace ordinaire est une coupure possible).
+ */
+export function finSoudee(texte: string, motsDeFin = 4, longueurMax = 28): string {
+  if (!texte) return texte;
+  const morceaux = texte.split(' ');
+  if (morceaux.length < 2) return texte;
+  const compter = (s: string) => s.split(/[\u00a0\u202f]+/).filter(Boolean).length;
+  let debut = morceaux.length - 1;
+  let mots = compter(morceaux[debut]!);
+  let longueur = morceaux[debut]!.length;
+  while (debut > 0 && mots < motsDeFin && longueur + 1 + morceaux[debut - 1]!.length <= longueurMax) {
+    debut -= 1;
+    mots += compter(morceaux[debut]!);
+    longueur += 1 + morceaux[debut]!.length;
+  }
+  return [...morceaux.slice(0, debut), morceaux.slice(debut).join(INSECABLE)].join(' ');
+}
+
+/** Paragraphe ou titre affiché : typographie française, puis fin soudée. */
+export function paragrapheFr(texte: string, longueurMax = 28): string {
+  return finSoudee(typographieFr(texte), 4, longueurMax);
+}

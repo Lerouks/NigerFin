@@ -2,13 +2,15 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { getSectorAnchor } from '@/lib/sector-anchor';
+import { secteurFr } from '@/lib/typographie-fr';
 
 interface SectorTOCProps {
   sectors: string[];
 }
 
 /**
- * Sommaire sectoriel sticky horizontal (desktop seulement, scroll-x mobile).
+ * Sommaire sectoriel sticky horizontal. Sur téléphone, les secteurs passent à la
+ * ligne au lieu de défiler hors de l'écran (24/11/2026 : rien de rogné sur téléphone).
  * Smooth scroll natif vers les sections + active highlight via IntersectionObserver.
  * Monochrome strict, separateurs verticaux discrets, pas de couleur sectorielle.
  */
@@ -72,7 +74,7 @@ export function SectorTOC({ sectors }: SectorTOCProps) {
       className="relative md:sticky md:top-[var(--header-height)] z-30 bg-background/95 backdrop-blur-md border-b border-black/8"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <ul className="flex items-center gap-0 overflow-x-auto py-3 -mx-1 scrollbar-thin scroll-smooth">
+        <ul className="flex flex-wrap items-center gap-y-1 py-3 -mx-1">
           <li className="shrink-0 px-3 py-1 text-[10px] uppercase tracking-[0.22em] text-gray-600 font-semibold border-r border-black/10">
             Secteurs
           </li>
@@ -97,7 +99,7 @@ export function SectorTOC({ sectors }: SectorTOCProps) {
                   }
                   aria-current={isActive ? 'true' : undefined}
                 >
-                  {sector}
+                  {secteurFr(sector)}
                 </a>
               </li>
             );

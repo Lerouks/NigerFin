@@ -16,6 +16,7 @@ import {
 import { ArticleCard } from '@/components/ArticleCard';
 import { CountryFlag } from '@/components/entreprises/CountryFlag';
 import { parseOwnership } from '@/lib/ownership';
+import { paragrapheFr, secteurFr } from '@/lib/typographie-fr';
 import type { Article } from '@/types';
 
 interface Enterprise {
@@ -117,18 +118,20 @@ export function EnterpriseContent({
               <p className="text-[10px] uppercase tracking-[0.22em] text-gold font-semibold mb-2">
                 Dossier entreprise
               </p>
-              <h1 className="text-3xl sm:text-5xl font-black leading-[1.05] tracking-tight">
-                {enterprise.name}
+              {/* Nom court (« Niger Telecoms ») tenu sur une ligne : police un peu
+                  réduite sous 360 px pour qu'il y tienne. */}
+              <h1 className="text-[26px] min-[360px]:text-3xl sm:text-5xl font-black leading-[1.05] tracking-tight">
+                {paragrapheFr(enterprise.name)}
               </h1>
               {enterprise.full_name &&
                 enterprise.full_name !== enterprise.name && (
                   <p className="text-[14px] sm:text-[16px] text-white/65 mt-2 italic">
-                    {enterprise.full_name}
+                    {paragrapheFr(enterprise.full_name, 36)}
                   </p>
                 )}
               <div className="flex flex-wrap items-center gap-2 mt-4">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-semibold tracking-wide rounded-full bg-white/10 text-white ring-1 ring-inset ring-white/20">
-                  {enterprise.sector}
+                  {enterprise.sector ? secteurFr(enterprise.sector) : null}
                 </span>
                 {enterprise.founded_year && (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] text-white/65 rounded-full ring-1 ring-inset ring-white/15">
@@ -179,7 +182,7 @@ export function EnterpriseContent({
                       />
                       <span>
                         <strong className="font-semibold">{fact.label}&nbsp;:</strong>{' '}
-                        {fact.value}
+                        {paragrapheFr(fact.value)}
                       </span>
                     </li>
                   ))}
@@ -192,8 +195,10 @@ export function EnterpriseContent({
               <h2 className="text-[11px] uppercase tracking-[0.18em] text-gray-500 font-bold mb-4">
                 Présentation
               </h2>
-              <p className="text-[16px] leading-relaxed text-foreground/90 text-justify hyphens-auto">
-                {enterprise.detailed_description || enterprise.description}
+              {/* Aligné à gauche : un texte justifié creuse des blancs autour des
+                  insécables qui tiennent les fins et débuts de phrase. */}
+              <p className="text-[16px] leading-relaxed text-foreground/90 text-pretty">
+                {paragrapheFr(enterprise.detailed_description || enterprise.description || '')}
               </p>
             </div>
 
@@ -213,7 +218,7 @@ export function EnterpriseContent({
                         {fact.label}
                       </p>
                       <p className="text-[14px] font-medium text-foreground">
-                        {fact.value}
+                        {paragrapheFr(fact.value)}
                       </p>
                     </div>
                   ))}
@@ -322,7 +327,7 @@ export function EnterpriseContent({
               {/* CTA retour atlas */}
               <div className="bg-[#0a0a0a] text-white rounded-xl p-6">
                 <p className="text-[13px] text-white/70 mb-3">
-                  Explorer les autres piliers de l&apos;économie nigérienne
+                  {paragrapheFr('Explorer les autres piliers de l\u2019économie nigérienne')}
                 </p>
                 <Link
                   href="/entreprises"

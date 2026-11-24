@@ -1,5 +1,5 @@
 import { ImageResponse } from 'next/og';
-import { getStrategicEnterprises, AGGREGATED_STATS } from '@/lib/strategic-enterprises';
+import { getStrategicEnterprises, statistiquesAtlas } from '@/lib/strategic-enterprises';
 
 export const runtime = 'nodejs';
 export const revalidate = 3600;
@@ -11,7 +11,7 @@ export const contentType = 'image/png';
 export default async function EnterprisesAtlasOgImage() {
   const enterprises = await getStrategicEnterprises();
   const count = enterprises.length;
-  const stat = AGGREGATED_STATS.find((s) => s.label.includes('Emplois')) ?? AGGREGATED_STATS[0];
+  const stat = statistiquesAtlas(enterprises)[1];
 
   return new ImageResponse(
     (

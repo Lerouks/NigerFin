@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { StrategicEnterprise } from '@/lib/strategic-enterprises';
 import { getMajorityCountry } from '@/lib/ownership';
 import { CountryFlag } from './CountryFlag';
+import { paragrapheFr, secteurFr } from '@/lib/typographie-fr';
 
 interface EnterpriseListItemProps {
   enterprise: StrategicEnterprise;
@@ -11,7 +12,7 @@ interface EnterpriseListItemProps {
 
 /**
  * Ligne dense FT-style pour la liste sectorielle.
- * Structure : rang gris a gauche, logo N&B 48px, nom + secteur + description 2 lignes,
+ * Structure : rang gris a gauche (masqué sur téléphone), logo N&B, nom + secteur + description entière,
  * mini-stats inline (fondation + drapeau), fleche droite. Hover = surlignement gris tres leger.
  * Tout en charte monochrome stricte, ZERO couleur sectorielle.
  */
@@ -21,17 +22,17 @@ export function EnterpriseListItem({ enterprise, rank }: EnterpriseListItemProps
   const detailHref = enterprise.slug ? `/entreprises/${enterprise.slug}` : null;
 
   const inner = (
-    <article className="group flex items-start gap-5 md:gap-8 py-8 md:py-10 border-b border-black/8 hover:bg-secondary/40 transition-colors -mx-4 px-4 sm:-mx-6 sm:px-6 md:-mx-8 md:px-8">
+    <article className="group flex items-start gap-4 sm:gap-5 md:gap-8 py-8 md:py-10 border-b border-black/8 hover:bg-secondary/40 transition-colors -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
       {/* Rang FT-style : chiffre enorme opacity-20, scroll-anchor visuel */}
       <span
         aria-hidden
-        className="shrink-0 w-[60px] md:w-[100px] lg:w-[120px] font-black tabular-nums text-foreground/15 group-hover:text-gold/40 transition-colors leading-[0.85] text-[clamp(2.5rem,5vw,4.5rem)] tracking-tight mt-1"
+        className="hidden sm:block shrink-0 w-[60px] md:w-[100px] lg:w-[120px] font-black tabular-nums text-foreground/15 group-hover:text-gold/40 transition-colors leading-[0.85] text-[clamp(2.5rem,5vw,4.5rem)] tracking-tight mt-1"
       >
         {String(rank).padStart(2, '0')}
       </span>
 
       {/* Logo N&B */}
-      <div className="shrink-0 w-12 h-12 md:w-14 md:h-14 bg-secondary border border-black/6 flex items-center justify-center overflow-hidden">
+      <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-secondary border border-black/6 flex items-center justify-center overflow-hidden">
         {hasLogo ? (
           <Image
             src={enterprise.logo_url!}
@@ -51,7 +52,7 @@ export function EnterpriseListItem({ enterprise, rank }: EnterpriseListItemProps
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-2 flex-wrap">
           <h3 className="text-[17px] md:text-[18px] font-bold tracking-tight text-foreground leading-tight">
-            {enterprise.name}
+            {paragrapheFr(enterprise.name)}
           </h3>
           {enterprise.full_name && enterprise.full_name !== enterprise.name ? (
             <span className="text-[12px] text-gray-600 italic">
@@ -60,8 +61,8 @@ export function EnterpriseListItem({ enterprise, rank }: EnterpriseListItemProps
           ) : null}
         </div>
 
-        <div className="mt-1 flex items-center gap-2 flex-wrap text-[11px] uppercase tracking-[0.14em] text-gray-500 font-semibold">
-          <span>{enterprise.sector}</span>
+        <div className="mt-1 flex items-center gap-2 flex-wrap text-[11px] uppercase tracking-[0.06em] sm:tracking-[0.14em] text-gray-500 font-semibold">
+          <span>{enterprise.sector ? secteurFr(enterprise.sector) : null}</span>
           {enterprise.founded_year ? (
             <>
               <span aria-hidden className="text-gray-400">
@@ -80,18 +81,21 @@ export function EnterpriseListItem({ enterprise, rank }: EnterpriseListItemProps
           ) : null}
         </div>
 
-        <p className="mt-2 text-[14px] leading-relaxed text-gray-600 line-clamp-2">
-          {enterprise.description}
+        {/* Description entière, jamais tronquée : rien de rogné sur téléphone. */}
+        <p className="mt-2 text-[14px] leading-relaxed text-gray-600">
+          {enterprise.description ? paragrapheFr(enterprise.description, 24) : null}
         </p>
 
         {/* Pied : drapeau + stats facultatives */}
         <div className="mt-3 flex items-center gap-4 flex-wrap text-[12px] text-gray-500">
-          <span className="inline-flex items-center gap-1.5">
-            <CountryFlag country={majorityCountry} size={16} />
-            <span className="font-medium">Controle majoritaire</span>
-          </span>
+          {majorityCountry !== 'WORLD' ? (
+            <span className="inline-flex items-center gap-1.5">
+              <CountryFlag country={majorityCountry} size={16} />
+              <span className="font-medium">Contrôle majoritaire</span>
+            </span>
+          ) : null}
           {enterprise.employees ? (
-            <span className="tabular-nums">{enterprise.employees} employes</span>
+            <span className="tabular-nums">{enterprise.employees} employés</span>
           ) : null}
           {enterprise.revenue ? (
             <span className="tabular-nums">CA : {enterprise.revenue}</span>
@@ -107,7 +111,7 @@ export function EnterpriseListItem({ enterprise, rank }: EnterpriseListItemProps
           height="14"
           viewBox="0 0 14 14"
           fill="none"
-          className="shrink-0 self-center text-gray-400 group-hover:text-gold transition-colors"
+          className="hidden sm:block shrink-0 self-center text-gray-400 group-hover:text-gold transition-colors"
         >
           <path
             d="M2 7h10m0 0L8 3m4 4L8 11"

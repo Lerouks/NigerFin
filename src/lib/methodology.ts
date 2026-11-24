@@ -11,27 +11,30 @@ export interface MethodologySection {
   paragraphs: string[];
 }
 
-export const METHODOLOGY_LAST_UPDATED = '2026-05-27';
+export const METHODOLOGY_LAST_UPDATED = '2026-11-24';
 
+// Réécrit le 24/11/2026 : sans « selon » (règle de Raouf), sans promesse de
+// revue trimestrielle que personne ne tiendrait, et conforme à l'affichage
+// réel (une donnée non publique n'est pas affichée, aucune mention ND).
 export const METHODOLOGY_SECTIONS: MethodologySection[] = [
   {
     title: 'Pourquoi ces entreprises',
     paragraphs: [
-      "Les entreprises retenues dans cet atlas le sont selon trois critères cumulatifs : un poids macro-économique mesurable (contribution au PIB, aux recettes d'exportation ou aux recettes fiscales du Niger), une empreinte sociale significative (effectif employeur de premier rang dans leur secteur), et un rôle stratégique sur une infrastructure essentielle (énergie, mines, télécommunications, finance, agriculture).",
-      "Cette sélection privilégie les acteurs structurels de l'économie nigérienne plutôt que les acteurs émergents ou les filiales locales d'entreprises étrangères sans assise nationale.",
+      "Nous retenons les entreprises qui tiennent un secteur essentiel du pays : les mines, l'énergie, les télécommunications, la banque et l'agriculture. Chacune pèse dans l'économie nationale, par ses recettes, ses exportations ou le service qu'elle rend à tout le territoire.",
+      "Cette sélection privilégie les entreprises ancrées au Niger plutôt que les acteurs émergents ou les filiales locales de groupes étrangers.",
     ],
   },
   {
     title: 'Sources et données',
     paragraphs: [
-      "Les chiffres affichés (effectifs, chiffres d'affaires, actionnariat, fondation) proviennent exclusivement de sources publiques : rapports d'entreprise, communications officielles du gouvernement nigérien, publications de l'Institut National de la Statistique (INS Niger), de la Banque Centrale des États de l'Afrique de l'Ouest (BCEAO), de la Banque mondiale, du FMI (rapports Article IV) et de la presse économique africaine.",
-      "Quand une donnée est contradictoire entre plusieurs sources, nous retenons la plus récente et la plus officielle. Quand une donnée n'est pas disponible publiquement, nous le signalons par la mention ND (non disponible) plutôt que de proposer une estimation.",
+      "Les informations affichées viennent de sources publiques : rapports des entreprises, communications officielles du gouvernement nigérien, Institut national de la statistique (INS), BCEAO, Banque mondiale, FMI et presse économique.",
+      "Quand deux sources se contredisent, nous retenons la plus récente et la plus officielle. Quand une donnée n'est pas publique, nous ne l'affichons pas plutôt que de proposer une estimation.",
     ],
   },
   {
-    title: 'Mise à jour et signalements',
+    title: 'Corrections',
     paragraphs: [
-      "Cet atlas est revu trimestriellement par la rédaction NFI Report. Les entreprises ajoutées, retirées ou complétées le sont selon les mêmes critères. Toute correction factuelle peut être signalée à l'adresse contact@nfireport.com avec la source documentaire correspondante.",
+      "Une erreur ou une donnée dépassée peut nous être signalée à contact@nfireport.com, avec sa source. Nous corrigeons la fiche après vérification.",
     ],
   },
 ];

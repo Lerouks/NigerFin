@@ -1,6 +1,5 @@
 import {
-  AGGREGATED_STATS,
-  AGGREGATED_STATS_LAST_UPDATED,
+  statistiquesAtlas,
   groupEnterprisesBySector,
   getSectorList,
   type StrategicEnterprise,
@@ -39,13 +38,10 @@ export function EnterprisesAtlas({ enterprises, featured }: EnterprisesAtlasProp
       <HeroAtlas
         eyebrow="Atlas économique du Niger"
         title="Les piliers de l'économie nigérienne"
-        lead="Cartographie éditoriale des entreprises stratégiques qui structurent l'économie du Niger : mines, énergie, télécommunications, banque, agriculture. Données publiques, actualisées, sourcées."
+        lead="Les entreprises stratégiques qui portent l'économie du Niger, des mines à la banque."
       />
 
-      <StatsBand
-        stats={AGGREGATED_STATS}
-        lastUpdated={AGGREGATED_STATS_LAST_UPDATED}
-      />
+      <StatsBand stats={statistiquesAtlas(enterprises)} />
 
       <SectorTOC sectors={sectors} />
 

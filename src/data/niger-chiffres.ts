@@ -83,20 +83,7 @@ export function pourcentFr(valeur: number): string {
   return `${valeur.toFixed(1).replace('.', ',')}${NB}%`;
 }
 
-/**
- * Secteur écrit à la française : « Mines & Ressources » devient « Mines et
- * ressources ». Les sigles (BTP, BCEAO) gardent leurs capitales.
- */
-export function secteurFr(secteur: string): string {
-  return secteur
-    .trim()
-    .replace(/\s*&\s*/g, ' et ')
-    .split(' ')
-    .map((mot, i) =>
-      i === 0 || /^[A-ZÀ-ÖØ-Þ0-9]{2,}$/.test(mot) ? mot : mot.charAt(0).toLocaleLowerCase('fr') + mot.slice(1),
-    )
-    .join(' ');
-}
+export { secteurFr } from '@/lib/typographie-fr';
 
 /** Ville du siège : « Arlit, Niger » devient « Arlit ». */
 export function villeDuSiege(siege: string | null | undefined): string {

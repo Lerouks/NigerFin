@@ -2,7 +2,6 @@ import type { AggregatedStat } from '@/lib/strategic-enterprises';
 
 interface StatsBandProps {
   stats: AggregatedStat[];
-  lastUpdated: string;
 }
 
 /**
@@ -10,7 +9,7 @@ interface StatsBandProps {
  * Format World Bank country page : chiffres ENORMES Inter Black, filet or
  * signature sous chaque, source en petits caps, padding genereux.
  */
-export function StatsBand({ stats, lastUpdated }: StatsBandProps) {
+export function StatsBand({ stats }: StatsBandProps) {
   return (
     <section
       aria-labelledby="atlas-stats-heading"
@@ -20,7 +19,7 @@ export function StatsBand({ stats, lastUpdated }: StatsBandProps) {
         Chiffres clés de l&apos;atlas
       </h2>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-12">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-12">
           {stats.map((stat) => (
             <div
               key={stat.label}
@@ -40,23 +39,7 @@ export function StatsBand({ stats, lastUpdated }: StatsBandProps) {
             </div>
           ))}
         </div>
-        <p className="mt-12 pt-6 border-t border-black/8 text-[11px] uppercase tracking-[0.18em] text-gray-500">
-          Données agrégées, dernière mise à jour : {formatDateFr(lastUpdated)}
-        </p>
       </div>
     </section>
   );
-}
-
-function formatDateFr(iso: string): string {
-  try {
-    const d = new Date(iso);
-    return d.toLocaleDateString('fr-FR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
-  } catch {
-    return iso;
-  }
 }

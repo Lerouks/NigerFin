@@ -1,6 +1,7 @@
 import type { StrategicEnterprise } from '@/lib/strategic-enterprises';
 import { getSectorAnchor } from '@/lib/strategic-enterprises';
 import { EnterpriseListItem } from './EnterpriseListItem';
+import { secteurFr } from '@/lib/typographie-fr';
 
 interface EnterpriseSectorBlockProps {
   sector: string;
@@ -40,7 +41,7 @@ export function EnterpriseSectorBlock({
           id={`${getSectorAnchor(sector)}-title`}
           className="text-[clamp(1.5rem,3vw,2rem)] font-bold tracking-tight text-foreground leading-tight"
         >
-          {sector}
+          {secteurFr(sector)}
         </h2>
         {intro ? (
           <p className="mt-3 text-[15px] leading-relaxed text-gray-600 max-w-2xl">

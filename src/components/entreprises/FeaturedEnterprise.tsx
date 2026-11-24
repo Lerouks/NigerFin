@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { StrategicEnterprise } from '@/lib/strategic-enterprises';
 import { parseOwnership, getMajorityCountry } from '@/lib/ownership';
 import { CountryFlag } from './CountryFlag';
+import { paragrapheFr, secteurFr } from '@/lib/typographie-fr';
 
 interface FeaturedEnterpriseProps {
   enterprise: StrategicEnterprise;
@@ -63,7 +64,7 @@ export function FeaturedEnterprise({
                 priority
               />
               <span className="self-end text-[11px] uppercase tracking-wider text-gray-500 font-medium">
-                {enterprise.sector}
+                {enterprise.sector ? secteurFr(enterprise.sector) : null}
               </span>
             </div>
           ) : (
@@ -83,22 +84,24 @@ export function FeaturedEnterprise({
               {String(rank).padStart(2, '0')} / 08
             </span>
             <span className="text-[11px] uppercase tracking-[0.22em] font-semibold text-gray-600">
-              Vedette &middot; {enterprise.sector}
+              Vedette &middot; {enterprise.sector ? secteurFr(enterprise.sector) : null}
             </span>
           </div>
 
           {/* Nom enorme : 48-72px Black */}
           <h2 className="font-black tracking-tight leading-[1.02] text-[clamp(2.5rem,5.5vw,3.75rem)] text-foreground">
-            {enterprise.name}
+            {paragrapheFr(enterprise.name)}
           </h2>
           {enterprise.full_name && enterprise.full_name !== enterprise.name ? (
             <p className="mt-2 text-[15px] md:text-[16px] font-medium text-gray-600 italic">
-              {enterprise.full_name}
+              {paragrapheFr(enterprise.full_name, 36)}
             </p>
           ) : null}
 
-          <p className="mt-6 text-[17px] md:text-[18px] leading-relaxed text-foreground/85 line-clamp-5">
-            {enterprise.detailed_description || enterprise.description}
+          {/* La description courte, entière : la présentation longue, coupée à
+              cinq lignes, était tronquée sur téléphone. Elle reste sur la fiche. */}
+          <p className="mt-6 text-[17px] md:text-[18px] leading-relaxed text-foreground/85">
+            {paragrapheFr(enterprise.description || enterprise.detailed_description || '')}
           </p>
 
           {/* Mini-stats */}

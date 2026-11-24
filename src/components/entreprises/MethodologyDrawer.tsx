@@ -6,6 +6,7 @@ import {
   METHODOLOGY_LAST_UPDATED,
   METHODOLOGY_SIGNATURE,
 } from '@/lib/methodology';
+import { paragrapheFr } from '@/lib/typographie-fr';
 
 interface MethodologyDrawerProps {
   triggerClassName?: string;
@@ -147,7 +148,7 @@ export function MethodologyDrawer({
                       key={idx}
                       className="text-[15px] leading-relaxed text-foreground/85"
                     >
-                      {paragraph}
+                      {paragrapheFr(paragraph)}
                     </p>
                   ))}
                 </div>

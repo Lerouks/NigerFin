@@ -7,6 +7,7 @@ import {
   getStrategicEnterprises,
   getFeaturedEnterprise,
 } from '@/lib/strategic-enterprises';
+import { paragrapheFr } from '@/lib/typographie-fr';
 
 export const revalidate = 3600;
 export const metadata: Metadata = {
@@ -43,11 +44,10 @@ export default async function EntreprisesPage() {
                 id="atlas-news-heading"
                 className="text-[clamp(2rem,4.5vw,2.75rem)] font-black tracking-tight text-foreground leading-[1.05]"
               >
-                Articles récents sur les entreprises
+                À lire
               </h2>
               <p className="mt-5 text-[15px] md:text-[16px] italic text-gray-700 max-w-2xl leading-relaxed">
-                Notre couverture des acteurs stratégiques nigériens et de leur
-                environnement régional.
+                {paragrapheFr('Ce que nous publions sur les grandes entreprises du Niger et de la région.')}
               </p>
             </header>
 

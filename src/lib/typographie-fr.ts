@@ -113,10 +113,10 @@ export function enPhrases(texte: string): string[] {
  * Fin de paragraphe soudée : les derniers mots restent ensemble jusqu'à en
  * compter quatre, pour qu'aucun paragraphe ni titre ne finisse sur une ligne
  * de deux ou trois mots. Le bloc soudé ne dépasse pas `longueurMax`
- * caractères : plus long, il déborderait d'un écran de 320 px. À appliquer
+ * caractères (32 par défaut) : plus long, il déborderait d'un écran de 320 px. À appliquer
  * après typographieFr (seule l'espace ordinaire est une coupure possible).
  */
-export function finSoudee(texte: string, motsDeFin = 4, longueurMax = 28): string {
+export function finSoudee(texte: string, motsDeFin = 4, longueurMax = 32): string {
   if (!texte) return texte;
   const morceaux = texte.split(' ');
   if (morceaux.length < 2) return texte;
@@ -132,7 +132,63 @@ export function finSoudee(texte: string, motsDeFin = 4, longueurMax = 28): strin
   return [...morceaux.slice(0, debut), morceaux.slice(debut).join(INSECABLE)].join(' ');
 }
 
-/** Paragraphe ou titre affiché : typographie française, puis fin soudée. */
-export function paragrapheFr(texte: string, longueurMax = 28): string {
-  return finSoudee(typographieFr(texte), 4, longueurMax);
+/**
+ * Débuts de phrase soudés : après un point, les premiers mots d'une phrase
+ * restent ensemble jusqu'à en compter quatre (au plus `longueurMax`
+ * caractères), pour qu'une phrase ne commence jamais par deux ou trois mots
+ * abandonnés en fin de ligne. À appliquer après typographieFr.
+ */
+export function debutsSoudes(texte: string, motsDeDebut = 4, longueurMax = 32): string {
+  if (!texte) return texte;
+  const morceaux = texte.split(' ');
+  const compter = (s: string) => s.split(/[\u00a0\u202f]+/).filter(Boolean).length;
+  const finDePhrase = (s: string) => /[.!?\u2026»]$/.test(s) && /[.!?\u2026]/.test(s.slice(-3));
+  const sortie: string[] = [];
+  let i = 0;
+  while (i < morceaux.length) {
+    if (i > 0 && finDePhrase(morceaux[i - 1]!)) {
+      let bloc = morceaux[i]!;
+      let mots = compter(bloc);
+      let j = i + 1;
+      while (
+        j < morceaux.length &&
+        mots < motsDeDebut &&
+        !finDePhrase(morceaux[j - 1]!) &&
+        bloc.length + 1 + morceaux[j]!.length <= longueurMax
+      ) {
+        bloc += INSECABLE + morceaux[j]!;
+        mots += compter(morceaux[j]!);
+        j += 1;
+      }
+      sortie.push(bloc);
+      i = j;
+    } else {
+      sortie.push(morceaux[i]!);
+      i += 1;
+    }
+  }
+  return sortie.join(' ');
+}
+
+/**
+ * Paragraphe ou titre affiché : typographie française, débuts de phrase et
+ * fin soudés. Jamais sur un texte justifié (l'insécable y creuse des blancs).
+ */
+export function paragrapheFr(texte: string, longueurMax = 32): string {
+  return finSoudee(debutsSoudes(typographieFr(texte), 4, longueurMax), 4, longueurMax);
+}
+
+/**
+ * Secteur écrit à la française : « Mines & Ressources » devient « Mines et
+ * ressources ». Les sigles (BTP, BCEAO) gardent leurs capitales.
+ */
+export function secteurFr(secteur: string): string {
+  return secteur
+    .trim()
+    .replace(/\s*&\s*/g, ' et ')
+    .split(' ')
+    .map((mot, i) =>
+      i === 0 || /^[A-ZÀ-ÖØ-Þ0-9]{2,}$/.test(mot) ? mot : mot.charAt(0).toLocaleLowerCase('fr') + mot.slice(1),
+    )
+    .join(' ');
 }

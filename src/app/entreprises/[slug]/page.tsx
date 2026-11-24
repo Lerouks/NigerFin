@@ -6,7 +6,6 @@ import { SITE_URL, truncateSeoDescription } from '@/lib/config';
 import { searchArticles } from '@/lib/articles';
 import { safeJsonLd } from '@/lib/seo';
 import { EnterpriseContent } from './EnterpriseContent';
-import { EnterpriseSeoBlock } from './EnterpriseSeoBlock';
 
 export const revalidate = 300;
 
@@ -137,7 +136,6 @@ export default async function EnterprisePage({ params }: EnterprisePageProps) {
         dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }}
       />
       <EnterpriseContent enterprise={enterprise} relatedArticles={relatedArticles} />
-      <EnterpriseSeoBlock enterprise={enterprise} />
     </>
   );
 }

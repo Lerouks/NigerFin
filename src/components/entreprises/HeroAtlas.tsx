@@ -1,4 +1,5 @@
 import { MethodologyDrawer } from './MethodologyDrawer';
+import { paragrapheFr, typographieFr } from '@/lib/typographie-fr';
 
 interface HeroAtlasProps {
   eyebrow: string;
@@ -53,17 +54,20 @@ export function HeroAtlas({ eyebrow, title, lead }: HeroAtlasProps) {
 
       {/* Contenu : header (eyebrow+H1+lead) en haut, methodologie en bas */}
       <div className="relative flex-1 flex flex-col justify-between max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-24 lg:py-28">
-        <div className="max-w-3xl">
+        <div className="max-w-6xl">
           <div className="flex items-center gap-3 mb-6">
             <span className="text-[11px] md:text-[12px] font-semibold tracking-[0.24em] uppercase text-gold">
               {eyebrow}
             </span>
           </div>
-          <h1 className="text-white font-black tracking-tight leading-[1.02] text-[clamp(2.75rem,7.5vw,5rem)]">
-            {title}
+          {/* Titre d'affiche : sur une ligne dès la tablette (taille calculée
+              pour), en lignes équilibrées sur téléphone ; mots-outils soudés au
+              mot suivant, sans bloc insécable qui déborderait à cette taille. */}
+          <h1 className="text-white font-black tracking-tight leading-[1.02] text-balance text-[clamp(2rem,4.2vw,3.75rem)]">
+            {typographieFr(title)}
           </h1>
           <p className="mt-7 text-[clamp(1.05rem,1.7vw,1.375rem)] font-normal italic leading-relaxed text-white/85 max-w-2xl">
-            {lead}
+            {paragrapheFr(lead)}
           </p>
         </div>
 
@@ -73,7 +77,7 @@ export function HeroAtlas({ eyebrow, title, lead }: HeroAtlasProps) {
             triggerClassName="inline-flex items-center gap-2 px-5 py-2.5 text-[13px] font-bold uppercase tracking-[0.16em] text-gold border border-gold/60 hover:bg-gold hover:text-[#0a0a0a] transition-colors rounded-full"
           />
           <p className="text-[10px] uppercase tracking-wider text-white/50 max-w-xs text-right">
-            Photo : Jean Rebiffe &middot; Wikimedia Commons (CC BY-SA 3.0)
+            {paragrapheFr('Photo : Jean Rebiffe \u00b7 Wikimedia Commons (CC BY-SA 3.0)')}
           </p>
         </div>
       </div>

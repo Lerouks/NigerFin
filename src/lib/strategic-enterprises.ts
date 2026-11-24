@@ -14,17 +14,11 @@ export const STRATEGIC_ENTERPRISES_CACHE_TAG = 'strategic-enterprises';
 export type StrategicEnterprise = Database['public']['Tables']['strategic_enterprises']['Row'];
 
 /**
- * Statistiques cumulees affichees dans le bandeau hero de /entreprises.
- * Valeurs hardcodees ici (single source of truth editoriale) plutot que calculees
- * a la volee depuis la base car :
- *   - Les champs employees/revenue sont des strings libres ("~1 500", "ND"),
- *     non sommables fiablement
- *   - Les vrais chiffres macro (% PIB, % capital public) demandent des sources
- *     officielles (INS Niger, BCEAO, FMI Article IV) qui ne sont pas dans la DB
- *   - La frequence de mise a jour (annuelle) est compatible avec un commit
- *
- * Pour modifier : editer ce fichier, commit, redeploy. Source obligatoire en
- * commentaire pour chaque chiffre.
+ * Chiffres du bandeau de /entreprises. Depuis le 24/11/2026, ils sont calculés
+ * à partir des entreprises visibles en base, au lieu d'être écrits ici : la
+ * version écrite à la main annonçait encore 8 entreprises et 6 secteurs après
+ * le retrait de COMINAK, et un « 75 % sous contrôle public » sans vraie source,
+ * retiré (règle de Raouf : rien d'affiché qui ne se source pas).
  */
 export interface AggregatedStat {
   value: string;
@@ -32,26 +26,13 @@ export interface AggregatedStat {
   source?: string;
 }
 
-export const AGGREGATED_STATS: AggregatedStat[] = [
-  {
-    value: '8',
-    label: 'Entreprises stratégiques',
-  },
-  {
-    value: '6',
-    label: 'Secteurs couverts',
-  },
-  {
-    // Source : 5 entreprises sur 8 majoritairement publiques (SONIDEP, NIGELEC,
-    // Niger Telecoms, SOPAMIN, BAGRI). SOMAIR nationalisee en 2025.
-    // SONIBANK = actionnariat mixte prive/institutionnel. COMINAK dissoute.
-    value: '75%',
-    label: 'Sous contrôle public majoritaire',
-    source: 'Décrets gouvernementaux Niger 2025',
-  },
-];
-
-export const AGGREGATED_STATS_LAST_UPDATED = '2026-07-17';
+export function statistiquesAtlas(entreprises: StrategicEnterprise[]): AggregatedStat[] {
+  const secteurs = new Set(entreprises.map((e) => e.sector).filter(Boolean));
+  return [
+    { value: String(entreprises.length), label: 'Entreprises stratégiques' },
+    { value: String(secteurs.size), label: 'Secteurs couverts' },
+  ];
+}
 
 // ─── Fetchers ────────────────────────────────────────────────────────────────
 
@@ -77,7 +58,7 @@ export const getStrategicEnterprises = unstable_cache(
     }
     return data ?? [];
   },
-  ['strategic-enterprises-all'],
+  ['strategic-enterprises-all-2026-11-24b'],
   { tags: [STRATEGIC_ENTERPRISES_CACHE_TAG], revalidate: 3600 }
 );
 

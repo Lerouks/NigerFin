@@ -13,6 +13,7 @@ import {
   ArrowRight,
   type LucideIcon,
 } from 'lucide-react';
+import { paragrapheFr } from '@/lib/typographie-fr';
 
 interface LearningPath {
   id: string;
@@ -75,7 +76,7 @@ export function LearningPathsSection() {
         <div>
           <h2 className="text-xl md:text-2xl font-bold leading-tight">Parcours recommandés</h2>
           <p className="text-[13px] text-gray-500 mt-1">
-            Suis une séquence de leçons ordonnée pour atteindre un objectif précis.
+            {paragrapheFr('Suivez une séquence de leçons, dans l’ordre, pour atteindre un objectif précis.')}
           </p>
         </div>
       </div>
@@ -104,9 +105,9 @@ export function LearningPathsSection() {
                   </div>
                   <div>
                     <h3 className="text-[15px] font-semibold leading-tight text-[#111]">
-                      {path.title}
+                      {paragrapheFr(path.title)}
                     </h3>
-                    <p className="text-[11px] text-gray-500 mt-1 line-clamp-2">{path.goal_label}</p>
+                    <p className="text-[11px] text-gray-500 mt-1 line-clamp-2">{paragrapheFr(path.goal_label)}</p>
                     <div className="flex items-center gap-3 mt-3 text-[11px] text-gray-500">
                       <span className="flex items-center gap-1">
                         <BookOpen className="w-3 h-3" />

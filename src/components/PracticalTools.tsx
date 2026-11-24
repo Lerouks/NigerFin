@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Calculator, TrendingUp, Percent, DollarSign, BarChart3, Wallet, ArrowRight, Lock, Wrench } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+import { paragrapheFr } from '@/lib/typographie-fr';
 
 interface ToolData {
   _id: string;
@@ -82,7 +83,7 @@ function PlanCard({ title, badge, tools, isPremium = false, isSubscribed = false
               </div>
               <div className="flex-1">
                 <p className={`text-[14px] ${isPremium ? 'text-white/90' : 'text-gray-700'}`}>
-                  {tool.name}
+                  {paragrapheFr(tool.name)}
                 </p>
               </div>
               <ArrowRight
@@ -174,7 +175,7 @@ export function PracticalTools({ avecEnTete = true }: { avecEnTete?: boolean } =
 
         <div className="text-center mt-10">
           <p className="text-[12px] text-gray-500">
-            Tous les outils sont optimisés pour le contexte économique africain
+            {paragrapheFr('Tous les outils sont adaptés au contexte économique africain.')}
           </p>
         </div>
       </div>

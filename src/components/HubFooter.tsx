@@ -1,3 +1,6 @@
+import { paragrapheFr } from '@/lib/typographie-fr';
+import { TexteSoude } from './TexteSoude';
+
 interface HubFooterProps {
   paragraphs: string[];
   highlights?: { title: string; body: string }[];
@@ -8,6 +11,8 @@ interface HubFooterProps {
  * Footer SEO discret pour les pages hub. Affiché APRÈS le contenu interactif
  * (cours, articles, widgets) afin que les éléments visuels priment.
  * Server component, rendu en SSR pour que les crawlers indexent le contenu riche.
+ * Paragraphes justifiés avec césure : soudés par TexteSoude, pour que la césure
+ * ne coupe jamais un groupe de mots soudé.
  */
 export function HubFooter({
   paragraphs,
@@ -26,7 +31,9 @@ export function HubFooter({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-12">
           <div className="lg:col-span-2 space-y-4 text-[14px] sm:text-[15px] leading-relaxed text-gray-600 texte-justifie">
             {paragraphs.map((p, idx) => (
-              <p key={`${idx}-${p.slice(0, 24)}`}>{p}</p>
+              <p key={`${idx}-${p.slice(0, 24)}`}>
+                <TexteSoude texte={p} />
+              </p>
             ))}
           </div>
 
@@ -39,7 +46,7 @@ export function HubFooter({
                       {h.title}
                     </dt>
                     <dd className="text-[13px] leading-relaxed text-gray-500">
-                      {h.body}
+                      {paragrapheFr(h.body)}
                     </dd>
                   </div>
                 ))}

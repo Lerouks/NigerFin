@@ -29,13 +29,14 @@ lignes.forEach((plages, rang) => {
 
 /**
  * Place des noms de ville, la même sur tous les écrans (reprise de la page
- * d'attente) : Maradi, Zinder et Diffa sont trop proches pour avoir tous leur
- * nom à droite. Dosso et Tillabéri gardent leur point sans nom, pour laisser
- * lire le repère de Niamey.
+ * d'attente) : chaque nom reste DANS le pays. Écrit sous son point, « Maradi »
+ * tombait au Nigeria (la ville est à 40 km de la frontière), remarqué par
+ * Raouf le 24/11/2026 : Maradi et Diffa au-dessus, Zinder à droite. Dosso et
+ * Tillabéri gardent leur point sans nom, pour laisser lire le repère de Niamey.
  */
 const PLACE_DU_NOM: Record<string, 'droite' | 'gauche' | 'dessus' | 'dessous' | 'aucune'> = {
-  Maradi: 'dessous',
-  Zinder: 'dessus',
+  Maradi: 'dessus',
+  Zinder: 'droite',
   Diffa: 'dessus',
   Tahoua: 'gauche',
   Dosso: 'aucune',

@@ -39,10 +39,14 @@ function poser(v: number) {
 
 const FOND = '#09090a';
 
-/** Place des noms de ville sur petit écran (par défaut : à droite du point). */
+/**
+ * Place des noms de ville sur petit écran (par défaut : à droite du point).
+ * Chaque nom reste DANS le pays : écrit sous son point, « Maradi » tombait au
+ * Nigeria (la ville est à 40 km de la frontière, deux rangées de points),
+ * remarqué par Raouf le 24/11/2026.
+ */
 const POSITION_PETIT_ECRAN: Record<string, 'dessus' | 'dessous' | 'gauche'> = {
-  Maradi: 'dessous',
-  Zinder: 'dessus',
+  Maradi: 'dessus',
   Diffa: 'dessus',
   Tahoua: 'gauche',
 };
@@ -226,7 +230,7 @@ export function CarteNiger({ className, ajuster = false, centrer = false }: { cl
         ctx.strokeStyle = FOND;
         ctx.globalAlpha = apparition;
         // Sur petit écran, Maradi, Zinder et Diffa sont trop proches pour avoir
-        // tous leur nom à droite : certains passent au-dessus ou au-dessous.
+        // tous leur nom à droite : Maradi et Diffa passent au-dessus, côté pays.
         const position = petit ? POSITION_PETIT_ECRAN[ville.nom] : undefined;
         const largeurNom = ctx.measureText(ville.nom).width;
         const tx = position === 'gauche' ? x - largeurNom - 9 : position ? x - largeurNom / 2 : x + 9;

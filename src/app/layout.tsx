@@ -9,6 +9,7 @@ import { CookieBanner } from '@/components/CookieBanner';
 import { CivilityPrompt } from '@/components/CivilityPrompt';
 import { NOM_DU_SITE, SITE_URL, TITRE_DU_SITE } from '@/lib/config';
 import { getFlashBanner, getSiteFeatures } from '@/lib/site-data';
+import { getMenuApprendre, MENU_APPRENDRE_VIDE } from '@/lib/menu-apprendre';
 import { isAdminViewer } from '@/lib/viewer';
 import { PAGE_ATTENTE, estPageOuverte } from '@/lib/pre-lancement';
 import { ComingSoon } from '@/components/coming-soon/ComingSoon';
@@ -182,9 +183,9 @@ export default async function RootLayout({
   // ouvre /attente pour la regarder.
   const sansMenu = visiteur || pathname === PAGE_ATTENTE;
 
-  const initialFlashBanner = sansMenu
-    ? { enabled: false as const, items: [] }
-    : await getFlashBanner();
+  const [initialFlashBanner, menuApprendre] = sansMenu
+    ? [{ enabled: false as const, items: [] }, MENU_APPRENDRE_VIDE]
+    : await Promise.all([getFlashBanner(), getMenuApprendre()]);
 
   return (
     <html lang="fr" dir="ltr" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
@@ -210,7 +211,7 @@ export default async function RootLayout({
         ) : (
           <Providers>
             <ViewTracker />
-            <MainLayoutShell initialFlashBanner={initialFlashBanner}>{children}</MainLayoutShell>
+            <MainLayoutShell initialFlashBanner={initialFlashBanner} menuApprendre={menuApprendre}>{children}</MainLayoutShell>
             <CookieBanner />
             <CivilityPrompt />
           </Providers>

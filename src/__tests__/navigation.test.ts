@@ -6,7 +6,10 @@ import {
   FOOTER_ENTRIES,
   SITEMAP_ENTRIES,
   EDITORIAL_ENTRIES,
+  SIMULATEURS_MENU,
 } from '@/lib/navigation';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { SECTION_META } from '@/lib/sections';
 
 /**
@@ -57,7 +60,7 @@ describe('Barre de navigation cible : cinq entrees, deux registres', () => {
     expect(NAV_ENTRIES.map((e) => e.label)).toEqual([
       'Économie',
       'Finance',
-      'Entreprises',
+      'Niger',
       'Apprendre',
       'Simulateurs',
     ]);
@@ -68,35 +71,45 @@ describe('Barre de navigation cible : cinq entrees, deux registres', () => {
     expect(NAV_ENTRIES.find((e) => e.label === 'Simulateurs')?.path).toBe('/outils');
   });
 
-  it('Économie et Finance portent le sous-titre qui les rend distinguables', () => {
-    expect(NAVIGATION.find((e) => e.key === 'economie')?.subtitle).toBe('Le pays');
+  it('les sous-titres choisis par Raouf le 24/11/2026 disent ce que contient chaque rubrique', () => {
+    expect(NAVIGATION.find((e) => e.key === 'economie')?.subtitle).toBe('Enjeux');
     expect(NAVIGATION.find((e) => e.key === 'finance')?.subtitle).toBe('Votre argent');
+    expect(NAVIGATION.find((e) => e.key === 'niger')?.subtitle).toBe('Chiffres et entreprises');
+  });
+
+  it('aucun sous-titre ne répète le mot « Niger », déjà libellé de rubrique', () => {
+    for (const entry of NAV_ENTRIES) {
+      expect(entry.subtitle ?? '').not.toMatch(/Niger/);
+    }
   });
 
   it('les entrees se repartissent en deux registres, separes par un filet', () => {
     expect(NAV_GROUPS).toHaveLength(2);
     expect(NAV_GROUPS[0]!.entries.map((e) => e.key)).toEqual(['economie', 'finance']);
     expect(NAV_GROUPS[1]!.entries.map((e) => e.key)).toEqual([
-      'entreprises',
+      'niger',
       'education',
       'outils',
     ]);
   });
 });
 
-describe('Marches et Niger sortent de la barre sans rien perdre', () => {
-  it('ne figurent plus dans la barre principale', () => {
+describe('Marchés et Entreprises hors de la barre, Niger dedans (24/11/2026)', () => {
+  it('Marchés et Entreprises ne figurent pas dans la barre principale, Niger si', () => {
     expect(NAV_ENTRIES.map((e) => e.key)).not.toContain('marches');
-    expect(NAV_ENTRIES.map((e) => e.key)).not.toContain('niger');
+    expect(NAV_ENTRIES.map((e) => e.key)).not.toContain('entreprises');
+    expect(NAV_ENTRIES.map((e) => e.key)).toContain('niger');
   });
 
   it('restent accessibles depuis le pied de page', () => {
     expect(FOOTER_ENTRIES.map((e) => e.key)).toContain('marches');
+    expect(FOOTER_ENTRIES.map((e) => e.key)).toContain('entreprises');
     expect(FOOTER_ENTRIES.map((e) => e.key)).toContain('niger');
   });
 
   it('restent indexees dans le sitemap : les pages ne sont ni retirees ni redirigees', () => {
     expect(SITEMAP_ENTRIES.map((e) => e.path)).toContain('/marches');
+    expect(SITEMAP_ENTRIES.map((e) => e.path)).toContain('/entreprises');
     expect(SITEMAP_ENTRIES.map((e) => e.path)).toContain('/niger');
   });
 
@@ -137,5 +150,33 @@ describe('Les fichiers derives ne peuvent plus diverger', () => {
 
   it('aucun ordre en double, sinon l\'affichage devient non deterministe', () => {
     expect(new Set(NAVIGATION.map((e) => e.order)).size).toBe(NAVIGATION.length);
+  });
+});
+
+describe('La liste déroulante des simulateurs suit leurs vraies pages', () => {
+  // Les pages des simulateurs (src/app/outil/[slug]) ne se modifient jamais :
+  // on lit leur fichier pour vérifier que le menu reprend exactement leurs
+  // adresses et leur statut Premium.
+  const source = readFileSync(join(process.cwd(), 'src/app/outil/[slug]/page.tsx'), 'utf8');
+  const meta = [...source.matchAll(/'([a-z0-9-]+)': \{[^}]*?premium: (true|false)/g)].map((m) => ({
+    slug: m[1]!,
+    premium: m[2] === 'true',
+  }));
+
+  it('lit bien les six simulateurs du site', () => {
+    expect(meta).toHaveLength(6);
+  });
+
+  it('chaque simulateur du site est dans le menu, et rien d\'autre', () => {
+    expect(SIMULATEURS_MENU.map((s) => s.href.replace('/outil/', '')).sort()).toEqual(
+      meta.map((m) => m.slug).sort(),
+    );
+  });
+
+  it('le statut Premium du menu est celui de la page', () => {
+    for (const m of meta) {
+      const lien = SIMULATEURS_MENU.find((s) => s.href === `/outil/${m.slug}`);
+      expect(Boolean(lien?.premium)).toBe(m.premium);
+    }
   });
 });

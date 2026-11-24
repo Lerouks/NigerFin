@@ -50,7 +50,7 @@ export const NAVIGATION: NavigationEntry[] = [
   {
     key: 'economie',
     label: 'Économie',
-    subtitle: 'Le pays',
+    subtitle: 'Enjeux',
     path: '/economie',
     order: 1,
     register: 'comprendre',
@@ -74,12 +74,15 @@ export const NAVIGATION: NavigationEntry[] = [
 
   // --- Registre « agir » : les ressources, ce qu'on en fait ---
   {
+    // Entreprises sort de la barre le 24/11/2026 (décision de Raouf) : ses
+    // fiches rejoignent la page Niger, « Chiffres et entreprises ». La page
+    // reste en 200, jamais redirigée, et garde son lien de pied de page.
     key: 'entreprises',
     label: 'Entreprises',
     path: '/entreprises',
-    order: 3,
+    order: 7,
     register: 'agir',
-    inNav: true,
+    inNav: false,
     inFooter: true,
     inSitemap: true,
     isEditorial: true,
@@ -131,14 +134,17 @@ export const NAVIGATION: NavigationEntry[] = [
     isEditorial: false,
   },
   {
-    // Niger sort de la barre, la PAGE RESTE en 200 et n'est JAMAIS redirigee.
-    // Elle devient une page de reference, accessible depuis le pied de page.
+    // Niger revient dans la barre le 24/11/2026 (décision de Raouf), à la place
+    // d'Entreprises : une page de référence, les chiffres du pays et ses
+    // entreprises. Le libellé reste « Niger », qui attire le clic ; le
+    // sous-titre dit ce qu'on y trouve.
     key: 'niger',
     label: 'Niger',
+    subtitle: 'Chiffres et entreprises',
     path: '/niger',
-    order: 7,
-    register: 'comprendre',
-    inNav: false,
+    order: 3,
+    register: 'agir',
+    inNav: true,
     inFooter: true,
     inSitemap: true,
     isEditorial: true,
@@ -173,3 +179,36 @@ export const NAV_GROUPS: NavGroup[] = (['comprendre', 'agir'] as NavRegister[])
 export function getNavigationEntry(key: string): NavigationEntry | undefined {
   return NAVIGATION.find((e) => e.key === key);
 }
+
+/** Un lien d'une liste déroulante du menu (Apprendre, Simulateurs). */
+export interface LienSousMenu {
+  href: string;
+  label: string;
+  /** Une ligne d'explication, affichée sur ordinateur. */
+  detail?: string;
+  /** Réservé aux abonnés Premium. */
+  premium?: boolean;
+}
+
+/**
+ * Les six simulateurs, dans l'ordre de la liste déroulante. Leurs pages vivent
+ * dans src/app/outil/[slug] (à ne jamais modifier) : un test vérifie que cette
+ * liste reprend exactement leurs adresses et leur statut Premium.
+ */
+export const SIMULATEURS_MENU: LienSousMenu[] = [
+  { href: '/outil/simulateur-salaire', label: 'Salaire net', detail: 'Du brut au net, avec la CNSS et l\u2019ITS', premium: true },
+  { href: '/outil/simulateur-emprunt', label: 'Emprunt', detail: 'Mensualités, coût total et intérêts' },
+  { href: '/outil/budget-familial', label: 'Budget familial', detail: 'La règle 50/30/20 au\u00a0Niger', premium: true },
+  { href: '/outil/interet-compose', label: 'Intérêts composés', detail: 'L\u2019effet boule de neige de l\u2019épargne', premium: true },
+  { href: '/outil/interet-simple', label: 'Intérêts simples', detail: 'Placement, épargne ou crédit court' },
+  { href: '/outil/indices-economiques', label: 'Indices économiques', detail: 'PIB, inflation, taux de la\u00a0BCEAO' },
+];
+
+/** Parcours et thèmes de la liste déroulante « Apprendre », lus en base côté serveur. */
+export interface MenuApprendre {
+  parcours: LienSousMenu[];
+  themes: LienSousMenu[];
+  lecons: number;
+}
+
+export const MENU_APPRENDRE_VIDE: MenuApprendre = { parcours: [], themes: [], lecons: 0 };

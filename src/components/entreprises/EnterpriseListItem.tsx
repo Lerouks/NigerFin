@@ -69,7 +69,7 @@ export function EnterpriseListItem({ enterprise, rank }: EnterpriseListItemProps
               <span aria-hidden className="text-gray-400">
                 &middot;
               </span>
-              <span className="font-normal">Fondee {enterprise.founded_year}</span>
+              <span className="font-normal">Fondée en {enterprise.founded_year}</span>
             </>
           ) : null}
           {enterprise.headquarters ? (

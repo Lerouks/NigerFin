@@ -51,6 +51,7 @@ export function EnterprisesAtlas({ enterprises, featured }: EnterprisesAtlasProp
           <FeaturedEnterprise
             enterprise={featured}
             rank={1}
+            total={enterprises.length}
             sectorIndex={sectors.indexOf(featured.sector || 'Autres')}
           />
         </div>

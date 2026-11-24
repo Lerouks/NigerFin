@@ -3,11 +3,13 @@ import Link from 'next/link';
 import type { StrategicEnterprise } from '@/lib/strategic-enterprises';
 import { parseOwnership, getMajorityCountry } from '@/lib/ownership';
 import { CountryFlag } from './CountryFlag';
-import { paragrapheFr, secteurFr } from '@/lib/typographie-fr';
+import { paragrapheFr, secteurFr, typographieFr } from '@/lib/typographie-fr';
 
 interface FeaturedEnterpriseProps {
   enterprise: StrategicEnterprise;
   rank: number;
+  /** Nombre d'entreprises de l'Atlas (« 01 / 07 »). */
+  total: number;
   sectorIndex: number;
 }
 
@@ -20,6 +22,7 @@ interface FeaturedEnterpriseProps {
 export function FeaturedEnterprise({
   enterprise,
   rank,
+  total,
   sectorIndex,
 }: FeaturedEnterpriseProps) {
   const ownership = parseOwnership(enterprise.ownership);
@@ -80,11 +83,11 @@ export function FeaturedEnterprise({
         <div>
           {/* Kicker rang + secteur, aligne sur le haut du logo */}
           <div className="flex items-center gap-3 mb-4">
-            <span className="font-mono text-[13px] font-bold tracking-tight text-foreground/70">
-              {String(rank).padStart(2, '0')} / 08
+            <span className="shrink-0 whitespace-nowrap font-mono text-[13px] font-bold tracking-tight text-foreground/70">
+              {String(rank).padStart(2, '0')} / {String(total).padStart(2, '0')}
             </span>
-            <span className="text-[11px] uppercase tracking-[0.22em] font-semibold text-gray-600">
-              Vedette &middot; {enterprise.sector ? secteurFr(enterprise.sector) : null}
+            <span className="text-balance text-[11px] uppercase tracking-[0.22em] font-semibold text-gray-600">
+              Vedette &middot; {enterprise.sector ? typographieFr(secteurFr(enterprise.sector)) : null}
             </span>
           </div>
 
@@ -150,9 +153,9 @@ export function FeaturedEnterprise({
             <div className="mt-8">
               <Link
                 href={detailHref}
-                className="inline-flex items-center gap-2.5 px-6 py-3.5 text-[14px] font-bold uppercase tracking-[0.14em] text-white bg-foreground hover:bg-gold hover:text-foreground transition-colors rounded-full"
+                className="inline-flex items-center gap-2.5 whitespace-nowrap px-6 py-3.5 text-[14px] font-bold uppercase tracking-[0.14em] text-white bg-foreground hover:bg-gold hover:text-foreground transition-colors rounded-full"
               >
-                Lire le dossier complet
+                Lire le dossier
                 <svg
                   aria-hidden
                   width="14"

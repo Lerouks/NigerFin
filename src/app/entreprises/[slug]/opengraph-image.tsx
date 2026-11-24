@@ -1,5 +1,6 @@
 import { ImageResponse } from 'next/og';
 import { createServiceClient } from '@/lib/supabase';
+import { secteurFr } from '@/lib/typographie-fr';
 
 export const runtime = 'nodejs';
 export const revalidate = 3600;
@@ -27,15 +28,15 @@ export default async function EnterpriseOgImage({
 }) {
   const { slug } = await params;
   const enterprise = await getEnterprise(slug);
-  const title = enterprise?.name || 'Entreprise strategique';
-  const sector = enterprise?.sector || 'Atlas economique';
+  const title = enterprise?.name || 'Entreprise stratégique';
+  const sector = enterprise?.sector ? secteurFr(enterprise.sector) : 'Atlas économique';
   const subtitle = enterprise?.full_name || enterprise?.description || '';
   const founded = enterprise?.founded_year;
   const hq = enterprise?.headquarters;
 
   // KPI line under the title: only show items that exist
   const kpis: string[] = [];
-  if (founded) kpis.push(`Fondee ${founded}`);
+  if (founded) kpis.push(`Fondée en ${founded}`);
   if (hq) kpis.push(hq);
 
   return new ImageResponse(

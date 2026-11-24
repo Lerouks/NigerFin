@@ -8,7 +8,10 @@
  * 1000 × 785. Points sur une grille de 13 : chaque ligne donne des plages
  * [première colonne, dernière colonne, …] de points dans le pays (2496
  * points en tout). Villes : les huit chefs-lieux de région et Arlit, à leurs
- * coordonnées publiques.
+ * coordonnées publiques. Diffa est collée à la frontière (la Komadougou Yobé) :
+ * à sa vraie place (787,8 ; 677,5), elle tombait sous la dernière rangée de
+ * points, hors du pays. Elle est posée sur le point du pays le plus proche,
+ * 8 px au nord (un point couvre environ 20 km). Corrigé le 24/11/2026.
  */
 export const CARTE_NIGER = {
   largeur: 1000,
@@ -84,7 +87,7 @@ export const CARTE_NIGER = {
     { nom: 'Maradi', x: 439.1, y: 665.2 },
     { nom: 'Zinder', x: 558.5, y: 645.0 },
     { nom: 'Agadez', x: 495.4, y: 434.6 },
-    { nom: 'Diffa', x: 787.8, y: 677.5 },
+    { nom: 'Diffa', x: 786.5, y: 669.5 },
     { nom: 'Arlit', x: 457.1, y: 317.5 },
   ],
 };

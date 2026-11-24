@@ -216,7 +216,9 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
     onOpenChange(false);
     try {
       const supabase = createBrowserSupabaseClient();
-      await supabase.auth.signOut();
+      // Cet appareil seulement : sans portée, la déconnexion fermerait aussi
+      // l'app Cockpit et les autres appareils.
+      await supabase.auth.signOut({ scope: 'local' });
     } catch (err) {
       // signOut peut echouer si Supabase est inaccessible ; on continue le
       // redirect cote client malgre tout (la session sera invalidee a la

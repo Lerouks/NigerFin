@@ -53,6 +53,7 @@ const SOURCE_LABELS: Record<string, string> = {
   popup_scroll: 'Popup scroll',
   signup: 'Inscription',
   premium_upgrade: 'Upgrade Premium',
+  compte: 'Mon compte',
   backfill_user_profiles: 'Migration profil',
   admin: 'Manuel admin',
   magic_link: 'Magic link',

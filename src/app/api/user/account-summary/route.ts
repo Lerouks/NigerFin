@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import { createServerSupabaseClient } from '@/lib/supabase';
+import { etatNewsletterDuCompte, type EtatNewsletterCompte } from '@/lib/newsletter/compte';
+import { connexionDuCompte, type ResumeDuCompte } from '@/lib/compte';
+
+/** Ce que « Mon compte » affiche en plus du profil (voir ResumeDuCompte). */
 
 export async function GET() {
   const supabase = await createServerSupabaseClient();
@@ -14,28 +19,44 @@ export async function GET() {
     return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
   }
 
-  // Fetch subscription, liked articles count, and payment history in parallel
-  const [subscriptionRes, likesRes, paymentsRes] = await Promise.all([
+  const [abonnement, factures] = await Promise.all([
     supabase
       .from('subscriptions')
-      .select('tier, status, billing_cycle, current_period_start, current_period_end, cancel_at_period_end, price_amount, created_at')
+      .select('tier, status, billing_cycle, current_period_start, current_period_end, price_amount')
       .eq('user_id', user.id)
       .maybeSingle(),
     supabase
-      .from('article_likes')
-      .select('article_id', { count: 'exact', head: true })
-      .eq('user_id', user.id),
-    supabase
-      .from('payment_requests')
-      .select('id, amount, tier, billing_cycle, status, created_at')
+      .from('invoices')
+      .select('id, invoice_number, amount_xof, status, paid_at, created_at, billing_cycle, pdf_path')
       .eq('user_id', user.id)
+      .order('paid_at', { ascending: false, nullsFirst: false })
       .order('created_at', { ascending: false })
-      .limit(5),
+      .limit(60),
   ]);
 
-  return NextResponse.json({
-    subscription: subscriptionRes.data || null,
-    likedArticlesCount: likesRes.count || 0,
-    recentPayments: paymentsRes.data || [],
-  });
+  if (factures.error) {
+    Sentry.captureException(new Error('compte: factures illisibles'), {
+      tags: { context: 'compte-factures' },
+      extra: { userId: user.id, code: factures.error.code },
+    });
+  }
+
+  let newsletter: EtatNewsletterCompte | null = null;
+  if (user.email && user.email_confirmed_at) {
+    try {
+      newsletter = await etatNewsletterDuCompte(user.email);
+    } catch (err) {
+      Sentry.captureException(err, { tags: { context: 'compte-newsletter-etat' }, extra: { userId: user.id } });
+    }
+  }
+
+  const resume: ResumeDuCompte = {
+    subscription: abonnement.data ?? null,
+    invoices: factures.error
+      ? null
+      : (factures.data ?? []).map(({ pdf_path, ...f }) => ({ ...f, pdf: Boolean(pdf_path) })),
+    connexion: connexionDuCompte(user),
+    newsletter,
+  };
+  return NextResponse.json(resume);
 }

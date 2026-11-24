@@ -6,22 +6,17 @@ import { applyOverridesTo } from '@/lib/emails/overrides';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logAuditEvent } from '@/lib/audit';
 import * as Sentry from '@sentry/nextjs';
+import { createServiceClient } from '@/lib/supabase';
+import { erreurMotDePasse } from '@/lib/mot-de-passe';
+import { connexionDuCompte } from '@/lib/compte';
 
-// Password strength rules
-const PASSWORD_MIN = 8;
-const PASSWORD_MAX = 128;
-const HAS_UPPERCASE = /[A-Z]/;
-const HAS_DIGIT = /\d/;
-const HAS_SPECIAL = /[!@#$%^&*]/;
-
-function validatePasswordStrength(password: string): string | null {
-  if (password.length < PASSWORD_MIN) return `Le mot de passe doit contenir au moins ${PASSWORD_MIN} caractères.`;
-  if (password.length > PASSWORD_MAX) return `Le mot de passe ne doit pas dépasser ${PASSWORD_MAX} caractères.`;
-  if (!HAS_UPPERCASE.test(password)) return 'Le mot de passe doit contenir au moins une majuscule.';
-  if (!HAS_DIGIT.test(password)) return 'Le mot de passe doit contenir au moins un chiffre.';
-  if (!HAS_SPECIAL.test(password)) return 'Le mot de passe doit contenir au moins un caractère spécial (!@#$%^&*).';
-  return null;
-}
+/**
+ * Un compte sans mot de passe (ouvert avec Google) en crée un sans « mot de
+ * passe actuel », qu'il n'a pas. Pour qu'une session volée ne suffise pas, la
+ * connexion doit dater de moins de 15 minutes : sinon, on demande de se
+ * reconnecter avec Google d'abord.
+ */
+const CREATION_FENETRE_MS = 15 * 60 * 1000;
 
 export async function POST(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -65,14 +60,48 @@ export async function POST(request: NextRequest) {
 
   const { currentPassword, newPassword } = body;
 
-  if (!currentPassword || !newPassword) {
+  if (typeof newPassword !== 'string' || !newPassword) {
     return NextResponse.json({ error: 'Tous les champs sont requis.' }, { status: 400 });
   }
 
   // Server-side password strength validation
-  const strengthErr = validatePasswordStrength(newPassword);
+  const strengthErr = erreurMotDePasse(newPassword);
   if (strengthErr) {
     return NextResponse.json({ error: strengthErr }, { status: 400 });
+  }
+
+  // Création d'un premier mot de passe (compte Google).
+  if (!connexionDuCompte(user).motDePasse) {
+    const derniere = user.last_sign_in_at ? new Date(user.last_sign_in_at).getTime() : 0;
+    if (!derniere || Date.now() - derniere > CREATION_FENETRE_MS) {
+      return NextResponse.json({
+        error: 'Par sécurité, reconnectez-vous avec Google, puis créez votre mot de passe dans le quart d’heure.',
+        reconnexion: true,
+      }, { status: 403 });
+    }
+    const service = createServiceClient();
+    if (!service) return NextResponse.json({ error: 'Service indisponible.' }, { status: 503 });
+    const { error: creationErr } = await service.auth.admin.updateUserById(user.id, {
+      password: newPassword,
+      app_metadata: { ...user.app_metadata, mot_de_passe_cree: true },
+    });
+    if (creationErr) {
+      await logAuditEvent(user.id, 'password_create_failed', 'user', user.id, { error: creationErr.message });
+      return NextResponse.json({ error: 'Erreur lors de la création. Veuillez réessayer.' }, { status: 500 });
+    }
+    await logAuditEvent(user.id, 'password_created', 'user', user.id);
+    try {
+      const fullName = user.user_metadata?.full_name || user.email.split('@')[0];
+      const template = await applyOverridesTo('password_changed', passwordChangedEmail(fullName));
+      await sendTransactionalEmail({ to: user.email, ...template, emailType: 'password_changed', userId: user.id });
+    } catch (err) {
+      Sentry.captureException(err, { tags: { context: 'password-created-email' } });
+    }
+    return NextResponse.json({ message: 'Votre mot de passe est créé\u00A0: vous pouvez aussi vous connecter avec votre adresse e-mail.' });
+  }
+
+  if (typeof currentPassword !== 'string' || !currentPassword) {
+    return NextResponse.json({ error: 'Tous les champs sont requis.' }, { status: 400 });
   }
 
   // Check new password is different from current

@@ -8,6 +8,57 @@ import * as Sentry from '@sentry/nextjs';
 type EtapeAbonnement = 'par-compte' | 'lecture-du-compte' | 'par-adresse';
 
 /**
+ * Le compte a des factures, que la loi impose de garder dix ans (OHADA), et la
+ * base refuse encore de les détacher du compte (invoices.user_id NOT NULL, ON
+ * DELETE RESTRICT). Levée AVANT toute suppression : rien n'est effacé.
+ */
+export class CompteAvecFactures extends Error {
+  constructor() {
+    super('Votre compte a des factures, que la loi nous oblige à garder dix ans. Écrivez-nous à contact@nfireport.com\u00A0: nous supprimerons votre compte en les conservant.');
+    this.name = 'CompteAvecFactures';
+  }
+}
+
+/** Code PostgREST d'une table absente : la réplique de test n'a pas toutes les tables. */
+const TABLE_ABSENTE = '42P01';
+
+/**
+ * Les factures du compte, avant toute suppression. Aucune : rien à faire. Sinon
+ * on les détache du compte (user_id vidé, la facture garde son bloc client) ;
+ * si la base le refuse encore, la suppression s'arrête là, sans rien effacer.
+ * Une lecture impossible arrête aussi tout : mieux vaut ne rien supprimer que
+ * laisser un compte à moitié effacé.
+ */
+async function detacherLesFactures(serviceClient: SupabaseClient, userId: string): Promise<boolean> {
+  const { count, error } = await serviceClient
+    .from('invoices')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId);
+  if (error) {
+    if (error.code === TABLE_ABSENTE) return false;
+    throw new Error(`delete-user: factures illisibles (${error.code ?? 'sans code'})`);
+  }
+  if (!count) return false;
+  const { error: detache } = await serviceClient.from('invoices').update({ user_id: null }).eq('user_id', userId);
+  if (detache) throw new CompteAvecFactures();
+  return true;
+}
+
+/** Le rôle du compte supprimé, pour savoir si ses lignes du journal peuvent partir. */
+async function roleDuCompte(serviceClient: SupabaseClient, userId: string): Promise<string | null> {
+  const { data, error } = await serviceClient.from('user_profiles').select('role').eq('id', userId).maybeSingle();
+  if (error && error.code !== TABLE_ABSENTE) {
+    throw new Error(`delete-user: profil illisible (${error.code ?? 'sans code'})`);
+  }
+  return (data as { role?: string } | null)?.role ?? null;
+}
+
+/** Échappe le nom et l'adresse avant de les poser dans le courriel. */
+function echapper(texte: string): string {
+  return texte.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] ?? c);
+}
+
+/**
  * Signale un abonnement à la newsletter qui n'a pas pu être retiré. Le code
  * seul part chez Sentry : jamais l'adresse, ni le message de la base ou de la
  * requête, qui peut la citer (la valeur filtrée figure dans l'adresse de la
@@ -57,11 +108,21 @@ export async function deleteUserCompletely(
   userName: string,
   deletedBy: string,
 ) {
-  // 1. Log deletion BEFORE removing data (for audit trail)
-  await logAuditEvent(deletedBy, 'delete_user', 'user', userId, {
-    email: userEmail,
-    name: userName,
-  });
+  // 0. Avant d'effacer quoi que ce soit : les factures (voir CompteAvecFactures)
+  // et le rôle du compte.
+  const facturesDetachees = await detacherLesFactures(serviceClient, userId);
+  const estAdmin = (await roleDuCompte(serviceClient, userId)) === 'admin';
+
+  // 1. Le journal, quand un administrateur supprime le compte d'un autre. Un
+  // lecteur qui supprime le sien n'y laisse rien : une ligne à son nom
+  // (admin_id, NOT NULL, clé vers son compte) empêcherait la base de
+  // supprimer le compte, et la sentinelle « système » n'existe pas en base.
+  if (deletedBy !== userId) {
+    await logAuditEvent(deletedBy, 'delete_user', 'user', userId, {
+      email: userEmail,
+      name: userName,
+    });
+  }
 
   // 2. Delete from all tables in order (most dependent first)
   const tables = [
@@ -121,6 +182,20 @@ export async function deleteUserCompletely(
     }
   }
 
+  // 2 ter. Les lignes du journal écrites au nom d'un lecteur (mot de passe
+  // changé, abonnement expiré…) : leur admin_id pointe vers son compte et son
+  // profil sans ON DELETE, la base refuserait sinon de les supprimer. Celles
+  // d'un administrateur restent : ce sont ses actions sur les autres comptes.
+  if (!estAdmin) {
+    const { error } = await serviceClient.from('audit_log').delete().eq('admin_id', userId);
+    if (error && error.code !== TABLE_ABSENTE) {
+      Sentry.captureException(new Error('delete-user: lignes du journal non retirées'), {
+        tags: { context: 'delete-user-journal' },
+        extra: { userId, code: error.code },
+      });
+    }
+  }
+
   // 3. Delete user profile
   await serviceClient.from('user_profiles').delete().eq('id', userId);
 
@@ -173,11 +248,13 @@ export async function deleteUserCompletely(
         <div style="font-family: Inter, sans-serif; max-width: 500px; margin: 0 auto; padding: 40px 20px;">
           <h2 style="color: #111; margin-bottom: 16px;">Compte supprimé</h2>
           <p style="color: #666; font-size: 14px; line-height: 1.6;">
-            Bonjour ${userName || 'cher utilisateur'},
+            Bonjour ${echapper(userName) || 'cher utilisateur'},
           </p>
           <p style="color: #666; font-size: 14px; line-height: 1.6;">
-            Votre compte NFI Report associé à l'adresse <strong>${userEmail}</strong> a été définitivement supprimé.
-            Toutes vos données personnelles ont été effacées.
+            Votre compte NFI Report associé à l'adresse <strong>${echapper(userEmail)}</strong> a été définitivement supprimé.
+            ${facturesDetachees
+              ? 'Vos données personnelles ont été effacées, sauf vos factures, que la loi nous oblige à garder dix ans.'
+              : 'Toutes vos données personnelles ont été effacées.'}
           </p>
           <p style="color: #666; font-size: 14px; line-height: 1.6;">
             Si vous n'êtes pas à l'origine de cette action, contactez-nous immédiatement à contact@nfireport.com.

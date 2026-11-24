@@ -9,7 +9,8 @@ vi.mock('@/lib/supabase', () => ({ createServiceClient: vi.fn(() => null), creat
 import type { SupabaseClient } from '@supabase/supabase-js';
 import * as Sentry from '@sentry/nextjs';
 import { sendTransactionalEmail } from '@/lib/email';
-import { deleteUserCompletely } from '@/lib/delete-user';
+import { logAuditEvent } from '@/lib/audit';
+import { CompteAvecFactures, deleteUserCompletely } from '@/lib/delete-user';
 
 const uuid = (n: number): string => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 const ADMIN = uuid(1);
@@ -29,11 +30,33 @@ function clientQuiNote(
     lectureEchoue?: boolean;
     adresse?: string | null;
     nonConfirmee?: boolean;
+    /** Nombre de factures du compte (0 par défaut). */
+    factures?: number;
+    /** La base refuse de détacher les factures (user_id NOT NULL, avant la migration). */
+    detachementRefuse?: boolean;
+    /** Rôle lu dans user_profiles (« reader » par défaut). */
+    role?: string;
   } = {},
 ) {
   const ordre: string[] = [];
   const valeurs: Record<string, string[]> = {};
   const from = vi.fn((table: string) => ({
+    // Lectures d'avant la suppression : le nombre de factures, le rôle du compte.
+    select: () => ({
+      eq: (colonne: string) => {
+        ordre.push(`select:${table}.${colonne}`);
+        const reponse = table === 'invoices'
+          ? { count: options.factures ?? 0, data: null, error: null }
+          : { data: table === 'user_profiles' ? { role: options.role ?? 'reader' } : null, error: null };
+        return Object.assign(Promise.resolve(reponse), { maybeSingle: async () => reponse });
+      },
+    }),
+    update: () => ({
+      eq: async (colonne: string) => {
+        ordre.push(`update:${table}.${colonne}`);
+        return { error: options.detachementRefuse ? { code: '23502', message: 'null value in column "user_id"' } : null };
+      },
+    }),
     delete: () => ({
       eq: async (colonne: string, valeur: string) => {
         ordre.push(`delete:${table}.${colonne}`);
@@ -179,5 +202,71 @@ describe('deleteUserCompletely et la corbeille', () => {
     );
     expect(ordre.at(-1)).toBe('delete:article_likes.user_id');
     expect(sendTransactionalEmail).toHaveBeenCalledTimes(1);
+  });
+
+  it('un lecteur qui supprime son compte : ses lignes du journal partent avant son profil, aucune n’est écrite à son nom', async () => {
+    const { client, ordre } = clientQuiNote();
+
+    await deleteUserCompletely(client, LECTRICE, 'lectrice@exemple.test', 'Lectrice', LECTRICE);
+
+    expect(logAuditEvent).not.toHaveBeenCalled();
+    const journal = ordre.indexOf('delete:audit_log.admin_id');
+    expect(journal).toBeGreaterThanOrEqual(0);
+    expect(journal).toBeLessThan(ordre.indexOf('delete:user_profiles.id'));
+    expect(ordre).toContain('auth.deleteUser');
+  });
+
+  it('supprimé par un administrateur : la suppression est journalisée au nom de l’administrateur', async () => {
+    const { client } = clientQuiNote();
+
+    await deleteUserCompletely(client, LECTRICE, 'lectrice@exemple.test', 'Lectrice', ADMIN);
+
+    expect(logAuditEvent).toHaveBeenCalledWith(ADMIN, 'delete_user', 'user', LECTRICE, expect.anything());
+  });
+
+  it('un administrateur supprimé : ses actions au journal restent', async () => {
+    const { client, ordre } = clientQuiNote({ role: 'admin' });
+
+    await deleteUserCompletely(client, LECTRICE, 'lectrice@exemple.test', 'Lectrice', ADMIN);
+
+    expect(ordre).not.toContain('delete:audit_log.admin_id');
+  });
+
+  it('des factures que la base refuse encore de détacher : tout s’arrête avant d’effacer quoi que ce soit', async () => {
+    const { client, ordre } = clientQuiNote({ factures: 1, detachementRefuse: true });
+
+    await expect(deleteUserCompletely(client, LECTRICE, 'lectrice@exemple.test', 'Lectrice', LECTRICE)).rejects.toBeInstanceOf(CompteAvecFactures);
+
+    expect(ordre.filter((o) => o.startsWith('delete:') || o === 'auth.deleteUser')).toEqual([]);
+    expect(sendTransactionalEmail).not.toHaveBeenCalled();
+  });
+
+  it('des factures détachables : détachées avant toute suppression, et le courriel le dit', async () => {
+    const { client, ordre } = clientQuiNote({ factures: 2 });
+
+    await deleteUserCompletely(client, LECTRICE, 'lectrice@exemple.test', 'Lectrice', LECTRICE);
+
+    expect(ordre.indexOf('update:invoices.user_id')).toBeGreaterThanOrEqual(0);
+    expect(ordre.indexOf('update:invoices.user_id')).toBeLessThan(ordre.findIndex((o) => o.startsWith('delete:')));
+    expect(ordre).toContain('auth.deleteUser');
+    expect(vi.mocked(sendTransactionalEmail).mock.calls[0]?.[0]).toMatchObject({ html: expect.stringContaining('sauf vos factures') });
+  });
+
+  it('sans facture, rien n’est détaché', async () => {
+    const { client, ordre } = clientQuiNote();
+
+    await deleteUserCompletely(client, LECTRICE, 'lectrice@exemple.test', 'Lectrice', LECTRICE);
+
+    expect(ordre).not.toContain('update:invoices.user_id');
+  });
+
+  it('le nom et l’adresse sont échappés dans le courriel', async () => {
+    const { client } = clientQuiNote();
+
+    await deleteUserCompletely(client, LECTRICE, 'lectrice@exemple.test', '<b>Lectrice</b>', LECTRICE);
+
+    const html = String(vi.mocked(sendTransactionalEmail).mock.calls[0]?.[0]?.html ?? '');
+    expect(html).toContain('&lt;b&gt;Lectrice&lt;/b&gt;');
+    expect(html).not.toContain('<b>Lectrice</b>');
   });
 });

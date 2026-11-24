@@ -1,7 +1,7 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PGlite } from '@electric-sql/pglite';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { baseModele, clientDeService, cloner, commeRole, uuid, type Base } from './helpers/base-corbeille';
+import { baseModele, clientDeService, cloner, commeRole, erreurDe, uuid, type Base } from './helpers/base-corbeille';
 
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn(), revalidateTag: vi.fn(), unstable_cache: (fn: unknown) => fn }));
 vi.mock('@sentry/nextjs', () => ({ captureException: vi.fn(), captureMessage: vi.fn() }));
@@ -10,7 +10,7 @@ vi.mock('@/lib/email', () => ({ sendTransactionalEmail: vi.fn(async () => undefi
 vi.mock('@/lib/supabase', () => ({ createServiceClient: vi.fn(() => null), createServerSupabaseClient: vi.fn(async () => null) }));
 
 import * as Sentry from '@sentry/nextjs';
-import { deleteUserCompletely } from '@/lib/delete-user';
+import { CompteAvecFactures, deleteUserCompletely } from '@/lib/delete-user';
 import { normalizeEmail } from '@/lib/validation';
 
 /**
@@ -47,6 +47,23 @@ beforeAll(async () => {
     insert into public.newsletter_subscribers (id, email, user_id) values
       ('${uuid(510)}', '${COURRIEL}', '${LECTRICE}'),
       ('${uuid(511)}', 'lecteur@exemple.test', '${LECTEUR}');
+    -- Le journal et les factures, avec les clés de la production (relevées le
+    -- 24/11/2026) : admin_id NOT NULL sans ON DELETE, user_id NOT NULL en RESTRICT.
+    create table public.audit_log (
+      id uuid primary key default gen_random_uuid(),
+      admin_id uuid not null references auth.users(id),
+      action text not null,
+      entity_type text not null,
+      entity_id text,
+      details jsonb,
+      created_at timestamptz not null default now()
+    );
+    create table public.invoices (
+      id uuid primary key default gen_random_uuid(),
+      user_id uuid not null references auth.users(id) on delete restrict,
+      invoice_number text not null
+    );
+    grant select, insert, update, delete on public.audit_log, public.invoices to service_role;
   `);
 }, 120_000);
 
@@ -68,7 +85,44 @@ afterEach(async () => {
  */
 function clientDeSuppression(base: Base, nonConfirmes: string[] = []): SupabaseClient {
   const service = clientDeService(base);
+  const absente = async (table: string) =>
+    !(await base.query<{ t: string | null }>('select to_regclass($1)::text as t', [`public.${table}`])).rows[0]?.t;
+  const erreurAbsente = (table: string) => ({ code: '42P01', message: `relation "public.${table}" does not exist` });
   const from = (table: string) => ({
+    // select(colonnes, { head }).eq() et .maybeSingle(), comme PostgREST.
+    select: (colonnes: string, options?: { head?: boolean }) => ({
+      eq: (colonne: string, valeur: string) => {
+        const lire = async () => {
+          if (![table, colonne].every((n) => /^[a-z_]+$/.test(n)) || !/^[a-z_, ]+$/.test(colonnes)) throw new Error('nom refusé');
+          if (await absente(table)) return { data: null, count: null, error: erreurAbsente(table) };
+          const lu = await commeRole(base, 'service_role', () =>
+            base.query<Record<string, unknown>>(`select ${colonnes} from public.${table} where ${colonne}::text = $1`, [valeur]));
+          return { data: lu.rows, count: lu.rows.length, error: null };
+        };
+        const promesse = lire();
+        return Object.assign(
+          promesse.then((r) => (options?.head ? { data: null, count: r.count, error: r.error } : r)),
+          { maybeSingle: async () => { const r = await promesse; return { data: r.data?.[0] ?? null, error: r.error }; } },
+        );
+      },
+    }),
+    update: (valeurs: Record<string, unknown>) => ({
+      eq: async (colonne: string, valeur: string) => {
+        const cles = Object.keys(valeurs);
+        if (![table, colonne, ...cles].every((n) => /^[a-z_]+$/.test(n))) throw new Error('nom refusé');
+        if (await absente(table)) return { error: erreurAbsente(table) };
+        try {
+          await commeRole(base, 'service_role', () => base.query(
+            `update public.${table} set ${cles.map((c, i) => `${c} = $${i + 2}`).join(', ')} where ${colonne}::text = $1`,
+            [valeur, ...cles.map((c) => valeurs[c])],
+          ));
+          return { error: null };
+        } catch (erreur) {
+          const e = erreur as { code?: string; message?: string };
+          return { error: { code: e.code ?? '', message: e.message ?? '' } };
+        }
+      },
+    }),
     delete: () => ({
       eq: async (colonne: string, valeur: string) => {
         if (!/^[a-z_]+$/.test(table) || !/^[a-z_]+$/.test(colonne)) throw new Error('nom refusé');
@@ -93,9 +147,14 @@ function clientDeSuppression(base: Base, nonConfirmes: string[] = []): SupabaseC
     const email_confirmed_at = nonConfirmes.includes(id) ? undefined : '2026-07-01T10:00:00Z';
     return { data: { user: { id, email: compte.email ?? undefined, email_confirmed_at } }, error: null };
   };
+  // Comme GoTrue : une clé étrangère qui bloque renvoie une erreur, sans lever.
   const deleteUser = async (id: string) => {
-    await base.query('delete from auth.users where id = $1', [id]);
-    return { error: null };
+    try {
+      await base.query('delete from auth.users where id = $1', [id]);
+      return { error: null };
+    } catch (erreur) {
+      return { error: { message: `Database error deleting user (${(erreur as { code?: string }).code ?? ''})` } };
+    }
   };
   return { rpc: service.rpc.bind(service), from, auth: { admin: { getUserById, deleteUser } } } as unknown as SupabaseClient;
 }
@@ -180,5 +239,42 @@ describe('la suppression d’un compte, sur la vraie base', () => {
     const reste = await db.query<{ user_id: string | null }>('select user_id from public.newsletter_subscribers where email = $1', [COURRIEL]);
 
     expect(reste.rows).toEqual([{ user_id: null }]);
+  });
+
+  it('une ligne du journal à son nom (mot de passe changé) ne bloque plus la suppression du compte', async () => {
+    await db.exec(`insert into public.audit_log (admin_id, action, entity_type, entity_id)
+      values ('${LECTEUR}', 'password_changed', 'user', '${LECTEUR}');`);
+    // Sans le nettoyage du journal, la base refuse de supprimer le compte.
+    expect(await erreurDe(db.query('delete from auth.users where id = $1', [LECTEUR]))).toMatchObject({ code: '23503' });
+
+    await deleteUserCompletely(clientDeSuppression(db), LECTEUR, 'lecteur@exemple.test', 'Lecteur', LECTEUR);
+
+    expect(await compter('select count(*) as n from auth.users where id = $1', [LECTEUR])).toBe(0);
+    expect(await compter('select count(*) as n from public.audit_log where admin_id = $1', [LECTEUR])).toBe(0);
+    expect(await compter('select count(*) as n from public.comments where user_id = $1', [LECTEUR])).toBe(0);
+  });
+
+  it('des factures que la base attache encore au compte : refus, et le compte reste entier', async () => {
+    await db.exec(`insert into public.invoices (user_id, invoice_number) values ('${LECTEUR}', 'FAC-2026-0001');`);
+
+    await expect(deleteUserCompletely(clientDeSuppression(db), LECTEUR, 'lecteur@exemple.test', 'Lecteur', LECTEUR))
+      .rejects.toBeInstanceOf(CompteAvecFactures);
+
+    expect(await compter('select count(*) as n from auth.users where id = $1', [LECTEUR])).toBe(1);
+    expect(await compter('select count(*) as n from public.comments where user_id = $1', [LECTEUR])).toBe(1);
+    expect(await compter("select count(*) as n from public.newsletter_subscribers where email = 'lecteur@exemple.test'")).toBe(1);
+    expect(await compter('select count(*) as n from public.invoices where user_id = $1', [LECTEUR])).toBe(1);
+  });
+
+  it('après la migration des factures (user_id libre, ON DELETE SET NULL) : le compte part, la facture reste, détachée', async () => {
+    await db.exec(`alter table public.invoices alter column user_id drop not null;
+      alter table public.invoices drop constraint invoices_user_id_fkey;
+      alter table public.invoices add constraint invoices_user_id_fkey foreign key (user_id) references auth.users(id) on delete set null;
+      insert into public.invoices (user_id, invoice_number) values ('${LECTEUR}', 'FAC-2026-0001');`);
+
+    await deleteUserCompletely(clientDeSuppression(db), LECTEUR, 'lecteur@exemple.test', 'Lecteur', LECTEUR);
+
+    expect(await compter('select count(*) as n from auth.users where id = $1', [LECTEUR])).toBe(0);
+    expect(await compter("select count(*) as n from public.invoices where invoice_number = 'FAC-2026-0001' and user_id is null")).toBe(1);
   });
 });

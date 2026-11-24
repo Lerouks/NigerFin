@@ -22,7 +22,10 @@ interface AuthContextType {
     fullName: string,
     civility?: 'M.' | 'Mme'
   ) => Promise<{ error: { message: string } | null; existingUser: boolean }>;
+  /** Ferme la session de cet appareil seulement. */
   signOut: () => Promise<void>;
+  /** Ferme toutes les sessions du compte, sur tous les appareils (« Se déconnecter partout »). */
+  signOutEverywhere: () => Promise<{ error: string | null }>;
   refreshProfile: () => Promise<void>;
 }
 
@@ -38,6 +41,7 @@ const AuthContext = createContext<AuthContextType>({
   signIn: async () => ({ error: null }),
   signUp: async () => ({ error: null, existingUser: false }),
   signOut: async () => {},
+  signOutEverywhere: async () => ({ error: null }),
   refreshProfile: async () => {},
 });
 
@@ -195,11 +199,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   };
 
+  // Sans portée, supabase.auth.signOut() ferme TOUTES les sessions du compte
+  // (téléphone, ordinateur, app Cockpit) : « Se déconnecter » ne ferme que
+  // celle de cet appareil, « Se déconnecter partout » les ferme toutes.
   const signOut = async () => {
     if (!supabase) return;
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope: 'local' });
     setProfile(null);
     setPremiumArticlesUsed(0);
+  };
+
+  const signOutEverywhere = async (): Promise<{ error: string | null }> => {
+    if (!supabase) return { error: 'Service indisponible.' };
+    const { error } = await supabase.auth.signOut({ scope: 'global' });
+    if (error) return { error: error.message };
+    setProfile(null);
+    setPremiumArticlesUsed(0);
+    return { error: null };
   };
 
   return (
@@ -216,6 +232,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signIn,
         signUp,
         signOut,
+        signOutEverywhere,
         refreshProfile,
       }}
     >

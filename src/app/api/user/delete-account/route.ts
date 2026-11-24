@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase';
 import { checkRateLimit, getClientIP } from '@/lib/rate-limit';
-import { deleteUserCompletely } from '@/lib/delete-user';
+import { CompteAvecFactures, deleteUserCompletely } from '@/lib/delete-user';
 
 export async function DELETE(request: NextRequest) {
   // Rate limit: 1 per hour per IP
@@ -23,9 +23,18 @@ export async function DELETE(request: NextRequest) {
   // Get profile for name/email
   const { data: profile } = await serviceClient
     .from('user_profiles')
-    .select('email, full_name')
+    .select('email, full_name, role')
     .eq('id', user.id)
     .single();
+
+  // Un administrateur ne se supprime pas depuis « Mon compte » : il perdrait
+  // l'accès au cockpit, et ses actions au journal bloqueraient la suppression.
+  if (profile?.role === 'admin') {
+    return NextResponse.json(
+      { error: 'Un compte administrateur ne se supprime pas depuis cette page.' },
+      { status: 403 },
+    );
+  }
 
   try {
     await deleteUserCompletely(
@@ -36,7 +45,10 @@ export async function DELETE(request: NextRequest) {
       user.id, // deleted by self
     );
   } catch (err) {
-    return NextResponse.json({ error: (err as Error).message || 'Erreur lors de la suppression' }, { status: 500 });
+    if (err instanceof CompteAvecFactures) {
+      return NextResponse.json({ error: err.message, factures: true }, { status: 409 });
+    }
+    return NextResponse.json({ error: 'La suppression n’a pas abouti. Écrivez-nous à contact@nfireport.com\u00A0: nous la terminerons pour vous.' }, { status: 500 });
   }
 
   return NextResponse.json({ success: true });

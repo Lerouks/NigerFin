@@ -23,10 +23,14 @@ import {
  *
  * Listes déroulantes (24/11/2026, demandées par Raouf) : seules Apprendre et
  * Simulateurs en ont, parce que ce sont les deux rubriques qui ont des
- * sous-pages. Sur ordinateur, la liste s'ouvre au survol de la souris, ou au
- * clic sur la flèche (clavier, écran tactile), et se ferme avec Échap ou en
- * cliquant ailleurs ; le libellé, lui, mène toujours à la page. Sur téléphone
- * et tablette en portrait, la même liste s'ouvre dans le menu.
+ * sous-pages. Aucune flèche visible dans la barre (Raouf : « ça alourdit ») :
+ * - souris : la liste s'ouvre au survol, et un clic sur le libellé mène à la page ;
+ * - écran tactile (iPad en paysage) : le premier toucher ouvre la liste, le
+ *   deuxième mène à la page ;
+ * - clavier : un bouton n'apparaît qu'au passage de la touche Tab, après le
+ *   libellé ; Échap referme la liste et lui rend la main.
+ * Un clic ailleurs referme la liste. Sur téléphone et tablette en portrait, la
+ * même liste se déplie dans le menu.
  */
 type CleSousMenu = 'education' | 'outils';
 
@@ -56,6 +60,7 @@ export function Header({ menuApprendre = MENU_APPRENDRE_VIDE }: HeaderProps) {
   const declencheurs = useRef<Partial<Record<CleSousMenu, HTMLDivElement | null>>>({});
   const fleches = useRef<Partial<Record<CleSousMenu, HTMLButtonElement | null>>>({});
   const minuterie = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dernierPointeur = useRef<string>('mouse');
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -119,12 +124,19 @@ export function Header({ menuApprendre = MENU_APPRENDRE_VIDE }: HeaderProps) {
     router.refresh();
   };
 
-  const lienRubrique = (entry: NavigationEntry, isActive: boolean, avecFleche: boolean) => (
+  const lienRubrique = (entry: NavigationEntry, isActive: boolean, cle?: CleSousMenu) => (
     <Link
       href={entry.path}
-      className={`group flex flex-col justify-center border-b-2 transition-colors ${
-        avecFleche ? 'pl-3.5 pr-1' : 'px-3.5'
-      } ${
+      onClick={(e) => {
+        // Écran tactile : le premier toucher ouvre la liste au lieu de quitter
+        // la page. Un clic au clavier (detail 0) ou à la souris navigue.
+        if (!cle || e.detail === 0 || dernierPointeur.current === 'mouse') return;
+        if (ouvert !== cle) {
+          e.preventDefault();
+          setOuvert(cle);
+        }
+      }}
+      className={`group flex flex-col justify-center border-b-2 px-3.5 transition-colors ${
         isActive
           ? 'border-foreground text-foreground'
           : 'border-transparent text-foreground/75 hover:text-foreground hover:border-black/20'
@@ -267,7 +279,7 @@ export function Header({ menuApprendre = MENU_APPRENDRE_VIDE }: HeaderProps) {
                     const isActive =
                       pathname === entry.path || pathname.startsWith(entry.path + '/');
                     if (!estSousMenu(entry.key)) {
-                      return <div key={entry.path} className="flex items-stretch">{lienRubrique(entry, isActive, false)}</div>;
+                      return <div key={entry.path} className="flex items-stretch">{lienRubrique(entry, isActive)}</div>;
                     }
                     const cle = entry.key;
                     const estOuvert = ouvert === cle;
@@ -278,6 +290,9 @@ export function Header({ menuApprendre = MENU_APPRENDRE_VIDE }: HeaderProps) {
                           declencheurs.current[cle] = el;
                         }}
                         className={`flex items-stretch transition-colors ${estOuvert ? 'bg-black/[0.03]' : ''}`}
+                        onPointerDown={(e) => {
+                          dernierPointeur.current = e.pointerType;
+                        }}
                         onPointerEnter={(e) => {
                           if (e.pointerType === 'mouse') ouvrirAuSurvol(cle);
                         }}
@@ -285,7 +300,7 @@ export function Header({ menuApprendre = MENU_APPRENDRE_VIDE }: HeaderProps) {
                           if (e.pointerType === 'mouse') fermerAuDepart();
                         }}
                       >
-                        {lienRubrique(entry, isActive, true)}
+                        {lienRubrique(entry, isActive, cle)}
                         <button
                           type="button"
                           ref={(el) => {
@@ -295,7 +310,7 @@ export function Header({ menuApprendre = MENU_APPRENDRE_VIDE }: HeaderProps) {
                           aria-expanded={estOuvert}
                           aria-controls={`sous-menu-${cle}`}
                           aria-label={`${estOuvert ? 'Fermer' : 'Ouvrir'} la liste ${cle === 'outils' ? 'des simulateurs' : 'd’Apprendre'}`}
-                          className="flex items-center justify-center w-8 mr-1 text-gray-500 hover:text-foreground transition-colors"
+                          className="sr-only focus-visible:not-sr-only focus-visible:flex focus-visible:items-center focus-visible:justify-center focus-visible:w-8 focus-visible:mr-1 text-gray-500"
                         >
                           <ChevronDown
                             className={`w-3.5 h-3.5 motion-safe:transition-transform motion-safe:duration-200 ${estOuvert ? 'rotate-180' : ''}`}

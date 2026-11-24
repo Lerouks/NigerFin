@@ -48,6 +48,8 @@ export const getMenuApprendre = unstable_cache(
       return MENU_APPRENDRE_VIDE;
     }
   },
-  ['menu-apprendre-v1'],
+  // v2 le 24/11/2026 : les titres des thèmes ont été corrigés en base, la
+  // nouvelle clé force leur relecture sans attendre l'heure de cache.
+  ['menu-apprendre-v2'],
   { revalidate: 3600, tags: ['menu-apprendre'] },
 );

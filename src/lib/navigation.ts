@@ -50,7 +50,7 @@ export const NAVIGATION: NavigationEntry[] = [
   {
     key: 'economie',
     label: 'Économie',
-    subtitle: 'Enjeux',
+    subtitle: 'Les enjeux',
     path: '/economie',
     order: 1,
     register: 'comprendre',
@@ -136,11 +136,11 @@ export const NAVIGATION: NavigationEntry[] = [
   {
     // Niger revient dans la barre le 24/11/2026 (décision de Raouf), à la place
     // d'Entreprises : une page de référence, les chiffres du pays et ses
-    // entreprises. Le libellé reste « Niger », qui attire le clic ; le
-    // sous-titre dit ce qu'on y trouve.
+    // entreprises. Le libellé seul, « Niger », attire le clic ; le filet qui
+    // sépare les deux registres suffit à le distinguer d'Économie et Finance,
+    // et tout le groupe de droite tient ainsi sur une ligne.
     key: 'niger',
     label: 'Niger',
-    subtitle: 'Chiffres et entreprises',
     path: '/niger',
     order: 3,
     register: 'agir',

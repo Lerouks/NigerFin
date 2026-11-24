@@ -72,9 +72,10 @@ describe('Barre de navigation cible : cinq entrees, deux registres', () => {
   });
 
   it('les sous-titres choisis par Raouf le 24/11/2026 disent ce que contient chaque rubrique', () => {
-    expect(NAVIGATION.find((e) => e.key === 'economie')?.subtitle).toBe('Enjeux');
+    expect(NAVIGATION.find((e) => e.key === 'economie')?.subtitle).toBe('Les enjeux');
     expect(NAVIGATION.find((e) => e.key === 'finance')?.subtitle).toBe('Votre argent');
-    expect(NAVIGATION.find((e) => e.key === 'niger')?.subtitle).toBe('Chiffres et entreprises');
+    // Niger, Apprendre et Simulateurs tiennent sur une ligne, sans sous-titre.
+    expect(NAVIGATION.find((e) => e.key === 'niger')?.subtitle).toBeUndefined();
   });
 
   it('aucun sous-titre ne répète le mot « Niger », déjà libellé de rubrique', () => {

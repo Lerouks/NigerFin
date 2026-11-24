@@ -78,7 +78,7 @@ const FAQ = [
   },
   {
     q: 'Que recouvre exactement Premium ?',
-    a: 'Tout : la newsletter en intégralité, articles & analyses illimités, outils Premium avec PDF, cours\u00a0d’éducation\u00a0financière,\u00a0alertes.',
+    a: 'Tout : articles & analyses illimités, outils Premium avec PDF, cours d’éducation financière, alertes, et la\u00a0newsletter\u00a0en\u00a0intégralité.',
   },
 ];
 

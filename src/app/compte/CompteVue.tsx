@@ -157,8 +157,9 @@ function Ligne({ etiquette, valeur, action }: { etiquette: string; valeur: React
   );
 }
 
-function NonRenseigne() {
-  return <span className="font-normal text-[#8a8e95]">Non renseigné</span>;
+/** « Non renseigné », accordé au nom de la ligne (une adresse, une profession : « Non renseignée »). */
+function NonRenseigne({ feminin = false }: { feminin?: boolean }) {
+  return <span className="font-normal text-[#8a8e95]">{feminin ? 'Non renseignée' : 'Non renseigné'}</span>;
 }
 
 /**
@@ -341,13 +342,13 @@ function InformationsLues({ profil }: { profil: ProfilAffiche }) {
     <>
       <dl>
         <Ligne etiquette="Nom" valeur={nomAffiche || <NonRenseigne />} />
-        <Ligne etiquette="Profession" valeur={profil.profession || <NonRenseigne />} />
+        <Ligne etiquette="Profession" valeur={profil.profession || <NonRenseigne feminin />} />
         {naissance && <Ligne etiquette="Date de naissance" valeur={naissance} />}
       </dl>
       <p className="mb-2.5 mt-5 border-t border-[#ececee] pt-4 text-[13px] font-bold text-[#1a1a1a]">Imprimé sur vos factures</p>
       <dl>
         <Ligne etiquette="Téléphone" valeur={profil.telephone ? <span className="whitespace-nowrap">{telephoneLisible(profil.telephone)}</span> : <NonRenseigne />} />
-        <Ligne etiquette="Adresse" valeur={adresse ? <span className="block [text-wrap:balance]">{adresse}</span> : <NonRenseigne />} />
+        <Ligne etiquette="Adresse" valeur={adresse ? <span className="block [text-wrap:balance]">{adresse}</span> : <NonRenseigne feminin />} />
         <Ligne etiquette="Pays" valeur={profil.pays || <NonRenseigne />} />
       </dl>
     </>

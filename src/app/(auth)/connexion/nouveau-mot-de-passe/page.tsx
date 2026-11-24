@@ -86,7 +86,16 @@ export default function NouveauMotDePassePage() {
         setMessage({ type: 'erreur', texte: traduire(error.message) });
       } else {
         setMessage({ type: 'succes', texte: 'Mot de passe enregistré. Redirection en cours.' });
-        setTimeout(() => chargementComplet('/admin', { remplacer: true }), 1200);
+        // L'administrateur retrouve son cockpit, un lecteur son compte (le
+        // cockpit lui est fermé). Sans réponse du profil : le compte.
+        let destination = '/compte';
+        try {
+          const profil = await fetch('/api/user/profile', { cache: 'no-store' });
+          if (profil.ok && ((await profil.json()) as { role?: string }).role === 'admin') destination = '/admin';
+        } catch {
+          // Réseau coupé : le compte, ouvert à tous les rôles.
+        }
+        setTimeout(() => chargementComplet(destination, { remplacer: true }), 1200);
       }
     } catch {
       setMessage({

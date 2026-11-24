@@ -37,6 +37,7 @@
     "exceljs": "^4.4.0",
     "lucide-react": "^1.69.0",
     "next": "^16.4.6",
+    "pako": "^2.1.0",
     "posthog-js": "^1.453.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
@@ -72,5 +73,10 @@
   },
   "overrides": {
     "rollup": "^4.0.0"
+  },
+  "knip": {
+    "ignoreDependencies": [
+      "pako"
+    ]
   }
 }

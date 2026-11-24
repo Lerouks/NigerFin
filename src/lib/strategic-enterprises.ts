@@ -58,7 +58,7 @@ export const getStrategicEnterprises = unstable_cache(
     }
     return data ?? [];
   },
-  ['strategic-enterprises-all-2026-11-24b'],
+  ['strategic-enterprises-all-2026-11-24g'],
   { tags: [STRATEGIC_ENTERPRISES_CACHE_TAG], revalidate: 3600 }
 );
 

@@ -68,7 +68,7 @@ export default async function EducationPage() {
         highlights={[
           { title: 'Catégories thématiques', body: 'Budget, banque, Bourse, immobilier, crypto, fiscalité, assurance, entrepreneuriat : chaque grand sujet a ses leçons.' },
           { title: 'Parcours guidés', body: 'Suivez des leçons dans l\'ordre, des premières notions jusqu\'à vos propres placements.' },
-          { title: 'Cas concrets Niger', body: 'Exemples chiffrés, comparaisons de banques locales, droit OHADA, paiements par Mobile Money.' },
+          { title: 'Cas concrets Niger', body: 'Exemples chiffrés, banques locales comparées, droit OHADA, Mobile Money.' },
           { title: 'Leçons gratuites', body: 'Une bonne partie des leçons est accessible sans abonnement : tout le monde peut apprendre.' },
         ]}
       />

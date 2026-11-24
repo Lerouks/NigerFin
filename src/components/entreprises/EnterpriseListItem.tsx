@@ -12,7 +12,8 @@ interface EnterpriseListItemProps {
 
 /**
  * Ligne dense FT-style pour la liste sectorielle.
- * Structure : rang gris a gauche (masqué sur téléphone), logo N&B, nom + secteur + description entière,
+ * Structure : rang gris a gauche et logo N&B (masqués sur téléphone, pour laisser toute la
+ * largeur au texte), nom + secteur + description entière,
  * mini-stats inline (fondation + drapeau), fleche droite. Hover = surlignement gris tres leger.
  * Tout en charte monochrome stricte, ZERO couleur sectorielle.
  */
@@ -32,7 +33,7 @@ export function EnterpriseListItem({ enterprise, rank }: EnterpriseListItemProps
       </span>
 
       {/* Logo N&B */}
-      <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-secondary border border-black/6 flex items-center justify-center overflow-hidden">
+      <div className="hidden sm:flex shrink-0 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-secondary border border-black/6 items-center justify-center overflow-hidden">
         {hasLogo ? (
           <Image
             src={enterprise.logo_url!}

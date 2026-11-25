@@ -113,7 +113,8 @@ function sourcesDesCours(cours: Cours[]): SourceDeCours[] {
     euro: `Parité fixe : 1 euro vaut 655,957${NB}FCFA.`,
     dollar: 'Cours de référence de la Banque centrale européenne, converti en FCFA par la parité fixe.',
     naira: 'Cours indicatif du marché des changes, mis à jour chaque jour.',
-    brvm: 'Cours de clôture publié par la BRVM à la fin de chaque séance.',
+    // « de chaque séance. » restait seul en dernière ligne à 360 px et sur ordinateur (mesuré le 25/11/2026).
+    brvm: `Cours de clôture publié par la BRVM à${NB}la${NB}fin${NB}de${NB}chaque${NB}séance.`,
     // Le nom de la banque ne se coupe jamais : « Bank of » seul en fin de ligne.
     boan: `Cours de clôture de Bank${NB}of${NB}Africa${NB}Niger, la seule société nigérienne cotée à la BRVM, publié chaque soir de séance.`,
     or: 'Cours de l’or à New York (COMEX), converti en FCFA le gramme avec le dollar du jour.',
@@ -121,6 +122,23 @@ function sourcesDesCours(cours: Cours[]): SourceDeCours[] {
   };
   return cours.map((c) => ({ cours: c.libelle, source: paragrapheFr(textes[c.cle], 24) }));
 }
+
+/**
+ * Mention de protection sous les sources, mot pour mot (choix de Raouf,
+ * 25/11/2026). Chaque phrase commence en début de ligne, et ses quatre derniers
+ * mots restent ensemble : mesuré de 320 à 1 440 px, aucune ligne ne finit sur
+ * un début de phrase et aucune phrase ne finit sur une ligne de trois mots.
+ */
+const MENTION_SOURCES = (
+  <>
+    <span className="block">
+      Ces cours sont donnés à titre <span className="whitespace-nowrap">indicatif, sans garantie d’exactitude.</span>
+    </span>
+    <span className="block">
+      Ils ne constituent <span className="whitespace-nowrap">pas un conseil d’investissement.</span>
+    </span>
+  </>
+);
 
 export async function CoursDuJour() {
   const cours = await getCoursDuJour();
@@ -138,7 +156,7 @@ export async function CoursDuJour() {
           </h2>
           <p className="text-[13px] text-gray-500">{dateLongue(plusRecente)}</p>
         </div>
-        <SourcesDesCours sources={sourcesDesCours(cours)} />
+        <SourcesDesCours sources={sourcesDesCours(cours)} mention={MENTION_SOURCES} />
       </header>
 
       <div className={`mt-5 grid grid-cols-2 gap-y-6 sm:grid-cols-3 ${COLONNES_LARGES[cours.length] ?? 'lg:grid-cols-6'}`}>

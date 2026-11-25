@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { Info } from 'lucide-react';
 
 export interface SourceDeCours {
@@ -12,9 +12,10 @@ export interface SourceDeCours {
  * Bouton « Sources » du bloc « Les cours du jour » (choix de Raouf le
  * 24/11/2026, à la place d'un paragraphe de sources sous les tuiles). Il ouvre
  * la liste des sources, cours par cours ; un second clic, un clic ailleurs ou
- * Échap la referment, comme les listes du menu.
+ * Échap la referment, comme les listes du menu. La mention de protection,
+ * choisie par Raouf le 25/11/2026, ferme la liste sous un trait fin.
  */
-export function SourcesDesCours({ sources }: { sources: SourceDeCours[] }) {
+export function SourcesDesCours({ sources, mention }: { sources: SourceDeCours[]; mention?: ReactNode }) {
   const [ouvert, setOuvert] = useState(false);
   const racine = useRef<HTMLDivElement>(null);
   const bouton = useRef<HTMLButtonElement>(null);
@@ -67,6 +68,9 @@ export function SourcesDesCours({ sources }: { sources: SourceDeCours[] }) {
               </div>
             ))}
           </dl>
+          {mention ? (
+            <p className="mt-4 border-t border-black/10 pt-3 text-[12px] leading-snug text-gray-500">{mention}</p>
+          ) : null}
         </div>
       ) : null}
     </div>

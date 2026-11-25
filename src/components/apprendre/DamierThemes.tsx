@@ -100,6 +100,9 @@ export function DamierThemes({ themes }: { themes: Theme[] }) {
         const depart = leconDeDepart(cours.lecons, lues);
         const nouveau = !toutLu && cours.lecons.some((l) => l.nouvelle && !lues.has(l.id));
         const action = toutLu ? 'Relire' : depart?.reprise ? 'Reprendre' : 'Commencer';
+        // Avec la barre de progression, le carré garde sa forme sur téléphone : marges resserrées.
+        const enCours = luesIci > 0 && !toutLu;
+        const marge = enCours ? 'mt-2 sm:mt-3 lg:mt-4 max-[359px]:mt-1.5' : 'mt-3 lg:mt-4';
         const descriptionAccessible = [
           typographieFr(theme.titre),
           `${n} leçon${n > 1 ? 's' : ''}`,
@@ -130,17 +133,17 @@ export function DamierThemes({ themes }: { themes: Theme[] }) {
             </span>
             <span className="block" aria-hidden="true">
               {titre}
-              <span className="mt-1.5 block text-[12.5px] lg:text-[13px] max-[359px]:text-[12px] text-white/55 tabular-nums">
+              <span className={`${enCours ? 'mt-1.5 max-[359px]:mt-1' : 'mt-1.5'} block text-[12.5px] lg:text-[13px] max-[359px]:text-[12px] text-white/55 tabular-nums`}>
                 {n}&nbsp;leçon{n > 1 ? 's' : ''} · {cours.minutes}&nbsp;min
               </span>
-              {luesIci > 0 && !toutLu && (
-                <span className="mt-3 lg:mt-4 grid gap-[3px]" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}>
+              {enCours && (
+                <span className={`${marge} grid gap-[3px]`} style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}>
                   {cours.lecons.map((l) => (
                     <span key={l.id} className={`h-[3px] rounded-full ${lues.has(l.id) ? 'bg-white' : 'bg-white/16'}`} />
                   ))}
                 </span>
               )}
-              <span className="mt-3 lg:mt-4 flex items-center justify-between gap-2 text-[13.5px] lg:text-[14px] max-[359px]:text-[13px] font-semibold">
+              <span className={`${marge} flex items-center justify-between gap-2 text-[13.5px] lg:text-[14px] max-[359px]:text-[13px] font-semibold`}>
                 {action}
                 <ArrowRight className="h-[18px] w-[18px] shrink-0 transition-transform group-hover:translate-x-0.5" />
               </span>

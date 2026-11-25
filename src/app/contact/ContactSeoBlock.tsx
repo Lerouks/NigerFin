@@ -8,7 +8,7 @@ export function ContactSeoBlock() {
           </h2>
           <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-pretty mb-6 text-justify hyphens-auto">
             Ce formulaire permet d&apos;écrire à NFI Report pour toute demande relative à nos
-            articles, nos analyses, nos simulateurs financiers ou un partenariat.
+            articles, nos analyses, nos simulateurs <span className="whitespace-nowrap">financiers ou un partenariat.</span>
           </p>
           <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-pretty mb-10 text-justify hyphens-auto">
             Pour les demandes professionnelles structurées (partenariats stratégiques,
@@ -63,7 +63,8 @@ export function ContactSeoBlock() {
               <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
                 <strong>Suggestions et retours</strong>&nbsp;: améliorations à apporter au site,
-                aux simulateurs financiers, à la newsletter, à l&apos;offre éditoriale en général.
+                aux simulateurs financiers, <span className="whitespace-nowrap">à la newsletter,</span>{' '}
+                <span className="whitespace-nowrap">à l&apos;offre éditoriale en général.</span>
               </span>
             </li>
           </ul>

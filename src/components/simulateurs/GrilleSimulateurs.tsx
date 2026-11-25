@@ -9,9 +9,9 @@ import { typographieFr } from '@/lib/typographie-fr';
  * trois, à la place des cartes « Plan gratuit » et « Plan Premium », qui
  * faisaient de la page une page de tarifs).
  *
- * Une colonne sous 390 px (iPhone SE, iPhone mini, Android de 360 px) : à deux
- * colonnes, les légendes y passaient sur trois lignes. Deux colonnes ensuite,
- * trois dès la tablette.
+ * Une colonne sur téléphone, deux de 768 à 1 279 px, trois dès 1 280 px : chaque
+ * légende tient alors sur une ligne (mesuré mot par mot en production, de 320 à
+ * 1 440 px : à deux colonnes sur téléphone, elles finissaient sur deux mots).
  *
  * La liste, l'ordre, les libellés et le statut Premium viennent du menu
  * (SIMULATEURS_MENU) : un seul endroit à tenir à jour, vérifié par un test
@@ -19,7 +19,7 @@ import { typographieFr } from '@/lib/typographie-fr';
  */
 export function GrilleSimulateurs() {
   return (
-    <ul className="grid grid-cols-1 min-[390px]:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3 lg:gap-3.5">
+    <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5 sm:gap-3 lg:gap-3.5">
       {SIMULATEURS_MENU.map((s) => {
         const detail = typographieFr(s.detail ?? '');
         return (
@@ -27,7 +27,7 @@ export function GrilleSimulateurs() {
             <Link
               href={s.href}
               aria-label={`${s.label}, ${s.premium ? 'Premium' : 'gratuit'}. ${detail}`}
-              className="group flex w-full min-h-[120px] flex-col justify-between gap-4 rounded-[14px] border border-[#111] bg-[#111] p-4 text-white transition-colors hover:bg-[#1d1d1d] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111] min-[390px]:min-h-[156px] min-[390px]:gap-5 sm:min-h-[208px] sm:gap-8 sm:p-6 lg:min-h-[228px] lg:p-7"
+              className="group flex w-full min-h-[120px] flex-col justify-between gap-4 rounded-[14px] border border-[#111] bg-[#111] p-4 text-white transition-colors hover:bg-[#1d1d1d] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111] md:min-h-[200px] md:gap-8 md:p-6 xl:min-h-[228px] xl:p-7"
             >
               <span className="flex items-center justify-between gap-3 text-[12px] leading-none" aria-hidden="true">
                 <span className={`inline-flex items-center gap-1.5 ${s.premium ? 'text-white/75' : 'text-white/55'}`}>
@@ -37,10 +37,10 @@ export function GrilleSimulateurs() {
                 <ArrowRight className="h-[18px] w-[18px] text-white/40 transition-transform group-hover:translate-x-0.5 group-hover:text-white" />
               </span>
               <span aria-hidden="true">
-                <span className="block text-[18px] font-semibold leading-[1.18] tracking-[-0.015em] sm:text-[24px] lg:text-[28px]">
+                <span className="block text-[18px] font-semibold leading-[1.18] tracking-[-0.015em] md:text-[24px] xl:text-[28px]">
                   {s.label}
                 </span>
-                <span className="mt-1.5 block text-[13px] leading-snug text-white/60 text-balance sm:mt-2 sm:text-[15px]">
+                <span className="mt-1.5 block text-[13px] leading-snug text-white/60 text-balance md:mt-2 md:text-[15px]">
                   {detail}
                 </span>
               </span>

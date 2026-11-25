@@ -8,6 +8,7 @@ import {
   ArrowRight, Sparkles,
 } from 'lucide-react';
 import { BILLING_OPTIONS, formatPrice, PREMIUM_MONTHLY_PRICE } from '@/config/pricing';
+import { paragrapheFr } from '@/lib/typographie-fr';
 
 const SCREENSHOTS = [
   {
@@ -44,7 +45,7 @@ const BENEFITS = [
   {
     icon: Wrench,
     title: 'Simulateurs Premium avancés',
-    desc: 'Salaire net, budget familial et intérêts composés, avec des analyses détaillées et personnalisées.',
+    desc: 'Salaire net, budget familial et\u00a0intérêts composés, avec\u00a0une analyse détaillée\u00a0de\u00a0vos\u00a0chiffres.',
   },
   {
     icon: Download,
@@ -210,8 +211,10 @@ function HeroSection() {
           </h1>
 
           <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-gray-600 sm:text-[19px]">
-            Pour les jeunes qui veulent savoir, agir et investir en Afrique de l&rsquo;Ouest.
-            Newsletters, analyses, simulateurs et téléchargements PDF. Tout est dans Premium.
+            {/* Deux blocs : la seconde phrase commence toujours en début de ligne
+                (mesuré de 320 à 1 440 px, elle tombait en fin de ligne). */}
+            <span className="block">{paragrapheFr('Pour les jeunes qui veulent savoir, agir et investir en Afrique de l\u2019Ouest.')}</span>
+            <span className="block">{paragrapheFr('Newsletters, analyses, simulateurs et téléchargements PDF. Tout est dans Premium.')}</span>
           </p>
 
           <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center">

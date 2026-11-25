@@ -20,7 +20,7 @@ export default async function CGUPage() {
       initialSections={initialSections}
       introParagraphs={[
         'Les présentes conditions générales d’utilisation régissent l’accès et l’usage du site NFI Report (nfireport.com), média d’information économique et financière consacré au Niger et à l’Afrique de l’Ouest, édité par NFI Group SARL. En utilisant le site, l’utilisateur accepte les présentes conditions.',
-        'Elles s’appliquent à l’ensemble des services du site : articles, simulateurs, contenus pédagogiques, newsletter et commentaires.',
+        'Elles s’appliquent à l’ensemble des services du site\u00a0: articles, simulateurs, cours,\u00a0newsletter\u00a0et\u00a0commentaires.',
         'NFI Report peut modifier les présentes conditions à tout moment. La version en vigueur est celle publiée sur le site.',
       ]}
       fallbackSections={[

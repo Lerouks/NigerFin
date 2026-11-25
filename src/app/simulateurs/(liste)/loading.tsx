@@ -13,9 +13,9 @@ export default function Loading() {
         </div>
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 md:pt-12 md:pb-24">
-        <div className="grid grid-cols-1 min-[390px]:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3 lg:gap-3.5">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5 sm:gap-3 lg:gap-3.5">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="min-h-[120px] min-[390px]:min-h-[156px] sm:min-h-[208px] lg:min-h-[228px] rounded-[14px] bg-[#111]/85 animate-pulse" />
+            <div key={i} className="min-h-[120px] md:min-h-[200px] xl:min-h-[228px] rounded-[14px] bg-[#111]/85 animate-pulse" />
           ))}
         </div>
       </div>

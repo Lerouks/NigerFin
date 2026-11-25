@@ -64,7 +64,7 @@ export function AboutSeoBlock() {
               <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
                 <strong>Simulateurs</strong> : emprunt, salaire, budget familial et intérêts,
-                calibrés sur les réalités du Niger.
+                calibrés <span className="whitespace-nowrap">sur les réalités du Niger.</span>
               </span>
             </li>
           </ul>

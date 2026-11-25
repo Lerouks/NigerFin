@@ -108,21 +108,23 @@ export default function PlanDuSitePage() {
               Niger), notre section dédiée à l&apos;éducation financière, nos simulateurs
               (emprunt, intérêts simples et composés, salaire, budget familial,
               indices économiques), ainsi que toutes les pages
-              transactionnelles et institutionnelles du site.
+              transactionnelles <span className="whitespace-nowrap">et institutionnelles du site.</span>
             </p>
             <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 mb-10 text-justify hyphens-auto">
               Pour les moteurs de recherche, nous publions également un sitemap XML complet à
               l&apos;adresse{' '}
-              <Link href="/sitemap.xml" className="text-[#111] underline underline-offset-2">
+              {/* Un fichier, pas une page : <a> simple, sinon Next.js le précharge
+                  comme une page et la console affiche une erreur 404. */}
+              <a href="/sitemap.xml" className="text-[#111] underline underline-offset-2">
                 /sitemap.xml
-              </Link>{' '}
+              </a>{' '}
               qui contient l&apos;ensemble des articles, pages et ressources accessibles. Le
               sitemap est mis à jour automatiquement à chaque publication d&apos;un nouvel
               article ou d&apos;une nouvelle catégorie. Vous pouvez aussi consulter notre
               fichier{' '}
-              <Link href="/robots.txt" className="text-[#111] underline underline-offset-2">
+              <a href="/robots.txt" className="text-[#111] underline underline-offset-2">
                 /robots.txt
-              </Link>{' '}
+              </a>{' '}
               pour les directives destinées aux robots d&apos;indexation.
             </p>
 

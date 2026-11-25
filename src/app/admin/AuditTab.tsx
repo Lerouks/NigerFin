@@ -5,7 +5,7 @@ import { appelAdmin } from '@/app/admin/lib/appel-admin';
 import { EtatListe } from '@/app/admin/lib/EtatListe';
 import { auteurDeLaLigne, type AuteurDuJournal } from '@/app/admin/lib/auteur-du-journal';
 
-interface AuditEntry extends AuteurDuJournal {
+export interface AuditEntry extends AuteurDuJournal {
   id: string;
   action: string;
   entity_type: string;
@@ -67,40 +67,68 @@ export function AuditTab() {
         onReessayer={fetchAuditLog}
       />
 
-      {!chargement && !erreur && auditLog.length > 0 && (
-        <div className="bg-white rounded-xl border border-black/6 overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-black/4">
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Date</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Admin</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Action</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Type</th>
-                <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Détails</th>
-              </tr>
-            </thead>
-            <tbody>
-              {auditLog.map((entry) => (
-                <tr key={entry.id} className="border-b border-black/3 last:border-0">
-                  <td className="px-4 py-3 text-[12px] text-gray-500 whitespace-nowrap">
-                    {new Date(entry.created_at).toLocaleString('fr-FR')}
-                  </td>
-                  <td className="px-4 py-3 text-[12px]">
-                    {auteurDeLaLigne(entry)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <AuditActionBadge action={entry.action} />
-                  </td>
-                  <td className="px-4 py-3 text-[12px] text-gray-600">{entry.entity_type}</td>
-                  <td className="px-4 py-3 text-[12px] text-gray-500 font-mono max-w-xs truncate">
-                    {JSON.stringify(entry.details)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      {!chargement && !erreur && auditLog.length > 0 && <ListeDuJournal lignes={auditLog} />}
+    </div>
+  );
+}
+
+/**
+ * Les lignes du journal. Sous 1280 px, une action par bloc empilé : le tableau
+ * de cinq colonnes mesure 900 px, et avec le menu latéral du cockpit (256 px)
+ * il sortait de l'écran, coupé sans défilement possible (contrôle du
+ * 25/11/2026). Le détail passe à la ligne n'importe où : un texte insécable
+ * élargirait toute la page.
+ */
+export function ListeDuJournal({ lignes }: { lignes: AuditEntry[] }) {
+  return (
+    <div className="bg-white rounded-xl border border-black/6 overflow-hidden">
+      <ul className="xl:hidden">
+        {lignes.map((entry) => (
+          <li key={entry.id} className="border-b border-black/3 last:border-0 px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5">
+              <AuditActionBadge action={entry.action} />
+              <span className="text-[12px] text-gray-500 whitespace-nowrap">
+                {new Date(entry.created_at).toLocaleString('fr-FR')}
+              </span>
+            </div>
+            <p className="mt-2 text-[12px] [overflow-wrap:anywhere]">{auteurDeLaLigne(entry)}</p>
+            <p className="mt-0.5 line-clamp-2 text-[12px] text-gray-500 [overflow-wrap:anywhere]">
+              <span className="text-gray-600">{entry.entity_type}</span>{' '}
+              <span className="font-mono">{JSON.stringify(entry.details)}</span>
+            </p>
+          </li>
+        ))}
+      </ul>
+      <table className="hidden xl:table w-full">
+        <thead>
+          <tr className="border-b border-black/4">
+            <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Date</th>
+            <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Admin</th>
+            <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Action</th>
+            <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Type</th>
+            <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Détails</th>
+          </tr>
+        </thead>
+        <tbody>
+          {lignes.map((entry) => (
+            <tr key={entry.id} className="border-b border-black/3 last:border-0">
+              <td className="px-4 py-3 text-[12px] text-gray-500 whitespace-nowrap">
+                {new Date(entry.created_at).toLocaleString('fr-FR')}
+              </td>
+              <td className="px-4 py-3 text-[12px]">
+                {auteurDeLaLigne(entry)}
+              </td>
+              <td className="px-4 py-3">
+                <AuditActionBadge action={entry.action} />
+              </td>
+              <td className="px-4 py-3 text-[12px] text-gray-600">{entry.entity_type}</td>
+              <td className="px-4 py-3 text-[12px] text-gray-500 font-mono max-w-xs truncate">
+                {JSON.stringify(entry.details)}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

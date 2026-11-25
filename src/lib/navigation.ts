@@ -30,6 +30,11 @@ export interface NavigationEntry {
   subtitle?: string;
   /** URL. FIGEE : ne jamais modifier, des liens externes en dependent. */
   path: string;
+  /**
+   * Autres chemins sous lesquels la rubrique s'allume dans la barre : les
+   * fiches /entreprises/[slug] appartiennent à la rubrique Niger.
+   */
+  actifSur?: string[];
   order: number;
   register: NavRegister;
   /** Presente dans la barre de navigation principale. */
@@ -144,6 +149,7 @@ export const NAVIGATION: NavigationEntry[] = [
     key: 'niger',
     label: 'Niger',
     path: '/niger',
+    actifSur: ['/entreprises'],
     order: 3,
     register: 'agir',
     inNav: true,
@@ -152,6 +158,11 @@ export const NAVIGATION: NavigationEntry[] = [
     isEditorial: true,
   },
 ];
+
+/** La rubrique est-elle celle de la page affichée ? Son chemin ou un de ses chemins associés. */
+export function estRubriqueActive(entry: Pick<NavigationEntry, 'path' | 'actifSur'>, pathname: string): boolean {
+  return [entry.path, ...(entry.actifSur ?? [])].some((chemin) => pathname === chemin || pathname.startsWith(chemin + '/'));
+}
 
 /** Rubriques de la barre principale, dans l'ordre, tous registres confondus. */
 export const NAV_ENTRIES = NAVIGATION.filter((e) => e.inNav).sort((a, b) => a.order - b.order);

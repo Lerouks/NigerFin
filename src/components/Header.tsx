@@ -10,6 +10,7 @@ import {
   NAV_GROUPS,
   SIMULATEURS_MENU,
   MENU_APPRENDRE_VIDE,
+  estRubriqueActive,
   type MenuApprendre,
   type NavigationEntry,
 } from '@/lib/navigation';
@@ -279,8 +280,7 @@ export function Header({ menuApprendre = MENU_APPRENDRE_VIDE }: HeaderProps) {
                     <div className="self-center h-8 w-px bg-black/12 mx-4" aria-hidden="true" />
                   )}
                   {groupe.entries.map((entry) => {
-                    const isActive =
-                      pathname === entry.path || pathname.startsWith(entry.path + '/');
+                    const isActive = estRubriqueActive(entry, pathname);
                     if (!estSousMenu(entry.key)) {
                       return <div key={entry.path} className="flex items-stretch">{lienRubrique(entry, isActive)}</div>;
                     }

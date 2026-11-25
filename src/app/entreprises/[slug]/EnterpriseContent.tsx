@@ -1,312 +1,250 @@
-'use client';
-
 import Image from 'next/image';
 import Link from 'next/link';
-import {
-  ArrowLeft,
-  MapPin,
-  Calendar,
-  Users,
-  Globe,
-  DollarSign,
-  ExternalLink,
-  ChevronRight,
-} from 'lucide-react';
+import { ArrowLeft, ArrowUpRight } from 'lucide-react';
 import { ArticleCard } from '@/components/ArticleCard';
-import { paragrapheFr, secteurFr } from '@/lib/typographie-fr';
+import { CarteSiege, villeSurLaCarte } from '@/components/niger/CarteSiege';
+import { AutresEntreprises, type AutreEntreprise } from '@/components/niger/AutresEntreprises';
+import { enPhrases, paragrapheFr, typographieFr } from '@/lib/typographie-fr';
 import type { Article } from '@/types';
 
-interface Enterprise {
-  id: string;
-  name: string;
-  slug: string;
-  sector: string;
-  description: string;
-  full_name: string | null;
-  founded_year: number | null;
-  headquarters: string | null;
-  employees: string | null;
-  revenue: string | null;
-  website: string | null;
-  detailed_description: string | null;
-  logo_url: string | null;
-  image_url: string | null;
-  key_facts: { label: string; value: string }[] | null;
-  brand_color: string | null;
+/**
+ * Fiche d'une entreprise, direction « Dans la famille Niger » choisie par
+ * Raouf le 25/11/2026 : le haut reprend la grammaire de la page Niger
+ * (bandeau noir, carte en points avec le siège allumé, année, ville et
+ * secteur en grand), le logo posé sur le noir sans carré blanc ; dessous, la
+ * présentation, les points clés en cartes, la photo à son format d'origine,
+ * les articles qui citent l'entreprise et les autres entreprises.
+ */
+
+export interface PhotoDeLaFiche {
+  src: string;
+  /** Inconnues pour une photo envoyée depuis l'admin : elle garde alors son format au chargement. */
+  largeur: number | null;
+  hauteur: number | null;
+  legende?: string;
+  credit?: string;
+  source?: string;
 }
 
-interface EnterpriseContentProps {
-  enterprise: Enterprise;
-  relatedArticles: Article[];
+export interface FicheEntreprise {
+  nom: string;
+  nomComplet: string | null;
+  ligne: string | null;
+  logo: string | null;
+  ville: string;
+  annee: number | null;
+  secteur: string;
+  site: { url: string; libelle: string } | null;
+  presentation: string;
+  points: { label: string; value: string }[];
+  photo: PhotoDeLaFiche | null;
 }
 
-function InfoRow({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: React.ElementType;
-  label: string;
-  value: React.ReactNode;
-}) {
+function PhotoFiche({ photo, nom }: { photo: PhotoDeLaFiche; nom: string }) {
+  const credit = photo.credit ? typographieFr(`Photo : ${photo.credit}`) : null;
   return (
-    <div className="flex items-start gap-3 py-3">
-      <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 bg-secondary border border-black/6">
-        <Icon className="w-4 h-4 text-foreground/70" />
-      </div>
-      <div className="min-w-0">
-        <p className="text-[11px] uppercase tracking-[0.14em] text-gray-500 font-semibold">
-          {label}
-        </p>
-        <div className="text-[14px] text-foreground mt-0.5">{value}</div>
-      </div>
-    </div>
+    <figure className="min-w-0">
+      <Image
+        src={photo.src}
+        alt={photo.legende ?? `Photo publiée par ${nom}`}
+        width={photo.largeur ?? 1600}
+        height={photo.hauteur ?? 1067}
+        sizes="(min-width: 1280px) 500px, (min-width: 768px) 40vw, 100vw"
+        className="h-auto w-full rounded-[10px] bg-black/[0.04]"
+      />
+      {photo.legende || credit ? (
+        <figcaption className="mt-2.5 text-[13px] leading-snug">
+          {photo.legende ? <span className="block text-gray-600">{typographieFr(photo.legende)}</span> : null}
+          {credit ? (
+            <span className="mt-0.5 block text-gray-500">
+              {photo.source ? (
+                <a
+                  href={photo.source}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline decoration-black/20 underline-offset-2 transition-colors hover:text-gray-700"
+                >
+                  {credit}
+                </a>
+              ) : (
+                credit
+              )}
+            </span>
+          ) : null}
+        </figcaption>
+      ) : null}
+    </figure>
   );
 }
 
 export function EnterpriseContent({
-  enterprise,
-  relatedArticles,
-}: EnterpriseContentProps) {
-  const hasInfo =
-    enterprise.full_name ||
-    enterprise.founded_year ||
-    enterprise.headquarters ||
-    enterprise.employees ||
-    enterprise.revenue ||
-    enterprise.website;
-  const takeaways = (enterprise.key_facts ?? []).slice(0, 3);
+  fiche,
+  autres,
+  articles,
+}: {
+  fiche: FicheEntreprise;
+  autres: AutreEntreprise[];
+  articles: Article[];
+}) {
+  const avecCarte = Boolean(villeSurLaCarte(fiche.ville));
+  const cles = [
+    fiche.annee ? { label: 'Création', valeur: String(fiche.annee) } : null,
+    fiche.ville ? { label: 'Siège', valeur: fiche.ville } : null,
+    fiche.secteur ? { label: 'Secteur', valeur: fiche.secteur } : null,
+  ].filter((c): c is { label: string; valeur: string } => c !== null);
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header noir, charte unique (gold accent uniquement) */}
-      <div className="relative bg-[#0a0a0a] text-white overflow-hidden">
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
-          <Link
-            href="/niger#entreprises"
-            className="inline-flex items-center gap-1.5 text-[13px] text-white/60 hover:text-white transition-colors mb-6"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Toutes les entreprises
-          </Link>
-
-          <div className="flex items-start gap-5">
-            {/* Logo - fond blanc, couleur marque preservee (D3=A) */}
-            <div className="w-18 h-18 sm:w-24 sm:h-24 rounded-2xl bg-white flex items-center justify-center shrink-0 shadow-xl p-2.5 sm:p-3">
-              {enterprise.logo_url ? (
+      {/* L'entreprise d'un coup d'œil, comme le haut de la page Niger. */}
+      <section className="bg-[#0b0b0c] text-white">
+        <div
+          className={`mx-auto grid max-w-7xl gap-7 px-4 pb-10 pt-2 sm:px-6 md:pb-14 lg:gap-x-14 lg:gap-y-9 lg:px-8 lg:pb-16 lg:pt-8 ${
+            avecCarte
+              ? "[grid-template-areas:'titre''carte''cles'] lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:[grid-template-areas:'titre_carte''cles_carte']"
+              : "[grid-template-areas:'titre''cles']"
+          }`}
+        >
+          <div className="[grid-area:titre] lg:self-end">
+            <Link
+              href="/niger#entreprises"
+              className="-ml-1 inline-flex min-h-[44px] items-center gap-2 px-1 text-[14px] text-white/60 transition-colors hover:text-white"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              Toutes les entreprises
+            </Link>
+            {fiche.logo ? (
+              <div className="relative mt-5 h-16 w-[220px] sm:h-[76px] sm:w-[260px]">
                 <Image
-                  src={enterprise.logo_url}
-                  alt={`Logo ${enterprise.name}`}
-                  width={96}
-                  height={96}
-                  className="w-full h-full object-contain"
+                  src={fiche.logo}
+                  alt={`Logo ${fiche.nom}`}
+                  fill
+                  priority
+                  sizes="260px"
+                  className="object-contain object-left"
                 />
-              ) : (
-                <span className="text-2xl sm:text-3xl font-bold text-foreground">
-                  {enterprise.name.charAt(0)}
-                </span>
-              )}
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-gold font-semibold mb-2">
-                Dossier entreprise
-              </p>
-              {/* Nom court (« Niger Telecoms ») tenu sur une ligne : police un peu
-                  réduite sous 360 px pour qu'il y tienne. */}
-              <h1 className="text-[26px] min-[360px]:text-3xl sm:text-5xl font-black leading-[1.05] tracking-tight">
-                {paragrapheFr(enterprise.name)}
-              </h1>
-              {enterprise.full_name &&
-                enterprise.full_name !== enterprise.name && (
-                  <p className="text-[14px] sm:text-[16px] text-white/65 mt-2 italic">
-                    {paragrapheFr(enterprise.full_name, 36)}
-                  </p>
-                )}
-              <div className="flex flex-wrap items-center gap-2 mt-4">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-semibold tracking-wide rounded-full bg-white/10 text-white ring-1 ring-inset ring-white/20">
-                  {enterprise.sector ? secteurFr(enterprise.sector) : null}
-                </span>
-                {enterprise.founded_year && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] text-white/65 rounded-full ring-1 ring-inset ring-white/15">
-                    <Calendar className="w-3 h-3" />
-                    Depuis {enterprise.founded_year}
-                  </span>
-                )}
-                {enterprise.headquarters && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] text-white/65 rounded-full ring-1 ring-inset ring-white/15">
-                    <MapPin className="w-3 h-3" />
-                    {enterprise.headquarters}
-                  </span>
-                )}
               </div>
-            </div>
+            ) : null}
+            {/* Nom tenu sur une ligne à toutes les largeurs, « Niger Telecoms » compris. */}
+            <h1 className="mt-6 text-[34px] font-bold leading-none tracking-[-0.03em] min-[360px]:text-[40px] sm:text-[56px] lg:text-[52px] xl:text-[64px]">
+              {fiche.nom}
+            </h1>
+            {fiche.nomComplet ? (
+              <p className="mt-3 text-[16px] text-[#8a8e95] sm:text-[18px]">{paragrapheFr(fiche.nomComplet, 36)}</p>
+            ) : null}
+            {fiche.ligne ? (
+              <p className="mt-1.5 text-[19px] text-gray-200 sm:text-[21px]">{typographieFr(fiche.ligne)}</p>
+            ) : null}
           </div>
-        </div>
 
-        {/* Filet or signature */}
-        <div className="h-[3px] bg-gold" />
-      </div>
+          {avecCarte ? (
+            <div className="[grid-area:carte] md:max-w-[600px] lg:max-w-none lg:self-center">
+              <CarteSiege ville={fiche.ville} entreprise={fiche.nom} />
+            </div>
+          ) : null}
 
-      {/* Content */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Section "A retenir" - bullets copy-paste friendly */}
-            {takeaways.length > 0 && (
-              <section
-                aria-labelledby="takeaways-title"
-                className="border-l-4 border-gold bg-gradient-to-br from-secondary to-background p-6 sm:p-8 rounded-r-xl"
+          <dl className="[grid-area:cles] border-t border-white/14 md:grid md:grid-cols-3 md:gap-x-7 md:border-t-0 lg:self-start">
+            {cles.map((c) => (
+              <div
+                key={c.label}
+                className="flex items-baseline justify-between gap-4 border-b border-white/10 py-3 md:block md:border-b-0 md:border-t md:border-white/14 md:pb-0 md:pt-3"
               >
-                <div className="flex items-baseline gap-3 mb-4">
-                  <span className="text-[11px] uppercase tracking-[0.22em] text-foreground font-extrabold">
-                    À retenir
+                <dt className="text-[14px] text-[#8a8e95]">{c.label}</dt>
+                <dd className="text-right text-[20px] font-bold tracking-[-0.01em] md:mt-1.5 md:text-left md:text-[28px]">
+                  {c.valeur}
+                </dd>
+              </div>
+            ))}
+            {fiche.site ? (
+              <div className="flex items-baseline justify-between gap-4 py-3 md:col-span-3 md:mt-4 md:block md:pb-0 md:pt-0">
+                <dt className="text-[14px] text-[#8a8e95]">Site officiel</dt>
+                <dd className="md:mt-1.5">
+                  <a
+                    href={fiche.site.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-[44px] items-center gap-1.5 text-[17px] font-semibold md:min-h-0"
+                  >
+                    <span className="border-b border-white/50 leading-tight">{fiche.site.libelle}</span>
+                    <ArrowUpRight className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    <span className="sr-only">(nouvel onglet)</span>
+                  </a>
+                </dd>
+              </div>
+            ) : null}
+          </dl>
+        </div>
+      </section>
+
+      <div className="mx-auto max-w-7xl px-4 pb-14 pt-11 sm:px-6 md:pb-20 md:pt-16 lg:px-8">
+        <div
+          className={
+            fiche.photo
+              ? 'grid items-start gap-10 md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] md:gap-x-10 lg:gap-x-16'
+              : undefined
+          }
+        >
+          <div className="min-w-0">
+            <section aria-labelledby="presentation">
+              <h2 id="presentation" className="text-[24px] font-bold tracking-[-0.01em] text-[#111]">
+                Présentation
+              </h2>
+              <p className="mt-2.5 max-w-[40em] text-[16px] leading-[1.7] text-[#2a2c30] text-pretty sm:text-[17px] lg:text-[18px]">
+                {/* Une phrase par bloc : une phrase commence toujours en début de ligne,
+                    jamais par deux ou trois mots laissés en bout de ligne. Chaque phrase est
+                    équilibrée sur ses lignes : sa dernière ligne n'est jamais courte. */}
+                {enPhrases(fiche.presentation).map((phrase, i) => (
+                  <span key={i} className="block [text-wrap:balance]">
+                    {paragrapheFr(phrase)}
                   </span>
-                </div>
-                <ul
-                  id="takeaways-title"
-                  className="space-y-3 text-[15px] leading-relaxed text-foreground"
-                >
-                  {takeaways.map((fact, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <span
-                        aria-hidden
-                        className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold"
-                      />
-                      <span>
-                        <strong className="font-semibold">{fact.label}&nbsp;:</strong>{' '}
-                        {paragrapheFr(fact.value)}
-                      </span>
+                ))}
+              </p>
+            </section>
+
+            {fiche.points.length > 0 ? (
+              <section aria-labelledby="points-cles" className="@container mt-9">
+                <h2 id="points-cles" className="text-[24px] font-bold tracking-[-0.01em] text-[#111]">
+                  Points clés
+                </h2>
+                <ul className="mt-3.5 grid gap-2.5 @xl:grid-cols-3 @xl:gap-3">
+                  {fiche.points.map((p) => (
+                    <li key={p.label} className="rounded-[10px] border border-black/8 bg-white px-[18px] pb-[17px] pt-[15px]">
+                      <p className="text-[14px] text-gray-600">{typographieFr(p.label)}</p>
+                      {/* Valeur courte : seuls les petits mots sont soudés, elle peut passer
+                          sur deux lignes dans une carte étroite au lieu d'en déborder. */}
+                      <p className="mt-1.5 text-[22px] font-bold leading-tight tracking-[-0.015em] text-[#111] [overflow-wrap:anywhere] @xl:text-[20px]">
+                        {typographieFr(p.value)}
+                      </p>
                     </li>
                   ))}
                 </ul>
               </section>
-            )}
-
-            {/* Description */}
-            <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.06)] border border-black/4 p-6 sm:p-8">
-              <h2 className="text-[11px] uppercase tracking-[0.18em] text-gray-500 font-bold mb-4">
-                Présentation
-              </h2>
-              {/* Aligné à gauche : un texte justifié creuse des blancs autour des
-                  insécables qui tiennent les fins et débuts de phrase. */}
-              <p className="text-[16px] leading-relaxed text-foreground/90 text-pretty">
-                {paragrapheFr(enterprise.detailed_description || enterprise.description || '')}
-              </p>
-            </div>
-
-            {/* Key facts (complementaires si plus de 3) */}
-            {enterprise.key_facts && enterprise.key_facts.length > 3 && (
-              <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.06)] border border-black/4 p-6 sm:p-8">
-                <h2 className="text-[11px] uppercase tracking-[0.18em] text-gray-500 font-bold mb-4">
-                  Points clés
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {enterprise.key_facts.slice(3).map((fact, i) => (
-                    <div
-                      key={i}
-                      className="p-4 rounded-lg bg-secondary border border-black/5 border-l-2 border-l-gold"
-                    >
-                      <p className="text-[10px] uppercase tracking-widest mb-1 font-semibold text-gray-500">
-                        {fact.label}
-                      </p>
-                      <p className="text-[14px] font-medium text-foreground">
-                        {paragrapheFr(fact.value)}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Related articles */}
-            {relatedArticles.length > 0 && (
-              <div>
-                <div className="flex items-center gap-4 mb-6">
-                  <h2 className="text-lg font-bold">Articles liés</h2>
-                  <div className="flex-1 h-px bg-black/8" />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {relatedArticles.map((article) => (
-                    <ArticleCard key={article._id} article={article} />
-                  ))}
-                </div>
-              </div>
-            )}
+            ) : null}
           </div>
 
-          {/* Sidebar - Fiche d'identite */}
-          <div className="lg:col-span-1">
-            <div className="lg:sticky lg:top-[calc(var(--header-height)+1.5rem)] space-y-6">
-              {hasInfo && (
-                <div className="bg-white rounded-xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.06)] border border-black/4 p-6">
-                  <h2 className="text-[11px] uppercase tracking-[0.18em] text-gray-500 font-bold mb-3">
-                    Fiche d&apos;identité
-                  </h2>
-                  <div className="divide-y divide-black/5">
-                    {enterprise.headquarters && (
-                      <InfoRow
-                        icon={MapPin}
-                        label="Siège"
-                        value={enterprise.headquarters}
-                      />
-                    )}
-                    {enterprise.founded_year && (
-                      <InfoRow
-                        icon={Calendar}
-                        label="Fondation"
-                        value={String(enterprise.founded_year)}
-                      />
-                    )}
-                    {enterprise.employees && (
-                      <InfoRow
-                        icon={Users}
-                        label="Effectifs"
-                        value={enterprise.employees}
-                      />
-                    )}
-                    {enterprise.revenue && (
-                      <InfoRow
-                        icon={DollarSign}
-                        label="Chiffre d'affaires"
-                        value={enterprise.revenue}
-                      />
-                    )}
-                    {enterprise.website && (
-                      <div className="py-3">
-                        <a
-                          href={enterprise.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 text-[13px] font-bold text-foreground hover:text-foreground/70 transition-colors border-b-2 border-gold pb-0.5"
-                        >
-                          <Globe className="w-4 h-4" />
-                          Site officiel
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* CTA retour atlas */}
-              <div className="bg-[#0a0a0a] text-white rounded-xl p-6">
-                <p className="text-[13px] text-white/70 mb-3">
-                  {paragrapheFr('Les autres entreprises qui pèsent dans l\u2019économie du pays')}
-                </p>
-                <Link
-                  href="/niger#entreprises"
-                  className="inline-flex items-center gap-2 text-[13px] font-semibold text-gold hover:text-white transition-colors"
-                >
-                  Voir toutes les entreprises
-                  <ChevronRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </div>
-          </div>
+          {fiche.photo ? <PhotoFiche photo={fiche.photo} nom={fiche.nom} /> : null}
         </div>
+
+        {articles.length > 0 ? (
+          <section aria-labelledby="a-lire" className="mt-14 md:mt-16">
+            <h2 id="a-lire" className="text-[24px] font-bold tracking-[-0.01em] text-[#111]">
+              À lire
+            </h2>
+            <div className="mt-5 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {articles.map((article) => (
+                <ArticleCard key={article._id} article={article} />
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {autres.length > 0 ? (
+          <section aria-labelledby="autres-entreprises" className="mt-14 md:mt-16">
+            <h2 id="autres-entreprises" className="text-[24px] font-bold tracking-[-0.01em] text-[#111]">
+              Les autres entreprises
+            </h2>
+            <AutresEntreprises entreprises={autres} />
+          </section>
+        ) : null}
       </div>
     </div>
   );

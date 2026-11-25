@@ -217,10 +217,10 @@ export interface LienSousMenu {
  */
 export const SIMULATEURS_MENU: LienSousMenu[] = [
   { href: '/simulateurs/salaire', label: 'Salaire net', detail: 'Du brut au net, avec la CNSS et l\u2019ITS', premium: true },
-  { href: '/simulateurs/emprunt', label: 'Emprunt', detail: 'Mensualités, coût total et intérêts' },
+  { href: '/simulateurs/emprunt', label: 'Emprunt', detail: 'Mensualités, coût\u00a0total et intérêts' },
   { href: '/simulateurs/budget-familial', label: 'Budget familial', detail: 'La règle 50/30/20 au\u00a0Niger', premium: true },
-  { href: '/simulateurs/interets-composes', label: 'Intérêts composés', detail: 'L\u2019effet boule de neige de l\u2019épargne', premium: true },
-  { href: '/simulateurs/interets-simples', label: 'Intérêts simples', detail: 'Placement, épargne ou crédit court' },
+  { href: '/simulateurs/interets-composes', label: 'Intérêts composés', detail: 'L\u2019effet boule\u00a0de\u00a0neige de l\u2019épargne', premium: true },
+  { href: '/simulateurs/interets-simples', label: 'Intérêts simples', detail: 'Placement, épargne ou crédit\u00a0court' },
   { href: '/simulateurs/indices-economiques', label: 'Indices économiques', detail: 'PIB, inflation, taux de la\u00a0BCEAO' },
 ];
 

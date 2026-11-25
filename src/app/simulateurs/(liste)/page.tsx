@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { CategoryHero } from '@/components/CategoryHero';
 import { HubFooter } from '@/components/HubFooter';
-import { PracticalTools } from '@/components/PracticalTools';
+import { GrilleSimulateurs } from '@/components/simulateurs/GrilleSimulateurs';
+import { OffrePremiumSimulateurs } from '@/components/simulateurs/OffrePremiumSimulateurs';
 
 export const revalidate = 3600;
 
@@ -24,7 +25,11 @@ export default function SimulateursPage() {
         title="Simulateurs"
         description="Calculez un salaire, un emprunt, un budget ou les intérêts d'une épargne, en francs CFA."
       />
-      <PracticalTools avecEnTete={false} />
+      <section aria-labelledby="simulateurs-liste" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 md:pt-12 md:pb-24">
+        <h2 id="simulateurs-liste" className="sr-only">Les simulateurs</h2>
+        <GrilleSimulateurs />
+        <OffrePremiumSimulateurs className="mt-8" />
+      </section>
       <HubFooter
         paragraphs={[
           "Les simulateurs de NFI Report sont conçus spécifiquement pour le contexte économique du Niger et de la zone UEMOA. Que vous prépariez l'achat d'une voiture, le financement d'un projet immobilier, l'analyse de votre salaire ou la gestion de votre budget familial, ils vous donnent la réponse en quelques secondes.",

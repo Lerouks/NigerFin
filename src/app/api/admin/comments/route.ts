@@ -3,6 +3,7 @@ import { requireAdmin } from '@/lib/admin-auth';
 import { serverError } from '@/lib/api-error';
 import { isValidUUID, normalizeUuid } from '@/lib/validation';
 import { logAuditEvent } from '@/lib/audit';
+import { numeroDePage } from '@/lib/pagination';
 
 // GET: list all comments with article title, paginated
 export async function GET(request: NextRequest) {
@@ -13,7 +14,8 @@ export async function GET(request: NextRequest) {
   const url = request.nextUrl;
   const articleId = url.searchParams.get('article_id');
   const countOnly = url.searchParams.get('count_only');
-  const page = parseInt(url.searchParams.get('page') || '1') || 1;
+  // Une page négative donnait un décalage négatif, donc une erreur 500.
+  const page = numeroDePage(url.searchParams.get('page'));
   const limit = Math.min(parseInt(url.searchParams.get('limit') || '50') || 50, 100);
   const offset = (page - 1) * limit;
 

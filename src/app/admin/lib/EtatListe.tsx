@@ -43,9 +43,9 @@ export function EtatListe({
       <div role="alert" className="mx-auto max-w-lg text-center py-14 px-6">
         <Icone className={`w-8 h-8 mx-auto mb-4 ${horsLigne ? 'text-gray-400' : 'text-red-500'}`} />
         <p className="font-medium mb-2">
-          {horsLigne ? 'Connexion perdue' : "La liste n'a pas pu être chargée"}
+          {horsLigne ? 'Connexion perdue' : 'Le chargement a échoué'}
         </p>
-        <p className="text-sm text-gray-500 mb-6 leading-relaxed">{erreur}</p>
+        <p className="text-sm text-gray-500 mb-6 leading-relaxed text-balance">{erreur}</p>
         {onReessayer && (
           <button
             onClick={onReessayer}
@@ -63,7 +63,7 @@ export function EtatListe({
     return (
       <div className="text-center py-16 px-6">
         <Inbox className="w-8 h-8 mx-auto mb-4 text-gray-300" />
-        <p className="text-gray-500 text-sm mb-5">{texteVide}</p>
+        <p className="text-gray-500 text-sm mb-5 text-balance">{texteVide}</p>
         {actionVide}
       </div>
     );

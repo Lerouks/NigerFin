@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { appelAdmin } from '@/app/admin/lib/appel-admin';
 import { EtatListe } from '@/app/admin/lib/EtatListe';
 import { auteurDeLaLigne, type AuteurDuJournal } from '@/app/admin/lib/auteur-du-journal';
+import { actionDuJournal, ajouterLaSuite, typeDuJournal } from '@/app/admin/lib/libelles-du-journal';
 
 export interface AuditEntry extends AuteurDuJournal {
   id: string;
@@ -20,16 +21,23 @@ interface AuditResponse {
   total: number;
 }
 
+const SUITE_ABSENTE = "Le serveur n'a pas renvoyé la suite du journal. Réessayez dans un instant.";
+
 export function AuditTab() {
   const [auditLog, setAuditLog] = useState<AuditEntry[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState<string | null>(null);
   const [horsLigne, setHorsLigne] = useState(false);
+  const [suiteEnCours, setSuiteEnCours] = useState(false);
+  const [erreurSuite, setErreurSuite] = useState<string | null>(null);
 
   const fetchAuditLog = useCallback(async () => {
     setChargement(true);
     setErreur(null);
     setHorsLigne(false);
+    setErreurSuite(null);
 
     const resultat = await appelAdmin<AuditResponse>('/api/admin/audit');
 
@@ -50,10 +58,39 @@ export function AuditTab() {
     }
 
     setAuditLog(donnees.data);
+    setTotal(donnees.total);
+    setPage(1);
     setChargement(false);
   }, []);
 
   useEffect(() => { fetchAuditLog(); }, [fetchAuditLog]);
+
+  /**
+   * Les actions plus anciennes, 50 à la fois comme la route les donne. Avant le
+   * 25/11/2026, seules les 50 dernières s'affichaient, sans moyen de voir les autres.
+   */
+  const chargerLaSuite = async () => {
+    setSuiteEnCours(true);
+    setErreurSuite(null);
+    const resultat = await appelAdmin<AuditResponse>(`/api/admin/audit?page=${page + 1}`);
+    if (!resultat.ok) {
+      setErreurSuite(resultat.message);
+      setSuiteEnCours(false);
+      return;
+    }
+    const suite = resultat.donnees;
+    if (!suite || !Array.isArray(suite.data)) {
+      setErreurSuite(SUITE_ABSENTE);
+      setSuiteEnCours(false);
+      return;
+    }
+    const lignes = ajouterLaSuite(auditLog, suite.data);
+    setAuditLog(lignes);
+    // Une page vide arrête la suite, même si le total annoncé dit le contraire.
+    setTotal(suite.data.length === 0 ? lignes.length : Math.max(suite.total, lignes.length));
+    setPage(page + 1);
+    setSuiteEnCours(false);
+  };
 
   return (
     <div className="space-y-4">
@@ -67,7 +104,27 @@ export function AuditTab() {
         onReessayer={fetchAuditLog}
       />
 
-      {!chargement && !erreur && auditLog.length > 0 && <ListeDuJournal lignes={auditLog} />}
+      {!chargement && !erreur && auditLog.length > 0 && (
+        <>
+          <ListeDuJournal lignes={auditLog} />
+          {auditLog.length < total && (
+            <div className="flex flex-col items-center gap-2 pt-1">
+              <button
+                type="button"
+                onClick={chargerLaSuite}
+                disabled={suiteEnCours}
+                className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-black/10 bg-white px-4 text-sm font-medium text-foreground transition-colors hover:bg-gray-50 disabled:opacity-60"
+              >
+                {suiteEnCours ? 'Chargement…' : 'Voir les actions plus anciennes'}
+              </button>
+              <p className="text-[12px] text-gray-500">Vous voyez {auditLog.length} actions sur {total}.</p>
+              {erreurSuite && (
+                <p role="alert" className="text-[12px] text-red-600 text-center text-balance">{erreurSuite}</p>
+              )}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
@@ -93,7 +150,7 @@ export function ListeDuJournal({ lignes }: { lignes: AuditEntry[] }) {
             </div>
             <p className="mt-2 text-[12px] [overflow-wrap:anywhere]">{auteurDeLaLigne(entry)}</p>
             <p className="mt-0.5 line-clamp-2 text-[12px] text-gray-500 [overflow-wrap:anywhere]">
-              <span className="text-gray-600">{entry.entity_type}</span>{' '}
+              <span className="text-gray-600">{typeDuJournal(entry.entity_type)}</span>{' '}
               <span className="font-mono">{JSON.stringify(entry.details)}</span>
             </p>
           </li>
@@ -103,7 +160,7 @@ export function ListeDuJournal({ lignes }: { lignes: AuditEntry[] }) {
         <thead>
           <tr className="border-b border-black/4">
             <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Date</th>
-            <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Admin</th>
+            <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Auteur</th>
             <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Action</th>
             <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Type</th>
             <th className="text-left text-[11px] uppercase tracking-wider text-gray-500 px-4 py-3">Détails</th>
@@ -121,8 +178,9 @@ export function ListeDuJournal({ lignes }: { lignes: AuditEntry[] }) {
               <td className="px-4 py-3">
                 <AuditActionBadge action={entry.action} />
               </td>
-              <td className="px-4 py-3 text-[12px] text-gray-600">{entry.entity_type}</td>
-              <td className="px-4 py-3 text-[12px] text-gray-500 font-mono max-w-xs truncate">
+              <td className="px-4 py-3 text-[12px] text-gray-600 whitespace-nowrap">{typeDuJournal(entry.entity_type)}</td>
+              {/* Largeur nulle et pleine largeur : la colonne prend la place qui reste, sans jamais pousser le tableau hors de sa carte. */}
+                  <td className="px-4 py-3 text-[12px] text-gray-500 font-mono w-full max-w-0 truncate">
                 {JSON.stringify(entry.details)}
               </td>
             </tr>
@@ -134,47 +192,6 @@ export function ListeDuJournal({ lignes }: { lignes: AuditEntry[] }) {
 }
 
 function AuditActionBadge({ action }: { action: string }) {
-  const colors: Record<string, string> = {
-    verify_payment: 'bg-emerald-100 text-emerald-700',
-    reject_payment: 'bg-red-100 text-red-700',
-    change_role: 'bg-blue-100 text-blue-700',
-    block_user: 'bg-red-100 text-red-700',
-    unblock_user: 'bg-emerald-100 text-emerald-700',
-    activate_subscription: 'bg-purple-100 text-purple-700',
-    deactivate_subscription: 'bg-gray-100 text-gray-700',
-    subscription_expired: 'bg-orange-100 text-orange-700',
-    ipaymoney_payment_verified: 'bg-emerald-100 text-emerald-700',
-    ipaymoney_payment_failed: 'bg-red-100 text-red-700',
-    update_price: 'bg-amber-100 text-amber-700',
-    export_csv: 'bg-blue-100 text-blue-700',
-    export_xlsx: 'bg-blue-100 text-blue-700',
-    'corbeille.mise': 'bg-gray-100 text-gray-700',
-    'corbeille.restauration': 'bg-emerald-100 text-emerald-700',
-    'corbeille.suppression_definitive': 'bg-red-100 text-red-700',
-  };
-
-  const labels: Record<string, string> = {
-    verify_payment: 'Paiement validé',
-    reject_payment: 'Paiement rejeté',
-    change_role: 'Rôle modifié',
-    block_user: 'Utilisateur bloqué',
-    unblock_user: 'Utilisateur débloqué',
-    activate_subscription: 'Abo activé',
-    deactivate_subscription: 'Abo désactivé',
-    subscription_expired: 'Abo expiré (auto)',
-    ipaymoney_payment_verified: 'Paiement iPayMoney validé',
-    ipaymoney_payment_failed: 'Paiement iPayMoney refusé',
-    update_price: 'Prix modifié',
-    export_csv: 'Export CSV',
-    export_xlsx: 'Export Excel',
-    'corbeille.mise': 'Mis à la corbeille',
-    'corbeille.restauration': 'Restauré',
-    'corbeille.suppression_definitive': 'Supprimé définitivement',
-  };
-
-  return (
-    <span className={`text-[11px] px-2 py-1 rounded-sm ${colors[action] || 'bg-gray-100 text-gray-600'}`}>
-      {labels[action] || action}
-    </span>
-  );
+  const { libelle, couleur } = actionDuJournal(action);
+  return <span className={`whitespace-nowrap text-[11px] px-2 py-1 rounded-sm ${couleur}`}>{libelle}</span>;
 }

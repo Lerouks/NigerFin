@@ -22,9 +22,14 @@ export interface PaginatedResponse<T> {
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
 
+/** Numéro de page lu dans l'adresse : 1 par défaut, jamais moins de 1 (« abc », 0 et -1 donnent 1). */
+export function numeroDePage(valeur: string | null): number {
+  return Math.max(1, parseInt(valeur || '1', 10) || 1);
+}
+
 /** Parse page/limit from URL search params with safe defaults */
 export function parsePagination(searchParams: URLSearchParams): PaginationParams {
-  const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10) || 1);
+  const page = numeroDePage(searchParams.get('page'));
   const rawLimit = parseInt(searchParams.get('limit') || String(DEFAULT_LIMIT), 10) || DEFAULT_LIMIT;
   const limit = Math.min(Math.max(1, rawLimit), MAX_LIMIT);
   const offset = (page - 1) * limit;

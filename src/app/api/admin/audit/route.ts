@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { serverError } from '@/lib/api-error';
+import { numeroDePage } from '@/lib/pagination';
 
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin();
@@ -8,7 +9,8 @@ export async function GET(request: NextRequest) {
 
   const { serviceClient } = auth;
   const url = request.nextUrl;
-  const page = parseInt(url.searchParams.get('page') || '1');
+  // Une page invalide (« abc », 0, -1) donnait un décalage négatif ou NaN, donc une erreur 500.
+  const page = numeroDePage(url.searchParams.get('page'));
   const limit = 50;
   const offset = (page - 1) * limit;
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parsePagination, paginatedResponse } from '@/lib/pagination';
+import { parsePagination, paginatedResponse, numeroDePage } from '@/lib/pagination';
 
 describe('parsePagination', () => {
   it('returns defaults when no params provided', () => {
@@ -70,5 +70,20 @@ describe('paginatedResponse', () => {
     expect(result.pagination.total).toBe(0);
     expect(result.pagination.totalPages).toBe(0);
     expect(result.pagination.hasMore).toBe(false);
+  });
+});
+
+describe('numeroDePage', () => {
+  it('donne 1 par défaut, et jamais moins de 1', () => {
+    expect(numeroDePage(null)).toBe(1);
+    expect(numeroDePage('')).toBe(1);
+    expect(numeroDePage('abc')).toBe(1);
+    expect(numeroDePage('0')).toBe(1);
+    expect(numeroDePage('-3')).toBe(1);
+  });
+
+  it('lit un numéro valide, en entier', () => {
+    expect(numeroDePage('4')).toBe(4);
+    expect(numeroDePage('2.7')).toBe(2);
   });
 });

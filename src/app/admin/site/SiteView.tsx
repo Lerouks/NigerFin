@@ -29,6 +29,7 @@ import { useAdminApi, useAdminApiPolling } from '../hooks/useAdminApi';
 import { envoiAdmin } from '@/app/admin/lib/appel-admin';
 import { EtatListe } from '@/app/admin/lib/EtatListe';
 import { nomDansLeFil, type AuteurDuJournal } from '@/app/admin/lib/auteur-du-journal';
+import { actionDuJournal } from '@/app/admin/lib/libelles-du-journal';
 
 // ─── Types ────────────────────────────────────────────────────────────────
 
@@ -133,8 +134,8 @@ function SiteHeader() {
         Site
       </h1>
       <p className="text-[15px] text-foreground/60 mt-3 leading-relaxed max-w-[560px]">
-        La santé technique et les données référentielles qui alimentent NFI
-        Report.
+        <span className="whitespace-nowrap">Vous y suivez la santé du site</span>{' '}
+        <span className="whitespace-nowrap">et les données qui l’alimentent.</span>
       </p>
     </header>
   );
@@ -179,13 +180,14 @@ function HealthSection() {
               <p className="font-semibold leading-snug">
                 {horsLigne
                   ? 'Connexion perdue'
-                  : "Les contrôles de santé n'ont pas pu être relevés"}
+                  : 'Le relevé de santé a échoué'}
               </p>
               <p className="mt-1 leading-relaxed">{erreur}</p>
               <p className="mt-1 leading-relaxed opacity-75">
-                Les cartes ci-dessous datent du dernier relevé réussi, ou
-                restent inconnues. Nouvel essai automatique dans 60 secondes.
+                <span className="whitespace-nowrap">Les cartes affichées datent</span>{' '}
+                <span className="whitespace-nowrap">du dernier relevé réussi.</span>
               </p>
+              <p className="leading-relaxed opacity-75">On réessaie dans 60 secondes.</p>
               <button
                 type="button"
                 onClick={() => {
@@ -237,7 +239,7 @@ function HealthSection() {
         />
         <HealthCard
           icon={CreditCard}
-          label="Webhook iPayMoney"
+          label="iPayMoney"
           okLabel="Sain"
           warnLabel="À surveiller"
           errorLabel="Bloqué"
@@ -451,8 +453,6 @@ function ActivitySection() {
 
 function AuditRow({ entry }: { entry: AuditEntry }) {
   const visual = getAuditVisual(entry.action);
-  const adminLabel = nomDansLeFil(entry);
-  const entityLabel = formatEntity(entry.entity_type);
 
   return (
     <div className="flex items-center gap-3 bg-white border border-black/6 rounded-2xl p-3.5">
@@ -464,13 +464,15 @@ function AuditRow({ entry }: { entry: AuditEntry }) {
           aria-hidden="true"
         />
       </div>
+      {/* L'auteur, puis l'action sous le même libellé que le journal. Avant le
+          25/11/2026, une seule ligne tronquée cachait l'action sur téléphone
+          (« Système a agi sur un pa… ») et des mots restaient en anglais. */}
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-semibold leading-tight text-foreground truncate">
-          {adminLabel}
-          <span className="text-foreground/45 font-normal">
-            {' '}
-            {visual.verb} {entityLabel}
-          </span>
+        <p className="text-[13px] font-semibold leading-tight text-foreground [overflow-wrap:anywhere]">
+          {nomDansLeFil(entry)}
+        </p>
+        <p className="text-[13px] leading-tight text-foreground/55 mt-0.5">
+          {actionDuJournal(entry.action).libelle}
         </p>
         <p className="text-[11px] text-foreground/45 mt-0.5">
           {relativeTime(entry.created_at)}
@@ -511,7 +513,6 @@ function getAuditVisual(action: string): {
   icon: LucideIcon;
   bg: string;
   iconColor: string;
-  verb: string;
 } {
   const normalized = action.toLowerCase();
   if (normalized.includes('delete') || normalized.includes('remove')) {
@@ -519,7 +520,6 @@ function getAuditVisual(action: string): {
       icon: Trash2,
       bg: 'bg-red-500/10',
       iconColor: 'text-red-600',
-      verb: 'a supprimé',
     };
   }
   if (normalized.includes('create') || normalized.includes('add')) {
@@ -527,7 +527,6 @@ function getAuditVisual(action: string): {
       icon: Plus,
       bg: 'bg-[#00c805]/12',
       iconColor: 'text-[#00a004]',
-      verb: 'a créé',
     };
   }
   if (
@@ -539,7 +538,6 @@ function getAuditVisual(action: string): {
       icon: Pencil,
       bg: 'bg-[#8a8e95]/15',
       iconColor: 'text-[#8a8e95]',
-      verb: 'a modifié',
     };
   }
   if (normalized.includes('publish')) {
@@ -547,52 +545,13 @@ function getAuditVisual(action: string): {
       icon: FileText,
       bg: 'bg-foreground',
       iconColor: 'text-[#8a8e95]',
-      verb: 'a publié',
     };
   }
   return {
     icon: Settings,
     bg: 'bg-black/6',
     iconColor: 'text-foreground/70',
-    verb: 'a agi sur',
   };
-}
-
-function formatEntity(entity: string): string {
-  switch (entity) {
-    case 'article':
-      return 'un article';
-    case 'comment':
-      return 'un commentaire';
-    case 'user':
-      return 'un utilisateur';
-    case 'payment':
-    case 'payment_request':
-      return 'un paiement';
-    case 'newsletter':
-      return 'une newsletter';
-    case 'pricing':
-      return 'un tarif';
-    case 'market_data':
-      return 'une donnée marché';
-    case 'enterprise':
-      return 'une fiche entreprise';
-    case 'niger_presentation':
-      return 'la présentation Niger';
-    case 'site_features':
-      return 'la visibilité du site';
-    case 'education':
-      return 'un contenu éducation';
-    case 'legal':
-    case 'legal_section':
-      return 'une page légale';
-    case 'flash_banner':
-      return 'le flash info';
-    case 'cron':
-      return 'un cron job';
-    default:
-      return entity.replace(/_/g, ' ');
-  }
 }
 
 // ─── Reference data section ───────────────────────────────────────────────
@@ -601,7 +560,11 @@ interface ReferenceCard {
   href: string;
   icon: LucideIcon;
   title: string;
-  description: string;
+  /**
+   * Une phrase en deux groupes insécables : la ligne se coupe toujours entre
+   * les deux, jamais avant deux ou trois mots seuls (contrôle du 25/11/2026).
+   */
+  description: readonly [string, string];
 }
 
 function ReferenceDataSection() {
@@ -610,32 +573,31 @@ function ReferenceDataSection() {
       href: '/admin/site/marches',
       icon: LineChart,
       title: 'Marchés BRVM',
-      description:
-        'Indices, devises et matières premières affichés sur la home.',
+      description: ['Vous y réglez les indices, devises', 'et matières premières du site.'],
     },
     {
       href: '/admin/site/niger',
       icon: MapPin,
       title: 'Niger en chiffres',
-      description: 'Carte, faits clés et régions de la page présentation.',
+      description: ['Vous y réglez la carte, les régions', 'et les faits clés de la page Niger.'],
     },
     {
       href: '/admin/site/entreprises',
       icon: Building2,
       title: 'Entreprises stratégiques',
-      description: 'Fiches détaillées des champions économiques nigériens.',
+      description: ['Vous y gérez la fiche de chaque', 'grande entreprise du Niger.'],
     },
     {
       href: '/admin/site/visibilite',
       icon: Eye,
       title: 'Visibilité du site',
-      description: 'Activer ou couper le bandeau Marchés et autres modules.',
+      description: ['Vous y réglez le bandeau Marchés', 'et les autres modules du site.'],
     },
     {
       href: '/admin/site/journal',
       icon: Scroll,
       title: "Journal d'audit",
-      description: 'Toutes les actions admin tracées, paginées et filtrables.',
+      description: ['Vous y retrouvez chaque action', 'des admins et du système.'],
     },
   ];
 
@@ -663,7 +625,8 @@ function ReferenceDataSection() {
               {card.title}
             </p>
             <p className="text-[13px] text-foreground/55 leading-relaxed mt-1">
-              {card.description}
+              <span className="whitespace-nowrap">{card.description[0]}</span>{' '}
+              <span className="whitespace-nowrap">{card.description[1]}</span>
             </p>
           </Link>
         ))}
@@ -809,19 +772,21 @@ function MarketTickerInlineToggle() {
     }
   };
 
+  // Une phrase courte par état : la colonne ne fait que 128 px sur le plus
+  // petit iPhone, et les anciennes phrases y laissaient « pages. » seul.
   const sousTitre = !data
     ? erreurLecture
-      ? "État inconnu, il n'a pas pu être lu."
-      : "Chargement de l'état..."
+      ? 'Son état est illisible.'
+      : 'Chargement de l’état…'
     : doute
-      ? "État incertain, la dernière bascule n'a pas été confirmée."
+      ? 'Rien n’est confirmé.'
       : envoiEnCours
-        ? 'Enregistrement en cours...'
+        ? 'Enregistrement…'
         : erreurLecture
-          ? 'État non revérifié, réglage momentanément indisponible.'
+          ? 'Le réglage est bloqué.'
           : valeurLue
-            ? 'Visible en haut de toutes les pages.'
-            : "Désactivé, le site ne l'affiche pas.";
+            ? 'Il est visible partout.'
+            : 'Il est masqué partout.';
 
   return (
     <div className="mt-4">
@@ -831,7 +796,7 @@ function MarketTickerInlineToggle() {
         </div>
         <div className="flex-1 min-w-0">
           <p className="font-bold text-[14px] text-foreground leading-tight">
-            Bandeau Marchés BRVM
+            Bandeau Marchés
           </p>
           <p className="text-[11px] text-foreground/55 mt-0.5">{sousTitre}</p>
         </div>
@@ -844,7 +809,7 @@ function MarketTickerInlineToggle() {
           aria-pressed={etatConnu ? afficheActif : undefined}
           aria-label={
             !etatConnu
-              ? 'Bandeau Marchés BRVM : état inconnu, réglage indisponible'
+              ? 'Bandeau Marchés : état inconnu, réglage indisponible'
               : afficheActif
                 ? 'Désactiver le bandeau Marchés BRVM'
                 : 'Activer le bandeau Marchés BRVM'

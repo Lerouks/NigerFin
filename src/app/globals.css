@@ -984,11 +984,16 @@ html.nfi-printing-blocked .article-content--protected .article-content__body {
   display: none;
 }
 
-/* Réserve de l'espace en bas du body quand le bandeau cookies est visible sur mobile.
-   Sur desktop le bandeau est en bottom-right max-w-sm donc pas besoin. */
-@media (max-width: 639px) {
-  body.cookie-banner-visible {
-    padding-bottom: 200px;
-    transition: padding-bottom 0.3s ease-out;
-  }
+/* Bandeau des cookies (bande noire en bas de l'écran, sur toutes les tailles) :
+   la page garde en bas la hauteur exacte du bandeau, mesurée par CookieBanner,
+   pour que sa fin reste lisible au-dessus, et les boutons flottants remontent
+   d'autant au lieu de passer dessous. */
+body.cookie-banner-visible {
+  padding-bottom: var(--hauteur-bandeau-cookies, 0px);
+}
+body.cookie-banner-visible [data-flottant="remonter"] {
+  bottom: calc(var(--hauteur-bandeau-cookies, 0px) + 1.5rem);
+}
+body.cookie-banner-visible [data-flottant="civilite"] {
+  bottom: calc(var(--hauteur-bandeau-cookies, 0px) + 1rem);
 }

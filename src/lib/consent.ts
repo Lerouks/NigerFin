@@ -34,3 +34,20 @@ export function setConsent(value: ConsentValue): void {
 export function hasAcceptedConsent(): boolean {
   return getConsent() === 'accepted';
 }
+
+/** Événement qui rouvre le bandeau des cookies (lien « Choix des cookies » du pied de page). */
+export const OUVRIR_CHOIX_COOKIES = 'nfi:ouvrir-choix-cookies';
+
+/** Rouvre le bandeau des cookies, pour changer son choix à tout moment. */
+export function ouvrirChoixCookies(): void {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new Event(OUVRIR_CHOIX_COOKIES));
+}
+
+/**
+ * Vrai quand le lecteur retire un accord déjà donné. Il faut alors recharger la
+ * page : Sentry ne se lance qu'au chargement, et seulement après accord.
+ */
+export function retraitDAccord(avant: ConsentValue | null, apres: ConsentValue): boolean {
+  return avant === 'accepted' && apres === 'rejected';
+}

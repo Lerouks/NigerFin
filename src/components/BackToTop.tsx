@@ -34,6 +34,7 @@ export function BackToTop({ threshold = 600 }: BackToTopProps) {
       type="button"
       onClick={scrollUp}
       aria-label="Remonter en haut de la page"
+      data-flottant="remonter"
       tabIndex={visible ? 0 : -1}
       className={`fixed bottom-6 right-6 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-[#111] text-white shadow-[0_8px_30px_-6px_rgba(0,0,0,0.35)] transition-all duration-300 hover:bg-[#8a8e95] hover:scale-105 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#8a8e95] focus-visible:ring-offset-2 ${
         visible ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-3 pointer-events-none'

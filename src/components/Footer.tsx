@@ -4,6 +4,7 @@ import { Mail, Phone, MapPin } from 'lucide-react';
 import { Facebook, Twitter, Linkedin, Instagram, Youtube } from '@/components/icons/social';
 import { defaultSocialLinks, defaultContactEmail } from '@/lib/site-data';
 import { FOOTER_ENTRIES } from '@/lib/navigation';
+import { BoutonChoixCookies } from '@/components/BoutonChoixCookies';
 
 function TikTokIcon({ className }: { className?: string }) {
   return (
@@ -159,8 +160,9 @@ export function Footer() {
             {/* Pleine largeur sur téléphone : sans cela, Safari calcule la largeur de
                 la rangée sans ses espacements et renvoie « Plan du site » à la ligne. */}
             <div className="flex w-full flex-wrap gap-x-6 gap-y-2 md:w-auto">
-              {/* Deux paires : sur un écran de 320 px, les liens passent deux par deux
-                  au lieu de laisser « Plan du site » seul sur sa ligne. */}
+              {/* Deux groupes : sur un écran de 320 px, les liens passent par trois
+                  puis par deux, au lieu de laisser « Plan du site » seul sur sa ligne.
+                  « Choix des cookies » rouvre le bandeau pour changer d'avis. */}
               <span className="flex gap-x-6">
                 <Link href="/confidentialite" className="hover:text-white/50 transition-colors">
                   Confidentialité
@@ -168,6 +170,7 @@ export function Footer() {
                 <Link href="/cookies" className="hover:text-white/50 transition-colors">
                   Cookies
                 </Link>
+                <BoutonChoixCookies className="cursor-pointer whitespace-nowrap hover:text-white/50 transition-colors" />
               </span>
               <span className="flex gap-x-6">
                 <Link href="/cgu" className="hover:text-white/50 transition-colors">

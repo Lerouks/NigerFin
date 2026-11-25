@@ -108,6 +108,7 @@ export function CivilityPrompt() {
   return (
     <aside
       aria-label="Indiquer votre civilité"
+      data-flottant="civilite"
       className="fixed bottom-4 right-4 z-50 max-w-sm bg-white rounded-2xl shadow-[0_10px_60px_-10px_rgba(0,0,0,0.18)] border border-black/6 p-5 animate-fade-in-up"
     >
       <div className="flex items-start gap-3 mb-3">

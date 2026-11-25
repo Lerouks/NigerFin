@@ -251,7 +251,8 @@ function textesDuBloc(n: Element, sortie: Texte[] = []): Texte[] {
 /**
  * Soude chaque mot-outil au mot qui le suit sur le texte entier du bloc, même à
  * travers le gras ou un lien (« des **actions** »), puis remet chaque morceau à
- * sa place : seules des espaces deviennent insécables, la longueur ne bouge pas.
+ * sa place : seules des espaces deviennent insécables et des apostrophes
+ * droites typographiques, la longueur ne bouge pas.
  *
  * Les fins et débuts de phrase ne se soudent pas ici : un bloc soudé de trente
  * caractères laisse un mot seul sur la ligne d'avant dans une colonne de
@@ -260,7 +261,13 @@ function textesDuBloc(n: Element, sortie: Texte[] = []): Texte[] {
 function souderBloc(n: Element): void {
   const textes = textesDuBloc(n);
   if (textes.length === 0) return;
-  const entier = textes.map((t) => t.value).join('');
+  // L'apostrophe devant un gras ou un lien (« l'**indice** ») restait droite :
+  // la typographie de l'étape 5 ne voit qu'un texte à la fois. Sur le bloc
+  // entier, elle redevient typographique (un caractère pour un autre).
+  const entier = textes
+    .map((t) => t.value)
+    .join('')
+    .replace(/(\p{L})['\u02bc](?=\p{L})/gu, '$1\u2019');
   const soude = souderMotsOutils(entier);
   if (soude.length !== entier.length) return;
   let position = 0;

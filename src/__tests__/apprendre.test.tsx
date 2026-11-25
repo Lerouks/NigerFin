@@ -166,6 +166,14 @@ describe('corps d’une leçon', () => {
     expect(html).toContain('chaque matin très tôt.');
   });
 
+  it('l’apostrophe devant un gras ou un lien devient typographique', () => {
+    // Vu en production le 25/11/2026 : « avec l'indice des prix » gardait une apostrophe droite.
+    const html = rendu("Elle se mesure avec l'**indice des prix** et d'[autres outils](/apprendre).");
+    expect(html).toContain('l’<strong>indice');
+    expect(html).toContain('d’<a href="/apprendre">autres');
+    expect(html).not.toContain("'");
+  });
+
   it('un lien « //autre-site » est refusé, un faux nfireport.com reste externe', () => {
     const md = 'Voir [ce site](//exemple.org/page) et [cet autre](https://nfireport.com.exemple.org/x).';
     const html = rendu(md);

@@ -59,7 +59,7 @@ export interface LeconComplete extends LeconResume {
   suivante: LeconResume | null;
 }
 
-interface LigneLecon {
+export interface LigneLecon {
   id: string;
   category_id: string;
   slug: string | null;
@@ -72,12 +72,27 @@ interface LigneLecon {
   quiz: unknown;
 }
 
-interface LigneCours {
+export interface LigneCours {
   id: string;
   slug: string;
   title: string;
   description: string | null;
   sort_order: number;
+  /** Nom d'une icône lucide (BookOpen, TrendingUp…), choisi dans l'administration. */
+  icon: string | null;
+}
+
+/**
+ * Un thème de la page d'entrée : tous les thèmes disponibles, ouverts ou non.
+ * Un thème ouvert a son cours (au moins une leçon publiée) ; un thème encore
+ * vide reste affiché, grisé, avec « En préparation ».
+ */
+export interface Theme {
+  id: string;
+  slug: string;
+  titre: string;
+  icone: string;
+  cours: Cours | null;
 }
 
 /** Chemin d'une leçon. */
@@ -108,7 +123,7 @@ async function lireTout(): Promise<{ cours: LigneCours[]; lecons: LigneLecon[] }
   const [cours, lecons] = await Promise.all([
     service
       .from('education_categories')
-      .select('id, slug, title, description, sort_order')
+      .select('id, slug, title, description, sort_order, icon')
       .eq('available', true)
       .order('sort_order'),
     service
@@ -169,6 +184,28 @@ export const getCours = unstable_cache(
     return assembler(cours, lecons, Date.now());
   },
   ['apprendre-cours-v1'],
+  { revalidate: 3600, tags: [APPRENDRE_CACHE_TAG] },
+);
+
+/** Les thèmes dans leur ordre, chacun avec son cours s'il a au moins une leçon publiée. */
+export function assemblerThemes(lignesCours: LigneCours[], lignesLecons: LigneLecon[], maintenant: number): Theme[] {
+  const ouverts = assembler(lignesCours, lignesLecons, maintenant);
+  return lignesCours.map((c) => ({
+    id: c.id,
+    slug: c.slug,
+    titre: c.title,
+    icone: c.icon || 'BookOpen',
+    cours: ouverts.find((o) => o.id === c.id) ?? null,
+  }));
+}
+
+/** Tous les thèmes de la page d'entrée, ouverts ou en préparation. */
+export const getThemes = unstable_cache(
+  async (): Promise<Theme[]> => {
+    const { cours, lecons } = await lireTout();
+    return assemblerThemes(cours, lecons, Date.now());
+  },
+  ['apprendre-themes-v1'],
   { revalidate: 3600, tags: [APPRENDRE_CACHE_TAG] },
 );
 

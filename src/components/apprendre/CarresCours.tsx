@@ -8,9 +8,8 @@ import { AjusteurLignes } from './AjusteurLignes';
 import { leconDeDepart, useProgression } from './progression';
 
 /**
- * Un cours en carrés noirs, comme les cases de l'ancienne page Apprendre
- * (choix de Raouf, 25/11/2026) : le grand carré du cours, puis un carré par
- * leçon, dans l'ordre. Le carré blanc montre où commencer, ou reprendre pour
+ * La page d'un cours en carrés noirs (choix de Raouf, 25/11/2026) : le grand
+ * carré du cours, puis un carré par leçon, dans l'ordre. Le carré blanc montre où commencer, ou reprendre pour
  * un lecteur connecté ; une leçon lue jusqu'au bout est cochée.
  */
 export function CarresCours({ cours, titrePrincipal = false }: { cours: Cours; titrePrincipal?: boolean }) {
@@ -26,10 +25,24 @@ export function CarresCours({ cours, titrePrincipal = false }: { cours: Cours; t
       ? `Reprendre : leçon ${depart.lecon.numero}`
       : 'Commencer le cours';
   const cible = toutLu ? cours.lecons[0]!.href : (depart?.lecon.href ?? cours.href);
+  // Un petit cours (une à trois leçons) tient sur une seule rangée : le carré du
+  // cours sur deux colonnes, ses leçons à côté, à la même hauteur.
+  const petit = total <= 3;
+  const grille =
+    total === 1
+      ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-3'
+      : total === 2
+        ? 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4'
+        : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5';
+  const blocCours = petit
+    ? total === 2
+      ? 'col-span-2 lg:col-span-2'
+      : 'col-span-2 sm:col-span-3 lg:col-span-2'
+    : 'col-span-2 sm:col-span-3 lg:col-span-2 lg:row-span-2';
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3 lg:gap-3.5">
-      <div className="col-span-2 sm:col-span-3 lg:col-span-2 lg:row-span-2 flex flex-col justify-between gap-10 rounded-[14px] bg-[#111] text-white p-6 sm:p-7 lg:p-8 min-h-[260px]">
+    <div className={`grid ${grille} gap-2.5 sm:gap-3 lg:gap-3.5`}>
+      <div className={`${blocCours} flex flex-col justify-between gap-10 rounded-[14px] bg-[#111] text-white p-6 sm:p-7 lg:p-8 min-h-[260px]`}>
         <div className="flex items-start justify-between gap-4 text-[13px] text-white/55 tabular-nums">
           <span>Cours {cours.numero}</span>
           <span className="text-right">
@@ -66,7 +79,7 @@ export function CarresCours({ cours, titrePrincipal = false }: { cours: Cours; t
         const dernier = i === total - 1;
         // Une leçon seule sur la dernière rangée prend toute la largeur, jamais un carré orphelin.
         const seuleTelephone = dernier && total % 2 === 1;
-        const seuleTablette = dernier && total % 3 === 1;
+        const seuleTablette = dernier && total !== 2 && total % 3 === 1;
         const etat = estDepart
           ? depart?.reprise
             ? 'Reprendre'
@@ -91,10 +104,19 @@ export function CarresCours({ cours, titrePrincipal = false }: { cours: Cours; t
             href={lecon.href}
             aria-label={descriptionAccessible}
             className={[
-              'group flex flex-col justify-between rounded-[14px] p-4 sm:p-5 transition-colors',
+              'group flex flex-col justify-between rounded-[14px] p-4 sm:p-5 max-[359px]:p-3 transition-colors',
               'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111]',
-              seuleTelephone ? 'col-span-2 min-h-[150px] sm:col-span-1 sm:min-h-0 sm:aspect-square' : 'aspect-square',
-              seuleTablette ? 'sm:col-span-3 sm:aspect-auto sm:min-h-[150px] lg:col-span-1 lg:aspect-square lg:min-h-0' : '',
+              seuleTelephone ? 'col-span-2 min-h-[150px]' : 'aspect-square',
+              seuleTablette
+                ? 'sm:col-span-3 sm:aspect-auto sm:min-h-[150px]'
+                : seuleTelephone
+                  ? 'sm:col-span-1 sm:min-h-0 sm:aspect-square'
+                  : '',
+              petit
+                ? 'lg:col-span-1 lg:aspect-auto lg:min-h-0'
+                : seuleTelephone || seuleTablette
+                  ? 'lg:col-span-1 lg:min-h-0 lg:aspect-square'
+                  : '',
               estDepart
                 ? 'bg-white text-[#111] border border-black/12 hover:bg-[#f4f4f5]'
                 : 'bg-[#111] text-white border border-[#111] hover:bg-[#1d1d1d]',
@@ -102,7 +124,7 @@ export function CarresCours({ cours, titrePrincipal = false }: { cours: Cours; t
           >
             <span className="flex items-start justify-between gap-2" aria-hidden="true">
               <span
-                className={`text-[24px] sm:text-[28px] font-medium leading-none tracking-[-0.02em] tabular-nums ${
+                className={`text-[24px] sm:text-[28px] max-[359px]:text-[20px] font-medium leading-none tracking-[-0.02em] tabular-nums ${
                   estDepart ? 'text-black/25' : lue ? 'text-white/25' : 'text-white/35'
                 }`}
               >

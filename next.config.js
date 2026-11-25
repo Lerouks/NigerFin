@@ -83,6 +83,16 @@ const nextConfig = {
         destination: '/apprendre/:cours',
         permanent: true,
       },
+      // Simulateurs prend son adresse le 25/11/2026 (choix de Raouf, avant
+      // l'ouverture du site) : /outils devient /simulateurs, et chaque simulateur
+      // une adresse courte. Les adresses changées d'abord, puis les autres.
+      { source: '/outils', destination: '/simulateurs', permanent: true },
+      { source: '/outil', destination: '/simulateurs', permanent: true },
+      { source: '/outil/simulateur-salaire', destination: '/simulateurs/salaire', permanent: true },
+      { source: '/outil/simulateur-emprunt', destination: '/simulateurs/emprunt', permanent: true },
+      { source: '/outil/interet-compose', destination: '/simulateurs/interets-composes', permanent: true },
+      { source: '/outil/interet-simple', destination: '/simulateurs/interets-simples', permanent: true },
+      { source: '/outil/:slug', destination: '/simulateurs/:slug', permanent: true },
     ];
   },
   async headers() {

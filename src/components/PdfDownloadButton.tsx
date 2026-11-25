@@ -9,11 +9,11 @@ import { useAuth } from '@/lib/auth-context';
 import type { PdfExportOptions } from '@/hooks/usePdfExport';
 import { usePdfExport } from '@/hooks/usePdfExport';
 
-/** Extrait le slug d'outil depuis l'URL courante (ex: /outil/simulateur-emprunt -> simulateur-emprunt). */
+/** Extrait le slug du simulateur depuis l'URL courante (ex : /simulateurs/emprunt -> emprunt). */
 function extractToolSlug(pathname: string | null): string {
-  if (!pathname) return 'outil';
-  const match = pathname.match(/\/outil\/([^/?#]+)/);
-  return match?.[1] ?? 'outil';
+  if (!pathname) return 'simulateur';
+  const match = pathname.match(/\/simulateurs\/([^/?#]+)/);
+  return match?.[1] ?? 'simulateur';
 }
 
 interface PdfDownloadButtonProps {

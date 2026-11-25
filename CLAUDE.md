@@ -21,7 +21,7 @@ Tests live in `src/__tests__/*.test.ts` and match the pattern `src/**/*.test.ts`
 
 **Stack:** Next.js 16 (App Router, webpack build forcé via `--webpack` car Sentry v8 pas encore compatible Turbopack), React 19, Supabase (auth + DB + Storage), iPayMoney (payments Mobile Money & carte), Tailwind CSS 3, TipTap (rich text editor), Recharts, Sentry, PostHog analytics, Resend (transactional email + newsletter envoi self-hosted), React-PDF (génération PDF facture).
 
-**Routing:** French-language routes under `src/app/` — e.g., `/articles`, `/economie`, `/finance`, `/marches`, `/niger`, `/education`, `/entreprises`, `/outils`, `/compte`, `/paiement`, `/pricing`, `/admin`. Auth routes use a route group `(auth)/` with `/connexion` and `/inscription`.
+**Routing:** French-language routes under `src/app/` — e.g., `/articles`, `/economie`, `/finance`, `/marches`, `/niger`, `/education`, `/entreprises`, `/simulateurs`, `/compte`, `/paiement`, `/pricing`, `/admin`. Auth routes use a route group `(auth)/` with `/connexion` and `/inscription`.
 
 **API Routes:** Extensive API at `src/app/api/` covering: articles, auth, comments, contact, cron jobs, discussions, education, flash-banner, ipaymoney, legal-sections, likes, market-data, newsletter, payment, paywall, prices, site-settings, tools, user profile, and admin operations.
 

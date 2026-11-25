@@ -10,6 +10,9 @@
  * silencieuse. Tout se declare desormais ICI, une seule fois.
  *
  * REGLE D'OR : on renomme des LIBELLES, jamais des CHEMINS.
+ * Deux exceptions datées, décidées par Raouf le 25/11/2026 avant l'ouverture du
+ * site au public : /apprendre (ex-/education) et /simulateurs (ex-/outils et
+ * /outil/*). Les anciennes adresses renvoient vers les nouvelles (next.config.js).
  * Aucune URL existante ne doit changer, aucune redirection n'est a ecrire. Les
  * `path` ci-dessous sont figes ; seuls les `label` sont du ressort editorial.
  */
@@ -109,13 +112,15 @@ export const NAVIGATION: NavigationEntry[] = [
     isEditorial: true,
   },
   {
-    // Libelle change (« Outils » devient « Simulateurs »), CHEMIN INCHANGE.
+    // « Outils » devient « Simulateurs » : le libellé le 24/11/2026, l'adresse le
+    // 25/11/2026 (/outils renvoie vers /simulateurs, choix de Raouf). La clé reste
+    // « outils » : elle est enregistrée en base.
     // Hub de simulateurs, pas une rubrique sous laquelle classer un article :
     // isEditorial reste false, ce qui etait deja le cas de fait, mais par
     // omission silencieuse plutot que par declaration explicite.
     key: 'outils',
     label: 'Simulateurs',
-    path: '/outils',
+    path: '/simulateurs',
     order: 5,
     register: 'agir',
     inNav: true,
@@ -207,16 +212,16 @@ export interface LienSousMenu {
 
 /**
  * Les six simulateurs, dans l'ordre de la liste déroulante. Leurs pages vivent
- * dans src/app/outil/[slug] (à ne jamais modifier) : un test vérifie que cette
+ * dans src/app/simulateurs/[slug] (calculs à ne jamais modifier) : un test vérifie que cette
  * liste reprend exactement leurs adresses et leur statut Premium.
  */
 export const SIMULATEURS_MENU: LienSousMenu[] = [
-  { href: '/outil/simulateur-salaire', label: 'Salaire net', detail: 'Du brut au net, avec la CNSS et l\u2019ITS', premium: true },
-  { href: '/outil/simulateur-emprunt', label: 'Emprunt', detail: 'Mensualités, coût total et intérêts' },
-  { href: '/outil/budget-familial', label: 'Budget familial', detail: 'La règle 50/30/20 au\u00a0Niger', premium: true },
-  { href: '/outil/interet-compose', label: 'Intérêts composés', detail: 'L\u2019effet boule de neige de l\u2019épargne', premium: true },
-  { href: '/outil/interet-simple', label: 'Intérêts simples', detail: 'Placement, épargne ou crédit court' },
-  { href: '/outil/indices-economiques', label: 'Indices économiques', detail: 'PIB, inflation, taux de la\u00a0BCEAO' },
+  { href: '/simulateurs/salaire', label: 'Salaire net', detail: 'Du brut au net, avec la CNSS et l\u2019ITS', premium: true },
+  { href: '/simulateurs/emprunt', label: 'Emprunt', detail: 'Mensualités, coût total et intérêts' },
+  { href: '/simulateurs/budget-familial', label: 'Budget familial', detail: 'La règle 50/30/20 au\u00a0Niger', premium: true },
+  { href: '/simulateurs/interets-composes', label: 'Intérêts composés', detail: 'L\u2019effet boule de neige de l\u2019épargne', premium: true },
+  { href: '/simulateurs/interets-simples', label: 'Intérêts simples', detail: 'Placement, épargne ou crédit court' },
+  { href: '/simulateurs/indices-economiques', label: 'Indices économiques', detail: 'PIB, inflation, taux de la\u00a0BCEAO' },
 ];
 
 /** Cours et premières leçons de la liste déroulante « Apprendre », lus en base côté serveur. */

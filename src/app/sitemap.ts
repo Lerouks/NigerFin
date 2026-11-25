@@ -72,14 +72,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const toolPages: MetadataRoute.Sitemap = [
-    'simulateur-emprunt',
-    'interet-simple',
-    'interet-compose',
-    'simulateur-salaire',
+    'emprunt',
+    'interets-simples',
+    'interets-composes',
+    'salaire',
     'indices-economiques',
     'budget-familial',
   ].map((slug) => ({
-    url: `${SITE_URL}/outil/${slug}`,
+    url: `${SITE_URL}/simulateurs/${slug}`,
     lastModified: new Date(),
     changeFrequency: 'monthly',
     priority: 0.7,

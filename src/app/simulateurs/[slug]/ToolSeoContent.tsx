@@ -6,13 +6,13 @@ interface ToolSeoBlock {
 }
 
 const SEO_CONTENT: Record<string, ToolSeoBlock> = {
-  'simulateur-emprunt': {
+  'emprunt': {
     intro:
       "Que vous prépariez l'achat d'un véhicule, le financement d'un projet immobilier à Niamey ou un crédit à la consommation auprès d'une banque locale (SONIBANK, BOA Niger, Ecobank Niger, BAGRI, Banque Atlantique), simuler votre emprunt avant de signer est essentiel. Ce simulateur calcule vos mensualités, le coût total du crédit et la part des intérêts en quelques secondes, à partir des trois variables clés : le montant emprunté, la durée et le taux d'intérêt.",
     howItWorks: {
       title: 'Comment fonctionne le simulateur',
       body:
-        "L'outil applique la formule classique du crédit amortissable à mensualités constantes. La mensualité est calculée à partir du capital emprunté, du taux mensuel (taux annuel divisé par 12) et du nombre total de mensualités. Vous obtenez immédiatement le détail de chaque versement et la décomposition entre capital remboursé et intérêts payés sur toute la durée du prêt.",
+        "Le simulateur applique la formule classique du crédit amortissable à mensualités constantes. La mensualité est calculée à partir du capital emprunté, du taux mensuel (taux annuel divisé par 12) et du nombre total de mensualités. Vous obtenez immédiatement le détail de chaque versement et la décomposition entre capital remboursé et intérêts payés sur toute la durée du prêt.",
     },
     context: {
       title: 'Contexte du crédit au Niger',
@@ -30,7 +30,7 @@ const SEO_CONTENT: Record<string, ToolSeoBlock> = {
       ],
     },
   },
-  'interet-simple': {
+  'interets-simples': {
     intro:
       "L'intérêt simple est le mécanisme financier le plus basique et le plus utilisé pour les placements de courte durée, les bons du Trésor BCEAO, les comptes sur livret bancaires et certains crédits à très court terme. Contrairement à l'intérêt composé, les intérêts générés ne se réinvestissent pas dans le capital, ce qui rend le calcul prévisible et linéaire dans le temps.",
     howItWorks: {
@@ -53,9 +53,9 @@ const SEO_CONTENT: Record<string, ToolSeoBlock> = {
       ],
     },
   },
-  'interet-compose': {
+  'interets-composes': {
     intro:
-      "L'intérêt composé est l'un des mécanismes les plus puissants en finance personnelle : les intérêts générés s'ajoutent au capital et produisent à leur tour des intérêts, créant un effet de levier exponentiel sur le long terme. C'est ce qu'Albert Einstein qualifiait de huitième merveille du monde. Cet outil simule la croissance de votre capital sur la durée de votre choix.",
+      "L'intérêt composé est l'un des mécanismes les plus puissants en finance personnelle : les intérêts générés s'ajoutent au capital et produisent à leur tour des intérêts, créant un effet de levier exponentiel sur le long terme. C'est ce qu'Albert Einstein qualifiait de huitième merveille du monde. Ce simulateur calcule la croissance de votre capital sur la durée de votre choix.",
     howItWorks: {
       title: 'La formule de l\'intérêt composé',
       body:
@@ -77,9 +77,9 @@ const SEO_CONTENT: Record<string, ToolSeoBlock> = {
       ],
     },
   },
-  'simulateur-salaire': {
+  'salaire': {
     intro:
-      "Comprendre la décomposition de son salaire au Niger est essentiel avant toute négociation salariale, signature de contrat ou changement d'employeur. Cet outil estime votre salaire net mensuel à partir du brut, en intégrant les cotisations CNSS, l'impôt sur les traitements et salaires (ITS) et les autres prélèvements sociaux applicables selon la réglementation nigérienne en vigueur.",
+      "Comprendre la décomposition de son salaire au Niger est essentiel avant toute négociation salariale, signature de contrat ou changement d'employeur. Ce simulateur estime votre salaire net mensuel à partir du brut, en intégrant les cotisations CNSS, l'impôt sur les traitements et salaires (ITS) et les autres prélèvements sociaux applicables selon la réglementation nigérienne en vigueur.",
     howItWorks: {
       title: 'Calcul du salaire net au Niger',
       body:
@@ -103,7 +103,7 @@ const SEO_CONTENT: Record<string, ToolSeoBlock> = {
   },
   'indices-economiques': {
     intro:
-      "Suivre les indicateurs économiques clés du Niger et de la zone UEMOA est essentiel pour comprendre la conjoncture, anticiper les évolutions de prix, prendre des décisions d'investissement éclairées et ajuster sa stratégie financière personnelle ou professionnelle. Cet outil regroupe les principaux indices publiés par la BCEAO, l'INS Niger et les institutions internationales.",
+      "Suivre les indicateurs économiques clés du Niger et de la zone UEMOA est essentiel pour comprendre la conjoncture, anticiper les évolutions de prix, prendre des décisions d'investissement éclairées et ajuster sa stratégie financière personnelle ou professionnelle. Cette page regroupe les principaux indices publiés par la BCEAO, l'INS Niger et les institutions internationales.",
     howItWorks: {
       title: 'Les indicateurs disponibles',
       body:
@@ -127,7 +127,7 @@ const SEO_CONTENT: Record<string, ToolSeoBlock> = {
   },
   'budget-familial': {
     intro:
-      "Construire un budget familial structuré est la première étape d'une gestion financière saine, en particulier dans un contexte où le coût de la vie à Niamey et dans les autres villes nigériennes évolue. Cet outil vous aide à analyser vos revenus, catégoriser vos dépenses, calculer votre taux d'épargne et identifier les postes où réaliser des économies sans sacrifier votre qualité de vie.",
+      "Construire un budget familial structuré est la première étape d'une gestion financière saine, en particulier dans un contexte où le coût de la vie à Niamey et dans les autres villes nigériennes évolue. Ce simulateur vous aide à analyser vos revenus, catégoriser vos dépenses, calculer votre taux d'épargne et identifier les postes où réaliser des économies sans sacrifier votre qualité de vie.",
     howItWorks: {
       title: 'La méthode 50/30/20 adaptée au Niger',
       body:

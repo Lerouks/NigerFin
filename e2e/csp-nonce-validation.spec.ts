@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test';
  * - L'interactivite est preservee (bouton clickable)
  */
 test.describe('CSP nonce-based en prod local', () => {
-  const pages = ['/', '/articles', '/inscription', '/pricing', '/outil/simulateur-emprunt', '/connexion'];
+  const pages = ['/', '/articles', '/inscription', '/pricing', '/simulateurs/emprunt', '/connexion'];
 
   for (const path of pages) {
     test(`${path} : 0 erreur console + 0 CSP violation`, async ({ page }) => {

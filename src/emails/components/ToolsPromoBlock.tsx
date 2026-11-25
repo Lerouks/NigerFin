@@ -5,11 +5,11 @@ import { colors, fonts, fontSizes, lineHeights } from './tokens';
 export interface ToolPromoItem {
   /** Emoji ou icône courte. */
   emoji?: string;
-  /** Titre court de l'outil (ex: "Simulateur emprunt BRVM"). */
+  /** Titre court du simulateur (ex : "Simulateur d'emprunt"). */
   title: string;
   /** 1 ligne d'accroche pour le contexte. */
   description: string;
-  /** URL absolue du simulateur sur le site (ex: https://nfireport.com/outil/simulateur-emprunt). */
+  /** URL absolue du simulateur sur le site (ex : https://nfireport.com/simulateurs/emprunt). */
   url: string;
 }
 
@@ -22,12 +22,12 @@ export interface ToolsPromoBlockProps {
 }
 
 /**
- * Bloc "VOS OUTILS PREMIUM" : promotion des simulateurs et calculateurs financiers
+ * Bloc "VOS SIMULATEURS PREMIUM" : promotion des simulateurs financiers
  * NFI Report directement dans la newsletter. Style card list horizontale.
  */
 export function ToolsPromoBlock({
   sectionNumeral,
-  eyebrow = 'Vos outils Premium',
+  eyebrow = 'Vos simulateurs Premium',
   title = 'Mettez vos analyses en chiffres',
   caption,
   items,

@@ -13,7 +13,7 @@ const PAGES = [
   { name: 'niger', path: '/niger' },
   { name: 'education', path: '/education' },
   { name: 'entreprises', path: '/entreprises' },
-  { name: 'outils', path: '/outils' },
+  { name: 'simulateurs', path: '/simulateurs' },
   { name: 'connexion', path: '/connexion' },
   { name: 'inscription', path: '/inscription' },
 ];

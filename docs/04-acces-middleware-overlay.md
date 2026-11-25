@@ -235,4 +235,4 @@ Les categories (economie, finance, marches, niger, education, entreprises) sont 
 
 Il n'y a PAS de regle d'acces par categorie. L'acces depend uniquement de content_type (free/premium) x userRole (reader/premium/admin).
 
-Exception : les outils (/outils) ont leur propre flag isPremiumTool verifie via canAccessTool().
+Exception : les simulateurs (/simulateurs) ont leur propre flag isPremiumTool verifie via canAccessTool().

@@ -229,11 +229,18 @@ export function fiche(lignes: Array<[string, string]>): string {
 }
 
 /** Liste numérotée (numéro gris, titre, texte, lien), séparée par des filets fins. */
+/**
+ * Longueur maximale de la fin soudée d'un texte de liste numérotée. Les zones
+ * modifiables des e-mails (slots.ts) reprennent la même valeur : sinon le texte
+ * cherché dans le HTML n'est plus celui qui y est écrit.
+ */
+export const PLAFOND_LISTE = 28;
+
 export function listeNumerotee(items: Array<{ titre: string; texte: string; lien?: [string, string] }>): string {
   const r = items.map((it, i) => `<tr><td style="padding:20px 0 0;">${filet()}</td></tr><tr><td style="padding:18px 0 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>`
     + `<td valign="top" width="32" class="c-num" style="width:32px;font-family:${TITRE};font-size:18px;line-height:24px;font-weight:700;color:${C.num};">${i + 1}</td>`
     + `<td valign="top"><p class="c-encre" style="margin:0;font-family:${TITRE};font-size:18px;line-height:24px;font-weight:700;letter-spacing:-0.01em;color:${C.encre};">${titreTypo(it.titre)}</p>`
-    + para(it.texte, { taille: 15, hauteur: 24, marge: '6px 0 0', plafond: 28 })
+    + para(it.texte, { taille: 15, hauteur: 24, marge: '6px 0 0', plafond: PLAFOND_LISTE })
     + (it.lien ? lienFleche(it.lien[0], it.lien[1]) : '')
     + `</td></tr></table></td></tr>`).join('');
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0">${r}</table>`;

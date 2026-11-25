@@ -12,7 +12,7 @@
  */
 
 const AVANTAGES_PREMIUM =
-  'tous les contenus Premium : les cours d’éducation financière, la newsletter complète, les outils avancés et tous nos articles';
+  'tous les contenus Premium : les cours d’éducation financière, la newsletter complète, les simulateurs avancés et tous nos articles';
 
 export const TEXTES = {
   welcome_signup: {
@@ -28,7 +28,7 @@ export const TEXTES = {
     simulateurs: 'Ils calculent vos emprunts et vos placements.',
     simulateursLien: 'Ouvrir les simulateurs',
     premiumTitre: 'L’offre Premium',
-    premium: 'Elle donne accès à tous les contenus Premium : articles, newsletter complète, outils avancés et cours.',
+    premium: 'Elle donne accès à tous les contenus Premium : articles, newsletter complète, simulateurs avancés et cours.',
     premiumLien: 'Découvrir l’offre Premium',
     bouton: 'Lire les derniers articles',
     salut: 'Bonne lecture,',
@@ -43,7 +43,7 @@ export const TEXTES = {
     articles: 'Nos derniers articles sont déjà en ligne, si vous voulez commencer tout de suite.',
     bouton: 'Lire les derniers articles',
     premiumTitre: 'La newsletter en intégralité',
-    premium: 'Les lecteurs Premium reçoivent la newsletter complète, et ont aussi accès à tous nos articles, outils et cours Premium.',
+    premium: 'Les lecteurs Premium reçoivent la newsletter complète, et ont aussi accès à tous nos articles, simulateurs et cours Premium.',
     premiumLien: 'Découvrir l’offre Premium',
     raison: 'Vous recevez ce message parce que cette adresse vient d’être inscrite à la newsletter de NFI REPORT.',
     desabonner: 'Se désabonner de la newsletter',

@@ -119,7 +119,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
               <div className="mt-6">
                 <p className="text-[13px] text-gray-500 mb-4">Suggestions populaires</p>
                 <div className="flex flex-wrap gap-2 justify-center">
-                  {['Économie', 'Finance', 'BRVM', 'Uranium', 'Éducation', 'Outils'].map((tag) => (
+                  {['Économie', 'Finance', 'BRVM'].map((tag) => (
                     <button
                       key={tag}
                       onClick={() => setQuery(tag)}

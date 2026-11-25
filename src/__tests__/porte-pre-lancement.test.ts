@@ -10,7 +10,7 @@ describe('porte du pré-lancement, visiteur non admin', () => {
   it('ferme toutes les pages du site, accueil compris', () => {
     for (const chemin of [
       '/', '/articles', '/articles/banques-nigeriennes-sous-pression', '/economie', '/finance',
-      '/entreprises', '/entreprises/somair', '/marches', '/niger', '/outils', '/outil/simulateur-emprunt',
+      '/entreprises', '/entreprises/somair', '/marches', '/niger', '/outils', '/outil/simulateur-emprunt', '/simulateurs', '/simulateurs/emprunt',
       '/education', '/apprendre', '/apprendre/bases-finance', '/apprendre/bases-finance/qu-est-ce-que-la-finance', '/premium', '/pricing', '/paiement', '/newsletter', '/contact', '/about',
       '/publicite', '/plan-du-site', '/inscription', '/inscription/completer-profil', '/compte',
       '/page-qui-n-existe-pas',

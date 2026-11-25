@@ -50,7 +50,7 @@ const baseMetadata: Metadata = {
     template: `%s | ${NOM_DU_SITE}`,
   },
   description:
-    "Votre source d'informations économiques et financières pour le Niger et l'Afrique de l'Ouest. Articles, analyses, outils financiers et données de marché.",
+    "Votre source d'informations économiques et financières pour le Niger et l'Afrique de l'Ouest. Articles, analyses, simulateurs financiers et données de marché.",
   keywords: [
     'Niger',
     'économie',

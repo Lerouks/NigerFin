@@ -63,7 +63,7 @@ export function welcomeSignupEmail(name: string): { subject: string; html: strin
         + para(t.intro)
         + listeNumerotee([
           { titre: t.articlesTitre, texte: t.articles, lien: [t.articlesLien, `${SITE_URL}/articles`] },
-          { titre: t.simulateursTitre, texte: t.simulateurs, lien: [t.simulateursLien, `${SITE_URL}/outils`] },
+          { titre: t.simulateursTitre, texte: t.simulateurs, lien: [t.simulateursLien, `${SITE_URL}/simulateurs`] },
           { titre: t.premiumTitre, texte: t.premium, lien: [t.premiumLien, `${SITE_URL}/pricing`] },
         ])
         + blanc(30) + bouton(t.bouton, `${SITE_URL}/articles`)

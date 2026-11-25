@@ -6,7 +6,7 @@ export const revalidate = 86400;
 
 export const metadata: Metadata = {
   title: 'Plan du site : toutes les rubriques',
-  description: 'Retrouvez l\'ensemble des pages et rubriques de NFI Report : économie, finance, marchés, outils, éducation et plus.',
+  description: 'Retrouvez l\'ensemble des pages et rubriques de NFI Report : économie, finance, marchés, simulateurs, éducation et plus.',
   alternates: { canonical: '/plan-du-site' },
 };
 
@@ -21,15 +21,15 @@ const sections = [
     ],
   },
   {
-    title: 'Outils pratiques',
+    title: 'Simulateurs',
     links: [
-      { label: 'Tous les outils', href: '/outils' },
-      { label: 'Simulateur d\'emprunt', href: '/outil/simulateur-emprunt' },
-      { label: 'Intérêt simple', href: '/outil/interet-simple' },
-      { label: 'Intérêt composé', href: '/outil/interet-compose' },
-      { label: 'Simulateur de salaire', href: '/outil/simulateur-salaire' },
-      { label: 'Indices économiques', href: '/outil/indices-economiques' },
-      { label: 'Budget familial', href: '/outil/budget-familial' },
+      { label: 'Tous les simulateurs', href: '/simulateurs' },
+      { label: 'Simulateur d\'emprunt', href: '/simulateurs/emprunt' },
+      { label: 'Intérêt simple', href: '/simulateurs/interets-simples' },
+      { label: 'Intérêt composé', href: '/simulateurs/interets-composes' },
+      { label: 'Simulateur de salaire', href: '/simulateurs/salaire' },
+      { label: 'Indices économiques', href: '/simulateurs/indices-economiques' },
+      { label: 'Budget familial', href: '/simulateurs/budget-familial' },
     ],
   },
   {
@@ -105,9 +105,9 @@ export default function PlanDuSitePage() {
               Ce plan du site recense l&apos;ensemble des pages publiques de NFI Report,
               organisées par thématique pour faciliter votre navigation. Il couvre nos cinq
               rubriques éditoriales principales (Économie, Finance, Marchés, Entreprises,
-              Niger), notre section dédiée à l&apos;éducation financière, nos outils
-              pratiques (simulateurs d&apos;emprunt, calculateurs d&apos;intérêts, simulateur
-              de salaire, budget familial, indices économiques), ainsi que toutes les pages
+              Niger), notre section dédiée à l&apos;éducation financière, nos simulateurs
+              (emprunt, intérêts simples et composés, salaire, budget familial,
+              indices économiques), ainsi que toutes les pages
               transactionnelles et institutionnelles du site.
             </p>
             <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 mb-10 text-justify hyphens-auto">

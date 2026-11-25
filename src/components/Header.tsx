@@ -360,7 +360,7 @@ export function Header({ menuApprendre = MENU_APPRENDRE_VIDE }: HeaderProps) {
                       </ul>
                       <div className="mt-3.5 pt-3 border-t border-black/6 flex items-center justify-between gap-4 text-[13px]">
                         <span className="text-gray-500">Adaptés aux règles du Niger et de l&rsquo;UEMOA</span>
-                        <Link href="/outils" className="font-semibold text-foreground hover:text-foreground/70 whitespace-nowrap">
+                        <Link href="/simulateurs" className="font-semibold text-foreground hover:text-foreground/70 whitespace-nowrap">
                           Tous les simulateurs&nbsp;›
                         </Link>
                       </div>

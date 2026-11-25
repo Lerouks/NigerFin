@@ -24,8 +24,8 @@ const SCREENSHOTS = [
   },
   {
     src: '/premium/outil-budget.webp',
-    alt: 'Outil Budget - taux d’épargne, répartition des dépenses',
-    label: 'Outil Budget',
+    alt: 'Simulateur Budget familial : taux d’épargne, répartition des dépenses',
+    label: 'Budget familial',
     desc: 'Entrez vos revenus et dépenses. Obtenez votre taux d’épargne, votre répartition par poste et des recommandations concrètes pour passer à 15-20 % d’épargne. Export PDF inclus.',
   },
 ];
@@ -38,13 +38,13 @@ const BENEFITS = [
   },
   {
     icon: FileText,
-    title: 'Articles & analyses illimités',
+    title: 'Articles et analyses illimités',
     desc: 'Toute la rubrique Premium débloquée. Décryptages bancaires, dynamiques économiques régionales, marchés africains.',
   },
   {
     icon: Wrench,
-    title: 'Outils Premium avancés',
-    desc: 'Simulateurs salaire FCFA, budget familial, emprunt, avec analyses détaillées personnalisées.',
+    title: 'Simulateurs Premium avancés',
+    desc: 'Salaire net, budget familial et intérêts composés, avec des analyses détaillées et personnalisées.',
   },
   {
     icon: Download,
@@ -78,7 +78,7 @@ const FAQ = [
   },
   {
     q: 'Que recouvre exactement Premium ?',
-    a: 'Tout : articles & analyses illimités, outils Premium avec PDF, cours d’éducation financière, alertes, et la\u00a0newsletter\u00a0en\u00a0intégralité.',
+    a: 'Tout : articles et analyses illimités, simulateurs Premium avec PDF, cours d’éducation financière, alertes, et la\u00a0newsletter\u00a0en\u00a0intégralité.',
   },
 ];
 
@@ -211,7 +211,7 @@ function HeroSection() {
 
           <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-gray-600 sm:text-[19px]">
             Pour les jeunes qui veulent savoir, agir et investir en Afrique de l&rsquo;Ouest.
-            Newsletters, analyses, outils et téléchargements PDF. Tout est dans Premium.
+            Newsletters, analyses, simulateurs et téléchargements PDF. Tout est dans Premium.
           </p>
 
           <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center">

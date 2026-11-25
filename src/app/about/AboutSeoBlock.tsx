@@ -63,8 +63,8 @@ export function AboutSeoBlock() {
             <li className="flex items-start gap-3">
               <span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-gold" />
               <span className="leading-relaxed">
-                <strong>Outils pratiques</strong> : simulateurs financiers (emprunt, salaire,
-                budget familial, intérêts) calibrés sur les réalités du Niger.
+                <strong>Simulateurs</strong> : emprunt, salaire, budget familial et intérêts,
+                calibrés sur les réalités du Niger.
               </span>
             </li>
           </ul>

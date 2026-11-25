@@ -37,7 +37,7 @@ function FadeUp({
 const PRICING_HIGHLIGHTS = [
   'Articles et analyses Premium illimités',
   'La newsletter en intégralité',
-  'Outils avancés avec téléchargements PDF',
+  'Simulateurs avancés avec téléchargements PDF',
   "Cours complets d'éducation financière",
 ];
 
@@ -386,7 +386,7 @@ function FreePlanCard({ isSignedIn }: { isSignedIn: boolean }) {
                 Accès limité, 0 {CURRENCY}
               </h3>
               <p className="max-w-md text-[13.5px] text-gray-600">
-                3 articles Premium par mois, newsletter mensuelle, outils de base.
+                3 articles Premium par mois, newsletter mensuelle, simulateurs de base.
               </p>
             </div>
             <Link

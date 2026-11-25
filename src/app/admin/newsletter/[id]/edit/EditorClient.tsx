@@ -671,7 +671,7 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
         </FormSection>
 
         {/* TOOLS PROMO */}
-        <FormSection title="Outils Premium (promo, optionnel)">
+        <FormSection title="Simulateurs Premium (promo, optionnel)">
           <p className="text-xs text-foreground/55">Met en avant vos simulateurs/calculateurs financiers pour fidéliser et convertir.</p>
           <div className="grid gap-3 sm:grid-cols-2">
             <Field label="Eyebrow (petit titre or)">
@@ -679,7 +679,7 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
                 type="text"
                 value={content.toolsPromo?.eyebrow ?? ''}
                 onChange={(e) => patchContent({ toolsPromo: { ...(content.toolsPromo ?? { items: [] }), eyebrow: e.target.value } })}
-                placeholder="Vos outils Premium"
+                placeholder="Vos simulateurs Premium"
                 className="w-full rounded-md border border-foreground/15 bg-white px-3 py-2 text-sm"
               />
             </Field>
@@ -702,7 +702,7 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
             />
           </Field>
           <RepeatableSection
-            label="Outils mis en avant"
+            label="Simulateurs mis en avant"
             items={content.toolsPromo?.items ?? []}
             onAdd={() => patchContent({ toolsPromo: { ...(content.toolsPromo ?? { items: [] }), items: [...(content.toolsPromo?.items ?? []), { title: '', description: '', url: '' }] } })}
             onRemove={(idx) => patchContent({ toolsPromo: { ...(content.toolsPromo ?? { items: [] }), items: (content.toolsPromo?.items ?? []).filter((_, i) => i !== idx) } })}
@@ -716,7 +716,7 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
                     className="rounded-sm border border-foreground/15 bg-white px-2 py-1 text-base"
                   />
                   <input
-                    placeholder="Nom de l'outil"
+                    placeholder="Nom du simulateur"
                     value={it.title}
                     onChange={(e) => patchContent({ toolsPromo: { ...(content.toolsPromo ?? { items: [] }), items: (content.toolsPromo?.items ?? []).map((x, i) => i === idx ? { ...x, title: e.target.value } : x) } })}
                     className="rounded-sm border border-foreground/15 bg-white px-2 py-1 text-sm font-semibold"
@@ -731,7 +731,7 @@ export function EditorClient({ issue: initialIssue }: EditorClientProps) {
                 <ArticlePicker
                   value={it.url}
                   onChange={(url) => patchContent({ toolsPromo: { ...(content.toolsPromo ?? { items: [] }), items: (content.toolsPromo?.items ?? []).map((x, i) => i === idx ? { ...x, url: url ?? '' } : x) } })}
-                  placeholder="URL de l'outil (ex: nfireport.com/outil/simulateur-emprunt)"
+                  placeholder="Adresse du simulateur (ex : nfireport.com/simulateurs/emprunt)"
                 />
               </div>
             )}

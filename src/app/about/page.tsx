@@ -22,7 +22,7 @@ const FALLBACK_SECTIONS = [
   {
     id: 'fallback-1',
     heading: 'Notre mission',
-    text: "NFI Report a été fondé pour combler un manque criant : l'accès à une information économique et financière fiable, contextualisée et exploitable pour le Niger et l'Afrique de l'Ouest. Trop souvent, les médias internationaux survolent la région ou en présentent une vision simpliste, et les sources locales manquent de moyens pour proposer des analyses approfondies. Nous voulons changer cela en proposant chaque jour des décryptages rigoureux, des données vérifiées et des outils pratiques qui aident les Nigériens à comprendre leur économie, à protéger leur patrimoine et à saisir les opportunités.",
+    text: "NFI Report a été fondé pour combler un manque criant : l'accès à une information économique et financière fiable, contextualisée et exploitable pour le Niger et l'Afrique de l'Ouest. Trop souvent, les médias internationaux survolent la région ou en présentent une vision simpliste, et les sources locales manquent de moyens pour proposer des analyses approfondies. Nous voulons changer cela en proposant chaque jour des décryptages rigoureux, des données vérifiées et des simulateurs qui aident les Nigériens à comprendre leur économie, à protéger leur patrimoine et à saisir les opportunités.",
     display_order: 1,
     updated_at: new Date().toISOString(),
   },

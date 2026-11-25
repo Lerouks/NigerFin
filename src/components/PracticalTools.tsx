@@ -69,7 +69,7 @@ function PlanCard({ title, badge, tools, isPremium = false, isSubscribed = false
           return (
             <Link
               key={tool._id}
-              href={`/outil/${slug}`}
+              href={`/simulateurs/${slug}`}
               className={`flex items-center gap-4 p-4 rounded-lg transition-all duration-200 group/item ${
                 isPremium ? 'hover:bg-white/5' : 'hover:bg-background'
               }`}
@@ -98,7 +98,7 @@ function PlanCard({ title, badge, tools, isPremium = false, isSubscribed = false
 
       <div className="px-6 pb-6 pt-2">
         <Link
-          href={isPremium && !isSubscribed ? '/pricing' : `/outil/${tools[0] ? getSlug(tools[0].slug) : ''}`}
+          href={isPremium && !isSubscribed ? '/pricing' : `/simulateurs/${tools[0] ? getSlug(tools[0].slug) : ''}`}
           className={`flex items-center justify-center gap-2 w-full py-3 rounded-lg text-[13px] transition-all duration-300 ${
             isPremium
               ? isSubscribed
@@ -108,7 +108,7 @@ function PlanCard({ title, badge, tools, isPremium = false, isSubscribed = false
           }`}
         >
           {isPremium && !isSubscribed && <Lock className="w-3.5 h-3.5" />}
-          {isPremium ? (isSubscribed ? 'Accéder aux outils' : 'Débloquer Premium') : 'Accéder gratuitement'}
+          {isPremium ? (isSubscribed ? 'Accéder aux simulateurs' : 'Débloquer Premium') : 'Accéder gratuitement'}
         </Link>
       </div>
     </div>
@@ -116,14 +116,14 @@ function PlanCard({ title, badge, tools, isPremium = false, isSubscribed = false
 }
 
 const defaultFreeTools: ToolData[] = [
-  { _id: 'f1', name: "Simulateur d'emprunt", slug: 'simulateur-emprunt', icon: 'Calculator', isPremium: false },
-  { _id: 'f2', name: 'Intérêt simple', slug: 'interet-simple', icon: 'Percent', isPremium: false },
+  { _id: 'f1', name: "Simulateur d'emprunt", slug: 'emprunt', icon: 'Calculator', isPremium: false },
+  { _id: 'f2', name: 'Intérêt simple', slug: 'interets-simples', icon: 'Percent', isPremium: false },
   { _id: 'f4', name: 'Indices économiques', slug: 'indices-economiques', icon: 'BarChart3', isPremium: false },
 ];
 
 const defaultPremiumTools: ToolData[] = [
-  { _id: 'f3', name: 'Simulateur de salaire', slug: 'simulateur-salaire', icon: 'DollarSign', isPremium: true },
-  { _id: 'f5', name: 'Intérêt composé', slug: 'interet-compose', icon: 'TrendingUp', isPremium: true },
+  { _id: 'f3', name: 'Simulateur de salaire', slug: 'salaire', icon: 'DollarSign', isPremium: true },
+  { _id: 'f5', name: 'Intérêt composé', slug: 'interets-composes', icon: 'TrendingUp', isPremium: true },
   { _id: 'f6', name: 'Budget familial', slug: 'budget-familial', icon: 'Wallet', isPremium: true },
 ];
 
@@ -151,14 +151,14 @@ export function PracticalTools({ avecEnTete = true }: { avecEnTete?: boolean } =
   }, []);
 
   return (
-    <section id="outils" className={`${avecEnTete ? 'py-20 md:py-28' : 'pt-10 pb-20 md:pt-14 md:pb-28'} scroll-mt-[180px]`}>
+    <section id="simulateurs" className={`${avecEnTete ? 'py-20 md:py-28' : 'pt-10 pb-20 md:pt-14 md:pb-28'} scroll-mt-[180px]`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Sur /outils, l'en-tête de la page présente déjà les simulateurs :
+        {/* Sur /simulateurs, l'en-tête de la page présente déjà les simulateurs :
             cet en-tête de section n'y est pas répété (24/11/2026). */}
         {avecEnTete ? (
           <div className="max-w-xl mb-14">
             <span className="text-[11px] tracking-[0.15em] uppercase text-gray-500 block mb-3">
-              Outils financiers
+              Simulateurs
             </span>
             <h2 className="text-3xl md:text-4xl mb-4">Calculez, simulez, anticipez</h2>
             <p className="text-gray-500 text-[15px] leading-relaxed">
@@ -170,12 +170,12 @@ export function PracticalTools({ avecEnTete = true }: { avecEnTete?: boolean } =
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
           <PlanCard title="Plan gratuit" badge="GRATUIT" tools={freeTools} />
-          <PlanCard title={isSubscribed ? 'Vos outils Premium' : 'Plan Premium'} badge={isSubscribed ? 'DÉBLOQUÉ' : 'PREMIUM'} tools={premiumTools} isPremium isSubscribed={isSubscribed} />
+          <PlanCard title={isSubscribed ? 'Vos simulateurs Premium' : 'Plan Premium'} badge={isSubscribed ? 'DÉBLOQUÉ' : 'PREMIUM'} tools={premiumTools} isPremium isSubscribed={isSubscribed} />
         </div>
 
         <div className="text-center mt-10">
           <p className="text-[12px] text-gray-500">
-            {paragrapheFr('Tous les outils sont adaptés au contexte économique africain.')}
+            {paragrapheFr('Tous les simulateurs sont adaptés au contexte économique africain.')}
           </p>
         </div>
       </div>

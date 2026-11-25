@@ -30,7 +30,7 @@ test.describe('Verification post-audit en prod', () => {
   test('Outil simulateur emprunt : la page se charge sans erreur', async ({ page }) => {
     const errors: string[] = [];
     page.on('pageerror', (err) => errors.push(err.message));
-    await page.goto('/outil/simulateur-emprunt');
+    await page.goto('/simulateurs/emprunt');
     await page.waitForLoadState('networkidle');
     expect(errors).toEqual([]);
     await expect(page.locator('text=Simulateur').first()).toBeVisible();

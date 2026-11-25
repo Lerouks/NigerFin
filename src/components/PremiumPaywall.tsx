@@ -91,7 +91,7 @@ export function PremiumPaywall({ articleTitle }: PremiumPaywallProps) {
         <div className="flex flex-wrap justify-center gap-x-6 gap-y-1 mt-8 text-[11px] text-gray-500">
           <span>Analyses complètes</span>
           <span>·</span>
-          <span>Outils premium</span>
+          <span>Simulateurs Premium</span>
           <span>·</span>
           <span>Newsletters exclusives</span>
         </div>

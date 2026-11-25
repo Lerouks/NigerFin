@@ -22,26 +22,26 @@ interface ToolContentProps {
 }
 
 const toolComponents: Record<string, React.ComponentType> = {
-  'simulateur-emprunt': SimulateurEmprunt,
-  'interet-simple': InteretSimple,
-  'simulateur-salaire': SimulateurSalaire,
+  'emprunt': SimulateurEmprunt,
+  'interets-simples': InteretSimple,
+  'salaire': SimulateurSalaire,
   'indices-economiques': IndicesEconomiques,
-  'interet-compose': InteretCompose,
+  'interets-composes': InteretCompose,
   'budget-familial': BudgetFamilial,
 };
 
 const toolIcons: Record<string, React.ComponentType<{ className?: string }>> = {
-  'simulateur-emprunt': Calculator,
-  'interet-simple': Percent,
-  'simulateur-salaire': DollarSign,
+  'emprunt': Calculator,
+  'interets-simples': Percent,
+  'salaire': DollarSign,
   'indices-economiques': BarChart3,
-  'interet-compose': TrendingUp,
+  'interets-composes': TrendingUp,
   'budget-familial': Wallet,
 };
 
 /* ─── Contenu éducatif par outil ─── */
 const toolEducation: Record<string, { sections: { heading: string; body: string }[] }> = {
-  'interet-compose': {
+  'interets-composes': {
     sections: [
       {
         heading: 'Comment fonctionnent les intérêts composés ?',
@@ -66,11 +66,11 @@ C'est ce mécanisme qui fait dire qu'Albert Einstein aurait qualifié les intér
 
 Le simulateur calcule la croissance de votre capital en tenant compte des versements réguliers et de la capitalisation des intérêts. Vous obtenez une estimation du capital final que vous pourriez accumuler.
 
-C'est un outil idéal pour planifier vos investissements à long terme, que ce soit dans des actifs boursiers, de l'immobilier, des cryptomonnaies ou des livrets d'épargne. Pour établir un plan d'épargne réaliste, utilisez aussi notre outil de budget familial.`,
+C'est un simulateur idéal pour planifier vos investissements à long terme, que ce soit dans des actifs boursiers, de l'immobilier, des cryptomonnaies ou des livrets d'épargne. Pour établir un plan d'épargne réaliste, utilisez aussi notre simulateur de budget familial.`,
       },
     ],
   },
-  'interet-simple': {
+  'interets-simples': {
     sections: [
       {
         heading: 'Comment fonctionnent les intérêts simples ?',
@@ -102,11 +102,11 @@ Les intérêts simples sont courants pour les prêts à court terme, les découv
         heading: 'Comment utiliser ce simulateur ?',
         body: `Saisissez votre capital initial, le taux d'intérêt annuel et la durée du placement. Le simulateur calcule instantanément le montant des intérêts et la valeur totale à l'échéance.
 
-Utilisez cet outil pour comparer les offres de placement à court terme ou évaluer le coût réel d'un emprunt à intérêts simples avant de vous engager.`,
+Utilisez ce simulateur pour comparer les offres de placement à court terme ou évaluer le coût réel d'un emprunt à intérêts simples avant de vous engager.`,
       },
     ],
   },
-  'simulateur-salaire': {
+  'salaire': {
     sections: [
       {
         heading: 'Comment fonctionne l\'ITS au Niger ?',
@@ -152,7 +152,7 @@ Sont considérées comme personnes à charge : le conjoint sans revenu et les en
       },
     ],
   },
-  'simulateur-emprunt': {
+  'emprunt': {
     sections: [
       {
         heading: 'Comment fonctionne un emprunt à mensualités constantes ?',
@@ -241,8 +241,8 @@ Les principaux indicateurs suivis pour le Niger et la zone UEMOA :
 L'économie nigérienne repose principalement sur l'agriculture (40% du PIB), l'extraction minière (uranium, or, pétrole) et les services. Suivre ces indicateurs vous aide à anticiper les tendances et à prendre de meilleures décisions financières.`,
       },
       {
-        heading: 'Comment utiliser cet outil ?',
-        body: `Cet outil agrège les données économiques de sources officielles (Banque Mondiale, FMI, BCEAO) et les présente de manière claire et actualisée. Consultez les différents indicateurs pour suivre l'évolution de l'économie nigérienne et régionale.
+        heading: 'Comment utiliser cette page ?',
+        body: `Cette page agrège les données économiques de sources officielles (Banque Mondiale, FMI, BCEAO) et les présente de manière claire et actualisée. Consultez les différents indicateurs pour suivre l'évolution de l'économie nigérienne et régionale.
 
 Les données sont mises à jour régulièrement pour refléter les dernières publications statistiques disponibles.`,
       },
@@ -262,7 +262,7 @@ export function ToolContent({ slug, title, description, isPremium }: ToolContent
     <div className="min-h-screen bg-background">
       <section className="bg-[#111] text-white py-10 md:py-14">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Link href="/#outils" className="inline-flex items-center gap-1.5 text-[13px] text-white/70 hover:text-white/70 transition-colors mb-6"><ArrowLeft className="w-4 h-4" />Retour aux outils</Link>
+          <Link href="/simulateurs" className="inline-flex items-center gap-1.5 text-[13px] text-white/70 hover:text-white/70 transition-colors mb-6"><ArrowLeft className="w-4 h-4" />Tous les simulateurs</Link>
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-white/8 rounded-xl flex items-center justify-center"><Icon className="w-6 h-6 text-white/70" /></div>
             <div>
@@ -281,11 +281,11 @@ export function ToolContent({ slug, title, description, isPremium }: ToolContent
           {needsGate ? (
             <div className="text-center py-20 bg-white border border-black/6 rounded-xl">
               <Lock className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold mb-3">Outil Premium</h2>
+              <h2 className="text-2xl font-bold mb-3">Simulateur Premium</h2>
               <p className="text-gray-600 mb-8 max-w-md mx-auto">
                 {isSignedIn
-                  ? 'Débloquez les outils premium avec l\'abonnement Premium.'
-                  : 'Connectez-vous et abonnez-vous pour accéder à cet outil professionnel.'}
+                  ? 'Débloquez les simulateurs Premium avec l\'abonnement Premium.'
+                  : 'Connectez-vous et abonnez-vous pour accéder à ce simulateur professionnel.'}
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 {!isSignedIn && (

@@ -189,27 +189,27 @@ export const issue001Demo: NewsletterIssue = {
   },
 
   toolsPromo: {
-    eyebrow: 'Vos outils Premium',
+    eyebrow: 'Vos simulateurs Premium',
     title: 'Mettez vos analyses en chiffres',
-    caption: 'Trois outils inclus dans votre abonnement Premium pour passer du décryptage à la décision.',
+    caption: 'Trois simulateurs inclus dans votre abonnement Premium pour passer du décryptage à la décision.',
     items: [
       {
         emoji: '💼',
         title: 'Simulateur Salaire',
-        description: 'IRPP, IUTS, cotisations CNSS : du brut au net en moins de 30 secondes.',
-        url: `${SITE_URL}/outil/simulateur-salaire`,
+        description: 'ITS, CNSS et INAM : du brut au net en moins de 30 secondes.',
+        url: `${SITE_URL}/simulateurs/salaire`,
       },
       {
         emoji: '💰',
         title: 'Intérêt Composé',
-        description: 'Projetez votre épargne sur 1, 5, 10 ans avec inflation BCEAO incluse.',
-        url: `${SITE_URL}/outil/interet-compose`,
+        description: 'Projetez votre épargne sur 1, 5 ou 10 ans.',
+        url: `${SITE_URL}/simulateurs/interets-composes`,
       },
       {
         emoji: '📊',
         title: 'Budget Familial',
         description: 'Catégorisez vos dépenses, suivez votre épargne mensuelle, ajustez en temps réel.',
-        url: `${SITE_URL}/outil/budget-familial`,
+        url: `${SITE_URL}/simulateurs/budget-familial`,
       },
     ],
   },

@@ -82,7 +82,7 @@ export interface NewsletterIssue {
 
   radar?: { sectionNumeral?: string; eyebrow?: string; title?: string; items: RadarItem[] };
 
-  /** Bloc promotionnel des outils Premium NFI Report (simulateurs, calculateurs). */
+  /** Bloc promotionnel des simulateurs Premium de NFI Report. */
   toolsPromo?: {
     sectionNumeral?: string;
     eyebrow?: string;

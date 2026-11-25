@@ -29,6 +29,9 @@ describe('Regle d\'or : on renomme des LIBELLES, jamais des CHEMINS', () => {
   // site au public (aucune page indexée, aucun lien extérieur), « Apprendre »
   // a pris son adresse /apprendre. L'ancienne /education et ses sous-pages
   // renvoient vers la nouvelle (308, next.config.js), et ce contrat repart de là.
+  // Deuxième exception, le même jour et pour la même raison : « Simulateurs »
+  // prend /simulateurs, et chaque simulateur une adresse courte
+  // (/simulateurs/salaire…) ; /outils et /outil/* renvoient vers les nouvelles.
   const CHEMINS_FIGES = [
     '/apprendre',
     '/economie',
@@ -36,7 +39,7 @@ describe('Regle d\'or : on renomme des LIBELLES, jamais des CHEMINS', () => {
     '/finance',
     '/marches',
     '/niger',
-    '/outils',
+    '/simulateurs',
   ];
 
   it('l\'ensemble des chemins declares est exactement celui d\'origine', () => {
@@ -51,7 +54,7 @@ describe('Regle d\'or : on renomme des LIBELLES, jamais des CHEMINS', () => {
       entreprises: '/entreprises',
       niger: '/niger',
       education: '/apprendre',
-      outils: '/outils',
+      outils: '/simulateurs',
     };
     for (const [cle, chemin] of Object.entries(attendu)) {
       expect(NAVIGATION.find((e) => e.key === cle)?.path).toBe(chemin);
@@ -70,9 +73,9 @@ describe('Barre de navigation cible : cinq entrees, deux registres', () => {
     ]);
   });
 
-  it('« Apprendre » vit à /apprendre, « Simulateurs » garde /outils', () => {
+  it('« Apprendre » vit à /apprendre, « Simulateurs » à /simulateurs', () => {
     expect(NAV_ENTRIES.find((e) => e.label === 'Apprendre')?.path).toBe('/apprendre');
-    expect(NAV_ENTRIES.find((e) => e.label === 'Simulateurs')?.path).toBe('/outils');
+    expect(NAV_ENTRIES.find((e) => e.label === 'Simulateurs')?.path).toBe('/simulateurs');
   });
 
   it('les sous-titres choisis par Raouf le 24/11/2026 disent ce que contient chaque rubrique', () => {
@@ -144,7 +147,7 @@ describe('Les fichiers derives ne peuvent plus diverger', () => {
       expect(SECTION_META[entry.key]).toBeDefined();
     }
     expect(SECTION_META.outils).toBeDefined();
-    expect(SECTION_META.outils!.path).toBe('/outils');
+    expect(SECTION_META.outils!.path).toBe('/simulateurs');
   });
 
   it('les simulateurs ne sont pas une rubrique editoriale', () => {
@@ -165,10 +168,10 @@ describe('Les fichiers derives ne peuvent plus diverger', () => {
 });
 
 describe('La liste déroulante des simulateurs suit leurs vraies pages', () => {
-  // Les pages des simulateurs (src/app/outil/[slug]) ne se modifient jamais :
+  // Les calculs des simulateurs (src/app/simulateurs/[slug]) ne se modifient jamais :
   // on lit leur fichier pour vérifier que le menu reprend exactement leurs
   // adresses et leur statut Premium.
-  const source = readFileSync(join(process.cwd(), 'src/app/outil/[slug]/page.tsx'), 'utf8');
+  const source = readFileSync(join(process.cwd(), 'src/app/simulateurs/[slug]/page.tsx'), 'utf8');
   const meta = [...source.matchAll(/'([a-z0-9-]+)': \{[^}]*?premium: (true|false)/g)].map((m) => ({
     slug: m[1]!,
     premium: m[2] === 'true',
@@ -179,14 +182,14 @@ describe('La liste déroulante des simulateurs suit leurs vraies pages', () => {
   });
 
   it('chaque simulateur du site est dans le menu, et rien d\'autre', () => {
-    expect(SIMULATEURS_MENU.map((s) => s.href.replace('/outil/', '')).sort()).toEqual(
+    expect(SIMULATEURS_MENU.map((s) => s.href.replace('/simulateurs/', '')).sort()).toEqual(
       meta.map((m) => m.slug).sort(),
     );
   });
 
   it('le statut Premium du menu est celui de la page', () => {
     for (const m of meta) {
-      const lien = SIMULATEURS_MENU.find((s) => s.href === `/outil/${m.slug}`);
+      const lien = SIMULATEURS_MENU.find((s) => s.href === `/simulateurs/${m.slug}`);
       expect(Boolean(lien?.premium)).toBe(m.premium);
     }
   });

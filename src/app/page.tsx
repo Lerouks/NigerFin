@@ -16,7 +16,7 @@ import { NOM_DU_SITE, TITRE_DU_SITE } from '@/lib/config';
 export const metadata: Metadata = {
   title: TITRE_DU_SITE,
   description:
-    "Magazine économique premium dédié au Niger et à l'Afrique de l'Ouest : analyses, données de marché, dossiers d'entreprises stratégiques, outils financiers.",
+    "Magazine économique premium dédié au Niger et à l'Afrique de l'Ouest : analyses, données de marché, dossiers d'entreprises stratégiques, simulateurs financiers.",
   alternates: { canonical: '/' },
   // Bloc OG complet : dans Next, le openGraph d'une page remplace celui du
   // layout (pas de fusion profonde), il faut donc redonner l'image ici.
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     url: '/',
     title: TITRE_DU_SITE,
     description:
-      "Magazine économique premium dédié au Niger et à l'Afrique de l'Ouest : analyses, données de marché, dossiers d'entreprises stratégiques, outils financiers.",
+      "Magazine économique premium dédié au Niger et à l'Afrique de l'Ouest : analyses, données de marché, dossiers d'entreprises stratégiques, simulateurs financiers.",
     images: [
       {
         url: '/og-image.png',
@@ -311,7 +311,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Practical Tools (outils financiers gratuits + premium) */}
+      {/* Simulateurs (gratuits et Premium) */}
       <PracticalTools />
     </div>
   );

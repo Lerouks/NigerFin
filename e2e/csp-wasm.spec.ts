@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('CSP autorise WebAssembly pour @react-pdf/renderer', () => {
   test('header contient wasm-unsafe-eval', async ({ page }) => {
-    const response = await page.goto('/outil/simulateur-emprunt');
+    const response = await page.goto('/simulateurs/emprunt');
     expect(response).not.toBeNull();
     const csp = response!.headers()['content-security-policy'] ?? '';
     expect(csp).toContain("'wasm-unsafe-eval'");
@@ -15,7 +15,7 @@ test.describe('CSP autorise WebAssembly pour @react-pdf/renderer', () => {
       if (msg.type() === 'error') errors.push(msg.text());
     });
 
-    await page.goto('/outil/simulateur-emprunt');
+    await page.goto('/simulateurs/emprunt');
 
     const wasmStatus = await page.evaluate(async () => {
       // Module WebAssembly minimal valide (export d'une fonction add)

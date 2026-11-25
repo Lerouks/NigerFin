@@ -1,5 +1,5 @@
 import type { TransactionalEmailKey } from '@/lib/emails/registry';
-import { soude, titreRendu, titreTypo, typo } from '@/lib/emails/edition';
+import { PLAFOND_LISTE, soude, titreRendu, titreTypo, typo } from '@/lib/emails/edition';
 import { TEXTES } from '@/lib/emails/textes';
 
 /**
@@ -37,6 +37,8 @@ export interface TemplateSlots {
 const titreSlot = (d: string): EmailSlot => ({ key: 'heading', label: 'Titre', default: titreTypo(d), rendu: titreRendu(d) });
 const boutonSlot = (d: string): EmailSlot => ({ key: 'bouton', label: 'Bouton', default: titreTypo(d) });
 const bloc = (key: string, label: string, d: string): EmailSlot => ({ key, label, default: soude(d) });
+/** Texte d'une liste numérotée : même soudure que listeNumerotee (edition.ts). */
+const blocListe = (key: string, label: string, d: string): EmailSlot => ({ key, label, default: soude(d, PLAFOND_LISTE) });
 
 const W = TEXTES.welcome_signup;
 const N = TEXTES.newsletter_welcome;
@@ -58,11 +60,11 @@ export const TEMPLATE_SLOTS: Record<TransactionalEmailKey, TemplateSlots> = {
       titreSlot(W.titre),
       bloc('intro', 'Introduction', W.intro),
       { key: 'articles_titre', label: 'Rubrique 1 (titre)', default: titreTypo(W.articlesTitre) },
-      bloc('articles', 'Rubrique 1 (texte)', W.articles),
+      blocListe('articles', 'Rubrique 1 (texte)', W.articles),
       { key: 'simulateurs_titre', label: 'Rubrique 2 (titre)', default: titreTypo(W.simulateursTitre) },
-      bloc('simulateurs', 'Rubrique 2 (texte)', W.simulateurs),
+      blocListe('simulateurs', 'Rubrique 2 (texte)', W.simulateurs),
       { key: 'premium_titre', label: 'Rubrique 3 (titre)', default: titreTypo(W.premiumTitre) },
-      bloc('premium', 'Rubrique 3 (texte)', W.premium),
+      blocListe('premium', 'Rubrique 3 (texte)', W.premium),
       boutonSlot(W.bouton),
     ],
   },

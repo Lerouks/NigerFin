@@ -6,7 +6,7 @@ Source : `ORDONNANCE-N-2025-44 LOI DE FINANCES 2026.pdf`, signée 31/12/2025 par
 
 ## Règles d'application
 
-- Ne pas toucher aux simulateurs (/outil/*) même si les taux semblent obsolètes
+- Ne pas toucher aux calculs des simulateurs (/simulateurs/*, anciennement /outil/*) même si les taux semblent obsolètes
 - Ajouter un disclaimer "tarifs et conditions peuvent évoluer, consulter un conseiller" sur toute leçon touchant aux chiffres fiscaux
 - Faire valider par le fondateur chaque leçon avant écriture en DB
 

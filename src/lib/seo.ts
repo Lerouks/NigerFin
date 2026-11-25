@@ -11,7 +11,7 @@
  * Pattern utilise par Next.js en interne pour ses propres blocs JSON-LD.
  *
  * Identifie par security-reviewer (HIGH-1) le 2026-05-27 sur /entreprises/[slug].
- * Le meme bug existait sur /outil/[slug], corrige en meme temps.
+ * Le meme bug existait sur /outil/[slug] (aujourd'hui /simulateurs/[slug]), corrige en meme temps.
  */
 export function safeJsonLd(obj: unknown): string {
   return JSON.stringify(obj)

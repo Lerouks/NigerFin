@@ -9,17 +9,17 @@ import { ToolSeoContent } from './ToolSeoContent';
 export const revalidate = 86400;
 
 const toolsMeta: Record<string, { title: string; description: string; premium: boolean }> = {
-  'simulateur-emprunt': {
+  'emprunt': {
     title: "Simulateur d'emprunt : mensualités et coût",
     description: 'Calculez vos mensualités, le coût total et les intérêts de votre emprunt selon les taux pratiqués au Niger et dans l\'UEMOA.',
     premium: false,
   },
-  'interet-simple': {
+  'interets-simples': {
     title: "Calculateur d'intérêts simples gratuit",
     description: 'Calculez les intérêts simples sur votre placement, votre épargne ou votre crédit court terme. Formule, exemples et conseils adaptés au contexte UEMOA.',
     premium: false,
   },
-  'simulateur-salaire': {
+  'salaire': {
     title: 'Simulateur salaire Niger : net depuis brut',
     description: 'Estimez votre salaire net mensuel à partir du brut selon les barèmes CNSS et l\'impôt sur les traitements et salaires (ITS) en vigueur au Niger.',
     premium: true,
@@ -29,7 +29,7 @@ const toolsMeta: Record<string, { title: string; description: string; premium: b
     description: 'Consultez les principaux indicateurs économiques du Niger et de la zone UEMOA : PIB, inflation, taux directeur BCEAO, dette, réserves de change.',
     premium: false,
   },
-  'interet-compose': {
+  'interets-composes': {
     title: "Calculateur d'intérêts composés en FCFA",
     description: 'Simulez la croissance de votre capital sur le long terme avec les intérêts composés. Visualisez l\'effet boule de neige de votre épargne.',
     premium: true,
@@ -48,11 +48,11 @@ interface ToolPageProps {
 export async function generateMetadata({ params }: ToolPageProps): Promise<Metadata> {
   const { slug } = await params;
   const tool = toolsMeta[slug];
-  if (!tool) return { title: 'Outil introuvable' };
+  if (!tool) return { title: 'Simulateur introuvable' };
   return {
     title: tool.title,
     description: tool.description,
-    alternates: { canonical: `/outil/${slug}` },
+    alternates: { canonical: `/simulateurs/${slug}` },
   };
 }
 
@@ -75,7 +75,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
     description: tool.description,
     applicationCategory: 'FinanceApplication',
     operatingSystem: 'Web',
-    url: `${SITE_URL}/outil/${slug}`,
+    url: `${SITE_URL}/simulateurs/${slug}`,
     inLanguage: 'fr',
     offers: {
       '@type': 'Offer',
@@ -95,8 +95,8 @@ export default async function ToolPage({ params }: ToolPageProps) {
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Accueil', item: SITE_URL },
-      { '@type': 'ListItem', position: 2, name: 'Outils', item: `${SITE_URL}/outils` },
-      { '@type': 'ListItem', position: 3, name: tool.title, item: `${SITE_URL}/outil/${slug}` },
+      { '@type': 'ListItem', position: 2, name: 'Simulateurs', item: `${SITE_URL}/simulateurs` },
+      { '@type': 'ListItem', position: 3, name: tool.title, item: `${SITE_URL}/simulateurs/${slug}` },
     ],
   };
 

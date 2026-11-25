@@ -4,9 +4,9 @@ import { PremiumContent } from './PremiumContent';
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: 'Devenir Premium : analyses et outils exclusifs',
+  title: 'Devenir Premium : analyses et simulateurs exclusifs',
   description:
-    'Newsletters, articles et outils financiers exclusifs pour décider et investir en Afrique de l’Ouest. À partir de 5 000 FCFA/mois.',
+    'Newsletters, articles et simulateurs financiers exclusifs pour décider et investir en Afrique de l’Ouest. À partir de 5 000 FCFA/mois.',
   keywords: [
     'NFI Report Premium',
     'abonnement NFI Report',
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'NFI REPORT Premium\u00a0: la connaissance, votre meilleur capital',
     description:
-      'Newsletters exclusives, articles Premium illimités, outils financiers avancés et téléchargement PDF des analyses. À partir de 5 000 FCFA/mois.',
+      'Newsletters exclusives, articles Premium illimités, simulateurs financiers avancés et téléchargement PDF des analyses. À partir de 5 000 FCFA/mois.',
     type: 'website',
     url: '/premium',
     images: ['/og-image.png'],

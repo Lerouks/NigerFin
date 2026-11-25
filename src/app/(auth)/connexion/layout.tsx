@@ -4,7 +4,7 @@ import { FournisseurGoogle } from '@/components/auth/FournisseurGoogle';
 
 export const metadata: Metadata = {
   title: 'Connexion',
-  description: 'Connectez-vous à votre compte NFI Report pour accéder aux analyses économiques, articles premium et outils financiers.',
+  description: 'Connectez-vous à votre compte NFI Report pour accéder aux analyses économiques, articles premium et simulateurs financiers.',
   robots: { index: false },
 };
 

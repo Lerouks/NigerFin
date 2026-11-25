@@ -230,7 +230,7 @@ function BlocAbonnement({ etat, prixMensuel }: { etat: EtatAbonnement; prixMensu
         <p className="mt-4 text-[15px] leading-[1.5] text-[#1a1a1a]">
           Premium ouvre <span className="whitespace-nowrap">tous les articles,</span>{' '}
           <span className="whitespace-nowrap">la newsletter en intégralité,</span>{' '}
-          <span className="whitespace-nowrap">les outils avancés et les cours.</span>
+          <span className="whitespace-nowrap">les simulateurs avancés et les cours.</span>
         </p>
         <div className="mt-[18px] flex flex-wrap items-center gap-x-[18px] gap-y-3">
           <Link href="/pricing" className={BOUTON}>{etat.ancienneFin ? 'Reprendre Premium' : 'Passer Premium'}</Link>

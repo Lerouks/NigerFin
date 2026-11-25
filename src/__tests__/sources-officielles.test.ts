@@ -14,6 +14,8 @@ import {
 } from '@/lib/brvm-seances';
 import { palmares } from '@/components/marches/SeanceBrvm';
 import { lignesDevises } from '@/components/marches/DevisesBceao';
+import { lignesNewsletter, sourcesNewsletter } from '@/lib/newsletter/market-sync';
+import type { Cours } from '@/lib/cours-du-jour';
 
 /**
  * SOURCES OFFICIELLES DES COURS (25/11/2026)
@@ -201,5 +203,47 @@ describe('Le franc CFA face aux devises', () => {
   it('ne donne aucune variation sans jour précédent, et rien sans cours', () => {
     expect(lignesDevises([{ date: '2026-11-25', devises: { 'Dollar us': 599.87 } }])[1]!.variation).toBeNull();
     expect(lignesDevises([])).toEqual([]);
+  });
+});
+
+describe('Tableau des marchés de la newsletter', () => {
+  const cours = (cle: Cours['cle'], extra: Partial<Cours> = {}): Cours => ({
+    cle,
+    libelle: cle,
+    valeur: 1,
+    unite: 'FCFA',
+    decimales: 2,
+    date: '2026-11-25',
+    variation: 0.5,
+    serie: [],
+    source: '',
+    ...extra,
+  });
+
+  it('reprend les cours du jour du site, sans le taux directeur, et jamais un zéro inventé', () => {
+    const lignes = lignesNewsletter([
+      cours('dollar', { libelle: 'Dollar', valeur: 599.87, decimales: 0, serie: [{ date: '2026-11-24', valeur: 598.34 }, { date: '2026-11-25', valeur: 599.87 }] }),
+      cours('euro', { libelle: 'Euro', valeur: 655.957, decimales: 3, variation: null, date: null }),
+      cours('taux', { libelle: 'Taux BCEAO', valeur: 3, unite: '%', variation: null, date: null }),
+    ]);
+    expect(lignes.map((l) => l.label)).toEqual(['Dollar', 'Euro']);
+    expect(lignes[0]).toMatchObject({ value: '600', changePercent: 0.5, spark: [598.34, 599.87] });
+    // L'euro : variation nulle, que le tableau affiche « fixe ».
+    expect(lignes[1]).toMatchObject({ value: '655,957', changePercent: 0, spark: undefined });
+  });
+
+  it('nomme les sources réellement utilisées, sans doublon', () => {
+    expect(
+      sourcesNewsletter([
+        cours('dollar', { source: 'Cours de référence publié chaque jour par la BCEAO.' }),
+        cours('naira'),
+        cours('brvm'),
+        cours('boan'),
+        cours('or'),
+        cours('brent'),
+        cours('euro'),
+      ]),
+    ).toBe('BCEAO, Banque centrale du Nigeria, BRVM, COMEX et NYMEX (New York)');
+    expect(sourcesNewsletter([cours('dollar', { source: 'Cours de référence de la Banque centrale européenne…' })])).toBe('Banque centrale européenne');
   });
 });

@@ -11,7 +11,7 @@ import { getLiveMarketRows, getMarketSourceLine } from '@/lib/newsletter/market-
  */
 export async function renderPremiumBriefingHtml(props: PremiumBriefingProps): Promise<string> {
   // Si l'issue a active autoSync sur les marches, on remplace les rows par les
-  // valeurs vivantes de la table market_data (single source of truth = site).
+  // cours du jour du site (page Finance), memes sources officielles.
   const issue = await maybeSyncMarketRows(props.issue);
   const html = await render(React.createElement(PremiumBriefing, { ...props, issue }), {
     pretty: false,

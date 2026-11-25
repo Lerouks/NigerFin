@@ -226,7 +226,7 @@ export default async function InstitutionsPage() {
         'Elle s’appelait auparavant le CREPMF, le Conseil régional de l’épargne publique et des marchés financiers.',
       ],
       pourVous: [
-        'Elle agrée les SGI et les sociétés de gestion : aucune n’exerce sans son autorisation.',
+        'Elle agrée les SGI et les sociétés de gestion, qui ne peuvent pas exercer sans son autorisation.',
         'Elle contrôle les emprunts et les titres proposés au public avant leur vente.',
         'Avant de confier votre épargne à un intermédiaire, vérifiez auprès d’elle qu’il est agréé.',
       ],

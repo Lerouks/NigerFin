@@ -34,7 +34,7 @@ export default async function MarchesPage() {
     <div className="min-h-screen bg-background">
       <CategoryHero
         title="Marchés"
-        description="Le franc CFA face aux devises, la séance de la BRVM, l’or et le pétrole : les cours qui comptent au Niger, chaque jour, de sources officielles."
+        description="Retrouvez chaque jour, de sources officielles, les cours qui comptent au Niger : le franc CFA face aux devises, la séance de la BRVM, l’or et le pétrole."
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 md:pt-12 pb-14 md:pb-20 space-y-8 md:space-y-10">

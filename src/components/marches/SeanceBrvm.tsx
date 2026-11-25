@@ -31,10 +31,10 @@ function milliards(fcfa: number): string {
 }
 
 function Variation({ valeur, className = '' }: { valeur: number; className?: string }) {
-  if (Math.abs(valeur) < 0.005) return <span className={`text-gray-500 ${className}`}>inchangé</span>;
+  if (Math.abs(valeur) < 0.005) return <span className={`whitespace-nowrap text-gray-500 ${className}`}>inchangé</span>;
   const hausse = valeur > 0;
   return (
-    <span className={`font-semibold tabular-nums ${hausse ? 'text-emerald-700' : 'text-red-700'} ${className}`}>
+    <span className={`whitespace-nowrap font-semibold tabular-nums ${hausse ? 'text-emerald-700' : 'text-red-700'} ${className}`}>
       <span aria-hidden="true">{hausse ? '▲' : '▼'} </span>
       <span className="sr-only">{hausse ? 'En hausse de' : 'En baisse de'} </span>
       {`${hausse ? '+' : MOINS}${nombre(Math.abs(valeur), 2)}${NB}%`}

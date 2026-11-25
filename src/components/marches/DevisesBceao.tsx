@@ -60,7 +60,7 @@ function Variation({ valeur }: { valeur: number | null }) {
   if (Math.abs(valeur) < 0.005) return <span className="text-gray-500">inchangé</span>;
   const hausse = valeur > 0;
   return (
-    <span className={`font-semibold ${hausse ? 'text-emerald-700' : 'text-red-700'}`}>
+    <span className={`whitespace-nowrap font-semibold ${hausse ? 'text-emerald-700' : 'text-red-700'}`}>
       <span aria-hidden="true">{hausse ? '▲' : '▼'} </span>
       <span className="sr-only">{hausse ? 'En hausse de' : 'En baisse de'} </span>
       {`${hausse ? '+' : MOINS}${nombre(Math.abs(valeur), 2)}${NB}%`}

@@ -23,14 +23,16 @@ export function AutresEntreprises({ entreprises }: { entreprises: AutreEntrepris
   if (entreprises.length === 0) return null;
   return (
     <div className="mt-4 overflow-hidden rounded-[10px] border border-black/8 bg-white">
-      <ul className="-mb-px -mr-px grid md:grid-cols-2 lg:grid-cols-3">
+      {/* Trois colonnes seulement à partir de 1280 px : à 1024, une colonne sur
+          trois coupait « Les parts minières de l’État » en deux lignes. */}
+      <ul className="-mb-px -mr-px grid md:grid-cols-2 xl:grid-cols-3">
         {entreprises.map((e) => (
           <li key={e.slug} className="border-b border-r border-black/[0.07]">
             <Link
               href={`/entreprises/${e.slug}`}
-              className="grid min-h-[72px] grid-cols-[64px_minmax(0,1fr)_16px] items-center gap-3.5 px-4 py-3 transition-colors hover:bg-black/[0.025] focus-visible:bg-black/[0.025] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#111]"
+              className="grid min-h-[72px] grid-cols-[56px_minmax(0,1fr)] items-center gap-3 px-3 py-3 transition-colors min-[400px]:grid-cols-[64px_minmax(0,1fr)_16px] min-[400px]:gap-3.5 min-[400px]:px-4 hover:bg-black/[0.025] focus-visible:bg-black/[0.025] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#111]"
             >
-              <span className="relative block h-10 w-16">
+              <span className="relative block h-9 w-14 min-[400px]:h-10 min-[400px]:w-16">
                 {e.logo ? (
                   <Image src={e.logo} alt={`Logo ${e.nom}`} fill sizes="64px" className="object-contain" />
                 ) : null}
@@ -40,7 +42,9 @@ export function AutresEntreprises({ entreprises }: { entreprises: AutreEntrepris
               <span className="min-w-0">
                 <span className="block text-[16px] font-bold leading-tight text-[#111]">{e.nom}</span>
                 {e.ligne ? (
-                  <span className="mt-0.5 block text-[14px] leading-snug text-gray-600">{typographieFr(e.ligne)}</span>
+                  <span className="mt-0.5 block text-[13px] leading-snug text-gray-600 min-[360px]:text-[14px]">
+                    {typographieFr(e.ligne)}
+                  </span>
                 ) : null}
                 {e.ville || e.annee ? (
                   <span className="mt-1 block text-[13px] leading-snug text-gray-500">
@@ -53,7 +57,8 @@ export function AutresEntreprises({ entreprises }: { entreprises: AutreEntrepris
                   </span>
                 ) : null}
               </span>
-              <ChevronRight className="h-4 w-4 text-gray-400" aria-hidden="true" />
+              {/* Sous 400 px, la flèche cède sa place au texte : toute la ligne reste un lien. */}
+              <ChevronRight className="hidden h-4 w-4 text-gray-400 min-[400px]:block" aria-hidden="true" />
             </Link>
           </li>
         ))}

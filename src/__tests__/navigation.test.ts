@@ -102,16 +102,22 @@ describe('Marchés et Entreprises hors de la barre, Niger dedans (24/11/2026)', 
     expect(NAV_ENTRIES.map((e) => e.key)).toContain('niger');
   });
 
-  it('restent accessibles depuis le pied de page', () => {
+  it('Marchés et Niger restent accessibles depuis le pied de page', () => {
     expect(FOOTER_ENTRIES.map((e) => e.key)).toContain('marches');
-    expect(FOOTER_ENTRIES.map((e) => e.key)).toContain('entreprises');
     expect(FOOTER_ENTRIES.map((e) => e.key)).toContain('niger');
   });
 
-  it('restent indexees dans le sitemap : les pages ne sont ni retirees ni redirigees', () => {
+  it('Marchés et Niger restent indexés dans le sitemap', () => {
     expect(SITEMAP_ENTRIES.map((e) => e.path)).toContain('/marches');
-    expect(SITEMAP_ENTRIES.map((e) => e.path)).toContain('/entreprises');
     expect(SITEMAP_ENTRIES.map((e) => e.path)).toContain('/niger');
+  });
+
+  it('l\'Atlas /entreprises est fondu dans la page Niger : redirection permanente, ni pied de page ni sitemap', () => {
+    // Choix de Raouf le 24/11/2026. Les fiches /entreprises/[slug] restent.
+    expect(FOOTER_ENTRIES.map((e) => e.key)).not.toContain('entreprises');
+    expect(SITEMAP_ENTRIES.map((e) => e.path)).not.toContain('/entreprises');
+    const config = readFileSync(join(process.cwd(), 'next.config.js'), 'utf8');
+    expect(config).toMatch(/source: '\/entreprises',\s*destination: '\/niger#entreprises',\s*permanent: true/);
   });
 
   it('« marches » reste une cle connue, mais son lien de tag pointe vers /finance', () => {

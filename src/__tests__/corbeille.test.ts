@@ -320,7 +320,7 @@ describe('rafraîchissement du cache', () => {
     { table: 'articles', slug: 'or-du-sahel', attendu: [[ARTICLE_CACHE_TAG, { expire: 0 }], ['/articles/or-du-sahel'], ['/']] },
     { table: 'education_lessons', slug: null, attendu: [['/education'], ['/education/[id]', 'page'], ['/education/parcours/[slug]', 'page']] },
     { table: 'education_categories', slug: 'bourse', attendu: [['/education'], ['/education/[id]', 'page']] },
-    { table: 'strategic_enterprises', slug: 'sonidep', attendu: [['strategic-enterprises', 'max'], ['/entreprises'], ['/entreprises/sonidep']] },
+    { table: 'strategic_enterprises', slug: 'sonidep', attendu: [['strategic-enterprises', 'max'], ['/niger'], ['/entreprises/sonidep']] },
     { table: 'legal_sections', slug: null, attendu: [['/cgu'], ['/mentions-legales'], ['/confidentialite']] },
     { table: 'newsletter_issues', slug: '009-brouillon', attendu: [] },
   ];

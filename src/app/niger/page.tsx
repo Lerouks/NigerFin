@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { SITE_URL } from '@/lib/config';
-import { createServiceClient } from '@/lib/supabase';
+import { getStrategicEnterprises } from '@/lib/strategic-enterprises';
 import { getArticlesByCategory } from '@/lib/articles';
 import { ArticleCard } from '@/components/ArticleCard';
-import { paragrapheFr, typographieFr } from '@/lib/typographie-fr';
+import { paragrapheFr } from '@/lib/typographie-fr';
 import { CarteNigerEntreprises, type EntrepriseSurCarte } from '@/components/niger/CarteNigerEntreprises';
+import { MurEntreprises, type EntrepriseDuMur } from '@/components/niger/MurEntreprises';
+import { LIGNE_ENTREPRISE, logoEntreprise, secteurCourt } from '@/data/entreprises-niger';
 import {
   CHIFFRES_CLES,
   DETTE_PUBLIQUE,
@@ -51,22 +52,21 @@ function dateFr(iso: string): string {
     .replace(/ /g, NB);
 }
 
-async function getEntreprises(): Promise<EntrepriseSurCarte[]> {
-  const supabase = createServiceClient();
-  if (!supabase) return [];
-  const { data, error } = await supabase
-    .from('strategic_enterprises')
-    .select('name, slug, sector, headquarters')
-    .eq('is_visible', true)
-    .order('display_order', { ascending: true });
-  if (error || !data) return [];
-  return data
+/** Les entreprises visibles (cache d'une heure, vidé quand l'admin les modifie). */
+async function getEntreprises(): Promise<(EntrepriseSurCarte & EntrepriseDuMur & { secteurMur: string })[]> {
+  const toutes = await getStrategicEnterprises();
+  return toutes
     .filter((e) => e.slug && e.name)
     .map((e) => ({
-      nom: e.name as string,
-      slug: e.slug as string,
-      secteur: secteurFr((e.sector as string | null) ?? ''),
-      ville: villeDuSiege(e.headquarters as string | null),
+      nom: e.name,
+      slug: e.slug!,
+      // La carte garde le secteur complet ; le mur, un mot.
+      secteur: secteurFr(e.sector ?? ''),
+      secteurMur: secteurCourt(e.sector),
+      ville: villeDuSiege(e.headquarters),
+      annee: e.founded_year ?? null,
+      ligne: LIGNE_ENTREPRISE[e.slug!] ?? null,
+      logo: logoEntreprise(e.slug!, e.logo_url),
     }));
 }
 
@@ -197,23 +197,14 @@ export default async function NigerPage() {
       {/* Les entreprises stratégiques, lues en base (visibles dans l'admin). */}
       {entreprises.length > 0 && (
         <section id="entreprises" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 md:pb-16 scroll-mt-24">
-          <h2 className="text-[24px] font-bold tracking-[-0.01em]">Les entreprises</h2>
-          <p className="mt-1.5 text-[15px] text-gray-500">{soigne('Les sociétés qui pèsent dans l\u2019économie du pays.')}</p>
-          <ul className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-3.5 lg:grid-cols-4">
-            {entreprises.map((e) => (
-              <li key={e.slug}>
-                <Link
-                  href={`/entreprises/${e.slug}`}
-                  className="block h-full rounded-[10px] border border-black/8 bg-white p-[18px] transition-colors hover:border-black/20"
-                >
-                  <span className="block text-[17px] font-bold leading-tight">{e.nom}</span>
-                  <span className="mt-1 block text-[13px] text-gray-500">{typographieFr(e.secteur)}</span>
-                  {e.ville && <span className="block text-[13px] text-gray-400">{e.ville}</span>}
-                  <span className="mt-3 block text-[13px] font-semibold">Voir la fiche&nbsp;›</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-1">
+            <div>
+              <h2 className="text-[24px] font-bold tracking-[-0.01em]">Les entreprises</h2>
+              <p className="mt-1.5 text-[15px] text-gray-500">{soigne('Les sociétés qui pèsent dans l\u2019économie du pays.')}</p>
+            </div>
+            <p className="text-[13px] text-gray-500">{entreprises.length}{'\u00a0'}entreprises</p>
+          </div>
+          <MurEntreprises entreprises={entreprises.map((e) => ({ ...e, secteur: e.secteurMur }))} />
         </section>
       )}
 

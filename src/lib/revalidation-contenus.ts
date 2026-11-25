@@ -12,7 +12,7 @@ import { STRATEGIC_ENTERPRISES_CACHE_TAG } from '@/lib/strategic-enterprises';
  * jusqu'à l'expiration du cache, une heure plus tard.
  */
 
-const RUBRIQUES_ARTICLES = ['/economie', '/finance', '/entreprises', '/education', '/marches', '/niger'] as const;
+const RUBRIQUES_ARTICLES = ['/economie', '/finance', '/education', '/marches', '/niger'] as const;
 
 export const PAGES_LEGALES = [
   '/mentions-legales',
@@ -41,7 +41,7 @@ export function revaliderArticles(slug?: string | null): void {
 /** L'atlas des entreprises et la fiche elle-même. */
 export function revaliderEntreprises(slug?: string | null): void {
   revalidateTag(STRATEGIC_ENTERPRISES_CACHE_TAG, 'max');
-  revalidatePath('/entreprises');
+  revalidatePath('/niger');
   if (slug) revalidatePath(`/entreprises/${slug}`);
 }
 

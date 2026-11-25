@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       revalidatePath(`/articles/${body.slug}`);
       revalidated.push(`/articles/${body.slug}`);
     }
-    for (const cat of ['/economie', '/finance', '/entreprises', '/education', '/marches']) {
+    for (const cat of ['/economie', '/finance', '/niger', '/education', '/marches']) {
       revalidatePath(cat);
       revalidated.push(cat);
     }

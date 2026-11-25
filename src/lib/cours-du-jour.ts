@@ -31,7 +31,7 @@ export interface PointDeCours {
   valeur: number;
 }
 
-export type CleCours = 'euro' | 'dollar' | 'naira' | 'brvm' | 'or' | 'brent';
+type CleCours = 'euro' | 'dollar' | 'naira' | 'brvm' | 'or' | 'brent';
 
 export interface Cours {
   cle: CleCours;
@@ -53,7 +53,7 @@ export interface Cours {
 
 // ─── Calculs (purs, testés) ──────────────────────────────────────────────────
 
-export const dateIso = (d: Date) => d.toISOString().slice(0, 10);
+const dateIso = (d: Date) => d.toISOString().slice(0, 10);
 
 export function variationPourcent(serie: PointDeCours[]): number | null {
   if (serie.length < 2) return null;
@@ -129,7 +129,7 @@ export function pointsYahoo(json: ReponseYahoo): PointDeCours[] {
   return [...parDate].map(([date, valeur]) => ({ date, valeur })).sort((a, b) => a.date.localeCompare(b.date));
 }
 
-export function seancesEnPoints(seances: SeanceBrvm[]): PointDeCours[] {
+function seancesEnPoints(seances: SeanceBrvm[]): PointDeCours[] {
   return seances.map((s) => ({ date: s.date, valeur: s.cloture }));
 }
 

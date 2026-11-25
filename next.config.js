@@ -51,7 +51,14 @@ const nextConfig = {
     return [
       {
         source: '/niger/entreprises-strategiques',
-        destination: '/entreprises',
+        destination: '/niger#entreprises',
+        permanent: true,
+      },
+      {
+        // L'Atlas des entreprises est fondu dans la page Niger (choix de Raouf,
+        // 24/11/2026). Les fiches gardent leur adresse /entreprises/[slug].
+        source: '/entreprises',
+        destination: '/niger#entreprises',
         permanent: true,
       },
       {

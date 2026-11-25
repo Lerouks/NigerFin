@@ -9,13 +9,10 @@ import {
   Users,
   Globe,
   DollarSign,
-  Landmark,
   ExternalLink,
   ChevronRight,
 } from 'lucide-react';
 import { ArticleCard } from '@/components/ArticleCard';
-import { CountryFlag } from '@/components/entreprises/CountryFlag';
-import { parseOwnership } from '@/lib/ownership';
 import { paragrapheFr, secteurFr } from '@/lib/typographie-fr';
 import type { Article } from '@/types';
 
@@ -30,7 +27,6 @@ interface Enterprise {
   headquarters: string | null;
   employees: string | null;
   revenue: string | null;
-  ownership: string | null;
   website: string | null;
   detailed_description: string | null;
   logo_url: string | null;
@@ -76,11 +72,9 @@ export function EnterpriseContent({
     enterprise.full_name ||
     enterprise.founded_year ||
     enterprise.headquarters ||
-    enterprise.ownership ||
     enterprise.employees ||
     enterprise.revenue ||
     enterprise.website;
-  const ownership = parseOwnership(enterprise.ownership);
   const takeaways = (enterprise.key_facts ?? []).slice(0, 3);
 
   return (
@@ -89,11 +83,11 @@ export function EnterpriseContent({
       <div className="relative bg-[#0a0a0a] text-white overflow-hidden">
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
           <Link
-            href="/entreprises"
+            href="/niger#entreprises"
             className="inline-flex items-center gap-1.5 text-[13px] text-white/60 hover:text-white transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
-            Retour à l&apos;atlas
+            Toutes les entreprises
           </Link>
 
           <div className="flex items-start gap-5">
@@ -265,33 +259,6 @@ export function EnterpriseContent({
                         value={String(enterprise.founded_year)}
                       />
                     )}
-                    {ownership.length > 0 && (
-                      <InfoRow
-                        icon={Landmark}
-                        label="Actionnariat"
-                        value={
-                          <ul className="space-y-1.5">
-                            {ownership.map((share, idx) => (
-                              <li
-                                key={`${share.label}-${idx}`}
-                                className="flex items-center gap-2"
-                              >
-                                <CountryFlag
-                                  country={share.country}
-                                  size={18}
-                                />
-                                <span>{share.label}</span>
-                                {share.share != null && (
-                                  <span className="text-gray-500 tabular-nums text-[13px]">
-                                    {share.share}&nbsp;%
-                                  </span>
-                                )}
-                              </li>
-                            ))}
-                          </ul>
-                        }
-                      />
-                    )}
                     {enterprise.employees && (
                       <InfoRow
                         icon={Users}
@@ -327,13 +294,13 @@ export function EnterpriseContent({
               {/* CTA retour atlas */}
               <div className="bg-[#0a0a0a] text-white rounded-xl p-6">
                 <p className="text-[13px] text-white/70 mb-3">
-                  {paragrapheFr('Explorer les autres piliers de l\u2019économie nigérienne')}
+                  {paragrapheFr('Les autres entreprises qui pèsent dans l\u2019économie du pays')}
                 </p>
                 <Link
-                  href="/entreprises"
+                  href="/niger#entreprises"
                   className="inline-flex items-center gap-2 text-[13px] font-semibold text-gold hover:text-white transition-colors"
                 >
-                  Atlas économique du Niger
+                  Voir toutes les entreprises
                   <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>

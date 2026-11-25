@@ -74,17 +74,19 @@ export const NAVIGATION: NavigationEntry[] = [
 
   // --- Registre « agir » : les ressources, ce qu'on en fait ---
   {
-    // Entreprises sort de la barre le 24/11/2026 (décision de Raouf) : ses
-    // fiches rejoignent la page Niger, « Chiffres et entreprises ». La page
-    // reste en 200, jamais redirigée, et garde son lien de pied de page.
+    // Entreprises sort de la barre le 24/11/2026 (décision de Raouf), puis son
+    // Atlas est fondu dans la page Niger le même jour : /entreprises renvoie
+    // (301, next.config.js) vers la section « Les entreprises » de /niger. La
+    // rubrique reste pour la catégorie des articles ; ses fiches gardent leur
+    // adresse /entreprises/[slug].
     key: 'entreprises',
     label: 'Entreprises',
     path: '/entreprises',
     order: 7,
     register: 'agir',
     inNav: false,
-    inFooter: true,
-    inSitemap: true,
+    inFooter: false,
+    inSitemap: false,
     isEditorial: true,
   },
   {

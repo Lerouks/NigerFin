@@ -8,6 +8,7 @@ import { paymentConfirmationEmail } from '@/lib/email-templates';
 import { applyOverridesTo } from '@/lib/emails/overrides';
 import { upsertNewsletterSubscriber } from '@/lib/newsletter/subscribers';
 import { issueInvoice } from '@/lib/invoices/issue';
+import { periodePayee, type AccesEnCours, type PeriodePayee } from '@/lib/periode-payee';
 import { SITE_URL } from '@/lib/config';
 import { checkRateLimit, getClientIP, RATE_LIMITS } from '@/lib/rate-limit';
 import { verifyIPayPayment, isIPaySucceeded, isIPayFailed } from '@/lib/ipaymoney';
@@ -74,12 +75,22 @@ function verifyWebhookAuth(request: NextRequest): boolean {
   }
 }
 
-/** Date d'expiration de l'abonnement pour un cycle de facturation donné. */
-function computeExpiry(billingCycle: BillingCycle): Date {
-  const { durationMonths } = getBillingOption(billingCycle);
-  const expiresAt = new Date();
-  expiresAt.setMonth(expiresAt.getMonth() + durationMonths);
-  return expiresAt;
+/**
+ * Statut et fin de l'accès en cours, lus avant de calculer la période payée :
+ * un renouvellement anticipé s'ajoute à la fin en cours (voir periodePayee).
+ * Si la lecture échoue, la période part du paiement, comme avant ce calcul.
+ */
+async function lireAccesEnCours(serviceClient: ServiceClient, userId: string): Promise<AccesEnCours | null> {
+  const { data, error } = await serviceClient
+    .from('user_profiles')
+    .select('subscription_status, subscription_end')
+    .eq('id', userId)
+    .single();
+  if (error) {
+    Sentry.captureException(error, { tags: { context: 'ipaymoney-acces-en-cours' }, extra: { userId } });
+    return null;
+  }
+  return data;
 }
 
 /**
@@ -191,9 +202,9 @@ async function notifyAndInvoicePremium(
   billingCycle: BillingCycle,
   amount: number,
   iPayReference: string,
-  now: string,
-  expiresAt: Date,
+  periode: PeriodePayee,
 ): Promise<void> {
+  const expiresAt = periode.fin;
   const { data: profile } = await serviceClient
     .from('user_profiles')
     .select('email, full_name')
@@ -222,7 +233,7 @@ async function notifyAndInvoicePremium(
     description: `Abonnement Premium NFI Report (${cycleLabelLower})`,
     lineItems: [
       {
-        description: `Premium ${cycleLabelLower}, accès illimité aux articles, analyses, simulateurs et briefings exclusifs (du ${new Date(now).toLocaleDateString('fr-FR')} au ${expiresAt.toLocaleDateString('fr-FR')}).`,
+        description: `Premium ${cycleLabelLower}, accès illimité aux articles, analyses, simulateurs et briefings exclusifs (du ${periode.debut.toLocaleDateString('fr-FR')} au ${expiresAt.toLocaleDateString('fr-FR')}).`,
         qty: 1,
         unitPriceXof: amount,
         totalXof: amount,
@@ -231,7 +242,7 @@ async function notifyAndInvoicePremium(
     paymentMethod: 'iPayMoney',
     paymentReference: iPayReference,
     billingCycle,
-    periodStart: now,
+    periodStart: periode.debut.toISOString(),
     periodEnd: expiresAt.toISOString(),
   }).catch((err) =>
     Sentry.captureException(err, {
@@ -253,7 +264,9 @@ async function activatePremium(
   const billingCycle = (paymentRequest.billing_cycle || 'monthly') as BillingCycle;
   const { amount, user_id: userId } = paymentRequest;
   const now = new Date().toISOString();
-  const expiresAt = computeExpiry(billingCycle);
+  // Payer avant la fin de son accès ne fait perdre aucun jour.
+  const periode = periodePayee(billingCycle, await lireAccesEnCours(serviceClient, userId), new Date(now));
+  const expiresAt = periode.fin;
 
   // Verrou d'idempotence atomique : une seule exécution passe les effets de bord.
   const won = await claimPaymentVerified(serviceClient, paymentRequest.id, expiresAt, now);
@@ -270,9 +283,10 @@ async function activatePremium(
     amount,
     ipaymoney_ref: iPayReference,
     expiresAt: expiresAt.toISOString(),
+    prolonge: periode.prolonge,
   });
 
-  await notifyAndInvoicePremium(serviceClient, userId, billingCycle, amount, iPayReference, now, expiresAt);
+  await notifyAndInvoicePremium(serviceClient, userId, billingCycle, amount, iPayReference, periode);
   return true;
 }
 

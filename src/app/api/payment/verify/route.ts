@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { logAuditEvent } from '@/lib/audit';
-import { getBillingOption, type BillingCycle } from '@/config/pricing';
+import { type BillingCycle } from '@/config/pricing';
+import { periodePayee } from '@/lib/periode-payee';
 import { sendTransactionalEmail } from '@/lib/email';
 import { paymentConfirmationEmail, paymentRejectionEmail } from '@/lib/email-templates';
 import { applyOverridesTo } from '@/lib/emails/overrides';
@@ -97,11 +98,18 @@ export async function POST(request: NextRequest) {
 
     // action === 'verify', duration depends on billing cycle
     const cycle = (paymentRequest.billing_cycle || 'monthly') as BillingCycle;
-    const billingOption = getBillingOption(cycle);
-    const expiresAt = new Date();
-    expiresAt.setMonth(expiresAt.getMonth() + billingOption.durationMonths);
-
     const now = new Date().toISOString();
+
+    // Rôle et accès en cours, lus avant le calcul : le rôle admin est préservé,
+    // et payer avant la fin de son accès ne fait perdre aucun jour.
+    const { data: targetProfile } = await serviceClient
+      .from('user_profiles')
+      .select('role, subscription_status, subscription_end')
+      .eq('id', paymentRequest.user_id)
+      .single();
+
+    const periode = periodePayee(cycle, targetProfile, new Date(now));
+    const expiresAt = periode.fin;
 
     // Update payment request
     const { error: paymentUpdateError } = await serviceClient
@@ -119,13 +127,6 @@ export async function POST(request: NextRequest) {
       Sentry.captureException(paymentUpdateError, { tags: { context: 'payment-verify-update' } });
       return NextResponse.json({ error: 'Erreur lors de la vérification du paiement' }, { status: 500 });
     }
-
-    // Preserve admin role
-    const { data: targetProfile } = await serviceClient
-      .from('user_profiles')
-      .select('role')
-      .eq('id', paymentRequest.user_id)
-      .single();
 
     const role = targetProfile?.role === 'admin' ? 'admin' : 'premium';
 
@@ -176,6 +177,7 @@ export async function POST(request: NextRequest) {
       amount: paymentRequest.amount,
       payment_method: paymentRequest.payment_method,
       expiresAt: expiresAt.toISOString(),
+      prolonge: periode.prolonge,
     });
 
     // Send confirmation email to user
@@ -216,7 +218,7 @@ export async function POST(request: NextRequest) {
       description: `Abonnement Premium NFI Report (${cycleLabelLower})`,
       lineItems: [
         {
-          description: `Premium ${cycleLabelLower}, accès illimité aux articles, analyses, simulateurs et briefings exclusifs (du ${new Date(now).toLocaleDateString('fr-FR')} au ${expiresAt.toLocaleDateString('fr-FR')}).`,
+          description: `Premium ${cycleLabelLower}, accès illimité aux articles, analyses, simulateurs et briefings exclusifs (du ${periode.debut.toLocaleDateString('fr-FR')} au ${expiresAt.toLocaleDateString('fr-FR')}).`,
           qty: 1,
           unitPriceXof: paymentRequest.amount,
           totalXof: paymentRequest.amount,
@@ -225,7 +227,7 @@ export async function POST(request: NextRequest) {
       paymentMethod: paymentRequest.payment_method ?? undefined,
       paymentReference: paymentRequest.transaction_number ?? paymentRequestId,
       billingCycle: cycle,
-      periodStart: now,
+      periodStart: periode.debut.toISOString(),
       periodEnd: expiresAt.toISOString(),
     }).catch((err) => {
       Sentry.captureException(err, {

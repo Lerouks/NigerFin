@@ -224,6 +224,59 @@ describe('POST /api/ipaymoney/callback', () => {
     expect(auditCalledWith(VERIFIED)).toBe(true);
   });
 
+  // Le profil que lisent les deux .single() de la route (accès en cours, puis courriel).
+  function profilAvecAcces(subscription_status: string, subscription_end: string) {
+    builder.single.mockImplementation(async () => ({
+      data: { role: 'premium', email: 'u@test.com', full_name: 'Test', subscription_status, subscription_end },
+      error: null,
+    }));
+  }
+  function finEcrite(): string | undefined {
+    const patch = builder.update.mock.calls
+      .map((c) => c[0] as Record<string, unknown>)
+      .find((p) => typeof p.subscription_end === 'string');
+    return patch?.subscription_end as string | undefined;
+  }
+
+  it('renouvellement anticipé : l’année payée s’ajoute à la fin en cours, aucun jour perdu', async () => {
+    const finEnCours = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
+    profilAvecAcces('active', finEnCours.toISOString());
+    mockVerify.mockResolvedValue({ external_reference: 'NFI-1', reference: 'ipayref', status: 'succeeded', amount: 48543 });
+    const { POST } = await import('@/app/api/ipaymoney/callback/route');
+    const res = await POST(
+      ipayRequest({ data: { external_reference: 'NFI-1', reference: 'ipayref', status: 'succeeded' } }, AUTH),
+    );
+    expect(res.status).toBe(200);
+
+    const attendue = new Date(finEnCours);
+    attendue.setMonth(attendue.getMonth() + 12);
+    expect(finEcrite()).toBe(attendue.toISOString());
+    // La facture dit la période réellement payée : de l'ancienne fin à la nouvelle.
+    const { issueInvoice } = await import('@/lib/invoices/issue');
+    expect(issueInvoice).toHaveBeenCalledWith(
+      expect.objectContaining({ periodStart: finEnCours.toISOString(), periodEnd: attendue.toISOString() }),
+    );
+    const appel = mockAudit.mock.calls.find((c) => c[1] === VERIFIED) as unknown[] | undefined;
+    expect(appel?.[4]).toMatchObject({ prolonge: true });
+  });
+
+  it('accès arrivé à sa fin : l’année part du paiement', async () => {
+    profilAvecAcces('active', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+    mockVerify.mockResolvedValue({ external_reference: 'NFI-1', reference: 'ipayref', status: 'succeeded', amount: 48543 });
+    const avant = Date.now();
+    const { POST } = await import('@/app/api/ipaymoney/callback/route');
+    const res = await POST(
+      ipayRequest({ data: { external_reference: 'NFI-1', reference: 'ipayref', status: 'succeeded' } }, AUTH),
+    );
+    expect(res.status).toBe(200);
+
+    const ecrite = new Date(finEcrite() ?? '').getTime();
+    const auPlusTot = new Date(avant);
+    auPlusTot.setMonth(auPlusTot.getMonth() + 12);
+    expect(ecrite).toBeGreaterThanOrEqual(auPlusTot.getTime());
+    expect(ecrite - auPlusTot.getTime()).toBeLessThan(60_000);
+  });
+
   it('REFUSE d\'activer si le client a paye MOINS que du (anti sous-paiement)', async () => {
     // iPay confirme "succeeded" mais le montant reellement paye est 100 au lieu de 48 543.
     mockVerify.mockResolvedValue({ external_reference: 'NFI-1', reference: 'ipayref', status: 'succeeded', amount: 100 });

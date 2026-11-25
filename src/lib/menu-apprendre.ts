@@ -22,11 +22,14 @@ export const getMenuApprendre = unstable_cache(
       const cours = await getCours();
       if (cours.length === 0) return MENU_APPRENDRE_VIDE;
       const premier = cours[0]!;
+      // Au-delà de quatre cours, un titre par ligne : la liste déroulante reste
+      // moins haute que l'écran d'un portable (dix thèmes ouverts depuis le 25/11/2026).
+      const avecDetail = cours.length <= 4;
       return {
         cours: cours.map((c) => ({
           href: c.href,
           label: typographieFr(c.titre),
-          detail: `${c.lecons.length} leçon${c.lecons.length > 1 ? 's' : ''} · ${c.minutes} min`,
+          ...(avecDetail ? { detail: `${c.lecons.length} leçon${c.lecons.length > 1 ? 's' : ''} · ${c.minutes} min` } : {}),
         })),
         pourCommencer: premier.lecons.slice(0, 4).map((l) => ({
           href: l.href,
@@ -39,7 +42,7 @@ export const getMenuApprendre = unstable_cache(
       return MENU_APPRENDRE_VIDE;
     }
   },
-  // v3 le 25/11/2026 : les parcours laissent la place aux cours.
-  ['menu-apprendre-v3'],
+  // v3 le 25/11/2026 : les parcours laissent la place aux cours ; v4 : titres seuls au-delà de quatre cours.
+  ['menu-apprendre-v4'],
   { revalidate: 3600, tags: [MENU_APPRENDRE_CACHE_TAG] },
 );

@@ -4,10 +4,15 @@ vi.mock('next/cache', () => ({
   unstable_cache: <T extends (...args: never[]) => unknown>(fn: T) => fn,
 }));
 
-const seancesEnBase = vi.hoisted(() => ({ valeur: [] as unknown[] }));
+const seancesEnBase = vi.hoisted(() => ({ valeur: [] as unknown[], boan: [] as unknown[] }));
 vi.mock('@/lib/brvm-seances', async (importOriginal) => {
   const original = await importOriginal<typeof import('@/lib/brvm-seances')>();
-  return { ...original, lireSeancesBrvm: vi.fn(async () => seancesEnBase.valeur) };
+  return {
+    ...original,
+    lireSeancesBrvm: vi.fn(async (historique = 'composite') =>
+      historique === 'boan' ? seancesEnBase.boan : seancesEnBase.valeur,
+    ),
+  };
 });
 
 import {
@@ -21,7 +26,14 @@ import {
   pointsYahoo,
   variationPourcent,
 } from '@/lib/cours-du-jour';
-import { ajouterSeance, analyserIndicesBrvm, nombreFr, type SeanceBrvm } from '@/lib/brvm-seances';
+import {
+  ajouterSeance,
+  ajouterSeanceAction,
+  analyserCoursActionBrvm,
+  analyserIndicesBrvm,
+  nombreFr,
+  type SeanceBrvm,
+} from '@/lib/brvm-seances';
 
 /**
  * LES COURS DU JOUR (page Finance, 24/11/2026)
@@ -39,6 +51,16 @@ const PAGE_BRVM = `
 <tr><td>BRVM - COMPOSITE TOTAL RETURN</td><td class="text-right">1 230,86</td><td class="text-right">1 228,62</td><td class="text-right"><span class="text-bad">-0,18</span></td><td>1,97</td> </tr>
 <tr><td>BRVM - COMPOSITE</td><td class="text-right">476,54</td><td class="text-right">472,04</td><td class="text-right"><span class="text-bad">-0,94</span><span class="icone-seance bad"></span></td><td class="text-right"><span class="text-bad">1,70</span></td> </tr>
 <tr><td>BRVM - PRESTIGE</td><td class="text-right">182,29</td><td class="text-right">180,92</td><td class="text-right">-0,75</td><td>1,47</td></tr>
+</tbody></table>`;
+
+// Extrait de brvm.org/fr/cours-actions/0 (25/11/2026) : la séance du 24/11.
+const PAGE_ACTIONS = `
+<p class="header-seance">Mercredi, 25 novembre, 2026 - 07:24</p>
+<table><thead><tr><th>Symbole</th><th>Nom</th><th>Volume</th><th>Cours veille (FCFA)</th><th>Cours Ouverture (FCFA)</th><th>Cours Clôture (FCFA)</th><th>Variation (%)</th></tr></thead>
+<tbody>
+<tr><td>BOAM</td><td>BANK OF AFRICA MALI</td><td>1 020</td><td>3 900</td><td>3 900</td><td>3 950</td><td>1,28</td></tr>
+<tr><td>BOAN</td><td>BANK OF AFRICA NIGER</td><td>11 468</td><td>4 165</td><td>4 160</td><td>4 105</td><td><span class="text-bad">-1,44</span></td></tr>
+<tr><td>SEMC</td><td>EVIOSYS PACKAGING SIEM COTE D'IVOIRE</td><td>0</td><td>1 495</td><td>0</td><td>1 495</td><td>0,00</td></tr>
 </tbody></table>`;
 
 describe('Lecture de la page des indices de la BRVM', () => {
@@ -87,6 +109,35 @@ describe('Historique des séances', () => {
     expect(ajouterSeance(avant, { ...fermee, statut: 'ouverte' })).toBe(avant);
     expect(ajouterSeance(avant, { ...fermee, date: null })).toBe(avant);
     expect(ajouterSeance(avant, { ...fermee, composite: null })).toBe(avant);
+  });
+
+  it("n'ajoute pas un jour férié, où la page répète la dernière séance sous la date du jour", () => {
+    const avant = ajouterSeance([s('2026-11-23', 476.54)], fermee);
+    const ferie = { ...fermee, date: '2026-11-25' };
+    expect(ajouterSeance(avant, ferie)).toBe(avant);
+    // Une vraie séance part de la clôture de la précédente : elle entre.
+    const suivante = { ...ferie, composite: { precedent: 472.04, cloture: 474.1, variation: 0.44 } };
+    expect(ajouterSeance(avant, suivante).at(-1)).toEqual({ date: '2026-11-25', precedent: 472.04, cloture: 474.1, variation: 0.44 });
+  });
+});
+
+describe('BOA Niger (page des cours des actions)', () => {
+  it('lit la ligne de BOAN : cours de la veille, clôture, variation publiée', () => {
+    expect(analyserCoursActionBrvm(PAGE_ACTIONS, 'BOAN')).toEqual({ precedent: 4165, cloture: 4105, variation: -1.44 });
+  });
+
+  it("lit une action sans échange (clôture égale à la veille) et ignore un symbole absent", () => {
+    expect(analyserCoursActionBrvm(PAGE_ACTIONS, 'SEMC')).toEqual({ precedent: 1495, cloture: 1495, variation: 0 });
+    expect(analyserCoursActionBrvm(PAGE_ACTIONS, 'SNTS')).toBeNull();
+    expect(analyserCoursActionBrvm('<p>Maintenance</p>', 'BOAN')).toBeNull();
+  });
+
+  it('range la séance à la date du Composite, sans doublon', () => {
+    const valeurs = { precedent: 4165, cloture: 4105, variation: -1.44 };
+    const avant: SeanceBrvm[] = [{ date: '2026-11-20', precedent: 4150, cloture: 4420, variation: 6.51 }];
+    const apres = ajouterSeanceAction(avant, '2026-11-24', valeurs);
+    expect(apres.map((x) => x.date)).toEqual(['2026-11-20', '2026-11-24']);
+    expect(ajouterSeanceAction(apres, '2026-11-24', { ...valeurs, cloture: 4110 })).toHaveLength(2);
   });
 });
 
@@ -175,6 +226,10 @@ describe('Assemblage des tuiles', () => {
       { date: '2026-11-23', precedent: 492.89, cloture: 476.54, variation: -3.32 },
       { date: '2026-11-24', precedent: 476.54, cloture: 472.04, variation: -0.94 },
     ];
+    seancesEnBase.boan = [
+      { date: '2026-11-20', precedent: 4150, cloture: 4420, variation: 6.51 },
+      { date: '2026-11-24', precedent: 4165, cloture: 4105, variation: -1.44 },
+    ];
     vi.spyOn(console, 'error').mockImplementation(() => {});
     vi.useFakeTimers({ toFake: ['Date'], now: AUJOURDHUI });
   });
@@ -185,7 +240,7 @@ describe('Assemblage des tuiles', () => {
     vi.restoreAllMocks();
   });
 
-  it('assemble les six tuiles dans l’ordre de la maquette', async () => {
+  it('assemble les sept tuiles, BOA Niger après le Composite et l’euro en dernier', async () => {
     repondre({
       'api.frankfurter.dev': { rates: { '2026-11-23': { USD: 1.1 }, '2026-11-24': { USD: 1.0963 } } },
       'currency-api@': naira,
@@ -193,11 +248,13 @@ describe('Assemblage des tuiles', () => {
       'BZ%3DF': yahoo([88, 87.6, 87.12]),
     });
     const cours = await getCoursDuJour(AUJOURDHUI);
-    expect(cours.map((c) => c.cle)).toEqual(['euro', 'dollar', 'naira', 'brvm', 'or', 'brent']);
+    expect(cours.map((c) => c.cle)).toEqual(['dollar', 'naira', 'brvm', 'boan', 'or', 'brent', 'euro']);
     const brvm = cours.find((c) => c.cle === 'brvm')!;
     expect(brvm.valeur).toBe(472.04);
     expect(brvm.variation).toBe(-0.94);
-    expect(cours[0]).toMatchObject({ valeur: 655.957, mention: 'parité fixe', date: null });
+    // BOA Niger : la variation publiée par la BRVM, pas un calcul sur un historique troué.
+    expect(cours.find((c) => c.cle === 'boan')).toMatchObject({ valeur: 4105, variation: -1.44, unite: 'FCFA', date: '2026-11-24' });
+    expect(cours.at(-1)).toMatchObject({ cle: 'euro', valeur: 655.957, mention: 'parité fixe', date: null });
   });
 
   it('retire la tuile d’une source en panne, et l’or sans dollar', async () => {
@@ -208,13 +265,17 @@ describe('Assemblage des tuiles', () => {
       'BZ%3DF': 'panne',
     });
     const cours = await getCoursDuJour(AUJOURDHUI);
-    expect(cours.map((c) => c.cle)).toEqual(['euro', 'naira', 'brvm']);
+    expect(cours.map((c) => c.cle)).toEqual(['naira', 'brvm', 'boan', 'euro']);
   });
 
   it('retire un cours de plus de dix jours', async () => {
     seancesEnBase.valeur = [
       { date: '2026-11-02', precedent: 534.71, cloture: 525.3, variation: -1.76 },
       { date: '2026-11-03', precedent: 525.3, cloture: 529.41, variation: 0.78 },
+    ];
+    seancesEnBase.boan = [
+      { date: '2026-11-03', precedent: 5000, cloture: 4975, variation: -0.5 },
+      { date: '2026-11-04', precedent: 4975, cloture: 5000, variation: 0.5 },
     ];
     repondre({ 'api.frankfurter.dev': 'panne', 'currency-api@': 'panne', 'GC%3DF': 'panne', 'BZ%3DF': 'panne' });
     const cours = await getCoursDuJour(AUJOURDHUI);

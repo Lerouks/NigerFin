@@ -11,7 +11,8 @@ import { lireSeancesBrvm, type SeanceBrvm } from '@/lib/brvm-seances';
  * - Dollar : cours de référence de la Banque centrale européenne (Frankfurter),
  *   converti par la parité fixe.
  * - Naira : cours indicatif du marché (currency-api, publié chaque jour).
- * - BRVM Composite : séances relevées par le site (voir brvm-seances.ts).
+ * - BRVM Composite et BOA Niger (seule société nigérienne cotée) : séances
+ *   relevées par le site chaque soir de séance (voir brvm-seances.ts).
  * - Or et Brent : cours de New York (COMEX, NYMEX) lus chez Yahoo Finance ; l'or
  *   est converti en FCFA le gramme avec le dollar du même jour.
  */
@@ -31,7 +32,7 @@ export interface PointDeCours {
   valeur: number;
 }
 
-type CleCours = 'euro' | 'dollar' | 'naira' | 'brvm' | 'or' | 'brent';
+type CleCours = 'euro' | 'dollar' | 'naira' | 'brvm' | 'boan' | 'or' | 'brent';
 
 export interface Cours {
   cle: CleCours;
@@ -207,11 +208,21 @@ const serieBrent = serieYahoo('BZ=F');
 
 const seancesBrvm = unstable_cache(
   async (): Promise<SeanceBrvm[]> => {
-    const seances = await lireSeancesBrvm();
+    const seances = await lireSeancesBrvm('composite');
     if (seances.length < 2) throw new Error('BRVM : historique vide');
     return seances;
   },
   ['cours-brvm-seances-v1'],
+  { revalidate: 3600, tags: ['cours-du-jour', 'brvm-seances'] },
+);
+
+const seancesBoaNiger = unstable_cache(
+  async (): Promise<SeanceBrvm[]> => {
+    const seances = await lireSeancesBrvm('boan');
+    if (seances.length < 2) throw new Error('BOA Niger : historique vide');
+    return seances;
+  },
+  ['cours-boan-seances-v1'],
   { revalidate: 3600, tags: ['cours-du-jour', 'brvm-seances'] },
 );
 
@@ -250,26 +261,16 @@ function tuile(
 }
 
 export async function getCoursDuJour(aujourdhui = new Date()): Promise<Cours[]> {
-  const [dollar, naira, brvm, orUsd, brent] = await Promise.all([
+  const [dollar, naira, brvm, boan, orUsd, brent] = await Promise.all([
     essayer(serieDollar),
     essayer(serieNaira),
     essayer(seancesBrvm),
+    essayer(seancesBoaNiger),
     essayer(serieOrUsd),
     essayer(serieBrent),
   ]);
 
   const tuiles: Array<Cours | null> = [
-    {
-      cle: 'euro',
-      libelle: 'Euro',
-      valeur: PARITE_EURO_FCFA,
-      unite: 'FCFA',
-      decimales: 3,
-      date: null,
-      variation: null,
-      serie: [],
-      mention: 'parité fixe',
-    },
     tuile({ cle: 'dollar', libelle: 'Dollar', unite: 'FCFA', decimales: 0 }, dollar, aujourdhui),
     tuile({ cle: 'naira', libelle: '100 nairas', unite: 'FCFA', decimales: 0 }, naira, aujourdhui),
     tuile(
@@ -281,11 +282,29 @@ export async function getCoursDuJour(aujourdhui = new Date()): Promise<Cours[]> 
       brvm?.at(-1)?.variation ?? null,
     ),
     tuile(
+      { cle: 'boan', libelle: 'BOA Niger', unite: 'FCFA', decimales: 0 },
+      boan ? seancesEnPoints(boan) : null,
+      aujourdhui,
+      boan?.at(-1)?.variation ?? null,
+    ),
+    tuile(
       { cle: 'or', libelle: 'Or, le gramme', unite: 'FCFA', decimales: 0 },
       orUsd && dollar ? orEnFcfaLeGramme(orUsd, dollar) : null,
       aujourdhui,
     ),
     tuile({ cle: 'brent', libelle: 'Brent, le baril', unite: 'dollars', decimales: 2 }, brent, aujourdhui),
+    // L'euro ferme la rangée : sa parité ne bouge pas, il n'a ni courbe ni variation.
+    {
+      cle: 'euro',
+      libelle: 'Euro',
+      valeur: PARITE_EURO_FCFA,
+      unite: 'FCFA',
+      decimales: 3,
+      date: null,
+      variation: null,
+      serie: [],
+      mention: 'parité fixe',
+    },
   ];
   return tuiles.filter((t): t is Cours => t !== null);
 }

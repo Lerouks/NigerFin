@@ -1,17 +1,20 @@
 import { createServiceClient } from '@/lib/supabase';
 
 /**
- * Historique des séances du BRVM Composite, tenu par le site lui-même.
+ * Historiques des séances de la BRVM tenus par le site lui-même : le BRVM
+ * Composite et BOA Niger (BOAN), seule société nigérienne cotée.
  *
- * La BRVM ne publie aucun historique : sa page des indices ne montre que la
- * dernière séance (brvm.org/fr/indices/status/0, lisible en HTML sans script).
- * Une tâche planifiée (/api/cron/releve-brvm, chaque jour ouvré après la
- * clôture) lit cette page et ajoute la séance du jour à l'historique, rangé
- * dans api_cache (source « brvm_seances ») : aucune table à créer.
+ * La BRVM ne publie aucun historique : ses pages ne montrent que la dernière
+ * séance (indices : brvm.org/fr/indices/status/0, actions :
+ * brvm.org/fr/cours-actions/0, lisibles en HTML sans script). Une tâche
+ * planifiée (/api/cron/releve-brvm, chaque jour ouvré après la clôture) lit
+ * ces pages et ajoute la séance du jour aux historiques, rangés dans api_cache
+ * (source « brvm_seances », clés « composite » et « boan ») : aucune table à
+ * créer.
  *
- * L'historique a été amorcé le 24/11/2026 avec les séances archivées par le
- * Veilleur NFI depuis le 26/08/2026. Seules les séances fermées (cours
- * définitifs) sont enregistrées.
+ * Historiques amorcés avec les séances archivées par le Veilleur NFI depuis le
+ * 26/08/2026 (Composite le 24/11/2026, BOA Niger le 25/11/2026). Seules les
+ * séances fermées (cours définitifs) sont enregistrées.
  */
 
 export interface SeanceBrvm {
@@ -31,8 +34,12 @@ export interface LectureIndicesBrvm {
 }
 
 export const URL_INDICES_BRVM = 'https://www.brvm.org/fr/indices/status/0';
+export const URL_COURS_ACTIONS_BRVM = 'https://www.brvm.org/fr/cours-actions/0';
+/** Bank of Africa Niger, seule société nigérienne cotée à la BRVM. */
+export const SYMBOLE_BOA_NIGER = 'BOAN';
+/** Clé de chaque historique dans api_cache. */
+export type HistoriqueBrvm = 'composite' | 'boan';
 const SOURCE_CACHE = 'brvm_seances';
-const CLE_CACHE = 'composite';
 /** Environ un an de séances. */
 const SEANCES_GARDEES = 260;
 
@@ -98,15 +105,66 @@ export function analyserIndicesBrvm(html: string): LectureIndicesBrvm {
 }
 
 /**
- * Ajoute une séance lue à l'historique. Ne garde que des cours définitifs
- * (séance fermée) ; une séance déjà connue est remplacée, jamais doublée.
+ * Lit la ligne d'une action dans la page des cours de la BRVM : cours de la
+ * veille, clôture et variation du jour. Une action sans échange garde le cours
+ * de la veille en clôture, avec 0 % de variation : c'est ainsi que la BRVM
+ * l'affiche.
  */
-export function ajouterSeance(seances: SeanceBrvm[], lecture: LectureIndicesBrvm): SeanceBrvm[] {
-  if (lecture.statut !== 'fermee' || !lecture.date || !lecture.composite) return seances;
-  const nouvelle: SeanceBrvm = { date: lecture.date, ...lecture.composite };
+export function analyserCoursActionBrvm(html: string, symbole: string): Omit<SeanceBrvm, 'date'> | null {
+  for (const ligne of html.match(/<tr[\s\S]*?<\/tr>/gi) ?? []) {
+    const cellules = (ligne.match(/<t[dh][\s\S]*?<\/t[dh]>/gi) ?? []).map(decoder);
+    // Symbole, Nom, Volume, Cours veille, Cours ouverture, Cours clôture, Variation (%).
+    if (cellules.length >= 7 && cellules[0] === symbole) {
+      const precedent = nombreFr(cellules[3]!);
+      const cloture = nombreFr(cellules[5]!);
+      const variation = nombreFr(cellules[6]!);
+      if (precedent && cloture && variation !== null) return { precedent, cloture, variation };
+    }
+  }
+  return null;
+}
+
+function inserer(seances: SeanceBrvm[], nouvelle: SeanceBrvm): SeanceBrvm[] {
   return [...seances.filter((s) => s.date !== nouvelle.date), nouvelle]
     .sort((a, b) => a.date.localeCompare(b.date))
     .slice(-SEANCES_GARDEES);
+}
+
+/**
+ * Ajoute une séance lue à l'historique. Ne garde que des cours définitifs
+ * (séance fermée) ; une séance déjà connue est remplacée, jamais doublée.
+ *
+ * Un jour férié, la page de la BRVM affiche la date du jour au-dessus des
+ * chiffres de la dernière séance : mêmes « fermeture précédente » et
+ * « fermeture » que la séance déjà enregistrée. Ce n'est pas une nouvelle
+ * séance, elle n'est pas ajoutée (une vraie séance part toujours de la clôture
+ * de la précédente).
+ */
+export function ajouterSeance(seances: SeanceBrvm[], lecture: LectureIndicesBrvm): SeanceBrvm[] {
+  if (lecture.statut !== 'fermee' || !lecture.date || !lecture.composite) return seances;
+  const derniere = seances.at(-1);
+  if (
+    derniere &&
+    derniere.date !== lecture.date &&
+    derniere.precedent === lecture.composite.precedent &&
+    derniere.cloture === lecture.composite.cloture
+  ) {
+    return seances;
+  }
+  return inserer(seances, { date: lecture.date, ...lecture.composite });
+}
+
+/**
+ * Ajoute la séance d'une action, datée par la séance du Composite relevée au
+ * même moment : la page des actions n'affiche que l'heure de consultation, et
+ * une action peu échangée peut garder le même cours plusieurs jours.
+ */
+export function ajouterSeanceAction(
+  seances: SeanceBrvm[],
+  date: string,
+  valeurs: Omit<SeanceBrvm, 'date'>,
+): SeanceBrvm[] {
+  return inserer(seances, { date, ...valeurs });
 }
 
 function estSeance(valeur: unknown): valeur is SeanceBrvm {
@@ -120,28 +178,31 @@ function estSeance(valeur: unknown): valeur is SeanceBrvm {
 }
 
 /** Historique enregistré, du plus ancien au plus récent ; vide si la base ne répond pas. */
-export async function lireSeancesBrvm(): Promise<SeanceBrvm[]> {
+export async function lireSeancesBrvm(historique: HistoriqueBrvm = 'composite'): Promise<SeanceBrvm[]> {
   const supabase = createServiceClient();
   if (!supabase) return [];
   const { data, error } = await supabase
     .from('api_cache')
     .select('data')
     .eq('source', SOURCE_CACHE)
-    .eq('key', CLE_CACHE)
+    .eq('key', historique)
     .maybeSingle();
   if (error || !data) return [];
   const seances = (data.data as { seances?: unknown[] } | null)?.seances ?? [];
   return seances.filter(estSeance).sort((a, b) => a.date.localeCompare(b.date));
 }
 
-export async function enregistrerSeancesBrvm(seances: SeanceBrvm[]): Promise<void> {
+export async function enregistrerSeancesBrvm(
+  seances: SeanceBrvm[],
+  historique: HistoriqueBrvm = 'composite',
+): Promise<void> {
   const supabase = createServiceClient();
   if (!supabase) throw new Error('Client Supabase indisponible');
   const maintenant = new Date().toISOString();
   const { error } = await supabase.from('api_cache').upsert(
     {
       source: SOURCE_CACHE,
-      key: CLE_CACHE,
+      key: historique,
       data: { seances } as unknown as Record<string, unknown>,
       fetched_at: maintenant,
       // L'historique ne périme jamais : c'est une archive, pas un cache.
@@ -150,5 +211,5 @@ export async function enregistrerSeancesBrvm(seances: SeanceBrvm[]): Promise<voi
     },
     { onConflict: 'source,key' },
   );
-  if (error) throw new Error(`Enregistrement des séances BRVM : ${error.message}`);
+  if (error) throw new Error(`Enregistrement des séances BRVM (${historique}) : ${error.message}`);
 }

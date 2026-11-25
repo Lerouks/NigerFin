@@ -4,7 +4,8 @@ import { SourcesDesCours, type SourceDeCours } from './SourcesDesCours';
 
 /**
  * « Les cours du jour », en tête de la page Finance (maquette validée le
- * 24/11/2026). Six tuiles : euro, dollar, naira, BRVM Composite, or et Brent.
+ * 24/11/2026). Sept tuiles : dollar, naira, BRVM Composite, BOA Niger (ajouté
+ * le 25/11/2026, seule société nigérienne cotée), or, Brent, puis l'euro.
  * Une tuile dont la source est en panne disparaît ; le bloc entier disparaît
  * s'il ne reste que l'euro. Les sources s'ouvrent par le bouton « Sources »
  * (choix de Raouf le 24/11/2026, à la place d'un paragraphe sous les tuiles).
@@ -22,22 +23,30 @@ const dateLongue = (iso: string) =>
 const dateCourte = (iso: string) =>
   new Date(`${iso}T12:00:00Z`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', timeZone: 'UTC' });
 
-/** Bordure de séparation : jamais sur la première tuile d'une rangée (2, 3 puis 6 colonnes). */
-function separation(index: number): string {
-  return [
-    index % 2 === 0 ? 'border-l-0 pl-0' : 'border-l pl-3',
-    index % 3 === 0 ? 'sm:border-l-0 sm:pl-0' : 'sm:border-l sm:pl-4',
-    index === 0 ? 'lg:border-l-0 lg:pl-0' : 'lg:border-l lg:pl-4',
-  ].join(' ');
-}
-
+/**
+ * Colonnes sur ordinateur : une seule rangée jusqu'à six cours. Sept cours ne
+ * tiennent sur une rangée qu'à partir de 1 280 px (en dessous, « BRVM
+ * Composite » sortirait de sa colonne) : quatre colonnes entre 1 024 et 1 280 px.
+ */
 const COLONNES_LARGES: Record<number, string> = {
   2: 'lg:grid-cols-2',
   3: 'lg:grid-cols-3',
   4: 'lg:grid-cols-4',
   5: 'lg:grid-cols-5',
   6: 'lg:grid-cols-6',
+  7: 'lg:grid-cols-4 xl:grid-cols-7',
 };
+
+/** Bordure de séparation : jamais sur la première tuile d'une rangée (2, 3, puis 4 à 7 colonnes). */
+function separation(index: number, total: number): string {
+  const colonnesLarges = total === 7 ? 4 : total;
+  return [
+    index % 2 === 0 ? 'border-l-0 pl-0' : 'border-l pl-3',
+    index % 3 === 0 ? 'sm:border-l-0 sm:pl-0' : 'sm:border-l sm:pl-4',
+    index % colonnesLarges === 0 ? 'lg:border-l-0 lg:pl-0' : 'lg:border-l lg:pl-4',
+    total === 7 ? (index === 0 ? 'xl:border-l-0 xl:pl-0' : 'xl:border-l xl:pl-4') : '',
+  ].join(' ');
+}
 
 function LigneVariation({ cours }: { cours: Cours }) {
   if (cours.mention) {
@@ -105,6 +114,8 @@ function sourcesDesCours(cours: Cours[]): SourceDeCours[] {
     dollar: 'Cours de référence de la Banque centrale européenne, converti en FCFA par la parité fixe.',
     naira: 'Cours indicatif du marché des changes, mis à jour chaque jour.',
     brvm: 'Cours de clôture publié par la BRVM à la fin de chaque séance.',
+    // Le nom de la banque ne se coupe jamais : « Bank of » seul en fin de ligne.
+    boan: `Cours de clôture de Bank${NB}of${NB}Africa${NB}Niger, la seule société nigérienne cotée à la BRVM, publié chaque soir de séance.`,
     or: 'Cours de l’or à New York (COMEX), converti en FCFA le gramme avec le dollar du jour.',
     brent: 'Cours du Brent à New York (NYMEX), en dollars le baril.',
   };
@@ -132,7 +143,7 @@ export async function CoursDuJour() {
 
       <div className={`mt-5 grid grid-cols-2 gap-y-6 sm:grid-cols-3 ${COLONNES_LARGES[cours.length] ?? 'lg:grid-cols-6'}`}>
         {cours.map((c, index) => (
-          <div key={c.cle} className={`min-w-0 border-black/8 pr-2 sm:pr-3 ${separation(index)}`}>
+          <div key={c.cle} className={`min-w-0 border-black/8 pr-2 sm:pr-3 ${separation(index, cours.length)}`}>
             <p className="whitespace-nowrap text-[13px] text-gray-500">{c.libelle}</p>
             <p className="mt-1 flex flex-wrap items-baseline gap-x-1">
               <span className="text-[19px] min-[360px]:text-[21px] sm:text-[23px] font-bold leading-tight tracking-tight tabular-nums text-[#111]">

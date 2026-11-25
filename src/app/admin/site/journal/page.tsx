@@ -19,8 +19,8 @@ export default function SiteJournalPage() {
           Journal d&apos;audit
         </h1>
         <p className="text-[14px] text-foreground/60 mt-2 leading-relaxed max-w-[560px]">
-          Toutes les actions admin tracées en base : qui a fait quoi, sur
-          quelle ressource, et quand.
+          Le journal note chaque action{' '}
+          <span className="whitespace-nowrap">des admins et du système.</span>
         </p>
       </header>
       <AuditTab />

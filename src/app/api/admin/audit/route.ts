@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { serverError } from '@/lib/api-error';
-import { numeroDePage } from '@/lib/pagination';
+import { estPageAuDela, numeroDePage } from '@/lib/pagination';
 
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin();
@@ -19,6 +19,11 @@ export async function GET(request: NextRequest) {
     .select('*, user_profiles!audit_log_admin_profile_fkey(email, full_name)', { count: 'exact' })
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1);
+
+  if (estPageAuDela(error)) {
+    const { count: total } = await serviceClient.from('audit_log').select('*', { count: 'exact', head: true });
+    return NextResponse.json({ data: [], total: total || 0 });
+  }
 
   if (error) {
     // Fallback without join if FK not set up

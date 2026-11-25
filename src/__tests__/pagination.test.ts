@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parsePagination, paginatedResponse, numeroDePage } from '@/lib/pagination';
+import { parsePagination, paginatedResponse, numeroDePage, estPageAuDela } from '@/lib/pagination';
 
 describe('parsePagination', () => {
   it('returns defaults when no params provided', () => {
@@ -85,5 +85,14 @@ describe('numeroDePage', () => {
   it('lit un numéro valide, en entier', () => {
     expect(numeroDePage('4')).toBe(4);
     expect(numeroDePage('2.7')).toBe(2);
+  });
+});
+
+describe('estPageAuDela', () => {
+  it('reconnaît le refus de la base pour une page après la fin, et rien d’autre', () => {
+    expect(estPageAuDela({ code: 'PGRST103' })).toBe(true);
+    expect(estPageAuDela({ code: '42501' })).toBe(false);
+    expect(estPageAuDela(null)).toBe(false);
+    expect(estPageAuDela(undefined)).toBe(false);
   });
 });

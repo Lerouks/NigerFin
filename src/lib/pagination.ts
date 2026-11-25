@@ -27,6 +27,15 @@ export function numeroDePage(valeur: string | null): number {
   return Math.max(1, parseInt(valeur || '1', 10) || 1);
 }
 
+/**
+ * Une page au-delà de la fin : quand le total est demandé, la base la refuse
+ * (HTTP 416, code PGRST103, vérifié le 25/11/2026). C'est une page vide, pas
+ * une panne : la route doit répondre une liste vide, pas une erreur 500.
+ */
+export function estPageAuDela(erreur: { code?: string } | null | undefined): boolean {
+  return erreur?.code === 'PGRST103';
+}
+
 /** Parse page/limit from URL search params with safe defaults */
 export function parsePagination(searchParams: URLSearchParams): PaginationParams {
   const page = numeroDePage(searchParams.get('page'));

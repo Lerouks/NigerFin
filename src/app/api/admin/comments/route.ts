@@ -3,7 +3,7 @@ import { requireAdmin } from '@/lib/admin-auth';
 import { serverError } from '@/lib/api-error';
 import { isValidUUID, normalizeUuid } from '@/lib/validation';
 import { logAuditEvent } from '@/lib/audit';
-import { numeroDePage } from '@/lib/pagination';
+import { estPageAuDela, numeroDePage } from '@/lib/pagination';
 
 // GET: list all comments with article title, paginated
 export async function GET(request: NextRequest) {
@@ -42,6 +42,12 @@ export async function GET(request: NextRequest) {
   }
 
   const { data: comments, count, error } = await query;
+  if (estPageAuDela(error)) {
+    let compte = serviceClient.from('comments').select('*', { count: 'exact', head: true });
+    if (articleId && isValidUUID(articleId)) compte = compte.eq('article_id', normalizeUuid(articleId));
+    const { count: total } = await compte;
+    return NextResponse.json({ data: [], total: total || 0, page, limit, totalPages: Math.ceil((total || 0) / limit) });
+  }
   if (error) return serverError(error, 'admin-comments');
 
   // Fetch article titles for the comments

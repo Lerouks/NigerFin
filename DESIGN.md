@@ -92,7 +92,7 @@ Black footer (`bg-[#111]`) with 4 columns: brand+description, Rubriques, Sociét
 
 ### Section pages (Économie, Finance, Marchés, Entreprises, Niger, Éducation, Outils)
 
-Black hero with category title (48px) + intro paragraph (text-gray-300). Interactive content first (cours, articles, simulateurs, parcours) right under the hero to prioritize data over description, Bloomberg / Apple Stocks pattern. Article grid uses the `SectionArticlesFiltered` component with filter sidebar on the left (Pertinence, Période, Format, Durée). Cards use the same `ArticleCard` component everywhere.
+Black hero with category title (48px) + intro paragraph (text-gray-300). Interactive content first (cours, articles, simulateurs, parcours) right under the hero to prioritize data over description, Bloomberg / Apple Stocks pattern. Article grid uses the `SectionArticlesFiltered` component: one quiet line above the grid (article count on the left, a "Trier et filtrer" button on the right) that opens a panel, a bottom sheet on phones and a popover from tablets up (chosen on 2026-11-25). The panel only offers choices that change the list (`src/lib/filtres-articles.ts`). Cards use the same `ArticleCard` component everywhere.
 
 After the interactive content, a discrete SEO footer (`HubFooter` component) closes the page with a `Comprendre cette rubrique` block: 2/3 column of paragraphs + 1/3 column definition list of highlights, pure typography hierarchy (no colored borders or decorative containers — both would trip the AI slop blacklist).
 

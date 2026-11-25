@@ -44,37 +44,47 @@ export function ArticleCard({ article, featured = false, priority = false }: Art
   if (featured) {
     return (
       <Link href={`/articles/${article.slug.current}`} className="group block">
-        <article className="relative overflow-hidden bg-[#111]">
+        {/*
+          La carte grandit avec son titre au lieu de le couper : sur téléphone, un
+          titre long tronqué à trois lignes s'arrêtait au milieu d'un mot
+          (« l'Ira… », 25/11/2026). L'image couvre toute la carte, quelle que
+          soit sa hauteur.
+        */}
+        <article className="relative flex min-h-[300px] md:min-h-[500px] items-end overflow-hidden bg-[#111]">
           <Image
             src={imageUrl}
             alt={article.title}
-            width={1200}
-            height={600}
+            fill
             sizes="100vw"
             quality={90}
-            className="w-full h-[300px] md:h-[500px] object-cover opacity-70 group-hover:opacity-60 group-hover:scale-[1.02] transition-all duration-700"
+            className="object-cover opacity-70 group-hover:opacity-60 group-hover:scale-[1.02] transition-all duration-700"
             priority
           />
           <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 text-white">
+          <div className="relative w-full p-5 sm:p-8 md:p-12 text-white">
             <div className="max-w-7xl mx-auto">
               <SectionBadges sections={article.sections} category={article.category} variant="dark" />
-              <h2 className="text-3xl md:text-4xl lg:text-5xl mb-3 mt-3 line-clamp-3 group-hover:text-gray-200 transition-colors leading-[1.1]">
-                {article.title}
+              <h2 className="text-[22px] sm:text-3xl md:text-4xl lg:text-5xl mb-3 mt-3 md:line-clamp-3 group-hover:text-gray-200 transition-colors leading-[1.15]">
+                {paragrapheFr(article.title, 18)}
               </h2>
               {article.subtitle && (
                 <p className="text-base md:text-lg text-white/60 mb-5 line-clamp-3 max-w-2xl">
-                  {article.subtitle}
+                  {paragrapheFr(article.subtitle)}
                 </p>
               )}
-              <div className="flex items-center gap-3 text-[13px] text-white/45">
-                <span className="text-white/70">{article.author.name}</span>
-                <span className="w-1 h-1 rounded-full bg-white/30" />
-                <span>{formatDate(article.publishedAt)}</span>
-                <span className="w-1 h-1 rounded-full bg-white/30" />
-                <span className="flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  {article.readTime} min
+              {/* Chaque point reste collé à l'information qu'il annonce : sur un écran étroit, la ligne passe à la suivante avec lui. */}
+              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[13px] text-white/45">
+                <span className="whitespace-nowrap text-white/70">{article.author.name}</span>
+                <span className="flex items-center gap-2.5 whitespace-nowrap">
+                  <span className="w-1 h-1 rounded-full bg-white/30" />
+                  {formatDate(article.publishedAt)}
+                </span>
+                <span className="flex items-center gap-2.5 whitespace-nowrap">
+                  <span className="w-1 h-1 rounded-full bg-white/30" />
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    {`${article.readTime}\u00a0min`}
+                  </span>
                 </span>
               </div>
             </div>
@@ -110,7 +120,7 @@ export function ArticleCard({ article, featured = false, priority = false }: Art
             <span className="w-1 h-1 rounded-full bg-gray-200" />
             <span className="text-[11px] text-gray-500 flex items-center gap-1">
               <Clock className="w-3 h-3" />
-              {article.readTime} min
+              {`${article.readTime}\u00a0min`}
             </span>
           </div>
           <h3 className="text-[17px] leading-snug mb-2 line-clamp-2 group-hover:text-gray-600 transition-colors">

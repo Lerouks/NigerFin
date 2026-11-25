@@ -1,31 +1,50 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { Clock, Crown, Unlock, ArrowUpDown, ChevronLeft, ChevronRight, SlidersHorizontal, X, TrendingUp } from 'lucide-react';
+import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as ClavierReact } from 'react';
+import { ChevronDown, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { ArticleCard } from '@/components/ArticleCard';
 import type { Article } from '@/types';
-
-type ContentFilter = 'all' | 'free' | 'premium';
-type SortOrder = 'recent' | 'oldest' | 'popular';
-type ReadTimeFilter = 'all' | 'short' | 'medium' | 'long';
-
-const PER_PAGE = 20;
+import {
+  CHOIX_PAR_DEFAUT,
+  choixProposes,
+  filtrerArticles,
+  libelleAfficher,
+  libelleNombre,
+  morceauxDuResume,
+  nombreDeChoixActifs,
+  type ChoixArticles,
+  type Facette,
+  type OptionChoix,
+} from '@/lib/filtres-articles';
 
 /**
- * Facette thematique optionnelle : restreint la liste aux articles portant une
- * cle de section donnee.
+ * Liste des articles d'une rubrique, avec sa barre « Trier et filtrer ».
  *
- * Sert a accueillir dans Finance les articles de l'ancienne rubrique Marches
- * sans les y noyer : le lecteur qui cherche la BRVM la trouve d'un clic. Passee
- * en DONNEES et non en fonction, pour rester serialisable depuis un composant
- * serveur.
+ * Refaite le 25/11/2026 (maquette B « Un seul bouton », choisie par Raouf parmi
+ * trois) : l'ancien panneau de filtres collé à gauche, avec ses intitulés en
+ * capitales espacées et une icône par choix, laisse la place à une ligne
+ * discrète. Le nombre d'articles à gauche, un bouton à droite qui ouvre un
+ * panneau : une fenêtre posée en bas de l'écran sur téléphone, un panneau sous
+ * le bouton à partir de la tablette. Même contenu sur tous les écrans.
+ *
+ * Le panneau ne propose que les choix qui changent vraiment la liste
+ * (`choixProposes`) : sans article Premium dans la rubrique, pas de « Premium »,
+ * et ainsi de suite. Quand il ne reste que le tri, le bouton s'appelle « Trier ».
  */
-export interface SectionFacet {
-  /** Cle presente dans `article.sections` (ex. « marches »). */
-  key: string;
-  /** Libelle affiche (ex. « Marches & BRVM »). */
-  label: string;
-}
+
+const PER_PAGE = 18;
+const AUCUNE_FACETTE: Facette[] = [];
+const AUCUN_CLASSEMENT: string[] = [];
+const TELEPHONE = '(max-width: 639px)';
+const NBSP = '\u00a0';
+
+/**
+ * Facette thématique optionnelle : restreint la liste aux articles portant une
+ * clé de section donnée. Sert à accueillir dans Finance les articles de
+ * l'ancienne rubrique Marchés sans les y noyer. Passée en DONNÉES et non en
+ * fonction, pour rester sérialisable depuis un composant serveur.
+ */
+export type SectionFacet = Facette;
 
 interface SectionArticlesFilteredProps {
   articles: Article[];
@@ -34,59 +53,73 @@ interface SectionArticlesFilteredProps {
   sectionPath: string;
   /** Article IDs ordered by view count (most viewed first). Never exposed to user. */
   viewRanking?: string[];
-  /** Facettes thematiques proposees en plus des filtres habituels. */
+  /** Facettes thématiques proposées en plus des choix habituels. */
   facets?: SectionFacet[];
 }
 
-/** Label de groupe facon eyebrow editorial NFI : filet dore + majuscules espacees. */
-function FilterGroup({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-2.5">
-        <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-foreground">{label}</p>
-      </div>
-      <div className="space-y-1">{children}</div>
-    </div>
-  );
-}
-
-function FilterOption({
-  active,
-  onClick,
-  icon: Icon,
-  label,
-  golden,
+/** Un groupe de choix exclusifs, en segments (flèches du clavier pour passer d'un choix à l'autre). */
+function GroupeDeChoix<T extends string | null>({
+  titre,
+  options,
+  valeur,
+  onChoix,
+  colonnes,
 }: {
-  active: boolean;
-  onClick: () => void;
-  icon?: React.ElementType;
-  label: string;
-  golden?: boolean;
+  titre: string;
+  options: OptionChoix<T>[];
+  valeur: T;
+  onChoix: (v: T) => void;
+  colonnes: string;
 }) {
+  const id = useId();
+  const boutons = useRef<(HTMLButtonElement | null)[]>([]);
+  const coche = Math.max(0, options.findIndex((o) => o.valeur === valeur));
+
+  const deplacer = (e: ClavierReact<HTMLButtonElement>, i: number) => {
+    let j = -1;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') j = (i + 1) % options.length;
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') j = (i - 1 + options.length) % options.length;
+    if (e.key === 'Home') j = 0;
+    if (e.key === 'End') j = options.length - 1;
+    const cible = options[j];
+    if (!cible) return;
+    e.preventDefault();
+    onChoix(cible.valeur);
+    boutons.current[j]?.focus();
+  };
+
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={`group/opt w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] transition-all duration-200 text-left ${
-        active
-          ? golden
-            ? 'bg-gold text-white font-semibold shadow-xs'
-            : 'bg-[#111] text-white font-semibold shadow-xs'
-          : golden
-            ? 'text-gold font-medium hover:bg-gold/10'
-            : 'text-gray-600 font-medium hover:bg-secondary hover:text-foreground'
-      }`}
-    >
-      {Icon && (
-        <Icon
-          className={`w-3.5 h-3.5 shrink-0 transition-colors ${
-            active || golden ? '' : 'text-gray-400 group-hover/opt:text-gray-600'
-          }`}
-        />
-      )}
-      <span className="flex-1">{label}</span>
-    </button>
+    <div>
+      <p id={id} className="mb-2 text-[13px] font-medium text-gray-500">
+        {titre}
+      </p>
+      <div role="radiogroup" aria-labelledby={id} className={`grid ${colonnes} gap-1 rounded-lg bg-black/[0.045] p-1`}>
+        {options.map((o, i) => {
+          const actif = i === coche;
+          return (
+            <button
+              key={String(o.valeur)}
+              ref={(el) => {
+                boutons.current[i] = el;
+              }}
+              type="button"
+              role="radio"
+              aria-checked={actif}
+              tabIndex={actif ? 0 : -1}
+              onClick={() => onChoix(o.valeur)}
+              onKeyDown={(e) => deplacer(e, i)}
+              className={`min-h-11 rounded-md px-2 text-[13px] leading-tight transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#111] ${
+                actif
+                  ? 'bg-white font-semibold text-[#111] shadow-[0_1px_3px_rgba(0,0,0,0.12)]'
+                  : 'font-medium text-gray-600 hover:text-[#111]'
+              }`}
+            >
+              {o.libelle}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -94,112 +127,86 @@ export function SectionArticlesFiltered({
   articles,
   total: _total,
   sectionLabel: _sectionLabel,
-  viewRanking = [],
-  facets = [],
+  viewRanking = AUCUN_CLASSEMENT,
+  facets = AUCUNE_FACETTE,
 }: SectionArticlesFilteredProps) {
-  const [facetKey, setFacetKey] = useState<string | null>(null);
-  const [contentFilter, setContentFilter] = useState<ContentFilter>('all');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('recent');
-  const [readTimeFilter, setReadTimeFilter] = useState<ReadTimeFilter>('all');
+  const [choix, setChoix] = useState<ChoixArticles>(CHOIX_PAR_DEFAUT);
   const [currentPage, setCurrentPage] = useState(1);
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [ouvert, setOuvert] = useState(false);
+  const racine = useRef<HTMLDivElement>(null);
+  const bouton = useRef<HTMLButtonElement>(null);
+  const panneau = useRef<HTMLDivElement>(null);
+  const idPanneau = useId();
 
-  const filtered = useMemo(() => {
-    let result = [...articles];
+  const proposes = useMemo(() => choixProposes(articles, facets, viewRanking), [articles, facets, viewRanking]);
+  const filtered = useMemo(() => filtrerArticles(articles, choix, viewRanking), [articles, choix, viewRanking]);
+  const actifs = nombreDeChoixActifs(choix);
+  const filtre = actifs > 0;
+  const resume = morceauxDuResume(choix, facets);
+  const seulementTri = proposes.themes.length === 0 && proposes.acces.length === 0 && proposes.durees.length === 0;
+  const aDesChoix = proposes.tris.length > 0 || !seulementTri;
+  const titre = seulementTri ? 'Trier' : 'Trier et filtrer';
 
-    if (facetKey) {
-      result = result.filter((a) => a.sections?.includes(facetKey));
+  const changer = <K extends keyof ChoixArticles>(cle: K, valeur: ChoixArticles[K]) => {
+    setChoix((c) => ({ ...c, [cle]: valeur }));
+    setCurrentPage(1);
+  };
+
+  const resetFilters = () => {
+    setChoix(CHOIX_PAR_DEFAUT);
+    setCurrentPage(1);
+  };
+
+  const fermer = useCallback((rendreLaMain = true) => {
+    setOuvert(false);
+    if (rendreLaMain) bouton.current?.focus();
+  }, []);
+
+  // Échap ferme ; un clic hors du panneau le ferme à partir de la tablette ;
+  // sur téléphone, la page ne défile plus sous la fenêtre.
+  useEffect(() => {
+    if (!ouvert) return;
+    const telephone = window.matchMedia(TELEPHONE).matches;
+    const echap = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') fermer();
+    };
+    const dehors = (e: PointerEvent) => {
+      if (!window.matchMedia(TELEPHONE).matches && !racine.current?.contains(e.target as Node)) fermer(false);
+    };
+    document.addEventListener('keydown', echap);
+    document.addEventListener('pointerdown', dehors);
+    panneau.current?.focus({ preventScroll: true });
+    const defilementAvant = document.documentElement.style.overflow;
+    if (telephone) document.documentElement.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', echap);
+      document.removeEventListener('pointerdown', dehors);
+      if (telephone) document.documentElement.style.overflow = defilementAvant;
+    };
+  }, [ouvert, fermer]);
+
+  // Sur téléphone, la fenêtre est modale : la touche Tab y reste.
+  const garderLeFocus = (e: ClavierReact<HTMLDivElement>) => {
+    if (e.key !== 'Tab' || !window.matchMedia(TELEPHONE).matches) return;
+    const elements = Array.from(
+      panneau.current?.querySelectorAll<HTMLElement>('button:not([disabled]):not([tabindex="-1"])') ?? [],
+    );
+    const premier = elements[0];
+    const dernier = elements[elements.length - 1];
+    if (!premier || !dernier) return;
+    const ici = document.activeElement;
+    if (e.shiftKey && (ici === premier || ici === panneau.current)) {
+      e.preventDefault();
+      dernier.focus();
+    } else if (!e.shiftKey && ici === dernier) {
+      e.preventDefault();
+      premier.focus();
     }
-
-    if (contentFilter === 'free') {
-      result = result.filter((a) => !a.isPremium);
-    } else if (contentFilter === 'premium') {
-      result = result.filter((a) => a.isPremium);
-    }
-
-    if (readTimeFilter === 'short') {
-      result = result.filter((a) => a.readTime < 5);
-    } else if (readTimeFilter === 'medium') {
-      result = result.filter((a) => a.readTime >= 5 && a.readTime <= 10);
-    } else if (readTimeFilter === 'long') {
-      result = result.filter((a) => a.readTime > 10);
-    }
-
-    if (sortOrder === 'popular' && viewRanking.length > 0) {
-      const rankMap = new Map(viewRanking.map((id, i) => [id, i]));
-      result.sort((a, b) => (rankMap.get(a._id) ?? Infinity) - (rankMap.get(b._id) ?? Infinity));
-    } else {
-      result.sort((a, b) => {
-        const dateA = new Date(a.publishedAt).getTime();
-        const dateB = new Date(b.publishedAt).getTime();
-        return sortOrder === 'oldest' ? dateA - dateB : dateB - dateA;
-      });
-    }
-
-    return result;
-  }, [articles, facetKey, contentFilter, sortOrder, readTimeFilter, viewRanking]);
+  };
 
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
   const safePage = Math.min(currentPage, Math.max(1, totalPages));
   const paginatedArticles = filtered.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE);
-
-  const hasActiveFilters =
-    facetKey !== null || contentFilter !== 'all' || sortOrder !== 'recent' || readTimeFilter !== 'all';
-  const activeCount = [
-    facetKey !== null,
-    contentFilter !== 'all',
-    sortOrder !== 'recent',
-    readTimeFilter !== 'all',
-  ].filter(Boolean).length;
-
-  const resetFilters = () => {
-    setFacetKey(null);
-    setContentFilter('all');
-    setSortOrder('recent');
-    setReadTimeFilter('all');
-    setCurrentPage(1);
-  };
-
-  const applyFilter = <T,>(setter: (v: T) => void, value: T) => {
-    setter(value);
-    setCurrentPage(1);
-  };
-
-  // Puces de filtres actifs supprimables (pattern editorial FT/Bloomberg).
-  const activeChips: { key: string; label: string; clear: () => void }[] = [];
-  if (facetKey) {
-    activeChips.push({
-      key: 'facet',
-      label: facets.find((f) => f.key === facetKey)?.label ?? facetKey,
-      clear: () => applyFilter(setFacetKey, null),
-    });
-  }
-  if (contentFilter !== 'all') {
-    activeChips.push({
-      key: 'content',
-      label: contentFilter === 'free' ? 'Gratuit' : 'Premium',
-      clear: () => applyFilter(setContentFilter, 'all'),
-    });
-  }
-  if (sortOrder !== 'recent') {
-    activeChips.push({
-      key: 'sort',
-      label: sortOrder === 'oldest' ? 'Plus anciens' : 'Les plus lus',
-      clear: () => applyFilter(setSortOrder, 'recent'),
-    });
-  }
-  if (readTimeFilter !== 'all') {
-    activeChips.push({
-      key: 'time',
-      label:
-        readTimeFilter === 'short'
-          ? 'Moins de 5 min'
-          : readTimeFilter === 'medium'
-            ? '5 à 10 min'
-            : 'Plus de 10 min',
-      clear: () => applyFilter(setReadTimeFilter, 'all'),
-    });
-  }
 
   const goToPage = (page: number) => {
     setCurrentPage(page);
@@ -218,284 +225,224 @@ export function SectionArticlesFiltered({
     return pages;
   };
 
-  const filtersContent = (
-    <div className="space-y-7">
-      {/*
-        Facette thematique. Presente uniquement quand la rubrique en declare une,
-        elle apparait EN PREMIER car c'est le tri le plus structurant : sur
-        Finance, elle isole en un clic les articles de marches et BRVM, qui
-        avaient auparavant leur propre rubrique.
-      */}
-      {facets.length > 0 && (
-        <>
-          <FilterGroup label="Thème">
-            <FilterOption
-              active={facetKey === null}
-              onClick={() => applyFilter(setFacetKey, null)}
-              label="Tous les thèmes"
-            />
-            {facets.map((facet) => (
-              <FilterOption
-                key={facet.key}
-                active={facetKey === facet.key}
-                onClick={() => applyFilter(setFacetKey, facet.key)}
-                label={facet.label}
-              />
-            ))}
-          </FilterGroup>
-
-          <div className="h-px bg-black/8" />
-        </>
-      )}
-
-      {/* Type */}
-      <FilterGroup label="Type d'article">
-        <FilterOption active={contentFilter === 'all'} onClick={() => applyFilter(setContentFilter, 'all')} label="Tous les articles" />
-        <FilterOption active={contentFilter === 'free'} onClick={() => applyFilter(setContentFilter, 'free')} icon={Unlock} label="Gratuit" />
-        <FilterOption active={contentFilter === 'premium'} onClick={() => applyFilter(setContentFilter, 'premium')} icon={Crown} label="Premium" golden />
-      </FilterGroup>
-
-      <div className="h-px bg-black/8" />
-
-      {/* Sort */}
-      <FilterGroup label="Trier par">
-        <FilterOption active={sortOrder === 'recent'} onClick={() => applyFilter(setSortOrder, 'recent')} icon={ArrowUpDown} label="Plus récents" />
-        <FilterOption active={sortOrder === 'oldest'} onClick={() => applyFilter(setSortOrder, 'oldest')} icon={ArrowUpDown} label="Plus anciens" />
-        <FilterOption active={sortOrder === 'popular'} onClick={() => applyFilter(setSortOrder, 'popular')} icon={TrendingUp} label="Les plus lus" />
-      </FilterGroup>
-
-      <div className="h-px bg-black/8" />
-
-      {/* Read time */}
-      <FilterGroup label="Durée de lecture">
-        <FilterOption active={readTimeFilter === 'all'} onClick={() => applyFilter(setReadTimeFilter, 'all')} icon={Clock} label="Toutes les durées" />
-        <FilterOption active={readTimeFilter === 'short'} onClick={() => applyFilter(setReadTimeFilter, 'short')} icon={Clock} label="Moins de 5 min" />
-        <FilterOption active={readTimeFilter === 'medium'} onClick={() => applyFilter(setReadTimeFilter, 'medium')} icon={Clock} label="5 à 10 min" />
-        <FilterOption active={readTimeFilter === 'long'} onClick={() => applyFilter(setReadTimeFilter, 'long')} icon={Clock} label="Plus de 10 min" />
-      </FilterGroup>
-    </div>
-  );
+  if (articles.length === 0) {
+    return (
+      <div className="text-center py-20">
+        <p className="text-gray-500 text-lg mb-2">Aucun article dans cette rubrique pour l’instant.</p>
+        <p className="text-gray-500 text-sm">De nouveaux contenus arrivent bientôt.</p>
+      </div>
+    );
+  }
 
   return (
     <div>
-      {/* Mobile: filter toggle button */}
-      <button
-        type="button"
-        onClick={() => setMobileFiltersOpen(true)}
-        className="lg:hidden flex items-center gap-2 px-4 py-3 mb-6 bg-white border border-black/8 rounded-xl text-[13px] font-semibold text-foreground hover:border-gold transition-colors w-full justify-center"
-      >
-        <SlidersHorizontal className="w-4 h-4 text-gold" />
-        Filtres
-        {activeCount > 0 && (
-          <span className="w-5 h-5 rounded-full bg-gold text-white text-[10px] font-bold flex items-center justify-center">
-            {activeCount}
-          </span>
-        )}
-      </button>
+      <div ref={racine} className="relative border-b border-black/10 pb-4">
+        <div className="flex items-center justify-between gap-4">
+          <p className="min-w-0 text-[14px] font-semibold text-[#111]" aria-live="polite">
+            {libelleNombre(filtered.length, articles.length)}
+          </p>
 
-      {/* Mobile: filter bottom sheet */}
-      {mobileFiltersOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          {/* a11y H-3 : backdrop click-outside accessible via bouton invisible. */}
-          <button
-            type="button"
-            aria-label="Fermer les filtres"
-            onClick={() => setMobileFiltersOpen(false)}
-            className="absolute inset-0 bg-black/40 backdrop-blur-xs cursor-default"
-          />
-          <div className="absolute inset-x-0 bottom-0 max-h-[85vh] bg-white rounded-t-2xl shadow-2xl overflow-y-auto overscroll-contain animate-slide-up">
-            {/* Drag handle */}
-            <div className="sticky top-0 bg-white pt-3 pb-3 px-6 border-b border-black/6 z-10">
-              <div className="w-10 h-1 rounded-full bg-gray-200 mx-auto mb-3" />
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <SlidersHorizontal className="w-4 h-4 text-gold" />
-                  <h3 className="text-[16px] font-bold tracking-tight text-foreground">Filtres</h3>
-                  {activeCount > 0 && (
-                    <span className="w-5 h-5 rounded-full bg-gold text-white text-[10px] font-bold flex items-center justify-center">
-                      {activeCount}
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-3">
-                  {hasActiveFilters && (
+          {aDesChoix && (
+            <button
+              ref={bouton}
+              type="button"
+              aria-haspopup="dialog"
+              aria-expanded={ouvert}
+              aria-controls={ouvert ? idPanneau : undefined}
+              onClick={() => (ouvert ? fermer() : setOuvert(true))}
+              className="inline-flex h-11 shrink-0 items-center gap-2 rounded-lg border border-black/12 bg-white px-4 text-[14px] font-semibold text-[#111] transition-colors hover:border-black/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111]"
+            >
+              {titre}
+              {filtre ? `${NBSP}(${actifs})` : ''}
+              <ChevronDown
+                className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${ouvert ? 'rotate-180' : ''}`}
+                aria-hidden="true"
+              />
+            </button>
+          )}
+        </div>
+
+        {/* Ce qui est appliqué, sur sa propre ligne : les deux derniers choix restent ensemble. */}
+        {resume.length > 0 && (
+          <p className="mt-1 text-[14px] text-gray-500">
+            {resume.slice(0, -2).map((m) => (
+              <Fragment key={m}>
+                <span className="whitespace-nowrap">{m},</span>{' '}
+              </Fragment>
+            ))}
+            <span className="whitespace-nowrap">{resume.slice(-2).join(', ')}</span>
+          </p>
+        )}
+
+        {ouvert && (
+          <>
+            {/* Fond assombri, sur téléphone seulement : le toucher ferme la fenêtre. */}
+            <button
+              type="button"
+              aria-label="Fermer"
+              tabIndex={-1}
+              onClick={() => fermer()}
+              className="fixed inset-0 z-50 cursor-default bg-black/35 sm:hidden"
+            />
+            <div
+              ref={panneau}
+              id={idPanneau}
+              role="dialog"
+              aria-label={titre}
+              tabIndex={-1}
+              onKeyDown={garderLeFocus}
+              className="fixed inset-x-0 bottom-0 z-50 max-h-[88vh] overflow-y-auto overscroll-contain rounded-t-2xl bg-white shadow-[0_-12px_40px_rgba(0,0,0,0.14)] animate-slide-up focus:outline-none sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:top-full sm:z-[46] sm:mt-2 sm:w-[25rem] sm:max-h-none sm:overflow-visible sm:rounded-xl sm:border sm:border-black/6 sm:shadow-[0_18px_40px_rgba(0,0,0,0.08)] sm:animate-[fadeIn_120ms_ease-out]"
+            >
+              <div className="flex items-center justify-between border-b border-black/6 py-1.5 pl-5 pr-2">
+                <p className="text-[16px] font-semibold text-[#111]">{titre}</p>
+                <div className="flex items-center">
+                  {filtre && (
                     <button
                       type="button"
                       onClick={resetFilters}
-                      className="text-[12px] text-gold hover:text-[#6b6f76] font-semibold transition-colors"
+                      className="h-11 px-3 text-[13px] font-semibold text-gray-600 transition-colors hover:text-[#111]"
                     >
                       Tout effacer
                     </button>
                   )}
                   <button
                     type="button"
-                    onClick={() => setMobileFiltersOpen(false)}
-                    className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-[#eee] transition-colors"
                     aria-label="Fermer"
+                    onClick={() => fermer()}
+                    className="flex h-11 w-11 items-center justify-center rounded-md text-gray-500 transition-colors hover:bg-black/[0.04] hover:text-[#111]"
                   >
-                    <X className="w-4 h-4 text-gray-500" />
+                    <X className="w-[18px] h-[18px]" aria-hidden="true" />
                   </button>
                 </div>
               </div>
-            </div>
-            <div className="p-6">
-              {filtersContent}
-            </div>
-            <div className="sticky bottom-0 bg-white border-t border-black/6 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-              <button
-                type="button"
-                onClick={() => setMobileFiltersOpen(false)}
-                className="w-full py-3.5 bg-[#111] text-white rounded-xl text-[14px] font-semibold hover:bg-[#333] transition-colors"
-              >
-                Voir les résultats ({filtered.length})
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
-      <div className="flex gap-8 lg:gap-10">
-        {/* Desktop: sidebar filters */}
-        <aside className="hidden lg:block w-[240px] shrink-0">
-          <div className="sticky top-[calc(var(--header-height)+1.5rem)] bg-white rounded-2xl border border-black/8 p-6 shadow-[0_4px_30px_-14px_rgba(0,0,0,0.1)]">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <SlidersHorizontal className="w-4 h-4 text-gold" />
-                <span className="text-[13px] font-bold tracking-tight text-foreground">Filtres</span>
-                {activeCount > 0 && (
-                  <span className="w-5 h-5 rounded-full bg-gold text-white text-[10px] font-bold flex items-center justify-center">
-                    {activeCount}
-                  </span>
+              <div className="space-y-5 px-5 py-5">
+                {proposes.themes.length > 0 && (
+                  <GroupeDeChoix
+                    titre="Thème"
+                    options={proposes.themes}
+                    valeur={choix.theme}
+                    onChoix={(v) => changer('theme', v)}
+                    colonnes="grid-cols-2"
+                  />
+                )}
+                {proposes.tris.length > 0 && (
+                  <GroupeDeChoix
+                    titre="Trier par"
+                    options={proposes.tris}
+                    valeur={choix.tri}
+                    onChoix={(v) => changer('tri', v)}
+                    colonnes={proposes.tris.length === 3 ? 'grid-cols-3' : 'grid-cols-2'}
+                  />
+                )}
+                {proposes.acces.length > 0 && (
+                  <GroupeDeChoix
+                    titre="Type d’article"
+                    options={proposes.acces}
+                    valeur={choix.acces}
+                    onChoix={(v) => changer('acces', v)}
+                    colonnes="grid-cols-3"
+                  />
+                )}
+                {proposes.durees.length > 0 && (
+                  <GroupeDeChoix
+                    titre="Durée de lecture"
+                    options={proposes.durees}
+                    valeur={choix.duree}
+                    onChoix={(v) => changer('duree', v)}
+                    colonnes="grid-cols-2"
+                  />
                 )}
               </div>
-              {hasActiveFilters && (
-                <button
-                  type="button"
-                  onClick={resetFilters}
-                  className="text-[11px] text-gold hover:text-[#6b6f76] font-semibold transition-colors"
-                >
-                  Tout effacer
-                </button>
-              )}
-            </div>
-            <div className="h-px bg-black/8 my-6" />
-            {filtersContent}
-          </div>
-        </aside>
 
-        {/* Articles */}
-        <div className="flex-1 min-w-0">
-          {/* Results count + active filter chips */}
-          <div className="mb-7 space-y-3">
-            <p className="text-[13px] text-gray-500">
-              <span className="font-bold text-foreground">{filtered.length}</span> article{filtered.length !== 1 ? 's' : ''}
-              {hasActiveFilters ? (filtered.length !== 1 ? ' filtrés' : ' filtré') : ''}
-              {totalPages > 1 && ` · Page ${safePage} sur ${totalPages}`}
-            </p>
-            {activeChips.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2">
-                {activeChips.map((chip) => (
-                  <button
-                    key={chip.key}
-                    type="button"
-                    onClick={chip.clear}
-                    aria-label={`Retirer le filtre ${chip.label}`}
-                    className="group inline-flex items-center gap-1.5 rounded-full border border-black/10 bg-white pl-3 pr-2 py-1 text-[12px] font-medium text-gray-700 hover:border-gold hover:text-foreground transition-colors"
-                  >
-                    {chip.label}
-                    <X className="w-3 h-3 text-gray-400 group-hover:text-gold transition-colors" />
-                  </button>
-                ))}
+              <div className="px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
                 <button
                   type="button"
-                  onClick={resetFilters}
-                  className="text-[12px] font-semibold text-gold hover:text-[#6b6f76] transition-colors"
+                  disabled={filtered.length === 0}
+                  onClick={() => fermer()}
+                  className="h-12 w-full rounded-lg bg-[#111] text-[15px] font-semibold text-white transition-colors hover:bg-[#333] disabled:bg-black/20"
                 >
-                  Tout effacer
+                  {libelleAfficher(filtered.length)}
                 </button>
               </div>
-            )}
-          </div>
+            </div>
+          </>
+        )}
+      </div>
 
-          {/* Articles grid : 1 colonne si peu d'articles pour ne pas laisser de vide */}
-          <div className={`grid gap-6 stagger-grid ${paginatedArticles.length === 1 ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
+      <div className="mt-8 md:mt-10">
+        {filtered.length === 0 ? (
+          <div className="py-16">
+            <p className="text-[17px] font-semibold text-[#111]">Aucun article ne correspond à ces choix.</p>
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="mt-2 min-h-11 text-[14px] font-semibold text-gray-600 underline decoration-black/25 underline-offset-4 transition-colors hover:text-[#111] hover:decoration-black"
+            >
+              Revenir à tous les articles
+            </button>
+          </div>
+        ) : (
+          <div
+            className={`grid gap-6 stagger-grid ${
+              paginatedArticles.length === 1 ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+            }`}
+          >
             {paginatedArticles.map((article) => (
               <ArticleCard key={article._id} article={article} featured={paginatedArticles.length === 1} />
             ))}
           </div>
+        )}
 
-          {/* Empty state (filters active) */}
-          {filtered.length === 0 && articles.length > 0 && (
-            <div className="text-center py-16">
-              <p className="text-gray-500 text-lg mb-2">Aucun article ne correspond aux filtres</p>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <nav className="mt-10 flex items-center justify-center" aria-label="Pagination">
+            <div className="flex flex-wrap items-center gap-1.5">
               <button
                 type="button"
-                onClick={resetFilters}
-                className="text-[13px] text-gold hover:text-[#6b6f76] font-semibold transition-colors"
+                onClick={() => goToPage(safePage - 1)}
+                disabled={safePage <= 1}
+                aria-label="Page précédente"
+                className="flex items-center gap-1 px-3 py-2 rounded-lg text-[13px] font-medium text-gray-500 hover:bg-[#111] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-500 transition-all min-w-[44px] min-h-[44px] justify-center"
               >
-                Réinitialiser les filtres
+                <ChevronLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Précédent</span>
+              </button>
+
+              {getPageNumbers().map((page, i) =>
+                page === 'ellipsis' ? (
+                  <span key={`ellipsis-${i}`} className="px-2 text-gray-500 text-[13px]">
+                    …
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    key={page}
+                    onClick={() => goToPage(page)}
+                    aria-label={`Page ${page}`}
+                    aria-current={page === safePage ? 'page' : undefined}
+                    className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-[13px] font-medium transition-all ${
+                      page === safePage ? 'bg-[#111] text-white' : 'text-gray-500 hover:bg-secondary hover:text-gray-700'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ),
+              )}
+
+              <button
+                type="button"
+                onClick={() => goToPage(safePage + 1)}
+                disabled={safePage >= totalPages}
+                aria-label="Page suivante"
+                className="flex items-center gap-1 px-3 py-2 rounded-lg text-[13px] font-medium text-gray-500 hover:bg-[#111] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-500 transition-all min-w-[44px] min-h-[44px] justify-center"
+              >
+                <span className="hidden sm:inline">Suivant</span>
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
-          )}
-
-          {/* Empty state (no articles) */}
-          {articles.length === 0 && (
-            <div className="text-center py-20">
-              <p className="text-gray-500 text-lg mb-2">Aucun article dans cette rubrique</p>
-              <p className="text-gray-500 text-sm">De nouveaux contenus arrivent bientôt.</p>
-            </div>
-          )}
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <nav className="mt-10 flex items-center justify-center" aria-label="Pagination">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => goToPage(safePage - 1)}
-                  disabled={safePage <= 1}
-                  aria-label="Page précédente"
-                  className="flex items-center gap-1 px-3 py-2 rounded-lg text-[13px] font-medium text-gray-500 hover:bg-[#111] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-500 transition-all min-w-[44px] min-h-[44px] justify-center"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  <span className="hidden sm:inline">Précédent</span>
-                </button>
-
-                {getPageNumbers().map((page, i) =>
-                  page === 'ellipsis' ? (
-                    <span key={`ellipsis-${i}`} className="px-2 text-gray-500 text-[13px]">...</span>
-                  ) : (
-                    <button
-                      type="button"
-                      key={page}
-                      onClick={() => goToPage(page)}
-                      aria-label={`Page ${page}`}
-                      aria-current={page === safePage ? 'page' : undefined}
-                      className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-[13px] font-medium transition-all ${
-                        page === safePage
-                          ? 'bg-[#111] text-white'
-                          : 'text-gray-500 hover:bg-secondary hover:text-gray-700'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ),
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => goToPage(safePage + 1)}
-                  disabled={safePage >= totalPages}
-                  aria-label="Page suivante"
-                  className="flex items-center gap-1 px-3 py-2 rounded-lg text-[13px] font-medium text-gray-500 hover:bg-[#111] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-500 transition-all min-w-[44px] min-h-[44px] justify-center"
-                >
-                  <span className="hidden sm:inline">Suivant</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </nav>
-          )}
-        </div>
+          </nav>
+        )}
       </div>
     </div>
   );

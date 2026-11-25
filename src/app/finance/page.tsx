@@ -26,7 +26,7 @@ export default async function FinancePage() {
           <CoursDuJour />
         </div>
         {/*
-          Facette « Marchés & BRVM » : la rubrique Marchés est sortie de la barre
+          Facette « Marchés et BRVM » : la rubrique Marchés est sortie de la barre
           de navigation et ses articles ont rejoint Finance. La facette leur rend
           une porte d'entree directe, sans recreer une rubrique entiere. La page
           /marches reste, elle, accessible et n'est jamais redirigee.
@@ -37,7 +37,7 @@ export default async function FinancePage() {
           sectionLabel="Finance"
           sectionPath="/finance"
           viewRanking={viewRanking}
-          facets={[{ key: 'marches', label: 'Marchés & BRVM' }]}
+          facets={[{ key: 'marches', label: 'Marchés et BRVM' }]}
         />
       </div>
       <HubFooter

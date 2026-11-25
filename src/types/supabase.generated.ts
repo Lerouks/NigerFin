@@ -203,30 +203,33 @@ export type Database = {
       audit_log: {
         Row: {
           action: string
-          admin_id: string
+          admin_id: string | null
           created_at: string
           details: Json | null
           entity_id: string | null
           entity_type: string
           id: string
+          par_le_systeme: boolean
         }
         Insert: {
           action: string
-          admin_id: string
+          admin_id?: string | null
           created_at?: string
           details?: Json | null
           entity_id?: string | null
           entity_type: string
           id?: string
+          par_le_systeme?: boolean
         }
         Update: {
           action?: string
-          admin_id?: string
+          admin_id?: string | null
           created_at?: string
           details?: Json | null
           entity_id?: string | null
           entity_type?: string
           id?: string
+          par_le_systeme?: boolean
         }
         Relationships: [
           {

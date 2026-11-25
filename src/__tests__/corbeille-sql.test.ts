@@ -18,7 +18,7 @@ import {
 
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn(), revalidateTag: vi.fn(), unstable_cache: (fn: unknown) => fn }));
 vi.mock('@sentry/nextjs', () => ({ captureException: vi.fn(), captureMessage: vi.fn() }));
-vi.mock('@/lib/audit', () => ({ logAuditEvent: vi.fn(async () => undefined), SYSTEM_AUDIT_ID: '00000000-0000-0000-0000-000000000000' }));
+vi.mock('@/lib/audit', () => ({ logAuditEvent: vi.fn(async () => undefined), SYSTEM_AUDIT_ID: '00000000-0000-0000-0000-000000000000', AUTEUR_SYSTEME: { admin_id: null, par_le_systeme: true } }));
 vi.mock('@/lib/supabase', () => ({ createServiceClient: vi.fn(() => null) }));
 
 import * as Sentry from '@sentry/nextjs';

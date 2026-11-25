@@ -3,16 +3,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { appelAdmin } from '@/app/admin/lib/appel-admin';
 import { EtatListe } from '@/app/admin/lib/EtatListe';
+import { auteurDeLaLigne, type AuteurDuJournal } from '@/app/admin/lib/auteur-du-journal';
 
-interface AuditEntry {
+interface AuditEntry extends AuteurDuJournal {
   id: string;
-  admin_id: string;
   action: string;
   entity_type: string;
   entity_id: string | null;
   details: Record<string, unknown>;
   created_at: string;
-  user_profiles?: { email: string; full_name: string };
 }
 
 /** Ce que la route /api/admin/audit renvoie. */
@@ -87,7 +86,7 @@ export function AuditTab() {
                     {new Date(entry.created_at).toLocaleString('fr-FR')}
                   </td>
                   <td className="px-4 py-3 text-[12px]">
-                    {entry.user_profiles?.email || entry.admin_id.slice(0, 8) + '...'}
+                    {auteurDeLaLigne(entry)}
                   </td>
                   <td className="px-4 py-3">
                     <AuditActionBadge action={entry.action} />
@@ -116,6 +115,8 @@ function AuditActionBadge({ action }: { action: string }) {
     activate_subscription: 'bg-purple-100 text-purple-700',
     deactivate_subscription: 'bg-gray-100 text-gray-700',
     subscription_expired: 'bg-orange-100 text-orange-700',
+    ipaymoney_payment_verified: 'bg-emerald-100 text-emerald-700',
+    ipaymoney_payment_failed: 'bg-red-100 text-red-700',
     update_price: 'bg-amber-100 text-amber-700',
     export_csv: 'bg-blue-100 text-blue-700',
     export_xlsx: 'bg-blue-100 text-blue-700',
@@ -133,6 +134,8 @@ function AuditActionBadge({ action }: { action: string }) {
     activate_subscription: 'Abo activé',
     deactivate_subscription: 'Abo désactivé',
     subscription_expired: 'Abo expiré (auto)',
+    ipaymoney_payment_verified: 'Paiement iPayMoney validé',
+    ipaymoney_payment_failed: 'Paiement iPayMoney refusé',
     update_price: 'Prix modifié',
     export_csv: 'Export CSV',
     export_xlsx: 'Export Excel',

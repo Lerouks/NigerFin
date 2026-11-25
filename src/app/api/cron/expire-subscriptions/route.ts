@@ -4,7 +4,7 @@ import { createServiceClient } from '@/lib/supabase';
 import { sendTransactionalEmail } from '@/lib/email';
 import { subscriptionExpiredEmail } from '@/lib/email-templates';
 import { applyOverridesTo } from '@/lib/emails/overrides';
-import { SYSTEM_AUDIT_ID } from '@/lib/audit';
+import { AUTEUR_SYSTEME } from '@/lib/audit';
 import { purgerLaCorbeille } from '@/lib/corbeille';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import * as Sentry from '@sentry/nextjs';
@@ -122,10 +122,10 @@ export async function GET(request: NextRequest) {
   });
 
   // Batch audit log inserts
-  // Sec M-6 : admin_id = SYSTEM_AUDIT_ID au lieu de user.id. L'action est
-  // executee par le cron, pas par le user qui expire.
+  // Sec M-6 : l'action est faite par la tâche de nuit, pas par le lecteur qui
+  // expire. Elle s'écrit sans auteur, marquée « système » (migration 00034).
   const auditRows = expiredUsers.map((user) => ({
-    admin_id: SYSTEM_AUDIT_ID,
+    ...AUTEUR_SYSTEME,
     action: 'subscription_expired',
     entity_type: 'user',
     entity_id: user.id,
@@ -137,7 +137,13 @@ export async function GET(request: NextRequest) {
     },
   }));
 
-  await service.from('audit_log').insert(auditRows);
+  const { error: erreurJournal } = await service.from('audit_log').insert(auditRows);
+  if (erreurJournal) {
+    Sentry.captureException(new Error('journal: expirations refusées par la base'), {
+      tags: { context: 'cron-expiration-journal' },
+      extra: { lignes: auditRows.length, code: erreurJournal.code },
+    });
+  }
 
   return repondreApresLaCorbeille(service, { expired: expiredUsers.length, total: expiredUsers.length });
 }

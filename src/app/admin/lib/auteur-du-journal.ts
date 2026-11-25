@@ -14,3 +14,13 @@ export function auteurDeLaLigne(ligne: AuteurDuJournal): string {
   if (ligne.admin_id) return ligne.admin_id.slice(0, 8) + '…';
   return 'Compte supprimé';
 }
+
+/**
+ * Le nom à afficher dans le fil d'activité du module Site : le nom complet quand
+ * il existe, sinon le même auteur que le journal. Avant le 25/11/2026, une ligne
+ * sans auteur (système, compte supprimé) faisait planter toute la page.
+ */
+export function nomDansLeFil(ligne: AuteurDuJournal): string {
+  if (!ligne.par_le_systeme && ligne.user_profiles?.full_name) return ligne.user_profiles.full_name;
+  return auteurDeLaLigne(ligne);
+}

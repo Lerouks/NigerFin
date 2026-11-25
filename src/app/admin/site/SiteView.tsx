@@ -28,6 +28,7 @@ import type { LucideIcon } from 'lucide-react';
 import { useAdminApi, useAdminApiPolling } from '../hooks/useAdminApi';
 import { envoiAdmin } from '@/app/admin/lib/appel-admin';
 import { EtatListe } from '@/app/admin/lib/EtatListe';
+import { nomDansLeFil, type AuteurDuJournal } from '@/app/admin/lib/auteur-du-journal';
 
 // ─── Types ────────────────────────────────────────────────────────────────
 
@@ -72,15 +73,18 @@ interface SiteHealthData {
   checkedAt: string;
 }
 
-interface AuditEntry {
+/**
+ * Une ligne du journal. L'auteur peut manquer depuis la migration 00034 : action
+ * du système, ou compte supprimé depuis. Le type le dit, pour que le compilateur
+ * refuse toute lecture qui l'oublierait.
+ */
+interface AuditEntry extends AuteurDuJournal {
   id: string;
-  admin_id: string;
   action: string;
   entity_type: string;
   entity_id: string | null;
   details: Record<string, unknown> | null;
   created_at: string;
-  user_profiles?: { email: string; full_name: string };
 }
 
 interface AuditResponse {
@@ -447,10 +451,7 @@ function ActivitySection() {
 
 function AuditRow({ entry }: { entry: AuditEntry }) {
   const visual = getAuditVisual(entry.action);
-  const adminLabel =
-    entry.user_profiles?.full_name ||
-    entry.user_profiles?.email ||
-    `${entry.admin_id.slice(0, 8)}...`;
+  const adminLabel = nomDansLeFil(entry);
   const entityLabel = formatEntity(entry.entity_type);
 
   return (

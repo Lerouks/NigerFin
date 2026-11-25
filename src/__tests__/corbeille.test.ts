@@ -150,7 +150,7 @@ describe('messages de la restauration', () => {
     ];
     expect(cas.map((e) => e.statut)).toEqual([409, 409, 409, 409, 409, 404]);
     expect(cas[0]?.motif).toContain(`«${FINE}Le${NB}franc CFA${FINE}»`);
-    expect(cas[1]?.motif).toContain(`«${FINE}/education/bourse${FINE}»`);
+    expect(cas[1]?.motif).toContain(`«${FINE}/apprendre/bourse${FINE}»`);
     expect(lisible(cas[2]?.motif)).toMatch(/sa catégorie « Bourse » est dans la corbeille\. Remettez d’abord la catégorie en place, puis cette leçon\./);
     expect(lisible(cas[3]?.motif)).toMatch(/n’est plus dans la corbeille/);
     expect(lisible(cas[4]?.motif)).toMatch(/ne peut pas changer de numéro/);
@@ -318,8 +318,8 @@ describe('mettreALaCorbeille', () => {
 describe('rafraîchissement du cache', () => {
   const CAS: { table: TableCorbeille; slug: string | null; attendu: unknown[][] }[] = [
     { table: 'articles', slug: 'or-du-sahel', attendu: [[ARTICLE_CACHE_TAG, { expire: 0 }], ['/articles/or-du-sahel'], ['/']] },
-    { table: 'education_lessons', slug: null, attendu: [['/education'], ['/education/[id]', 'page'], ['/education/parcours/[slug]', 'page']] },
-    { table: 'education_categories', slug: 'bourse', attendu: [['/education'], ['/education/[id]', 'page']] },
+    { table: 'education_lessons', slug: null, attendu: [['apprendre', { expire: 0 }], ['menu-apprendre', { expire: 0 }], ['/apprendre'], ['/apprendre/[cours]', 'page'], ['/apprendre/[cours]/[lecon]', 'page']] },
+    { table: 'education_categories', slug: 'bourse', attendu: [['apprendre', { expire: 0 }], ['/apprendre'], ['/apprendre/[cours]', 'page']] },
     { table: 'strategic_enterprises', slug: 'sonidep', attendu: [['strategic-enterprises', 'max'], ['/niger'], ['/entreprises/sonidep']] },
     { table: 'legal_sections', slug: null, attendu: [['/cgu'], ['/mentions-legales'], ['/confidentialite']] },
     { table: 'newsletter_issues', slug: '009-brouillon', attendu: [] },

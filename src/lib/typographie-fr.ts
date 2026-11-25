@@ -20,13 +20,19 @@ const INSECABLE = '\u00a0';
 const FINE_INSECABLE = '\u202f';
 const TRAIT_INSECABLE = '\u2011';
 
+/** Unités qui restent collées au nombre qui les précède. */
+const UNITE_APRES_NOMBRE = new RegExp(
+  '(\\d)[ \\u00a0](%|‰|FCFA|€|\\$|milliards?|millions?|min|minutes?|heures?|h|ans?|mois|jours?|semaines?|km|kg|tonnes?|t|points?)(?![\\p{L}\\p{N}])',
+  'gu',
+);
+
 /**
  * Mots qui ne doivent jamais finir une ligne : ils restent avec le mot suivant.
  * Articles, prépositions, conjonctions et possessifs, rien d'autre : souder
  * aussi les pronoms sujets formait des blocs insécables trop longs (« ce que
  * vous les supprimiez »), qui forçaient des coupures pires que celles évitées.
  */
-const MOTS_OUTILS = [
+export const MOTS_OUTILS = [
   'à', 'a', 'au', 'aux', 'avec', 'ce', 'ces', 'cet', 'cette', 'chez', 'dans', 'de', 'des', 'du',
   'en', 'et', 'la', 'le', 'les', 'leur', 'leurs', 'mais', 'ne', 'ni', 'non', 'nos', 'ou', 'par', 'pour',
   'puis', 'que', 'qui', 'sa', 'sans', 'se', 'ses', 'si', 'son', 'sous', 'sur', 'un', 'une',
@@ -35,7 +41,7 @@ const MOTS_OUTILS = [
 // Aussi après une apostrophe : « d’une leçon » ne se coupe pas après « d’une ».
 const MOT_OUTIL = new RegExp(`(^|[\\s«(’'])(${MOTS_OUTILS.join('|')}) (?=\\S)`, 'giu');
 
-function souderMotsOutils(texte: string): string {
+export function souderMotsOutils(texte: string): string {
   // Deux mots-outils qui se suivent (« de la ») demandent deux passages : la
   // première soudure consomme l'espace qui précède le second.
   let avant = '';
@@ -64,6 +70,10 @@ export function typographieFr(texte: string): string {
     .replace(/[ \u00a0\u202f]*»/g, `${FINE_INSECABLE}»`)
     // Milliers déjà espacés (1 450) : fine insécable.
     .replace(/\d{1,3}(?:[ \u00a0]\d{3})+\b/g, (nombre) => nombre.replace(/[ \u00a0]/g, FINE_INSECABLE))
+    // Un nombre et son unité ne se séparent jamais : « 9,1 % », « 950 000 FCFA »,
+    // « 3 min ». Sans cela, le « % » partait seul au début de la ligne suivante
+    // sur téléphone (vu le 25/11/2026 dans une leçon d'Apprendre).
+    .replace(UNITE_APRES_NOMBRE, (_, chiffre: string, unite: string) => `${chiffre}${INSECABLE}${unite}`)
     // Trait d'union insécable dans un mot composé : jamais « entre- » en fin de
     // ligne et « temps » au début de la suivante. La police Inter du site a ce
     // glyphe. Jamais dans un lien ni une adresse (« /articles/franc-cfa »), qui
@@ -120,7 +130,8 @@ export function finSoudee(texte: string, motsDeFin = 4, longueurMax = 32): strin
   if (!texte) return texte;
   const morceaux = texte.split(' ');
   if (morceaux.length < 2) return texte;
-  const compter = (s: string) => s.split(/[\u00a0\u202f]+/).filter(Boolean).length;
+  // Seuls comptent les vrais mots : « somme\u202f? » fait un mot, pas deux.
+  const compter = (s: string) => s.split(/[\u00a0\u202f]+/).filter((m) => /[\p{L}\p{N}]/u.test(m)).length;
   let debut = morceaux.length - 1;
   let mots = compter(morceaux[debut]!);
   let longueur = morceaux[debut]!.length;
@@ -141,7 +152,8 @@ export function finSoudee(texte: string, motsDeFin = 4, longueurMax = 32): strin
 export function debutsSoudes(texte: string, motsDeDebut = 4, longueurMax = 32): string {
   if (!texte) return texte;
   const morceaux = texte.split(' ');
-  const compter = (s: string) => s.split(/[\u00a0\u202f]+/).filter(Boolean).length;
+  // Seuls comptent les vrais mots : « somme\u202f? » fait un mot, pas deux.
+  const compter = (s: string) => s.split(/[\u00a0\u202f]+/).filter((m) => /[\p{L}\p{N}]/u.test(m)).length;
   const finDePhrase = (s: string) => /[.!?\u2026»]$/.test(s) && /[.!?\u2026]/.test(s.slice(-3));
   const sortie: string[] = [];
   let i = 0;

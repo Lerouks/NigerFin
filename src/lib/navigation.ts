@@ -95,10 +95,12 @@ export const NAVIGATION: NavigationEntry[] = [
     isEditorial: true,
   },
   {
-    // Libelle change (« Éducation » devient « Apprendre »), CHEMIN INCHANGE.
+    // « Éducation » devient « Apprendre » le 24/11/2026, puis son adresse suit
+    // le 25/11/2026 : /education renvoie vers /apprendre (308, next.config.js).
+    // La clé reste « education » : c'est aussi la rubrique des articles.
     key: 'education',
     label: 'Apprendre',
-    path: '/education',
+    path: '/apprendre',
     order: 4,
     register: 'agir',
     inNav: true,
@@ -217,11 +219,11 @@ export const SIMULATEURS_MENU: LienSousMenu[] = [
   { href: '/outil/indices-economiques', label: 'Indices économiques', detail: 'PIB, inflation, taux de la\u00a0BCEAO' },
 ];
 
-/** Parcours et thèmes de la liste déroulante « Apprendre », lus en base côté serveur. */
+/** Cours et premières leçons de la liste déroulante « Apprendre », lus en base côté serveur. */
 export interface MenuApprendre {
-  parcours: LienSousMenu[];
-  themes: LienSousMenu[];
+  cours: LienSousMenu[];
+  pourCommencer: LienSousMenu[];
   lecons: number;
 }
 
-export const MENU_APPRENDRE_VIDE: MenuApprendre = { parcours: [], themes: [], lecons: 0 };
+export const MENU_APPRENDRE_VIDE: MenuApprendre = { cours: [], pourCommencer: [], lecons: 0 };

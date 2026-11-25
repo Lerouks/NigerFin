@@ -25,9 +25,13 @@ describe('Regle d\'or : on renomme des LIBELLES, jamais des CHEMINS', () => {
   // Ce test est un CONTRAT. Si une modification le fait echouer, c'est qu'elle
   // casse des URL publiques, des liens externes et le referencement. La bonne
   // reaction est de revenir en arriere, pas de mettre a jour cette liste.
+  // Seule exception, voulue et datée : le 25/11/2026, avant l'ouverture du
+  // site au public (aucune page indexée, aucun lien extérieur), « Apprendre »
+  // a pris son adresse /apprendre. L'ancienne /education et ses sous-pages
+  // renvoient vers la nouvelle (308, next.config.js), et ce contrat repart de là.
   const CHEMINS_FIGES = [
+    '/apprendre',
     '/economie',
-    '/education',
     '/entreprises',
     '/finance',
     '/marches',
@@ -46,7 +50,7 @@ describe('Regle d\'or : on renomme des LIBELLES, jamais des CHEMINS', () => {
       marches: '/marches',
       entreprises: '/entreprises',
       niger: '/niger',
-      education: '/education',
+      education: '/apprendre',
       outils: '/outils',
     };
     for (const [cle, chemin] of Object.entries(attendu)) {
@@ -66,8 +70,8 @@ describe('Barre de navigation cible : cinq entrees, deux registres', () => {
     ]);
   });
 
-  it('« Apprendre » et « Simulateurs » sont de simples renommages, chemins inchanges', () => {
-    expect(NAV_ENTRIES.find((e) => e.label === 'Apprendre')?.path).toBe('/education');
+  it('« Apprendre » vit à /apprendre, « Simulateurs » garde /outils', () => {
+    expect(NAV_ENTRIES.find((e) => e.label === 'Apprendre')?.path).toBe('/apprendre');
     expect(NAV_ENTRIES.find((e) => e.label === 'Simulateurs')?.path).toBe('/outils');
   });
 

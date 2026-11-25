@@ -627,7 +627,7 @@ function MarketForm({ form, setForm, onSave, onCancel, saving }: {
             type="text"
             value={form.education_link}
             onChange={(e) => update('education_link', e.target.value)}
-            placeholder="Ex: /education/bourse-marches"
+            placeholder="Ex : /apprendre/bases-finance"
             className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
           />
           <p className="text-[10px] text-gray-500 mt-1">Lien vers la page éducation correspondante</p>

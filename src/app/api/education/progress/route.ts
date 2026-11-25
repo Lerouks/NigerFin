@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase';
 import { serverError } from '@/lib/api-error';
+import { isValidUUID } from '@/lib/validation';
 
+/** Progression du lecteur connecté dans Apprendre : leçons lues et score des questions de fin. */
 export async function GET() {
   const supabase = await createServerSupabaseClient();
   if (!supabase) {
@@ -17,9 +19,14 @@ export async function GET() {
     .eq('user_id', user.id);
 
   if (error) return serverError(error, 'progress-get');
-  return NextResponse.json(data || []);
+  return NextResponse.json(data || [], { headers: { 'Cache-Control': 'private, no-store' } });
 }
 
+/**
+ * Enregistre la lecture d'une leçon (`completed`) et/ou le score de sa question
+ * de fin (`quiz_score`, de 0 à 100). Un champ absent n'est pas touché : noter
+ * le score ne décoche pas une leçon déjà lue.
+ */
 export async function POST(request: NextRequest) {
   const supabase = await createServerSupabaseClient();
   if (!supabase) {
@@ -42,26 +49,37 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Corps invalide' }, { status: 400 });
   }
 
-  const { lesson_id, completed } = body as { lesson_id?: unknown; completed?: unknown };
+  const { lesson_id, completed, quiz_score } = body as { lesson_id?: unknown; completed?: unknown; quiz_score?: unknown };
 
-  if (typeof lesson_id !== 'string' || lesson_id.length === 0) {
-    return NextResponse.json({ error: 'lesson_id requis' }, { status: 400 });
+  if (!isValidUUID(lesson_id)) {
+    return NextResponse.json({ error: 'lesson_id invalide' }, { status: 400 });
+  }
+  if (completed !== undefined && typeof completed !== 'boolean') {
+    return NextResponse.json({ error: 'completed doit être vrai ou faux' }, { status: 400 });
+  }
+  if (
+    quiz_score !== undefined &&
+    (typeof quiz_score !== 'number' || !Number.isInteger(quiz_score) || quiz_score < 0 || quiz_score > 100)
+  ) {
+    return NextResponse.json({ error: 'quiz_score doit être un entier de 0 à 100' }, { status: 400 });
+  }
+  if (completed === undefined && quiz_score === undefined) {
+    return NextResponse.json({ error: 'Rien à enregistrer' }, { status: 400 });
   }
 
-  const isCompleted = completed === true;
   const now = new Date().toISOString();
-
-  const payload = {
+  const payload: Record<string, unknown> = {
     user_id: user.id,
     lesson_id,
     last_viewed_at: now,
-    completed_at: isCompleted ? now : null,
   };
+  if (completed !== undefined) payload.completed_at = completed ? now : null;
+  if (quiz_score !== undefined) payload.quiz_score = quiz_score;
 
   const { data, error } = await supabase
     .from('user_lesson_progress')
     .upsert(payload, { onConflict: 'user_id,lesson_id' })
-    .select('lesson_id, completed_at, last_viewed_at')
+    .select('lesson_id, completed_at, last_viewed_at, quiz_score')
     .single();
 
   if (error) return serverError(error, 'progress-upsert');

@@ -143,11 +143,11 @@ export function MarchesContent() {
             Comprendre les marchés financiers
           </h3>
           <p className="text-gray-600 text-[14px] max-w-md">
-            Nos cours pour comprendre les indices, devises, matières premières et cryptomonnaies.
+            Nos cours pour comprendre l&rsquo;argent, l&rsquo;économie et les marchés, leçon par leçon.
           </p>
         </div>
         <Link
-          href="/education"
+          href="/apprendre"
           className="inline-flex items-center gap-2 bg-[#111] text-white px-5 py-2.5 rounded-lg text-[14px] font-medium hover:bg-black transition-colors shrink-0 self-start sm:self-auto"
         >
           Explorer les cours

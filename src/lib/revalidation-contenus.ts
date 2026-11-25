@@ -1,6 +1,7 @@
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { ARTICLE_CACHE_TAG } from '@/lib/articles';
 import { STRATEGIC_ENTERPRISES_CACHE_TAG } from '@/lib/strategic-enterprises';
+import { APPRENDRE_CACHE_TAG, MENU_APPRENDRE_CACHE_TAG } from '@/lib/apprendre/cache';
 
 /**
  * Ce que chaque type de contenu rafraîchit sur le site public quand il change.
@@ -12,7 +13,7 @@ import { STRATEGIC_ENTERPRISES_CACHE_TAG } from '@/lib/strategic-enterprises';
  * jusqu'à l'expiration du cache, une heure plus tard.
  */
 
-const RUBRIQUES_ARTICLES = ['/economie', '/finance', '/education', '/marches', '/niger'] as const;
+const RUBRIQUES_ARTICLES = ['/economie', '/finance', '/apprendre', '/marches', '/niger'] as const;
 
 export const PAGES_LEGALES = [
   '/mentions-legales',
@@ -53,13 +54,15 @@ export function revaliderPagesLegales(): void {
 }
 
 /**
- * L'accueil Éducation, chaque page de catégorie (elle liste ses leçons) et
- * chaque parcours (il enchaîne des leçons). Rafraîchir le seul /education
- * laissait une leçon supprimée, ou restaurée, en l'état pendant une heure sur
- * sa page de catégorie.
+ * Apprendre : la rubrique, chaque cours (il liste ses leçons), chaque leçon
+ * (elle montre ses voisines) et la liste déroulante du menu. Rafraîchir la
+ * seule rubrique laissait une leçon supprimée, restaurée ou publiée en l'état
+ * pendant une heure sur les autres pages.
  */
 export function revaliderEducation(): void {
-  revalidatePath('/education');
-  revalidatePath('/education/[id]', 'page');
-  revalidatePath('/education/parcours/[slug]', 'page');
+  revalidateTag(APPRENDRE_CACHE_TAG, { expire: 0 });
+  revalidateTag(MENU_APPRENDRE_CACHE_TAG, { expire: 0 });
+  revalidatePath('/apprendre');
+  revalidatePath('/apprendre/[cours]', 'page');
+  revalidatePath('/apprendre/[cours]/[lecon]', 'page');
 }

@@ -11,7 +11,7 @@ describe('porte du pré-lancement, visiteur non admin', () => {
     for (const chemin of [
       '/', '/articles', '/articles/banques-nigeriennes-sous-pression', '/economie', '/finance',
       '/entreprises', '/entreprises/somair', '/marches', '/niger', '/outils', '/outil/simulateur-emprunt',
-      '/education', '/premium', '/pricing', '/paiement', '/newsletter', '/contact', '/about',
+      '/education', '/apprendre', '/apprendre/bases-finance', '/apprendre/bases-finance/qu-est-ce-que-la-finance', '/premium', '/pricing', '/paiement', '/newsletter', '/contact', '/about',
       '/publicite', '/plan-du-site', '/inscription', '/inscription/completer-profil', '/compte',
       '/page-qui-n-existe-pas',
     ]) {
@@ -44,7 +44,7 @@ describe('porte du pré-lancement, visiteur non admin', () => {
   it('ferme les API de contenu', () => {
     for (const chemin of [
       '/api/articles', '/api/articles/un-article/content', '/api/search', '/api/comments', '/api/likes',
-      '/api/discussions', '/api/education', '/api/markets/brvm/stocks', '/api/economy/macro',
+      '/api/discussions', '/api/education', '/api/apprendre/lecons/15f7c746-ff94-4265-bb84-e25f4bbf082c', '/api/markets/brvm/stocks', '/api/economy/macro',
       '/api/strategic-enterprises', '/api/niger-presentation', '/api/legal-sections', '/api/flash-banner',
       '/api/newsletter', '/api/contact', '/api/track', '/api/user/profile', '/api/payment/list',
       '/api/ipaymoney/checkout', '/api/waitlistx', '/api/cronjob',

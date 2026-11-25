@@ -42,7 +42,7 @@ function estSousMenu(cle: string): cle is CleSousMenu {
 }
 
 interface HeaderProps {
-  /** Parcours et thèmes d'Apprendre, lus en base par le layout racine. */
+  /** Cours et premières leçons d'Apprendre, lus en base par le layout racine. */
   menuApprendre?: MenuApprendre;
 }
 
@@ -367,20 +367,20 @@ export function Header({ menuApprendre = MENU_APPRENDRE_VIDE }: HeaderProps) {
                     </>
                   ) : (
                     <>
-                      {(menuApprendre.parcours.length > 0 || menuApprendre.themes.length > 0) && (
-                        <div className="grid grid-cols-[1fr_1.45fr] gap-x-9">
+                      {menuApprendre.cours.length > 0 && (
+                        <div className="grid grid-cols-[1fr_1.25fr] gap-x-9">
                           <div>
-                            <p className="text-[12px] font-semibold text-gray-500 mb-2.5">Les parcours</p>
+                            <p className="text-[12px] font-semibold text-gray-500 mb-2.5">Les cours</p>
                             <ul>
-                              {menuApprendre.parcours.map((p) => (
-                                <li key={p.href}>
+                              {menuApprendre.cours.map((c) => (
+                                <li key={c.href}>
                                   <Link
-                                    href={p.href}
+                                    href={c.href}
                                     className="block rounded-md px-2.5 py-2 -mx-2.5 hover:bg-black/[0.035] focus-visible:bg-black/[0.035] transition-colors"
                                   >
-                                    <span className="text-[14px] font-semibold text-foreground">{p.label}</span>
-                                    {p.detail && (
-                                      <span className="block text-[13px] text-gray-500 mt-0.5">{p.detail}</span>
+                                    <span className="text-[14px] font-semibold text-foreground">{c.label}</span>
+                                    {c.detail && (
+                                      <span className="block text-[13px] text-gray-500 mt-0.5">{c.detail}</span>
                                     )}
                                   </Link>
                                 </li>
@@ -388,29 +388,30 @@ export function Header({ menuApprendre = MENU_APPRENDRE_VIDE }: HeaderProps) {
                             </ul>
                           </div>
                           <div>
-                            <p className="text-[12px] font-semibold text-gray-500 mb-2.5">Les thèmes</p>
-                            <ul className="grid grid-cols-2 gap-x-5">
-                              {menuApprendre.themes.map((t) => (
-                                <li key={t.href}>
+                            <p className="text-[12px] font-semibold text-gray-500 mb-2.5">Pour commencer</p>
+                            <ol>
+                              {menuApprendre.pourCommencer.map((l, i) => (
+                                <li key={l.href}>
                                   <Link
-                                    href={t.href}
-                                    className="block rounded-md px-2.5 py-1.5 -mx-2.5 text-[14px] text-foreground hover:bg-black/[0.035] focus-visible:bg-black/[0.035] transition-colors"
+                                    href={l.href}
+                                    className="grid grid-cols-[22px_1fr] rounded-md px-2.5 py-1.5 -mx-2.5 text-[14px] text-foreground hover:bg-black/[0.035] focus-visible:bg-black/[0.035] transition-colors"
                                   >
-                                    {t.label}
+                                    <span className="text-gray-400 tabular-nums">{i + 1}</span>
+                                    <span>{l.label}</span>
                                   </Link>
                                 </li>
                               ))}
-                            </ul>
+                            </ol>
                           </div>
                         </div>
                       )}
                       <div className="mt-3.5 pt-3 border-t border-black/6 flex items-center justify-between gap-4 text-[13px]">
                         <span className="text-gray-500">
                           {menuApprendre.lecons > 0
-                            ? `${menuApprendre.lecons}\u00a0leçons, du premier pas à la\u00a0BRVM`
+                            ? `${menuApprendre.lecons}\u00a0leçon${menuApprendre.lecons > 1 ? 's' : ''}, à suivre dans l’ordre`
                             : 'Des cours pour comprendre l’argent'}
                         </span>
-                        <Link href="/education" className="font-semibold text-foreground hover:text-foreground/70 whitespace-nowrap">
+                        <Link href="/apprendre" className="font-semibold text-foreground hover:text-foreground/70 whitespace-nowrap">
                           Tout Apprendre&nbsp;›
                         </Link>
                       </div>
@@ -467,7 +468,7 @@ export function Header({ menuApprendre = MENU_APPRENDRE_VIDE }: HeaderProps) {
                   }
                   const cle = entry.key;
                   const deplie = sousMenuMobile === cle;
-                  const liens = cle === 'outils' ? SIMULATEURS_MENU : menuApprendre.parcours;
+                  const liens = cle === 'outils' ? SIMULATEURS_MENU : menuApprendre.cours;
                   return (
                     <div key={entry.path}>
                       <button

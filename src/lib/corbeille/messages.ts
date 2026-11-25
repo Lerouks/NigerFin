@@ -183,7 +183,7 @@ export function echecMiseALaCorbeille(lue: ErreurLue): Echec {
 
 const CHEMIN_PUBLIC: Partial<Record<TableCorbeille, string>> = {
   articles: '/articles/',
-  education_categories: '/education/',
+  education_categories: '/apprendre/',
   strategic_enterprises: '/entreprises/',
 };
 

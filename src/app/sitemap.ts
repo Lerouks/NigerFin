@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next';
 import { createServiceClient } from '@/lib/supabase';
 import { SITE_URL } from '@/lib/config';
 import { SITEMAP_ENTRIES } from '@/lib/navigation';
+import { getCours } from '@/lib/apprendre/donnees';
 
 export const revalidate = 3600;
 
@@ -25,34 +26,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .eq('is_visible', true)
     : Promise.resolve({ data: [] as { slug: string; updated_at: string | null }[] });
 
-  // Fetch education categories
-  const categoriesPromise = service
-    ? service
-        .from('education_categories')
-        .select('slug, updated_at')
-        .eq('available', true)
-    : Promise.resolve({ data: [] as { slug: string; updated_at: string | null }[] });
+  // Apprendre : les cours ouverts et leurs leçons publiées, rien de caché.
+  const coursPromise = getCours().catch(() => []);
 
-  // Parcours d'apprentissage : pages publiques et indexables, absentes du plan
-  // jusqu'ici.
-  const pathsPromise = service
-    ? service
-        .from('learning_paths')
-        .select('slug, updated_at')
-        .eq('available', true)
-    : Promise.resolve({ data: [] as { slug: string; updated_at: string | null }[] });
-
-  const [articlesResult, enterprisesResult, categoriesResult, pathsResult] = await Promise.all([
+  const [articlesResult, enterprisesResult, cours] = await Promise.all([
     articlesPromise,
     enterprisesPromise,
-    categoriesPromise,
-    pathsPromise,
+    coursPromise,
   ]);
 
   const articles = ('data' in articlesResult ? articlesResult.data : articlesResult) || [];
   const enterpriseRows = ('data' in enterprisesResult ? enterprisesResult.data : enterprisesResult) || [];
-  const categories = ('data' in categoriesResult ? categoriesResult.data : categoriesResult) || [];
-  const paths = ('data' in pathsResult ? pathsResult.data : pathsResult) || [];
 
   // SEO M-1 : /connexion et /inscription retires - contradiction avec
   // robots.txt Disallow (Perf H-5). Les pages auth sont noindex en plus.
@@ -108,21 +92,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   }));
 
-  const educationPages: MetadataRoute.Sitemap = categories.map((cat: { slug: string; updated_at: string | null }) => ({
-    url: `${SITE_URL}/education/${cat.slug}`,
-    lastModified: cat.updated_at ? new Date(cat.updated_at) : new Date(),
-    changeFrequency: 'weekly',
-    priority: 0.7,
-  }));
-
-  const pathPages: MetadataRoute.Sitemap = paths
-    .filter((p: { slug: string }) => p.slug)
-    .map((p: { slug: string; updated_at: string | null }) => ({
-      url: `${SITE_URL}/education/parcours/${p.slug}`,
-      lastModified: p.updated_at ? new Date(p.updated_at) : new Date(),
+  const pagesApprendre: MetadataRoute.Sitemap = cours.flatMap((c) => [
+    {
+      url: `${SITE_URL}${c.href}`,
+      lastModified: new Date(Math.max(...c.lecons.map((l) => Date.parse(l.publieeLe)))),
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    },
+    ...c.lecons.map((l) => ({
+      url: `${SITE_URL}${l.href}`,
+      lastModified: new Date(l.publieeLe),
       changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    }));
+      priority: 0.7,
+    })),
+  ]);
 
   // Individual enterprise pages
   const enterprisePages: MetadataRoute.Sitemap = enterpriseRows
@@ -134,5 +117,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
 
-  return [...staticPages, ...toolPages, ...articlePages, ...enterprisePages, ...educationPages, ...pathPages];
+  return [...staticPages, ...toolPages, ...articlePages, ...enterprisePages, ...pagesApprendre];
 }

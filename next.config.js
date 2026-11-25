@@ -66,6 +66,23 @@ const nextConfig = {
         destination: '/niger',
         permanent: true,
       },
+      // Apprendre prend son adresse le 25/11/2026 : les thèmes deviennent des
+      // cours, les parcours sont fondus dedans (décisions de Raouf).
+      {
+        source: '/education/parcours/:slug*',
+        destination: '/apprendre',
+        permanent: true,
+      },
+      {
+        source: '/education',
+        destination: '/apprendre',
+        permanent: true,
+      },
+      {
+        source: '/education/:cours',
+        destination: '/apprendre/:cours',
+        permanent: true,
+      },
     ];
   },
   async headers() {

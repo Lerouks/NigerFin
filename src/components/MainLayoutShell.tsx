@@ -10,7 +10,7 @@ import type { MenuApprendre } from '@/lib/navigation';
 interface MainLayoutShellProps {
   children: React.ReactNode;
   initialFlashBanner: FlashBannerData;
-  /** Parcours et thèmes de la liste déroulante « Apprendre », lus en base. */
+  /** Cours et premières leçons de la liste déroulante « Apprendre », lus en base. */
   menuApprendre: MenuApprendre;
 }
 

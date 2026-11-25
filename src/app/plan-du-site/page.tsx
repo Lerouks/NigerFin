@@ -131,8 +131,8 @@ export default function PlanDuSitePage() {
               Si vous découvrez NFI Report, nous vous recommandons de commencer par la page
               d&apos;accueil pour découvrir nos derniers articles, puis d&apos;explorer la
               rubrique qui correspond le plus à vos centres d&apos;intérêt. Pour aller plus
-              loin, nos parcours pédagogiques d&apos;éducation financière vous accompagnent du
-              débutant à l&apos;investisseur autonome, à votre rythme.
+              loin, les cours de la rubrique Apprendre reprennent les bases de l&apos;argent et
+              des marchés, leçon par leçon.
             </p>
             <p className="text-[15px] sm:text-[16px] leading-relaxed text-gray-700 text-justify hyphens-auto">
               Si vous cherchez une information précise (un indicateur économique, un cours de

@@ -72,7 +72,10 @@ CREATE TABLE public.education_lessons (
   sort_order integer DEFAULT 0 NOT NULL,
   content text DEFAULT ''::text NOT NULL,
   created_at timestamp with time zone DEFAULT now() NOT NULL,
-  updated_at timestamp with time zone DEFAULT now() NOT NULL
+  updated_at timestamp with time zone DEFAULT now() NOT NULL,
+  slug text,
+  published_at timestamp with time zone,
+  quiz jsonb
 );
 
 CREATE TABLE public.learning_paths (
@@ -258,6 +261,9 @@ ALTER TABLE public.articles ADD CONSTRAINT articles_category_check CHECK ((categ
 ALTER TABLE public.articles ADD CONSTRAINT articles_content_type_check CHECK ((content_type = ANY (ARRAY['free'::text, 'premium'::text, 'pro'::text])));
 ALTER TABLE public.articles ADD CONSTRAINT articles_status_check CHECK ((status = ANY (ARRAY['draft'::text, 'published'::text, 'archived'::text])));
 ALTER TABLE public.education_lessons ADD CONSTRAINT education_lessons_access_level_check CHECK ((access_level = ANY (ARRAY['free'::text, 'standard'::text, 'premium'::text, 'pro'::text])));
+ALTER TABLE public.education_lessons ADD CONSTRAINT education_lessons_slug_format CHECK (((slug IS NULL) OR (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'::text)));
+ALTER TABLE public.education_lessons ADD CONSTRAINT education_lessons_quiz_tableau CHECK (((quiz IS NULL) OR (jsonb_typeof(quiz) = 'array'::text)));
+CREATE UNIQUE INDEX education_lessons_cours_slug_unique ON public.education_lessons USING btree (category_id, slug) WHERE (slug IS NOT NULL);
 ALTER TABLE public.learning_paths ADD CONSTRAINT learning_paths_difficulty_check CHECK ((difficulty = ANY (ARRAY['Debutant'::text, 'Intermediaire'::text, 'Avance'::text])));
 ALTER TABLE public.newsletter_events ADD CONSTRAINT newsletter_events_event_type_check CHECK ((event_type = ANY (ARRAY['delivered'::text, 'opened'::text, 'clicked'::text, 'bounced'::text, 'complained'::text, 'unsubscribed'::text])));
 ALTER TABLE public.newsletter_issues ADD CONSTRAINT newsletter_issues_audience_check CHECK ((audience = ANY (ARRAY['premium'::text, 'all'::text, 'free'::text])));

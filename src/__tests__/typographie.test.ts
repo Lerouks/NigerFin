@@ -69,3 +69,37 @@ describe('debutsSoudes : une phrase ne commence jamais en fin de ligne', () => {
     expect(debutsSoudes('Fin. Oui. Puis la suite vient ici.')).toBe('Fin. Oui. Puis\u00a0la\u00a0suite\u00a0vient ici.');
   });
 });
+
+describe('un point d’interrogation n’est pas un mot (25/11/2026)', () => {
+  it('une phrase qui finit par « ? » garde quatre vrais mots sur sa dernière ligne', async () => {
+    const { finSoudee, typographieFr } = await import('@/lib/typographie-fr');
+    const soudee = finSoudee(typographieFr('Que pourrez-vous acheter avec cette somme ?'));
+    // « acheter avec cette somme ? » : quatre mots, plus le point d’interrogation.
+    expect(soudee.endsWith('acheter\u00a0avec\u00a0cette\u00a0somme\u202f?')).toBe(true);
+  });
+
+  it('un début de phrase soudé ne compte pas la ponctuation comme un mot', async () => {
+    const { debutsSoudes, typographieFr } = await import('@/lib/typographie-fr');
+    // « Note : » compte pour un mot : le début soudé va jusqu'à « baisse. ».
+    const soude = debutsSoudes(typographieFr('Avant tout. Note : le chiffre baisse.'));
+    expect(soude).toContain('Note\u00a0:\u00a0le\u00a0chiffre\u00a0baisse.');
+  });
+});
+
+describe('un nombre et son unité restent ensemble (25/11/2026)', () => {
+  it('soude %, FCFA, min et les autres unités au nombre', async () => {
+    const { typographieFr } = await import('@/lib/typographie-fr');
+    expect(typographieFr('une hausse de 9,1 % en 2024')).toContain('9,1\u00a0%');
+    expect(typographieFr('environ 950 000 FCFA d’avant')).toContain('950\u202f000\u00a0FCFA');
+    expect(typographieFr('3 min de lecture')).toBe('3\u00a0min de\u00a0lecture');
+    expect(typographieFr('pendant 20 ans')).toContain('20\u00a0ans');
+  });
+
+  it('ne touche ni aux mots qui commencent comme une unité, ni deux fois au même texte', async () => {
+    const { typographieFr } = await import('@/lib/typographie-fr');
+    expect(typographieFr('en 2025 ministres')).not.toContain('2025\u00a0min');
+    expect(typographieFr('les 3 hommes')).not.toContain('3\u00a0h');
+    const une = typographieFr('9,1 % et 3 min');
+    expect(typographieFr(une)).toBe(une);
+  });
+});

@@ -93,7 +93,7 @@ export function EditorDiscoverSection({ content, patchContent }: EditorDiscoverS
             <ArticlePicker
               value={it.url}
               onChange={(url) => patchContent({ discover: { ...discover, items: items.map((x, i) => i === idx ? { ...x, url: url ?? '' } : x) } })}
-              placeholder="URL de la rubrique (ex: nfireport.com/education)"
+              placeholder="URL de la rubrique (ex : nfireport.com/apprendre)"
             />
           </div>
         )}

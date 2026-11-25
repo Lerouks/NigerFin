@@ -10,6 +10,8 @@ import { useToast } from '@/components/Toast';
 import { typographieFr } from '@/lib/typographie-fr';
 import { appelAdmin, envoiAdmin } from '@/app/admin/lib/appel-admin';
 import { EtatListe } from '@/app/admin/lib/EtatListe';
+import { minutesDeLecture } from '@/lib/apprendre/lecture';
+import { lireQuiz } from '@/lib/apprendre/quiz';
 
 interface Category {
   id: string;
@@ -30,6 +32,54 @@ interface Lesson {
   access_level: 'free' | 'premium';
   sort_order: number;
   content: string;
+  slug: string | null;
+  published_at: string | null;
+  quiz: unknown;
+}
+
+/**
+ * Le formulaire d'une leçon. La durée n'est plus saisie : le serveur la calcule
+ * sur la longueur du texte. La publication est une date : vide, la leçon reste
+ * cachée ; dans le futur, elle paraît seule à cette date (une leçon par
+ * semaine, décision de Raouf du 25/11/2026).
+ */
+interface FormulaireLecon {
+  title: string;
+  access_level: string;
+  sort_order: number;
+  content: string;
+  slug: string;
+  publie: boolean;
+  datePublication: string;
+  question: string;
+  choix: [string, string, string];
+  bonne: number;
+  explication: string;
+}
+
+const FORMULAIRE_VIDE: FormulaireLecon = {
+  title: '', access_level: 'free', sort_order: 0, content: '', slug: '',
+  publie: false, datePublication: '', question: '', choix: ['', '', ''], bonne: 0, explication: '',
+};
+
+/** « 2026-11-25T14:30 » pour un champ date et heure, à l'heure de l'appareil. */
+function versChampDate(iso: string | null): string {
+  const d = iso ? new Date(iso) : new Date();
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+/** Où en est une leçon : publiée, programmée ou cachée. */
+function etatPublication(lesson: Lesson): { libelle: string; classe: string } {
+  if (!lesson.published_at) return { libelle: 'Cachée', classe: 'bg-gray-100 text-gray-600' };
+  const date = new Date(lesson.published_at);
+  if (date.getTime() > Date.now()) {
+    return {
+      libelle: `Programmée le ${date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}`,
+      classe: 'bg-amber-50 text-amber-800',
+    };
+  }
+  return { libelle: 'Publiée', classe: 'bg-emerald-50 text-emerald-800' };
 }
 
 /** Ce qu'un appel raté rapporte : la phrase à afficher et le code du serveur. */
@@ -91,7 +141,7 @@ export function EducationManager() {
   // Lesson form
   const [showLessonForm, setShowLessonForm] = useState(false);
   const [editLessonId, setEditLessonId] = useState<string | null>(null);
-  const [lessonForm, setLessonForm] = useState({ title: '', duration: '5 min', access_level: 'free' as string, sort_order: 0, content: '' });
+  const [lessonForm, setLessonForm] = useState<FormulaireLecon>(FORMULAIRE_VIDE);
 
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
@@ -197,10 +247,31 @@ export function EducationManager() {
     if (!selectedCategory) return;
     setSaving(true);
 
+    // La question de fin : les réponses remplies, dans l'ordre, et la bonne parmi elles.
+    let quiz: unknown = null;
+    if (lessonForm.question.trim()) {
+      const remplies = lessonForm.choix.map((texte, i) => ({ texte: texte.trim(), i })).filter((c) => c.texte);
+      const bonne = remplies.findIndex((c) => c.i === lessonForm.bonne);
+      if (remplies.length < 2 || bonne === -1 || !lessonForm.explication.trim()) {
+        showToast('Question de fin incomplète : au moins deux réponses, la bonne réponse cochée et une explication.', 'error');
+        setSaving(false);
+        return;
+      }
+      quiz = [{ question: lessonForm.question.trim(), choix: remplies.map((c) => c.texte), bonne, explication: lessonForm.explication.trim() }];
+    }
+    const champs = {
+      title: lessonForm.title,
+      access_level: lessonForm.access_level,
+      sort_order: lessonForm.sort_order,
+      content: lessonForm.content,
+      slug: lessonForm.slug.trim(),
+      published_at: lessonForm.publie && lessonForm.datePublication ? new Date(lessonForm.datePublication).toISOString() : null,
+      quiz,
+    };
     const method = editLessonId ? 'PUT' : 'POST';
     const body = editLessonId
-      ? { id: editLessonId, ...lessonForm }
-      : { category_id: selectedCategory.id, ...lessonForm };
+      ? { id: editLessonId, ...champs }
+      : { category_id: selectedCategory.id, ...champs };
     const resultat = await envoiAdmin('/api/admin/education/lessons', method, body);
 
     if (resultat.ok) {
@@ -232,19 +303,26 @@ export function EducationManager() {
   const startEditLesson = (lesson: Lesson) => {
     setEditLessonId(lesson.id);
     setShowLessonForm(true);
+    const question = lireQuiz(lesson.quiz)[0];
     setLessonForm({
       title: lesson.title,
-      duration: lesson.duration,
       access_level: lesson.access_level,
       sort_order: lesson.sort_order,
       content: lesson.content || '',
+      slug: lesson.slug ?? '',
+      publie: !!lesson.published_at,
+      datePublication: versChampDate(lesson.published_at),
+      question: question?.question ?? '',
+      choix: [question?.choix[0] ?? '', question?.choix[1] ?? '', question?.choix[2] ?? ''],
+      bonne: question?.bonne ?? 0,
+      explication: question?.explication ?? '',
     });
   };
 
   const resetLessonForm = () => {
     setEditLessonId(null);
     setShowLessonForm(false);
-    setLessonForm({ title: '', duration: '5 min', access_level: 'free', sort_order: 0, content: '' });
+    setLessonForm(FORMULAIRE_VIDE);
   };
 
   const getAccessBadge = (level: string) => {
@@ -309,12 +387,13 @@ export function EducationManager() {
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">Durée</label>
+                  <label htmlFor="lecon-adresse" className="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">Adresse</label>
                   <input
+                    id="lecon-adresse"
                     type="text"
-                    value={lessonForm.duration}
-                    onChange={(e) => setLessonForm({ ...lessonForm, duration: e.target.value })}
-                    placeholder="5 min"
+                    value={lessonForm.slug}
+                    onChange={(e) => setLessonForm({ ...lessonForm, slug: e.target.value.toLowerCase() })}
+                    placeholder="Déduite du titre si vide"
                     className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
                   />
                 </div>
@@ -341,17 +420,83 @@ export function EducationManager() {
                     className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
                   />
                 </div>
+                <div>
+                  <label className="text-[10px] text-gray-500 uppercase tracking-wider flex items-center gap-2 mb-1">
+                    <input
+                      type="checkbox"
+                      checked={lessonForm.publie}
+                      onChange={(e) => setLessonForm({ ...lessonForm, publie: e.target.checked, datePublication: lessonForm.datePublication || versChampDate(null) })}
+                    />
+                    Publier le
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={lessonForm.datePublication}
+                    disabled={!lessonForm.publie}
+                    onChange={(e) => setLessonForm({ ...lessonForm, datePublication: e.target.value })}
+                    className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black disabled:opacity-40"
+                  />
+                </div>
               </div>
+              <p className="text-[12px] text-gray-500">
+                {lessonForm.publie
+                  ? 'Une date future programme la leçon : elle paraît seule à cette date, dans l’heure qui suit.'
+                  : 'Sans date de publication, la leçon reste cachée au public.'}{' '}
+                Durée de lecture calculée : {minutesDeLecture(lessonForm.content)}&nbsp;min.
+              </p>
               <div>
                 <label className="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">Contenu</label>
                 <textarea
                   value={lessonForm.content}
                   onChange={(e) => setLessonForm({ ...lessonForm, content: e.target.value })}
-                  rows={6}
+                  rows={16}
                   placeholder="Contenu de la leçon..."
                   className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black resize-y"
                 />
               </div>
+              <fieldset className="rounded-lg border border-black/8 p-4 space-y-2">
+                <legend className="px-1 text-[10px] text-gray-500 uppercase tracking-wider">Question de fin (facultative)</legend>
+                <input
+                  type="text"
+                  value={lessonForm.question}
+                  onChange={(e) => setLessonForm({ ...lessonForm, question: e.target.value })}
+                  placeholder="La question posée au lecteur"
+                  aria-label="Question de fin"
+                  className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
+                />
+                {lessonForm.choix.map((texte, i) => (
+                  <label key={i} className="flex items-center gap-2 text-sm">
+                    <input
+                      type="radio"
+                      name="bonne-reponse"
+                      checked={lessonForm.bonne === i}
+                      onChange={() => setLessonForm({ ...lessonForm, bonne: i })}
+                      aria-label={`La réponse ${'ABC'[i]} est la bonne`}
+                    />
+                    <span className="w-4 text-gray-500">{'ABC'[i]}</span>
+                    <input
+                      type="text"
+                      value={texte}
+                      onChange={(e) => {
+                        const choix = [...lessonForm.choix] as [string, string, string];
+                        choix[i] = e.target.value;
+                        setLessonForm({ ...lessonForm, choix });
+                      }}
+                      placeholder={i === 2 ? 'Réponse facultative' : 'Réponse'}
+                      className="flex-1 border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black"
+                    />
+                  </label>
+                ))}
+                <textarea
+                  value={lessonForm.explication}
+                  onChange={(e) => setLessonForm({ ...lessonForm, explication: e.target.value })}
+                  rows={2}
+                  placeholder="L’explication affichée après la réponse"
+                  aria-label="Explication de la bonne réponse"
+                  className="w-full border border-black/8 rounded-lg px-3 py-2 text-sm bg-background focus:outline-hidden focus:ring-1 focus:ring-black resize-y"
+                />
+                <p className="text-[12px] text-gray-500">Cochez la bonne réponse. Laissez la question vide pour ne pas en poser.</p>
+              </fieldset>
               <div className="flex gap-2 pt-1">
                 <button
                   onClick={handleSaveLesson}
@@ -379,10 +524,17 @@ export function EducationManager() {
                 </span>
                 <div className="min-w-0">
                   <p className="text-sm font-medium truncate">{lesson.title}</p>
-                  <p className="text-[11px] text-gray-500">{lesson.duration}</p>
+                  <p className="text-[11px] text-gray-500 truncate">
+                    {lesson.duration}
+                    {lesson.slug ? ` · /apprendre/${selectedCategory.slug}/${lesson.slug}` : ''}
+                    {lireQuiz(lesson.quiz).length > 0 ? ' · question de fin' : ''}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${etatPublication(lesson).classe}`}>
+                  {etatPublication(lesson).libelle}
+                </span>
                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${getAccessBadge(lesson.access_level).color}`}>
                   {getAccessBadge(lesson.access_level).label}
                 </span>

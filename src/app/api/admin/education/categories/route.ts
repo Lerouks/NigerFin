@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
+import { revaliderEducation } from '@/lib/revalidation-contenus';
 import { requireAdmin } from '@/lib/admin-auth';
 import { serverError } from '@/lib/api-error';
 import { mettreALaCorbeille } from '@/lib/corbeille';
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     return serverError(error, 'admin-education-categories');
   }
 
-  revalidatePath('/education');
+  revaliderEducation();
   return NextResponse.json(data);
 }
 
@@ -91,7 +91,7 @@ export async function PUT(request: NextRequest) {
     return serverError(error, 'admin-education-categories');
   }
 
-  revalidatePath('/education');
+  revaliderEducation();
   return NextResponse.json(data);
 }
 

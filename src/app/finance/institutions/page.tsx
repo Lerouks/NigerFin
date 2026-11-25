@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { CategoryHero } from '@/components/CategoryHero';
 import { AjusteurLignes } from '@/components/apprendre/AjusteurLignes';
 import { encadreBceao } from '@/lib/bceao';
 import { lireSeanceComplete, lireSeancesBrvm, SYMBOLE_BOA_NIGER } from '@/lib/brvm-seances';
@@ -169,9 +168,9 @@ export default async function InstitutionsPage() {
         'La Banque centrale des États de l’Afrique de l’Ouest émet le franc CFA et conduit la politique monétaire des huit pays de l’Union, depuis son siège de Dakar.',
       ],
       pourVous: [
-        'Son taux directeur fixe le prix auquel les banques empruntent auprès d’elle : quand il monte, le crédit coûte plus cher aux ménages comme aux entreprises.',
+        'Son taux directeur fixe le prix de l’argent que les banques empruntent auprès d’elle : quand il monte, le crédit coûte plus cher à leurs clients.',
         'Elle cherche à maintenir l’inflation entre 1 % et 3 % par an, pour protéger le pouvoir d’achat.',
-        'Elle encadre les banques, la microfinance et le mobile money.',
+        'Elle fixe les règles que suivent les banques, la microfinance et le mobile money.',
       ],
       chiffres: chiffresBceao,
       sourceChiffres: taux ? 'Taux lus chaque jour sur le site de la BCEAO.' : undefined,
@@ -252,10 +251,24 @@ export default async function InstitutionsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <CategoryHero
-        title={`Qui fait quoi dans${NB}la${NB}finance`}
-        description="Voici ce que font la BCEAO, l’UEMOA, la BRVM, l’AMF-UMOA et UMOA-Titres, et ce que cela change pour votre argent au Niger."
-      />
+      {/*
+        Même en-tête que les rubriques (CategoryHero), mais sous AjusteurLignes :
+        la phrase d'introduction est réglée à l'écran comme le reste de la page.
+      */}
+      <AjusteurLignes>
+        <section className="bg-background border-b border-black/8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight text-[#111] wrap-break-word">
+              {`Qui fait quoi dans${NB}la${NB}finance`}
+            </h1>
+            <p className="text-gray-600 text-[15px] md:text-[16px] mt-3 max-w-2xl leading-relaxed">
+              {typographieFr(
+                'Voici ce que font la BCEAO, l’UEMOA, la BRVM, l’AMF-UMOA et UMOA-Titres, et ce que cela change pour votre argent au Niger.',
+              )}
+            </p>
+          </div>
+        </section>
+      </AjusteurLignes>
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 md:pt-12 pb-16 md:pb-20">
         <nav aria-label="Les institutions de la page" className="mb-10">

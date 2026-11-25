@@ -1,6 +1,9 @@
 import type { LegalSection } from '@/lib/legal-sections';
 import { LegalIntroBlock } from '@/components/LegalIntroBlock';
 import { texteJustifie } from '@/components/TexteJustifie';
+// Titres des sections : apostrophe typographique et insécable avant « ? », comme
+// le texte (« Qu'est-ce qu'un cookie ? » s'affichait avec des apostrophes droites).
+import { typographier } from '@/lib/typographie';
 import { HabillagePreLancement } from '@/components/coming-soon/HabillagePreLancement';
 
 interface FallbackSection {
@@ -50,7 +53,7 @@ export function DynamicLegalPage({ title, introParagraphs, initialSections, fall
                 <div className="space-y-10 max-w-prose">
                   {sections.map((section) => (
                     <div key={section.id}>
-                      <h2 className="text-xl font-bold mb-3">{section.heading}</h2>
+                      <h2 className="text-xl font-bold mb-3">{typographier(section.heading)}</h2>
                       <div className={bodyClass}>{texteJustifie(section.text)}</div>
                     </div>
                   ))}
@@ -59,7 +62,7 @@ export function DynamicLegalPage({ title, introParagraphs, initialSections, fall
                 <div className="space-y-10 max-w-prose">
                   {fallbackSections.map((section, index) => (
                     <div key={index}>
-                      <h2 className="text-xl font-bold mb-3">{section.heading}</h2>
+                      <h2 className="text-xl font-bold mb-3">{typographier(section.heading)}</h2>
                       <div className={bodyClass}>{texteJustifie(section.text)}</div>
                     </div>
                   ))}

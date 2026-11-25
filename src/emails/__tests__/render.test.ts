@@ -1,4 +1,12 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
+
+// Le numéro de démonstration garde ses propres lignes de marché : le tableau
+// tiré des cours du jour du site (et de leurs sources en ligne) est testé dans
+// sources-officielles.test.ts, sans réseau.
+vi.mock('@/lib/newsletter/market-sync', () => ({
+  getLiveMarketRows: async () => [],
+  getMarketSourceLine: async () => '',
+}));
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { renderPremiumBriefingHtml, renderPremiumBriefingText } from '../render';
@@ -62,6 +70,11 @@ describe('PremiumBriefing render', () => {
     expect(plainText).toContain('NFI REPORT');
     expect(plainText).toContain('TABLEAU DE BORD');
     expect(plainText).toContain('BRVM Composite');
+  });
+
+  it('écrit les variations à la française dans la version texte', () => {
+    expect(plainText).not.toMatch(/[+-]\d+\.\d{2}%/);
+    expect(plainText).toMatch(/[+\u2212]\d+,\d{2}\u00a0%|fixe/);
   });
 
   it('escapes raw HTML in plain text fallback', () => {

@@ -20,9 +20,10 @@ export interface MarketTableProps {
   source?: string;
 }
 
-function formatPct(pct: number): string {
-  const sign = pct >= 0 ? '+' : '';
-  return `${sign}${pct.toFixed(2)}%`;
+/** « +0,26 % », « −1,54 % » : virgule, signe moins et espace insécable à la française. */
+export function formatPct(pct: number): string {
+  const sign = pct >= 0 ? '+' : '\u2212';
+  return `${sign}${Math.abs(pct).toFixed(2).replace('.', ',')}\u00a0%`;
 }
 
 /**

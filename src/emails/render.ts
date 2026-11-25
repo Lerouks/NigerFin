@@ -3,6 +3,7 @@ import * as React from 'react';
 import { PremiumBriefing, type PremiumBriefingProps } from './PremiumBriefing';
 import type { NewsletterIssue } from './types';
 import { getLiveMarketRows, getMarketSourceLine } from '@/lib/newsletter/market-sync';
+import { formatPct } from './components/MarketTable';
 
 /**
  * Rend la newsletter en HTML.
@@ -59,8 +60,7 @@ export function renderPremiumBriefingText(issue: NewsletterIssue, siteUrl: strin
   lines.push('');
   lines.push('I · TABLEAU DE BORD');
   issue.market.rows.forEach((r) => {
-    const sign = r.changePercent >= 0 ? '+' : '';
-    lines.push(`  ${r.label.padEnd(18)} ${r.value}${r.unit ? ' ' + r.unit : ''}   ${sign}${r.changePercent.toFixed(2)}%`);
+    lines.push(`  ${r.label.padEnd(18)} ${r.value}${r.unit ? ' ' + r.unit : ''}   ${r.changePercent === 0 ? 'fixe' : formatPct(r.changePercent)}`);
   });
   if (issue.market.source) lines.push(`Source : ${issue.market.source}`);
   lines.push('');

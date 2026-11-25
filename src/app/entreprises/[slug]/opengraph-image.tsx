@@ -32,6 +32,18 @@ async function getEnterprise(slug: string) {
   return data;
 }
 
+/**
+ * Texte de l'image : apostrophes typographiques, mais espaces ordinaires. Les
+ * insécables n'y servent à rien (pas de retour à la ligne) et le moteur de
+ * l'image les dessine plus étroites qu'une espace : les blancs devenaient
+ * irréguliers (« Le crédit  agricole »).
+ */
+function texteImage(texte: string): string {
+  return typographieFr(texte)
+    .replace(/[\u00a0\u202f]/g, ' ')
+    .replace(/\u2011/g, '-');
+}
+
 /** Le logo en data URL : sans lui (réseau en panne), l'image se dessine quand même. */
 async function logoEnDataUrl(chemin: string | null): Promise<string | null> {
   if (!chemin) return null;
@@ -120,12 +132,12 @@ export default async function EnterpriseOgImage({ params }: { params: Promise<{ 
             </div>
             {nomComplet ? (
               <div style={{ marginTop: '20px', color: '#8a8e95', fontSize: '28px', lineHeight: 1.3 }}>
-                {typographieFr(nomComplet)}
+                {texteImage(nomComplet)}
               </div>
             ) : null}
             {ligne ? (
               <div style={{ marginTop: '10px', color: '#e5e7eb', fontSize: '32px', lineHeight: 1.3 }}>
-                {typographieFr(ligne)}
+                {texteImage(ligne)}
               </div>
             ) : null}
           </div>

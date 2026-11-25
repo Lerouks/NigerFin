@@ -227,7 +227,9 @@ function BlocAbonnement({ etat, prixMensuel }: { etat: EtatAbonnement; prixMensu
             ? <>Votre accès Premium a pris fin <span className="whitespace-nowrap">le {etat.ancienneFin}.</span></>
             : 'Lecture sans abonnement'}
         </p>
-        <p className="mt-4 text-[15px] leading-[1.5] text-[#1a1a1a]">
+        {/* 14,5 px sous 360 px : à 320 px, « les simulateurs avancés et les cours. »
+            dépassait de 6 px la colonne (25/11/2026). */}
+        <p className="mt-4 text-[15px] max-[359px]:text-[14.5px] leading-[1.5] text-[#1a1a1a]">
           Premium ouvre <span className="whitespace-nowrap">tous les articles,</span>{' '}
           <span className="whitespace-nowrap">la newsletter en intégralité,</span>{' '}
           <span className="whitespace-nowrap">les simulateurs avancés et les cours.</span>

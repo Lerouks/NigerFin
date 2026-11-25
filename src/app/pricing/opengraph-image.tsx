@@ -36,7 +36,8 @@ export default function PricingOgImage() {
             Devenir Premium
           </div>
           <div style={{ color: '#9ca3af', fontSize: '32px', lineHeight: 1.4 }}>
-            {`À partir de ${monthly}/mois. Articles illimités, newsletters Premium, simulateurs avancés.`}
+            {/* Fin soudée : jamais « simulateurs avancés. » seuls sur la dernière ligne. */}
+            {`À partir de ${monthly}/mois. Articles illimités, newsletters\u00a0Premium,\u00a0simulateurs\u00a0avancés.`}
           </div>
         </div>
 

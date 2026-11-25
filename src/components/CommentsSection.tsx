@@ -150,7 +150,7 @@ export function CommentsSection({ articleId }: CommentsSectionProps) {
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
               aria-label="Votre commentaire" placeholder="Partagez votre avis..."
-              className="w-full border border-black/6 rounded-lg p-4 focus:outline-hidden focus:border-black/15 focus:ring-1 focus:ring-black/5 bg-background resize-none text-[14px] transition-all"
+              className="w-full border border-black/6 rounded-lg p-4 focus:outline-hidden focus:border-black/15 focus:ring-1 focus:ring-black/5 bg-background resize-none text-[16px] transition-all"
               rows={3}
             />
             <div className="flex justify-end mt-3">

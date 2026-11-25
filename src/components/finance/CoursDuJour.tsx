@@ -1,14 +1,18 @@
+import Link from 'next/link';
 import { getCoursDuJour, type Cours, type PointDeCours } from '@/lib/cours-du-jour';
 import { paragrapheFr } from '@/lib/typographie-fr';
+import { MentionCours } from './MentionCours';
 import { SourcesDesCours, type SourceDeCours } from './SourcesDesCours';
 
 /**
  * « Les cours du jour », en tête de la page Finance (maquette validée le
- * 24/11/2026). Sept tuiles : dollar, naira, BRVM Composite, BOA Niger (ajouté
- * le 25/11/2026, seule société nigérienne cotée), or, Brent, puis l'euro.
+ * 24/11/2026). Huit tuiles : dollar, naira, BRVM Composite, BOA Niger (ajouté
+ * le 25/11/2026, seule société nigérienne cotée), or, Brent, puis l'euro et le
+ * taux directeur de la BCEAO (25/11/2026), qui ne bougent pas chaque jour.
  * Une tuile dont la source est en panne disparaît ; le bloc entier disparaît
  * s'il ne reste que l'euro. Les sources s'ouvrent par le bouton « Sources »
  * (choix de Raouf le 24/11/2026, à la place d'un paragraphe sous les tuiles).
+ * Le même bloc ouvre la page Marchés (sans le lien « Tous les cours »).
  */
 
 const NB = '\u00a0';
@@ -27,6 +31,8 @@ const dateCourte = (iso: string) =>
  * Colonnes sur ordinateur : une seule rangée jusqu'à six cours. Sept cours ne
  * tiennent sur une rangée qu'à partir de 1 280 px (en dessous, « BRVM
  * Composite » sortirait de sa colonne) : quatre colonnes entre 1 024 et 1 280 px.
+ * Huit cours font deux rangées de quatre, sur tous les ordinateurs : huit
+ * colonnes serreraient « 655,957 FCFA » au point de renvoyer l'unité dessous.
  */
 const COLONNES_LARGES: Record<number, string> = {
   2: 'lg:grid-cols-2',
@@ -35,11 +41,12 @@ const COLONNES_LARGES: Record<number, string> = {
   5: 'lg:grid-cols-5',
   6: 'lg:grid-cols-6',
   7: 'lg:grid-cols-4 xl:grid-cols-7',
+  8: 'lg:grid-cols-4',
 };
 
-/** Bordure de séparation : jamais sur la première tuile d'une rangée (2, 3, puis 4 à 7 colonnes). */
+/** Bordure de séparation : jamais sur la première tuile d'une rangée (2, 3, puis 4 à 8 colonnes). */
 function separation(index: number, total: number): string {
-  const colonnesLarges = total === 7 ? 4 : total;
+  const colonnesLarges = total >= 7 ? 4 : total;
   return [
     index % 2 === 0 ? 'border-l-0 pl-0' : 'border-l pl-3',
     index % 3 === 0 ? 'sm:border-l-0 sm:pl-0' : 'sm:border-l sm:pl-4',
@@ -107,40 +114,12 @@ function Courbe({ serie, description }: { serie: PointDeCours[]; description?: s
   );
 }
 
-/** Les sources des cours affichés, dans l'ordre des tuiles. */
+/** Les sources des cours affichés, dans l'ordre des tuiles : chaque cours dit d'où il vient. */
 function sourcesDesCours(cours: Cours[]): SourceDeCours[] {
-  const textes: Record<Cours['cle'], string> = {
-    euro: `Parité fixe : 1 euro vaut 655,957${NB}FCFA.`,
-    dollar: 'Cours de référence de la Banque centrale européenne, converti en FCFA par la parité fixe.',
-    naira: 'Cours indicatif du marché des changes, mis à jour chaque jour.',
-    // « de chaque séance. » restait seul en dernière ligne à 360 px et sur ordinateur (mesuré le 25/11/2026).
-    brvm: `Cours de clôture publié par la BRVM à${NB}la${NB}fin${NB}de${NB}chaque${NB}séance.`,
-    // Le nom de la banque ne se coupe jamais : « Bank of » seul en fin de ligne.
-    boan: `Cours de clôture de Bank${NB}of${NB}Africa${NB}Niger, la seule société nigérienne cotée à la BRVM, publié chaque soir de séance.`,
-    or: 'Cours de l’or à New York (COMEX), converti en FCFA le gramme avec le dollar du jour.',
-    brent: 'Cours du Brent à New York (NYMEX), en dollars le baril.',
-  };
-  return cours.map((c) => ({ cours: c.libelle, source: paragrapheFr(textes[c.cle], 24) }));
+  return cours.map((c) => ({ cours: c.libelle, source: paragrapheFr(c.source, 24) }));
 }
 
-/**
- * Mention de protection sous les sources, mot pour mot (choix de Raouf,
- * 25/11/2026). Chaque phrase commence en début de ligne, et ses quatre derniers
- * mots restent ensemble : mesuré de 320 à 1 440 px, aucune ligne ne finit sur
- * un début de phrase et aucune phrase ne finit sur une ligne de trois mots.
- */
-const MENTION_SOURCES = (
-  <>
-    <span className="block">
-      Ces cours sont donnés à titre <span className="whitespace-nowrap">indicatif, sans garantie d’exactitude.</span>
-    </span>
-    <span className="block">
-      Ils ne constituent <span className="whitespace-nowrap">pas un conseil d’investissement.</span>
-    </span>
-  </>
-);
-
-export async function CoursDuJour() {
+export async function CoursDuJour({ lienTousLesCours = false }: { lienTousLesCours?: boolean } = {}) {
   const cours = await getCoursDuJour();
   if (cours.length < 2) return null;
 
@@ -156,7 +135,7 @@ export async function CoursDuJour() {
           </h2>
           <p className="text-[13px] text-gray-500">{dateLongue(plusRecente)}</p>
         </div>
-        <SourcesDesCours sources={sourcesDesCours(cours)} mention={MENTION_SOURCES} />
+        <SourcesDesCours sources={sourcesDesCours(cours)} mention={<MentionCours />} />
       </header>
 
       <div className={`mt-5 grid grid-cols-2 gap-y-6 sm:grid-cols-3 ${COLONNES_LARGES[cours.length] ?? 'lg:grid-cols-6'}`}>
@@ -177,6 +156,18 @@ export async function CoursDuJour() {
           </div>
         ))}
       </div>
+
+      {lienTousLesCours ? (
+        <p className="mt-5 border-t border-black/8 pt-4 text-right">
+          <Link
+            href="/marches"
+            className="inline-flex items-center gap-1 text-[14px] font-semibold text-[#111] underline-offset-4 hover:underline"
+          >
+            Tous les cours
+            <span aria-hidden="true">→</span>
+          </Link>
+        </p>
+      ) : null}
 
     </section>
   );

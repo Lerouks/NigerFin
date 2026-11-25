@@ -1,162 +1,94 @@
 'use client';
 
-import { useMemo } from 'react';
-import { useMarketData, groupByType, type MarketDataType } from '@/hooks/useMarketData';
+import Link from 'next/link';
 import { VariationBadge } from '@/components/data/VariationBadge';
+import { MentionCours } from '@/components/finance/MentionCours';
+import { useCoursDuJour } from '@/hooks/useCoursDuJour';
 
-const TYPE_LABELS: Record<MarketDataType, string> = {
-  currency: 'Devises',
-  commodity: 'Matières premières',
-  index: 'Indices',
-  crypto: 'Cryptomonnaies',
-};
+const nombre = (valeur: number, decimales: number) =>
+  new Intl.NumberFormat('fr-FR', { minimumFractionDigits: decimales, maximumFractionDigits: decimales }).format(valeur);
 
-const TYPE_ORDER: MarketDataType[] = ['currency', 'commodity', 'index', 'crypto'];
+const dateLongue = (iso: string) =>
+  new Date(`${iso}T12:00:00Z`).toLocaleDateString('fr-FR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'UTC',
+  });
 
 /**
- * Compact market data sidebar widget.
- * Reads from admin-managed Supabase market_data table.
+ * Encadré des cours de l'accueil et des articles (refait le 25/11/2026).
+ *
+ * Il lisait l'ancienne table market_data, un second circuit : l'or en dollars
+ * l'once quand la page Finance le donnait en FCFA le gramme, le Brent d'un autre
+ * contrat, le dollar signé BCEAO alors qu'il venait de la BCE. Il montre
+ * désormais exactement les cours du jour de la page Finance, mêmes sources,
+ * mêmes chiffres, avec la mention de protection et le lien vers la page
+ * Marchés, qui détaille les sources.
+ *
+ * Sa largeur décide de sa forme : une colonne dans la marge d'un article, deux
+ * puis quatre sur la pleine largeur de l'accueil.
  */
 export function MarketDataWidget() {
-  const { items, isLoading } = useMarketData();
+  const { cours, isLoading } = useCoursDuJour();
 
-  // Un cours sans valeur (source coupée chez son fournisseur) n'est pas affiché :
-  // une ligne « indisponible » fait croire à une panne du site. Il réapparaît
-  // seul dès que sa source renvoie une valeur.
-  const groupedData = useMemo(
-    () => groupByType(items.filter((item) => item.value !== null && Number.isFinite(item.value))),
-    [items],
-  );
+  // Comme sur la page Finance : rien plutôt qu'un cadre vide ou l'euro seul.
+  if (!isLoading && cours.length < 2) return null;
 
-  const lastUpdated = useMemo(() => {
-    let latest: string | null = null;
-    for (const item of items) {
-      if (item.updatedAt && (!latest || item.updatedAt > latest)) {
-        latest = item.updatedAt;
-      }
-    }
-    return latest;
-  }, [items]);
+  const plusRecente = cours
+    .map((c) => c.date)
+    .filter((d): d is string => Boolean(d))
+    .sort()
+    .at(-1);
 
-  // Aucune donnee et plus rien en cours de chargement : le bloc ne s'affiche pas
-  // du tout. Un cadre « Marches » vide, ou pire accompagne d'une phrase
-  // rassurante sans le moindre chiffre, laisserait croire a une panne d'affichage
-  // alors qu'il s'agit d'une absence assumee de donnee.
-  if (!isLoading && items.length === 0) {
-    return null;
-  }
+  return (
+    <div className="@container overflow-hidden rounded-xl border border-black/6 bg-white">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 border-b border-black/5 px-5 py-4">
+        <h3 className="text-[15px] font-semibold">Les cours du jour</h3>
+        {plusRecente ? <p className="text-[12px] text-gray-500">{dateLongue(plusRecente)}</p> : null}
+      </div>
 
-  if (isLoading && items.length === 0) {
-    return (
-      <div className="bg-white rounded-xl border border-black/6 sticky top-[calc(var(--header-height)+1.5rem)] overflow-hidden">
-        <div className="border-b border-black/5 px-5 py-4">
-          <h3 className="text-[15px] font-semibold">Marchés</h3>
-        </div>
-        <div className="p-5 space-y-3">
+      {isLoading && cours.length === 0 ? (
+        <div className="space-y-3 p-5" aria-hidden="true">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="flex justify-between items-center py-1.5">
-              <div className="h-3 w-24 bg-gray-100 rounded-sm animate-pulse" />
-              <div className="h-3 w-16 bg-gray-100 rounded-sm animate-pulse" />
+            <div key={i} className="flex items-center justify-between py-1.5">
+              <div className="h-3 w-24 animate-pulse rounded-sm bg-gray-100" />
+              <div className="h-3 w-16 animate-pulse rounded-sm bg-gray-100" />
             </div>
           ))}
         </div>
-      </div>
-    );
-  }
+      ) : (
+        <ul className="grid grid-cols-1 gap-x-8 px-5 pb-1 pt-1 @xl:grid-cols-2 @4xl:grid-cols-4">
+          {cours.map((c) => (
+            <li key={c.cle} className="flex items-center justify-between gap-3 border-b border-black/6 py-2.5">
+              <span className="min-w-0 text-[13px] font-medium">{c.libelle}</span>
+              <span className="shrink-0 text-right">
+                <span className="block whitespace-nowrap text-[13px] font-medium tabular-nums">
+                  {nombre(c.valeur, c.decimales)}
+                  <span className="ml-1 text-[12px] font-normal text-gray-500">{c.unite}</span>
+                </span>
+                {c.mention ? (
+                  <span className="block text-[12px] text-gray-500">{c.mention}</span>
+                ) : (
+                  <span className="flex justify-end">
+                    <VariationBadge value={c.variation} pill />
+                  </span>
+                )}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
 
-  return (
-    <div className="bg-white rounded-xl border border-black/6 sticky top-[calc(var(--header-height)+1.5rem)] overflow-hidden">
-      <div className="border-b border-black/5 px-5 py-4">
-        <h3 className="text-[15px] font-semibold">Marchés</h3>
-      </div>
-      <div className="p-5 space-y-5">
-        {TYPE_ORDER.map((type) => {
-          const group = groupedData[type];
-          if (!group || group.length === 0) return null;
-
-          return (
-            <div key={type}>
-              <h4 className="text-[11px] uppercase tracking-[0.14em] font-semibold text-gray-500 mb-2">
-                {TYPE_LABELS[type]}
-              </h4>
-              {/* Lignes separees par un filet de 1 px (grammaire anti-carte). */}
-              <div className="divide-y divide-black/6">
-                {group.map((item) => {
-                  const indispo = item.value === null || !Number.isFinite(item.value);
-                  return (
-                    <div
-                      key={item.id}
-                      className="flex justify-between items-center gap-3 py-2"
-                    >
-                      <div className="min-w-0">
-                        <div className="text-[13px] font-medium truncate">{item.name}</div>
-                        <div className="font-mono text-[10px] text-gray-400 uppercase tracking-[0.04em]">
-                          {item.symbol}
-                        </div>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <div className="text-[13px] tabular-nums font-medium">
-                          {indispo ? (
-                            <span className="text-gray-400 font-normal">indisponible</span>
-                          ) : (
-                            <>
-                              {(item.value as number).toLocaleString('fr-FR', {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                              })}
-                              {item.unit && (
-                                <span className="text-[10px] text-gray-500 ml-0.5">{item.unit}</span>
-                              )}
-                            </>
-                          )}
-                        </div>
-                        {!indispo && (
-                          <div className="flex justify-end">
-                            {item.symbol === 'EUR/XOF' ? (
-                              <span className="text-[10px] text-gray-500">Taux fixe</span>
-                            ) : (
-                              <VariationBadge value={item.changePercent} pill />
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      {/*
-        La condition etait inversee : la phrase rassurante « Donnees gerees par
-        l'equipe NFI Report » s'affichait TOUJOURS, et la date seulement si elle
-        existait. En mode repli, la caution editoriale restait donc seule, sans
-        aucune date, ce qui est la pire combinaison possible. C'est la date qui
-        engage, pas la formule : elle passe en premier et commande le bloc.
-      */}
-      <div className="border-t border-black/4 px-5 py-3 bg-background rounded-b-xl space-y-0.5">
-        {lastUpdated ? (
-          <>
-            <p className="text-[10px] text-gray-500 text-center tabular-nums">
-              Dernière mise à jour :{' '}
-              {new Date(lastUpdated).toLocaleString('fr-FR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </p>
-            <p className="text-[10px] text-gray-500 text-center">
-              Données gérées par l&apos;équipe NFI Report
-            </p>
-          </>
-        ) : (
-          <p className="text-[10px] text-gray-500 text-center">
-            Date de mise à jour non disponible
-          </p>
-        )}
+      <div className="border-t border-black/5 bg-background px-5 py-3.5 text-[12px] leading-snug text-gray-500">
+        <p>
+          <MentionCours />
+        </p>
+        <p className="mt-2">
+          <Link href="/marches" className="font-semibold text-[#111] underline-offset-4 hover:underline">
+            Tous les cours et leurs sources
+          </Link>
+        </p>
       </div>
     </div>
   );

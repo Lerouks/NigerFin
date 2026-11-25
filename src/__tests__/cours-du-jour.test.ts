@@ -201,13 +201,29 @@ describe('Assemblage des tuiles', () => {
         const route = cle ? routes[cle] : 'panne';
         if (route === 'panne') return new Response('panne', { status: 503 });
         const corps = typeof route === 'function' ? (route as (u: string) => unknown)(String(url)) : route;
-        return new Response(JSON.stringify(corps), { status: 200 });
+        // Les pages de la BCEAO sont du HTML, le reste du JSON.
+        return new Response(typeof corps === 'string' ? corps : JSON.stringify(corps), { status: 200 });
       }),
     );
   }
 
-  // Un fichier de currency-api par jour, daté par son adresse.
-  const naira = (url: string) => ({ date: url.match(/currency-api@(\d{4}-\d{2}-\d{2})/)![1], eur: { ngn: 1480.938 } });
+  // La BCEAO sert un fragment par jour ouvré, daté par l'adresse demandée.
+  const DOLLAR_BCEAO: Record<string, string> = { '2026-11-23': '600,1200', '2026-11-24': '598,3400' };
+  const coursBceao = (url: string) => {
+    const date = url.match(/dateJour=(\d{4}-\d{2}-\d{2})/)![1]!;
+    const [a, m, j] = date.split('-');
+    const valeur = DOLLAR_BCEAO[date];
+    return valeur
+      ? `<h2>Cours des devises du jour ${Number(j)} ${['', 'janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'][Number(m)]} ${a}</h2><table><tr><td>Euro</td><td>655,9570</td></tr><tr><td>Dollar us</td><td>${valeur}</td></tr></table>`
+      : '<h2>Cours des devises du jour sans cours</h2>';
+  };
+  const accueilBceao =
+    '<li>Taux minimum de soumission : 3,00 %</li><li>Taux du guichet de prêt marginal: 5,00 %</li><p><strong>Effectifs depuis le 16 mars 2026</strong></p>';
+  // La Banque centrale du Nigeria : nairas pour un franc CFA.
+  const naira = [
+    { currency: 'CFA', ratedate: '2026-11-23', centralrate: '2.3175' },
+    { currency: 'CFA', ratedate: '2026-11-24', centralrate: '2.3139' },
+  ];
 
   const yahoo = (valeurs: number[]) => ({
     chart: {
@@ -240,27 +256,55 @@ describe('Assemblage des tuiles', () => {
     vi.restoreAllMocks();
   });
 
-  it('assemble les sept tuiles, BOA Niger après le Composite et l’euro en dernier', async () => {
+  it('assemble les huit tuiles : BCEAO, Banque centrale du Nigeria, BRVM, Yahoo, puis l’euro et le taux directeur', async () => {
     repondre({
+      get_all_reference_by_date: coursBceao,
+      'bceao.int/fr': accueilBceao,
+      'cbn.gov.ng': naira,
       'api.frankfurter.dev': { rates: { '2026-11-23': { USD: 1.1 }, '2026-11-24': { USD: 1.0963 } } },
-      'currency-api@': naira,
       'GC%3DF': yahoo([3600, 3590, 3582.8]),
       'BZ%3DF': yahoo([88, 87.6, 87.12]),
     });
     const cours = await getCoursDuJour(AUJOURDHUI);
-    expect(cours.map((c) => c.cle)).toEqual(['dollar', 'naira', 'brvm', 'boan', 'or', 'brent', 'euro']);
+    expect(cours.map((c) => c.cle)).toEqual(['dollar', 'naira', 'brvm', 'boan', 'or', 'brent', 'euro', 'taux']);
+    // Le dollar vient de la BCEAO, et le bouton « Sources » le dit.
+    expect(cours[0]).toMatchObject({ valeur: 598.34, date: '2026-11-24', source: 'Cours de référence publié chaque jour par la BCEAO.' });
+    expect(cours[0]!.variation).toBeCloseTo(-0.2966, 3);
+    // Le naira : cours officiel de la Banque centrale du Nigeria, 100 nairas en FCFA.
+    expect(cours[1]!.valeur).toBeCloseTo(100 / 2.3139, 6);
+    expect(cours[1]!.source).toContain('Banque centrale du Nigeria');
     const brvm = cours.find((c) => c.cle === 'brvm')!;
     expect(brvm.valeur).toBe(472.04);
     expect(brvm.variation).toBe(-0.94);
     // BOA Niger : la variation publiée par la BRVM, pas un calcul sur un historique troué.
     expect(cours.find((c) => c.cle === 'boan')).toMatchObject({ valeur: 4105, variation: -1.44, unite: 'FCFA', date: '2026-11-24' });
-    expect(cours.at(-1)).toMatchObject({ cle: 'euro', valeur: 655.957, mention: 'parité fixe', date: null });
+    expect(cours.find((c) => c.cle === 'euro')).toMatchObject({ valeur: 655.957, mention: 'parité fixe', date: null });
+    expect(cours.at(-1)).toMatchObject({ cle: 'taux', valeur: 3, unite: '%', date: null, mention: 'depuis mars\u00a02026' });
+    expect(cours.at(-1)!.source).toBe('Principal taux directeur de la BCEAO, en vigueur depuis le 16\u00a0mars\u00a02026.');
+  });
+
+  it('repasse au dollar de la BCE, et le dit, quand la BCEAO ne répond pas', async () => {
+    repondre({
+      get_all_reference_by_date: 'panne',
+      'bceao.int/fr': 'panne',
+      'cbn.gov.ng': naira,
+      'api.frankfurter.dev': { rates: { '2026-11-23': { USD: 1.1 }, '2026-11-24': { USD: 1.0963 } } },
+      'GC%3DF': yahoo([3600, 3590, 3582.8]),
+      'BZ%3DF': yahoo([88, 87.6, 87.12]),
+    });
+    const cours = await getCoursDuJour(AUJOURDHUI);
+    // Sans la page d'accueil de la BCEAO, pas de tuile du taux directeur.
+    expect(cours.map((c) => c.cle)).toEqual(['dollar', 'naira', 'brvm', 'boan', 'or', 'brent', 'euro']);
+    expect(cours[0]!.valeur).toBeCloseTo(PARITE_EURO_FCFA / 1.0963, 6);
+    expect(cours[0]!.source).toContain('Banque centrale européenne');
   });
 
   it('retire la tuile d’une source en panne, et l’or sans dollar', async () => {
     repondre({
+      get_all_reference_by_date: 'panne',
+      'bceao.int/fr': 'panne',
       'api.frankfurter.dev': 'panne',
-      'currency-api@': naira,
+      'cbn.gov.ng': naira,
       'GC%3DF': yahoo([3600, 3590, 3582.8]),
       'BZ%3DF': 'panne',
     });
@@ -277,7 +321,7 @@ describe('Assemblage des tuiles', () => {
       { date: '2026-11-03', precedent: 5000, cloture: 4975, variation: -0.5 },
       { date: '2026-11-04', precedent: 4975, cloture: 5000, variation: 0.5 },
     ];
-    repondre({ 'api.frankfurter.dev': 'panne', 'currency-api@': 'panne', 'GC%3DF': 'panne', 'BZ%3DF': 'panne' });
+    repondre({ get_all_reference_by_date: 'panne', 'bceao.int/fr': 'panne', 'api.frankfurter.dev': 'panne', 'cbn.gov.ng': 'panne', 'GC%3DF': 'panne', 'BZ%3DF': 'panne' });
     const cours = await getCoursDuJour(AUJOURDHUI);
     expect(cours.map((c) => c.cle)).toEqual(['euro']);
   });

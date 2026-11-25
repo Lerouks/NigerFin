@@ -213,3 +213,148 @@ export async function enregistrerSeancesBrvm(
   );
   if (error) throw new Error(`Enregistrement des séances BRVM (${historique}) : ${error.message}`);
 }
+
+// ─── Séance complète (page Marchés, 25/11/2026) ──────────────────────────────
+
+export interface IndiceBrvm {
+  nom: string;
+  precedent: number;
+  cloture: number;
+  /** Variation de la séance, en %. */
+  variation: number;
+  /** Variation depuis le 31 décembre, en % ; null si la BRVM ne la donne pas. */
+  variationAnnee: number | null;
+}
+
+export interface ActionBrvm {
+  symbole: string;
+  /** Nom tel que la BRVM l'écrit (en capitales). */
+  nom: string;
+  cloture: number;
+  variation: number;
+  /** Nombre de titres échangés pendant la séance. */
+  volume: number | null;
+}
+
+export interface SeanceComplete {
+  /** Jour de la séance, AAAA-MM-JJ (celui du Composite). */
+  date: string;
+  indices: IndiceBrvm[];
+  actions: ActionBrvm[];
+  /** Capitalisation des actions, en FCFA. */
+  capitalisationActions: number | null;
+  /** Valeur des transactions de la séance, en FCFA. */
+  valeurTransactions: number | null;
+}
+
+/** « 18 226 419 319 289 FCFA » en nombre ; null sinon. */
+function montantFcfa(texte: string): number | null {
+  return nombreFr(texte.replace(/FCFA/i, ''));
+}
+
+/** Tous les indices de la page des indices (« BRVM - COMPOSITE », « BRVM-30 »…), dans l'ordre de la page. */
+export function analyserTousLesIndices(html: string): IndiceBrvm[] {
+  const sortie: IndiceBrvm[] = [];
+  for (const ligne of html.match(/<tr[\s\S]*?<\/tr>/gi) ?? []) {
+    const cellules = (ligne.match(/<t[dh][\s\S]*?<\/t[dh]>/gi) ?? []).map(decoder);
+    // Nom, Fermeture précédente, Fermeture, Variation (%), Variation 31 décembre (%).
+    if (cellules.length >= 4 && /^BRVM/i.test(cellules[0]!)) {
+      const precedent = nombreFr(cellules[1]!);
+      const cloture = nombreFr(cellules[2]!);
+      const variation = nombreFr(cellules[3]!);
+      if (precedent && cloture && variation !== null && !sortie.some((i) => i.nom === cellules[0])) {
+        sortie.push({
+          nom: cellules[0]!,
+          precedent,
+          cloture,
+          variation,
+          variationAnnee: cellules[4] ? nombreFr(cellules[4]) : null,
+        });
+      }
+    }
+  }
+  return sortie;
+}
+
+/** Capitalisation des actions et valeur des transactions (« Activités du marché »). */
+export function analyserActiviteMarche(html: string): Pick<SeanceComplete, 'capitalisationActions' | 'valeurTransactions'> {
+  let capitalisationActions: number | null = null;
+  let valeurTransactions: number | null = null;
+  for (const ligne of html.match(/<tr[\s\S]*?<\/tr>/gi) ?? []) {
+    const cellules = (ligne.match(/<t[dh][\s\S]*?<\/t[dh]>/gi) ?? []).map(decoder);
+    if (cellules.length < 2) continue;
+    if (/^Capitalisation Actions$/i.test(cellules[0]!)) capitalisationActions = montantFcfa(cellules[1]!);
+    if (/^Valeur des transactions$/i.test(cellules[0]!)) valeurTransactions = montantFcfa(cellules[1]!);
+  }
+  return { capitalisationActions, valeurTransactions };
+}
+
+/** Toutes les actions de la page des cours, dans l'ordre de la page. */
+export function analyserToutesLesActions(html: string): ActionBrvm[] {
+  const sortie: ActionBrvm[] = [];
+  for (const ligne of html.match(/<tr[\s\S]*?<\/tr>/gi) ?? []) {
+    const cellules = (ligne.match(/<t[dh][\s\S]*?<\/t[dh]>/gi) ?? []).map(decoder);
+    // Symbole, Nom, Volume, Cours veille, Cours ouverture, Cours clôture, Variation (%).
+    if (cellules.length >= 7 && /^[A-Z]{3,6}$/.test(cellules[0]!)) {
+      const cloture = nombreFr(cellules[5]!);
+      const variation = nombreFr(cellules[6]!);
+      if (cloture && variation !== null && !sortie.some((a) => a.symbole === cellules[0])) {
+        sortie.push({ symbole: cellules[0]!, nom: cellules[1]!, cloture, variation, volume: nombreFr(cellules[2]!) });
+      }
+    }
+  }
+  return sortie;
+}
+
+/**
+ * La séance complète, datée par le Composite : null si la page des actions
+ * manque ou si l'une des deux pages est illisible (moins de dix actions).
+ */
+export function construireSeanceComplete(
+  date: string,
+  pageIndices: string,
+  pageActions: string | null,
+): SeanceComplete | null {
+  if (!pageActions) return null;
+  const actions = analyserToutesLesActions(pageActions);
+  const indices = analyserTousLesIndices(pageIndices);
+  if (actions.length < 10 || indices.length === 0) return null;
+  return { date, indices, actions, ...analyserActiviteMarche(pageIndices) };
+}
+
+function estSeanceComplete(valeur: unknown): valeur is SeanceComplete {
+  const s = valeur as SeanceComplete;
+  return !!s && typeof s.date === 'string' && Array.isArray(s.indices) && Array.isArray(s.actions) && s.actions.length > 0;
+}
+
+/** La dernière séance complète enregistrée ; null si aucune ou si la base ne répond pas. */
+export async function lireSeanceComplete(): Promise<SeanceComplete | null> {
+  const supabase = createServiceClient();
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from('api_cache')
+    .select('data')
+    .eq('source', SOURCE_CACHE)
+    .eq('key', 'seance_complete')
+    .maybeSingle();
+  if (error || !data) return null;
+  return estSeanceComplete(data.data) ? data.data : null;
+}
+
+export async function enregistrerSeanceComplete(seance: SeanceComplete): Promise<void> {
+  const supabase = createServiceClient();
+  if (!supabase) throw new Error('Client Supabase indisponible');
+  const maintenant = new Date().toISOString();
+  const { error } = await supabase.from('api_cache').upsert(
+    {
+      source: SOURCE_CACHE,
+      key: 'seance_complete',
+      data: seance as unknown as Record<string, unknown>,
+      fetched_at: maintenant,
+      expires_at: '2100-01-01T00:00:00.000Z',
+      updated_at: maintenant,
+    },
+    { onConflict: 'source,key' },
+  );
+  if (error) throw new Error(`Enregistrement de la séance complète de la BRVM : ${error.message}`);
+}

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { CategoryHero } from '@/components/CategoryHero';
 import { CoursDuJour } from '@/components/finance/CoursDuJour';
+import { LienInstitutions } from '@/components/finance/LienInstitutions';
 import { HubFooter } from '@/components/HubFooter';
 import { SectionArticlesFiltered } from '@/components/SectionArticlesFiltered';
 import { getArticlesByCategory, getArticleViewRanking } from '@/lib/articles';
@@ -21,9 +22,14 @@ export default async function FinancePage() {
     <div className="min-h-screen bg-background">
       <CategoryHero title="Finance" description="Votre argent : banques, crédit, épargne, placements et marchés au Niger et en Afrique de l'Ouest." />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 md:pt-12 pb-14 md:pb-20">
-        {/* Les cours du jour : euro, dollar, naira, BRVM, or et Brent (24/11/2026). */}
-        <div className="mb-12 md:mb-16">
-          <CoursDuJour />
+        {/*
+          Les cours du jour (24/11/2026), sources officielles et taux de la BCEAO
+          depuis le 25/11/2026, puis l'entrée vers « Qui fait quoi dans la
+          finance de l'UEMOA ».
+        */}
+        <div className="mb-12 md:mb-16 space-y-6 md:space-y-8">
+          <CoursDuJour lienTousLesCours />
+          <LienInstitutions />
         </div>
         {/*
           Facette « Marchés et BRVM » : la rubrique Marchés est sortie de la barre

@@ -130,9 +130,12 @@ describe('Logos et photos', () => {
     }
   });
 
-  it('une photo sous licence libre porte son crédit et sa source', () => {
-    for (const photo of Object.values(PHOTO_ENTREPRISE)) {
-      if (photo.credit?.includes('CC BY')) expect(photo.source).toMatch(/^https:\/\/commons\.wikimedia\.org\//);
+  it('les sept entreprises ont leur photo, avec sa description et sans source', () => {
+    const sept = ['somair', 'sonidep', 'nigelec', 'niger-telecoms', 'sonibank', 'bagri', 'sopamin'];
+    expect(Object.keys(PHOTO_ENTREPRISE).sort()).toEqual([...sept].sort());
+    for (const [slug, photo] of Object.entries(PHOTO_ENTREPRISE)) {
+      expect(photo.legende.trim().length, slug).toBeGreaterThan(0);
+      expect(Object.keys(photo).sort(), slug).toEqual(['hauteur', 'largeur', 'legende', 'src']);
     }
   });
 });

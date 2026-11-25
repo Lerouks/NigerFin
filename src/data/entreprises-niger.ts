@@ -45,18 +45,15 @@ export interface PhotoEntreprise {
   /** Dimensions du fichier : la photo s'affiche entière, à son format d'origine. */
   largeur: number;
   hauteur: number;
-  /** Ce que montre la photo, seulement quand c'est certain. */
-  legende?: string;
-  /** Auteur de la photo, et sa licence quand elle est libre. */
-  credit?: string;
-  /** Page de la photo (licence et auteur) quand elle vient de Wikimedia Commons. */
-  source?: string;
+  /** Ce que montre la photo, écrit dessous. */
+  legende: string;
 }
 
 /**
- * Une photo par entreprise, dans public/photos/entreprises (25/11/2026).
- * Raouf fournira celles qui manquent (SONIDEP, Niger Telecoms, SONIBANK) :
- * aucune photo libre ou officielle de qualité suffisante n'a été trouvée.
+ * Une photo par entreprise, dans public/photos/entreprises.
+ * Choix du 25/11/2026 : sous chaque photo, sa description seulement, jamais de
+ * source ni de crédit. Une photo dont la licence exige le nom de son auteur
+ * (Wikimedia Commons en CC BY ou CC BY-SA) n'a donc pas sa place ici.
  * Sans photo ici, la fiche prend celle de l'admin si elle existe, sinon la
  * mise en page se resserre d'elle-même.
  */
@@ -67,26 +64,41 @@ export const PHOTO_ENTREPRISE: Record<string, PhotoEntreprise> = {
     hauteur: 1402,
     legende: 'L’immeuble de la SOMAÏR à Niamey',
   },
+  sonidep: {
+    src: '/photos/entreprises/sonidep.jpg',
+    largeur: 1670,
+    hauteur: 941,
+    legende: 'Le siège de la SONIDEP à Niamey',
+  },
   nigelec: {
     src: '/photos/entreprises/nigelec.jpg',
-    largeur: 1920,
-    hauteur: 1080,
-    legende: 'La centrale solaire de Malbaza',
-    credit: 'NIGELEC, licence CC BY-SA 4.0',
-    source: 'https://commons.wikimedia.org/wiki/File:Champs_de_panneaux_solaires_-_Centrale_PV_de_Malbaza.jpg',
+    largeur: 1452,
+    hauteur: 1083,
+    legende: 'La direction régionale de la NIGELEC à Agadez',
+  },
+  'niger-telecoms': {
+    src: '/photos/entreprises/niger-telecoms.jpg',
+    largeur: 1537,
+    hauteur: 1023,
+    legende: 'Une agence de Niger Telecoms',
+  },
+  sonibank: {
+    src: '/photos/entreprises/sonibank.jpg',
+    largeur: 1254,
+    hauteur: 1254,
+    legende: 'Le siège de la SONIBANK à Niamey',
   },
   bagri: {
     src: '/photos/entreprises/bagri.jpg',
     largeur: 1920,
     hauteur: 1080,
     legende: 'L’agence principale de la BAGRI',
-    credit: 'BAGRI',
   },
   sopamin: {
     src: '/photos/entreprises/sopamin.jpg',
     largeur: 1920,
     hauteur: 1280,
-    credit: 'SOPAMIN',
+    legende: 'Le siège de la SOPAMIN à Niamey',
   },
 };
 

@@ -21,9 +21,8 @@ export interface PhotoDeLaFiche {
   /** Inconnues pour une photo envoyée depuis l'admin : elle garde alors son format au chargement. */
   largeur: number | null;
   hauteur: number | null;
+  /** Ce que montre la photo. Jamais de source ni de crédit dessous (choix du 25/11/2026). */
   legende?: string;
-  credit?: string;
-  source?: string;
 }
 
 export interface FicheEntreprise {
@@ -41,7 +40,6 @@ export interface FicheEntreprise {
 }
 
 function PhotoFiche({ photo, nom }: { photo: PhotoDeLaFiche; nom: string }) {
-  const credit = photo.credit ? typographieFr(`Photo : ${photo.credit}`) : null;
   return (
     <figure className="min-w-0">
       <Image
@@ -52,25 +50,9 @@ function PhotoFiche({ photo, nom }: { photo: PhotoDeLaFiche; nom: string }) {
         sizes="(min-width: 1280px) 500px, (min-width: 768px) 40vw, 100vw"
         className="h-auto w-full rounded-[10px] bg-black/[0.04]"
       />
-      {photo.legende || credit ? (
+      {photo.legende ? (
         <figcaption className="mt-2.5 text-[13px] leading-snug">
-          {photo.legende ? <span className="block text-gray-600">{typographieFr(photo.legende)}</span> : null}
-          {credit ? (
-            <span className="mt-0.5 block text-gray-500">
-              {photo.source ? (
-                <a
-                  href={photo.source}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline decoration-black/20 underline-offset-2 transition-colors hover:text-gray-700"
-                >
-                  {credit}
-                </a>
-              ) : (
-                credit
-              )}
-            </span>
-          ) : null}
+          <span className="block text-gray-600">{typographieFr(photo.legende)}</span>
         </figcaption>
       ) : null}
     </figure>

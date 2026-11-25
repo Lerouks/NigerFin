@@ -99,7 +99,7 @@ export type EtatAbonnement =
       jours: number | null;
       /** Part du temps qui reste, de 0 à 1, null si la durée est inconnue. */
       partRestante: number | null;
-      /** Sept jours ou moins : on montre comment renouveler sans perdre de jour. */
+      /** Sept jours ou moins : on propose de renouveler, les jours restants s'ajoutent (periodePayee). */
       bientotFini: boolean;
     }
   | { type: 'lecteur'; ancienneFin: string | null };

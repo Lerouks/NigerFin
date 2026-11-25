@@ -249,7 +249,7 @@ function BlocAbonnement({ etat, prixMensuel }: { etat: EtatAbonnement; prixMensu
       </p>
       {etat.fin && (
         <div className="mt-[18px] border-t border-[#ececee] pt-4">
-          <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-[15px]">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-[14px] min-[360px]:text-[15px]">
             <p className="text-[#111]">Accès jusqu{'’'}au <strong className="whitespace-nowrap font-semibold">{etat.fin}</strong></p>
             {jours !== null && (
               <p className="whitespace-nowrap text-[#5f636b]">
@@ -264,10 +264,10 @@ function BlocAbonnement({ etat, prixMensuel }: { etat: EtatAbonnement; prixMensu
           )}
         </div>
       )}
-      {etat.bientotFini && etat.fin ? (
+      {etat.bientotFini ? (
         <>
           <p className="mt-3.5 text-[14px] leading-[1.5] text-[#5f636b]">
-            Pour ne perdre aucun jour, renouvelez <span className="whitespace-nowrap">à partir du {etat.fin}.</span>
+            Renouvelez sans perdre aucun jour.
           </p>
           <div className="mt-[18px]"><Link href="/pricing" className={BOUTON}>Voir les formules</Link></div>
         </>
@@ -631,7 +631,7 @@ function FenetreSuppression({ supprimer, fermer }: { supprimer: ActionsCompte['s
     <div className="fixed inset-0 z-[60] flex items-end justify-center p-3 sm:items-center sm:p-4">
       <div className="absolute inset-0 bg-black/50" onClick={() => !enCours && fermer()} aria-hidden="true" />
       <div role="dialog" aria-modal="true" aria-labelledby={titreId} className="relative w-full max-w-[440px] rounded-lg bg-white p-6 shadow-xl">
-        <h2 id={titreId} className="text-[19px] font-bold tracking-[-0.012em] text-[#b42318]">Supprimer définitivement mon compte</h2>
+        <h2 id={titreId} className="text-[19px] font-bold tracking-[-0.012em] text-[#b42318]">Supprimer mon compte</h2>
         <p className={`${TEXTE} mt-3`}>Effacés aussitôt{NB}:</p>
         <ul className={`${TEXTE} mt-1 list-disc pl-5`}>
           <li>votre profil et vos préférences{NB};</li>
@@ -781,7 +781,7 @@ export function CompteVue({ donnees, actions }: { donnees: DonneesCompte; action
             <BlocAbonnement etat={abonnement} prixMensuel={donnees.prixMensuel} />
           </Fiche>
 
-          <Fiche id="factures" titre="Factures" pied={<>Vos factures restent ici, <span className="whitespace-nowrap">même après la fin de votre accès.</span></>}>
+          <Fiche id="factures" titre="Factures" pied={<>Vos factures restent ici, même après <span className="whitespace-nowrap">la fin de votre accès.</span></>}>
             <ListeFactures factures={donnees.factures} />
           </Fiche>
 
@@ -866,8 +866,8 @@ export function CompteVue({ donnees, actions }: { donnees: DonneesCompte; action
                 </>
               ) : (
                 <>
-                  <p className={`${TEXTE} mt-0.5`}>Votre profil <span className="whitespace-nowrap">et vos préférences sont effacés.</span></p>
-                  <p className={TEXTE}>Vos factures sont gardées dix{NB}ans, <span className="whitespace-nowrap">comme la loi l{'’'}exige.</span></p>
+                  <p className={`${TEXTE} mt-0.5`}>Vos données sont effacées.</p>
+                  <p className={TEXTE}><span className="whitespace-nowrap">La loi impose de garder</span>{' '}<span className="whitespace-nowrap">vos factures dix{NB}ans.</span></p>
                   <button type="button" onClick={() => setSuppression(true)} className="mt-2 min-h-[32px] text-[14px] font-semibold text-[#b42318] underline decoration-1 underline-offset-[3px] hover:text-[#931d14] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b42318]">
                     Supprimer mon compte
                   </button>
@@ -908,8 +908,8 @@ export function CompteVue({ donnees, actions }: { donnees: DonneesCompte; action
                   </>
                 ) : etatNewsletter.recoit ? (
                   <>
-                    <p className={`${TEXTE} mt-1`}>Elle arrive à l{'’'}adresse <span className="whitespace-nowrap">de votre compte.</span></p>
-                    <p className={TEXTE}>Vous pouvez <span className="whitespace-nowrap">l{'’'}arrêter ici à tout moment.</span></p>
+                    <p className={`${TEXTE} mt-1`}>Elle arrive à l{'’'}adresse du compte.</p>
+                    <p className={TEXTE}>Vous pouvez l{'’'}arrêter ici.</p>
                   </>
                 ) : (
                   <p className={`${TEXTE} mt-1`}>Activez-la pour la recevoir <span className="whitespace-nowrap">par e-mail.</span></p>

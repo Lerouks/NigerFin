@@ -1,8 +1,7 @@
 /**
- * Les neuf institutions de la page « Qui fait quoi dans la finance »
- * (/finance/institutions), dans l'ordre de la mosaïque choisie par Raouf le
- * 26/11/2026 (maquette C) : la BCEAO en grand, l'UEMOA et la BRVM en tuiles
- * larges avec leur chiffre du jour, les autres en tuiles simples.
+ * Les neuf institutions de la carte « Le système financier de l'UEMOA », dans
+ * la page Finance (/finance#institutions), dans l'ordre de la rangée de logos
+ * (choix de Raouf du 26/11/2026 : « Carte noire dans la page », « Compact »).
  *
  * Les textes sont ceux de la page vérifiée le 25/11/2026 (sites des
  * institutions) ; quelques phrases ont été retournées le 26/11/2026, sans en
@@ -17,15 +16,12 @@
  * jamais de carré blanc dessous).
  */
 
-export type FormeTuile = 'grande' | 'large' | 'petite';
-
 export interface InstitutionFinance {
   id: string;
   sigle: string;
   nomComplet: string;
   /** Le rôle en quelques mots, sous le sigle de la tuile. */
   role: string;
-  forme: FormeTuile;
   /** Dimensions réelles des deux fichiers de logo (identiques pour les deux versions). */
   logo: { largeur: number; hauteur: number };
   /** Une phrase par élément : un début de phrase ne reste jamais en bout de ligne. */
@@ -41,7 +37,6 @@ export const INSTITUTIONS_FINANCE: InstitutionFinance[] = [
     sigle: 'BCEAO',
     nomComplet: 'Banque centrale des États de l’Afrique de l’Ouest',
     role: 'La banque centrale des huit pays',
-    forme: 'grande',
     logo: { largeur: 810, hauteur: 360 },
     presentation: [
       'La Banque centrale des États de l’Afrique de l’Ouest émet le franc CFA et conduit la politique monétaire des huit pays de l’Union, depuis son siège de Dakar.',
@@ -59,7 +54,6 @@ export const INSTITUTIONS_FINANCE: InstitutionFinance[] = [
     sigle: 'UEMOA',
     nomComplet: 'Union économique et monétaire ouest-africaine',
     role: 'L’union économique',
-    forme: 'large',
     logo: { largeur: 287, hauteur: 360 },
     presentation: [
       'L’Union économique et monétaire ouest-africaine réunit le Bénin, le Burkina Faso, la Côte d’Ivoire, la Guinée-Bissau, le Mali, le Niger, le Sénégal et le Togo.',
@@ -77,7 +71,6 @@ export const INSTITUTIONS_FINANCE: InstitutionFinance[] = [
     sigle: 'BRVM',
     nomComplet: 'Bourse régionale des valeurs mobilières',
     role: 'La Bourse commune',
-    forme: 'large',
     logo: { largeur: 521, hauteur: 267 },
     presentation: [
       'La Bourse régionale des valeurs mobilières, installée à Abidjan, est la Bourse des huit pays.',
@@ -96,7 +89,6 @@ export const INSTITUTIONS_FINANCE: InstitutionFinance[] = [
     sigle: 'AMF-UMOA',
     nomComplet: 'Autorité des marchés financiers de l’UMOA',
     role: 'Le gendarme de la Bourse',
-    forme: 'petite',
     logo: { largeur: 375, hauteur: 98 },
     presentation: [
       'L’Autorité des marchés financiers de l’UMOA surveille le marché financier régional.',
@@ -114,7 +106,6 @@ export const INSTITUTIONS_FINANCE: InstitutionFinance[] = [
     sigle: 'UMOA-Titres',
     nomComplet: 'Agence UMOA-Titres',
     role: 'Là où les États empruntent',
-    forme: 'petite',
     logo: { largeur: 623, hauteur: 183 },
     presentation: [
       'L’Agence UMOA-Titres, basée à Dakar, organise avec la BCEAO les emprunts des huit États sur le marché régional des titres publics.',
@@ -131,7 +122,6 @@ export const INSTITUTIONS_FINANCE: InstitutionFinance[] = [
     sigle: 'BOAD',
     nomComplet: 'Banque ouest-africaine de développement',
     role: 'La banque de développement',
-    forme: 'petite',
     logo: { largeur: 199, hauteur: 360 },
     presentation: [
       'La Banque ouest-africaine de développement, installée à Lomé, finance des routes, de l’énergie et d’autres projets dans les huit pays.',
@@ -144,7 +134,6 @@ export const INSTITUTIONS_FINANCE: InstitutionFinance[] = [
     sigle: 'Commission bancaire',
     nomComplet: 'Commission bancaire de l’UMOA',
     role: 'Le contrôle des banques',
-    forme: 'petite',
     logo: { largeur: 245, hauteur: 244 },
     presentation: ['La Commission bancaire de l’UMOA contrôle les banques de l’Union et peut les sanctionner.'],
     pourVous: [],
@@ -155,7 +144,6 @@ export const INSTITUTIONS_FINANCE: InstitutionFinance[] = [
     sigle: 'FGDR-UMOA',
     nomComplet: 'Fonds de garantie des dépôts et de résolution dans l’UMOA',
     role: 'La garantie de vos dépôts',
-    forme: 'large',
     logo: { largeur: 424, hauteur: 162 },
     presentation: [
       'Le Fonds de garantie des dépôts et de résolution indemnise les déposants si leur banque ou leur institution de microfinance fait faillite, jusqu’à un plafond fixé par les ministres de l’Union.',
@@ -167,7 +155,6 @@ export const INSTITUTIONS_FINANCE: InstitutionFinance[] = [
     sigle: 'CIMA',
     nomComplet: 'Conférence interafricaine des marchés d’assurances',
     role: 'Le contrôle des assurances',
-    forme: 'large',
     logo: { largeur: 869, hauteur: 118 },
     presentation: [
       'La Conférence interafricaine des marchés d’assurances encadre les assureurs de plusieurs pays africains, dont le Niger.',
@@ -176,42 +163,3 @@ export const INSTITUTIONS_FINANCE: InstitutionFinance[] = [
     site: { libelle: 'Le site de la CIMA', url: 'https://cima-afrique.org' },
   },
 ];
-
-/**
- * Les blocs de la mosaïque : la fiche d'une institution s'ouvre juste sous le
- * bloc de sa tuile, sur toute la largeur, sans déplacer aucune tuile.
- * Sur ordinateur et tablette (4 colonnes), trois blocs ; sur téléphone
- * (2 colonnes), une rangée par bloc. Chaque bloc remplit ses rangées en entier.
- */
-export const BLOCS_ORDI: string[][] = [
-  ['bceao', 'uemoa', 'brvm'],
-  ['amf-umoa', 'umoa-titres', 'boad', 'commission-bancaire'],
-  ['fgdr-umoa', 'cima'],
-];
-export const BLOCS_TELEPHONE: string[][] = [
-  ['bceao'],
-  ['uemoa', 'brvm'],
-  ['amf-umoa', 'umoa-titres'],
-  ['boad', 'commission-bancaire'],
-  ['fgdr-umoa', 'cima'],
-];
-
-/** Rang d'affichage (propriété CSS `order`) de la tuile n° `index`. */
-export function ordreTuile(index: number): number {
-  return index * 10;
-}
-
-/** Rang d'affichage de la fiche : juste après la dernière tuile de son bloc. */
-export function ordreFiche(id: string, blocs: string[][]): number {
-  const bloc = blocs.find((b) => b.includes(id));
-  if (!bloc) throw new Error(`Institution sans bloc : ${id}`);
-  const derniere = INSTITUTIONS_FINANCE.findIndex((i) => i.id === bloc[bloc.length - 1]);
-  return ordreTuile(derniere) + 5;
-}
-
-/** Nombre de cases de grille qu'occupe une tuile, selon l'écran. */
-export function casesDeLaTuile(forme: FormeTuile, ecran: 'ordi' | 'telephone'): number {
-  if (ecran === 'telephone') return forme === 'grande' ? 2 : 1;
-  if (forme === 'grande') return 4;
-  return forme === 'large' ? 2 : 1;
-}

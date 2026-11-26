@@ -50,6 +50,13 @@ const nextConfig = {
   async redirects() {
     return [
       {
+        // « Qui fait quoi dans la finance » fait partie de la page Finance
+        // (choix de Raouf, 26/11/2026) : l'ancienne page à part y renvoie.
+        source: '/finance/institutions',
+        destination: '/finance#institutions',
+        permanent: true,
+      },
+      {
         source: '/niger/entreprises-strategiques',
         destination: '/niger#entreprises',
         permanent: true,

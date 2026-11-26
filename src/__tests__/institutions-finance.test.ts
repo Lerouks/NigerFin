@@ -1,23 +1,15 @@
 import { describe, it, expect } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import {
-  BLOCS_ORDI,
-  BLOCS_TELEPHONE,
-  INSTITUTIONS_FINANCE,
-  casesDeLaTuile,
-  ordreFiche,
-  ordreTuile,
-} from '@/data/institutions-finance';
+import { INSTITUTIONS_FINANCE } from '@/data/institutions-finance';
 
 /**
- * « QUI FAIT QUOI DANS LA FINANCE » (mosaïque choisie par Raouf le 26/11/2026)
+ * « QUI FAIT QUOI DANS LA FINANCE » (carte noire de la page Finance, choix de
+ * Raouf du 26/11/2026, et non une page à part)
  *
  * Ce qui doit tenir : les deux versions de chaque logo réellement présentes,
- * aux dimensions déclarées ; des blocs qui couvrent les neuf institutions dans
- * l'ordre du mur et remplissent leurs rangées en entier (sinon une fiche
- * s'ouvrirait au milieu d'une rangée) ; chaque fiche placée juste après son
- * bloc ; aucun texte qui cite une année antérieure à 2025.
+ * aux dimensions déclarées ; aucun texte qui cite une année antérieure à 2025 ;
+ * la carte dans la page Finance, et l'ancienne adresse qui y renvoie.
  */
 
 function dimensionsPng(chemin: string): { largeur: number; hauteur: number } {
@@ -42,31 +34,6 @@ describe('Qui fait quoi dans la finance', () => {
     }
   });
 
-  it.each([
-    ['ordinateur', BLOCS_ORDI, 'ordi', 4],
-    ['téléphone', BLOCS_TELEPHONE, 'telephone', 2],
-  ] as const)('%s : les blocs suivent le mur et remplissent leurs rangées', (_, blocs, ecran, colonnes) => {
-    expect(blocs.flat()).toEqual(ids);
-    for (const bloc of blocs) {
-      const cases = bloc.reduce((total, id) => total + casesDeLaTuile(INSTITUTIONS_FINANCE.find((i) => i.id === id)!.forme, ecran), 0);
-      expect(cases % colonnes, bloc.join(', ')).toBe(0);
-    }
-  });
-
-  it.each([
-    ['ordinateur', BLOCS_ORDI],
-    ['téléphone', BLOCS_TELEPHONE],
-  ] as const)('%s : chaque fiche s’affiche juste après le bloc de sa tuile', (_, blocs) => {
-    for (const bloc of blocs) {
-      const derniere = ids.indexOf(bloc[bloc.length - 1]!);
-      for (const id of bloc) {
-        const rang = ordreFiche(id, blocs);
-        expect(rang).toBeGreaterThan(ordreTuile(derniere));
-        if (derniere + 1 < ids.length) expect(rang).toBeLessThan(ordreTuile(derniere + 1));
-      }
-    }
-  });
-
   it('aucun texte ne cite une année antérieure à 2025 (règle de Raouf, 26/11/2026)', () => {
     for (const i of INSTITUTIONS_FINANCE) {
       const texte = [i.nomComplet, i.role, ...i.presentation, ...i.pourVous].join(' ');
@@ -80,5 +47,15 @@ describe('Qui fait quoi dans la finance', () => {
     for (const i of INSTITUTIONS_FINANCE) {
       if (i.site) expect(i.site.url).toMatch(/^https:\/\//);
     }
+  });
+
+  it('fait partie de la page Finance, et l’ancienne page à part y renvoie', () => {
+    const racine = process.cwd();
+    const finance = readFileSync(join(racine, 'src', 'app', 'finance', 'page.tsx'), 'utf8');
+    expect(finance).toContain('<QuiFaitQuoi institutions={institutions} {...TEXTES_QUI_FAIT_QUOI} />');
+    expect(existsSync(join(racine, 'src', 'app', 'finance', 'institutions', 'page.tsx'))).toBe(false);
+    const config = readFileSync(join(racine, 'next.config.js'), 'utf8');
+    expect(config).toMatch(/source:\s*'\/finance\/institutions',\s*destination:\s*'\/finance#institutions',\s*permanent:\s*true/);
+    expect(readFileSync(join(racine, 'src', 'app', 'sitemap.ts'), 'utf8')).not.toContain('/finance/institutions');
   });
 });

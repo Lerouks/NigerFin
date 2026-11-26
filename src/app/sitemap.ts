@@ -52,8 +52,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // propre canonical : la page de conversion la plus mise en avant du site
     // n'etait pas soumise a l'indexation. /articles et /newsletter manquaient
     // egalement, sans etre bloquees par robots.txt ni marquees noindex.
-    // « Qui fait quoi dans la finance » (25/11/2026), ouverte depuis Finance.
-    '/finance/institutions',
     '/premium',
     '/articles',
     '/newsletter',

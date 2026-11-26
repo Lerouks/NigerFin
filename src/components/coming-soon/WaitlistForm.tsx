@@ -78,8 +78,9 @@ export function WaitlistForm() {
       <label htmlFor="waitlist-email" className="mb-[7px] block text-[13.5px] text-[#a9adb4] md:text-[14px] 2xl:mb-2 2xl:text-[16px]">
         Être prévenu de l’ouverture
       </label>
-      {/* Un seul cadre : le champ et le bouton blanc côte à côte, sur tous les écrans. */}
-      <div className="flex h-[52px] items-center rounded-[8px] border border-[#3a3d42] p-1 transition-colors duration-200 focus-within:border-[#f4f4f5] 2xl:h-[60px] [@media(max-height:640px)]:h-12">
+      {/* Un seul cadre : le champ et le bouton blanc côte à côte, sur tous les écrans.
+          Le bouton garde 44 px de haut, la taille minimale d'une zone à toucher. */}
+      <div className="flex h-[52px] items-center rounded-[8px] border border-[#3a3d42] p-[3px] transition-colors duration-200 focus-within:border-[#f4f4f5] 2xl:h-[60px]">
         <input
           id="waitlist-email"
           type="email"

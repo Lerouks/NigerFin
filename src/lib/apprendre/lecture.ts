@@ -54,7 +54,7 @@ export function compterMots(markdown: string): number {
  * chaque correction de la leçon.
  */
 export function minutesDeLecture(markdown: string): number {
-  return Math.max(2, Math.ceil(compterMots(markdown) / MOTS_PAR_MINUTE));
+  return Math.max(1, Math.ceil(compterMots(markdown) / MOTS_PAR_MINUTE));
 }
 
 export interface LeconDecoupee {
@@ -85,6 +85,44 @@ export function decouperLecon(markdown: string, titre: string): LeconDecoupee {
     return { chapeau: '', corps: blocs.join('\n\n').trim() };
   }
   return { chapeau: premier.replace(/\s*\n\s*/g, ' '), corps: blocs.slice(1).join('\n\n').trim() };
+}
+
+/** Une idée d'une leçon d'une minute : sa phrase en gras, puis son explication. */
+export interface IdeeLecon {
+  titre: string;
+  texte: string;
+}
+
+export interface LeconEnIdees {
+  idees: IdeeLecon[];
+  /** La phrase de fin, après les idées ; vide s'il n'y en a pas. */
+  fin: string;
+}
+
+/**
+ * Le corps d'une leçon d'une minute, au format choisi par Raouf le 26/11/2026
+ * (« une phrase d'entrée, trois idées, une phrase de fin, puis la question ») :
+ * une liste numérotée « 1. **Idée.** Explication. », puis la phrase de fin.
+ * Null quand le corps suit un autre format : il est alors rendu tel quel.
+ */
+export function decouperIdees(corps: string): LeconEnIdees | null {
+  const blocs = corps
+    .replace(/\r\n/g, '\n')
+    .split(/\n{2,}/)
+    .map((b) => b.trim())
+    .filter(Boolean);
+  if (blocs.length < 1 || blocs.length > 2) return null;
+  const lignes = blocs[0]!.split('\n').map((l) => l.trim()).filter(Boolean);
+  if (lignes.length < 2) return null;
+  const idees: IdeeLecon[] = [];
+  for (const ligne of lignes) {
+    const m = /^\d+\.\s+\*\*(.+?)\*\*\s*(.*)$/.exec(ligne);
+    if (!m) return null;
+    idees.push({ titre: m[1]!.trim(), texte: m[2]!.trim() });
+  }
+  const fin = blocs[1] ?? '';
+  if (fin && blocSpecial(fin)) return null;
+  return { idees, fin: fin.replace(/\s*\n\s*/g, ' ') };
 }
 
 /**

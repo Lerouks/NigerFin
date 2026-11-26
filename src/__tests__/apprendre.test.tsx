@@ -32,11 +32,11 @@ describe('adresse d’une leçon', () => {
 });
 
 describe('temps de lecture', () => {
-  it('se calcule sur les mots réels, à 180 par minute, jamais moins de 2 minutes', () => {
+  it('se calcule sur les mots réels, à 180 par minute, jamais moins d’une minute (leçons d’une minute, 26/11/2026)', () => {
     const texte = Array.from({ length: 540 }, (_, i) => `mot${i}`).join(' ');
     expect(compterMots(texte)).toBe(540);
     expect(minutesDeLecture(texte)).toBe(3);
-    expect(minutesDeLecture('')).toBe(2);
+    expect(minutesDeLecture('')).toBe(1);
   });
 
   it('ne compte ni les balises ni la syntaxe Markdown', () => {

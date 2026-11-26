@@ -1,75 +1,36 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import type { Cours, LeconResume } from '@/lib/apprendre/donnees';
 
 /**
- * APPRENDRE, page d'un cours et page d'une leçon (choix de Raouf, 26/11/2026) :
- * page du cours sobre, « Titres seulement » (une ligne par leçon, sans résumé
- * ni figure), « À venir », Premium annoncé avant le clic. La progression du
- * lecteur est simulée.
+ * APPRENDRE, page d'un cours (choix de Raouf, 26/11/2026) : les leçons
+ * s'ouvrent dans la page (maquette « Grand format »), chacune tient en une
+ * minute (« une phrase d'entrée, trois idées, une phrase de fin, puis la
+ * question »), « À venir », et les thèmes regroupés de 10 à 5.
  */
-
-const progression = vi.hoisted(() => ({ lues: new Set<string>() }));
 
 vi.mock('next/cache', () => ({ unstable_cache: <T,>(f: T) => f }));
 vi.mock('@/lib/supabase', () => ({ createServiceClient: () => null }));
 vi.mock('@/components/apprendre/progression', async () => {
   const { leconDeDepart } = await import('@/lib/apprendre/lecture');
-  return {
-    leconDeDepart,
-    useProgression: () => ({ connecte: progression.lues.size > 0, chargement: false, lues: progression.lues, enregistrer: async () => {} }),
-  };
+  return { leconDeDepart, useProgression: () => ({ connecte: false, chargement: false, lues: new Set<string>(), enregistrer: async () => {} }) };
 });
 
 const { suiteAVenir, titreAVenir } = await import('@/lib/apprendre/a-venir');
-const { aVenirDuCours, assemblerThemes } = await import('@/lib/apprendre/donnees');
-const { ancresDesParties } = await import('@/components/apprendre/PlanLecon');
-const { ActionCours, SommaireDuCours } = await import('@/components/apprendre/SommaireDuCours');
-const { rehypeLecon } = await import('@/lib/apprendre/rehype-lecon');
+const { aVenirDuCours, apercuPremium, assemblerThemes, cheminLecon } = await import('@/lib/apprendre/donnees');
+const { decouperIdees } = await import('@/lib/apprendre/lecture');
+const { adresseDuThemeRegroupe } = await import('@/lib/apprendre/anciens-cours');
+const { CorpsCourt } = await import('@/components/apprendre/CorpsCourt');
+const { LeconsDuCours } = await import('@/components/apprendre/LeconsDuCours');
 
-function lecon(id: string, numero: number, premium = false): LeconResume {
-  return {
-    id,
-    slug: id,
-    titre: `Leçon ${id}`,
-    numero,
-    premium,
-    minutes: 3,
-    publieeLe: '2026-11-25T10:00:00Z',
-    nouvelle: false,
-    href: `/apprendre/cours/${id}`,
-    chapeau: 'Première phrase du résumé. Seconde phrase.',
-    parties: ['Une partie', 'Une autre partie'],
-  };
-}
+const sansBalises = (html: string) => html.replace(/<[^>]+>/g, '').replace(/[\u00a0\u202f]/g, ' ');
 
-function cours(premiums: number[] = [], aVenir: Cours['aVenir'] = null, n = 9): Cours {
-  return {
-    id: 'c',
-    slug: 'economie-niger',
-    titre: 'Économie du Niger',
-    description: 'Ce cours donne les clés pour lire l’économie du Niger.',
-    numero: 3,
-    minutes: n * 3,
-    href: '/apprendre/economie-niger',
-    lecons: Array.from({ length: n }, (_, i) => lecon(`l${i + 1}`, i + 1, premiums.includes(i + 1))),
-    icone: 'Landmark',
-    aVenir,
-  };
-}
-
-const sommaire = (c: Cours) =>
-  renderToStaticMarkup(
-    <>
-      <ActionCours cours={c} />
-      <SommaireDuCours cours={c} />
-    </>,
-  );
-const sansBalises = (html: string) => html.replace(/<[^>]+>/g, '').replace(/\u00a0/g, ' ');
-
-beforeEach(() => {
-  progression.lues = new Set();
-});
+const COURTE = [
+  "1. **L'argent a une valeur dans le temps.** Un franc disponible aujourd'hui peut être placé et rapporter.",
+  '2. **Le risque va avec le rendement.** Plus un placement promet de rapporter, plus il est risqué.',
+  "3. **La liquidité compte.** L'argent d'un compte courant se retire tout de suite.",
+  '',
+  'Comprendre ces idées aide à tenir un budget.',
+].join('\n');
 
 describe('« À venir », la formule choisie par Raouf', () => {
   it('« À venir : X, et 9 autres leçons. », d’un seul tenant à partir de « et »', () => {
@@ -119,51 +80,81 @@ describe('assemblage d’un cours', () => {
   });
 });
 
-describe('le sommaire du cours', () => {
-  it('un visiteur : « Commencer la leçon 1 », puis une ligne par leçon, sans résumé ni parties', () => {
-    const html = sommaire(cours([], { prochaine: 'Commerce international', nombre: 10 }));
-    const texte = sansBalises(html);
-    expect(texte).toContain('Commencer la leçon 1');
-    expect(texte).toContain('Leçon l1');
-    expect(texte).toContain('3 min');
-    expect(texte).not.toContain('Première phrase du résumé.');
-    expect(texte).not.toContain('Dans cette leçon');
-    expect(texte).not.toContain('Thème suivant');
-    expect(texte).toContain('À venir : Commerce international, et 9 autres leçons.');
-    // Plus de carré noir dans la page du cours : seul le bouton est noir.
-    expect(html.match(/bg-\[#111\]/g)?.length ?? 0).toBe(1);
+describe('une leçon d’une minute', () => {
+  it('trois idées, chacune sa phrase en gras et son explication, puis la phrase de fin', () => {
+    const l = decouperIdees(COURTE)!;
+    expect(l.idees).toHaveLength(3);
+    expect(l.idees[0]).toEqual({ titre: "L'argent a une valeur dans le temps.", texte: "Un franc disponible aujourd'hui peut être placé et rapporter." });
+    expect(l.fin).toBe('Comprendre ces idées aide à tenir un budget.');
   });
 
-  it('trois leçons lues et la quatrième Premium : annoncée avant le clic, la prochaine libre proposée', () => {
-    progression.lues = new Set(['l1', 'l2', 'l3']);
-    const texte = sansBalises(sommaire(cours([4, 5, 8, 9])));
-    expect(texte).toContain('Leçon 4 · Premium');
-    expect(texte).toContain('Lire la leçon 6, en accès libre');
-    expect(texte).toContain(', Premium');
-    expect(texte).toContain(', lue');
+  it('un corps écrit autrement (intertitres, tableau) n’est pas découpé', () => {
+    expect(decouperIdees('### Une partie\n\nTexte.')).toBeNull();
+    expect(decouperIdees('1. **A.** a\n2. b sans gras')).toBeNull();
+    expect(decouperIdees(`${COURTE}\n\n| a | b |`)).toBeNull();
   });
 
-  it('une leçon déjà commencée : « Reprendre : leçon 2 »', () => {
-    progression.lues = new Set(['l1']);
-    expect(sansBalises(sommaire(cours([], null, 3)))).toContain('Reprendre : leçon 2');
+  it('Premium : rien de plus que la phrase d’entrée pour un non-abonné', () => {
+    expect(apercuPremium(COURTE)).toBe('');
+    expect(apercuPremium('### Partie\n\nTexte libre.\n\n### Suite\n\nTexte réservé.')).toBe('### Partie\n\nTexte libre.');
   });
 
-  it('tout lu : « Relire le cours »', () => {
-    progression.lues = new Set(['l1', 'l2']);
-    expect(sansBalises(sommaire(cours([], null, 2)))).toContain('Relire le cours');
+  it('le rendu : trois idées numérotées, la phrase de fin, et l’ancien format rendu tel quel', () => {
+    const html = renderToStaticMarkup(<CorpsCourt corps={COURTE} />);
+    expect(html.match(/<li/g)).toHaveLength(3);
+    expect(sansBalises(html)).toContain('Le risque va avec le rendement.');
+    expect(sansBalises(html)).toContain('Comprendre ces idées aide à tenir un budget.');
+    expect(sansBalises(renderToStaticMarkup(<CorpsCourt corps={'### Une partie\n\nTexte.'} />))).toContain('Une partie');
   });
 });
 
-describe('le plan d’une leçon', () => {
-  it('ses ancres sont celles que rehype-lecon donne aux intertitres', () => {
-    const arbre = {
-      type: 'root' as const,
-      children: ['Qu’est-ce que le PIB ?', 'La croissance', 'La croissance'].map((t) => ({
-        type: 'element' as const, tagName: 'h3', properties: {}, children: [{ type: 'text' as const, value: t }],
-      })),
-    };
-    rehypeLecon()(arbre as never);
-    const ids = (arbre.children as unknown as { properties: { id: string } }[]).map((n) => n.properties.id);
-    expect(ancresDesParties(['Qu’est-ce que le PIB ?', 'La croissance', 'La croissance'])).toEqual(ids);
+describe('les leçons s’ouvrent dans la page du cours', () => {
+  const lecons = [
+    { id: 'a', slug: 'qu-est-ce-que-la-finance', numero: 1, titre: 'Qu’est-ce que la finance ?', premium: false, chapeau: 'La finance étudie la façon dont on gère l’argent.' },
+    { id: 'b', slug: 'les-taux-d-interet', numero: 4, titre: 'Les taux d’intérêt', premium: true, chapeau: 'Le taux d’intérêt est le prix de l’argent.' },
+  ];
+  const html = renderToStaticMarkup(
+    <LeconsDuCours lecons={lecons}>
+      <p>Contenu A</p>
+      <p>Contenu B</p>
+    </LeconsDuCours>,
+  );
+
+  it('une ligne par leçon, numérotée 01, 04, fermée au départ, avec son contenu dans la page', () => {
+    expect(sansBalises(html)).toContain('01');
+    expect(sansBalises(html)).toContain('04');
+    expect(html.match(/aria-expanded="false"/g)).toHaveLength(2);
+    expect(html).toContain('aria-controls="lecon-qu-est-ce-que-la-finance"');
+    expect(html).toContain('id="lecon-qu-est-ce-que-la-finance"');
+    expect(html).toContain('Contenu A');
+    expect(html).toContain('Contenu B');
+  });
+
+  it('la leçon Premium porte son cadenas, dit aux lecteurs d’écran ; la phrase d’entrée sert d’aperçu au survol', () => {
+    expect(sansBalises(html)).toContain(', Premium');
+    expect(sansBalises(html)).toContain('Le taux d’intérêt est le prix de l’argent.');
+  });
+
+  it('plus de « Leçon suivante » : la suivante est juste en dessous', () => {
+    expect(sansBalises(html)).not.toContain('Leçon suivante');
+  });
+
+  it('l’adresse d’une leçon est celle de son cours, ouverte sur elle', () => {
+    expect(cheminLecon('bases-finance', 'qu-est-ce-que-la-finance')).toBe('/apprendre/bases-finance#qu-est-ce-que-la-finance');
+  });
+});
+
+describe('les thèmes regroupés (10 devenus 5)', () => {
+  it('l’ancienne adresse d’un thème mène au thème qui l’a repris ; Immobilier, retiré, mène à Apprendre', () => {
+    expect(adresseDuThemeRegroupe('devises-change')).toBe('/apprendre/economie-monnaie');
+    expect(adresseDuThemeRegroupe('crypto-blockchain')).toBe('/apprendre/bourse-crypto');
+    expect(adresseDuThemeRegroupe('assurance-prevoyance')).toBe('/apprendre/budget-assurance');
+    expect(adresseDuThemeRegroupe('fiscalite-droit')).toBe('/apprendre/entreprise-impots');
+    expect(adresseDuThemeRegroupe('immobilier')).toBe('/apprendre');
+  });
+
+  it('un thème qui existe, ou une adresse quelconque, ne redirige pas', () => {
+    expect(adresseDuThemeRegroupe('bases-finance')).toBeNull();
+    expect(adresseDuThemeRegroupe('constructor')).toBeNull();
   });
 });

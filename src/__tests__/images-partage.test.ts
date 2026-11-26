@@ -9,7 +9,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
  * réseaux montrait le titre générique au lieu de celui de la page.
  */
 
-const { getArticleBySlug, eq, getCoursParSlug, getLecon } = vi.hoisted(() => ({
+const { getArticleBySlug, eq, getCoursParSlug } = vi.hoisted(() => ({
   getArticleBySlug: vi.fn(async (slug: string) =>
     slug === 'budget-2027'
       ? { article: { title: 'Budget 2027 : ce qui change', category: 'economie', sections: ['economie'], excerpt: 'Les grandes lignes.' }, htmlBody: '' }
@@ -18,11 +18,6 @@ const { getArticleBySlug, eq, getCoursParSlug, getLecon } = vi.hoisted(() => ({
   eq: vi.fn(),
   getCoursParSlug: vi.fn(async (slug: string) =>
     slug === 'bases-finance' ? { titre: 'Les bases de la finance', numero: 1, minutes: 9, lecons: [{}, {}, {}] } : null,
-  ),
-  getLecon: vi.fn(async (cours: string, lecon: string) =>
-    cours === 'bases-finance' && lecon === 'comprendre-l-inflation'
-      ? { titre: 'Comprendre l’inflation', numero: 3, cours: { titre: 'Les bases de la finance', lecons: [{}, {}, {}, {}] } }
-      : null,
   ),
 }));
 
@@ -36,7 +31,7 @@ vi.mock('next/og', () => ({
   },
 }));
 vi.mock('@/lib/articles', () => ({ getArticleBySlug }));
-vi.mock('@/lib/apprendre/donnees', () => ({ getCoursParSlug, getLecon }));
+vi.mock('@/lib/apprendre/donnees', () => ({ getCoursParSlug }));
 vi.mock('@/lib/supabase', () => ({
   createServiceClient: () => {
     const requete = {
@@ -55,7 +50,6 @@ vi.mock('@/lib/supabase', () => ({
 
 import ArticleOgImage from '@/app/articles/[slug]/opengraph-image';
 import ImageCours from '@/app/apprendre/[cours]/opengraph-image';
-import ImageLecon from '@/app/apprendre/[cours]/[lecon]/opengraph-image';
 
 /** Tout le texte d'un arbre d'éléments React, dans l'ordre. */
 function texte(noeud: unknown): string {
@@ -97,19 +91,5 @@ describe('Les images de partage montrent la page partagée', () => {
     // « Cours 1 » ne disait rien au lecteur (retour de Raouf, 26/11/2026) : le nombre de leçons et la durée.
     expect(contenu).toContain('3 leçons · 9 min');
     expect(contenu).not.toContain('Cours 1');
-  });
-
-  it('Apprendre : la leçon demandée, avec son cours et sa place', async () => {
-    const image = await ImageLecon({ params: Promise.resolve({ cours: 'bases-finance', lecon: 'comprendre-l-inflation' }) });
-    const contenu = texte((image as unknown as { element: unknown }).element);
-
-    expect(getLecon).toHaveBeenCalledWith('bases-finance', 'comprendre-l-inflation');
-    expect(contenu).toContain('Comprendre l’inflation');
-    expect(contenu).toContain('Les bases de la finance · leçon 3 sur 4');
-  });
-
-  it('Apprendre : une adresse inconnue donne l’image générique, sans erreur', async () => {
-    const image = await ImageLecon({ params: Promise.resolve({ cours: 'x', lecon: 'y' }) });
-    expect(texte((image as unknown as { element: unknown }).element)).toContain('Apprendre');
   });
 });

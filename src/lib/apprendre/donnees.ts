@@ -1,6 +1,6 @@
 import { unstable_cache } from 'next/cache';
 import { createServiceClient } from '@/lib/supabase';
-import { decouperLecon, intertitres, minutesDeLecture } from '@/lib/apprendre/lecture';
+import { decouperIdees, decouperLecon, intertitres, minutesDeLecture } from '@/lib/apprendre/lecture';
 import { lireQuiz, type Question } from '@/lib/apprendre/quiz';
 import { APPRENDRE_CACHE_TAG } from '@/lib/apprendre/cache';
 
@@ -60,17 +60,16 @@ export interface Cours {
   aVenir: AVenir | null;
 }
 
-export interface LeconComplete extends LeconResume {
-  cours: Cours;
-  chapeau: string;
-  /** Corps entier pour une leçon gratuite ; null pour une leçon Premium (servi à part aux abonnés). */
+/**
+ * Une leçon telle que la page de son cours la déplie (26/11/2026 : les leçons
+ * s'ouvrent dans la page du cours, plus de page par leçon).
+ */
+export interface LeconDuCours extends LeconResume {
+  /** Le corps sans la phrase d'entrée ; null pour une leçon Premium, servie à part aux abonnés. */
   corps: string | null;
-  /** Début du corps d'une leçon Premium, montré à tous avant l'invitation à s'abonner. */
+  /** Début du corps d'une leçon Premium, montré à tous ; vide pour une leçon d'une minute. */
   apercu: string;
   quiz: Question[];
-  miseAJour: string;
-  precedente: LeconResume | null;
-  suivante: LeconResume | null;
 }
 
 export interface LigneLecon {
@@ -116,13 +115,18 @@ export interface Theme {
   cours: Cours | null;
 }
 
-/** Chemin d'une leçon. */
+/** Adresse d'une leçon : la page de son cours, ouverte sur elle (#leçon). */
 export function cheminLecon(coursSlug: string, leconSlug: string): string {
-  return `${CHEMIN_APPRENDRE}/${coursSlug}/${leconSlug}`;
+  return `${CHEMIN_APPRENDRE}/${coursSlug}#${leconSlug}`;
 }
 
-/** Le début d'une leçon Premium : son corps jusqu'au deuxième intertitre. */
+/**
+ * Le début d'une leçon Premium : son corps jusqu'au deuxième intertitre. Une
+ * leçon d'une minute n'en montre rien de plus que sa phrase d'entrée : ses
+ * trois idées sont la leçon même.
+ */
 export function apercuPremium(corps: string): string {
+  if (decouperIdees(corps)) return '';
   const blocs = corps.split(/\n{2,}/);
   const sortie: string[] = [];
   let intertitres = 0;
@@ -262,31 +266,25 @@ export async function getCoursParSlug(slug: string): Promise<Cours | null> {
 }
 
 
-/** Une leçon publiée, avec son cours, ses voisines et son contenu (sauf le corps Premium). */
-export const getLecon = unstable_cache(
-  async (coursSlug: string, leconSlug: string): Promise<LeconComplete | null> => {
+/** Un cours et toutes ses leçons, avec leur contenu (sauf le corps Premium), pour la page du cours. */
+export const getLeconsDuCours = unstable_cache(
+  async (coursSlug: string): Promise<{ cours: Cours; lecons: LeconDuCours[] } | null> => {
     const { cours: lignesCours, lecons: lignesLecons, aVenir } = await lireTout();
-    const tous = assembler(lignesCours, lignesLecons, Date.now(), aVenir);
-    const cours = tous.find((c) => c.slug === coursSlug);
+    const cours = assembler(lignesCours, lignesLecons, Date.now(), aVenir).find((c) => c.slug === coursSlug);
     if (!cours) return null;
-    const index = cours.lecons.findIndex((l) => l.slug === leconSlug);
-    if (index === -1) return null;
-    const resume = cours.lecons[index]!;
-    const ligne = lignesLecons.find((l) => l.id === resume.id)!;
-    const { chapeau, corps } = decouperLecon(ligne.content, ligne.title);
-    return {
-      ...resume,
-      cours,
-      chapeau,
-      corps: resume.premium ? null : corps,
-      apercu: resume.premium ? apercuPremium(corps) : '',
-      quiz: resume.premium ? [] : lireQuiz(ligne.quiz),
-      miseAJour: ligne.updated_at,
-      precedente: cours.lecons[index - 1] ?? null,
-      suivante: cours.lecons[index + 1] ?? null,
-    };
+    const lecons = cours.lecons.map((resume): LeconDuCours => {
+      const ligne = lignesLecons.find((l) => l.id === resume.id)!;
+      const { corps } = decouperLecon(ligne.content, ligne.title);
+      return {
+        ...resume,
+        corps: resume.premium ? null : corps,
+        apercu: resume.premium ? apercuPremium(corps) : '',
+        quiz: resume.premium ? [] : lireQuiz(ligne.quiz),
+      };
+    });
+    return { cours, lecons };
   },
-  ['apprendre-lecon-v2'],
+  ['apprendre-cours-lecons-v1'],
   { revalidate: 3600, tags: [APPRENDRE_CACHE_TAG] },
 );
 

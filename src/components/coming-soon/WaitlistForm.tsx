@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Loader2, Check, ArrowRight } from 'lucide-react';
+import { Loader2, Check } from 'lucide-react';
 
 type Status = 'idle' | 'loading' | 'success' | 'error';
 
@@ -55,7 +55,7 @@ export function WaitlistForm() {
   if (status === 'success') {
     return (
       <p
-        className="nfi-merci flex items-center gap-2 border-b border-white/25 py-[14px] text-[15px] font-medium text-[#f4f4f5] sm:justify-center"
+        className="nfi-merci flex min-h-[52px] items-center 2xl:min-h-[60px] 2xl:text-[17px] justify-center gap-2 rounded-[8px] border border-[#3a3d42] px-4 py-2 text-[15px] font-medium text-[#f4f4f5]"
         role="status"
         aria-live="polite"
       >
@@ -75,12 +75,11 @@ export function WaitlistForm() {
 
   return (
     <form onSubmit={handleSubmit} noValidate>
-      <label htmlFor="waitlist-email" className="mb-2 block text-[clamp(14px,3.6vw,15.5px)] text-[#a9adb4] transition-colors duration-200 sm:mb-2.5 sm:text-center sm:text-[14px] xl:text-[13px]">
+      <label htmlFor="waitlist-email" className="mb-[7px] block text-[13.5px] text-[#a9adb4] md:text-[14px] 2xl:mb-2 2xl:text-[16px]">
         Être prévenu de l’ouverture
       </label>
-      {/* Téléphone : champ encadré et vrai bouton blanc, sur toute la largeur.
-          À partir de la tablette : la ligne fine du site, champ et bouton côte à côte. */}
-      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-3 sm:border-b sm:border-white/25 sm:transition-colors sm:duration-200 sm:focus-within:border-[#f4f4f5]">
+      {/* Un seul cadre : le champ et le bouton blanc côte à côte, sur tous les écrans. */}
+      <div className="flex h-[52px] items-center rounded-[8px] border border-[#3a3d42] p-1 transition-colors duration-200 focus-within:border-[#f4f4f5] 2xl:h-[60px] [@media(max-height:640px)]:h-12">
         <input
           id="waitlist-email"
           type="email"
@@ -98,12 +97,12 @@ export function WaitlistForm() {
           }}
           disabled={status === 'loading'}
           aria-invalid={status === 'error'}
-          className="h-[clamp(48px,12.6vw,56px)] min-w-0 flex-none rounded-[10px] border border-white/20 bg-transparent px-4 text-[clamp(16px,4.1vw,17px)] text-[#f4f4f5] transition-colors duration-200 placeholder:text-[#6b6f76] focus:border-[#f4f4f5] focus:outline-none disabled:opacity-60 sm:h-auto sm:flex-1 sm:rounded-none sm:border-0 sm:px-0 sm:py-[13px] sm:text-[17px] sm:placeholder:text-[#5c6068]"
+          className="h-full min-w-0 flex-1 border-0 bg-transparent pl-[11px] pr-2.5 text-left text-[16px] text-[#f4f4f5] placeholder:text-[#6b6f76] focus:outline-none disabled:opacity-60 max-[350px]:pl-[9px] 2xl:pl-[14px] 2xl:text-[18px]"
         />
         <button
           type="submit"
           disabled={status === 'loading'}
-          className="group inline-flex h-[clamp(48px,12.6vw,56px)] w-full shrink-0 items-center justify-center gap-2 rounded-[10px] bg-[#f4f4f5] text-[clamp(16px,4.1vw,17px)] font-semibold text-[#0b0b0c] transition-colors duration-200 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f4f5] focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090a] active:bg-[#dcdfe3] disabled:opacity-60 sm:h-auto sm:min-h-[44px] sm:w-auto sm:rounded-none sm:bg-transparent sm:text-[15px] sm:text-[#f4f4f5] sm:hover:bg-transparent sm:hover:opacity-80 sm:focus-visible:underline sm:focus-visible:ring-0 sm:active:bg-transparent"
+          className="inline-flex h-full shrink-0 items-center justify-center gap-2 rounded-[5px] bg-[#f4f4f5] px-4 text-[15.5px] font-semibold text-[#0b0b0c] transition-colors duration-200 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f4f5] focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090a] active:bg-[#dcdfe3] disabled:opacity-60 max-[350px]:px-3 max-[350px]:text-[15px] 2xl:px-5 2xl:text-[17px]"
         >
           {status === 'loading' ? (
             <>
@@ -111,19 +110,13 @@ export function WaitlistForm() {
               <span>Envoi…</span>
             </>
           ) : (
-            <>
-              <span>M’inscrire</span>
-              <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
-            </>
+            'M’inscrire'
           )}
         </button>
       </div>
 
-      <p
-        className="mt-2 min-h-[1.25rem] text-[13px]"
-        aria-live="polite"
-        role={status === 'error' ? 'alert' : undefined}
-      >
+      {/* Vide, la ligne d'erreur ne prend aucune place : la page tient dans l'écran. */}
+      <p className="text-[13px] [&:not(:empty)]:mt-2" aria-live="polite" role={status === 'error' ? 'alert' : undefined}>
         {status === 'error' && <span className="text-[#ff8f80]">{message}</span>}
       </p>
     </form>

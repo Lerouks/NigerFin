@@ -30,20 +30,10 @@
 }
 
 /* ─── Page d'attente (mode pré-lancement) ───
-   Entrée jouée une seule fois, chaque mouvement porte un sens : la carte
-   s'assemble (CarteNiger.tsx), le titre monte mot par mot de sous un cache,
-   « en clair » passe du flou au net, le texte et le formulaire arrivent en
-   fondu. Rien au défilement, rien qui flotte au survol. */
-@keyframes nfi-monte { from { transform: translateY(108%); } to { transform: none; } }
-@keyframes nfi-net { from { opacity: 0; filter: blur(14px); } to { opacity: 1; filter: blur(0); } }
+   La page s'affiche d'un coup, sans animation (26/11/2026). Seule la
+   confirmation d'inscription arrive en fondu, avec sa coche qui se trace. */
 @keyframes nfi-fondu { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @keyframes nfi-trace { from { stroke-dashoffset: 24; } to { stroke-dashoffset: 0; } }
-.nfi-mot { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .12em; margin-bottom: -.12em; }
-.nfi-mot > span { display: inline-block; animation: nfi-monte .95s cubic-bezier(.2, .75, .1, 1) both; animation-delay: calc(.2s + var(--i, 0) * .11s); }
-.nfi-net { display: inline-block; animation: nfi-net 1.2s cubic-bezier(.2, .7, .1, 1) .62s both; }
-.nfi-apparait { animation: nfi-fondu .8s cubic-bezier(.2, .7, .1, 1) .95s both; }
-.nfi-apparait-2 { animation-delay: 1.1s; }
-.nfi-apparait-3 { animation-delay: 1.3s; }
 .nfi-merci { animation: nfi-fondu .5s ease both; }
 .nfi-coche { stroke-dasharray: 24; animation: nfi-trace .6s cubic-bezier(.65, 0, .35, 1) .15s both; }
 
@@ -61,7 +51,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .nfi-reseau, .nfi-reseau svg, .nfi-reseau-fond { transition: none; }
-  .nfi-mot > span, .nfi-net, .nfi-apparait, .nfi-merci, .nfi-coche { animation: none; }
+  .nfi-merci, .nfi-coche { animation: none; }
 }
 
 /*

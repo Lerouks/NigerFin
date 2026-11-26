@@ -1,7 +1,7 @@
 import { Facebook, Instagram, Youtube } from '@/components/icons/social';
 import { defaultSocialLinks } from '@/lib/site-data';
 import { WaitlistForm } from './WaitlistForm';
-import { CarteNiger } from './CarteNiger';
+import { CarteAtlas } from './CarteAtlas';
 
 /** Icône TikTok (identique à celle du Footer, non fournie par le pack lucide). */
 function TikTokIcon({ className }: { className?: string }) {
@@ -26,91 +26,66 @@ const SOCIALS = [
 ].filter((s) => Boolean(s.url));
 
 /**
- * Page d'attente du pré-lancement (maquette « la carte », 23/11/2026).
+ * Page d'attente du pré-lancement, version « l'atlas » (choisie par Raouf le
+ * 26/11/2026, l'ancienne carte en points lumineux « faisait trop IA »).
  *
- * - Téléphone (version D) : la carte en tête, puis le titre et le formulaire.
- *   Le premier écran prend la hauteur visible exacte de Safari et la carte
- *   occupe la place que laissent le titre et le formulaire.
- * - Tablette et ordinateur (version B) : tout est centré, le titre et le
- *   formulaire en haut, la carte en dessous comme un horizon.
- * - Entrée (globals.css et CarteNiger) : la carte s'assemble d'ouest en est, le
- *   titre monte mot par mot puis « en clair » passe du flou au net, le reste
- *   arrive en fondu ; sur ordinateur, la souris éclaire les points qu'elle
- *   survole. Tout est coupé pour qui demande moins de mouvement.
- * - Signature (choix de Raouf, 24/11/2026) : le slogan, mot pour mot, ferme la
- *   page juste au-dessus des réseaux, comme à la fin de nos posts.
+ * - Une seule page : tout tient dans l'écran, sans défiler, de l'iPhone SE
+ *   (375 × 553 visibles dans Safari) à l'écran 2560. La carte prend la place
+ *   qui reste entre le texte et la signature, et rapetisse seule sur les
+ *   petits écrans.
+ * - Même composition partout : le texte d'abord, centré, puis la carte, puis
+ *   le slogan et les réseaux. Sur téléphone, la carte va d'un bord à l'autre.
+ * - Aucune animation : la page s'affiche d'un coup.
  */
 export function ComingSoon() {
   return (
-    <main className="relative flex min-h-svh w-full flex-col overflow-hidden bg-[#09090a] px-[22px] pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-4 text-[#f4f4f5] antialiased [-webkit-tap-highlight-color:transparent] sm:items-center sm:px-10 sm:pt-6 sm:text-center xl:px-14 xl:pb-6 xl:pt-7">
-      {/* Tablette et ordinateur : la carte sous le texte, centrée, comme un horizon.
-          Elle prend toute la hauteur que laissent le texte et les réseaux : la page
-          tient dans l'écran, du portable 1280 × 720 à l'écran 2560. */}
-      <div className="relative hidden sm:order-2 sm:mt-[2.4vh] sm:block sm:max-h-[62vh] sm:min-h-[170px] sm:w-full sm:flex-1 sm:self-stretch">
-        <CarteNiger ajuster centrer className="pointer-events-none absolute inset-0 block h-full w-full" />
-      </div>
+    <main className="relative flex min-h-svh w-full flex-col items-center overflow-hidden bg-[#09090a] px-[22px] pb-[max(14px,env(safe-area-inset-bottom))] pt-[14px] text-center text-[#f4f4f5] antialiased [-webkit-tap-highlight-color:transparent] md:px-12 md:pb-[22px] md:pt-[26px]">
+      <header>
+        <p className="font-[family-name:var(--font-playfair)] text-[20px] font-bold tracking-[0.01em] md:text-[24px] 2xl:text-[28px]">NFI&nbsp;REPORT</p>
+      </header>
 
-      {/* Téléphone : le premier écran (marque, carte, titre, formulaire) prend la
-          hauteur visible exacte ; à partir de la tablette, ce bloc s'efface et ses
-          éléments rejoignent la colonne centrée (display: contents). */}
-      <div className="flex min-h-[calc(100svh-1.75rem)] flex-col sm:contents">
-        <header className="relative z-10 order-0 sm:self-stretch">
-          <p className="font-[family-name:var(--font-playfair)] text-[22px] font-bold tracking-[0.01em] 2xl:text-[26px]">NFI&nbsp;REPORT</p>
-        </header>
-
-        <div className="relative my-[1.2svh] min-h-[110px] flex-1 sm:hidden">
-          <CarteNiger ajuster className="pointer-events-none absolute inset-0 block h-full w-full" />
+      <section className="mt-[3.4svh] flex w-full flex-col items-center md:mt-[4vh]">
+        {/* Sans point final, comme un titre de presse. Deux lignes sur téléphone,
+            une seule à partir de la tablette ; « du Niger, en clair » ne se coupe jamais. */}
+        <h1 className="text-[calc((100vw-44px)*0.108)] font-[650] leading-[1.04] tracking-[-0.025em] md:whitespace-nowrap md:text-[min(6.2vw,9.4vh)]">
+          L’économie
+          <br className="md:hidden" /> <span className="whitespace-nowrap">du Niger, en clair</span>
+        </h1>
+        {/* « et » et « les » ne finissent jamais une ligne, et la dernière ligne
+            garde au moins quatre mots, à toutes les largeurs. */}
+        <p className="mt-[10px] max-w-[470px] text-[15px] leading-[1.5] text-[#a9adb4] md:mt-[2.2vh] md:max-w-[560px] md:text-[18px] 2xl:max-w-[660px] 2xl:text-[21px] [@media(max-height:640px)]:mt-2 [@media(max-height:640px)]:text-[14.5px]">
+          Un média d’information économique et&nbsp;financière consacré au&nbsp;Niger&nbsp;: l’énergie, les&nbsp;banques,{' '}
+          <span className="whitespace-nowrap">la bourse, les entreprises.</span>
+        </p>
+        <div className="mt-[18px] w-full max-w-[470px] md:mt-[3.2vh] 2xl:max-w-[560px] [@media(max-height:640px)]:mt-[14px]">
+          <WaitlistForm />
         </div>
+        {/* La page collecte une adresse : qui la donne doit pouvoir lire qui la
+            collecte, et sortir. Ces pages restent ouvertes en pré-lancement.
+            « Politique de confidentialité » ne finit jamais seule sur sa ligne. */}
+        <p className="mt-[9px] max-w-[470px] text-[12.5px] leading-[1.5] text-[#8a8e95] 2xl:max-w-[560px] 2xl:text-[14px]">
+          Votre adresse ne sert qu’à vous prévenir{' '}
+          <span className="whitespace-nowrap">
+            de l’ouverture.{' '}
+            <a
+              href="/confidentialite"
+              className="underline underline-offset-[3px] transition-colors hover:text-[#f4f4f5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f4f5]"
+            >
+              Politique de confidentialité
+            </a>
+          </span>
+        </p>
+      </section>
 
-        <section className="relative z-10 flex max-w-[560px] flex-col sm:order-1 sm:max-w-[640px] sm:items-center sm:pt-[6vh] lg:max-w-none lg:pt-[4.2vh]">
-          {/* Sans point final, comme un titre de presse. Chaque groupe de mots
-              monte de sous un cache ; « en clair » passe du flou au net. */}
-          <h1 className="text-[clamp(34px,11.2vw,52px)] font-bold leading-[0.98] tracking-[-0.045em] sm:text-[clamp(44px,6.6vw,64px)] lg:whitespace-nowrap lg:text-[clamp(44px,4.3vw,84px)] 2xl:text-[clamp(66px,4.3vw,110px)]">
-            <span className="nfi-mot"><span style={{ '--i': 0 } as React.CSSProperties}>L’économie</span></span>{' '}
-            <span className="nfi-mot"><span style={{ '--i': 1 } as React.CSSProperties}>du&nbsp;Niger,</span></span>{' '}
-            <span className="nfi-net text-[#7d8189]">en&nbsp;clair</span>
-          </h1>
-          <p className="nfi-apparait mt-[clamp(10px,1.6svh,16px)] max-w-[470px] text-[clamp(15px,4.1vw,18px)] leading-[1.55] text-[#a9adb4] sm:mx-auto sm:mt-[2.4vh] sm:text-[18px] 2xl:max-w-[600px] 2xl:text-[20px]">
-            {/* « et » et « les » ne finissent jamais une ligne, et la dernière ligne
-                garde au moins quatre mots, à toutes les largeurs. */}
-            Un média d’information économique et&nbsp;financière consacré au&nbsp;Niger&nbsp;: l’énergie, les&nbsp;banques,{' '}
-            <span className="whitespace-nowrap">la bourse, les entreprises.</span>
-          </p>
-          <div className="nfi-apparait nfi-apparait-2 mt-[clamp(14px,2.4svh,24px)] w-full max-w-[470px] sm:mx-auto sm:mt-[3.4vh] 2xl:max-w-[540px]">
-            <WaitlistForm />
-            {/* La page collecte une adresse : qui la donne doit pouvoir lire qui la
-                collecte, et sortir. Ces pages restent ouvertes en pré-lancement. */}
-            <p className="mt-1 hidden text-[13px] leading-relaxed text-[#8a8e95] sm:block xl:text-[12px] xl:text-[#7d8189]">
-              Votre adresse ne sert qu’à vous prévenir de&nbsp;l’ouverture.{' '}
-              <a
-                href="/confidentialite"
-                className="whitespace-nowrap underline underline-offset-[3px] transition-colors hover:text-[#f4f4f5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f4f5]"
-              >
-                Politique de confidentialité
-              </a>
-            </p>
-          </div>
-        </section>
-      </div>
+      {/* La carte prend toute la place qui reste ; sur téléphone, d'un bord à l'autre. */}
+      <CarteAtlas className="-mx-[22px] mb-[14px] mt-2 min-h-0 flex-1 basis-0 self-stretch md:mx-0 md:mb-[1vh] md:mt-[3vh] [@media(max-height:640px)]:mb-[10px]" />
 
-      {/* Téléphone : la mention suit le bouton, juste sous le premier écran. */}
-      <p className="mt-3 text-[clamp(12.5px,3.3vw,14px)] leading-relaxed text-[#8a8e95] sm:hidden">
-        Votre adresse ne sert qu’à vous prévenir de&nbsp;l’ouverture.{' '}
-        <a
-          href="/confidentialite"
-          className="whitespace-nowrap underline underline-offset-[3px] transition-colors hover:text-[#f4f4f5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f4f5]"
-        >
-          Politique de confidentialité
-        </a>
-      </p>
-
-      {/* Le slogan signe la page au-dessus des réseaux. Sur ordinateur, la marge
-          du haut passe en vh pour que la page tienne toujours dans l'écran 1280 × 720. */}
-      <footer className="nfi-apparait nfi-apparait-3 relative z-10 order-3 mt-5 flex flex-col items-start sm:mt-0 sm:items-center sm:pt-[2.4vh]">
-        <p className="mb-1.5 font-[family-name:var(--font-playfair)] text-[16px] leading-snug text-[#a9adb4] sm:mb-2 sm:text-[17px] 2xl:text-[19px]">
+      {/* Le slogan signe la page au-dessus des réseaux, comme à la fin de nos posts. */}
+      <footer className="flex flex-col items-center">
+        <p className="font-[family-name:var(--font-playfair)] text-[15.5px] leading-snug text-[#a9adb4] md:text-[17px] 2xl:text-[20px]">
           La connaissance, votre meilleur&nbsp;capital.
         </p>
-        <nav className="-ml-2.5 flex items-center gap-1 sm:ml-0" aria-label="NFI REPORT sur les réseaux sociaux">
+        <nav className="mt-0.5 flex items-center gap-1" aria-label="NFI REPORT sur les réseaux sociaux">
           {/* Dégradé officiel d'Instagram, appelé par .nfi-reseau--instagram. */}
           <svg width="0" height="0" className="absolute" aria-hidden="true" focusable="false">
             <defs>

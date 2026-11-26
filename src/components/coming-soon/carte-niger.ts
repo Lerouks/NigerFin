@@ -1,5 +1,5 @@
 /**
- * Le Niger en points pour la page d'attente (CarteNiger.tsx).
+ * Le Niger en points, né pour l'ancienne page d'attente ; sert à la page Niger et aux images de partage des fiches entreprises.
  *
  * Fichier produit le 23/11/2026, ne pas modifier à la main. Contour du pays :
  * Natural Earth 1:50 m (domaine public), 255 sommets ; la frontière

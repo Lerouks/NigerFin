@@ -91,7 +91,7 @@ export default async function CoursPage({ params }: Props) {
             </h1>
             {cours.description && (
               <AjusteurLignes>
-                <p className="mt-4 max-w-[34ch] text-[18px] leading-[1.45] text-gray-700 sm:text-[21px] lg:mt-5 lg:text-[23px]">
+                <p className="mt-4 max-w-[40ch] text-[18px] leading-[1.45] text-gray-700 sm:text-[21px] lg:mt-5 lg:text-[23px]">
                   {typographieFr(cours.description)}
                 </p>
               </AjusteurLignes>

@@ -180,7 +180,7 @@ export default async function LeconPage({ params }: Props) {
                     {typographieFr(l.suivante.titre)}
                   </p>
                   {l.suivante.chapeau && (
-                    <p className="mt-3.5 text-[16.5px] leading-[1.6] text-gray-600 sm:text-[18px] max-sm:[&_.phrase]:block">
+                    <p className="mt-3.5 text-[16.5px] leading-[1.6] text-gray-600 sm:text-[18px] max-[359px]:[&_.phrase]:block">
                       {phrases(l.suivante.chapeau).map((phrase, i) => (
                         <span key={phrase} className="phrase">
                           {i > 0 ? ' ' : ''}
@@ -204,10 +204,13 @@ export default async function LeconPage({ params }: Props) {
                     {typographieFr(`Revoir le cours ${l.cours.titre}`)}
                   </p>
                   {l.cours.aVenir && (
-                    <p className="mt-3.5 text-[16.5px] leading-[1.6] text-gray-600 sm:text-[18px]">
-                      À venir&nbsp;: <strong className="font-semibold text-[#111]">{typographieFr(titreAVenir(l.cours.aVenir.prochaine, l.cours.aVenir.nombre))}</strong>
-                      {suiteAVenir(l.cours.aVenir.nombre)}
-                    </p>
+                    <div className="mt-3.5">
+                      <p className="text-[13px] text-gray-500">À venir</p>
+                      <p className="mt-0.5 text-[16.5px] leading-[1.6] text-gray-600 sm:text-[18px]">
+                        <strong className="font-semibold text-[#111]">{typographieFr(titreAVenir(l.cours.aVenir.prochaine, l.cours.aVenir.nombre))}</strong>
+                        {suiteAVenir(l.cours.aVenir.nombre)}
+                      </p>
+                    </div>
                   )}
                   <div className="mt-6 flex flex-wrap gap-3">
                     <Link href={l.cours.href} className={boutonNoir}>

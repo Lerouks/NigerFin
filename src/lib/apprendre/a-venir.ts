@@ -8,18 +8,18 @@ export function suiteAVenir(nombre: number): string {
   const reste = nombre - 1;
   if (reste <= 0) return '.';
   const s = reste > 1 ? 's' : '';
-  return `, et ${reste} autre${s} leçon${s}.`;
+  return `, et\u00a0${reste}\u00a0autre${s}\u00a0leçon${s}.`;
 }
 
 /**
  * Le titre de la prochaine leçon. Quand rien ne le suit que le point final,
- * ses trois derniers mots restent ensemble : jamais « OHADA. » seul en fin de
- * paragraphe.
+ * ses quatre derniers mots restent ensemble : la dernière ligne n'a jamais un,
+ * deux ou trois mots seuls (« en zone OHADA. »).
  */
 export function titreAVenir(titre: string, nombre: number): string {
   const t = titre.trim();
   if (nombre > 1) return t;
   const mots = t.split(/\s+/);
-  if (mots.length < 4) return t;
-  return `${mots.slice(0, -3).join(' ')} ${mots.slice(-3).join(' ')}`;
+  if (mots.length < 5) return mots.join('\u00a0');
+  return `${mots.slice(0, -4).join(' ')} ${mots.slice(-4).join('\u00a0')}`;
 }

@@ -31,8 +31,8 @@ export function QuestionLecon({ questions, leconId }: { questions: Question[]; l
   };
 
   return (
-    <section aria-labelledby="verifiez-vous" className="mt-8 border-t border-black/12 pt-7">
-      <h2 id="verifiez-vous" className="text-[14px] font-bold text-[#111]">
+    <section aria-labelledby="verifiez-vous" className="my-10 rounded-[14px] border border-black/8 bg-white p-4 min-[360px]:p-5 sm:p-7">
+      <h2 id="verifiez-vous" className="text-[15px] font-bold text-[#111]">
         Vérifiez-vous
       </h2>
       {questions.map((q, iq) => {

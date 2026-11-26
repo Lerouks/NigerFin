@@ -67,7 +67,7 @@ const sommaire = (c: Cours) =>
       <SommaireDuCours cours={c} suivant={{ titre: 'Budget et banque', href: '/apprendre/budget-banque', icone: 'Wallet' }} />
     </>,
   );
-const sansBalises = (html: string) => html.replace(/<[^>]+>/g, '').replace(/ /g, ' ');
+const sansBalises = (html: string) => html.replace(/<[^>]+>/g, '').replace(/\u00a0/g, ' ');
 
 beforeEach(() => {
   progression.lues = new Set();
@@ -80,10 +80,10 @@ describe('« À venir », la formule choisie par Raouf', () => {
     expect(suiteAVenir(1)).toBe('.');
   });
 
-  it('seule à venir : les trois derniers mots du titre restent avec le point final', () => {
-    expect(titreAVenir('Droits des actionnaires en zone OHADA', 1)).toBe('Droits des actionnaires en\u00a0zone\u00a0OHADA');
+  it('seule à venir : les quatre derniers mots du titre restent avec le point final', () => {
+    expect(titreAVenir('Droits des actionnaires en zone OHADA', 1)).toBe('Droits des actionnaires\u00a0en\u00a0zone\u00a0OHADA');
     expect(titreAVenir('Droits des actionnaires en zone OHADA', 3)).toBe('Droits des actionnaires en zone OHADA');
-    expect(titreAVenir('Le Forex', 1)).toBe('Le Forex');
+    expect(titreAVenir('Le marché des changes', 1)).toBe('Le\u00a0marché\u00a0des\u00a0changes');
   });
 
   it('la prochaine leçon dans l’ordre du cours, et leur nombre', () => {
@@ -160,7 +160,8 @@ describe('le sommaire du cours', () => {
     expect(texte).toContain('Première phrase du résumé.');
     expect(texte).toContain('Dans cette leçon');
     expect(texte).toContain('Une autre partie');
-    expect(texte).toContain('À venir : Commerce international, et 9 autres leçons.');
+    expect(texte).toContain('À venir');
+    expect(texte).toContain('Commerce international, et 9 autres leçons.');
     expect(texte).toContain('Thème suivant');
   });
 

@@ -82,7 +82,7 @@ function Repartition({ titre, label, parts, total }: {
   );
 }
 
-const fine = (n: number) => n.toLocaleString('fr-FR').replace(/[   ]/g, ' ');
+const fine = (n: number) => n.toLocaleString('fr-FR').replace(/[\u00a0\u202f ]/g, '\u202f');
 
 /** 25 000 FCFA par mois à 8 % par an pendant 20 ans : environ 14,7 millions pour 6 millions versés (leçon 9). */
 function Interets() {
@@ -149,7 +149,7 @@ function BaremeIts() {
         return (
           <g key={v}>
             <rect x={x} y={560 - h} width={84} height={Math.max(h, 4)} rx={5} fill={dernier ? FORT : ARGENT} />
-            <T x={x + 42} y={560 - h - 16} taille={28} poids={600} ancre="middle" couleur={dernier ? FORT : TEXTE}>{`${v} %`}</T>
+            <T x={x + 42} y={560 - h - 16} taille={28} poids={600} ancre="middle" couleur={dernier ? FORT : TEXTE}>{`${v}\u00a0%`}</T>
           </g>
         );
       })}
@@ -181,7 +181,7 @@ const FIGURES: Record<string, () => FigureTheme> = {
         <T x={250} y={480} taille={30} couleur={TEXTE} ancre="middle">intérêts connus</T>
         <T x={250} y={522} taille={30} couleur={TEXTE} ancre="middle">à l’avance</T>
         <T x={760} y={480} taille={30} couleur={TEXTE} ancre="middle">dividendes</T>
-        <T x={760} y={522} taille={30} couleur={TEXTE} ancre="middle">et plus‑value</T>
+        <T x={760} y={522} taille={30} couleur={TEXTE} ancre="middle">{'et plus\u2011value'}</T>
       </Toile>
     ),
     legende: 'Une obligation rapporte des intérêts connus à l’avance ; une action, des dividendes et une plus-value, avec un risque élevé.',
@@ -195,9 +195,9 @@ const FIGURES: Record<string, () => FigureTheme> = {
         label="Répartition du PIB du Niger en 2025"
         total={100}
         parts={[
-          { nom: 'Agriculture et élevage', valeur: '47,4 %', poids: 47.4, couleur: FORT },
-          { nom: 'Services', valeur: '33,6 %', poids: 33.6, couleur: ARGENT },
-          { nom: 'Industrie, mines, construction', valeur: '19 %', poids: 19, couleur: PALE },
+          { nom: 'Agriculture et élevage', valeur: '47,4\u00a0%', poids: 47.4, couleur: FORT },
+          { nom: 'Services', valeur: '33,6\u00a0%', poids: 33.6, couleur: ARGENT },
+          { nom: 'Industrie, mines, construction', valeur: '19\u00a0%', poids: 19, couleur: PALE },
         ]}
       />
     ),

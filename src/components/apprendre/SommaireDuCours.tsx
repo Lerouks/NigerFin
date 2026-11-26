@@ -17,7 +17,7 @@ export interface ThemeSuivant {
 }
 
 /** « 2 leçons » ; « 1 libre, 1 Premium ». */
-const pluriel = (n: number, mot: string) => `${n} ${mot}${n > 1 ? 's' : ''}`;
+const pluriel = (n: number, mot: string) => `${n}\u00a0${mot}${n > 1 ? 's' : ''}`;
 
 /** Ce que le lecteur doit savoir de sa progression, et le bouton commencer ou reprendre. */
 function etatDuCours(cours: Cours, lues: Set<string>) {
@@ -138,7 +138,7 @@ export function SommaireDuCours({ cours, suivant }: { cours: Cours; suivant: The
                     {typographieFr(l.titre)}
                   </h3>
                   {l.chapeau && (
-                    <p className="mt-3 text-[15.5px] leading-[1.62] text-gray-600 sm:text-[17px] max-sm:[&_.phrase]:block">
+                    <p className="mt-3 text-[15.5px] leading-[1.62] text-gray-600 sm:text-[17px] max-[359px]:[&_.phrase]:block">
                       {phrases(l.chapeau).map((phrase, i) => (
                         <span key={phrase} className="phrase">
                           {i > 0 ? ' ' : ''}
@@ -152,7 +152,7 @@ export function SommaireDuCours({ cours, suivant }: { cours: Cours; suivant: The
                       <b className="mr-2 font-semibold text-[#111]">Dans cette leçon</b>
                       {l.parties.map((partie, i) => (
                         <span key={partie}>
-                          {i > 0 ? ' · ' : ''}
+                          {i > 0 ? '\u00a0· ' : ''}
                           <span className="whitespace-nowrap">{typographieFr(partie)}</span>
                         </span>
                       ))}
@@ -181,10 +181,13 @@ export function SommaireDuCours({ cours, suivant }: { cours: Cours; suivant: The
         {cours.aVenir && (
           <div className="mt-6 flex items-start gap-3">
             <Clock className="mt-[3px] h-[18px] w-[18px] shrink-0 text-gold" strokeWidth={1.8} aria-hidden="true" />
-            <p className="text-[15px] leading-[1.6] text-gray-600 sm:text-[15.5px]">
-              À venir&nbsp;: <strong className="font-semibold text-[#111]">{typographieFr(titreAVenir(cours.aVenir.prochaine, cours.aVenir.nombre))}</strong>
-              {suiteAVenir(cours.aVenir.nombre)}
-            </p>
+            <div>
+              <p className="text-[13px] text-gray-500">À venir</p>
+              <p className="mt-0.5 text-[15px] leading-[1.6] text-gray-600 sm:text-[15.5px]">
+                <strong className="font-semibold text-[#111]">{typographieFr(titreAVenir(cours.aVenir.prochaine, cours.aVenir.nombre))}</strong>
+                {suiteAVenir(cours.aVenir.nombre)}
+              </p>
+            </div>
           </div>
         )}
       </AjusteurLignes>

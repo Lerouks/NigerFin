@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Heart } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+import styles from '@/app/articles/[slug]/article.module.css';
 
 interface ArticleLikesProps {
   articleId: string;
@@ -52,19 +53,19 @@ export function ArticleLikes({ articleId }: ArticleLikesProps) {
     setLoading(false);
   };
 
+  // Noir et blanc comme le reste de la page ; à zéro, le bouton dit « J'aime » plutôt qu'un compteur vide.
   return (
     <button
+      type="button"
       onClick={handleToggle}
       disabled={!isSignedIn}
-      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] transition-all duration-200 ${
-        isLiked
-          ? 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100'
-          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-transparent'
-      } ${!isSignedIn ? 'opacity-60 cursor-not-allowed' : 'active:scale-95'}`}
-      aria-label={isLiked ? `Retirer le j'aime (${count})` : `J'aime (${count})`}
+      className={`${styles.bouton} ${!isSignedIn ? 'opacity-60 cursor-not-allowed' : ''}`}
+      aria-pressed={isLiked}
+      aria-label={isLiked ? `Retirer le j\u2019aime (${count})` : `J\u2019aime (${count})`}
+      title={!isSignedIn ? 'Connectez-vous pour aimer cet article' : undefined}
     >
-      <Heart className={`w-4 h-4 transition-transform duration-200 ${isLiked ? 'scale-110' : ''}`} fill={isLiked ? 'currentColor' : 'none'} />
-      <span className="tabular-nums">{count}</span>
+      <Heart className={styles.icone} fill={isLiked ? 'currentColor' : 'none'} aria-hidden="true" />
+      <span className="tabular-nums">{count > 0 ? count : 'J\u2019aime'}</span>
     </button>
   );
 }

@@ -1,6 +1,7 @@
 import { unstable_cache } from 'next/cache';
 import { createServiceClient } from '@/lib/supabase';
 import { typographier, typographierHtml } from '@/lib/typographie';
+import { miseEnPageArticle } from '@/lib/article/mise-en-page';
 
 /**
  * Tags d'invalidation utilisés par unstable_cache.
@@ -78,6 +79,10 @@ function toArticle(row: SupabaseArticle): Article {
  * Otherwise, split on blank lines into <p> and convert single newlines to <br>.
  */
 function bodyToHtml(raw: string): string {
+  return miseEnPageArticle(bodyToHtmlBrut(raw));
+}
+
+function bodyToHtmlBrut(raw: string): string {
   if (!raw.trim()) return '';
   // If body already contains block-level HTML, assume it's already formatted
   if (/<(?:p|div|h[1-6]|ul|ol|blockquote|figure|table|section|article)\b/i.test(raw)) {

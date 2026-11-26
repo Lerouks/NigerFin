@@ -98,7 +98,13 @@ After the interactive content, a discrete SEO footer (`HubFooter` component) clo
 
 ### Article page
 
-Black hero with section badge ("ÉCONOMIE") + title (h1 visible, 48px on desktop, responsive 24/40/48) + author + date + read time. Full-bleed cover image with negative margin (`-mx-5 sm:-mx-8 md:-mx-12`). Body in `prose`-style typography in the left column (col-8), MarketDataWidget aside in the right column (col-4). Comments, share buttons, related articles below.
+Direction "La colonne", chosen on 2026-11-26 among three mockups: one reading column (680 px of text, photo up to 820 px), no card, no shadow, no side rail. Header: rubrics as plain links separated by middle dots (never tracked caps), title, chapô (the subtitle, or the article excerpt when there is none), author, date and reading time without icons, share buttons (WhatsApp, Facebook, copy link on desktop; WhatsApp and the phone's share sheet on mobile). The cover photo is shown whole at its native ratio (dimensions read once on the server, `src/lib/article/dimensions-image.ts`), never cropped.
+
+Body (`article.module.css`, `.corps`): 19 px desktop, 18 px phone (17 and 16 on small phones). `src/lib/article/mise-en-page.ts` normalises every body at render time: a bold-only paragraph becomes a real `<h2>`, a leading `<h2>` becomes the "accroche" (one sentence per line), orphan `<h3>` are promoted, empty paragraphs removed, non-breaking hyphens, units and locutions welded. Quotes are large black text without bar or quote mark; key figures and "À retenir" boxes are black, grey and white only.
+
+Line endings: `ReglageLignes` (client) measures every word on screen and lets `src/lib/article/coupures.ts` choose all line breaks of a block at once (dynamic programming, like TeX) under the editorial rules (no function word or sentence start at a line end, no last line of one to three words, no half-empty line), then sets a `<br data-regle>` at each break. Only blocks whose text React does not manage are touched (article HTML, titles rendered as escaped HTML).
+
+End of article: share row (WhatsApp first) with the like button, the discussion folded into one line (it opens the existing `CommentsSection`), then "À lire aussi" as a text list. On phones and tablets a sticky bar keeps WhatsApp under the thumb once the header is passed; it hides at the end of the article, over the footer, and while the cookie banner is shown. Premium article for non-subscribers: the real accroche and first two paragraphs (the second fades out), then the offer (`PremiumPaywall`, same texts) and three free articles.
 
 ### Marketing pages (Premium, Pricing, Outils)
 

@@ -1,0 +1,202 @@
+/*
+ * Page d'un article, direction « La colonne » (choisie le 26/11/2026) :
+ * une seule colonne de lecture, sans carte ni marge. Couleurs du site : noir,
+ * gris, argent, blanc ; vert et rouge jamais en fond. Photo toujours entière.
+ */
+.page {
+  --encre: #111214;
+  --texte: #1c1e21;
+  --gris-fonce: #3b3e44;
+  --gris: #5d6168;
+  --argent: #8a8e95;
+  --filet: #e3e3e0;
+  --panneau: #f1f1ee;
+  background: var(--background, #fafaf9);
+  color: var(--texte);
+}
+.page a { color: inherit; }
+
+.article { padding: 64px 24px 0; }
+.entete, .corps, .fin, .alire { max-width: 680px; margin-left: auto; margin-right: auto; }
+
+/* ─── En-tête ─────────────────────────────────────────────── */
+.rubriques { display: flex; flex-wrap: wrap; align-items: center; font-size: 15px; font-weight: 500; line-height: 1.5; color: var(--gris); }
+.rubriques a { display: inline-block; text-decoration: none; padding: 11px 0; margin: -11px 0; }
+.rubriques a:hover { color: var(--encre); text-decoration: underline; text-underline-offset: 3px; }
+.sep { margin: 0 .5em; color: var(--argent); }
+.premium { color: var(--encre); font-weight: 650; }
+
+.titre { margin: 14px 0 0; font-size: 46px; line-height: 1.08; font-weight: 700; letter-spacing: -0.028em; color: var(--encre); text-wrap: wrap; }
+.chapo { margin: 20px 0 0; font-size: 21px; line-height: 1.5; color: var(--gris-fonce); text-wrap: wrap; }
+.chapo :global(.phrase) { display: block; }
+
+.signature { position: relative; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 24px; margin-top: 30px; }
+.qui { margin: 0; font-size: 15px; line-height: 1.45; color: var(--gris); }
+.qui strong { display: block; font-weight: 650; color: var(--encre); }
+.nowrap { white-space: nowrap; }
+
+.photo { margin: 40px auto 0; max-width: min(820px, var(--l, 820px)); }
+.photo img { display: block; width: 100%; height: auto; background: #e9e9e6; }
+.photo figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; margin-top: 10px; font-size: 13px; line-height: 1.45; color: var(--gris); }
+
+/* ─── Boutons ─────────────────────────────────────────────── */
+.bouton {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 44px; padding: 0 18px; border-radius: 8px;
+  font: inherit; font-size: 15px; font-weight: 600; line-height: 1;
+  border: 1px solid #d4d5d2; background: #fff; color: var(--encre);
+  text-decoration: none; cursor: pointer; white-space: nowrap;
+  transition: border-color .2s ease, background-color .2s ease;
+}
+.page a.bouton, .corps a.bouton { color: var(--encre); text-decoration: none; }
+.bouton:hover { border-color: #a9aba7; }
+.bouton:focus-visible { outline: 2px solid var(--encre); outline-offset: 2px; }
+.plein, .page a.plein, .corps a.plein { background: var(--encre); border-color: var(--encre); color: #fff; }
+.plein:hover { background: #000; border-color: #000; }
+.rond { width: 44px; min-width: 44px; padding: 0; border-radius: 999px; }
+.icone { width: 20px; height: 20px; flex: none; }
+.partageHaut { display: flex; gap: 8px; }
+.seulTel { display: none; }
+.partageFin { position: relative; display: flex; flex-wrap: wrap; gap: 10px; }
+
+.messagePartage { position: fixed; left: 50%; bottom: 96px; z-index: 60; transform: translateX(-50%); padding: 10px 16px; border-radius: 8px; background: var(--encre); color: #fff; font-size: 14px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s ease; }
+.messageVisible { opacity: 1; }
+
+/* ─── Texte de l'article ──────────────────────────────────── */
+.corps { margin-top: 44px; font-size: 19px; line-height: 1.7; color: var(--texte); }
+.corps p, .corps li, .corps h2, .corps h3 { text-wrap: wrap; }
+.corps p { margin: 0 0 1.05em; }
+.corps :global(.accroche) { margin: 0 0 1.1em; font-size: 22px; line-height: 1.5; font-weight: 600; letter-spacing: -0.01em; color: var(--encre); }
+.corps :global(.accroche .phrase) { display: block; }
+.corps h2 { margin: 1.9em 0 .55em; font-size: 25px; line-height: 1.25; font-weight: 650; letter-spacing: -0.016em; color: var(--encre); }
+.corps h3 { margin: 1.6em 0 .45em; font-size: 20px; line-height: 1.32; font-weight: 600; color: var(--encre); }
+.corps h4 { margin: 1.4em 0 .4em; font-size: 18px; font-weight: 600; color: var(--encre); }
+.corps a { text-decoration: underline; text-decoration-color: #b4b6b2; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.corps a:hover { text-decoration-color: var(--encre); }
+.corps strong, .corps b { font-weight: 650; color: var(--encre); }
+.corps ul, .corps ol { margin: 0 0 1.2em; padding-left: 1.25em; }
+.corps ul { list-style: disc; }
+.corps ol { list-style: decimal; }
+.corps li { margin: 0 0 .45em; padding-left: .2em; }
+.corps li::marker { color: var(--argent); }
+.corps blockquote { margin: 1.9em 0; padding: 0; border: 0; background: none; }
+.corps blockquote p { margin: 0 0 .5em; font-size: 24px; line-height: 1.42; font-weight: 500; letter-spacing: -0.012em; color: var(--encre); font-style: normal; }
+.corps blockquote p:last-child { margin-bottom: 0; }
+.corps hr { margin: 2.4em 0; border: 0; border-top: 1px solid var(--filet); }
+.corps mark { background: #ececea; padding: 0 .2em; border-radius: 2px; }
+.corps img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+.corps figure { margin: 1.9em 0; }
+.corps figcaption { margin-top: 10px; font-size: 14px; line-height: 1.45; color: var(--gris); }
+/* Encadrés de l'éditeur : chiffre clé et « À retenir », en noir, gris et blanc. */
+.corps :global(div[data-type="key-figure"]) { margin: 1.9em 0; }
+.corps :global(div[data-type="key-figure"] > span:first-child),
+.corps :global(div[data-type="key-figure"] .key-figure-value) { display: block; font-size: 56px; line-height: 1; font-weight: 700; letter-spacing: -0.03em; color: var(--encre); font-variant-numeric: tabular-nums; }
+.corps :global(div[data-type="key-figure"] > span:last-child),
+.corps :global(div[data-type="key-figure"] .key-figure-label) { display: block; margin-top: 10px; font-size: 17px; line-height: 1.5; color: var(--gris-fonce); }
+.corps :global(div[data-type="callout"]) { margin: 1.9em 0; padding: 26px 28px 10px; background: var(--panneau); border-radius: 4px; }
+.corps :global(div[data-type="callout"] h3) { margin: 0 0 .6em; font-size: 18px; }
+.corps :global(div[data-type="callout"] li) { font-size: 17px; line-height: 1.6; color: var(--texte); }
+.corps table { width: 100%; margin: 1.6em 0; border-collapse: collapse; font-size: 16px; font-variant-numeric: tabular-nums; }
+.corps caption { caption-side: top; text-align: left; padding: 0 0 10px; font-size: 14px; color: var(--gris); }
+.corps th { padding: 0 12px 10px 0; font-size: 14px; font-weight: 600; text-align: left; color: var(--gris); border-bottom: 1px solid #cfd0cd; }
+.corps td { padding: 12px 12px 12px 0; text-align: left; vertical-align: top; border-bottom: 1px solid var(--filet); }
+
+/* Début d'un article Premium pour qui n'est pas abonné : le second paragraphe s'efface. */
+.efface { -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0,0,0,.55) 45%, transparent 100%); mask-image: linear-gradient(to bottom, #000 0%, rgba(0,0,0,.55) 45%, transparent 100%); max-height: 7.2em; overflow: hidden; user-select: none; }
+
+/* ─── Fin d'article ───────────────────────────────────────── */
+.fin { margin-top: 56px; padding-top: 36px; border-top: 1px solid var(--filet); }
+.finTitre { margin: 0 0 16px; font-size: 20px; line-height: 1.3; font-weight: 650; letter-spacing: -0.01em; color: var(--encre); }
+.discussion { margin-top: 48px; scroll-margin-top: 96px; }
+.discussionTete { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 16px; }
+.discussionTete .finTitre { margin: 0; }
+.discussionEtat { display: block; margin-top: 4px; font-size: 15px; color: var(--gris); }
+.alire { margin-top: 56px; padding-bottom: 104px; }
+.liste { list-style: none; margin: 0; padding: 0; }
+.liste li { border-top: 1px solid var(--filet); }
+.liste li:last-child { border-bottom: 1px solid var(--filet); }
+.liste a { display: block; padding: 18px 0; text-decoration: none; }
+.listeRub { display: block; font-size: 14px; color: var(--gris); }
+.listeTitre { display: block; margin-top: 4px; font-size: 19px; line-height: 1.35; font-weight: 650; color: var(--encre); }
+.liste a:hover .listeTitre { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.listeDate { display: block; margin-top: 6px; font-size: 14px; color: var(--gris); }
+
+/* ─── Offre Premium ───────────────────────────────────────── */
+.paywall { margin-top: 6px; padding: 32px 32px 30px; background: var(--panneau); border-radius: 4px; }
+.paywallSlogan { margin: 0; font-family: var(--font-playfair), Georgia, serif; font-weight: 500; font-size: 26px; line-height: 1.25; color: var(--encre); }
+.paywallTexte { margin: 12px 0 0; font-size: 17px; line-height: 1.55; color: var(--gris-fonce); }
+.paywallActions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 24px; }
+.paywallConnexion { background: transparent; }
+.paywallPlus { margin: 22px 0 0; font-size: 14px; line-height: 1.5; color: var(--gris); }
+.avantage + .avantage::before { content: " · "; }
+
+/* ─── Barre collante (téléphone et tablette) ──────────────── */
+.barre { display: none; }
+
+@media (max-width: 1023px) {
+  .titre { font-size: 40px; }
+  .barre {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    display: flex; align-items: center; gap: 6px;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    background: #fff; border-top: 1px solid var(--filet);
+    transform: translateY(110%); visibility: hidden; transition: transform .25s ease-out;
+  }
+  .barre .plein { flex: 1 1 0; min-width: 0; }
+  .barreVisible { transform: none; visibility: visible; }
+  :global(body.cookie-banner-visible) .barre { display: none; }
+  .alire { padding-bottom: 120px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .barre { transition: none; }
+}
+
+@media (max-width: 639px) {
+  .article { padding: 28px 20px 0; }
+  .titre { margin-top: 10px; font-size: 26px; line-height: 1.16; letter-spacing: -0.018em; }
+  .chapo { margin-top: 14px; font-size: 18px; line-height: 1.5; }
+  .signature { margin-top: 22px; flex-wrap: nowrap; }
+  .qui { font-size: 14px; }
+  .seulOrdi { display: none; }
+  .seulTel { display: inline-flex; }
+  .photo { margin: 26px -20px 0; max-width: none; }
+  .photo figcaption { padding: 0 20px; }
+  .corps { margin-top: 30px; font-size: 18px; line-height: 1.66; }
+  .corps :global(.accroche) { font-size: 20px; line-height: 1.48; }
+  .corps h2 { font-size: 22px; }
+  .corps h3 { font-size: 19px; }
+  .corps blockquote p { font-size: 21px; }
+  .corps :global(div[data-type="key-figure"] > span:first-child),
+  .corps :global(div[data-type="key-figure"] .key-figure-value) { font-size: 46px; }
+  .corps :global(div[data-type="callout"]) { margin-left: -20px; margin-right: -20px; padding: 22px 20px 8px; border-radius: 0; }
+  .corps figure { margin-left: -20px; margin-right: -20px; }
+  .corps figcaption { padding: 0 20px; }
+  .corps table { font-size: 15px; }
+  .fin { margin-top: 44px; padding-top: 30px; }
+  .partageFin .bouton { flex: 1 1 auto; }
+  .paywall { margin-left: -20px; margin-right: -20px; padding: 26px 20px; border-radius: 0; }
+  .paywallActions .bouton { width: 100%; }
+  .avantage { display: block; }
+  .avantage + .avantage::before { content: none; }
+  .listeTitre { font-size: 18px; }
+}
+@media (max-width: 479px) {
+  /* Tableaux : une ligne par rangée, libellé à gauche, valeurs à droite. */
+  .corps table, .corps tbody, .corps tr, .corps td { display: block; }
+  .corps thead { display: none; }
+  .corps caption { display: block; }
+  .corps tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--filet); }
+  .corps td { padding: 0; border: 0; }
+  .corps td:first-child { grid-row: 1 / span 2; align-self: center; }
+  .corps td:not(:first-child) { grid-column: 2; text-align: right; }
+}
+@media (max-width: 389px) {
+  .titre { font-size: 24px; }
+  .corps { font-size: 17px; }
+}
+@media (max-width: 359px) {
+  .titre { font-size: 22px; }
+  .corps { font-size: 16px; }
+  .qui .point { display: none; }
+  .qui .duree { display: block; }
+}

@@ -5,6 +5,8 @@ import { getArticleBySlug, getRelatedArticles, getAllArticleSlugs } from '@/lib/
 import { SITE_URL, truncateSeoTitle, truncateSeoDescription } from '@/lib/config';
 import { ArticleContent } from './ArticleContent';
 import { ArticleHeader } from './ArticleHeader';
+import { debutArticle } from '@/lib/article/mise-en-page';
+import { sanitizeHtml } from '@/lib/sanitize-html';
 
 export const revalidate = 3600;
 
@@ -78,6 +80,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   // Security: never include premium body in static payload
   const isPremium = article.contentType === 'premium' || article.isPremium;
   const safeHtmlBody = isPremium ? '' : htmlBody;
+  // Le début réel d'un article Premium (accroche et deux paragraphes), montré à qui n'est pas abonné.
+  // Nettoyé ici, côté serveur : le rendu serveur et le navigateur affichent ainsi le même HTML.
+  const debut = isPremium ? debutArticle(sanitizeHtml(htmlBody)) : undefined;
 
   const related = await getRelatedArticles(
     article.slug.current,
@@ -116,7 +121,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       hasPart: {
         '@type': 'WebPageElement',
         isAccessibleForFree: false,
-        cssSelector: '.prose',
+        cssSelector: '.article-content--protected',
       },
     }),
   };
@@ -151,6 +156,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         htmlBody={safeHtmlBody}
         relatedArticles={related}
         header={<ArticleHeader article={article} />}
+        debut={debut}
       />
     </>
   );

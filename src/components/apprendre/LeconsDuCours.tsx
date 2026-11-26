@@ -150,9 +150,10 @@ export function LeconsDuCours({ lecons, children }: { lecons: LigneLecon[]; chil
                     </>
                   )}
                 </span>
+                {/* Trois lignes au plus : invisible hors survol, l'aperçu garde sa place et fixe la hauteur de la ligne. */}
                 <span
                   aria-hidden="true"
-                  className={`hidden text-[15px] leading-[1.5] text-gray-500 transition duration-200 lg:block ${
+                  className={`hidden text-[15px] leading-[1.5] text-gray-500 transition duration-200 lg:line-clamp-3 ${
                     estOuverte ? 'lg:invisible' : 'translate-y-1 opacity-0 group-hover:translate-y-0 group-hover:opacity-100'
                   }`}
                 >

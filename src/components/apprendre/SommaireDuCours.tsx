@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, Check, Clock, Lock } from 'lucide-react';
+import { ArrowRight, Check, Clock, Lock } from 'lucide-react';
 import type { Cours } from '@/lib/apprendre/donnees';
-import { suiteAVenir } from '@/lib/apprendre/a-venir';
+import { suiteAVenir, titreAVenir } from '@/lib/apprendre/a-venir';
 import { phrases } from '@/lib/apprendre/lecture';
 import { typographieFr } from '@/lib/typographie-fr';
 import { AjusteurLignes } from './AjusteurLignes';
@@ -19,49 +19,40 @@ export interface ThemeSuivant {
 /** « 2 leçons » ; « 1 libre, 1 Premium ». */
 const pluriel = (n: number, mot: string) => `${n} ${mot}${n > 1 ? 's' : ''}`;
 
-/**
- * La page d'un cours, à droite de sa couverture (maquette « Le livre »,
- * 26/11/2026) : ce que le cours apprend, le bouton pour commencer ou
- * reprendre, puis le sommaire, chaque leçon avec son résumé et ses parties.
- * Une leçon Premium est annoncée avant le clic, avec la prochaine leçon libre.
- */
-export function SommaireDuCours({ cours, suivant }: { cours: Cours; suivant: ThemeSuivant | null }) {
-  const { lues } = useProgression();
+/** Ce que le lecteur doit savoir de sa progression, et le bouton commencer ou reprendre. */
+function etatDuCours(cours: Cours, lues: Set<string>) {
   const n = cours.lecons.length;
-  const premium = cours.lecons.filter((l) => l.premium).length;
   const luesIci = cours.lecons.filter((l) => lues.has(l.id)).length;
   const toutLu = n > 0 && luesIci === n;
   const depart = leconDeDepart(cours.lecons, lues);
   const cible = toutLu ? cours.lecons[0] : depart?.lecon;
   const verrouillee = !toutLu && !!cible?.premium;
+  return { n, luesIci, toutLu, depart, cible, verrouillee };
+}
+
+/**
+ * Sous le titre du cours (Raouf, 26/11/2026, page sobre) : nombre de leçons,
+ * durée, accès, la progression du lecteur et le bouton pour commencer ou
+ * reprendre. Une leçon Premium est annoncée avant le clic, avec la prochaine
+ * leçon libre.
+ */
+export function ActionCours({ cours }: { cours: Cours }) {
+  const { lues } = useProgression();
+  const { n, luesIci, toutLu, depart, cible, verrouillee } = etatDuCours(cours, lues);
+  const premium = cours.lecons.filter((l) => l.premium).length;
   const libre = verrouillee ? cours.lecons.find((l) => !lues.has(l.id) && !l.premium && l.numero > cible!.numero) : undefined;
   const libelle = toutLu
     ? 'Relire le cours'
     : verrouillee
       ? `Leçon ${cible!.numero} · Premium`
       : depart?.reprise
-        ? `Reprendre : leçon ${cible!.numero}`
+        ? `Reprendre\u00a0: leçon ${cible!.numero}`
         : `Commencer la leçon ${cible?.numero ?? 1}`;
-  const acces = premium ? `${pluriel(n - premium, 'libre')}, ${premium} Premium` : 'Accès libre';
+  const acces = premium ? `${pluriel(n - premium, 'libre')}, ${premium}\u00a0Premium` : 'Accès libre';
 
   return (
-    <div className="min-w-0">
-      <Link
-        href="/apprendre"
-        className="hidden min-h-[44px] items-center gap-1.5 text-[13.5px] text-gray-500 hover:text-[#111] lg:inline-flex"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-        Apprendre
-      </Link>
-
-      <AjusteurLignes>
-        {cours.description && (
-          <p className="mt-4 max-w-[30ch] text-[18px] font-medium leading-[1.45] tracking-[-0.015em] text-[#111] sm:text-[23px] lg:mt-3 lg:text-[27px] lg:leading-[1.38]">
-            {typographieFr(cours.description)}
-          </p>
-        )}
-      </AjusteurLignes>
-      <p className="mt-3.5 flex flex-wrap text-[14px] text-gray-600 tabular-nums sm:text-[15px] lg:mt-5">
+    <div className="mt-6 lg:mt-7">
+      <p className="flex flex-wrap text-[14px] text-gray-600 tabular-nums sm:text-[15px]">
         <span className="font-semibold text-[#111]">{pluriel(n, 'leçon')}</span>
         <span aria-hidden="true" className="mx-2 text-gray-300">·</span>
         <span>{cours.minutes}&nbsp;min de lecture</span>
@@ -83,7 +74,7 @@ export function SommaireDuCours({ cours, suivant }: { cours: Cours; suivant: The
       )}
 
       {cible && (
-        <div className="mt-[18px] flex flex-wrap items-center gap-x-6 gap-y-2 lg:mt-7">
+        <div className="mt-[18px] flex flex-wrap items-center gap-x-6 gap-y-2 lg:mt-6">
           <Link
             href={cible.href}
             className="inline-flex h-[52px] w-full items-center justify-between gap-3.5 rounded-[10px] bg-[#111] px-5 text-[16px] font-semibold text-white transition-colors hover:bg-[#2a2a2a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111] sm:w-auto sm:px-6 lg:h-[54px]"
@@ -95,17 +86,27 @@ export function SommaireDuCours({ cours, suivant }: { cours: Cours; suivant: The
             <ArrowRight className="h-5 w-5 shrink-0" aria-hidden="true" />
           </Link>
           {libre && (
-            <Link
-              href={libre.href}
-              className="inline-flex min-h-[44px] items-center text-[15px] text-[#111] underline underline-offset-4"
-            >
+            <Link href={libre.href} className="inline-flex min-h-[44px] items-center text-[15px] text-[#111] underline underline-offset-4">
               {typographieFr(`Lire la leçon ${libre.numero}, en accès libre`)}
             </Link>
           )}
         </div>
       )}
+    </div>
+  );
+}
 
-      <h2 className="mt-12 border-b-2 border-[#111] pb-3.5 text-[14px] font-bold text-[#111] lg:mt-[68px]">Au sommaire</h2>
+/**
+ * Le sommaire du cours : chaque leçon avec son résumé, ses parties (à partir
+ * de la tablette), sa durée et son état ; puis « À venir » et le thème suivant.
+ */
+export function SommaireDuCours({ cours, suivant }: { cours: Cours; suivant: ThemeSuivant | null }) {
+  const { lues } = useProgression();
+  const { toutLu, depart } = etatDuCours(cours, lues);
+
+  return (
+    <div className="min-w-0">
+      <h2 className="mt-12 border-b-2 border-[#111] pb-3.5 text-[14px] font-bold text-[#111] lg:mt-16">Au sommaire</h2>
       <AjusteurLignes>
         <ol>
           {cours.lecons.map((l) => {
@@ -181,7 +182,7 @@ export function SommaireDuCours({ cours, suivant }: { cours: Cours; suivant: The
           <div className="mt-6 flex items-start gap-3">
             <Clock className="mt-[3px] h-[18px] w-[18px] shrink-0 text-gold" strokeWidth={1.8} aria-hidden="true" />
             <p className="text-[15px] leading-[1.6] text-gray-600 sm:text-[15.5px]">
-              À venir&nbsp;: <strong className="font-semibold text-[#111]">{typographieFr(cours.aVenir.prochaine)}</strong>
+              À venir&nbsp;: <strong className="font-semibold text-[#111]">{typographieFr(titreAVenir(cours.aVenir.prochaine, cours.aVenir.nombre))}</strong>
               {suiteAVenir(cours.aVenir.nombre)}
             </p>
           </div>
@@ -193,7 +194,7 @@ export function SommaireDuCours({ cours, suivant }: { cours: Cours; suivant: The
           href={suivant.href}
           className="mt-14 grid grid-cols-[52px_minmax(0,1fr)] items-center gap-4 rounded-[14px] border border-black/12 bg-white p-3 transition-colors hover:border-black/30 sm:grid-cols-[64px_minmax(0,1fr)_24px] sm:gap-[18px] sm:p-3.5 sm:pr-[18px]"
         >
-          <span className="grid aspect-[4/5] w-[52px] place-items-center rounded-lg bg-[#111] text-white sm:w-16" aria-hidden="true">
+          <span className="grid h-[52px] w-[52px] place-items-center rounded-[10px] border border-black/12 text-[#111] sm:h-16 sm:w-16" aria-hidden="true">
             <IconeTheme nom={suivant.icone} className="h-6 w-6" />
           </span>
           <span className="min-w-0">

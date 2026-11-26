@@ -11,7 +11,7 @@ import { BoutonWhatsApp, PartageLecon } from '@/components/apprendre/PartageLeco
 import { PlanLecon, PlanLeconReplie } from '@/components/apprendre/PlanLecon';
 import { QuestionLecon } from '@/components/apprendre/QuestionLecon';
 import { MargeLecon, TeteLecon } from '@/components/apprendre/ReperesLecon';
-import { suiteAVenir } from '@/lib/apprendre/a-venir';
+import { suiteAVenir, titreAVenir } from '@/lib/apprendre/a-venir';
 import { getCours, getLecon } from '@/lib/apprendre/donnees';
 import { phrases } from '@/lib/apprendre/lecture';
 import { NOM_DU_SITE, SITE_URL } from '@/lib/config';
@@ -130,13 +130,13 @@ export default async function LeconPage({ params }: Props) {
           <MargeLecon cours={l.cours} leconId={l.id} plan={<PlanLecon parties={l.parties} liens={liens} />} />
           <article className="min-w-0">
             <p className="mb-3 hidden text-[14px] font-semibold text-gray-500 tabular-nums lg:block">Leçon {l.numero}</p>
-            <h1 className="text-[37px] font-bold leading-[1.06] tracking-[-0.035em] text-[#111] text-balance sm:text-[44px] lg:text-[52px] lg:leading-[1.04] lg:tracking-[-0.04em]">
+            <h1 className="text-[29px] font-bold leading-[1.08] tracking-[-0.03em] text-[#111] text-balance min-[360px]:text-[32px] sm:text-[40px] lg:text-[48px] lg:leading-[1.05] lg:tracking-[-0.035em]">
               {typographieFr(l.titre)}
             </h1>
             <AjusteurLignes>
               {/* Une phrase par ligne : aucune ne commence en bout de ligne, à toutes les largeurs. */}
               {l.chapeau && (
-                <div className="mt-4 text-[19px] leading-[1.5] text-gray-700 max-[359px]:text-[17px] sm:text-[21px] lg:mt-[22px] lg:text-[22px]">
+                <div className="mt-4 text-[18px] leading-[1.55] text-gray-600 max-[359px]:text-[17px] sm:text-[20px] lg:mt-5">
                   {phrases(l.chapeau).map((phrase) => (
                     <p key={phrase}>{typographieFr(phrase)}</p>
                   ))}
@@ -180,7 +180,14 @@ export default async function LeconPage({ params }: Props) {
                     {typographieFr(l.suivante.titre)}
                   </p>
                   {l.suivante.chapeau && (
-                    <p className="mt-3.5 text-[16.5px] leading-[1.6] text-gray-600 sm:text-[18px]">{typographieFr(l.suivante.chapeau)}</p>
+                    <p className="mt-3.5 text-[16.5px] leading-[1.6] text-gray-600 sm:text-[18px] max-sm:[&_.phrase]:block">
+                      {phrases(l.suivante.chapeau).map((phrase, i) => (
+                        <span key={phrase} className="phrase">
+                          {i > 0 ? ' ' : ''}
+                          {typographieFr(phrase)}
+                        </span>
+                      ))}
+                    </p>
                   )}
                   <div className="mt-6 flex flex-wrap gap-3">
                     <Link href={l.suivante.href} className={boutonNoir}>
@@ -198,7 +205,7 @@ export default async function LeconPage({ params }: Props) {
                   </p>
                   {l.cours.aVenir && (
                     <p className="mt-3.5 text-[16.5px] leading-[1.6] text-gray-600 sm:text-[18px]">
-                      À venir&nbsp;: <strong className="font-semibold text-[#111]">{typographieFr(l.cours.aVenir.prochaine)}</strong>
+                      À venir&nbsp;: <strong className="font-semibold text-[#111]">{typographieFr(titreAVenir(l.cours.aVenir.prochaine, l.cours.aVenir.nombre))}</strong>
                       {suiteAVenir(l.cours.aVenir.nombre)}
                     </p>
                   )}

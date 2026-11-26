@@ -8,14 +8,18 @@ import type { ReactNode } from 'react';
  *
  * Chaque chiffre ci-dessous est recopié d'une leçon publiée et vérifié
  * (source en commentaire). Une leçon corrigée : corriger aussi sa figure.
- * Dessin en blanc et argent sur le noir de la couverture, toile 946 × 584.
+ * Dessin sobre en noir et gris, directement sur la page claire, sans cadre ni
+ * fond (Raouf, 26/11/2026 : « ça doit être sobre »). Toile 946 × 584.
  */
 
-const BLANC = '#fff';
+/** Trait principal (la valeur mise en avant). */
+const FORT = '#111';
 const ARGENT = '#8a8e95';
-const PALE = 'rgba(255,255,255,.24)';
-const TEXTE = 'rgba(255,255,255,.84)';
-const LEGER = 'rgba(255,255,255,.6)';
+const PALE = '#d4d6da';
+const TEXTE = '#374151';
+const LEGER = '#6b7280';
+/** Texte posé sur un aplat du trait principal. */
+const SUR_FORT = '#fff';
 
 export interface FigureTheme {
   figure: ReactNode;
@@ -31,7 +35,7 @@ function Toile({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-function T({ x, y, taille, couleur = BLANC, poids = 500, ancre = 'start', children }: {
+function T({ x, y, taille, couleur = FORT, poids = 500, ancre = 'start', children }: {
   x: number;
   y: number;
   taille: number;
@@ -97,8 +101,8 @@ function Interets() {
     <Toile label="Courbe des intérêts composés">
       <line x1={60} y1={560} x2={940} y2={560} stroke={PALE} strokeWidth={2} />
       <path d={`M${X(0)},${Y(0)} L${X(mois)},${Y(versement * mois)}`} fill="none" stroke={ARGENT} strokeWidth={4} strokeDasharray="10 10" />
-      <path d={courbe} fill="none" stroke={BLANC} strokeWidth={7} strokeLinejoin="round" strokeLinecap="round" />
-      <circle cx={X(mois)} cy={Y(capital)} r={12} fill={BLANC} />
+      <path d={courbe} fill="none" stroke={FORT} strokeWidth={7} strokeLinejoin="round" strokeLinecap="round" />
+      <circle cx={X(mois)} cy={Y(capital)} r={12} fill={FORT} />
       <T x={X(mois)} y={Y(capital) - 36} taille={44} poids={700} ancre="end">14,7 millions FCFA</T>
       <T x={X(mois) - 10} y={Y(versement * mois) - 26} taille={30} couleur={ARGENT} ancre="end">6 millions versés</T>
       <T x={60} y={604} taille={26} couleur={ARGENT}>0</T>
@@ -120,9 +124,9 @@ function Chaine() {
         const plein = k === noms.length - 1;
         return (
           <g key={nom}>
-            <rect x={x} y={y} width={270} height={150} rx={12} fill={plein ? BLANC : 'none'} stroke={plein ? BLANC : ARGENT} strokeWidth={4} />
-            <T x={x + 24} y={y + 58} taille={40} poids={700} couleur={plein ? '#111' : BLANC}>{k + 1}</T>
-            <T x={x + 24} y={y + 116} taille={32} poids={600} couleur={plein ? '#111' : TEXTE}>{nom}</T>
+            <rect x={x} y={y} width={270} height={150} rx={12} fill={plein ? FORT : 'none'} stroke={plein ? FORT : ARGENT} strokeWidth={4} />
+            <T x={x + 24} y={y + 58} taille={40} poids={700} couleur={plein ? SUR_FORT : FORT}>{k + 1}</T>
+            <T x={x + 24} y={y + 116} taille={32} poids={600} couleur={plein ? SUR_FORT : TEXTE}>{nom}</T>
             {col < 2 && <line x1={x + 270} y1={y + 75} x2={x + 320} y2={y + 75} stroke={ARGENT} strokeWidth={4} />}
           </g>
         );
@@ -144,8 +148,8 @@ function BaremeIts() {
         const dernier = k === taux.length - 1;
         return (
           <g key={v}>
-            <rect x={x} y={560 - h} width={84} height={Math.max(h, 4)} rx={5} fill={dernier ? BLANC : ARGENT} />
-            <T x={x + 42} y={560 - h - 16} taille={28} poids={600} ancre="middle" couleur={dernier ? BLANC : TEXTE}>{`${v} %`}</T>
+            <rect x={x} y={560 - h} width={84} height={Math.max(h, 4)} rx={5} fill={dernier ? FORT : ARGENT} />
+            <T x={x + 42} y={560 - h - 16} taille={28} poids={600} ancre="middle" couleur={dernier ? FORT : TEXTE}>{`${v} %`}</T>
           </g>
         );
       })}
@@ -169,7 +173,7 @@ const FIGURES: Record<string, () => FigureTheme> = {
         <T x={60} y={400} taille={30} couleur={ARGENT}>Risque plus faible</T>
         <T x={948} y={400} taille={30} couleur={ARGENT} ancre="end">Risque élevé</T>
         <circle cx={250} cy={330} r={20} fill={ARGENT} />
-        <circle cx={760} cy={330} r={26} fill={BLANC} />
+        <circle cx={760} cy={330} r={26} fill={FORT} />
         <T x={250} y={196} taille={30} couleur={ARGENT} ancre="middle">un prêt</T>
         <T x={250} y={250} taille={50} poids={700} ancre="middle">Obligation</T>
         <T x={760} y={196} taille={30} couleur={ARGENT} ancre="middle">une part d’entreprise</T>
@@ -191,7 +195,7 @@ const FIGURES: Record<string, () => FigureTheme> = {
         label="Répartition du PIB du Niger en 2025"
         total={100}
         parts={[
-          { nom: 'Agriculture et élevage', valeur: '47,4 %', poids: 47.4, couleur: BLANC },
+          { nom: 'Agriculture et élevage', valeur: '47,4 %', poids: 47.4, couleur: FORT },
           { nom: 'Services', valeur: '33,6 %', poids: 33.6, couleur: ARGENT },
           { nom: 'Industrie, mines, construction', valeur: '19 %', poids: 19, couleur: PALE },
         ]}
@@ -208,7 +212,7 @@ const FIGURES: Record<string, () => FigureTheme> = {
         label="La règle 50/30/20"
         total={100}
         parts={[
-          { nom: 'Besoins', valeur: `${fine(100000)} FCFA`, poids: 50, couleur: BLANC },
+          { nom: 'Besoins', valeur: `${fine(100000)} FCFA`, poids: 50, couleur: FORT },
           { nom: 'Envies', valeur: `${fine(60000)} FCFA`, poids: 30, couleur: ARGENT },
           { nom: 'Épargne', valeur: `${fine(40000)} FCFA`, poids: 20, couleur: PALE },
         ]}
@@ -224,9 +228,9 @@ const FIGURES: Record<string, () => FigureTheme> = {
         <T x={40} y={96} taille={34} couleur={LEGER}>1 euro vaut</T>
         <T x={36} y={290} taille={190} poids={800}>655,957</T>
         <T x={44} y={370} taille={44} poids={600} couleur={ARGENT}>francs CFA</T>
-        <line x1={40} y1={480} x2={955} y2={480} stroke={BLANC} strokeWidth={6} strokeLinecap="round" />
-        <circle cx={40} cy={480} r={11} fill={BLANC} />
-        <circle cx={955} cy={480} r={11} fill={BLANC} />
+        <line x1={40} y1={480} x2={955} y2={480} stroke={FORT} strokeWidth={6} strokeLinecap="round" />
+        <circle cx={40} cy={480} r={11} fill={FORT} />
+        <circle cx={955} cy={480} r={11} fill={FORT} />
         <T x={40} y={548} taille={30} couleur={ARGENT}>1999</T>
         <T x={960} y={548} taille={30} couleur={ARGENT} ancre="end">Aujourd’hui</T>
       </Toile>
@@ -261,8 +265,8 @@ const FIGURES: Record<string, () => FigureTheme> = {
         <rect x={40} y={230} width={92} height={64} rx={6} fill={ARGENT} />
         <T x={152} y={276} taille={36} couleur={TEXTE}>1 million FCFA</T>
         <T x={40} y={405} taille={40} poids={700}>SA</T>
-        <rect x={40} y={430} width={920} height={64} rx={6} fill={BLANC} />
-        <T x={940} y={476} taille={36} poids={700} couleur="#111" ancre="end">10 millions FCFA</T>
+        <rect x={40} y={430} width={920} height={64} rx={6} fill={FORT} />
+        <T x={940} y={476} taille={36} poids={700} couleur={SUR_FORT} ancre="end">10 millions FCFA</T>
       </Toile>
     ),
     legende: 'Le capital minimum dans l’espace OHADA (pour la SARL, sauf disposition nationale contraire).',
@@ -281,7 +285,7 @@ const FIGURES: Record<string, () => FigureTheme> = {
         label="La franchise d’assurance"
         total={400000}
         parts={[
-          { nom: 'Versé par l’assureur', valeur: `${fine(350000)} FCFA`, poids: 350000, couleur: BLANC },
+          { nom: 'Versé par l’assureur', valeur: `${fine(350000)} FCFA`, poids: 350000, couleur: FORT },
           { nom: 'Franchise, à votre charge', valeur: `${fine(50000)} FCFA`, poids: 50000, couleur: ARGENT },
         ]}
       />

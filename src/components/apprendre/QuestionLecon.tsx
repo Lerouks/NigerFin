@@ -67,7 +67,7 @@ export function QuestionLecon({ questions, leconId }: { questions: Question[]; l
                     onClick={() => repondre(iq, ic)}
                     className={[
                       // La colonne de l'icône n'existe qu'après la réponse : avant, le texte prend toute la place.
-                      `grid ${repondu ? 'grid-cols-[30px_minmax(0,1fr)_22px]' : 'grid-cols-[30px_minmax(0,1fr)]'} items-center gap-2.5 min-[360px]:gap-3 rounded-[10px] border-[1.5px] bg-white px-3 min-[360px]:px-4 py-3 min-h-[56px] text-left text-[16.5px] max-[359px]:text-[15px] leading-[1.45] transition-colors`,
+                      `grid ${repondu ? 'grid-cols-[30px_minmax(0,1fr)_22px]' : 'grid-cols-[30px_minmax(0,1fr)]'} items-center gap-2.5 min-[360px]:gap-3 rounded-[10px] border-[1.5px] bg-white px-3 min-[360px]:px-3.5 py-3 min-h-[56px] text-left text-[16px] max-[359px]:text-[15px] leading-[1.45] transition-colors`,
                       montrerJuste
                         ? 'border-[#111] shadow-[inset_0_0_0_1px_#111] text-[#111]'
                         : montrerFaux

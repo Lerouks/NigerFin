@@ -21,12 +21,12 @@ vi.mock('@/components/apprendre/progression', async () => {
   };
 });
 
-const { suiteAVenir } = await import('@/lib/apprendre/a-venir');
+const { suiteAVenir, titreAVenir } = await import('@/lib/apprendre/a-venir');
 const { aVenirDuCours, assemblerThemes, coursSuivant } = await import('@/lib/apprendre/donnees');
 const { figureDuTheme, THEMES_AVEC_FIGURE } = await import('@/components/apprendre/FiguresThemes');
 const { ancresDesParties } = await import('@/components/apprendre/PlanLecon');
-const { SommaireDuCours } = await import('@/components/apprendre/SommaireDuCours');
-const { CouvertureCours } = await import('@/components/apprendre/CouvertureCours');
+const { ActionCours, SommaireDuCours } = await import('@/components/apprendre/SommaireDuCours');
+const { FigureCours } = await import('@/components/apprendre/FigureCours');
 const { rehypeLecon } = await import('@/lib/apprendre/rehype-lecon');
 
 function lecon(id: string, numero: number, premium = false): LeconResume {
@@ -60,7 +60,13 @@ function cours(premiums: number[] = [], aVenir: Cours['aVenir'] = null, n = 9): 
   };
 }
 
-const sommaire = (c: Cours) => renderToStaticMarkup(<SommaireDuCours cours={c} suivant={{ titre: 'Budget et banque', href: '/apprendre/budget-banque', icone: 'Wallet' }} />);
+const sommaire = (c: Cours) =>
+  renderToStaticMarkup(
+    <>
+      <ActionCours cours={c} />
+      <SommaireDuCours cours={c} suivant={{ titre: 'Budget et banque', href: '/apprendre/budget-banque', icone: 'Wallet' }} />
+    </>,
+  );
 const sansBalises = (html: string) => html.replace(/<[^>]+>/g, '').replace(/ /g, ' ');
 
 beforeEach(() => {
@@ -68,10 +74,16 @@ beforeEach(() => {
 });
 
 describe('« À venir », la formule choisie par Raouf', () => {
-  it('« À venir : X, et 9 autres leçons. », le nombre collé à « autres leçons »', () => {
-    expect(suiteAVenir(10)).toBe(', et 9 autres leçons.');
-    expect(suiteAVenir(2)).toBe(', et 1 autre leçon.');
+  it('« À venir : X, et 9 autres leçons. », d’un seul tenant à partir de « et »', () => {
+    expect(suiteAVenir(10)).toBe(', et\u00a09\u00a0autres\u00a0leçons.');
+    expect(suiteAVenir(2)).toBe(', et\u00a01\u00a0autre\u00a0leçon.');
     expect(suiteAVenir(1)).toBe('.');
+  });
+
+  it('seule à venir : les trois derniers mots du titre restent avec le point final', () => {
+    expect(titreAVenir('Droits des actionnaires en zone OHADA', 1)).toBe('Droits des actionnaires en\u00a0zone\u00a0OHADA');
+    expect(titreAVenir('Droits des actionnaires en zone OHADA', 3)).toBe('Droits des actionnaires en zone OHADA');
+    expect(titreAVenir('Le Forex', 1)).toBe('Le Forex');
   });
 
   it('la prochaine leçon dans l’ordre du cours, et leur nombre', () => {
@@ -127,17 +139,17 @@ describe('les figures des thèmes', () => {
     }
   });
 
-  it('un thème sans figure garde une couverture sans image, jamais une icône agrandie', () => {
+  it('un thème sans figure n’affiche rien à sa place, jamais une icône agrandie', () => {
     expect(figureDuTheme('nouveau-theme')).toBeNull();
-    const html = renderToStaticMarkup(<CouvertureCours cours={{ ...cours(), slug: 'nouveau-theme' }} />);
-    expect(html).not.toContain('<figure');
-    expect(html).toContain('<h1');
+    expect(renderToStaticMarkup(<FigureCours slug="nouveau-theme" />)).toBe('');
   });
 
-  it('la couverture d’Économie du Niger montre la répartition du PIB 2025 et cite l’INS', () => {
-    const html = renderToStaticMarkup(<CouvertureCours cours={cours()} />);
+  it('la figure d’Économie du Niger : la répartition du PIB 2025, sobre, avec l’INS en source', () => {
+    const html = renderToStaticMarkup(<FigureCours slug="economie-niger" />);
     expect(html).toContain('47,4');
     expect(sansBalises(html)).toContain('Source : INS, comptes économiques rapides 2025.');
+    // Plus de carré noir (Raouf, 26/11/2026) : aucun fond noir autour de la figure.
+    expect(html).not.toContain('bg-[#111]');
   });
 });
 

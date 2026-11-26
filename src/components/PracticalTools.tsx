@@ -162,8 +162,9 @@ export function PracticalTools({ avecEnTete = true }: { avecEnTete?: boolean } =
             </span>
             <h2 className="text-3xl md:text-4xl mb-4">Calculez, simulez, anticipez</h2>
             <p className="text-gray-500 text-[15px] leading-relaxed">
-              Des calculateurs et simulateurs professionnels conçus pour les investisseurs et
-              professionnels au Niger et en Afrique.
+              {paragrapheFr(
+                'Des calculateurs et simulateurs professionnels conçus pour les investisseurs et professionnels au Niger et en Afrique.',
+              )}
             </p>
           </div>
         ) : null}

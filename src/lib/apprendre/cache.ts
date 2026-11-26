@@ -4,4 +4,3 @@
  * charger la lecture en base.
  */
 export const APPRENDRE_CACHE_TAG = 'apprendre';
-export const MENU_APPRENDRE_CACHE_TAG = 'menu-apprendre';

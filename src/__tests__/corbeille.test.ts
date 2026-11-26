@@ -318,7 +318,7 @@ describe('mettreALaCorbeille', () => {
 describe('rafraîchissement du cache', () => {
   const CAS: { table: TableCorbeille; slug: string | null; attendu: unknown[][] }[] = [
     { table: 'articles', slug: 'or-du-sahel', attendu: [[ARTICLE_CACHE_TAG, { expire: 0 }], ['/articles/or-du-sahel'], ['/']] },
-    { table: 'education_lessons', slug: null, attendu: [['apprendre', { expire: 0 }], ['menu-apprendre', { expire: 0 }], ['/apprendre'], ['/apprendre/[cours]', 'page'], ['/apprendre/[cours]/[lecon]', 'page']] },
+    { table: 'education_lessons', slug: null, attendu: [['apprendre', { expire: 0 }], ['/apprendre'], ['/apprendre/[cours]', 'page'], ['/apprendre/[cours]/[lecon]', 'page']] },
     { table: 'education_categories', slug: 'bourse', attendu: [['apprendre', { expire: 0 }], ['/apprendre'], ['/apprendre/[cours]', 'page']] },
     { table: 'strategic_enterprises', slug: 'sonidep', attendu: [['strategic-enterprises', 'max'], ['/niger'], ['/entreprises/sonidep']] },
     { table: 'legal_sections', slug: null, attendu: [['/cgu'], ['/mentions-legales'], ['/confidentialite']] },

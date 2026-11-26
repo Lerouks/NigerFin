@@ -5,16 +5,13 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { BreakingNews } from '@/components/BreakingNews';
 import type { FlashBannerData } from '@/lib/site-data';
-import type { MenuApprendre } from '@/lib/navigation';
 
 interface MainLayoutShellProps {
   children: React.ReactNode;
   initialFlashBanner: FlashBannerData;
-  /** Cours et premières leçons de la liste déroulante « Apprendre », lus en base. */
-  menuApprendre: MenuApprendre;
 }
 
-export function MainLayoutShell({ children, initialFlashBanner, menuApprendre }: MainLayoutShellProps) {
+export function MainLayoutShell({ children, initialFlashBanner }: MainLayoutShellProps) {
   const pathname = usePathname() ?? '/';
   // Le Cockpit admin et la route preview de design-review ont leur propre chrome
   // (sidebar desktop + bottom nav mobile via AdminShell). On retire le Header,
@@ -38,7 +35,7 @@ export function MainLayoutShell({ children, initialFlashBanner, menuApprendre }:
         initialItems={initialFlashBanner.items}
         initialEnabled={initialFlashBanner.enabled}
       />
-      <Header menuApprendre={menuApprendre} />
+      <Header />
       <main id="main-content" className="flex-1 bg-background">
         {children}
       </main>

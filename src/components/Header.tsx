@@ -6,14 +6,7 @@ import { Menu, Search, X, ChevronRight, ChevronDown, LogOut, UserRound } from 'l
 import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { SearchOverlay } from './SearchOverlay';
-import {
-  NAV_GROUPS,
-  SIMULATEURS_MENU,
-  MENU_APPRENDRE_VIDE,
-  estRubriqueActive,
-  type MenuApprendre,
-  type NavigationEntry,
-} from '@/lib/navigation';
+import { NAV_GROUPS, SIMULATEURS_MENU, estRubriqueActive, type NavigationEntry } from '@/lib/navigation';
 
 /**
  * Le Header exposait une prop `navigation` qu'AUCUN appelant ne passait : un
@@ -22,9 +15,11 @@ import {
  * croire a une navigation configurable qui n'existait pas. Le Header lit
  * desormais directement la source unique de verite.
  *
- * Listes déroulantes (24/11/2026, demandées par Raouf) : seules Apprendre et
- * Simulateurs en ont, parce que ce sont les deux rubriques qui ont des
- * sous-pages. Aucune flèche visible dans la barre (Raouf : « ça alourdit ») :
+ * Liste déroulante (24/11/2026, demandée par Raouf) : seuls les Simulateurs en
+ * ont une. Celle d'Apprendre a été retirée le 26/11/2026 (Raouf : « même quand
+ * on survole l'onglet Apprendre il y a trop de trucs ») : un clic mène au damier
+ * des thèmes, qui sert de menu. Aucune flèche visible dans la barre (Raouf :
+ * « ça alourdit ») :
  * - souris : la liste s'ouvre au survol, et un clic sur le libellé mène à la page ;
  * - écran tactile (iPad en paysage) : le premier toucher ouvre la liste, le
  *   deuxième mène à la page ;
@@ -33,20 +28,15 @@ import {
  * Un clic ailleurs referme la liste. Sur téléphone et tablette en portrait, la
  * même liste se déplie dans le menu.
  */
-type CleSousMenu = 'education' | 'outils';
+type CleSousMenu = 'outils';
 
-const LARGEUR_PANNEAU: Record<CleSousMenu, number> = { outils: 560, education: 760 };
+const LARGEUR_PANNEAU: Record<CleSousMenu, number> = { outils: 560 };
 
 function estSousMenu(cle: string): cle is CleSousMenu {
-  return cle === 'education' || cle === 'outils';
+  return cle === 'outils';
 }
 
-interface HeaderProps {
-  /** Cours et premières leçons d'Apprendre, lus en base par le layout racine. */
-  menuApprendre?: MenuApprendre;
-}
-
-export function Header({ menuApprendre = MENU_APPRENDRE_VIDE }: HeaderProps) {
+export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -312,7 +302,7 @@ export function Header({ menuApprendre = MENU_APPRENDRE_VIDE }: HeaderProps) {
                           onClick={() => setOuvert(estOuvert ? null : cle)}
                           aria-expanded={estOuvert}
                           aria-controls={`sous-menu-${cle}`}
-                          aria-label={`${estOuvert ? 'Fermer' : 'Ouvrir'} la liste ${cle === 'outils' ? 'des simulateurs' : 'd’Apprendre'}`}
+                          aria-label={`${estOuvert ? 'Fermer' : 'Ouvrir'} la liste des simulateurs`}
                           className="sr-only focus-visible:not-sr-only focus-visible:flex focus-visible:items-center focus-visible:justify-center focus-visible:w-8 focus-visible:mr-1 text-gray-500"
                         >
                           <ChevronDown
@@ -338,85 +328,30 @@ export function Header({ menuApprendre = MENU_APPRENDRE_VIDE }: HeaderProps) {
                     if (e.pointerType === 'mouse') fermerAuDepart();
                   }}
                 >
-                  {ouvert === 'outils' ? (
-                    <>
-                      <ul className="grid grid-cols-2 gap-x-7">
-                        {SIMULATEURS_MENU.map((s) => (
-                          <li key={s.href}>
-                            <Link
-                              href={s.href}
-                              className="block rounded-md px-2.5 py-2 -mx-2.5 hover:bg-black/[0.035] focus-visible:bg-black/[0.035] transition-colors"
-                            >
-                              <span className="text-[14px] font-semibold text-foreground">{s.label}</span>
-                              {s.premium && (
-                                <span className="ml-1.5 text-[11px] font-semibold text-gold">Premium</span>
-                              )}
-                              {s.detail && (
-                                <span className="block text-[13px] text-gray-500 mt-0.5">{s.detail}</span>
-                              )}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                      <div className="mt-3.5 pt-3 border-t border-black/6 flex items-center justify-between gap-4 text-[13px]">
-                        <span className="text-gray-500">Adaptés aux règles du Niger et de l&rsquo;UEMOA</span>
-                        <Link href="/simulateurs" className="font-semibold text-foreground hover:text-foreground/70 whitespace-nowrap">
-                          Tous les simulateurs&nbsp;›
+                  <ul className="grid grid-cols-2 gap-x-7">
+                    {SIMULATEURS_MENU.map((s) => (
+                      <li key={s.href}>
+                        <Link
+                          href={s.href}
+                          className="block rounded-md px-2.5 py-2 -mx-2.5 hover:bg-black/[0.035] focus-visible:bg-black/[0.035] transition-colors"
+                        >
+                          <span className="text-[14px] font-semibold text-foreground">{s.label}</span>
+                          {s.premium && (
+                            <span className="ml-1.5 text-[11px] font-semibold text-gold">Premium</span>
+                          )}
+                          {s.detail && (
+                            <span className="block text-[13px] text-gray-500 mt-0.5">{s.detail}</span>
+                          )}
                         </Link>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      {menuApprendre.cours.length > 0 && (
-                        <div className="grid grid-cols-[1fr_1.25fr] gap-x-9">
-                          <div>
-                            <p className="text-[12px] font-semibold text-gray-500 mb-2.5">Les cours</p>
-                            <ul>
-                              {menuApprendre.cours.map((c) => (
-                                <li key={c.href}>
-                                  <Link
-                                    href={c.href}
-                                    className="block rounded-md px-2.5 py-2 -mx-2.5 hover:bg-black/[0.035] focus-visible:bg-black/[0.035] transition-colors"
-                                  >
-                                    <span className="text-[14px] font-semibold text-foreground">{c.label}</span>
-                                    {c.detail && (
-                                      <span className="block text-[13px] text-gray-500 mt-0.5">{c.detail}</span>
-                                    )}
-                                  </Link>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          <div>
-                            <p className="text-[12px] font-semibold text-gray-500 mb-2.5">Pour commencer</p>
-                            <ol>
-                              {menuApprendre.pourCommencer.map((l, i) => (
-                                <li key={l.href}>
-                                  <Link
-                                    href={l.href}
-                                    className="grid grid-cols-[22px_1fr] rounded-md px-2.5 py-1.5 -mx-2.5 text-[14px] text-foreground hover:bg-black/[0.035] focus-visible:bg-black/[0.035] transition-colors"
-                                  >
-                                    <span className="text-gray-400 tabular-nums">{i + 1}</span>
-                                    <span>{l.label}</span>
-                                  </Link>
-                                </li>
-                              ))}
-                            </ol>
-                          </div>
-                        </div>
-                      )}
-                      <div className="mt-3.5 pt-3 border-t border-black/6 flex items-center justify-between gap-4 text-[13px]">
-                        <span className="text-gray-500">
-                          {menuApprendre.lecons > 0
-                            ? `${menuApprendre.lecons}\u00a0leçon${menuApprendre.lecons > 1 ? 's' : ''}, à suivre dans l’ordre`
-                            : 'Des cours pour comprendre l’argent'}
-                        </span>
-                        <Link href="/apprendre" className="font-semibold text-foreground hover:text-foreground/70 whitespace-nowrap">
-                          Tout Apprendre&nbsp;›
-                        </Link>
-                      </div>
-                    </>
-                  )}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-3.5 pt-3 border-t border-black/6 flex items-center justify-between gap-4 text-[13px]">
+                    <span className="text-gray-500">Adaptés aux règles du Niger et de l&rsquo;UEMOA</span>
+                    <Link href="/simulateurs" className="font-semibold text-foreground hover:text-foreground/70 whitespace-nowrap">
+                      Tous les simulateurs&nbsp;›
+                    </Link>
+                  </div>
                 </div>
               )}
             </div>
@@ -468,7 +403,7 @@ export function Header({ menuApprendre = MENU_APPRENDRE_VIDE }: HeaderProps) {
                   }
                   const cle = entry.key;
                   const deplie = sousMenuMobile === cle;
-                  const liens = cle === 'outils' ? SIMULATEURS_MENU : menuApprendre.cours;
+                  const liens = SIMULATEURS_MENU;
                   return (
                     <div key={entry.path}>
                       <button
@@ -509,7 +444,7 @@ export function Header({ menuApprendre = MENU_APPRENDRE_VIDE }: HeaderProps) {
                               tabIndex={mobileMenuOpen ? 0 : -1}
                               className="flex items-center min-h-[44px] px-3 text-[15px] font-semibold text-foreground hover:bg-black/3 rounded-lg transition-colors"
                             >
-                              {cle === 'outils' ? 'Tous les simulateurs\u00a0›' : 'Tout Apprendre\u00a0›'}
+                              Tous les simulateurs&nbsp;›
                             </Link>
                           </li>
                         </ul>

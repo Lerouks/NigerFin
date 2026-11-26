@@ -200,7 +200,7 @@ export function getNavigationEntry(key: string): NavigationEntry | undefined {
   return NAVIGATION.find((e) => e.key === key);
 }
 
-/** Un lien d'une liste déroulante du menu (Apprendre, Simulateurs). */
+/** Un lien de la liste déroulante des Simulateurs. */
 export interface LienSousMenu {
   href: string;
   label: string;
@@ -224,11 +224,3 @@ export const SIMULATEURS_MENU: LienSousMenu[] = [
   { href: '/simulateurs/indices-economiques', label: 'Indices économiques', detail: 'PIB, inflation, taux de la\u00a0BCEAO' },
 ];
 
-/** Cours et premières leçons de la liste déroulante « Apprendre », lus en base côté serveur. */
-export interface MenuApprendre {
-  cours: LienSousMenu[];
-  pourCommencer: LienSousMenu[];
-  lecons: number;
-}
-
-export const MENU_APPRENDRE_VIDE: MenuApprendre = { cours: [], pourCommencer: [], lecons: 0 };

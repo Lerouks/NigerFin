@@ -1,7 +1,7 @@
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { ARTICLE_CACHE_TAG } from '@/lib/articles';
 import { STRATEGIC_ENTERPRISES_CACHE_TAG } from '@/lib/strategic-enterprises';
-import { APPRENDRE_CACHE_TAG, MENU_APPRENDRE_CACHE_TAG } from '@/lib/apprendre/cache';
+import { APPRENDRE_CACHE_TAG } from '@/lib/apprendre/cache';
 
 /**
  * Ce que chaque type de contenu rafraîchit sur le site public quand il change.
@@ -54,14 +54,13 @@ export function revaliderPagesLegales(): void {
 }
 
 /**
- * Apprendre : la rubrique, chaque cours (il liste ses leçons), chaque leçon
- * (elle montre ses voisines) et la liste déroulante du menu. Rafraîchir la
+ * Apprendre : la rubrique, chaque cours (il liste ses leçons) et chaque leçon
+ * (elle montre ses voisines). Rafraîchir la
  * seule rubrique laissait une leçon supprimée, restaurée ou publiée en l'état
  * pendant une heure sur les autres pages.
  */
 export function revaliderEducation(): void {
   revalidateTag(APPRENDRE_CACHE_TAG, { expire: 0 });
-  revalidateTag(MENU_APPRENDRE_CACHE_TAG, { expire: 0 });
   revalidatePath('/apprendre');
   revalidatePath('/apprendre/[cours]', 'page');
   revalidatePath('/apprendre/[cours]/[lecon]', 'page');

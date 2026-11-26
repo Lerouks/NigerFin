@@ -1,12 +1,10 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { paragrapheFr } from '@/lib/typographie-fr';
 import { MarketDataWidget } from '@/components/MarketDataWidget';
 import { MarketRail } from '@/components/MarketRail';
 import { NewsletterForm } from '@/components/NewsletterForm';
-import { GrilleSimulateurs } from '@/components/simulateurs/GrilleSimulateurs';
-import { OffrePremiumSimulateurs } from '@/components/simulateurs/OffrePremiumSimulateurs';
+import { PracticalTools } from '@/components/PracticalTools';
 import { HomeRubriqueSection } from '@/components/home/HomeRubriqueSection';
 import { formatDate } from '@/lib/utils';
 import { fallbackImageUrl } from '@/data/mock-data';
@@ -313,41 +311,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Simulateurs : les mêmes carrés noirs que la page /simulateurs (25/11/2026). */}
-      <section
-        id="simulateurs"
-        aria-labelledby="home-simulateurs-heading"
-        className="border-t border-black/10 scroll-mt-[180px]"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
-          <header className="mb-8 md:mb-10">
-            <div className="flex items-end justify-between gap-4 flex-wrap">
-              <div>
-                <h2
-                  id="home-simulateurs-heading"
-                  className="font-black tracking-tight leading-[1.05] text-[clamp(1.875rem,3.5vw,2.5rem)] text-foreground"
-                >
-                  Simulateurs
-                </h2>
-                <p className="mt-3 text-[15px] md:text-[16px] italic text-gray-700 max-w-2xl leading-relaxed">
-                  {paragrapheFr("Calculez un salaire, un emprunt, un budget ou les intérêts d'une épargne, en francs CFA.")}
-                </p>
-              </div>
-              <Link
-                href="/simulateurs"
-                className="inline-flex items-center gap-2 text-[12px] md:text-[13px] font-bold uppercase tracking-[0.14em] text-foreground hover:text-foreground/70 transition-colors border-b-2 border-gold pb-1"
-              >
-                Tous les simulateurs
-                <svg aria-hidden width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <path d="M2 6h8m0 0L7 3m3 3L7 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </Link>
-            </div>
-          </header>
-          <GrilleSimulateurs />
-          <OffrePremiumSimulateurs className="mt-8" />
-        </div>
-      </section>
+      {/* Simulateurs (gratuits et Premium) */}
+      <PracticalTools />
     </div>
   );
 }

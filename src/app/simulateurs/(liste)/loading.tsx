@@ -1,7 +1,7 @@
 /**
  * Chargement de la page Simulateurs : la même silhouette que la page (en-tête
- * clair de rubrique, puis les six carrés noirs), pour que rien ne saute à
- * l'arrivée du contenu.
+ * clair de rubrique, puis les deux cartes « Plan gratuit » et « Plan Premium »),
+ * pour que rien ne saute à l'arrivée du contenu.
  */
 export default function Loading() {
   return (
@@ -12,11 +12,10 @@ export default function Loading() {
           <div className="mt-4 h-4 w-full max-w-xl bg-black/6 rounded-sm animate-pulse" />
         </div>
       </div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 md:pt-12 md:pb-24">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5 sm:gap-3 lg:gap-3.5">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="min-h-[120px] md:min-h-[200px] xl:min-h-[228px] rounded-[14px] bg-[#111]/85 animate-pulse" />
-          ))}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-20 md:pt-14 md:pb-28">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
+          <div className="h-[420px] rounded-xl border border-black/6 bg-white animate-pulse" />
+          <div className="h-[420px] rounded-xl bg-[#111]/85 animate-pulse" />
         </div>
       </div>
     </div>

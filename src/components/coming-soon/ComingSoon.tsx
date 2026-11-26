@@ -80,9 +80,10 @@ export function ComingSoon() {
       {/* La carte prend toute la place qui reste ; sur téléphone, d'un bord à l'autre. */}
       <CarteAtlas className="-mx-[22px] mb-[14px] mt-2 min-h-0 flex-1 basis-0 self-stretch md:mx-0 md:mb-[1vh] md:mt-[3vh] [@media(max-height:640px)]:mb-[10px]" />
 
-      {/* Le slogan signe la page au-dessus des réseaux, comme à la fin de nos posts. */}
+      {/* Le slogan signe la page au-dessus des réseaux, comme à la fin de nos posts,
+          toujours sur une seule ligne. */}
       <footer className="flex flex-col items-center">
-        <p className="font-[family-name:var(--font-playfair)] text-[15.5px] leading-snug text-[#a9adb4] md:text-[17px] 2xl:text-[20px]">
+        <p className="font-[family-name:var(--font-playfair)] text-[15.5px] leading-snug text-[#a9adb4] max-[350px]:text-[14px] md:text-[17px] 2xl:text-[20px]">
           La connaissance, votre meilleur&nbsp;capital.
         </p>
         <nav className="mt-0.5 flex items-center gap-1" aria-label="NFI REPORT sur les réseaux sociaux">

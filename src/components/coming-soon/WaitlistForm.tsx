@@ -98,12 +98,12 @@ export function WaitlistForm() {
           }}
           disabled={status === 'loading'}
           aria-invalid={status === 'error'}
-          className="h-full min-w-0 flex-1 border-0 bg-transparent pl-[11px] pr-2.5 text-left text-[16px] text-[#f4f4f5] placeholder:text-[#6b6f76] focus:outline-none disabled:opacity-60 max-[350px]:pl-[9px] 2xl:pl-[14px] 2xl:text-[18px]"
+          className="h-full min-w-0 flex-1 border-0 bg-transparent pl-[11px] pr-2.5 text-left text-[16px] text-[#f4f4f5] placeholder:text-[#6b6f76] focus:outline-none disabled:opacity-60 max-[350px]:pl-[9px] max-[350px]:pr-1 2xl:pl-[14px] 2xl:text-[18px]"
         />
         <button
           type="submit"
           disabled={status === 'loading'}
-          className="inline-flex h-full shrink-0 items-center justify-center gap-2 rounded-[5px] bg-[#f4f4f5] px-4 text-[15.5px] font-semibold text-[#0b0b0c] transition-colors duration-200 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f4f5] focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090a] active:bg-[#dcdfe3] disabled:opacity-60 max-[350px]:px-3 max-[350px]:text-[15px] 2xl:px-5 2xl:text-[17px]"
+          className="inline-flex h-full shrink-0 items-center justify-center gap-2 rounded-[5px] bg-[#f4f4f5] px-4 text-[15.5px] font-semibold text-[#0b0b0c] transition-colors duration-200 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f4f5] focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090a] active:bg-[#dcdfe3] disabled:opacity-60 max-[350px]:px-[10px] max-[350px]:text-[15px] 2xl:px-5 2xl:text-[17px]"
         >
           {status === 'loading' ? (
             <>

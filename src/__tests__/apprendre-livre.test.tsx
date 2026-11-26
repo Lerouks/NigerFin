@@ -3,10 +3,10 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import type { Cours, LeconResume } from '@/lib/apprendre/donnees';
 
 /**
- * APPRENDRE, page d'un cours et page d'une leçon « Le livre » (choix de Raouf,
- * 26/11/2026) : couverture du thème avec la figure de ses leçons, sommaire
- * avec le résumé et les parties de chaque leçon, « À venir », Premium annoncé
- * avant le clic. La progression du lecteur est simulée.
+ * APPRENDRE, page d'un cours et page d'une leçon (choix de Raouf, 26/11/2026) :
+ * page du cours sobre, « Titres seulement » (une ligne par leçon, sans résumé
+ * ni figure), « À venir », Premium annoncé avant le clic. La progression du
+ * lecteur est simulée.
  */
 
 const progression = vi.hoisted(() => ({ lues: new Set<string>() }));
@@ -22,11 +22,9 @@ vi.mock('@/components/apprendre/progression', async () => {
 });
 
 const { suiteAVenir, titreAVenir } = await import('@/lib/apprendre/a-venir');
-const { aVenirDuCours, assemblerThemes, coursSuivant } = await import('@/lib/apprendre/donnees');
-const { figureDuTheme, THEMES_AVEC_FIGURE } = await import('@/components/apprendre/FiguresThemes');
+const { aVenirDuCours, assemblerThemes } = await import('@/lib/apprendre/donnees');
 const { ancresDesParties } = await import('@/components/apprendre/PlanLecon');
 const { ActionCours, SommaireDuCours } = await import('@/components/apprendre/SommaireDuCours');
-const { FigureCours } = await import('@/components/apprendre/FigureCours');
 const { rehypeLecon } = await import('@/lib/apprendre/rehype-lecon');
 
 function lecon(id: string, numero: number, premium = false): LeconResume {
@@ -64,7 +62,7 @@ const sommaire = (c: Cours) =>
   renderToStaticMarkup(
     <>
       <ActionCours cours={c} />
-      <SommaireDuCours cours={c} suivant={{ titre: 'Budget et banque', href: '/apprendre/budget-banque', icone: 'Wallet' }} />
+      <SommaireDuCours cours={c} />
     </>,
   );
 const sansBalises = (html: string) => html.replace(/<[^>]+>/g, '').replace(/\u00a0/g, ' ');
@@ -119,50 +117,21 @@ describe('assemblage d’un cours', () => {
     expect(c.aVenir).toEqual({ prochaine: 'Commerce international et balance des paiements', nombre: 1 });
     expect(themes[0]!.cours).toBeNull();
   });
-
-  it('le thème suivant est le prochain cours ouvert, puis on revient au premier', () => {
-    const tous = [cours(), { ...cours(), slug: 'budget-banque' }, { ...cours(), slug: 'devises-change' }];
-    expect(coursSuivant(tous, 'budget-banque')?.slug).toBe('devises-change');
-    expect(coursSuivant(tous, 'devises-change')?.slug).toBe('economie-niger');
-    expect(coursSuivant([cours()], 'economie-niger')).toBeNull();
-  });
-});
-
-describe('les figures des thèmes', () => {
-  it('les dix thèmes ont leur figure, chacune avec sa source', () => {
-    const attendus = ['bases-finance', 'bourse-investissement', 'economie-niger', 'budget-banque', 'devises-change', 'crypto-blockchain', 'immobilier', 'entrepreneuriat', 'fiscalite-droit', 'assurance-prevoyance'];
-    expect([...THEMES_AVEC_FIGURE].sort()).toEqual([...attendus].sort());
-    for (const slug of attendus) {
-      const f = figureDuTheme(slug)!;
-      expect(f.source.length).toBeGreaterThan(5);
-      expect(renderToStaticMarkup(<>{f.figure}</>)).toContain('<svg');
-    }
-  });
-
-  it('un thème sans figure n’affiche rien à sa place, jamais une icône agrandie', () => {
-    expect(figureDuTheme('nouveau-theme')).toBeNull();
-    expect(renderToStaticMarkup(<FigureCours slug="nouveau-theme" />)).toBe('');
-  });
-
-  it('la figure d’Économie du Niger : la répartition du PIB 2025, sobre, avec l’INS en source', () => {
-    const html = renderToStaticMarkup(<FigureCours slug="economie-niger" />);
-    expect(html).toContain('47,4');
-    expect(sansBalises(html)).toContain('Source : INS, comptes économiques rapides 2025.');
-    // Plus de carré noir (Raouf, 26/11/2026) : aucun fond noir autour de la figure.
-    expect(html).not.toContain('bg-[#111]');
-  });
 });
 
 describe('le sommaire du cours', () => {
-  it('un visiteur : « Commencer la leçon 1 », résumé et parties de chaque leçon, « À venir »', () => {
-    const texte = sansBalises(sommaire(cours([], { prochaine: 'Commerce international', nombre: 10 })));
+  it('un visiteur : « Commencer la leçon 1 », puis une ligne par leçon, sans résumé ni parties', () => {
+    const html = sommaire(cours([], { prochaine: 'Commerce international', nombre: 10 }));
+    const texte = sansBalises(html);
     expect(texte).toContain('Commencer la leçon 1');
-    expect(texte).toContain('Première phrase du résumé.');
-    expect(texte).toContain('Dans cette leçon');
-    expect(texte).toContain('Une autre partie');
-    expect(texte).toContain('À venir');
-    expect(texte).toContain('Commerce international, et 9 autres leçons.');
-    expect(texte).toContain('Thème suivant');
+    expect(texte).toContain('Leçon l1');
+    expect(texte).toContain('3 min');
+    expect(texte).not.toContain('Première phrase du résumé.');
+    expect(texte).not.toContain('Dans cette leçon');
+    expect(texte).not.toContain('Thème suivant');
+    expect(texte).toContain('À venir : Commerce international, et 9 autres leçons.');
+    // Plus de carré noir dans la page du cours : seul le bouton est noir.
+    expect(html.match(/bg-\[#111\]/g)?.length ?? 0).toBe(1);
   });
 
   it('trois leçons lues et la quatrième Premium : annoncée avant le clic, la prochaine libre proposée', () => {
@@ -170,13 +139,13 @@ describe('le sommaire du cours', () => {
     const texte = sansBalises(sommaire(cours([4, 5, 8, 9])));
     expect(texte).toContain('Leçon 4 · Premium');
     expect(texte).toContain('Lire la leçon 6, en accès libre');
-    expect(texte).toContain('3 leçons lues sur 9');
-    expect(texte).toContain('5 libres, 4 Premium');
-    expect(texte).toContain('Reprendre ici');
+    expect(texte).toContain(', Premium');
+    expect(texte).toContain(', lue');
   });
 
-  it('« 1 libre, 1 Premium » s’accorde', () => {
-    expect(sansBalises(sommaire(cours([2], null, 2)))).toContain('1 libre, 1 Premium');
+  it('une leçon déjà commencée : « Reprendre : leçon 2 »', () => {
+    progression.lues = new Set(['l1']);
+    expect(sansBalises(sommaire(cours([], null, 3)))).toContain('Reprendre : leçon 2');
   });
 
   it('tout lu : « Relire le cours »', () => {

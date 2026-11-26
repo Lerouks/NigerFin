@@ -261,12 +261,6 @@ export async function getCoursParSlug(slug: string): Promise<Cours | null> {
   return cours.find((c) => c.slug === slug) ?? null;
 }
 
-/** Le cours ouvert qui suit celui-ci dans l'ordre des thèmes, en revenant au premier après le dernier. */
-export function coursSuivant(tous: Cours[], slug: string): Cours | null {
-  const i = tous.findIndex((c) => c.slug === slug);
-  if (i === -1 || tous.length < 2) return null;
-  return tous[(i + 1) % tous.length] ?? null;
-}
 
 /** Une leçon publiée, avec son cours, ses voisines et son contenu (sauf le corps Premium). */
 export const getLecon = unstable_cache(

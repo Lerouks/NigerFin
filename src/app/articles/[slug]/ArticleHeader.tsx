@@ -3,12 +3,11 @@ import Link from 'next/link';
 import type { CSSProperties } from 'react';
 import type { Article } from '@/types';
 import { fallbackImageUrl } from '@/data/mock-data';
-import { formatDate } from '@/lib/utils';
 import { SECTION_META } from '@/lib/sections';
 import { getContentTypeFromArticle } from '@/lib/access-control';
 import { SITE_URL } from '@/lib/config';
 import { dimensionsImage } from '@/lib/article/dimensions-image';
-import { enLignes, texteAffiche } from '@/lib/article/mise-en-page';
+import { dateArticle, enLignes, texteAffiche } from '@/lib/article/mise-en-page';
 import { PartageHaut } from '@/components/article/BoutonsPartage';
 import styles from './article.module.css';
 
@@ -60,7 +59,7 @@ export async function ArticleHeader({ article }: ArticleHeaderProps) {
         <div className={styles.signature}>
           <p className={styles.qui}>
             <strong>{article.author.name}</strong>
-            <span className={styles.nowrap}>{formatDate(article.publishedAt)}</span>
+            <span className={styles.nowrap}>{dateArticle(article.publishedAt)}</span>
             <span className={styles.point}> · </span>
             <span className={`${styles.nowrap} ${styles.duree}`}>{`${article.readTime}\u00a0min de lecture`}</span>
           </p>

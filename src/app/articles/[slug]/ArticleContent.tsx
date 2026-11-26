@@ -17,9 +17,8 @@ import { BarreLecture } from '@/components/article/BarreLecture';
 import { DiscussionRepliee } from '@/components/article/DiscussionRepliee';
 import type { Article } from '@/types';
 import { SITE_URL } from '@/lib/config';
-import { formatDate } from '@/lib/utils';
 import { SECTION_META } from '@/lib/sections';
-import { texteAffiche } from '@/lib/article/mise-en-page';
+import { dateArticle, texteAffiche } from '@/lib/article/mise-en-page';
 import {
   checkArticleAccess,
   getContentTypeFromArticle,
@@ -54,7 +53,7 @@ function ListeArticles({ articles }: { articles: Article[] }) {
             <Link href={`/articles/${a.slug.current}`}>
               <span className={styles.listeRub}>{rubriques}</span>
               <span className={`${styles.listeTitre} ligne-reglee`} dangerouslySetInnerHTML={{ __html: texteAffiche(a.title) }} />
-              <span className={styles.listeDate}>{`${formatDate(a.publishedAt)} · ${a.readTime}\u00a0min`}</span>
+              <span className={styles.listeDate}>{`${dateArticle(a.publishedAt)} · ${a.readTime}\u00a0min`}</span>
             </Link>
           </li>
         );

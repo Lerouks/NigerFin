@@ -76,6 +76,16 @@ export function debutArticle(html: string): { accroche: string | null; paragraph
   return { accroche, paragraphes };
 }
 
+/**
+ * Date de publication à l'heure de Niamey, identique sur le serveur (UTC) et
+ * dans le navigateur (heure du lecteur) : sans fuseau fixe, un article publié
+ * tard le soir changeait de jour entre les deux, et React refusait la page
+ * (erreur 418, texte différent à l'hydratation).
+ */
+export function dateArticle(iso: string): string {
+  return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Africa/Niamey' });
+}
+
 /** Texte échappé pour un attribut ou un nœud HTML (titres rendus en HTML pour le régleur des lignes). */
 export function echapperHtml(texte: string): string {
   return texte.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');

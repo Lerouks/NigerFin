@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { debutArticle, enLignes, miseEnPageArticle, texteAffiche } from '@/lib/article/mise-en-page';
+import { dateArticle, debutArticle, enLignes, miseEnPageArticle, texteAffiche } from '@/lib/article/mise-en-page';
 import { meilleuresCoupures, type EspaceMesure, type MotMesure } from '@/lib/article/coupures';
 
 const NBSP = '\u00a0';
@@ -43,6 +43,11 @@ describe('mise en page du texte d’un article', () => {
     const debut = debutArticle('<h2>Accroche.</h2><p>Un.</p><p>Deux.</p><p>Trois.</p>');
     expect(debut.accroche).toContain('Accroche.');
     expect(debut.paragraphes).toEqual(['Un.', 'Deux.']);
+  });
+
+  it('date un article à l’heure de Niamey, quel que soit le fuseau du lecteur', () => {
+    // 17 avril à 23 h 30 UTC : déjà le 18 avril à Niamey (UTC+1).
+    expect(dateArticle('2026-04-17T23:30:00Z')).toBe('18 avril 2026');
   });
 
   it('échappe un titre avant de l’afficher en HTML', () => {

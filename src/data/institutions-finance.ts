@@ -144,11 +144,12 @@ export const INSTITUTIONS_FINANCE: InstitutionFinance[] = [
     sigle: 'FGDR-UMOA',
     nomComplet: 'Fonds de garantie des dépôts et de résolution dans l’UMOA',
     role: 'La garantie de vos dépôts',
-    logo: { largeur: 424, hauteur: 162 },
+    logo: { largeur: 900, hauteur: 342 },
     presentation: [
       'Le Fonds de garantie des dépôts et de résolution indemnise les déposants si leur banque ou leur institution de microfinance fait faillite, jusqu’à un plafond fixé par les ministres de l’Union.',
     ],
     pourVous: [],
+    site: { libelle: 'Le site du FGDR-UMOA', url: 'https://www.fgd-umoa.org' },
   },
   {
     id: 'cima',

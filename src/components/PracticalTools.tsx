@@ -59,7 +59,9 @@ function PlanCard({ title, badge, tools, isPremium = false, isSubscribed = false
         >
           {badge}
         </span>
-        <h3 className={`text-[22px] font-semibold ${isPremium ? 'text-white' : ''}`}>{title}</h3>
+        {/* 19 px sous 360 px : « Vos simulateurs Premium » (abonné) tient sur une ligne
+            à 320 px au lieu de laisser « Premium » seul en dessous (26/11/2026). */}
+        <h3 className={`text-[19px] min-[360px]:text-[22px] font-semibold ${isPremium ? 'text-white' : ''}`}>{title}</h3>
       </div>
 
       <div className="p-3">

@@ -1,6 +1,6 @@
 import { unstable_cache } from 'next/cache';
 import { createServiceClient } from '@/lib/supabase';
-import { decouperLecon, minutesDeLecture } from '@/lib/apprendre/lecture';
+import { decouperLecon, intertitres, minutesDeLecture } from '@/lib/apprendre/lecture';
 import { lireQuiz, type Question } from '@/lib/apprendre/quiz';
 import { APPRENDRE_CACHE_TAG } from '@/lib/apprendre/cache';
 
@@ -32,6 +32,16 @@ export interface LeconResume {
   /** Ajoutée récemment à un cours déjà ouvert. */
   nouvelle: boolean;
   href: string;
+  /** Premier paragraphe de la leçon, montré dans le sommaire du cours. */
+  chapeau: string;
+  /** Intertitres de ses sections, sans « À retenir » (« Dans cette leçon »). */
+  parties: string[];
+}
+
+/** Les leçons pas encore publiées d'un cours : la prochaine et leur nombre (choix de Raouf, 26/11/2026). */
+export interface AVenir {
+  prochaine: string;
+  nombre: number;
 }
 
 export interface Cours {
@@ -44,6 +54,10 @@ export interface Cours {
   minutes: number;
   lecons: LeconResume[];
   href: string;
+  /** Nom de l'icône lucide du thème, la même qu'au damier. */
+  icone: string;
+  /** Leçons écrites mais pas encore publiées ; null quand il n'y en a pas. */
+  aVenir: AVenir | null;
 }
 
 export interface LeconComplete extends LeconResume {
@@ -70,6 +84,13 @@ export interface LigneLecon {
   published_at: string | null;
   updated_at: string;
   quiz: unknown;
+}
+
+/** Une leçon pas encore publiée : seul son titre sort de la base, jamais son texte. */
+export interface LigneAVenir {
+  category_id: string;
+  title: string;
+  sort_order: number;
 }
 
 export interface LigneCours {
@@ -116,11 +137,11 @@ export function apercuPremium(corps: string): string {
   return sortie.join('\n\n').trim();
 }
 
-async function lireTout(): Promise<{ cours: LigneCours[]; lecons: LigneLecon[] }> {
+async function lireTout(): Promise<{ cours: LigneCours[]; lecons: LigneLecon[]; aVenir: LigneAVenir[] }> {
   const service = createServiceClient();
-  if (!service) return { cours: [], lecons: [] };
+  if (!service) return { cours: [], lecons: [], aVenir: [] };
   const maintenant = new Date().toISOString();
-  const [cours, lecons] = await Promise.all([
+  const [cours, lecons, aVenir] = await Promise.all([
     service
       .from('education_categories')
       .select('id, slug, title, description, sort_order, icon')
@@ -133,14 +154,30 @@ async function lireTout(): Promise<{ cours: LigneCours[]; lecons: LigneLecon[] }
       .lte('published_at', maintenant)
       .not('slug', 'is', null)
       .order('sort_order'),
+    // Les leçons à venir (sans date, ou datées plus tard) : le titre seulement.
+    service
+      .from('education_lessons')
+      .select('category_id, title, sort_order')
+      .or(`published_at.is.null,published_at.gt.${maintenant}`)
+      .order('sort_order'),
   ]);
-  if (cours.error || lecons.error) {
-    throw new Error(`apprendre : lecture impossible (${cours.error?.message ?? lecons.error?.message})`);
+  if (cours.error || lecons.error || aVenir.error) {
+    throw new Error(`apprendre : lecture impossible (${cours.error?.message ?? lecons.error?.message ?? aVenir.error?.message})`);
   }
-  return { cours: (cours.data ?? []) as LigneCours[], lecons: (lecons.data ?? []) as LigneLecon[] };
+  return {
+    cours: (cours.data ?? []) as LigneCours[],
+    lecons: (lecons.data ?? []) as LigneLecon[],
+    aVenir: (aVenir.data ?? []) as LigneAVenir[],
+  };
 }
 
-function assembler(lignesCours: LigneCours[], lignesLecons: LigneLecon[], maintenant: number): Cours[] {
+/** La prochaine leçon à venir d'un cours et leur nombre, dans l'ordre du cours. */
+export function aVenirDuCours(coursId: string, lignes: LigneAVenir[]): AVenir | null {
+  const siennes = lignes.filter((l) => l.category_id === coursId && l.title?.trim()).sort((a, b) => a.sort_order - b.sort_order);
+  return siennes.length ? { prochaine: siennes[0]!.title.trim(), nombre: siennes.length } : null;
+}
+
+function assembler(lignesCours: LigneCours[], lignesLecons: LigneLecon[], maintenant: number, lignesAVenir: LigneAVenir[] = []): Cours[] {
   const cours: Cours[] = [];
   for (const c of lignesCours) {
     const siennes = lignesLecons
@@ -151,6 +188,7 @@ function assembler(lignesCours: LigneCours[], lignesLecons: LigneLecon[], mainte
     const href = `${CHEMIN_APPRENDRE}/${c.slug}`;
     const lecons: LeconResume[] = siennes.map((l, i) => {
       const publiee = Date.parse(l.published_at!);
+      const { chapeau, corps } = decouperLecon(l.content, l.title);
       return {
         id: l.id,
         slug: l.slug!,
@@ -161,6 +199,8 @@ function assembler(lignesCours: LigneCours[], lignesLecons: LigneLecon[], mainte
         publieeLe: l.published_at!,
         nouvelle: publiee - ouverture > 24 * 3600 * 1000 && maintenant - publiee < DUREE_NOUVEAUTE_MS,
         href: cheminLecon(c.slug, l.slug!),
+        chapeau,
+        parties: intertitres(corps).filter((t) => !/retenir/i.test(t)),
       };
     });
     cours.push({
@@ -172,6 +212,8 @@ function assembler(lignesCours: LigneCours[], lignesLecons: LigneLecon[], mainte
       minutes: lecons.reduce((t, l) => t + l.minutes, 0),
       lecons,
       href,
+      icone: c.icon || 'BookOpen',
+      aVenir: aVenirDuCours(c.id, lignesAVenir),
     });
   }
   return cours;
@@ -180,16 +222,21 @@ function assembler(lignesCours: LigneCours[], lignesLecons: LigneLecon[], mainte
 /** Tous les cours ouverts, avec leurs leçons publiées, dans l'ordre. */
 export const getCours = unstable_cache(
   async (): Promise<Cours[]> => {
-    const { cours, lecons } = await lireTout();
-    return assembler(cours, lecons, Date.now());
+    const { cours, lecons, aVenir } = await lireTout();
+    return assembler(cours, lecons, Date.now(), aVenir);
   },
-  ['apprendre-cours-v1'],
+  ['apprendre-cours-v2'],
   { revalidate: 3600, tags: [APPRENDRE_CACHE_TAG] },
 );
 
 /** Les thèmes dans leur ordre, chacun avec son cours s'il a au moins une leçon publiée. */
-export function assemblerThemes(lignesCours: LigneCours[], lignesLecons: LigneLecon[], maintenant: number): Theme[] {
-  const ouverts = assembler(lignesCours, lignesLecons, maintenant);
+export function assemblerThemes(
+  lignesCours: LigneCours[],
+  lignesLecons: LigneLecon[],
+  maintenant: number,
+  lignesAVenir: LigneAVenir[] = [],
+): Theme[] {
+  const ouverts = assembler(lignesCours, lignesLecons, maintenant, lignesAVenir);
   return lignesCours.map((c) => ({
     id: c.id,
     slug: c.slug,
@@ -202,10 +249,10 @@ export function assemblerThemes(lignesCours: LigneCours[], lignesLecons: LigneLe
 /** Tous les thèmes de la page d'entrée, ouverts ou en préparation. */
 export const getThemes = unstable_cache(
   async (): Promise<Theme[]> => {
-    const { cours, lecons } = await lireTout();
-    return assemblerThemes(cours, lecons, Date.now());
+    const { cours, lecons, aVenir } = await lireTout();
+    return assemblerThemes(cours, lecons, Date.now(), aVenir);
   },
-  ['apprendre-themes-v1'],
+  ['apprendre-themes-v2'],
   { revalidate: 3600, tags: [APPRENDRE_CACHE_TAG] },
 );
 
@@ -214,11 +261,18 @@ export async function getCoursParSlug(slug: string): Promise<Cours | null> {
   return cours.find((c) => c.slug === slug) ?? null;
 }
 
+/** Le cours ouvert qui suit celui-ci dans l'ordre des thèmes, en revenant au premier après le dernier. */
+export function coursSuivant(tous: Cours[], slug: string): Cours | null {
+  const i = tous.findIndex((c) => c.slug === slug);
+  if (i === -1 || tous.length < 2) return null;
+  return tous[(i + 1) % tous.length] ?? null;
+}
+
 /** Une leçon publiée, avec son cours, ses voisines et son contenu (sauf le corps Premium). */
 export const getLecon = unstable_cache(
   async (coursSlug: string, leconSlug: string): Promise<LeconComplete | null> => {
-    const { cours: lignesCours, lecons: lignesLecons } = await lireTout();
-    const tous = assembler(lignesCours, lignesLecons, Date.now());
+    const { cours: lignesCours, lecons: lignesLecons, aVenir } = await lireTout();
+    const tous = assembler(lignesCours, lignesLecons, Date.now(), aVenir);
     const cours = tous.find((c) => c.slug === coursSlug);
     if (!cours) return null;
     const index = cours.lecons.findIndex((l) => l.slug === leconSlug);
@@ -238,7 +292,7 @@ export const getLecon = unstable_cache(
       suivante: cours.lecons[index + 1] ?? null,
     };
   },
-  ['apprendre-lecon-v1'],
+  ['apprendre-lecon-v2'],
   { revalidate: 3600, tags: [APPRENDRE_CACHE_TAG] },
 );
 

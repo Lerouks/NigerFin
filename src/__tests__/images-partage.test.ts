@@ -17,7 +17,7 @@ const { getArticleBySlug, eq, getCoursParSlug, getLecon } = vi.hoisted(() => ({
   ),
   eq: vi.fn(),
   getCoursParSlug: vi.fn(async (slug: string) =>
-    slug === 'bases-finance' ? { titre: 'Les bases de la finance', numero: 1, lecons: [{}, {}, {}] } : null,
+    slug === 'bases-finance' ? { titre: 'Les bases de la finance', numero: 1, minutes: 9, lecons: [{}, {}, {}] } : null,
   ),
   getLecon: vi.fn(async (cours: string, lecon: string) =>
     cours === 'bases-finance' && lecon === 'comprendre-l-inflation'
@@ -94,7 +94,9 @@ describe('Les images de partage montrent la page partagée', () => {
 
     expect(getCoursParSlug).toHaveBeenCalledWith('bases-finance');
     expect(contenu).toContain('Les bases de la finance');
-    expect(contenu).toContain('Cours 1 · 3 leçons');
+    // « Cours 1 » ne disait rien au lecteur (retour de Raouf, 26/11/2026) : le nombre de leçons et la durée.
+    expect(contenu).toContain('3 leçons · 9 min');
+    expect(contenu).not.toContain('Cours 1');
   });
 
   it('Apprendre : la leçon demandée, avec son cours et sa place', async () => {

@@ -3,8 +3,9 @@ import Link from 'next/link';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import { CarresCours } from '@/components/apprendre/CarresCours';
-import { getCours, getCoursParSlug } from '@/lib/apprendre/donnees';
+import { CouvertureCours } from '@/components/apprendre/CouvertureCours';
+import { SommaireDuCours } from '@/components/apprendre/SommaireDuCours';
+import { coursSuivant, getCours } from '@/lib/apprendre/donnees';
 import { NOM_DU_SITE, SITE_URL } from '@/lib/config';
 
 export const revalidate = 3600;
@@ -20,7 +21,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { cours: slug } = await params;
-  const cours = await getCoursParSlug(slug);
+  const cours = (await getCours()).find((c) => c.slug === slug);
   if (!cours) return { title: 'Cours introuvable', robots: { index: false } };
   const description = cours.description || `Le cours ${cours.titre} de NFI REPORT, leçon par leçon.`;
   return {
@@ -31,10 +32,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+/**
+ * La page d'un cours, maquette « Le livre » (choix de Raouf, 26/11/2026) :
+ * la couverture du thème à gauche (collée en haut sur ordinateur), le
+ * sommaire à droite. Sur téléphone, la couverture passe au-dessus.
+ */
 export default async function CoursPage({ params }: Props) {
   const { cours: slug } = await params;
-  const cours = await getCoursParSlug(slug);
+  const tous = await getCours();
+  const cours = tous.find((c) => c.slug === slug);
   if (!cours) notFound();
+  const apres = coursSuivant(tous, cours.slug);
+  const suivant = apres && apres.slug !== cours.slug ? { titre: apres.titre, href: apres.href, icone: apres.icone } : null;
 
   const nonce = (await headers()).get('x-nonce') || undefined;
   const donneesStructurees = {
@@ -67,12 +76,22 @@ export default async function CoursPage({ params }: Props) {
         nonce={nonce}
         dangerouslySetInnerHTML={{ __html: JSON.stringify(donneesStructurees).replace(/</g, '\\u003c') }}
       />
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-8 pb-14 md:pt-10 md:pb-20">
-        <Link href="/apprendre" className="mb-5 inline-flex items-center gap-1.5 text-[13px] text-gray-500 hover:text-[#111]">
-          <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-          Apprendre
-        </Link>
-        <CarresCours cours={cours} titrePrincipal />
+      <div className="mx-auto max-w-7xl px-4 pb-20 pt-1.5 sm:px-6 sm:pt-4 lg:px-8 lg:pb-24 lg:pt-10">
+        <div className="grid lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)] lg:gap-14 xl:grid-cols-[460px_minmax(0,1fr)] xl:gap-[88px]">
+          <div className="lg:sticky lg:top-[calc(var(--header-height)+32px)] lg:self-start">
+            <Link
+              href="/apprendre"
+              className="inline-flex min-h-[44px] items-center gap-1.5 text-[13.5px] text-gray-500 hover:text-[#111] lg:hidden"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+              Apprendre
+            </Link>
+            <div className="max-w-[560px] lg:max-w-none">
+              <CouvertureCours cours={cours} />
+            </div>
+          </div>
+          <SommaireDuCours cours={cours} suivant={suivant} />
+        </div>
       </div>
     </div>
   );

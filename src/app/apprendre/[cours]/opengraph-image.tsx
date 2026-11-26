@@ -12,6 +12,7 @@ export default async function ImageCours({ params }: { params: Promise<{ cours: 
   const { cours: slug } = await params;
   const cours = await getCoursParSlug(slug);
   const titre = cours?.titre ?? 'Apprendre';
-  const ligne = cours ? `Cours ${cours.numero} · ${cours.lecons.length} leçons` : 'Des cours d’économie et de finance';
+  const n = cours?.lecons.length ?? 0;
+  const ligne = cours ? `${n} leçon${n > 1 ? 's' : ''} · ${cours.minutes} min` : 'Des cours d’économie et de finance';
   return new ImageResponse(visuelPartage({ titre, ligne }), { ...size });
 }

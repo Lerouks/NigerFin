@@ -28,14 +28,14 @@ export function PartageLecon({ titre, chemin }: { titre: string; chemin: string 
     }
   };
 
-  const rond = 'grid h-10 w-10 place-items-center rounded-full border border-black/12 bg-white text-[#111] transition-colors hover:border-black/30';
+  const rond = 'grid h-11 w-11 place-items-center rounded-full border border-black/12 bg-white text-[#111] transition-colors hover:border-black/30';
   return (
     <div className="flex items-center gap-2.5">
       <a
         href={`https://wa.me/?text=${encodeURIComponent(`${titre} ${url}`)}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex h-10 items-center gap-2 rounded-full border border-black/12 bg-white pl-3 pr-4 text-[13px] font-semibold text-[#111] transition-colors hover:border-black/30"
+        className="inline-flex h-11 items-center gap-2 rounded-full border border-black/12 bg-white pl-3 pr-4 text-[13px] font-semibold text-[#111] transition-colors hover:border-black/30"
       >
         <IconeWhatsApp className="h-[18px] w-[18px]" />
         WhatsApp
@@ -56,5 +56,21 @@ export function PartageLecon({ titre, chemin }: { titre: string; chemin: string 
         {copie ? 'Lien copié' : ''}
       </span>
     </div>
+  );
+}
+
+/** En fin de leçon, à côté de « Lire la leçon suivante » : le partage sur WhatsApp, en bouton. */
+export function BoutonWhatsApp({ titre, chemin }: { titre: string; chemin: string }) {
+  const url = `${SITE_URL}${chemin}`;
+  return (
+    <a
+      href={`https://wa.me/?text=${encodeURIComponent(`${titre} ${url}`)}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex h-[54px] w-full items-center justify-center gap-2 rounded-[10px] border border-black/16 bg-white px-5 text-[15px] font-semibold text-[#111] transition-colors hover:border-black/35 sm:w-auto"
+    >
+      <IconeWhatsApp className="h-[18px] w-[18px]" />
+      Partager sur WhatsApp
+    </a>
   );
 }

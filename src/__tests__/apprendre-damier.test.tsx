@@ -42,7 +42,11 @@ function cours(slug: string, ids: string[]): Cours {
       publieeLe: '2026-11-25T10:00:00Z',
       nouvelle: false,
       href: `/apprendre/${slug}/${id}`,
+      chapeau: '',
+      parties: [],
     })),
+    icone: 'TrendingUp',
+    aVenir: null,
   };
 }
 

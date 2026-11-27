@@ -4,6 +4,7 @@ import { Clock, Calendar, User } from 'lucide-react';
 import type { Article } from '@/types';
 import { fallbackImageUrl } from '@/data/mock-data';
 import { formatDate } from '@/lib/utils';
+import { paragrapheFr } from '@/lib/typographie-fr';
 import { SECTION_META } from '@/lib/sections';
 import { getContentTypeFromArticle } from '@/lib/access-control';
 
@@ -45,11 +46,14 @@ export function ArticleHeader({ article }: ArticleHeaderProps) {
           </span>
         )}
       </div>
+      {/* Titre et chapô soudés comme dans les cartes d'articles : jamais un
+          mot-outil ni un début de phrase en bout de ligne, ni une dernière
+          ligne de un à trois mots. Blocs soudés courts : ils tiennent à 320 px. */}
       <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 leading-tight">
-        {article.title}
+        {paragrapheFr(article.title, 16)}
       </h1>
       {article.subtitle && (
-        <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-4 sm:mb-6">{article.subtitle}</p>
+        <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-4 sm:mb-6">{paragrapheFr(article.subtitle, 24)}</p>
       )}
 
       <div className="flex flex-wrap items-center gap-4 pb-6 mb-6 border-b border-black/6">

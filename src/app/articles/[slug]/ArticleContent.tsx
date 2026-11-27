@@ -24,6 +24,8 @@ import {
   type AccessResult,
 } from '@/lib/access-control';
 import { trackPremiumArticleRead } from '@/lib/user-profile';
+import { ReglageLignes } from '@/components/article/ReglageLignes';
+import { paragrapheFr } from '@/lib/typographie-fr';
 
 interface ArticleContentProps {
   article: Article;
@@ -171,7 +173,7 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [], header
 
                 <div className="relative select-none" aria-hidden="true">
                   <div className="space-y-4 text-[15px] sm:text-[16px] text-gray-700 leading-relaxed">
-                    <p className="opacity-80">{article.excerpt || 'Cet article analyse en profondeur les dernières évolutions économiques et financières de la région, avec des données exclusives et des perspectives d\'experts.'}</p>
+                    <p className="opacity-80">{paragrapheFr(article.excerpt || 'Cet article analyse en profondeur les dernières évolutions économiques et financières de la région, avec des données exclusives et des perspectives d\'experts.', 24)}</p>
                     <p className="opacity-50">Les indicateurs récents montrent une dynamique significative dans les secteurs clés de l&apos;économie. Notre analyse complète détaille les implications pour les investisseurs et les décideurs...</p>
                     <p className="opacity-25">Les experts interrogés soulignent l&apos;importance de ces évolutions pour le contexte régional et international...</p>
                   </div>
@@ -201,17 +203,22 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [], header
                 {header}
 
                 {resolvedBody ? (
-                  isPremiumContent ? (
-                    <ProtectedArticleBody
-                      html={resolvedBody}
-                      watermarkLabel={user?.email ?? user?.id ?? 'Abonné NFI'}
-                    />
-                  ) : (
-                    <div
-                      className="article-content"
-                      dangerouslySetInnerHTML={{ __html: sanitizeHtmlClient(resolvedBody) }}
-                    />
-                  )
+                  // Les fins de ligne du texte sont choisies sur le rendu réel
+                  // (jamais un mot-outil ni un début de phrase en bout de ligne,
+                  // jamais une dernière ligne de un à trois mots).
+                  <ReglageLignes>
+                    {isPremiumContent ? (
+                      <ProtectedArticleBody
+                        html={resolvedBody}
+                        watermarkLabel={user?.email ?? user?.id ?? 'Abonné NFI'}
+                      />
+                    ) : (
+                      <div
+                        className="article-content"
+                        dangerouslySetInnerHTML={{ __html: sanitizeHtmlClient(resolvedBody) }}
+                      />
+                    )}
+                  </ReglageLignes>
                 ) : bodyError ? (
                   <div className="text-center py-16">
                     <p className="text-gray-500 mb-4">Impossible de charger le contenu de cet article.</p>

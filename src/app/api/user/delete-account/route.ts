@@ -1,21 +1,55 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase';
-import { checkRateLimit, getClientIP } from '@/lib/rate-limit';
+import { checkRateLimit } from '@/lib/rate-limit';
 import { CompteAvecFactures, deleteUserCompletely } from '@/lib/delete-user';
+import { connexionDuCompte } from '@/lib/compte';
+import { motDePasseCorrect } from '@/lib/auth/verifier-mot-de-passe';
+import { logAuditEvent } from '@/lib/audit';
+
+/**
+ * Supprimer son compte. Une session ouverte ne suffit plus (décision de Raouf,
+ * 27/11/2026, sur le conseil de l'OWASP : s'identifier à nouveau avant une
+ * action grave) : le mot de passe est redemandé ; un compte ouvert avec
+ * Google, sans mot de passe, doit s'être connecté il y a moins d'un quart
+ * d'heure.
+ */
+const FENETRE_GOOGLE_MS = 15 * 60 * 1000;
 
 export async function DELETE(request: NextRequest) {
-  // Rate limit: 1 per hour per IP
-  const ip = getClientIP(request);
-  const rl = await checkRateLimit(`delete-account:${ip}`, 1, 60 * 60 * 1000);
-  if (rl.limited) {
-    return NextResponse.json({ error: 'Trop de tentatives. Réessayez dans 1 heure.' }, { status: 429 });
-  }
-
   const supabase = await createServerSupabaseClient();
   if (!supabase) return NextResponse.json({ error: 'Service indisponible' }, { status: 503 });
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
+
+  // Cinq essais par quart d'heure et par compte : un mot de passe mal tapé ne bloque pas une heure.
+  const rl = await checkRateLimit(`delete-account:${user.id}`, 5, 15 * 60 * 1000);
+  if (rl.limited) {
+    return NextResponse.json({ error: 'Trop de tentatives. Réessayez dans 15 minutes.' }, { status: 429 });
+  }
+
+  let motDePasse: string | null = null;
+  try {
+    const corps = (await request.json()) as { currentPassword?: unknown };
+    if (typeof corps?.currentPassword === 'string' && corps.currentPassword) motDePasse = corps.currentPassword;
+  } catch {
+    // Corps absent : traité comme sans mot de passe.
+  }
+
+  if (connexionDuCompte(user).motDePasse) {
+    if (!motDePasse || !user.email || !(await motDePasseCorrect(user.email, motDePasse))) {
+      await logAuditEvent(user.id, 'account_delete_wrong_password', 'user', user.id);
+      return NextResponse.json({ error: 'Le mot de passe est incorrect.' }, { status: 400 });
+    }
+  } else {
+    const derniere = user.last_sign_in_at ? Date.parse(user.last_sign_in_at) : 0;
+    if (!derniere || Date.now() - derniere > FENETRE_GOOGLE_MS) {
+      return NextResponse.json({
+        error: 'Par sécurité, reconnectez-vous avec Google, puis supprimez votre compte dans le quart d’heure.',
+        reconnexion: true,
+      }, { status: 403 });
+    }
+  }
 
   const serviceClient = createServiceClient();
   if (!serviceClient) return NextResponse.json({ error: 'Service indisponible' }, { status: 503 });
@@ -48,7 +82,7 @@ export async function DELETE(request: NextRequest) {
     if (err instanceof CompteAvecFactures) {
       return NextResponse.json({ error: err.message, factures: true }, { status: 409 });
     }
-    return NextResponse.json({ error: 'La suppression n’a pas abouti. Écrivez-nous à contact@nfireport.com\u00A0: nous la terminerons pour vous.' }, { status: 500 });
+    return NextResponse.json({ error: 'La suppression n’a pas abouti. Écrivez-nous à contact@nfireport.com : nous la terminerons pour vous.' }, { status: 500 });
   }
 
   return NextResponse.json({ success: true });

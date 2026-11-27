@@ -7,6 +7,8 @@ import { useAuth } from '@/lib/auth-context';
 import { chargementComplet } from '@/lib/chargement-complet';
 import { getBillingOption } from '@/config/pricing';
 import { dateFr, etatAbonnement, salutation, type ResumeDuCompte } from '@/lib/compte';
+import { nomDePays } from '@/lib/pays';
+import { estCivilite, estTrancheAge, normaliserNom, professionConnue } from '@/lib/regles-du-compte';
 import { CompteVue, type ActionsCompte, type DonneesCompte, type ProfilAffiche, type Reponse } from './CompteVue';
 
 /**
@@ -60,18 +62,15 @@ export function AccountDashboard() {
   }, [isSignedIn, chargerResume]);
 
   const profilAffiche: ProfilAffiche = useMemo(() => ({
-    civilite: profile?.civility ?? '',
+    civilite: estCivilite(profile?.civility) ? profile?.civility : '',
     prenom: profile?.first_name ?? '',
     nom: profile?.last_name ?? '',
-    profession: profile?.profession ?? '',
+    profession: professionConnue(profile?.profession) ?? profile?.profession ?? '',
+    trancheAge: estTrancheAge(profile?.age_range) ? profile?.age_range : '',
     telephone: profile?.phone ?? '',
     adresse: profile?.address ?? '',
     ville: profile?.city ?? '',
-    codePostal: profile?.postal_code ?? '',
-    pays: profile?.country ?? '',
-    jourNaissance: profile?.birth_day != null ? String(profile.birth_day) : '',
-    moisNaissance: profile?.birth_month != null ? String(profile.birth_month) : '',
-    anneeNaissance: profile?.birth_year != null ? String(profile.birth_year) : '',
+    pays: nomDePays(profile?.country),
   }), [profile]);
 
   const actions: ActionsCompte = useMemo(() => ({
@@ -81,16 +80,13 @@ export function AccountDashboard() {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            civility: p.civilite || null,
-            first_name: p.prenom.trim(),
-            last_name: p.nom.trim(),
+            civility: p.civilite,
+            first_name: normaliserNom(p.prenom),
+            last_name: normaliserNom(p.nom),
             phone: p.telephone || null,
-            birth_day: p.jourNaissance ? Number(p.jourNaissance) : null,
-            birth_month: p.moisNaissance ? Number(p.moisNaissance) : null,
-            birth_year: p.anneeNaissance ? Number(p.anneeNaissance) : null,
+            age_range: p.trancheAge || null,
             address: p.adresse.trim() || null,
             city: p.ville.trim() || null,
-            postal_code: p.codePostal.trim() || null,
             country: p.pays || null,
             profession: p.profession || null,
           }),
@@ -144,6 +140,21 @@ export function AccountDashboard() {
       }
     },
 
+    async changerEmail({ nouvelle, motDePasse }): Promise<Reponse> {
+      try {
+        const res = await fetch('/api/user/change-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: nouvelle, currentPassword: motDePasse }),
+        });
+        const corps = (await res.json().catch(() => ({}))) as { message?: string; error?: string };
+        if (!res.ok) return { ok: false, message: corps.error || 'Le changement n’a pas pu être demandé. Réessayez.' };
+        return { ok: true, message: corps.message || 'Deux mails de confirmation sont partis.' };
+      } catch {
+        return { ok: false, message: RESEAU };
+      }
+    },
+
     async deconnexion() {
       await signOut();
       chargementComplet('/');
@@ -156,12 +167,21 @@ export function AccountDashboard() {
       return { ok: true, message: '' };
     },
 
-    async supprimerCompte(): Promise<Reponse> {
+    async supprimerCompte(motDePasse): Promise<Reponse> {
       try {
-        const res = await fetch('/api/user/delete-account', { method: 'DELETE' });
+        const res = await fetch('/api/user/delete-account', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(motDePasse ? { currentPassword: motDePasse } : {}),
+        });
         if (!res.ok) {
-          const corps = (await res.json().catch(() => ({}))) as { error?: string; factures?: boolean };
-          return { ok: false, message: corps.error || 'La suppression n’a pas abouti.', factures: corps.factures === true };
+          const corps = (await res.json().catch(() => ({}))) as { error?: string; factures?: boolean; reconnexion?: boolean };
+          return {
+            ok: false,
+            message: corps.error || 'La suppression n’a pas abouti.',
+            factures: corps.factures === true,
+            reconnexion: corps.reconnexion === true,
+          };
         }
         await signOut();
         chargementComplet('/');

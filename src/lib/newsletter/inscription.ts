@@ -13,6 +13,7 @@ export type IssueInscription =
   | 'deja-inscrit'
   | 'adresse-invalide'
   | 'trop-de-tentatives'
+  | 'controle-robot'
   | 'erreur'
   | 'hors-ligne';
 
@@ -22,6 +23,7 @@ export type EchecInscription = Exclude<IssueInscription, 'inscrit' | 'deja-inscr
 export const MESSAGES_ECHEC: Record<EchecInscription, string> = {
   'adresse-invalide': 'Cette adresse e-mail n’est pas valide. Vérifiez-la et réessayez.',
   'trop-de-tentatives': 'Trop de tentatives. Réessayez dans un moment.',
+  'controle-robot': 'La vérification anti-robots a échoué. Rechargez la page, puis réessayez.',
   erreur: 'Un souci est survenu. Réessayez dans un instant.',
   'hors-ligne': 'Vérifiez votre connexion et réessayez.',
 };
@@ -35,19 +37,24 @@ export function estUnEchec(issue: IssueInscription): issue is EchecInscription {
 export async function inscrireALaNewsletter(
   email: string,
   source: string,
+  /** Le jeton de Turnstile, le contrôle anti-robots, quand il est en service. */
+  captchaToken?: string | null,
 ): Promise<IssueInscription> {
   let reponse: Response;
   try {
     reponse = await fetch('/api/newsletter', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.trim(), source }),
+      body: JSON.stringify({ email: email.trim(), source, ...(captchaToken ? { captchaToken } : {}) }),
     });
   } catch {
     return 'hors-ligne';
   }
 
-  if (reponse.status === 400) return 'adresse-invalide';
+  if (reponse.status === 400) {
+    const corps = (await reponse.json().catch(() => null)) as { code?: unknown } | null;
+    return corps?.code === 'captcha' ? 'controle-robot' : 'adresse-invalide';
+  }
   if (reponse.status === 429) return 'trop-de-tentatives';
   if (!reponse.ok) return 'erreur';
 

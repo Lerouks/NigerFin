@@ -1,5 +1,6 @@
 'use client';
 
+import { Turnstile } from '@/components/securite/Turnstile';
 import { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, Send, Check } from 'lucide-react';
 import { useToast } from '@/components/Toast';
@@ -13,6 +14,8 @@ interface ContactSection {
 export function ContactForm() {
   const { show } = useToast();
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
+  const [jeton, setJeton] = useState<string | null>(null);
+  const [tour, setTour] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -45,8 +48,9 @@ export function ContactForm() {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, ...(jeton ? { captchaToken: jeton } : {}) }),
       });
+      setTour((t) => t + 1);
       if (!res.ok) {
         const data = await res.json().catch(() => null);
         const msg = data?.error || 'Une erreur est survenue. Veuillez réessayer.';
@@ -183,6 +187,7 @@ export function ContactForm() {
                     </div>
                   )}
 
+                  <Turnstile onJeton={setJeton} tour={tour} action="contact" />
                   <button type="submit" disabled={loading} className="bg-[#111] text-white px-7 py-3 rounded-xl hover:bg-[#222] transition-all duration-200 flex items-center gap-2 text-[14px] disabled:opacity-50 active:scale-[0.98] font-medium">
                     <Send className="w-4 h-4" />
                     {loading ? 'Envoi...' : 'Envoyer le message'}

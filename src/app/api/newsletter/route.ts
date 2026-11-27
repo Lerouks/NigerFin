@@ -7,11 +7,14 @@ import { checkRateLimit, getClientIP, RATE_LIMITS } from '@/lib/rate-limit';
 import { createServerSupabaseClient } from '@/lib/supabase';
 import { lienDesinscription, upsertNewsletterSubscriber } from '@/lib/newsletter/subscribers';
 import * as Sentry from '@sentry/nextjs';
+import { jetonTurnstileValable, MESSAGE_TURNSTILE } from '@/lib/turnstile';
 
 interface SubscribePayload {
   email?: string;
   /** Optional source hint sent by the client (e.g. 'popup', 'form_homepage'). */
   source?: string;
+  /** Le jeton de Turnstile, exigé seulement quand le contrôle anti-robots est en service. */
+  captchaToken?: string;
 }
 
 export async function POST(request: NextRequest) {
@@ -36,7 +39,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Corps de requête JSON invalide' }, { status: 400 });
     }
 
-    const { email, source } = body as SubscribePayload;
+    const { email, source, captchaToken } = body as SubscribePayload;
+
+    if (!(await jetonTurnstileValable(captchaToken, ip))) {
+      return NextResponse.json({ error: MESSAGE_TURNSTILE, code: 'captcha' }, { status: 400 });
+    }
 
     if (!isValidEmail(email)) {
       return NextResponse.json({ error: 'Email invalide' }, { status: 400 });

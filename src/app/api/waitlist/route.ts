@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isValidEmail, safeParseJSON } from '@/lib/validation';
 import { checkRateLimit, getClientIP, RATE_LIMITS } from '@/lib/rate-limit';
+import { jetonTurnstileValable, MESSAGE_TURNSTILE } from '@/lib/turnstile';
 import { SOURCE_LISTE_ATTENTE, upsertNewsletterSubscriber } from '@/lib/newsletter/subscribers';
 import { sendTransactionalEmail } from '@/lib/email';
 import { waitlistConfirmationEmail } from '@/lib/email-templates';
@@ -39,7 +40,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Corps de requête JSON invalide' }, { status: 400 });
     }
 
-    const { email } = body as { email?: string };
+    const { email, captchaToken } = body as { email?: string; captchaToken?: string };
+    if (!(await jetonTurnstileValable(captchaToken, ip))) {
+      return NextResponse.json({ error: MESSAGE_TURNSTILE, code: 'captcha' }, { status: 400 });
+    }
     if (!isValidEmail(email)) {
       return NextResponse.json({ error: 'Email invalide' }, { status: 400 });
     }

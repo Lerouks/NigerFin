@@ -10,35 +10,51 @@ import { safeNextPath } from '@/lib/validation';
 import { Eye, EyeOff, Mail, Lock, ArrowLeft, CheckCircle } from 'lucide-react';
 import { AuthLayout } from '@/components/AuthLayout';
 import { BoutonGoogle, useGoogleDisponible } from '@/components/auth/ConnexionGoogle';
+import { EtapeCode } from '@/components/compte/EtapeCode';
+import { Turnstile, turnstileActif } from '@/components/securite/Turnstile';
+import { estNonConfirme, phraseErreurAuth } from '@/lib/auth/messages';
 
 // Traits d'union insécables (\u2011) : « connectez-vous » et « e-mail » ne se coupent pas en fin de ligne.
 const ERREUR_GOOGLE = 'La connexion avec Google n’a pas abouti. Réessayez, ou connectez\u2011vous avec votre\u00a0e\u2011mail.';
+// Le lien d'un mail ouvert dans un autre navigateur ne peut pas ouvrir la session, mais l'adresse est confirmée.
+const ERREUR_LIEN = 'Ce lien n’a pas pu vous connecter. Si vous venez de confirmer votre adresse, connectez\u2011vous ci\u2011dessous.';
+const PAS_PRET = 'La vérification anti-robots n’est pas encore prête. Patientez une seconde, puis réessayez.';
 
 function ConnexionContent() {
   const searchParams = useSearchParams();
   const [email, setEmail] = useState(searchParams.get('email') || '');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState(searchParams.get('erreur') === 'google' ? ERREUR_GOOGLE : '');
+  const [error, setError] = useState(
+    searchParams.get('erreur') === 'google' ? ERREUR_GOOGLE : searchParams.get('error') === 'auth' ? ERREUR_LIEN : '',
+  );
   const [loading, setLoading] = useState(false);
-  const [forgotMode, setForgotMode] = useState(false);
+  const [forgotMode, setForgotMode] = useState(searchParams.get('oubli') === '1');
   const [resetSent, setResetSent] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
-  const { signIn } = useAuth();
+  const [nonConfirme, setNonConfirme] = useState(false);
+  const [etapeCode, setEtapeCode] = useState(false);
+  const [jeton, setJeton] = useState<string | null>(null);
+  const [tour, setTour] = useState(0);
+  const { signIn, renvoyerCode } = useAuth();
   const google = useGoogleDisponible();
   const suite = searchParams.get('redirect') ?? searchParams.get('next');
+  const inscription = suite ? `/inscription?next=${encodeURIComponent(safeNextPath(suite))}` : '/inscription';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setNonConfirme(false);
+    if (turnstileActif && !jeton) { setError(PAS_PRET); return; }
     setLoading(true);
 
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(email, password, jeton ?? undefined);
+    setTour((t) => t + 1);
 
     if (error) {
-      setError(error.message === 'Invalid login credentials'
-        ? 'Email ou mot de passe incorrect.'
-        : 'Une erreur est survenue. Veuillez réessayer.');
+      // Compte pas encore confirmé : on le dit, et on propose un nouveau code.
+      if (estNonConfirme(error)) setNonConfirme(true);
+      setError(phraseErreurAuth(error, 'Une erreur est survenue. Veuillez réessayer.'));
       setLoading(false);
     } else {
       // Redirect immediately - profile loads in background via auth-context.
@@ -56,20 +72,53 @@ function ConnexionContent() {
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) { setError('Veuillez entrer votre email.'); return; }
+    if (turnstileActif && !jeton) { setError(PAS_PRET); return; }
     setError('');
     setResetLoading(true);
     try {
       const supabase = createBrowserSupabaseClient();
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
         redirectTo: `${window.location.origin}/connexion/nouveau-mot-de-passe`,
+        ...(jeton ? { captchaToken: jeton } : {}),
       });
-      if (error) throw error;
-      setResetSent(true);
+      if (error) {
+        setError(phraseErreurAuth(error, 'L’envoi a échoué. Vérifiez votre adresse e-mail.'));
+      } else {
+        setResetSent(true);
+      }
     } catch {
-      setError("Erreur lors de l'envoi. Vérifiez votre email.");
+      setError('L’envoi a échoué. Vérifiez votre connexion, puis réessayez.');
     }
+    setTour((t) => t + 1);
     setResetLoading(false);
   };
+
+  const demanderCode = async () => {
+    if (turnstileActif && !jeton) { setError(PAS_PRET); return; }
+    setLoading(true);
+    const { error } = await renvoyerCode(email, suite ? safeNextPath(suite) : null, jeton ?? undefined);
+    setTour((t) => t + 1);
+    setLoading(false);
+    if (error) { setError(phraseErreurAuth(error)); return; }
+    setError('');
+    setNonConfirme(false);
+    setEtapeCode(true);
+  };
+
+  if (etapeCode) {
+    return (
+      <AuthLayout>
+        <div className="bg-white rounded-2xl shadow-[0_4px_40px_-12px_rgba(0,0,0,0.08)] p-10 sm:p-12 animate-fade-in-up">
+          <EtapeCode
+            email={email.trim()}
+            suite={suite ? safeNextPath(suite) : null}
+            onConfirme={() => chargementComplet(`/inscription/bienvenue?suite=${encodeURIComponent(safeNextPath(suite))}`)}
+            onModifierAdresse={() => setEtapeCode(false)}
+          />
+        </div>
+      </AuthLayout>
+    );
+  }
 
   if (resetSent) {
     return (
@@ -113,9 +162,10 @@ function ConnexionContent() {
                   placeholder="votre@email.com" />
               </div>
             </div>
+            <Turnstile onJeton={setJeton} tour={tour} action="mot-de-passe-oublie" />
             <button type="submit" disabled={resetLoading}
               className="w-full bg-[#111] text-white py-3.5 rounded-xl hover:bg-[#222] transition-all duration-200 disabled:opacity-50 text-[15px] font-medium active:scale-[0.98]">
-              {resetLoading ? 'Envoi...' : 'Envoyer le lien'}
+              {resetLoading ? 'Envoi…' : 'Envoyer le lien'}
             </button>
           </form>
         </div>
@@ -134,8 +184,18 @@ function ConnexionContent() {
         </div>
 
         {error && (
-          <div role="alert" className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-lg mb-6 text-pretty">
+          <div role="alert" className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-lg mb-6 text-balance">
             {error}
+            {nonConfirme && (
+              <button
+                type="button"
+                onClick={demanderCode}
+                disabled={loading}
+                className="mt-2 block font-semibold text-[#111] underline underline-offset-2 disabled:opacity-50"
+              >
+                Recevoir un code pour l’activer
+              </button>
+            )}
           </div>
         )}
 
@@ -187,6 +247,8 @@ function ConnexionContent() {
             </div>
           </div>
 
+          <Turnstile onJeton={setJeton} tour={tour} action="connexion" />
+
           <button
             type="submit"
             disabled={loading}
@@ -195,7 +257,7 @@ function ConnexionContent() {
             {loading ? (
               <span className="flex items-center justify-center gap-2">
                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Connexion...
+                Connexion…
               </span>
             ) : 'Se connecter'}
           </button>
@@ -214,7 +276,7 @@ function ConnexionContent() {
 
         <p className={`text-center text-sm text-gray-500${google ? ' mt-8' : ''}`}>
           Pas encore de compte&nbsp;?{' '}
-          <Link href="/inscription" className="text-[#111] hover:text-gold font-semibold transition-colors">
+          <Link href={inscription} className="text-[#111] hover:text-gold font-semibold transition-colors">
             Créer&nbsp;un&nbsp;compte
           </Link>
         </p>

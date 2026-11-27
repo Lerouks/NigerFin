@@ -18,6 +18,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
+import { estNonConfirme, phraseErreurAuth } from '@/lib/auth/messages';
+import { safeNextPath } from '@/lib/validation';
+import { FormulaireInscription } from '@/components/compte/FormulaireInscription';
+import { EtapeCode } from '@/components/compte/EtapeCode';
+import { Turnstile, turnstileActif } from '@/components/securite/Turnstile';
 import {
   PREMIUM_TIER,
   BILLING_OPTIONS,
@@ -29,7 +34,7 @@ import {
 
 export function PaymentContent() {
   const searchParams = useSearchParams();
-  const { isSignedIn, isLoading, user, signIn, signUp } = useAuth();
+  const { isSignedIn, isLoading, user, signIn, renvoyerCode } = useAuth();
 
   const tierParam = searchParams.get('tier');
   const cycleParam = searchParams.get('cycle') || 'yearly';
@@ -42,12 +47,15 @@ export function PaymentContent() {
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
-  const [accountCreated, setAccountCreated] = useState(false);
+  // Compte pas encore confirmé : un nouveau code, tapé sur place.
+  const [nonConfirme, setNonConfirme] = useState(false);
+  const [etapeCode, setEtapeCode] = useState(false);
+  // Turnstile, le contrôle anti-robots, quand il est en service.
+  const [jeton, setJeton] = useState<string | null>(null);
+  const [tour, setTour] = useState(0);
 
   // Forgot password
   const [forgotMode, setForgotMode] = useState(false);
@@ -91,64 +99,59 @@ export function PaymentContent() {
   const billingOption = getBillingOption(billingCycle);
   const price = getPrice(billingCycle);
 
-  // Auth handlers
+  // Auth handlers. La création de compte passe par le formulaire commun du
+  // site (FormulaireInscription), avec le code à 6 chiffres tapé ici : l'acheteur
+  // ne quitte plus la page de paiement pour confirmer son adresse.
+  const requete = searchParams.toString();
+  const pageDuPaiement = safeNextPath(requete ? `/paiement?${requete}` : '/paiement');
+  const PAS_PRET = 'La vérification anti-robots n’est pas encore prête. Patientez une seconde, puis réessayez.';
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError('');
+    setNonConfirme(false);
+    if (turnstileActif && !jeton) { setAuthError(PAS_PRET); return; }
     setAuthLoading(true);
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(email, password, jeton ?? undefined);
+    setTour((t) => t + 1);
     if (error) {
-      setAuthError(
-        error.message === 'Invalid login credentials'
-          ? 'Email ou mot de passe incorrect.'
-          : 'Une erreur est survenue. Veuillez réessayer.'
-      );
+      if (estNonConfirme(error)) setNonConfirme(true);
+      setAuthError(phraseErreurAuth(error, 'Une erreur est survenue. Veuillez réessayer.'));
     }
     setAuthLoading(false);
   };
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAuthError('');
-
-    if (password.length < 8) {
-      setAuthError('Le mot de passe doit contenir au moins 8 caractères.');
-      return;
-    }
-    if (password !== confirmPassword) {
-      setAuthError('Les mots de passe ne correspondent pas.');
-      return;
-    }
-
+  const demanderCode = async () => {
+    if (turnstileActif && !jeton) { setAuthError(PAS_PRET); return; }
     setAuthLoading(true);
-    const { error, existingUser } = await signUp(email, password, fullName);
-
-    if (existingUser) {
-      setAuthError('Un compte existe déjà avec cet email. Connectez-vous.');
-      setAuthMode('login');
-    } else if (error) {
-      setAuthError(error.message || 'Une erreur est survenue.');
-    } else {
-      setAccountCreated(true);
-    }
+    const { error } = await renvoyerCode(email, pageDuPaiement, jeton ?? undefined);
+    setTour((t) => t + 1);
     setAuthLoading(false);
+    if (error) { setAuthError(phraseErreurAuth(error)); return; }
+    setAuthError('');
+    setNonConfirme(false);
+    setEtapeCode(true);
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) { setAuthError('Veuillez entrer votre email.'); return; }
+    if (turnstileActif && !jeton) { setAuthError(PAS_PRET); return; }
     setAuthError('');
     setResetLoading(true);
     try {
       const supabase = createBrowserSupabaseClient();
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/compte?reset=true`,
+      // La même page que depuis la connexion : /connexion/nouveau-mot-de-passe.
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/connexion/nouveau-mot-de-passe`,
+        ...(jeton ? { captchaToken: jeton } : {}),
       });
-      if (error) throw error;
-      setResetSent(true);
+      if (error) setAuthError(phraseErreurAuth(error, 'L’envoi a échoué. Vérifiez votre adresse e-mail.'));
+      else setResetSent(true);
     } catch {
-      setAuthError("Erreur lors de l'envoi. Vérifiez votre email.");
+      setAuthError('L’envoi a échoué. Vérifiez votre connexion, puis réessayez.');
     }
+    setTour((t) => t + 1);
     setResetLoading(false);
   };
 
@@ -380,24 +383,15 @@ export function PaymentContent() {
                       <p className="text-[13px] text-[#999]">Connecté</p>
                     </div>
                   </div>
-                ) : accountCreated ? (
-                  /* Account created, needs email verification */
-                  <div className="text-center py-4">
-                    <div className="w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Mail className="w-6 h-6 text-emerald-500" />
-                    </div>
-                    <h3 className="text-lg font-bold mb-2">Vérifiez votre email</h3>
-                    <p className="text-gray-500 text-sm mb-4">
-                      Un lien de confirmation a été envoyé à <strong>{email}</strong>.
-                      Cliquez dessus pour activer votre compte, puis revenez ici.
-                    </p>
-                    <button
-                      onClick={() => { setAccountCreated(false); setAuthMode('login'); }}
-                      className="text-sm text-[#111] hover:underline font-medium"
-                    >
-                      Se connecter
-                    </button>
-                  </div>
+                ) : etapeCode ? (
+                  /* Compte pas encore confirmé : le code, tapé ici */
+                  <EtapeCode
+                    email={email.trim()}
+                    suite={pageDuPaiement}
+                    titre={false}
+                    onConfirme={() => { setEtapeCode(false); fetch('/api/auth/bienvenue', { method: 'POST' }).catch(() => {}); }}
+                    onModifierAdresse={() => setEtapeCode(false)}
+                  />
                 ) : resetSent ? (
                   /* Reset email sent */
                   <div className="text-center py-4">
@@ -441,7 +435,7 @@ export function PaymentContent() {
                           required
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="w-full border border-black/8 rounded-xl pl-11 pr-4 py-3 bg-background focus:outline-hidden focus:border-[#8a8e95]/30 focus:ring-2 focus:ring-[#8a8e95]/10 transition-all text-[14px]"
+                          className="w-full border border-black/8 rounded-xl pl-11 pr-4 py-3 bg-background focus:outline-hidden focus:border-[#8a8e95]/30 focus:ring-2 focus:ring-[#8a8e95]/10 transition-all text-base"
                           aria-label="Adresse email" placeholder="votre@email.com"
                         />
                       </div>
@@ -450,8 +444,9 @@ export function PaymentContent() {
                         disabled={resetLoading}
                         className="w-full bg-[#111] text-white py-3 rounded-xl hover:bg-[#222] transition-all text-[14px] font-medium disabled:opacity-50"
                       >
-                        {resetLoading ? 'Envoi...' : 'Envoyer le lien'}
+                        {resetLoading ? 'Envoi…' : 'Envoyer le lien'}
                       </button>
+                      <Turnstile onJeton={setJeton} tour={tour} action="mot-de-passe-oublie" />
                     </form>
                   </div>
                 ) : (
@@ -463,32 +458,41 @@ export function PaymentContent() {
                     <p className="text-[13px] text-gray-500 mb-5">
                       {authMode === 'login'
                         ? 'Connectez-vous pour continuer votre paiement.'
-                        : 'Créez un compte pour accéder à NFI Report.'
+                        : 'Créez votre compte, puis tapez le code reçu par e-mail.'
                       }
                     </p>
 
+                    {authMode === 'signup' ? (
+                      <FormulaireInscription
+                        variante="paiement"
+                        suite={pageDuPaiement}
+                        emailInitial={email}
+                        onCompteExistant={(adresse) => {
+                          setEmail(adresse);
+                          setAuthMode('login');
+                          setAuthError('Un compte existe déjà avec cette adresse. Connectez-vous.');
+                        }}
+                        onConnecte={() => setAuthError('')}
+                      />
+                    ) : (
+                    <>
                     {authError && (
-                      <div role="alert" className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">
+                      <div role="alert" className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-lg mb-4 text-pretty">
                         {authError}
+                        {nonConfirme && (
+                          <button
+                            type="button"
+                            onClick={demanderCode}
+                            disabled={authLoading}
+                            className="mt-2 block font-semibold text-[#111] underline underline-offset-2 disabled:opacity-50"
+                          >
+                            Recevoir un code pour l’activer
+                          </button>
+                        )}
                       </div>
                     )}
 
-                    <form onSubmit={authMode === 'login' ? handleLogin : handleSignup} className="space-y-4">
-                      {authMode === 'signup' && (
-                        <div className="relative">
-                          <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                          <input
-                            type="text"
-                            required
-                            value={fullName}
-                            onChange={(e) => setFullName(e.target.value)}
-                            className="w-full border border-black/8 rounded-xl pl-11 pr-4 py-3 bg-background focus:outline-hidden focus:border-[#8a8e95]/30 focus:ring-2 focus:ring-[#8a8e95]/10 transition-all text-[14px]"
-                            aria-label="Nom complet" placeholder="Nom complet"
-                            autoComplete="name"
-                          />
-                        </div>
-                      )}
-
+                    <form onSubmit={handleLogin} className="space-y-4">
                       <div className="relative">
                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                         <input
@@ -496,7 +500,7 @@ export function PaymentContent() {
                           required
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="w-full border border-black/8 rounded-xl pl-11 pr-4 py-3 bg-background focus:outline-hidden focus:border-[#8a8e95]/30 focus:ring-2 focus:ring-[#8a8e95]/10 transition-all text-[14px]"
+                          className="w-full border border-black/8 rounded-xl pl-11 pr-4 py-3 bg-background focus:outline-hidden focus:border-[#8a8e95]/30 focus:ring-2 focus:ring-[#8a8e95]/10 transition-all text-base"
                           aria-label="Adresse email" placeholder="Entrez votre email"
                           autoComplete="email"
                         />
@@ -507,12 +511,11 @@ export function PaymentContent() {
                         <input
                           type={showPassword ? 'text' : 'password'}
                           required
-                          minLength={authMode === 'signup' ? 8 : undefined}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className="w-full border border-black/8 rounded-xl pl-11 pr-11 py-3 bg-background focus:outline-hidden focus:border-[#8a8e95]/30 focus:ring-2 focus:ring-[#8a8e95]/10 transition-all text-[14px]"
-                          aria-label="Mot de passe" placeholder={authMode === 'signup' ? 'Minimum 8 caractères' : 'Mot de passe'}
-                          autoComplete={authMode === 'login' ? 'current-password' : 'new-password'}
+                          className="w-full border border-black/8 rounded-xl pl-11 pr-11 py-3 bg-background focus:outline-hidden focus:border-[#8a8e95]/30 focus:ring-2 focus:ring-[#8a8e95]/10 transition-all text-base"
+                          aria-label="Mot de passe" placeholder="Mot de passe"
+                          autoComplete="current-password"
                         />
                         <button
                           type="button"
@@ -524,39 +527,18 @@ export function PaymentContent() {
                         </button>
                       </div>
 
-                      {authMode === 'signup' && (
-                        <div className="relative">
-                          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                          <input
-                            type={showPassword ? 'text' : 'password'}
-                            required
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            className={`w-full border rounded-xl pl-11 pr-4 py-3 bg-background focus:outline-hidden focus:ring-2 transition-all text-[14px] ${
-                              confirmPassword && password !== confirmPassword
-                                ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                                : 'border-black/8 focus:border-[#8a8e95]/30 focus:ring-[#8a8e95]/10'
-                            }`}
-                            aria-label="Confirmer le mot de passe" placeholder="Confirmez le mot de passe"
-                            autoComplete="new-password"
-                          />
-                        </div>
-                      )}
+                      <Turnstile onJeton={setJeton} tour={tour} action="connexion-paiement" />
 
                       <button
                         type="submit"
-                        disabled={authLoading || (authMode === 'signup' && (password.length < 8 || password !== confirmPassword))}
+                        disabled={authLoading}
                         className="w-full bg-[#111] text-white py-3 rounded-xl hover:bg-[#222] transition-all text-[14px] font-medium disabled:opacity-50 flex items-center justify-center gap-2"
                       >
-                        {authLoading ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : authMode === 'login' ? (
-                          'Continuer'
-                        ) : (
-                          'Créer mon compte'
-                        )}
+                        {authLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Continuer'}
                       </button>
                     </form>
+                    </>
+                    )}
 
                     {authMode === 'login' && (
                       <button

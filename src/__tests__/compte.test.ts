@@ -9,7 +9,7 @@ import {
   salutation,
   telephoneLisible,
 } from '@/lib/compte';
-import { criteresMotDePasse, erreurMotDePasse } from '@/lib/mot-de-passe';
+import { erreurMotDePasse } from '@/lib/mot-de-passe';
 
 const FINE = '\u202F';
 const NB = '\u00A0';
@@ -106,12 +106,16 @@ describe('« Mon compte » : l’état de l’abonnement', () => {
 
 describe('« Mon compte » : le téléphone', () => {
   it('un numéro du Niger se lit par paires, soudées', () => {
-    expect(telephoneLisible('+22790000000')).toBe(['+227', '90', '00', '00', '00'].join(NB));
-    expect(telephoneLisible('+227 90 00 00 00')).toBe(['+227', '90', '00', '00', '00'].join(NB));
+    expect(telephoneLisible('+22790123456')).toBe(['+227', '90', '12', '34', '56'].join(NB));
+    expect(telephoneLisible('+227 90 12 34 56')).toBe(['+227', '90', '12', '34', '56'].join(NB));
   });
 
-  it('un numéro d’une autre forme reste tel qu’il a été saisi', () => {
-    expect(telephoneLisible('+33612345678')).toBe('+33612345678');
+  it('un numéro d’un autre pays se lit comme on l’écrit là-bas', () => {
+    expect(telephoneLisible('+33612345678')).toBe(['+33', '6', '12', '34', '56', '78'].join(NB));
+  });
+
+  it('un numéro illisible reste tel qu’il a été saisi', () => {
+    expect(telephoneLisible('+2271234')).toBe('+2271234');
   });
 });
 
@@ -142,18 +146,26 @@ describe('« Mon compte » : la façon de se connecter', () => {
 });
 
 describe('les règles du mot de passe', () => {
-  it('tout signe compte comme caractère spécial, comme sur la page « nouveau mot de passe »', () => {
+  it('8 caractères suffisent, sans majuscule, chiffre ni caractère spécial (NIST SP 800-63B)', () => {
+    expect(erreurMotDePasse('fleuve du niger')).toBeNull();
+    expect(erreurMotDePasse('tamarinier')).toBeNull();
     expect(erreurMotDePasse('Niamey-2026')).toBeNull();
-    expect(erreurMotDePasse('Niamey?2026')).toBeNull();
-    expect(erreurMotDePasse('Niamey 2026')).toBeNull();
-    expect(criteresMotDePasse('Niamey2026').special).toBe(false);
   });
 
-  it('chaque critère manquant a sa phrase', () => {
-    expect(erreurMotDePasse('Ni-1')).toMatch(/au moins 8 caractères/);
-    expect(erreurMotDePasse('niamey-2026')).toMatch(/majuscule/);
-    expect(erreurMotDePasse('Niamey-deux')).toMatch(/chiffre/);
-    expect(erreurMotDePasse('Niamey2026')).toMatch(/caractère spécial/);
-    expect(erreurMotDePasse(`A1-${'x'.repeat(130)}`)).toMatch(/dépasser 128/);
+  it('trop court ou trop long : la phrase dit la limite', () => {
+    expect(erreurMotDePasse('Ni-1')).toMatch(/au moins 8/);
+    expect(erreurMotDePasse('x'.repeat(129))).toMatch(/dépasser 128/);
+  });
+
+  it('les mots de passe courants, les suites et les répétitions sont refusés', () => {
+    for (const mot of ['password', '12345678', 'azertyuiop', 'motdepasse', 'Niger2026', 'aaaaaaaa', 'abababab', '87654321']) {
+      expect(erreurMotDePasse(mot), mot).toMatch(/trop facile/);
+    }
+  });
+
+  it('ni l’adresse e-mail ni le nom de la personne', () => {
+    expect(erreurMotDePasse('aissatou.ali@exemple.ne', { email: 'aissatou.ali@exemple.ne' })).toMatch(/adresse e-mail/);
+    expect(erreurMotDePasse('aissatou2026', { email: 'aissatou@exemple.ne' })).toMatch(/adresse e-mail/);
+    expect(erreurMotDePasse('Moussa123', { prenom: 'Abdoul', nom: 'Moussa' })).toMatch(/votre nom/);
   });
 });

@@ -1,192 +1,126 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useId, useState } from 'react';
+import type { CountryCode } from 'libphonenumber-js';
+import { AUTRES_PAYS, PAYS_AFRIQUE_OUEST } from '@/lib/pays';
+import {
+  decomposerTelephone,
+  erreurTelephone,
+  estPaysDuTelephone,
+  indicatif,
+  saisieLisible,
+} from '@/lib/telephone';
 
-// ─── Country codes ───────────────────────────────────────────────────────────
+/**
+ * Le téléphone, facultatif : l'indicatif du pays, puis le numéro, regroupé
+ * comme on l'écrit dans ce pays. La valeur rendue est le numéro international
+ * (« +22790123456 »), ou une chaîne vide. La longueur de chaque pays vient de
+ * la bibliothèque de Google (src/lib/telephone.ts), plus d'une liste écrite à
+ * la main.
+ */
 
-interface CountryCode {
-  flag: string;
-  name: string;
-  code: string;
-  digits: number;
-  placeholder: string;
+/** Le drapeau d'un pays, à partir de son code ISO. */
+function drapeau(iso: string): string {
+  return String.fromCodePoint(...[...iso.toUpperCase()].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65));
 }
-
-const WEST_AFRICA: CountryCode[] = [
-  { flag: '🇳🇪', name: 'Niger', code: '+227', digits: 8, placeholder: '90 00 00 00' },
-  { flag: '🇧🇫', name: 'Burkina Faso', code: '+226', digits: 8, placeholder: '70 00 00 00' },
-  { flag: '🇲🇱', name: 'Mali', code: '+223', digits: 8, placeholder: '70 00 00 00' },
-  { flag: '🇸🇳', name: 'Sénégal', code: '+221', digits: 9, placeholder: '77 000 00 00' },
-  { flag: '🇨🇮', name: 'Côte d\'Ivoire', code: '+225', digits: 10, placeholder: '07 00 00 00 00' },
-  { flag: '🇬🇭', name: 'Ghana', code: '+233', digits: 9, placeholder: '24 000 0000' },
-  { flag: '🇬🇳', name: 'Guinée', code: '+224', digits: 9, placeholder: '620 00 00 00' },
-  { flag: '🇧🇯', name: 'Bénin', code: '+229', digits: 8, placeholder: '90 00 00 00' },
-  { flag: '🇹🇬', name: 'Togo', code: '+228', digits: 8, placeholder: '90 00 00 00' },
-  { flag: '🇲🇷', name: 'Mauritanie', code: '+222', digits: 8, placeholder: '30 00 00 00' },
-  { flag: '🇸🇱', name: 'Sierra Leone', code: '+232', digits: 8, placeholder: '76 00 00 00' },
-  { flag: '🇱🇷', name: 'Liberia', code: '+231', digits: 8, placeholder: '77 00 00 00' },
-  { flag: '🇬🇲', name: 'Gambie', code: '+220', digits: 7, placeholder: '300 0000' },
-  { flag: '🇬🇼', name: 'Guinée-Bissau', code: '+245', digits: 7, placeholder: '955 0000' },
-  { flag: '🇨🇻', name: 'Cap-Vert', code: '+238', digits: 7, placeholder: '991 0000' },
-];
-
-const OTHER_COUNTRIES: CountryCode[] = [
-  { flag: '🇳🇬', name: 'Nigeria', code: '+234', digits: 10, placeholder: '801 000 0000' },
-  { flag: '🇨🇲', name: 'Cameroun', code: '+237', digits: 9, placeholder: '6 70 00 00 00' },
-  { flag: '🇹🇩', name: 'Tchad', code: '+235', digits: 8, placeholder: '66 00 00 00' },
-  { flag: '🇩🇿', name: 'Algérie', code: '+213', digits: 9, placeholder: '5 50 00 00 00' },
-  { flag: '🇲🇦', name: 'Maroc', code: '+212', digits: 9, placeholder: '6 00 00 00 00' },
-  { flag: '🇹🇳', name: 'Tunisie', code: '+216', digits: 8, placeholder: '20 00 00 00' },
-  { flag: '🇪🇬', name: 'Égypte', code: '+20', digits: 10, placeholder: '100 000 0000' },
-  { flag: '🇫🇷', name: 'France', code: '+33', digits: 9, placeholder: '6 00 00 00 00' },
-  { flag: '🇧🇪', name: 'Belgique', code: '+32', digits: 9, placeholder: '470 00 00 00' },
-  { flag: '🇨🇭', name: 'Suisse', code: '+41', digits: 9, placeholder: '76 000 00 00' },
-  { flag: '🇺🇸', name: 'États-Unis', code: '+1', digits: 10, placeholder: '201 555 0000' },
-  { flag: '🇬🇧', name: 'Royaume-Uni', code: '+44', digits: 10, placeholder: '7911 123456' },
-  { flag: '🇩🇪', name: 'Allemagne', code: '+49', digits: 11, placeholder: '151 1234 5678' },
-  { flag: '🇸🇦', name: 'Arabie Saoudite', code: '+966', digits: 9, placeholder: '50 000 0000' },
-  { flag: '🇦🇪', name: 'Émirats', code: '+971', digits: 9, placeholder: '50 000 0000' },
-  { flag: '🇨🇳', name: 'Chine', code: '+86', digits: 11, placeholder: '131 0000 0000' },
-  { flag: '🇮🇳', name: 'Inde', code: '+91', digits: 10, placeholder: '98765 43210' },
-];
-
-const ALL_COUNTRIES = [...WEST_AFRICA, ...OTHER_COUNTRIES];
-
-function findCountryByCode(code: string): CountryCode {
-  return ALL_COUNTRIES.find((c) => c.code === code) || WEST_AFRICA[0]!;
-}
-
-// ─── Formatting ──────────────────────────────────────────────────────────────
-
-function formatNumber(raw: string): string {
-  const digits = raw.replace(/\D/g, '');
-  // Format in groups of 2
-  return digits.replace(/(\d{2})(?=\d)/g, '$1 ').trim();
-}
-
-// ─── Component ───────────────────────────────────────────────────────────────
 
 interface PhoneFieldProps {
-  /** Full phone number with country code, e.g. "+22790000000" */
+  /** Le numéro international, par exemple « +22790123456 », ou une chaîne vide. */
   value: string;
-  onChange: (fullPhone: string) => void;
+  onChange: (numero: string) => void;
   disabled?: boolean;
+  /** Texte d'aide sous le champ. */
+  aide?: string;
 }
 
-export function PhoneField({ value, onChange, disabled }: PhoneFieldProps) {
-  // Parse initial value into country code + number
-  const [countryCode, setCountryCode] = useState('+227');
-  const [number, setNumber] = useState('');
+export function PhoneField({ value, onChange, disabled, aide }: PhoneFieldProps) {
+  const idNumero = useId();
+  const idAide = useId();
+  const [pays, setPays] = useState<CountryCode>(() => decomposerTelephone(value).pays);
+  const [chiffres, setChiffres] = useState(() => decomposerTelephone(value).national);
 
-  // Parse value on mount and when value changes externally
+  // Une valeur changée de l'extérieur (annulation, enregistrement) se relit.
   useEffect(() => {
-    if (!value) {
-      setCountryCode('+227');
-      setNumber('');
-      return;
-    }
-
-    // Find matching country code (longest match first)
-    const sorted = [...ALL_COUNTRIES].sort((a, b) => b.code.length - a.code.length);
-    const match = sorted.find((c) => value.startsWith(c.code));
-    if (match) {
-      setCountryCode(match.code);
-      setNumber(value.slice(match.code.length));
-    } else {
-      // Fallback: assume it's just digits
-      setNumber(value.replace(/\D/g, ''));
-    }
+    const actuel = chiffres ? `${indicatif(pays)}${chiffres}` : '';
+    if (value === actuel) return;
+    const lu = decomposerTelephone(value);
+    setPays(lu.pays);
+    setChiffres(lu.national);
+    // On ne relit que si la valeur vient d'ailleurs que de ce champ.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
-  const country = findCountryByCode(countryCode);
+  function emettre(nouveauPays: CountryCode, nouveauxChiffres: string) {
+    onChange(nouveauxChiffres ? `${indicatif(nouveauPays)}${nouveauxChiffres}` : '');
+  }
 
-  const handleCountryChange = useCallback((newCode: string) => {
-    setCountryCode(newCode);
-    // Re-emit with new code
-    if (number) {
-      onChange(`${newCode}${number}`);
-    } else {
-      onChange('');
-    }
-  }, [number, onChange]);
+  function changerPays(iso: string) {
+    if (!estPaysDuTelephone(iso)) return;
+    setPays(iso);
+    emettre(iso, chiffres);
+  }
 
-  const handleNumberChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value.replace(/\D/g, '').slice(0, country.digits);
-    setNumber(raw);
-    if (raw) {
-      onChange(`${countryCode}${raw}`);
-    } else {
-      onChange('');
+  function changerNumero(saisie: string) {
+    // Un numéro collé avec son indicatif (« +227 90… » ou « 00227 90… ») : on
+    // garde la partie nationale si l'indicatif est celui du pays choisi.
+    let net = saisie.replace(/[^\d+]/g, '');
+    const prefixe = indicatif(pays).slice(1);
+    if (net.startsWith('+')) net = net.slice(1);
+    else if (net.startsWith('00')) net = net.slice(2);
+    else net = net.replace(/\+/g, '');
+    if (saisie.trim().startsWith('+') || saisie.trim().startsWith('00')) {
+      if (net.startsWith(prefixe)) net = net.slice(prefixe.length);
     }
-  }, [countryCode, country.digits, onChange]);
+    const nouveaux = net.replace(/\D/g, '').slice(0, 15);
+    setChiffres(nouveaux);
+    emettre(pays, nouveaux);
+  }
 
   return (
     <div>
-      <label htmlFor="phone-number" className="block text-[13px] font-medium text-gray-700 mb-1.5">Téléphone</label>
+      <label htmlFor={idNumero} className="block text-[13px] font-medium text-gray-700 mb-1.5">Téléphone</label>
       <div className="flex gap-2">
-        {/* Country code selector */}
         <select
-          value={countryCode}
-          onChange={(e) => handleCountryChange(e.target.value)}
-          aria-label="Indicatif pays"
+          value={pays}
+          onChange={(e) => changerPays(e.target.value)}
+          aria-label="Indicatif du pays"
           disabled={disabled}
           className="border border-black/8 rounded-lg px-2 py-3 text-[13px] bg-background disabled:text-gray-500 min-w-0 w-[120px] sm:w-[140px] shrink-0"
         >
-          <optgroup label="Afrique de l'Ouest">
-            {WEST_AFRICA.map((c) => (
-              <option key={c.code} value={c.code}>
-                {c.flag} {c.code}
+          <optgroup label="Afrique de l’Ouest">
+            {PAYS_AFRIQUE_OUEST.map((p) => (
+              <option key={p.iso} value={p.iso} aria-label={`${p.nom}, ${indicatif(p.iso as CountryCode)}`}>
+                {drapeau(p.iso)} {indicatif(p.iso as CountryCode)}
               </option>
             ))}
           </optgroup>
           <optgroup label="Autres pays">
-            {OTHER_COUNTRIES.map((c) => (
-              <option key={c.code} value={c.code}>
-                {c.flag} {c.code}
+            {AUTRES_PAYS.map((p) => (
+              <option key={p.iso} value={p.iso} aria-label={`${p.nom}, ${indicatif(p.iso as CountryCode)}`}>
+                {drapeau(p.iso)} {indicatif(p.iso as CountryCode)}
               </option>
             ))}
           </optgroup>
         </select>
 
-        {/* Number input */}
         <input
-          id="phone-number"
+          id={idNumero}
           type="tel"
-          inputMode="numeric"
-          value={formatNumber(number)}
-          onChange={handleNumberChange}
+          inputMode="tel"
+          autoComplete="tel-national"
+          value={saisieLisible(chiffres, pays)}
+          onChange={(e) => changerNumero(e.target.value)}
           disabled={disabled}
-          maxLength={country.digits + Math.floor(country.digits / 2)}
-          placeholder={country.placeholder}
+          aria-describedby={aide ? idAide : undefined}
           className="flex-1 border border-black/8 rounded-lg px-4 py-3 text-[14px] bg-background focus:outline-hidden focus:ring-1 focus:ring-black/10 disabled:text-gray-500 min-w-0"
         />
       </div>
+      {aide && <p id={idAide} className="mt-1.5 text-[13px] leading-[1.45] text-[#5f636b]">{aide}</p>}
     </div>
   );
 }
 
-/** Validate a full phone number (code + digits). Returns error message or null. */
-export function validatePhone(fullPhone: string): string | null {
-  if (!fullPhone) return null; // Optional field
-
-  const sorted = [...ALL_COUNTRIES].sort((a, b) => b.code.length - a.code.length);
-  const match = sorted.find((c) => fullPhone.startsWith(c.code));
-
-  if (!match) {
-    // Unknown code, just check basic length
-    const digits = fullPhone.replace(/\D/g, '');
-    if (digits.length < 8 || digits.length > 15) return 'Numéro de téléphone invalide.';
-    return null;
-  }
-
-  const numberPart = fullPhone.slice(match.code.length);
-  if (numberPart.length !== match.digits) {
-    return `Le numéro ${match.name} doit contenir ${match.digits} chiffres.`;
-  }
-
-  if (!/^\d+$/.test(numberPart)) {
-    return 'Le numéro ne doit contenir que des chiffres.';
-  }
-
-  return null;
+/** La phrase d'erreur d'un numéro, ou null s'il est vide ou valable. */
+export function validatePhone(numero: string): string | null {
+  return erreurTelephone(numero);
 }

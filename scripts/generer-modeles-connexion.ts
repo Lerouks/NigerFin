@@ -1,7 +1,7 @@
 /**
- * Génère les 6 mails de connexion envoyés par Supabase (inscription, lien de
+ * Génère les 7 mails de connexion envoyés par Supabase (inscription, lien de
  * connexion, mot de passe oublié, changement d'adresse, invitation, code de
- * vérification) dans le design « Cadre », avec le même code que les mails
+ * vérification, alerte « adresse changée ») dans le design « Cadre », avec le même code que les mails
  * du site (src/lib/emails/edition.ts).
  *
  * Usage : npx tsx scripts/generer-modeles-connexion.ts
@@ -40,20 +40,27 @@ interface Modele {
   bouton?: string;
   validite?: string;
   code?: boolean;
+  /** Le code se lit avant le bouton (inscription : le code d'abord, le lien en secours). */
+  codeAvant?: boolean;
   fin: string;
   raison: string;
 }
 
 const MODELES: Modele[] = [
   {
+    // Le code à 6 chiffres d'abord, tapé sur le site sans le quitter (décision de
+    // Raouf, 26/11/2026) ; le bouton reste pour qui préfère cliquer.
     fichier: 'confirmation', cle: 'confirmation',
     objet: 'Confirmez votre adresse pour activer votre compte',
-    apercu: 'Un clic suffit pour activer votre compte.',
+    apercu: 'Votre code à 6 chiffres, à taper sur le site.',
     titre: 'Activez votre compte',
-    corps: ['Pour activer le compte NFI REPORT que vous venez de créer, confirmez que cette adresse est bien la vôtre.'],
+    corps: ['Pour activer le compte NFI REPORT que vous venez de créer, tapez ce code sur le site.'],
+    code: true,
+    codeAvant: true,
     adresse: ['Adresse', EMAIL_],
+    suite: ['Vous pouvez aussi confirmer votre adresse avec le bouton suivant.'],
     bouton: 'Confirmer mon adresse',
-    validite: 'Ce lien reste valable une heure.',
+    validite: 'Le code et le lien restent valables une heure.',
     fin: "Si vous n'avez pas créé de compte, ignorez simplement ce message, et aucun compte ne sera activé.",
     raison: "Vous recevez ce message parce qu'un compte NFI REPORT vient d'être créé avec cette adresse.",
   },
@@ -115,12 +122,26 @@ const MODELES: Modele[] = [
     fin: "Si vous n'avez rien demandé, ignorez simplement ce message.",
     raison: "Vous recevez ce message parce qu'une vérification a été demandée sur votre compte NFI REPORT.",
   },
+  {
+    // Envoyé à l'ancienne adresse une fois le changement fait (alerte activée le 27/11/2026).
+    fichier: 'email-changed', cle: 'email_changed_notification',
+    objet: 'L’adresse e-mail de votre compte a changé',
+    apercu: 'Votre compte NFI REPORT a une nouvelle adresse.',
+    titre: 'Votre adresse a changé',
+    corps: ["L'adresse e-mail de votre compte NFI REPORT vient de changer. Les messages du site partiront désormais vers la nouvelle."],
+    adresse: ['Nouvelle adresse', EMAIL_],
+    fin: "Si ce changement ne vient pas de vous, écrivez-nous à contact@nfireport.com.",
+    raison: "Vous recevez ce message parce que l'adresse de votre compte NFI REPORT a changé.",
+  },
 ];
 
 const sortie = join(process.cwd(), 'supabase', 'templates');
 const objets: Record<string, string> = {};
 for (const m of MODELES) {
+  const blocCode = blanc(24) + `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="f-bloc" bgcolor="#f5f5f6" style="background:#f5f5f6;border-radius:6px;border-collapse:separate;"><tr><td align="center" style="padding:24px 0 26px;">`
+    + `<span class="c-encre" style="font-family:'SF Mono',Menlo,Consolas,'Roboto Mono',monospace;font-size:34px;line-height:40px;font-weight:600;letter-spacing:0.28em;color:#111111;">${CODE_}</span></td></tr></table>`;
   let corps = titre(m.titre) + paraHtml('Bonjour,', { marge: '22px 0 0' }) + m.corps.map((p) => para(p)).join('')
+    + (m.code && m.codeAvant ? blocCode : '')
     + (m.adresse ? blanc(22) + fiche([[m.adresse[0], m.adresse[1]]]) : '')
     + (m.suite ? m.suite.map((p) => para(p, { marge: '20px 0 0' })).join('') : '');
   if (m.bouton) {
@@ -129,10 +150,7 @@ for (const m of MODELES) {
       + para("Si le bouton ne s'ouvre pas, copiez cette adresse dans votre navigateur :", { role: 'doux', taille: 14, hauteur: 22, marge: m.validite ? '8px 0 0' : '26px 0 0' })
       + adresseBrute(URL_);
   }
-  if (m.code) {
-    corps += blanc(24) + `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="f-bloc" bgcolor="#f5f5f6" style="background:#f5f5f6;border-radius:6px;border-collapse:separate;"><tr><td align="center" style="padding:24px 0 26px;">`
-      + `<span class="c-encre" style="font-family:'SF Mono',Menlo,Consolas,'Roboto Mono',monospace;font-size:34px;line-height:40px;font-weight:600;letter-spacing:0.28em;color:#111111;">${CODE_}</span></td></tr></table>`;
-  }
+  if (m.code && !m.codeAvant) corps += blocCode;
   corps += blanc(24) + filet() + para(m.fin, { role: 'doux', taille: 14, hauteur: 22, marge: '18px 0 0' }) + signature();
   const html = documentEdition({
     objet: m.objet,

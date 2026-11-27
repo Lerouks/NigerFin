@@ -107,6 +107,8 @@ export interface UserProfile {
   premium_articles_reset_at: string | null;
   newsletter_subscribed: boolean;
   profile_completed: boolean | null;
+  /** Tranche d'âge (src/lib/regles-du-compte.ts, TRANCHES_AGE), facultative. */
+  age_range: string | null;
 
   // Timestamps
   created_at: string;

@@ -4,5 +4,6 @@
   "recovery": "Choisissez un nouveau mot de passe",
   "email_change": "Confirmez votre nouvelle adresse",
   "invite": "Vous êtes invité à rejoindre NFI REPORT",
-  "reauthentication": "Votre code de vérification"
+  "reauthentication": "Votre code de vérification",
+  "email_changed_notification": "L’adresse e-mail de votre compte a changé"
 }

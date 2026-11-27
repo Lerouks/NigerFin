@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { safeNextPath } from '@/lib/validation';
-import { envoyerBienvenueSiNouveau } from '@/lib/auth/bienvenue';
 import * as Sentry from '@sentry/nextjs';
 
 export async function GET(request: NextRequest) {
@@ -33,12 +32,10 @@ export async function GET(request: NextRequest) {
     );
 
     let exchangeError: Error | null = null;
-    let data: { user: { id: string; email?: string; user_metadata?: Record<string, unknown> } | null; session: unknown } | null = null;
 
     try {
       const result = await supabase.auth.exchangeCodeForSession(code);
       exchangeError = result.error;
-      data = result.data;
     } catch (err) {
       // Sec H-5 : on n'imprime pas l'erreur brute (peut contenir PKCE verifier ou tokens
       // d'un debug Supabase). Sentry reste capture pour suivi.
@@ -47,13 +44,9 @@ export async function GET(request: NextRequest) {
     }
 
     if (!exchangeError) {
-      // Send welcome email for newly confirmed users
-      if (data?.user) {
-        const userId = data.user.id;
-        envoyerBienvenueSiNouveau(userId, data.user.email, data.user.user_metadata?.full_name as string | undefined).catch((err) => {
-          Sentry.captureException(err, { tags: { context: 'welcome-email' }, extra: { userId } });
-        });
-      }
+      // Le mail de bienvenue part de l'écran de bienvenue (/api/auth/bienvenue),
+      // une seule fois : ce retour sert aussi aux confirmations de changement
+      // d'adresse, qui ne doivent pas en envoyer.
       // Prevent caching of auth callback responses
       supabaseResponse.headers.set('Cache-Control', 'no-store, max-age=0');
       return supabaseResponse;

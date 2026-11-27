@@ -1767,6 +1767,7 @@ export type Database = {
           premium_articles_reset_at: string | null
           profession: string | null
           profile_completed: boolean | null
+          age_range: string | null
           role: string
           subscription_end: string | null
           subscription_granted_by: string | null
@@ -1799,6 +1800,7 @@ export type Database = {
           premium_articles_reset_at?: string | null
           profession?: string | null
           profile_completed?: boolean | null
+          age_range?: string | null
           role?: string
           subscription_end?: string | null
           subscription_granted_by?: string | null
@@ -1831,6 +1833,7 @@ export type Database = {
           premium_articles_reset_at?: string | null
           profession?: string | null
           profile_completed?: boolean | null
+          age_range?: string | null
           role?: string
           subscription_end?: string | null
           subscription_granted_by?: string | null

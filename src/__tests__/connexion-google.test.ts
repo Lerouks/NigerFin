@@ -182,7 +182,7 @@ describe('/api/auth/google/retour, retour de Google', () => {
     expect(envoyerBienvenueSiNouveau).not.toHaveBeenCalled();
   });
 
-  it('compte tout juste ouvert : prénom et nom, mail de bienvenue, puis le profil à compléter', async () => {
+  it('compte tout juste ouvert : prénom et nom, mail de bienvenue, puis l’écran de bienvenue', async () => {
     const idToken = jetonIdentite({ given_name: 'Awa', family_name: 'Moussa' });
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ id_token: idToken }), { status: 200 })));
     signInWithIdToken.mockResolvedValue({
@@ -192,7 +192,8 @@ describe('/api/auth/google/retour, retour de Google', () => {
 
     const res = await retour(requeteRetour('code=c&state=etat-123', encoderEtat(ETAT)));
 
-    expect(destination(res).href).toBe(`${ORIGINE}/inscription/completer-profil`);
+    // Puis retour à la page de départ (« /premium » dans ce scénario).
+    expect(destination(res).href).toBe(`${ORIGINE}/inscription/bienvenue?suite=%2Fpremium`);
     expect(majProfil).toHaveBeenCalledWith({ first_name: 'Awa', last_name: 'Moussa' });
     expect(envoyerBienvenueSiNouveau).toHaveBeenCalledWith('u2', 'awa@example.com', 'Awa Moussa');
   });

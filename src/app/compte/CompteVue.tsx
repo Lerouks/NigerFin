@@ -4,8 +4,11 @@ import { useEffect, useId, useState } from 'react';
 import Link from 'next/link';
 import { ChevronDown, Loader2 } from 'lucide-react';
 import { PhoneField, validatePhone } from '@/components/PhoneField';
-import { criteresMotDePasse, erreurMotDePasse, MOT_DE_PASSE_MAX } from '@/lib/mot-de-passe';
+import { erreurMotDePasse, MOT_DE_PASSE_MAX } from '@/lib/mot-de-passe';
 import { dateFr, dureeDeFormule, montantFcfa, telephoneLisible, type EtatAbonnement, type FactureDuCompte } from '@/lib/compte';
+import { CIVILITES, erreurNom, estCivilite, libelleTrancheAge, NOM_MAX, PROFESSIONS, TRANCHES_AGE } from '@/lib/regles-du-compte';
+import { AUTRES_PAYS, PAYS_AFRIQUE_OUEST, PAYS_AUTRE } from '@/lib/pays';
+import { isValidEmail } from '@/lib/validation';
 
 /**
  * « Mon compte », la présentation seule (maquette A « Cadre », choisie par
@@ -27,14 +30,12 @@ export interface ProfilAffiche {
   prenom: string;
   nom: string;
   profession: string;
+  /** Une valeur de TRANCHES_AGE, ou une chaîne vide. */
+  trancheAge: string;
   telephone: string;
   adresse: string;
   ville: string;
-  codePostal: string;
   pays: string;
-  jourNaissance: string;
-  moisNaissance: string;
-  anneeNaissance: string;
 }
 
 export interface DonneesCompte {
@@ -66,13 +67,21 @@ export interface Reponse {
   factures?: boolean;
 }
 
+/** Le changement d'adresse attend la confirmation des deux adresses. */
+export interface ChangementEmail {
+  nouvelle: string;
+  motDePasse: string;
+}
+
 export interface ActionsCompte {
   enregistrerProfil: (profil: ProfilAffiche) => Promise<Reponse>;
   changerMotDePasse: (entree: { actuel: string | null; nouveau: string }) => Promise<Reponse>;
   changerNewsletter: (recevoir: boolean) => Promise<Reponse & { etat?: { recoit: boolean; bloquee: boolean } }>;
+  changerEmail: (entree: ChangementEmail) => Promise<Reponse>;
   deconnexion: () => Promise<void>;
   deconnexionPartout: () => Promise<Reponse>;
-  supprimerCompte: () => Promise<Reponse>;
+  /** Le mot de passe actuel, ou null pour un compte Google (connexion récente exigée). */
+  supprimerCompte: (motDePasse: string | null) => Promise<Reponse>;
 }
 
 const RUBRIQUES = [
@@ -82,26 +91,6 @@ const RUBRIQUES = [
   { id: 'securite', court: 'Sécurité' },
   { id: 'newsletter', court: 'Newsletter' },
 ] as const;
-
-const PAYS_AFRIQUE_OUEST = [
-  'Niger', 'Nigeria', 'Bénin', 'Burkina Faso', 'Côte d’Ivoire', 'Ghana',
-  'Guinée', 'Guinée-Bissau', 'Liberia', 'Mali', 'Mauritanie', 'Sénégal',
-  'Sierra Leone', 'Togo', 'Cap-Vert', 'Gambie',
-];
-const AUTRES_PAYS = [
-  'Algérie', 'Cameroun', 'Canada', 'Centrafrique', 'Comores', 'Congo',
-  'Djibouti', 'Égypte', 'Éthiopie', 'France', 'Gabon', 'Kenya',
-  'Madagascar', 'Maroc', 'RD Congo', 'Rwanda', 'Tchad', 'Tunisie',
-  'Belgique', 'Suisse', 'États-Unis', 'Royaume-Uni', 'Allemagne',
-  'Arabie saoudite', 'Émirats arabes unis', 'Chine', 'Inde', 'Autre',
-];
-const PROFESSIONS = [
-  'Entrepreneur', 'Fonctionnaire', 'Cadre d’entreprise', 'Commerçant', 'Agriculteur',
-  'Enseignant / Chercheur', 'Étudiant', 'Journaliste / Média', 'Banquier / Finance',
-  'Ingénieur / Technicien', 'Médecin / Santé', 'Avocat / Juriste', 'Consultant',
-  'Artisan', 'Retraité', 'Sans emploi', 'Autre',
-];
-const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
 
 const STATUTS_FACTURE: Record<string, string> = { cancelled: 'Annulée', refunded: 'Remboursée', draft: 'Brouillon' };
 
@@ -328,24 +317,17 @@ function ListeFactures({ factures }: { factures: FactureDuCompte[] | null | unde
 
 // ─── Mes informations ────────────────────────────────────────────────────────
 
-function lectureNaissance(p: ProfilAffiche): string | null {
-  if (!p.jourNaissance || !p.moisNaissance || !p.anneeNaissance) return null;
-  const jour = p.jourNaissance === '1' ? '1er' : p.jourNaissance;
-  return `${jour}${NB}${MOIS[Number(p.moisNaissance) - 1] ?? ''}${NB}${p.anneeNaissance}`;
-}
-
 function InformationsLues({ profil }: { profil: ProfilAffiche }) {
   const nom = [profil.prenom, profil.nom].filter(Boolean).join(' ');
   const nomAffiche = nom ? (profil.civilite ? `${profil.civilite}${NB}${nom}` : nom) : '';
-  const ville = [profil.codePostal, profil.ville].filter(Boolean).join(' ');
-  const adresse = [profil.adresse, ville].filter(Boolean).join(', ');
-  const naissance = lectureNaissance(profil);
+  const adresse = [profil.adresse, profil.ville].filter(Boolean).join(', ');
+  const tranche = libelleTrancheAge(profil.trancheAge);
   return (
     <>
       <dl>
         <Ligne etiquette="Nom" valeur={nomAffiche || <NonRenseigne />} />
         <Ligne etiquette="Profession" valeur={profil.profession || <NonRenseigne feminin />} />
-        {naissance && <Ligne etiquette="Date de naissance" valeur={naissance} />}
+        <Ligne etiquette="Tranche d’âge" valeur={tranche || <NonRenseigne feminin />} />
       </dl>
       <p className="mb-2.5 mt-5 border-t border-[#ececee] pt-4 text-[13px] font-bold text-[#1a1a1a]">Imprimé sur vos factures</p>
       <dl>
@@ -357,13 +339,16 @@ function InformationsLues({ profil }: { profil: ProfilAffiche }) {
   );
 }
 
-function Champ({ etiquette, valeur, onChange, requis, autoComplete, inputMode }: {
+function Champ({ etiquette, valeur, onChange, requis, autoComplete, inputMode, maxLength, erreur }: {
   etiquette: string;
   valeur: string;
   onChange: (v: string) => void;
   requis?: boolean;
   autoComplete?: string;
   inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
+  maxLength?: number;
+  /** La règle que le champ ne tient pas, affichée sous lui. */
+  erreur?: string | null;
 }) {
   const id = useId();
   return (
@@ -371,7 +356,20 @@ function Champ({ etiquette, valeur, onChange, requis, autoComplete, inputMode }:
       <label htmlFor={id} className={ETIQUETTE}>
         {etiquette}{requis && <span className="text-[#b42318]" aria-hidden="true">{NB}*</span>}
       </label>
-      <input id={id} type="text" value={valeur} onChange={(e) => onChange(e.target.value)} required={requis} autoComplete={autoComplete} inputMode={inputMode} className={CHAMP} />
+      <input
+        id={id}
+        type="text"
+        value={valeur}
+        onChange={(e) => onChange(e.target.value)}
+        required={requis}
+        autoComplete={autoComplete}
+        inputMode={inputMode}
+        maxLength={maxLength}
+        aria-invalid={erreur ? 'true' : undefined}
+        aria-describedby={erreur ? `${id}-e` : undefined}
+        className={`${CHAMP} ${erreur ? 'border-red-300' : ''}`}
+      />
+      {erreur && <p id={`${id}-e`} className="mt-1.5 text-[13px] leading-[1.45] text-red-700">{erreur}</p>}
     </div>
   );
 }
@@ -410,19 +408,24 @@ function FormulaireInformations({ initial, enregistrer, fermer }: {
 }) {
   const [p, setP] = useState<ProfilAffiche>(initial);
   const [enCours, setEnCours] = useState(false);
+  const [envoye, setEnvoye] = useState(false);
   const [reponse, setReponse] = useState<Reponse | null>(null);
   const maj = (cle: keyof ProfilAffiche) => (v: string) => setP((x) => ({ ...x, [cle]: v }));
-  const annees = Array.from({ length: 90 }, (_, i) => String(new Date().getFullYear() - 13 - i));
+  const erreurs = {
+    civilite: estCivilite(p.civilite) ? null : 'Choisissez votre civilité.',
+    prenom: erreurNom(p.prenom, 'Le prénom'),
+    nom: erreurNom(p.nom, 'Le nom'),
+    telephone: validatePhone(p.telephone),
+  };
+  // Un pays enregistré hors de la liste reste proposé tel quel.
+  const paysHorsListe = p.pays && ![...PAYS_AFRIQUE_OUEST, ...AUTRES_PAYS].some((x) => x.nom === p.pays) && p.pays !== PAYS_AUTRE;
 
   async function envoyer(e: React.FormEvent) {
     e.preventDefault();
-    if (!p.prenom.trim() || !p.nom.trim()) {
-      setReponse({ ok: false, message: 'Le prénom et le nom sont obligatoires.' });
-      return;
-    }
-    const erreurTel = validatePhone(p.telephone);
-    if (erreurTel) {
-      setReponse({ ok: false, message: erreurTel });
+    setEnvoye(true);
+    const premiere = Object.values(erreurs).find(Boolean);
+    if (premiere) {
+      setReponse({ ok: false, message: premiere });
       return;
     }
     setEnCours(true);
@@ -436,62 +439,52 @@ function FormulaireInformations({ initial, enregistrer, fermer }: {
   return (
     <form onSubmit={envoyer} noValidate>
       <fieldset>
-        <legend className={ETIQUETTE}>Civilité</legend>
+        <legend className={ETIQUETTE}>Civilité<span className="text-[#b42318]" aria-hidden="true">{NB}*</span></legend>
         <div className="flex gap-6">
-          {(['M.', 'Mme'] as const).map((c) => (
+          {CIVILITES.map((c) => (
             <label key={c} className="inline-flex min-h-[44px] cursor-pointer items-center gap-2 text-[16px]">
               <input type="radio" name="civilite" value={c} checked={p.civilite === c} onChange={() => setP((x) => ({ ...x, civilite: c }))} className="h-[18px] w-[18px] accent-[#111]" />
               {c}
             </label>
           ))}
         </div>
+        {envoye && erreurs.civilite && <p className="text-[13px] leading-[1.45] text-red-700">{erreurs.civilite}</p>}
       </fieldset>
       <div className="mt-3 grid gap-4 sm:grid-cols-2">
-        <Champ etiquette="Prénom" valeur={p.prenom} onChange={maj('prenom')} requis autoComplete="given-name" />
-        <Champ etiquette="Nom" valeur={p.nom} onChange={maj('nom')} requis autoComplete="family-name" />
+        <Champ etiquette="Prénom" valeur={p.prenom} onChange={maj('prenom')} requis autoComplete="given-name" maxLength={NOM_MAX + 10} erreur={envoye ? erreurs.prenom : null} />
+        <Champ etiquette="Nom" valeur={p.nom} onChange={maj('nom')} requis autoComplete="family-name" maxLength={NOM_MAX + 10} erreur={envoye ? erreurs.nom : null} />
       </div>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <Liste etiquette="Profession" valeur={p.profession} onChange={maj('profession')}>
           <option value="">Choisir</option>
+          {p.profession && !(PROFESSIONS as readonly string[]).includes(p.profession) && <option value={p.profession}>{p.profession}</option>}
           {PROFESSIONS.map((x) => <option key={x} value={x}>{x}</option>)}
         </Liste>
-        <fieldset>
-          <legend className={ETIQUETTE}>Date de naissance</legend>
-          <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-[1fr_1.4fr_1.2fr]">
-            <Deroulant aria-label="Jour de naissance" value={p.jourNaissance} onChange={(e) => maj('jourNaissance')(e.target.value)} className="pl-2.5 pr-7">
-              <option value="">Jour</option>
-              {Array.from({ length: 31 }, (_, i) => <option key={i + 1} value={String(i + 1)}>{i + 1}</option>)}
-            </Deroulant>
-            <Deroulant aria-label="Mois de naissance" value={p.moisNaissance} onChange={(e) => maj('moisNaissance')(e.target.value)} className="pl-2.5 pr-7">
-              <option value="">Mois</option>
-              {MOIS.map((m, i) => <option key={m} value={String(i + 1)}>{m}</option>)}
-            </Deroulant>
-            <Deroulant aria-label="Année de naissance" value={p.anneeNaissance} onChange={(e) => maj('anneeNaissance')(e.target.value)} className="pl-2.5 pr-7">
-              <option value="">Année</option>
-              {annees.map((a) => <option key={a} value={a}>{a}</option>)}
-            </Deroulant>
-          </div>
-        </fieldset>
+        <Liste etiquette="Tranche d’âge" valeur={p.trancheAge} onChange={maj('trancheAge')}>
+          <option value="">Choisir</option>
+          {TRANCHES_AGE.map((t) => <option key={t.valeur} value={t.valeur}>{t.libelle}</option>)}
+        </Liste>
       </div>
 
       <p className="mb-3 mt-6 border-t border-[#ececee] pt-4 text-[13px] font-bold text-[#1a1a1a]">Imprimé sur vos factures</p>
       <div className="[&_input]:min-h-[46px] [&_input]:px-3 [&_input]:text-[16px] [&_select]:min-h-[46px] [&_select]:w-[104px] [&_select]:text-[16px] sm:[&_select]:w-[140px]">
-        <PhoneField value={p.telephone} onChange={maj('telephone')} />
+        <PhoneField value={p.telephone} onChange={maj('telephone')} aide="Facultatif. Il sert seulement à vos factures." />
+        {envoye && erreurs.telephone && <p className="mt-1.5 text-[13px] leading-[1.45] text-red-700">{erreurs.telephone}</p>}
       </div>
       <div className="mt-4">
-        <Champ etiquette="Adresse" valeur={p.adresse} onChange={maj('adresse')} autoComplete="street-address" />
+        <Champ etiquette="Adresse" valeur={p.adresse} onChange={maj('adresse')} autoComplete="street-address" maxLength={300} />
       </div>
-      <div className="mt-4 grid gap-4 sm:grid-cols-[1fr_160px]">
-        <Champ etiquette="Ville" valeur={p.ville} onChange={maj('ville')} autoComplete="address-level2" />
-        <Champ etiquette="Code postal" valeur={p.codePostal} onChange={maj('codePostal')} autoComplete="postal-code" inputMode="numeric" />
-      </div>
-      <div className="mt-4">
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <Champ etiquette="Ville" valeur={p.ville} onChange={maj('ville')} autoComplete="address-level2" maxLength={100} />
         <Liste etiquette="Pays" valeur={p.pays} onChange={maj('pays')}>
+          <option value="">Choisir</option>
+          {paysHorsListe && <option value={p.pays}>{p.pays}</option>}
           <optgroup label={`Afrique de l${'’'}Ouest`}>
-            {PAYS_AFRIQUE_OUEST.map((x) => <option key={x} value={x}>{x}</option>)}
+            {PAYS_AFRIQUE_OUEST.map((x) => <option key={x.iso} value={x.nom}>{x.nom}</option>)}
           </optgroup>
           <optgroup label="Autres pays">
-            {AUTRES_PAYS.map((x) => <option key={x} value={x}>{x}</option>)}
+            {AUTRES_PAYS.map((x) => <option key={x.iso} value={x.nom}>{x.nom}</option>)}
+            <option value={PAYS_AUTRE}>{PAYS_AUTRE}</option>
           </optgroup>
         </Liste>
       </div>
@@ -542,28 +535,23 @@ function ChampMotDePasse({ etiquette, valeur, onChange, autoComplete }: {
   );
 }
 
-function FormulaireMotDePasse({ mode, changer, fermer }: {
+function FormulaireMotDePasse({ mode, changer, fermer, contexte }: {
   /** modifier : l'ancien est demandé ; creer : compte Google ; reinitialiser : lien « mot de passe oublié ». */
   mode: 'modifier' | 'creer' | 'reinitialiser';
   changer: ActionsCompte['changerMotDePasse'];
   fermer: (reponse: Reponse | null) => void;
+  /** L'adresse et le nom, que le mot de passe ne doit pas reprendre. */
+  contexte: { email: string; prenom: string; nom: string };
 }) {
   const [actuel, setActuel] = useState('');
   const [nouveau, setNouveau] = useState('');
   const [confirmation, setConfirmation] = useState('');
   const [enCours, setEnCours] = useState(false);
   const [reponse, setReponse] = useState<Reponse | null>(null);
-  const c = criteresMotDePasse(nouveau);
-  const criteres = [
-    { ok: c.longueur, texte: '8 caractères ou plus' },
-    { ok: c.majuscule, texte: 'une majuscule' },
-    { ok: c.chiffre, texte: 'un chiffre' },
-    { ok: c.special, texte: 'un caractère spécial' },
-  ];
 
   async function envoyer(e: React.FormEvent) {
     e.preventDefault();
-    const erreur = erreurMotDePasse(nouveau);
+    const erreur = erreurMotDePasse(nouveau, contexte);
     if (mode === 'modifier' && !actuel) return setReponse({ ok: false, message: 'Indiquez votre mot de passe actuel.' });
     if (erreur) return setReponse({ ok: false, message: erreur });
     if (nouveau !== confirmation) return setReponse({ ok: false, message: 'Les deux mots de passe ne correspondent pas.' });
@@ -581,14 +569,7 @@ function FormulaireMotDePasse({ mode, changer, fermer }: {
       {mode === 'modifier' && <ChampMotDePasse etiquette="Mot de passe actuel" valeur={actuel} onChange={setActuel} autoComplete="current-password" />}
       <div>
         <ChampMotDePasse etiquette="Nouveau mot de passe" valeur={nouveau} onChange={setNouveau} autoComplete="new-password" />
-        <ul className="mt-2 grid grid-cols-1 gap-x-3 gap-y-1 text-[13px] min-[360px]:grid-cols-2" aria-label="Critères du mot de passe">
-          {criteres.map((k) => (
-            <li key={k.texte} className={k.ok ? 'text-[#111]' : 'text-[#6b6f76]'}>
-              <span aria-hidden="true">{k.ok ? '✓' : '○'}{NB}</span>{k.texte}
-              <span className="sr-only">{k.ok ? `${NB}: respecté` : `${NB}: manquant`}</span>
-            </li>
-          ))}
-        </ul>
+        <p className="mt-1.5 text-[13px] leading-[1.45] text-[#5f636b]">8{NB}caractères au moins, rien d’autre.</p>
       </div>
       <ChampMotDePasse etiquette="Confirmer le nouveau mot de passe" valeur={confirmation} onChange={setConfirmation} autoComplete="new-password" />
       <Message reponse={reponse} />
@@ -606,10 +587,62 @@ function FormulaireMotDePasse({ mode, changer, fermer }: {
   );
 }
 
+// ─── Adresse e-mail ──────────────────────────────────────────────────────────
+
+function FormulaireEmail({ actuelle, changer, fermer }: {
+  actuelle: string;
+  changer: ActionsCompte['changerEmail'];
+  fermer: (reponse: Reponse | null) => void;
+}) {
+  const idEmail = useId();
+  const [nouvelle, setNouvelle] = useState('');
+  const [motDePasse, setMotDePasse] = useState('');
+  const [enCours, setEnCours] = useState(false);
+  const [reponse, setReponse] = useState<Reponse | null>(null);
+
+  async function envoyer(e: React.FormEvent) {
+    e.preventDefault();
+    const adresse = nouvelle.trim();
+    if (!isValidEmail(adresse)) return setReponse({ ok: false, message: 'Entrez une adresse e-mail valide.' });
+    if (adresse.toLowerCase() === actuelle.toLowerCase()) return setReponse({ ok: false, message: 'C’est déjà votre adresse.' });
+    if (!motDePasse) return setReponse({ ok: false, message: 'Indiquez votre mot de passe.' });
+    setEnCours(true);
+    setReponse(null);
+    const r = await changer({ nouvelle: adresse, motDePasse });
+    setEnCours(false);
+    if (r.ok) fermer(r);
+    else setReponse(r);
+  }
+
+  return (
+    <form onSubmit={envoyer} className="mt-4 max-w-[440px] space-y-4" noValidate>
+      <div>
+        <label htmlFor={idEmail} className={ETIQUETTE}>Nouvelle adresse e-mail</label>
+        <input id={idEmail} type="email" value={nouvelle} onChange={(e) => setNouvelle(e.target.value)} autoComplete="email" autoCapitalize="none" spellCheck={false} className={CHAMP} />
+      </div>
+      <ChampMotDePasse etiquette="Votre mot de passe" valeur={motDePasse} onChange={setMotDePasse} autoComplete="current-password" />
+      <p className={TEXTE}>Un mail de confirmation part vers chacune <span className="whitespace-nowrap">des deux adresses.</span></p>
+      <Message reponse={reponse} />
+      <div className="flex flex-wrap gap-3">
+        <button type="submit" disabled={enCours} className={BOUTON}>
+          {enCours && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}Changer d{'’'}adresse
+        </button>
+        <button type="button" onClick={() => fermer(null)} disabled={enCours} className={BOUTON_LIGNE}>Annuler</button>
+      </div>
+    </form>
+  );
+}
+
 // ─── Suppression ─────────────────────────────────────────────────────────────
 
-function FenetreSuppression({ supprimer, fermer }: { supprimer: ActionsCompte['supprimerCompte']; fermer: () => void }) {
+function FenetreSuppression({ supprimer, fermer, avecMotDePasse }: {
+  supprimer: ActionsCompte['supprimerCompte'];
+  fermer: () => void;
+  /** Compte avec mot de passe : on le redemande. Compte Google : une connexion récente suffit. */
+  avecMotDePasse: boolean;
+}) {
   const [texte, setTexte] = useState('');
+  const [motDePasse, setMotDePasse] = useState('');
   const [enCours, setEnCours] = useState(false);
   const [reponse, setReponse] = useState<Reponse | null>(null);
   const titreId = useId();
@@ -624,7 +657,7 @@ function FenetreSuppression({ supprimer, fermer }: { supprimer: ActionsCompte['s
   async function confirmer() {
     setEnCours(true);
     setReponse(null);
-    const r = await supprimer();
+    const r = await supprimer(avecMotDePasse ? motDePasse : null);
     setEnCours(false);
     if (!r.ok) setReponse(r);
   }
@@ -644,6 +677,11 @@ function FenetreSuppression({ supprimer, fermer }: { supprimer: ActionsCompte['s
           Tapez <strong className="text-[#b42318]">SUPPRIMER</strong> pour confirmer
         </label>
         <input id={champId} value={texte} onChange={(e) => setTexte(e.target.value)} autoComplete="off" autoCapitalize="characters" className={CHAMP} />
+        {avecMotDePasse && (
+          <div className="mt-3">
+            <ChampMotDePasse etiquette="Votre mot de passe" valeur={motDePasse} onChange={setMotDePasse} autoComplete="current-password" />
+          </div>
+        )}
         {reponse?.factures ? (
           <div role="alert" className="mt-3 rounded-lg border border-[#d4d4d8] bg-[#f4f4f5] px-3.5 py-3 text-[14px] leading-[1.5] text-[#111]">
             <p>Votre compte a des factures.</p>
@@ -652,13 +690,18 @@ function FenetreSuppression({ supprimer, fermer }: { supprimer: ActionsCompte['s
             <p><a href="mailto:contact@nfireport.com" className={LIEN}>contact@nfireport.com</a></p>
           </div>
         ) : (
-          <Message reponse={reponse} />
+          <>
+            <Message reponse={reponse} />
+            {reponse?.reconnexion && (
+              <p className={`${TEXTE} mt-2`}><a href="/api/auth/google?next=%2Fcompte%23securite" className={LIEN}>Se reconnecter avec Google</a></p>
+            )}
+          </>
         )}
         <div className="mt-5 flex flex-col gap-2">
           <button
             type="button"
             onClick={confirmer}
-            disabled={texte.trim().toUpperCase() !== 'SUPPRIMER' || enCours}
+            disabled={texte.trim().toUpperCase() !== 'SUPPRIMER' || (avecMotDePasse && !motDePasse) || enCours}
             className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-lg bg-[#b42318] px-5 text-[15px] font-semibold text-white hover:bg-[#931d14] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b42318] disabled:cursor-not-allowed disabled:opacity-40"
           >
             {enCours && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}Supprimer définitivement
@@ -678,6 +721,8 @@ export function CompteVue({ donnees, actions }: { donnees: DonneesCompte; action
   const [editionInfos, setEditionInfos] = useState(false);
   const [reponseInfos, setReponseInfos] = useState<Reponse | null>(null);
   const [motDePasse, setMotDePasse] = useState<'ferme' | 'ouvert'>(donnees.reinitialisation ? 'ouvert' : 'ferme');
+  const [editionEmail, setEditionEmail] = useState(false);
+  const [reponseEmail, setReponseEmail] = useState<Reponse | null>(null);
   const [reponseMotDePasse, setReponseMotDePasse] = useState<Reponse | null>(null);
   const [partout, setPartout] = useState<'repos' | 'confirmer' | 'en-cours'>('repos');
   const [reponsePartout, setReponsePartout] = useState<Reponse | null>(null);
@@ -809,11 +854,18 @@ export function CompteVue({ donnees, actions }: { donnees: DonneesCompte; action
                 valeur={
                   <>
                     <span className="break-all">{donnees.email}</span>
-                    <span className="mt-0.5 block text-[13px] font-normal text-[#5f636b]">
-                      Pour la changer, <Link href="/contact" className={LIEN}>écrivez-nous</Link>.
-                    </span>
+                    {connexion && !connexion.motDePasse && (
+                      <span className="mt-0.5 block text-[13px] font-normal text-[#5f636b]">
+                        Pour la changer, créez d{'’'}abord <span className="whitespace-nowrap">un mot de passe.</span>
+                      </span>
+                    )}
                   </>
                 }
+                action={!editionEmail && connexion?.motDePasse && (
+                  <button type="button" onClick={() => { setEditionEmail(true); setReponseEmail(null); }} className={`${LIEN} min-h-[32px] text-[14px]`}>
+                    Modifier
+                  </button>
+                )}
               />
               <Ligne
                 etiquette="Mot de passe"
@@ -831,12 +883,21 @@ export function CompteVue({ donnees, actions }: { donnees: DonneesCompte; action
                 )}
               />
             </dl>
+            {editionEmail && (
+              <FormulaireEmail actuelle={donnees.email} changer={actions.changerEmail} fermer={(r) => { setEditionEmail(false); setReponseEmail(r); }} />
+            )}
+            {!editionEmail && <Message reponse={reponseEmail} />}
             {motDePasse === 'ouvert' && (
               <>
                 {modeMotDePasse === 'creer' && (
                   <p className={`${TEXTE} mt-3`}>Créez un mot de passe <span className="whitespace-nowrap">pour vous connecter aussi par e-mail.</span></p>
                 )}
-                <FormulaireMotDePasse mode={modeMotDePasse} changer={actions.changerMotDePasse} fermer={(r) => { setMotDePasse('ferme'); setReponseMotDePasse(r); }} />
+                <FormulaireMotDePasse
+                  mode={modeMotDePasse}
+                  changer={actions.changerMotDePasse}
+                  fermer={(r) => { setMotDePasse('ferme'); setReponseMotDePasse(r); }}
+                  contexte={{ email: donnees.email, prenom: profil.prenom, nom: profil.nom }}
+                />
               </>
             )}
             {motDePasse === 'ferme' && <Message reponse={reponseMotDePasse} />}
@@ -927,7 +988,13 @@ export function CompteVue({ donnees, actions }: { donnees: DonneesCompte; action
         </main>
       </div>
 
-      {suppression && <FenetreSuppression supprimer={actions.supprimerCompte} fermer={() => setSuppression(false)} />}
+      {suppression && (
+        <FenetreSuppression
+          supprimer={actions.supprimerCompte}
+          fermer={() => setSuppression(false)}
+          avecMotDePasse={connexion?.motDePasse !== false}
+        />
+      )}
     </div>
   );
 }

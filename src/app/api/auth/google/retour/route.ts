@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
   if (!utilisateur) return echec();
 
   // 3. Compte tout juste ouvert : prénom et nom depuis Google, mail de bienvenue,
-  //    puis la page « Complétez votre profil », comme après une inscription par e-mail.
+  //    puis l'écran de bienvenue, comme après une inscription par e-mail.
   const nouveau = Date.now() - Date.parse(utilisateur.created_at) < NOUVEAU_COMPTE_MS;
   if (nouveau) {
     await completerNoms(utilisateur.id, idToken);
@@ -126,7 +126,12 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  return redirection(origin, nouveau ? '/inscription/completer-profil' : depart.suite, cookiesSession);
+  // Nouveau compte : l'écran de bienvenue (civilité, que Google ne donne pas,
+  // profession et tranche d'âge), puis la page de départ.
+  const bienvenue = depart.suite && depart.suite !== '/'
+    ? `/inscription/bienvenue?suite=${encodeURIComponent(depart.suite)}`
+    : '/inscription/bienvenue';
+  return redirection(origin, nouveau ? bienvenue : depart.suite, cookiesSession);
 }
 
 /**

@@ -5,6 +5,34 @@ import * as Sentry from '@sentry/nextjs';
 import { createBrowserSupabaseClient, isSupabaseConfigured } from '@/lib/supabase-browser';
 import type { User, Session, SupabaseClient } from '@supabase/supabase-js';
 import type { UserRole, UserProfile } from '@/types';
+import type { Civilite } from '@/lib/regles-du-compte';
+import type { ErreurAuth } from '@/lib/auth/messages';
+
+/** Ce que demande le formulaire d'inscription (src/components/compte/FormulaireInscription.tsx). */
+export interface EntreeInscription {
+  email: string;
+  motDePasse: string;
+  prenom: string;
+  nom: string;
+  civilite: Civilite;
+  /** La case « Recevoir la newsletter », que la personne coche elle-même. L'abonnement attend la confirmation de l'adresse. */
+  newsletter: boolean;
+  /** Le chemin du site où revenir après l'inscription (article, paiement). */
+  suite?: string | null;
+  /** Le jeton anti-robots de Turnstile, quand il est en service. */
+  captchaToken?: string;
+}
+
+/**
+ * Le lien du mail de confirmation (en plus du code à 6 chiffres) passe par
+ * /api/auth/callback, qui ouvre la session puis mène à l'écran de bienvenue,
+ * et de là à la page de départ. Sans cette adresse, Supabase renvoyait sur
+ * l'accueil, et la personne perdait son article ou son paiement.
+ */
+export function lienDeConfirmation(origine: string, suite?: string | null): string {
+  const bienvenue = suite ? `/inscription/bienvenue?suite=${encodeURIComponent(suite)}` : '/inscription/bienvenue';
+  return `${origine}/api/auth/callback?next=${encodeURIComponent(bienvenue)}`;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -15,13 +43,12 @@ interface AuthContextType {
   userRole: UserRole | null;
   premiumArticlesUsed: number;
   error: string | null;
-  signIn: (email: string, password: string) => Promise<{ error: { message: string } | null }>;
-  signUp: (
-    email: string,
-    password: string,
-    fullName: string,
-    civility?: 'M.' | 'Mme'
-  ) => Promise<{ error: { message: string } | null; existingUser: boolean }>;
+  signIn: (email: string, password: string, captchaToken?: string) => Promise<{ error: ErreurAuth | null }>;
+  signUp: (entree: EntreeInscription) => Promise<{ error: ErreurAuth | null; existingUser: boolean }>;
+  /** Confirme l'adresse avec le code à 6 chiffres du mail, et ouvre la session. */
+  verifierCode: (email: string, code: string) => Promise<{ error: ErreurAuth | null }>;
+  /** Renvoie le mail de confirmation (nouveau code et nouveau lien). */
+  renvoyerCode: (email: string, suite?: string | null, captchaToken?: string) => Promise<{ error: ErreurAuth | null }>;
   /** Ferme la session de cet appareil seulement. */
   signOut: () => Promise<void>;
   /** Ferme toutes les sessions du compte, sur tous les appareils (« Se déconnecter partout »). */
@@ -40,6 +67,8 @@ const AuthContext = createContext<AuthContextType>({
   error: null,
   signIn: async () => ({ error: null }),
   signUp: async () => ({ error: null, existingUser: false }),
+  verifierCode: async () => ({ error: null }),
+  renvoyerCode: async () => ({ error: null }),
   signOut: async () => {},
   signOutEverywhere: async () => ({ error: null }),
   refreshProfile: async () => {},
@@ -140,35 +169,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, [supabase, session, fetchProfile]);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string, captchaToken?: string) => {
     if (!supabase) return { error: { message: 'Supabase not configured' } };
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error };
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+      ...(captchaToken ? { options: { captchaToken } } : {}),
+    });
+    return { error: error ? { message: error.message, code: error.code, status: error.status } : null };
   };
 
-  const signUp = async (
-    email: string,
-    password: string,
-    fullName: string,
-    civility?: 'M.' | 'Mme'
-  ) => {
+  const signUp = async ({ email, motDePasse, prenom, nom, civilite, newsletter, suite, captchaToken }: EntreeInscription) => {
     if (!supabase) return { error: { message: 'Supabase not configured' }, existingUser: false };
 
-    // Split full_name in first/last (Premier mot = prenom, le reste = nom)
-    const trimmed = fullName.trim();
-    const parts = trimmed.split(/\s+/);
-    const firstName = parts[0] || '';
-    const lastName = parts.slice(1).join(' ');
-
+    // Prénom et nom arrivent séparés et déjà vérifiés (src/lib/regles-du-compte.ts) :
+    // plus de découpage d'un nom complet au premier espace, qui faussait les
+    // prénoms composés et l'ordre « NOM Prénom ».
     const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
+      email: email.trim(),
+      password: motDePasse,
       options: {
+        emailRedirectTo: lienDeConfirmation(window.location.origin, suite),
+        ...(captchaToken ? { captchaToken } : {}),
         data: {
-          full_name: fullName,
-          civility: civility ?? null,
-          first_name: firstName,
-          last_name: lastName,
+          full_name: `${prenom} ${nom}`,
+          civility: civilite,
+          first_name: prenom,
+          last_name: nom,
+          newsletter,
         },
       },
     });
@@ -194,9 +222,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return {
       error: existingUser
         ? { message: 'ACCOUNT_EXISTS' }
-        : error,
+        : error ? { message: error.message, code: error.code, status: error.status } : null,
       existingUser,
     };
+  };
+
+  const verifierCode = async (email: string, code: string) => {
+    if (!supabase) return { error: { message: 'Supabase not configured' } };
+    const { error } = await supabase.auth.verifyOtp({ email: email.trim(), token: code.trim(), type: 'email' });
+    return { error: error ? { message: error.message, code: error.code, status: error.status } : null };
+  };
+
+  const renvoyerCode = async (email: string, suite?: string | null, captchaToken?: string) => {
+    if (!supabase) return { error: { message: 'Supabase not configured' } };
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: email.trim(),
+      options: {
+        emailRedirectTo: lienDeConfirmation(window.location.origin, suite),
+        ...(captchaToken ? { captchaToken } : {}),
+      },
+    });
+    return { error: error ? { message: error.message, code: error.code, status: error.status } : null };
   };
 
   // Sans portée, supabase.auth.signOut() ferme TOUTES les sessions du compte
@@ -231,6 +278,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         error,
         signIn,
         signUp,
+        verifierCode,
+        renvoyerCode,
         signOut,
         signOutEverywhere,
         refreshProfile,

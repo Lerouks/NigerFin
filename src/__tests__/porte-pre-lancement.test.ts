@@ -12,7 +12,7 @@ describe('porte du pré-lancement, visiteur non admin', () => {
       '/', '/articles', '/articles/banques-nigeriennes-sous-pression', '/economie', '/finance',
       '/entreprises', '/entreprises/somair', '/marches', '/niger', '/outils', '/outil/simulateur-emprunt', '/simulateurs', '/simulateurs/emprunt',
       '/education', '/apprendre', '/apprendre/bases-finance', '/apprendre/bases-finance/qu-est-ce-que-la-finance', '/premium', '/pricing', '/paiement', '/newsletter', '/contact', '/about',
-      '/publicite', '/plan-du-site', '/inscription', '/inscription/completer-profil', '/compte',
+      '/publicite', '/plan-du-site', '/inscription', '/inscription/completer-profil', '/inscription/bienvenue', '/compte',
       '/page-qui-n-existe-pas',
     ]) {
       expect(visiteur(chemin), chemin).toBe('attente');

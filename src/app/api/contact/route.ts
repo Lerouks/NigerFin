@@ -6,6 +6,7 @@ import { contactConfirmationEmail, contactNotificationEmail } from '@/lib/email-
 import { applyOverridesTo } from '@/lib/emails/overrides';
 import { parseJsonBody } from '@/lib/validation';
 import { checkRateLimit, getClientIP, RATE_LIMITS } from '@/lib/rate-limit';
+import { jetonTurnstileValable, MESSAGE_TURNSTILE } from '@/lib/turnstile';
 import * as Sentry from '@sentry/nextjs';
 
 const ContactBody = z.object({
@@ -13,13 +14,14 @@ const ContactBody = z.object({
   email: z.string().trim().toLowerCase().email().max(254),
   subject: z.string().trim().min(2).max(200),
   message: z.string().trim().min(10).max(5000),
+  captchaToken: z.string().max(2048).optional(),
 });
 
 export async function POST(request: NextRequest) {
   try {
     const ip = getClientIP(request);
 
-    // Persistent rate limit: 3 per hour per IP
+    // Persistent rate limit: 10 per hour per IP
     const rl = await checkRateLimit(`contact:${ip}`, RATE_LIMITS.contact.limit, RATE_LIMITS.contact.windowMs);
     if (rl.limited) {
       return NextResponse.json(
@@ -32,7 +34,10 @@ export async function POST(request: NextRequest) {
     if (!parsed.ok) {
       return NextResponse.json({ error: parsed.error }, { status: parsed.status });
     }
-    const { name, email, subject, message } = parsed.data;
+    const { name, email, subject, message, captchaToken } = parsed.data;
+    if (!(await jetonTurnstileValable(captchaToken, ip))) {
+      return NextResponse.json({ error: MESSAGE_TURNSTILE, code: 'captcha' }, { status: 400 });
+    }
 
     const serviceClient = createServiceClient();
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { Turnstile } from '@/components/securite/Turnstile';
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { X, ArrowRight, Check, Loader2 } from 'lucide-react';
@@ -51,6 +52,8 @@ export function NewsletterPopup() {
   const [visible, setVisible] = useState(false);
   const [animateIn, setAnimateIn] = useState(false);
   const [email, setEmail] = useState('');
+  const [jeton, setJeton] = useState<string | null>(null);
+  const [tour, setTour] = useState(0);
   const [loading, setLoading] = useState(false);
   // Message de fin : inscription faite, ou adresse qui l'était déjà (aucun mail ne part alors).
   const [fin, setFin] = useState<string | null>(null);
@@ -117,7 +120,8 @@ export function NewsletterPopup() {
 
     setLoading(true);
     setErreur(null);
-    const issue = await inscrireALaNewsletter(email, 'popup_scroll');
+    const issue = await inscrireALaNewsletter(email, 'popup_scroll', jeton);
+    setTour((t) => t + 1);
     setLoading(false);
 
     if (estUnEchec(issue)) {
@@ -239,6 +243,7 @@ export function NewsletterPopup() {
                 {erreur && (
                   <p role="alert" className="text-[12px] text-red-500 text-balance">{erreur}</p>
                 )}
+                <Turnstile onJeton={setJeton} tour={tour} action="newsletter-fenetre" />
                 <button
                   type="submit"
                   disabled={loading}

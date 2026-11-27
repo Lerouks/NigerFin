@@ -6,6 +6,7 @@ import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import { Eye, EyeOff, Lock, CheckCircle, XCircle } from 'lucide-react';
 import { AuthLayout } from '@/components/AuthLayout';
 import { chargementComplet } from '@/lib/chargement-complet';
+import { erreurMotDePasse, MOT_DE_PASSE_MAX } from '@/lib/mot-de-passe';
 
 /**
  * Page de definition d'un nouveau mot de passe apres un lien recu par courriel.
@@ -18,12 +19,8 @@ import { chargementComplet } from '@/lib/chargement-complet';
  * n'etait pas ouvert au public.
  */
 
-const REGLES = [
-  { cle: 'longueur', texte: 'au moins 8 caractères', test: (v: string) => v.length >= 8 },
-  { cle: 'majuscule', texte: 'une majuscule', test: (v: string) => /[A-Z]/.test(v) },
-  { cle: 'chiffre', texte: 'un chiffre', test: (v: string) => /\d/.test(v) },
-  { cle: 'special', texte: 'un caractère spécial', test: (v: string) => /[^A-Za-z0-9]/.test(v) },
-];
+// La règle commune du mot de passe (src/lib/mot-de-passe.ts) : 8 caractères
+// au moins, sans autre exigence, et pas un mot de passe trop courant.
 
 export default function NouveauMotDePassePage() {
   const [motDePasse, setMotDePasse] = useState('');
@@ -69,9 +66,9 @@ export default function NouveauMotDePassePage() {
     };
   }, []);
 
-  const reglesTenues = REGLES.every((r) => r.test(motDePasse));
+  const erreurRegle = motDePasse ? erreurMotDePasse(motDePasse) : null;
   const identiques = confirmation.length > 0 && motDePasse === confirmation;
-  const envoyable = reglesTenues && identiques && motDePasse.length <= 128 && !enCours && sessionPrete !== false;
+  const envoyable = Boolean(motDePasse) && !erreurRegle && identiques && !enCours && sessionPrete !== false;
 
   async function envoyer(e: React.FormEvent) {
     e.preventDefault();
@@ -86,6 +83,9 @@ export default function NouveauMotDePassePage() {
         setMessage({ type: 'erreur', texte: traduire(error.message) });
       } else {
         setMessage({ type: 'succes', texte: 'Mot de passe enregistré. Redirection en cours.' });
+        // L'alerte « mot de passe changé », comme depuis « Mon compte » : c'est
+        // ainsi qu'on découvre qu'un compte a été pris.
+        fetch('/api/user/alerte-mot-de-passe', { method: 'POST' }).catch(() => {});
         // L'administrateur retrouve son cockpit, un lecteur son compte (le
         // cockpit lui est fermé). Sans réponse du profil : le compte.
         let destination = '/compte';
@@ -100,7 +100,7 @@ export default function NouveauMotDePassePage() {
     } catch {
       setMessage({
         type: 'erreur',
-        texte: "La connexion a echoue. Vérifiez votre réseau puis réessayez : rien n'a ete modifie.",
+        texte: 'La connexion a échoué. Vérifiez votre réseau puis réessayez\u00a0: rien n’a été modifié.',
       });
     } finally {
       setEnCours(false);
@@ -148,7 +148,7 @@ export default function NouveauMotDePassePage() {
                 autoComplete="new-password"
                 value={motDePasse}
                 disabled={sessionPrete === false}
-                onChange={(e) => setMotDePasse(e.target.value.slice(0, 128))}
+                onChange={(e) => setMotDePasse(e.target.value.slice(0, MOT_DE_PASSE_MAX))}
                 className="w-full border border-black/8 rounded-xl pl-12 pr-12 py-3.5 bg-background focus:outline-hidden focus:border-gold/30 focus:ring-2 focus:ring-gold/10 transition-all text-base"
                 placeholder="Votre nouveau mot de passe"
               />
@@ -161,17 +161,9 @@ export default function NouveauMotDePassePage() {
                 {visible ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
-            <ul className="mt-3 space-y-1">
-              {REGLES.map((regle) => {
-                const tenue = regle.test(motDePasse);
-                return (
-                  <li key={regle.cle} className={`text-[12px] flex items-center gap-1.5 ${tenue ? 'text-emerald-700' : 'text-gray-500'}`}>
-                    <span aria-hidden className={`inline-block w-1.5 h-1.5 rounded-full ${tenue ? 'bg-emerald-600' : 'bg-gray-300'}`} />
-                    {regle.texte}
-                  </li>
-                );
-              })}
-            </ul>
+            <p className={`mt-2 text-[12px] text-pretty ${erreurRegle ? 'text-red-600' : 'text-gray-500'}`}>
+              {erreurRegle ?? '8\u00a0caractères au moins, rien d’autre.'}
+            </p>
           </div>
 
           <div>
@@ -185,7 +177,7 @@ export default function NouveauMotDePassePage() {
                 autoComplete="new-password"
                 value={confirmation}
                 disabled={sessionPrete === false}
-                onChange={(e) => setConfirmation(e.target.value.slice(0, 128))}
+                onChange={(e) => setConfirmation(e.target.value.slice(0, MOT_DE_PASSE_MAX))}
                 className="w-full border border-black/8 rounded-xl pl-12 pr-4 py-3.5 bg-background focus:outline-hidden focus:border-gold/30 focus:ring-2 focus:ring-gold/10 transition-all text-base"
                 placeholder="Le même, une seconde fois"
               />
@@ -200,7 +192,7 @@ export default function NouveauMotDePassePage() {
             disabled={!envoyable}
             className="w-full bg-[#111] text-white py-3.5 rounded-xl hover:bg-[#222] transition-all duration-200 disabled:opacity-50 text-[15px] font-medium active:scale-[0.98]"
           >
-            {enCours ? 'Enregistrement...' : 'Enregistrer le nouveau mot de passe'}
+            {enCours ? 'Enregistrement…' : 'Enregistrer le nouveau mot de passe'}
           </button>
         </form>
 

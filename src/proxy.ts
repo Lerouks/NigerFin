@@ -35,7 +35,10 @@ function buildCspHeader(nonce: string): string {
     // page de paiement dans une iframe i-pay.money (=> frame-src). Sans ces deux
     // autorisations, le paiement echoue silencieusement en CSP stricte.
     `connect-src 'self' data: https://*.supabase.co https://*.sentry.io https://*.posthog.com https://i-pay.money https://*.ipaymoney.com https://*.ifutur.com${isDev ? ' ws://localhost:* http://localhost:*' : ''}`,
-    "frame-src https://i-pay.money https://*.ipaymoney.com https://*.ifutur.com",
+    // Turnstile, le contrôle anti-robots de Cloudflare, affiche sa vérification
+    // dans une fenêtre intégrée challenges.cloudflare.com ; son script, injecté
+    // par le nôtre, passe déjà par 'strict-dynamic'.
+    "frame-src https://i-pay.money https://*.ipaymoney.com https://*.ifutur.com https://challenges.cloudflare.com",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",

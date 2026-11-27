@@ -35,6 +35,7 @@
     "cmdk": "^1.1.1",
     "dompurify": "^3.4.17",
     "exceljs": "^4.4.0",
+    "libphonenumber-js": "^1.13.17",
     "lucide-react": "^1.69.0",
     "next": "^16.4.6",
     "pako": "^2.1.0",

@@ -5,6 +5,7 @@ import { ArrowRight, Check, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { isNewsletterSubscribed, markNewsletterSubscribed } from '@/components/NewsletterPopup';
 import { useToast } from '@/components/Toast';
+import { Turnstile } from '@/components/securite/Turnstile';
 import {
   estUnEchec,
   inscrireALaNewsletter,
@@ -24,6 +25,8 @@ export function NewsletterForm() {
   const { userRole, profile, isLoading } = useAuth();
   const { show } = useToast();
   const [email, setEmail] = useState('');
+  const [jeton, setJeton] = useState<string | null>(null);
+  const [tour, setTour] = useState(0);
   const [loading, setLoading] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [inscritIci, setInscritIci] = useState(false);
@@ -59,7 +62,8 @@ export function NewsletterForm() {
 
     setLoading(true);
     setErreur(null);
-    const issue = await inscrireALaNewsletter(email, 'form_home');
+    const issue = await inscrireALaNewsletter(email, 'form_home', jeton);
+    setTour((t) => t + 1);
     setLoading(false);
 
     if (estUnEchec(issue)) {
@@ -146,6 +150,7 @@ export function NewsletterForm() {
               {erreur}
             </p>
           )}
+          <Turnstile onJeton={setJeton} tour={tour} action="newsletter-accueil" />
         </form>
       )}
       <p className="text-[11px] text-white/20 mt-4">Gratuit. Désinscription à tout moment.</p>

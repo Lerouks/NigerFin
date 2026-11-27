@@ -39,16 +39,12 @@ export function joursRestants(finIso: string | null | undefined, maintenant: num
 }
 
 /**
- * « +227 90 00 00 00 » : un numéro du Niger se lit par paires, soudées par des
- * espaces insécables. Les autres pays ont leurs propres découpages : leur numéro
- * reste tel qu'il a été saisi.
+ * « +227 90 12 34 56 » : le numéro au format international, regroupé comme on
+ * l'écrit dans son pays, les groupes soudés par des espaces insécables
+ * (src/lib/telephone.ts, bibliothèque de Google). Un numéro illisible reste tel
+ * qu'il a été saisi.
  */
-export function telephoneLisible(numero: string): string {
-  const net = numero.replace(/\s+/g, '');
-  const m = /^(\+227)(\d{8})$/.exec(net);
-  if (!m) return numero;
-  return [m[1], ...m[2]!.match(/\d{2}/g)!].join(INSECABLE);
-}
+export { telephoneLisible } from '@/lib/telephone';
 
 /** « Formule annuelle » pour un cycle de facturation, « Premium » s'il est inconnu. */
 export function nomDeFormule(cycle: string | null | undefined): string {

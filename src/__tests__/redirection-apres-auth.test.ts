@@ -74,9 +74,9 @@ describe('/auth/confirm ne renvoie jamais hors du site', () => {
     expect(`${cible.pathname}${cible.search}`).toBe('/compte?tab=infos');
   });
 
-  it('sans next, une inscription mène toujours à la fin du profil', async () => {
+  it('sans next, une inscription mène toujours à l’écran de bienvenue', async () => {
     const res = await confirmer(new NextRequest(`${ORIGINE}/auth/confirm?token_hash=t&type=signup`));
-    expect(destination(res).href).toBe(`${ORIGINE}/inscription/completer-profil`);
+    expect(destination(res).href).toBe(`${ORIGINE}/inscription/bienvenue`);
   });
 
   it('sans next, une autre confirmation mène à l’accueil', async () => {

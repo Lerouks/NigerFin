@@ -1,19 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase';
 import { safeParseJSON } from '@/lib/validation';
+import { erreurNom, estCivilite, estTrancheAge, normaliserNom, professionConnue } from '@/lib/regles-du-compte';
+import { nomDePays } from '@/lib/pays';
+import { telephoneE164 } from '@/lib/telephone';
 
-// ─── Validation helpers ─────────────────────────────────────────────────────
-
-const NAME_REGEX = /^[a-zA-ZÀ-ÿ\s'-]+$/;
-const POSTAL_REGEX = /^[a-zA-Z0-9\s-]{0,20}$/;
-
-function validateName(value: string, label: string): string | null {
-  const trimmed = value.trim();
-  if (trimmed.length < 2) return `${label} doit contenir au moins 2 caractères.`;
-  if (trimmed.length > 100) return `${label} trop long (max 100 caractères).`;
-  if (!NAME_REGEX.test(trimmed)) return `${label} ne peut contenir que des lettres, espaces, apostrophes et tirets.`;
-  return null;
-}
+// ─── Règles ──────────────────────────────────────────────────────────────────
+//
+// Les mêmes que dans les formulaires (src/lib/regles-du-compte.ts,
+// src/lib/telephone.ts) : civilité M. ou Mme, prénom et nom de 2 à 50
+// caractères en lettres latines (accents, haoussa et peul compris), téléphone
+// valable pour son pays et enregistré au format international, tranche d'âge
+// de la liste.
 
 // ─── GET ─────────────────────────────────────────────────────────────────────
 
@@ -80,8 +78,7 @@ export async function PUT(request: NextRequest) {
 
   const {
     civility, first_name, last_name, phone,
-    birth_day, birth_month, birth_year,
-    address, city, postal_code, country, profession,
+    address, city, country, profession, age_range,
     profile_completed,
   } = body as Record<string, unknown>;
 
@@ -100,74 +97,43 @@ export async function PUT(request: NextRequest) {
     return s === 'null' || s === 'undefined' ? '' : s;
   };
 
-  // Civility
+  // Civilité : obligatoire, elle ne s'efface pas.
   if (civility !== undefined) {
     const cv = toStr(civility);
-    if (cv && cv !== 'M.' && cv !== 'Mme') {
-      errors.push('Civilité invalide (M. ou Mme).');
-    } else {
-      updates.civility = cv || null;
-    }
+    if (!estCivilite(cv)) errors.push('Choisissez votre civilité (M. ou Mme).');
+    else updates.civility = cv;
   }
 
-  // First name (required if provided)
+  // Prénom et nom : obligatoires, ils ne s'effacent pas.
   if (first_name !== undefined) {
-    const fn = toStr(first_name);
-    if (fn) {
-      const err = validateName(fn, 'Le prénom');
-      if (err) errors.push(err);
-      else updates.first_name = fn.trim();
-    } else {
-      updates.first_name = null;
-    }
+    const err = erreurNom(toStr(first_name), 'Le prénom');
+    if (err) errors.push(err);
+    else updates.first_name = normaliserNom(toStr(first_name));
   }
-
-  // Last name (required if provided)
   if (last_name !== undefined) {
-    const ln = toStr(last_name);
-    if (ln) {
-      const err = validateName(ln, 'Le nom');
-      if (err) errors.push(err);
-      else updates.last_name = ln.trim();
-    } else {
-      updates.last_name = null;
-    }
+    const err = erreurNom(toStr(last_name), 'Le nom');
+    if (err) errors.push(err);
+    else updates.last_name = normaliserNom(toStr(last_name));
   }
 
-  // Phone
+  // Téléphone : facultatif, au format international (+22790123456).
   if (phone !== undefined) {
-    const ph = toStr(phone).replace(/\s+/g, '');
+    const ph = toStr(phone).trim();
     if (!ph) {
       updates.phone = null;
-    } else if (ph.length < 8 || ph.length > 20) {
-      errors.push('Numéro de téléphone invalide.');
     } else {
-      updates.phone = ph;
+      const e164 = telephoneE164(ph);
+      if (!e164) errors.push('Ce numéro de téléphone n’est pas valable. Vérifiez l’indicatif et le nombre de chiffres.');
+      else updates.phone = e164;
     }
   }
 
-  // Birth date
-  if (birth_day !== undefined || birth_month !== undefined || birth_year !== undefined) {
-    const d = Number(birth_day) || 0;
-    const m = Number(birth_month) || 0;
-    const y = Number(birth_year) || 0;
-
-    if (d || m || y) {
-      if (d < 1 || d > 31) errors.push('Jour de naissance invalide.');
-      if (m < 1 || m > 12) errors.push('Mois de naissance invalide.');
-      if (y < 1920 || y > new Date().getFullYear() - 13) errors.push('Année de naissance invalide.');
-
-      if (errors.length === 0) {
-        const testDate = new Date(y, m - 1, d);
-        if (testDate.getDate() !== d || testDate.getMonth() !== m - 1) {
-          errors.push('Date de naissance invalide.');
-        }
-      }
-    }
-
-    updates.birth_day = d || null;
-    updates.birth_month = m || null;
-    updates.birth_year = y || null;
+  // Tranche d'âge : facultative, une valeur de la liste.
+  if (age_range !== undefined) {
+    const tranche = toStr(age_range);
+    if (!tranche) updates.age_range = null;
+    else if (!estTrancheAge(tranche)) errors.push('Tranche d’âge inconnue.');
+    else updates.age_range = tranche;
   }
 
   // Address
@@ -175,23 +141,19 @@ export async function PUT(request: NextRequest) {
 
   // City
   if (city !== undefined) {
-    const c = toStr(city).trim();
-    if (c && !NAME_REGEX.test(c)) errors.push('Nom de ville invalide.');
+    const c = normaliserNom(toStr(city));
+    if (c && !/^[\p{L}\p{M}][\p{L}\p{M} '\u2019.-]*$/u.test(c)) errors.push('Nom de ville invalide.');
     else updates.city = c.slice(0, 100) || null;
   }
 
-  // Postal code
-  if (postal_code !== undefined) {
-    const pc = toStr(postal_code).trim();
-    if (pc && !POSTAL_REGEX.test(pc)) errors.push('Code postal invalide.');
-    else updates.postal_code = pc.slice(0, 20) || null;
+  // Pays : celui que la personne a choisi, jamais d'office.
+  if (country !== undefined) { const v = nomDePays(toStr(country).trim()); updates.country = v.slice(0, 100) || null; }
+
+  // Profession : une valeur de la liste, sinon le texte tel quel (anciennes saisies).
+  if (profession !== undefined) {
+    const v = toStr(profession).trim();
+    updates.profession = v ? (professionConnue(v) ?? v.slice(0, 100)) : null;
   }
-
-  // Country
-  if (country !== undefined) { const v = toStr(country).trim(); updates.country = v.slice(0, 100) || null; }
-
-  // Profession
-  if (profession !== undefined) { const v = toStr(profession).trim(); updates.profession = v.slice(0, 100) || null; }
 
   if (errors.length > 0) {
     return NextResponse.json({ error: errors[0] }, { status: 400 });
@@ -201,7 +163,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'Rien à modifier' }, { status: 400 });
   }
 
-  // Sync full_name for backward compat
+  // Le nom complet suit le prénom et le nom (factures, mails, PDF des simulateurs).
   if (updates.first_name || updates.last_name) {
     const serviceClient = createServiceClient();
     if (serviceClient) {

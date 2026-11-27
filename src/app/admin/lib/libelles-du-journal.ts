@@ -40,6 +40,10 @@ export const ACTIONS_DU_JOURNAL: Readonly<Record<string, ActionDuJournal>> = {
   password_change_failed: { libelle: 'Mot de passe non changé', couleur: ROUGE },
   password_change_wrong_current: { libelle: 'Ancien mot de passe faux', couleur: ORANGE },
   password_change_rate_limited: { libelle: 'Trop d’essais de mot de passe', couleur: ORANGE },
+  password_reset_done: { libelle: 'Mot de passe réinitialisé', couleur: VERT },
+  email_change_requested: { libelle: 'Changement d’adresse demandé', couleur: BLEU },
+  email_change_wrong_password: { libelle: 'Changement d’adresse refusé (mot de passe faux)', couleur: ORANGE },
+  account_delete_wrong_password: { libelle: 'Suppression refusée (mot de passe faux)', couleur: ORANGE },
   // Messages et commentaires
   update_message_status: { libelle: 'Statut du message modifié', couleur: GRIS },
   delete_message: { libelle: 'Message supprimé', couleur: ROUGE },

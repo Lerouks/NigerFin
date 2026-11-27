@@ -121,7 +121,10 @@ export const RATE_LIMITS = {
   // jour de forte audience. Les mails ne se répètent pas pour autant : une
   // adresse déjà inscrite n'en reçoit aucun (décision de Raouf, 23/11/2026).
   newsletter: { limit: 30, windowMs: 60 * 60 * 1000 },        // 30/hour
-  contact: { limit: 3, windowMs: 60 * 60 * 1000 },            // 3/hour
+  // Contact : 10 par heure et par adresse IP (27/11/2026). À 3, une même
+  // adresse d'opérateur mobile, partagée par beaucoup de téléphones au Niger,
+  // aurait bloqué les vrais lecteurs, comme pour la newsletter.
+  contact: { limit: 10, windowMs: 60 * 60 * 1000 },           // 10/hour
   tracking: { limit: 60, windowMs: 60 * 1000 },               // 60/min
   likes: { limit: 30, windowMs: 60 * 1000 },                  // 30/min
   comments: { limit: 10, windowMs: 60 * 1000 },               // 10/min

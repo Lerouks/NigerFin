@@ -1,5 +1,5 @@
 /**
- * Met en ligne les 6 mails de connexion (objets et contenus) dans la
+ * Met en ligne les 7 mails de connexion (objets et contenus) dans la
  * configuration auth du projet Supabase de production.
  * À lancer seulement avec l'accord de Raouf, après relecture des rendus.
  *
@@ -12,7 +12,7 @@ import { join } from 'node:path';
 const PROJET = 'golrvonbqivqzywprjoo';
 const dossier = join(process.cwd(), 'supabase', 'templates');
 const objets = JSON.parse(readFileSync(join(dossier, 'objets.json'), 'utf-8'));
-const fichiers = { confirmation: 'confirmation', magic_link: 'magic-link', recovery: 'recovery', email_change: 'email-change', invite: 'invite', reauthentication: 'reauthentication' };
+const fichiers = { confirmation: 'confirmation', magic_link: 'magic-link', recovery: 'recovery', email_change: 'email-change', invite: 'invite', reauthentication: 'reauthentication', email_changed_notification: 'email-changed' };
 
 const corps = {};
 for (const [cle, fichier] of Object.entries(fichiers)) {

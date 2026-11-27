@@ -9,6 +9,7 @@ import * as Sentry from '@sentry/nextjs';
 import { createServiceClient } from '@/lib/supabase';
 import { erreurMotDePasse } from '@/lib/mot-de-passe';
 import { connexionDuCompte } from '@/lib/compte';
+import { motDePasseCorrect } from '@/lib/auth/verifier-mot-de-passe';
 
 /**
  * Un compte sans mot de passe (ouvert avec Google) en crée un sans « mot de
@@ -65,7 +66,11 @@ export async function POST(request: NextRequest) {
   }
 
   // Server-side password strength validation
-  const strengthErr = erreurMotDePasse(newPassword);
+  const strengthErr = erreurMotDePasse(newPassword, {
+    email: user.email,
+    prenom: typeof user.user_metadata?.first_name === 'string' ? user.user_metadata.first_name : null,
+    nom: typeof user.user_metadata?.last_name === 'string' ? user.user_metadata.last_name : null,
+  });
   if (strengthErr) {
     return NextResponse.json({ error: strengthErr }, { status: 400 });
   }
@@ -109,13 +114,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Le nouveau mot de passe doit être différent de l\'ancien.' }, { status: 400 });
   }
 
-  // Verify current password
-  const { error: signInError } = await supabase.auth.signInWithPassword({
-    email: user.email,
-    password: currentPassword,
-  });
-
-  if (signInError) {
+  // Le mot de passe actuel, vérifié à part : la session de ce navigateur reste
+  // celle du lecteur, et seules les autres sont fermées plus bas.
+  if (!(await motDePasseCorrect(user.email, currentPassword))) {
     await logAuditEvent(user.id, 'password_change_wrong_current', 'user', user.id);
     return NextResponse.json({ error: 'Le mot de passe actuel est incorrect.' }, { status: 400 });
   }

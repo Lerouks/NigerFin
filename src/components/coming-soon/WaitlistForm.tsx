@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Loader2, Check } from 'lucide-react';
+import { Turnstile } from '@/components/securite/Turnstile';
 
 type Status = 'idle' | 'loading' | 'success' | 'error';
 
@@ -13,6 +14,9 @@ export function WaitlistForm() {
   const [message, setMessage] = useState('');
   // L'adresse était déjà sur la liste : rien n'a été envoyé, on le dit.
   const [dejaInscrite, setDejaInscrite] = useState(false);
+  // Turnstile, le contrôle anti-robots, quand il est en service (invisible le plus souvent).
+  const [jeton, setJeton] = useState<string | null>(null);
+  const [tour, setTour] = useState(0);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -31,8 +35,9 @@ export function WaitlistForm() {
       const res = await fetch('/api/waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: value }),
+        body: JSON.stringify({ email: value, ...(jeton ? { captchaToken: jeton } : {}) }),
       });
+      setTour((t) => t + 1);
       if (res.ok) {
         const corps = (await res.json().catch(() => null)) as
           | { isNew?: unknown; reactivated?: unknown }
@@ -42,6 +47,9 @@ export function WaitlistForm() {
       } else if (res.status === 429) {
         setStatus('error');
         setMessage('Trop de tentatives. Réessayez dans un moment.');
+      } else if (res.status === 400 && ((await res.json().catch(() => null)) as { code?: unknown } | null)?.code === 'captcha') {
+        setStatus('error');
+        setMessage('La vérification anti-robots a échoué. Rechargez la page, puis réessayez.');
       } else {
         setStatus('error');
         setMessage('Un souci est survenu. Réessayez dans un instant.');
@@ -120,6 +128,7 @@ export function WaitlistForm() {
       <p className="text-[13px] [&:not(:empty)]:mt-2" aria-live="polite" role={status === 'error' ? 'alert' : undefined}>
         {status === 'error' && <span className="text-[#ff8f80]">{message}</span>}
       </p>
+      <Turnstile onJeton={setJeton} tour={tour} action="liste-attente" />
     </form>
   );
 }

@@ -1,7 +1,8 @@
 import type { ContentType, UserRole } from '@/types';
 
 const VISITOR_ARTICLE_LIMIT = 3;
-const DEFAULT_READER_PREMIUM_LIMIT = 3;
+/** Articles Premium offerts chaque mois à un compte gratuit (le serveur applique le même nombre). */
+export const DEFAULT_READER_PREMIUM_LIMIT = 3;
 
 // ─── Visitor (not logged in) article tracking ────────────────────────────────
 //

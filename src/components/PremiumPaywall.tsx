@@ -2,11 +2,15 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
+import { DEFAULT_READER_PREMIUM_LIMIT } from '@/lib/access-control';
 import { PREMIUM_MONTHLY_PRICE, CURRENCY } from '@/config/pricing';
 
 interface PremiumPaywallProps {
   articleTitle?: string;
+  /** Articles Premium offerts chaque mois par un compte gratuit. */
+  articlesOfferts?: number;
 }
 
 /**
@@ -15,9 +19,15 @@ interface PremiumPaywallProps {
  * in-article wall: gradient fade on text → slogan → mockup → CTA.
  *
  * Mounted inside ArticleContent when access is denied.
+ *
+ * Au visiteur sans compte, le mur propose aussi le compte gratuit, qui ouvre
+ * quelques articles Premium par mois (décision de Raouf, 27/11/2026) : c'est
+ * l'étape qui fait d'un visiteur un lecteur connu, puis un abonné. Après
+ * l'inscription ou la connexion, il revient sur cet article.
  */
-export function PremiumPaywall({ articleTitle }: PremiumPaywallProps) {
+export function PremiumPaywall({ articleTitle, articlesOfferts = DEFAULT_READER_PREMIUM_LIMIT }: PremiumPaywallProps) {
   const { isSignedIn } = useAuth();
+  const retour = encodeURIComponent(usePathname() ?? '/');
 
   return (
     <div className="relative">
@@ -51,29 +61,42 @@ export function PremiumPaywall({ articleTitle }: PremiumPaywallProps) {
         )}
 
         {/* Message */}
-        <p className="text-[15px] sm:text-[17px] text-gray-600 mb-6 max-w-md leading-relaxed">
+        <p className="text-[15px] sm:text-[17px] text-gray-600 mb-6 max-w-md leading-relaxed text-balance">
           {isSignedIn
             ? 'Passez en Premium pour accéder à l\'intégralité de nos analyses et contenus exclusifs.'
-            : 'Connectez-vous ou abonnez-vous pour lire cet article en intégralité.'}
+            : <>Créez un compte gratuit pour lire {articlesOfferts}{'\u00a0'}articles Premium par mois, ou abonnez{'\u2011'}vous pour <span className="whitespace-nowrap">tout lire.</span></>}
         </p>
 
         {/* Primary CTA */}
         <Link
           href="/pricing"
-          className="inline-flex items-center gap-2 bg-[#111] text-white px-8 py-3.5 rounded-lg text-[15px] font-semibold hover:bg-black active:scale-[0.98] transition-all"
+          className="inline-flex w-full max-w-sm items-center justify-center gap-2 bg-[#111] text-white px-5 py-3.5 rounded-lg text-[15px] leading-snug text-center font-semibold hover:bg-black active:scale-[0.98] transition-all"
         >
-          {`S'abonner : à partir de ${PREMIUM_MONTHLY_PRICE.toLocaleString('fr-FR')} ${CURRENCY}/mois`}
+          <span>
+            S’abonner{'\u00a0'}: à partir de{' '}
+            <span className="whitespace-nowrap">{`${PREMIUM_MONTHLY_PRICE.toLocaleString('fr-FR')}\u00a0${CURRENCY}/mois`}</span>
+          </span>
         </Link>
+
+        {/* Compte gratuit, pour le visiteur */}
+        {!isSignedIn && (
+          <Link
+            href={`/inscription?redirect=${retour}`}
+            className="inline-flex w-full max-w-sm items-center justify-center gap-2 border border-[#111] text-[#111] bg-white px-5 py-3 rounded-lg text-[15px] font-semibold hover:bg-[#f4f4f5] active:scale-[0.98] transition-all mt-3"
+          >
+            Créer un compte gratuit
+          </Link>
+        )}
 
         {/* Secondary links */}
         <div className="flex items-center gap-4 mt-4 text-[13px]">
           {!isSignedIn && (
             <>
               <Link
-                href="/connexion"
+                href={`/connexion?next=${retour}`}
                 className="text-gray-500 hover:text-[#111] font-medium transition-colors"
               >
-                Déjà abonné ? Se connecter
+                {'Déjà un compte\u00a0? Se connecter'}
               </Link>
             </>
           )}

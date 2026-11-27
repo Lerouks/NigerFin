@@ -61,11 +61,16 @@ export function coutLigne(
   if (w > largeur - 0.75) return Number.POSITIVE_INFINITY;
   const part = w / largeur;
   let cout = 0;
-  if (!derniere || genre !== 'texte') cout += 300 * (1 - part) ** 2;
+  // Des lignes pleines, proches de la mise en page du navigateur. Une ligne
+  // trop courte au milieu d'un bloc se voit plus qu'une coupure fautive :
+  // sous le tiers de la colonne, c'est pire qu'une faute ; sous la moitié,
+  // un peu moins. Vu le 27/11/2026 : « Le temps » seul sur sa ligne, pour
+  // éviter une dernière ligne de trois mots.
+  if (!derniere || genre !== 'texte') cout += 800 * (1 - part) ** 2;
   if (!derniere) {
-    if (part < 0.35) cout += 3000;
-    else if (part < 0.5) cout += 900;
-    else if (part < 0.62) cout += 120;
+    if (part < 0.35) cout += 12000;
+    else if (part < 0.5) cout += 3500;
+    else if (part < 0.62) cout += 600;
     const fin = mots[j]!.texte.toLowerCase();
     if (OUTILS.has(fin)) cout += 6000;
     if (PONCTUATION_EN_TETE.test(mots[j + 1]!.texte)) cout += 6000;

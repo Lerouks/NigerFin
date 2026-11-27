@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase';
 import { sanitizeHtml } from '@/lib/sanitize-html';
 import { typographierHtml } from '@/lib/typographie';
-import { miseEnPageArticle } from '@/lib/article/mise-en-page';
 
 export async function GET(
   _request: NextRequest,
@@ -141,6 +140,5 @@ function bodyToHtml(raw: string): string {
   }
   // Typographie française après le nettoyage : elle ne change que des
   // caractères dans les nœuds texte, jamais les balises.
-  // Puis la mise en page de la page d'un article (intertitres, accroche, insécables).
-  return miseEnPageArticle(typographierHtml(sanitizeHtml(html)));
+  return typographierHtml(sanitizeHtml(html));
 }

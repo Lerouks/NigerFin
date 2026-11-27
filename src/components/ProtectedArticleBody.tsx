@@ -7,13 +7,11 @@ import { buildWatermarkSvgDataUrl, isBlockedShortcut } from './ProtectedArticleB
 interface ProtectedArticleBodyProps {
   html: string;
   watermarkLabel: string;
-  /** Classe de mise en page du texte (par défaut l'ancienne, article-content). */
-  className?: string;
 }
 
 const HINT_DURATION_MS = 1500;
 
-export function ProtectedArticleBody({ html, watermarkLabel, className = 'article-content' }: ProtectedArticleBodyProps) {
+export function ProtectedArticleBody({ html, watermarkLabel }: ProtectedArticleBodyProps) {
   const [hintVisible, setHintVisible] = useState(false);
   const hintTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -60,7 +58,7 @@ export function ProtectedArticleBody({ html, watermarkLabel, className = 'articl
 
   return (
     <div
-      className={`${className} article-content--protected`}
+      className="article-content article-content--protected"
       aria-label="Article protégé contre la copie"
       onCopy={blockEvent}
       onCut={blockEvent}

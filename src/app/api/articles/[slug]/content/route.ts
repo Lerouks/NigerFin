@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase';
 import { sanitizeHtml } from '@/lib/sanitize-html';
 import { typographierHtml } from '@/lib/typographie';
+import { DEFAULT_READER_PREMIUM_LIMIT } from '@/lib/access-control';
 
 export async function GET(
   _request: NextRequest,
@@ -82,13 +83,10 @@ export async function GET(
     // Fall through to monthly free article limit check
   }
 
-  // Get configurable limit from paywall_config
-  const { data: config } = await service
-    .from('paywall_config')
-    .select('free_articles_count')
-    .eq('id', 1)
-    .single();
-  const limit = config?.free_articles_count ?? 3;
+  // Articles Premium offerts chaque mois à un compte gratuit : le même nombre que
+  // la page de l'article et le mur Premium. La colonne de réglage lue ici avant le
+  // 27/11/2026 n'existait pas en base : seule la valeur de secours jouait.
+  const limit = DEFAULT_READER_PREMIUM_LIMIT;
 
   // Count from tracking table for current month, only count articles that are
   // STILL premium (if an article was changed from premium to free, exclude it)

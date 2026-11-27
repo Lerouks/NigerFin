@@ -3,14 +3,18 @@ import {
   checkArticleAccess,
   getContentTypeFromArticle,
   canAccessTool,
-  getReaderPremiumLimit,
+  DEFAULT_READER_PREMIUM_LIMIT,
 } from '@/lib/access-control';
 
 describe('checkArticleAccess', () => {
   // ── Visitor (no user role) ──────────────────────────────────────────────
   describe('visitor (not logged in)', () => {
+    it('lets a visitor read every free article, with no monthly count', () => {
+      expect(checkArticleAccess('free', null, 0)).toEqual({ allowed: true });
+    });
+
     it('blocks premium content with login_required', () => {
-      const result = checkArticleAccess('premium', null, 0, 'test-slug');
+      const result = checkArticleAccess('premium', null, 0);
       expect(result).toEqual({ allowed: false, reason: 'login_required' });
     });
   });
@@ -18,50 +22,50 @@ describe('checkArticleAccess', () => {
   // ── Admin ───────────────────────────────────────────────────────────────
   describe('admin', () => {
     it('allows free content', () => {
-      expect(checkArticleAccess('free', 'admin', 0, 'slug')).toEqual({ allowed: true });
+      expect(checkArticleAccess('free', 'admin', 0)).toEqual({ allowed: true });
     });
 
     it('allows premium content regardless of count', () => {
-      expect(checkArticleAccess('premium', 'admin', 999, 'slug')).toEqual({ allowed: true });
+      expect(checkArticleAccess('premium', 'admin', 999)).toEqual({ allowed: true });
     });
   });
 
   // ── Premium user ────────────────────────────────────────────────────────
   describe('premium user', () => {
     it('allows free content', () => {
-      expect(checkArticleAccess('free', 'premium', 0, 'slug')).toEqual({ allowed: true });
+      expect(checkArticleAccess('free', 'premium', 0)).toEqual({ allowed: true });
     });
 
     it('allows premium content', () => {
-      expect(checkArticleAccess('premium', 'premium', 0, 'slug')).toEqual({ allowed: true });
+      expect(checkArticleAccess('premium', 'premium', 0)).toEqual({ allowed: true });
     });
   });
 
   // ── Reader ──────────────────────────────────────────────────────────────
   describe('reader', () => {
     it('allows free content', () => {
-      expect(checkArticleAccess('free', 'reader', 0, 'slug')).toEqual({ allowed: true });
+      expect(checkArticleAccess('free', 'reader', 0)).toEqual({ allowed: true });
     });
 
     it('allows premium content under monthly limit', () => {
-      expect(checkArticleAccess('premium', 'reader', 2, 'slug')).toEqual({ allowed: true });
+      expect(checkArticleAccess('premium', 'reader', 2)).toEqual({ allowed: true });
     });
 
     it('blocks premium content at monthly limit', () => {
-      const result = checkArticleAccess('premium', 'reader', 3, 'slug');
+      const result = checkArticleAccess('premium', 'reader', 3);
       expect(result).toEqual({ allowed: false, reason: 'paywall_reader' });
     });
 
     it('blocks premium content over monthly limit', () => {
-      const result = checkArticleAccess('premium', 'reader', 10, 'slug');
+      const result = checkArticleAccess('premium', 'reader', 10);
       expect(result).toEqual({ allowed: false, reason: 'paywall_reader' });
     });
 
     it('respects custom premium limit', () => {
       // Custom limit of 5, 4 read should still be allowed
-      expect(checkArticleAccess('premium', 'reader', 4, 'slug', 5)).toEqual({ allowed: true });
+      expect(checkArticleAccess('premium', 'reader', 4, 5)).toEqual({ allowed: true });
       // At 5 should be blocked
-      expect(checkArticleAccess('premium', 'reader', 5, 'slug', 5)).toEqual({
+      expect(checkArticleAccess('premium', 'reader', 5, 5)).toEqual({
         allowed: false,
         reason: 'paywall_reader',
       });
@@ -108,13 +112,10 @@ describe('canAccessTool', () => {
   });
 });
 
-describe('getReaderPremiumLimit', () => {
-  it('returns configured limit when provided', () => {
-    expect(getReaderPremiumLimit(10)).toBe(10);
-  });
-
-  it('returns default limit of 3 when not configured', () => {
-    expect(getReaderPremiumLimit()).toBe(3);
-    expect(getReaderPremiumLimit(undefined)).toBe(3);
+describe('DEFAULT_READER_PREMIUM_LIMIT', () => {
+  it('offre 3 articles Premium par mois à un compte gratuit, comme le dit le mur Premium', () => {
+    expect(DEFAULT_READER_PREMIUM_LIMIT).toBe(3);
+    expect(checkArticleAccess('premium', 'reader', 2)).toEqual({ allowed: true });
+    expect(checkArticleAccess('premium', 'reader', 3)).toEqual({ allowed: false, reason: 'paywall_reader' });
   });
 });

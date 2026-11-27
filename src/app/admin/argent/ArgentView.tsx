@@ -7,7 +7,6 @@ import {
   ArrowDownRight,
   Receipt,
   Tag,
-  Lock,
   Sparkles,
   AlertTriangle,
   WifiOff,
@@ -899,12 +898,6 @@ function QuickAccessSection() {
       icon: Tag,
       title: 'Tarifs détaillés',
       description: 'Configurer les prix Premium par cycle de facturation.',
-    },
-    {
-      href: '/admin/argent/paywall',
-      icon: Lock,
-      title: 'Configuration paywall',
-      description: 'Décider quels articles passent en Premium et comment.',
     },
   ];
 

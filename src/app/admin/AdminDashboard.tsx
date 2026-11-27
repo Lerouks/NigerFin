@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
   BarChart3, Shield, Loader2, Download, Building2,
   DollarSign, FileText, Newspaper, LineChart, Zap, BookOpen,
-  SlidersHorizontal, Mail, CreditCard, Users, Activity, MessageSquare,
+  Mail, CreditCard, Users, Activity, MessageSquare,
   Eye,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
@@ -16,7 +16,6 @@ import { CommentsManager } from './CommentsManager';
 import { MarketDataManager } from './MarketDataManager';
 import { FlashBannerManager } from './FlashBannerManager';
 import { EducationManager } from './EducationManager';
-import { PaywallManager } from './PaywallManager';
 import { NigerPresentationManager } from './NigerPresentationManager';
 import { LegalSectionsManager } from './LegalSectionsManager';
 import { StatsManager } from './StatsManager';
@@ -73,7 +72,7 @@ interface EchecChargement {
   horsLigne: boolean;
 }
 
-type TabId = 'overview' | 'articles' | 'comments' | 'market' | 'flash' | 'education' | 'niger' | 'enterprises' | 'legal' | 'paywall' | 'users' | 'payments' | 'pricing' | 'stats' | 'audit' | 'messages' | 'site';
+type TabId = 'overview' | 'articles' | 'comments' | 'market' | 'flash' | 'education' | 'niger' | 'enterprises' | 'legal' | 'users' | 'payments' | 'pricing' | 'stats' | 'audit' | 'messages' | 'site';
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -167,7 +166,6 @@ export function AdminDashboard() {
     { id: 'niger', label: 'Niger', icon: Activity },
     { id: 'enterprises', label: 'Entreprises', icon: Building2 },
     { id: 'legal', label: 'Pages', icon: FileText },
-    { id: 'paywall', label: 'Paywall', icon: SlidersHorizontal },
     { id: 'users', label: 'Utilisateurs', icon: Users },
     { id: 'messages', label: 'Messages', icon: Mail, badge: unreadMessages },
     { id: 'payments', label: 'Paiements', icon: CreditCard, badge: stats.pendingPayments },
@@ -255,7 +253,6 @@ export function AdminDashboard() {
         {activeTab === 'niger' && <NigerPresentationManager />}
         {activeTab === 'enterprises' && <StrategicEnterprisesManager />}
         {activeTab === 'legal' && <LegalSectionsManager />}
-        {activeTab === 'paywall' && <PaywallManager />}
         {activeTab === 'users' && <UsersTab onStatsRefresh={fetchStats} />}
         {activeTab === 'messages' && <MessagesManager />}
         {activeTab === 'payments' && <PaymentsTab onStatsRefresh={fetchStats} />}

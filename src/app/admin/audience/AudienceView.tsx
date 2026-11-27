@@ -27,6 +27,7 @@ import {
   CartesianGrid,
 } from 'recharts';
 import { useAdminApiPolling } from '@/app/admin/hooks/useAdminApi';
+import { QuiNousLitSection } from './QuiNousLit';
 
 interface MonthlyUser {
   month: string;
@@ -119,6 +120,8 @@ export function AudienceView() {
           />
         </>
       )}
+
+      <QuiNousLitSection />
 
       <QuickAccessSection
         unreadMessages={messagesCount?.unread ?? null}

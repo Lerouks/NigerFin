@@ -20,7 +20,6 @@ import { SITE_URL } from '@/lib/config';
 import {
   checkArticleAccess,
   getContentTypeFromArticle,
-  trackVisitorArticle,
   type AccessResult,
 } from '@/lib/access-control';
 import { trackPremiumArticleRead } from '@/lib/user-profile';
@@ -58,7 +57,6 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [], header
   const [hasTracked, setHasTracked] = useState(false);
   const [resolvedBody, setResolvedBody] = useState<string | null>(null);
   const [bodyError, setBodyError] = useState(false);
-  const [premiumLimit, setPremiumLimit] = useState(3);
   const contentType = getContentTypeFromArticle(article);
 
   const getArticleUrl = () =>
@@ -67,43 +65,20 @@ export function ArticleContent({ article, htmlBody, relatedArticles = [], header
       : `${SITE_URL}/articles/${article.slug.current}`;
 
   useEffect(() => {
-    if (contentType !== 'premium') return;
-    // Endpoint reel : /api/paywall (l'URL /api/paywall-config n'existe pas).
-    // Si la config retourne free_articles_count, on s'aligne sur le reglage
-    // admin ; sinon on garde le default useState(3).
-    fetch('/api/paywall')
-      .then((r) => r.ok ? r.json() : null)
-      .then((config) => {
-        if (config?.free_articles_count) setPremiumLimit(config.free_articles_count);
-      })
-      .catch(() => {});
-  }, [contentType]);
-
-  useEffect(() => {
     if (isLoading) return;
 
-    const result = checkArticleAccess(
-      contentType,
-      userRole,
-      premiumArticlesUsed,
-      article.slug.current,
-      premiumLimit
-    );
+    const result = checkArticleAccess(contentType, userRole, premiumArticlesUsed);
     setAccessResult(result);
 
-    if (result.allowed && !hasTracked) {
-      if (!isSignedIn) {
-        if (contentType === 'free') {
-          trackVisitorArticle(article.slug.current);
-        }
-      } else if (contentType === 'premium' && userRole === 'reader') {
-        trackPremiumArticleRead(article._id, article.slug.current).then(() => {
-          refreshProfile();
-        });
-        setHasTracked(true);
-      }
+    // Un compte gratuit qui ouvre un article Premium utilise un de ses articles
+    // offerts du mois : le serveur en tient le compte.
+    if (result.allowed && !hasTracked && isSignedIn && contentType === 'premium' && userRole === 'reader') {
+      trackPremiumArticleRead(article._id, article.slug.current).then(() => {
+        refreshProfile();
+      });
+      setHasTracked(true);
     }
-  }, [contentType, userRole, premiumArticlesUsed, article, isSignedIn, isLoading, hasTracked, refreshProfile, premiumLimit]);
+  }, [contentType, userRole, premiumArticlesUsed, article, isSignedIn, isLoading, hasTracked, refreshProfile]);
 
   useEffect(() => {
     if (htmlBody && !resolvedBody) {

@@ -110,14 +110,21 @@ export function PremiumPaywall({ articleTitle, articlesOfferts = DEFAULT_READER_
           )}
         </div>
 
-        {/* Subtle features */}
-        <div className="flex flex-wrap justify-center gap-x-6 gap-y-1 mt-8 text-[11px] text-gray-500">
-          <span>Analyses complètes</span>
-          <span>·</span>
-          <span>Simulateurs Premium</span>
-          <span>·</span>
-          <span>Newsletters exclusives</span>
-        </div>
+        {/* Ce que donne l'abonnement : une ligne par avantage sur téléphone, une seule
+            ligne avec des points de séparation dès qu'il y a la place (jamais un point
+            resté seul en bout de ligne). */}
+        <ul className="mt-8 flex flex-col items-center gap-1 sm:flex-row sm:justify-center sm:gap-0 text-[12px] text-gray-500">
+          {['Analyses complètes', 'Simulateurs Premium', 'Newsletters exclusives'].map((avantage, i) => (
+            <li key={avantage} className="flex items-center">
+              {i > 0 && (
+                <span className="hidden sm:inline px-3" aria-hidden="true">
+                  ·
+                </span>
+              )}
+              {avantage}
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );

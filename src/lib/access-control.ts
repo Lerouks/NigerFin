@@ -1,97 +1,32 @@
 import type { ContentType, UserRole } from '@/types';
 
-const VISITOR_ARTICLE_LIMIT = 3;
-/** Articles Premium offerts chaque mois à un compte gratuit (le serveur applique le même nombre). */
+/**
+ * Articles Premium offerts chaque mois à un compte gratuit. C'est la seule source
+ * de ce nombre : la page de l'article, le mur Premium et le serveur
+ * (/api/articles/[slug]/content) le lisent tous ici.
+ */
 export const DEFAULT_READER_PREMIUM_LIMIT = 3;
 
-// ─── Visitor (not logged in) article tracking ────────────────────────────────
+// ─── Règles d'accès aux articles ─────────────────────────────────────────────
 //
-// Sec H-7 (audit 2026-05-22) : le compteur "3 articles free / mois pour visiteurs
-// anonymes" est volontairement stocke en localStorage cote client. Un visiteur
-// motive peut le clear via DevTools pour lire plus que 3 articles free.
-//
-// On accepte ce trade-off pour les raisons suivantes :
-//   1. Le risque securite est NUL : tout le contenu vise par cette limite est
-//      du contenu FREE par definition.
-//   2. Le contenu PREMIUM est protege server-side dans
-//      /api/articles/[slug]/content/route.ts (verifie role + subscription_end
-//      + compteur mensuel persiste dans premium_article_tracking).
-//   3. Implementer un counter server-side cote anonyme imposerait soit un cookie
-//      signe HMAC (complexite + GDPR : tracker sans consentement), soit une
-//      cle IP (cassee sur les reseaux mobile Niger ou des centaines d'utilisateurs
-//      partagent une meme NAT). Cout/benefice negatif.
-//
-// Si demain le business cible explicitement la conversion visiteurs => readers
-// connectes, on pourra ajouter un cookie signe avec un sliding window de comptage.
-
-const VISITOR_STORAGE_KEY = 'nfi_visitor_articles';
-
-interface VisitorArticleData {
-  slugs: string[];
-  resetAt: string;
-}
-
-function getVisitorData(): VisitorArticleData {
-  if (typeof window === 'undefined') return { slugs: [], resetAt: '' };
-  try {
-    const raw = localStorage.getItem(VISITOR_STORAGE_KEY);
-    if (!raw) return { slugs: [], resetAt: getNextMonthReset() };
-    const data = JSON.parse(raw) as VisitorArticleData;
-    // Auto-reset if past the reset date
-    if (new Date(data.resetAt) <= new Date()) {
-      const fresh = { slugs: [], resetAt: getNextMonthReset() };
-      localStorage.setItem(VISITOR_STORAGE_KEY, JSON.stringify(fresh));
-      return fresh;
-    }
-    return data;
-  } catch {
-    return { slugs: [], resetAt: getNextMonthReset() };
-  }
-}
-
-function getNextMonthReset(): string {
-  const d = new Date();
-  d.setMonth(d.getMonth() + 1, 1);
-  d.setHours(0, 0, 0, 0);
-  return d.toISOString();
-}
-
-function canVisitorReadArticle(slug: string): boolean {
-  const data = getVisitorData();
-  if (data.slugs.includes(slug)) return true; // Already read this one
-  return data.slugs.length < VISITOR_ARTICLE_LIMIT;
-}
-
-export function trackVisitorArticle(slug: string): void {
-  if (typeof window === 'undefined') return;
-  const data = getVisitorData();
-  if (!data.slugs.includes(slug)) {
-    data.slugs.push(slug);
-    localStorage.setItem(VISITOR_STORAGE_KEY, JSON.stringify(data));
-  }
-}
-
-// ─── Content access rules ────────────────────────────────────────────────────
+// Sans compte, on lit tous les articles gratuits. L'ancien compteur « 3 articles
+// gratuits par mois », gardé dans le navigateur du visiteur, ne bloquait plus rien :
+// il a été retiré le 27/11/2026. Le contenu Premium reste protégé par le serveur
+// (rôle, abonnement en cours et compteur mensuel de premium_article_tracking).
 
 export type AccessResult =
   | { allowed: true }
-  | { allowed: false; reason: 'login_required' | 'paywall_reader' | 'visitor_limit' };
+  | { allowed: false; reason: 'login_required' | 'paywall_reader' };
 
 export function checkArticleAccess(
   contentType: ContentType,
   userRole: UserRole | null,
   premiumArticlesReadThisMonth: number,
-  articleSlug: string,
   readerPremiumLimit: number = DEFAULT_READER_PREMIUM_LIMIT
 ): AccessResult {
-  // Not logged in
+  // Sans compte : le gratuit est ouvert, le Premium demande un compte.
   if (!userRole) {
-    if (contentType === 'free') {
-      if (canVisitorReadArticle(articleSlug)) {
-        return { allowed: true };
-      }
-      return { allowed: false, reason: 'visitor_limit' };
-    }
+    if (contentType === 'free') return { allowed: true };
     return { allowed: false, reason: 'login_required' };
   }
 
@@ -123,8 +58,4 @@ export function canAccessTool(userRole: UserRole | null, isPremiumTool: boolean)
   if (!isPremiumTool) return true;
   if (!userRole) return false;
   return userRole === 'premium' || userRole === 'admin';
-}
-
-export function getReaderPremiumLimit(configuredLimit?: number): number {
-  return configuredLimit ?? DEFAULT_READER_PREMIUM_LIMIT;
 }
